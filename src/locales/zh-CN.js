@@ -78,8 +78,10 @@ export default {
 
   // Quick Table
   quickTableTitle: '📐 快查：防御贯通 × 目标防御力',
-  quickTableDesc: '固定当前系数和物魔路贯通，仅扫描防御贯通(DEF Break)',
-  quickTableHeadX: '防御贯通↓/目标防御→',
+  quickTablePmTitle: '📐 快查：物魔贯通 × 目标物魔防',
+  quickTableDesc: '固定当前系数和另一路贯通，仅扫描单路“贯通 vs 目标防御” 的减伤率。',
+  quickTableHeadX: '防御贯通↓ / 目标防御力→',
+  quickTableHeadXPm: '物魔贯通↓ / 目标物魔防→',
 
   // Sweep Chart
   xPen: '防御贯通 (PEN)',

@@ -161,6 +161,10 @@ export function renderCalculator(container) {
         <div style="overflow-x:auto">
           <table class="data-table" id="quick-table"><thead></thead><tbody></tbody></table>
         </div>
+        <div class="card-title mt-12" style="margin-top:16px">${t('quickTablePmTitle')}</div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="quick-table-pm"><thead></thead><tbody></tbody></table>
+        </div>
         <p class="text-xs text-muted mt-8">${t('quickTableDesc')}</p>
       </div>
     </div>
@@ -341,6 +345,20 @@ function updateCalcResults() {
         const rr = calcDamage({...s, pen, def:d})
         const cls = rr.defMitPct < 40 ? 'cell-high' : rr.defMitPct > 70 ? 'cell-low' : ''
         return `<td class="${cls}">${rr.defMitPct}%</td>`
+      }).join('')}</tr>
+    `).join('')
+  }
+
+  const pmPenVals = [0, 18750, 31200, 47700, 65700]
+  const pmDefVals = [1e6, 5e6, 10e6, 20e6, 50e6]
+  const tablePm = document.querySelector('#quick-table-pm')
+  if (tablePm) {
+    tablePm.querySelector('thead').innerHTML = `<tr><th>${t('quickTableHeadXPm') || t('quickTableHeadX')}</th>${pmDefVals.map(d=>`<th>${fmt(d)}</th>`).join('')}</tr>`
+    tablePm.querySelector('tbody').innerHTML = pmPenVals.map(pmPen => `
+      <tr><td>${pmPen.toLocaleString()}</td>${pmDefVals.map(d=>{
+        const rr = calcDamage({...s, pmPen, pmDef:d})
+        const cls = rr.pmMitPct < 40 ? 'cell-high' : rr.pmMitPct > 70 ? 'cell-low' : ''
+        return `<td class="${cls}">${rr.pmMitPct}%</td>`
       }).join('')}</tr>
     `).join('')
   }

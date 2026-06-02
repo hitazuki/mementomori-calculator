@@ -78,8 +78,10 @@ export default {
 
   // Quick Table
   quickTableTitle: '📐 Quick Look: PEN × Target DEF',
-  quickTableDesc: 'Fix current multiplier and P/M PEN, scan only DEF Break (PEN).',
-  quickTableHeadX: 'PEN ↓ / Target DEF →',
+  quickTablePmTitle: '📐 Quick Look: P/M.PEN × Target P/M.DEF',
+  quickTableDesc: 'Fixes current multipliers and scans single route "PEN vs DEF" mitigation rates.',
+  quickTableHeadX: 'PEN↓ / Target DEF→',
+  quickTableHeadXPm: 'P/M.PEN↓ / Target P/M.DEF→',
 
   // Sweep Chart
   xPen: 'DEF Break (PEN)',

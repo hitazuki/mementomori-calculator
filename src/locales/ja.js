@@ -78,8 +78,10 @@ export default {
 
   // Quick Table
   quickTableTitle: '📐 クイックチェック：防御貫通 × 目標防御力',
-  quickTableDesc: '現在の倍率と物魔貫通を固定し、防御貫通のみをスキャン。',
+  quickTablePmTitle: '📐 クイックチェック：物/魔貫通 × 目標物/魔防',
+  quickTableDesc: '現在の係数ともう一つの貫通を固定し、単一ルート「貫通 vs 目標防御」の軽減率のみをスキャンします。',
   quickTableHeadX: '防御貫通↓ / 目標防御力→',
+  quickTableHeadXPm: '物/魔貫通↓ / 目標物/魔防→',
 
   // Sweep Chart
   xPen: '防御貫通 (PEN)',

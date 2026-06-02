@@ -78,8 +78,10 @@ export default {
 
   // Quick Table
   quickTableTitle: '📐 빠른 확인: 방어 관통 × 대상 방어력',
-  quickTableDesc: '현재 계수와 물/마방 관통을 고정하고, 방어 관통(DEF Break)만 스캔합니다.',
+  quickTablePmTitle: '📐 빠른 확인: 물/마방 관통 × 대상 물/마방',
+  quickTableDesc: '현재 계수와 다른 경로의 관통을 고정하고 단일 경로의 "관통 vs 대상 방어" 경감률만 스캔합니다.',
   quickTableHeadX: '방어 관통↓ / 대상 방어력→',
+  quickTableHeadXPm: '물/마방 관통↓ / 대상 물/마방→',
 
   // Sweep Chart
   xPen: '방어 관통 (PEN)',
