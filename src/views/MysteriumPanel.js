@@ -144,6 +144,8 @@ export function renderMysterium(container) {
     const result = calculateMysteriumRankings(charactersRaw, mysteriumRaw, stateTemplate, algo)
     const tLevelCap = stateTemplate.find(t => t.key === 'appLevelCap')
     
+    const getCharFullName = (c) => t(c.nameKey) + (c.name2Key ? ` (${t(c.name2Key)})` : '')
+    
     const getDetailRow = (r, i, colspan) => {
       const charsCount = r.chars ? r.chars.length : 1
       let cardsHtml = `
@@ -221,7 +223,7 @@ export function renderMysterium(container) {
       `
       
       sortedColls.forEach((c, i) => {
-        const charNames = c.chars.map(ch => t(ch.nameKey)).join(' + ')
+        const charNames = c.chars.map(ch => getCharFullName(ch)).join(' + ')
         const dummyR = { chars: c.chars, activated: [{ col: c, portion: 1, score: c.totalScore }] }
 
         html += `
@@ -264,7 +266,7 @@ export function renderMysterium(container) {
       </tr></thead><tbody>
       `
       result.rankings.forEach((r, i) => {
-        const name = t(r.nameKey) + (r.name2Key ? ` (${t(r.name2Key)})` : '')
+        const name = getCharFullName(r)
         html += `
           <tr style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background=''" onclick="const n=this.nextElementSibling; n.style.display = n.style.display === 'none' ? 'table-row' : 'none'">
             <td>${i + 1}</td>
@@ -286,7 +288,7 @@ export function renderMysterium(container) {
       </tr></thead><tbody>
       `
       result.rankings.forEach((r, i) => {
-        const names = r.chars.map(c => t(c.nameKey)).join(' + ')
+        const names = r.chars.map(c => getCharFullName(c)).join(' + ')
         html += `
           <tr style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background=''" onclick="const n=this.nextElementSibling; n.style.display = n.style.display === 'none' ? 'table-row' : 'none'">
             <td>${i + 1}</td>
@@ -311,8 +313,8 @@ export function renderMysterium(container) {
       `
       
       result.rankings.forEach((r, i) => {
-        const names = r.chars.map(c => t(c.nameKey)).join(' + ')
-        const bottleneck = r.bottleneck.length > 0 ? r.bottleneck.map(c => t(c.nameKey)).join('+') : '-'
+        const names = r.chars.map(c => getCharFullName(c)).join(' + ')
+        const bottleneck = r.bottleneck.length > 0 ? r.bottleneck.map(c => getCharFullName(c)).join('+') : '-'
         html += `
           <tr style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background=''" onclick="const n=this.nextElementSibling; n.style.display = n.style.display === 'none' ? 'table-row' : 'none'">
             <td>${i + 1}</td>
