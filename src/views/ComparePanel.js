@@ -9,7 +9,8 @@ let compareChart = null
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(2)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
 
 let cs = {
-  builds: getCompareBuildsDefault().map((b,i) => ({...b, collapsed: i > 0})),
+  builds: getCompareBuildsDefault(),
+  editingBuildIdx: null,
   benchmarks: getDefBenchmarks().slice(0,4),
   baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, eleAdvantage: false,
   cDef: 834953, cPen: 1725,
@@ -106,6 +107,15 @@ export function renderCompare(container) {
         <div id="cmp-delta" style="overflow-x:auto"></div>
       </div>
     </div>
+  </div>
+  <div id="cmp-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+    <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; padding:20px; width:90%; max-width:400px; box-shadow:0 8px 32px rgba(0,0,0,0.8);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="margin:0;font-size:16px;color:var(--text-primary)">⚙ ${t('manualAdjust')}</h3>
+        <button class="btn btn-ghost btn-sm" id="cmp-modal-close" style="padding:0 8px">✕</button>
+      </div>
+      <div id="cmp-modal-body" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
   </div>`
 
   renderBuildCards(container)
@@ -119,37 +129,44 @@ export function renderCompare(container) {
 function renderBuildCards(container) {
   const el = container.querySelector('#cmp-builds'); if (!el) return
   el.innerHTML = cs.builds.map((b,i) => `
-    <div style="padding:10px;border-radius:8px;border:1px solid ${LINE_COLORS[i%LINE_COLORS.length]}30;background:${LINE_COLORS[i%LINE_COLORS.length]}08">
-      <div style="display: grid; grid-template-columns: 2fr 1.5fr 1.5fr auto auto; gap: 6px; align-items: end;">
-        <div class="form-group" style="min-width: 0; margin-bottom: 0;">
-          <label class="form-label" style="color:${LINE_COLORS[i%LINE_COLORS.length]};font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">▌ ${t('buildName')}</label>
-          <input class="form-input" type="text" data-build="${i}" data-field="name" value="${b.name}" style="padding: 7px 6px;">
-        </div>
-        <div class="form-group" style="min-width: 0; margin-bottom: 0;">
-          <label class="form-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t('pen')}</label>
-          <input class="form-input" type="number" data-build="${i}" data-field="pen" value="${b.pen}" min="0" style="padding: 7px 6px;">
-        </div>
-        <div class="form-group" style="min-width: 0; margin-bottom: 0;">
-          <label class="form-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t('pmPen')}</label>
-          <input class="form-input" type="number" data-build="${i}" data-field="pmPen" value="${b.pmPen}" min="0" style="padding: 7px 6px;">
-        </div>
-        <button class="btn ${b.collapsed ? 'btn-primary' : 'btn-ghost'} btn-sm" style="height: 32px; padding: 0 6px; margin-bottom: 0;" data-toggle-build="${i}">
-          ⚙ ${b.collapsed ? '▼' : '▲'}
-        </button>
-        <button class="btn btn-danger btn-sm" style="height: 32px; padding: 0 6px; margin-bottom: 0;" data-remove-build="${i}">×</button>
+    <div style="padding:8px 10px; border-radius:6px; border:1px solid ${LINE_COLORS[i%LINE_COLORS.length]}30; background:${LINE_COLORS[i%LINE_COLORS.length]}08; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
+        <span style="color:${LINE_COLORS[i%LINE_COLORS.length]};font-weight:600;font-size:12px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">▌ ${b.name}</span>
+        <span style="font-size:11px; color:var(--text-secondary); white-space:nowrap;">PEN: ${b.pen} | P/M: ${b.pmPen}</span>
       </div>
-      <div class="grid-2" style="display:${b.collapsed?'none':'grid'}; margin-top:10px; padding-top:10px; border-top:1px dashed ${LINE_COLORS[i%LINE_COLORS.length]}30">
-        <div class="form-group"><label class="form-label">${t('dmgBonus')}%</label>
-          <input class="form-input" type="number" data-build="${i}" data-field="dmgBonus" value="${(b.dmgBonus*100).toFixed(0)}" min="0"></div>
-        <div class="form-group"><label class="form-label">${t('eleAdvantage')}</label>
-          <div style="display:flex;align-items:center;height:32px"><input type="checkbox" data-build="${i}" data-field="eleAdvantage" ${b.eleAdvantage?'checked':''} style="width:16px;height:16px"></div></div>
-        <div class="form-group"><label class="form-label">${t('defBonus')}%</label>
-          <input class="form-input" type="number" data-build="${i}" data-field="defBonus" value="${(b.defBonus*100).toFixed(0)}"></div>
-        <div class="form-group"><label class="form-label">${t('pmDefBonus')}%</label>
-          <input class="form-input" type="number" data-build="${i}" data-field="pmDefBonus" value="${(b.pmDefBonus*100).toFixed(0)}"></div>
+      <div style="display:flex; gap:6px; flex-shrink:0;">
+        <button class="btn btn-secondary btn-sm" style="height:26px; padding:0 8px;" data-edit-build="${i}">✏️</button>
+        <button class="btn btn-danger btn-sm" style="height:26px; padding:0 8px;" data-remove-build="${i}">✖</button>
       </div>
     </div>
   `).join('')
+}
+
+function renderBuildModal(container) {
+  const el = container.querySelector('#cmp-modal-body'); if (!el || cs.editingBuildIdx === null) return
+  const b = cs.builds[cs.editingBuildIdx]
+  el.innerHTML = `
+    <div class="form-group"><label class="form-label">${t('buildName')}</label>
+      <input class="form-input" type="text" data-modal-field="name" value="${b.name}"></div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">${t('pen')}</label>
+        <input class="form-input" type="number" data-modal-field="pen" value="${b.pen}" min="0"></div>
+      <div class="form-group"><label class="form-label">${t('pmPen')}</label>
+        <input class="form-input" type="number" data-modal-field="pmPen" value="${b.pmPen}" min="0"></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">${t('dmgBonus')}%</label>
+        <input class="form-input" type="number" data-modal-field="dmgBonus" value="${(b.dmgBonus*100).toFixed(0)}" min="0"></div>
+      <div class="form-group"><label class="form-label">${t('eleAdvantage')}</label>
+        <div style="display:flex;align-items:center;height:32px"><input type="checkbox" data-modal-field="eleAdvantage" ${b.eleAdvantage?'checked':''} style="width:16px;height:16px"></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">${t('defBonus')}%</label>
+        <input class="form-input" type="number" data-modal-field="defBonus" value="${(b.defBonus*100).toFixed(0)}"></div>
+      <div class="form-group"><label class="form-label">${t('pmDefBonus')}%</label>
+        <input class="form-input" type="number" data-modal-field="pmDefBonus" value="${(b.pmDefBonus*100).toFixed(0)}"></div>
+    </div>
+  `
 }
 
 function renderBenchRows(container) {
@@ -212,29 +229,39 @@ function attachCompareListeners(container) {
     refreshCompare()
   }))
 
-  container.querySelector('#cmp-builds')?.addEventListener('input', e => {
-    const i=parseInt(e.target.dataset.build), field=e.target.dataset.field
-    if(isNaN(i)||!field) return
-    if(field==='name') cs.builds[i][field]=e.target.value
-    else if(field==='eleAdvantage') cs.builds[i][field]=e.target.checked
-    else if(['dmgBonus','defBonus','pmDefBonus'].includes(field)) cs.builds[i][field]=parseFloat(e.target.value)/100||0
-    else cs.builds[i][field]=parseFloat(e.target.value)||0
-    refreshCompare()
-  })
   container.querySelector('#cmp-builds')?.addEventListener('click', e => {
-    const toggleBtn = e.target.closest('[data-toggle-build]')
-    if (toggleBtn) {
-      const i = parseInt(toggleBtn.dataset.toggleBuild)
-      cs.builds[i].collapsed = !cs.builds[i].collapsed
-      renderBuildCards(container)
+    const editBtn = e.target.closest('[data-edit-build]')
+    if (editBtn) {
+      cs.editingBuildIdx = parseInt(editBtn.dataset.editBuild)
+      renderBuildModal(container)
+      container.querySelector('#cmp-modal').style.display = 'flex'
       return
     }
     const btn=e.target.closest('[data-remove-build]'); if(!btn) return
     cs.builds.splice(parseInt(btn.dataset.removeBuild),1); renderBuildCards(container); refreshCompare()
   })
+
+  container.querySelector('#cmp-modal-body')?.addEventListener('input', e => {
+    if (cs.editingBuildIdx === null) return
+    const i = cs.editingBuildIdx, field = e.target.dataset.modalField
+    if (!field) return
+    if(field==='name') cs.builds[i][field]=e.target.value
+    else if(field==='eleAdvantage') cs.builds[i][field]=e.target.checked
+    else if(['dmgBonus','defBonus','pmDefBonus'].includes(field)) cs.builds[i][field]=parseFloat(e.target.value)/100||0
+    else cs.builds[i][field]=parseFloat(e.target.value)||0
+    renderBuildCards(container)
+    refreshCompare()
+  })
+
+  container.querySelector('#cmp-modal-close')?.addEventListener('click', () => {
+    cs.editingBuildIdx = null; container.querySelector('#cmp-modal').style.display = 'none'
+  })
+  container.querySelector('#cmp-modal')?.addEventListener('mousedown', e => {
+    if (e.target.id === 'cmp-modal') { cs.editingBuildIdx = null; e.target.style.display = 'none' }
+  })
   container.querySelector('#cmp-addBuild')?.addEventListener('click', () => {
     if(cs.builds.length>=6) return
-    cs.builds.push({ id:Date.now(), name:`${t('buildNamePrefix')} ${cs.builds.length+1}`, pen:18950, pmPen:31200, dmgBonus:0.3, defBonus:0, pmDefBonus:0, eleAdvantage:false, collapsed:false })
+    cs.builds.push({ id:Date.now(), name:`${t('buildNamePrefix')} ${cs.builds.length+1}`, pen:18950, pmPen:31200, dmgBonus:0.3, defBonus:0, pmDefBonus:0, eleAdvantage:false })
     renderBuildCards(container); refreshCompare()
   })
 
