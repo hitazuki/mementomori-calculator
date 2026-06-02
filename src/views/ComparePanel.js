@@ -9,7 +9,7 @@ let compareChart = null
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(2)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
 
 let cs = {
-  builds: getCompareBuildsDefault(),
+  builds: getCompareBuildsDefault().map((b,i) => ({...b, collapsed: i > 0})),
   benchmarks: getDefBenchmarks().slice(0,4),
   baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, eleAdvantage: false,
   cDef: 834953, cPen: 1725,
@@ -121,24 +121,28 @@ function renderBuildCards(container) {
   el.innerHTML = cs.builds.map((b,i) => `
     <div style="padding:10px;border-radius:8px;border:1px solid ${LINE_COLORS[i%LINE_COLORS.length]}30;background:${LINE_COLORS[i%LINE_COLORS.length]}08">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="color:${LINE_COLORS[i%LINE_COLORS.length]};font-size:12px;font-weight:600">▌ ${b.name}</span>
-        <button class="btn btn-danger btn-sm" data-remove-build="${i}">×</button>
+        <span style="color:${LINE_COLORS[i%LINE_COLORS.length]};font-size:12px;font-weight:600;cursor:pointer;user-select:none" data-toggle-build="${i}">
+          <span style="display:inline-block;width:12px;transition:transform 0.2s;transform:rotate(${b.collapsed?-90:0}deg)">▼</span> ▌ ${b.name}
+        </span>
+        <button class="btn btn-danger btn-sm" data-remove-build="${i}" style="padding:0 6px;height:22px;line-height:22px">×</button>
       </div>
       <div class="grid-2">
-        <div class="form-group"><label class="form-label">${t('buildName')}</label>
+        <div class="form-group" style="grid-column: span 2"><label class="form-label">${t('buildName')}</label>
           <input class="form-input" type="text" data-build="${i}" data-field="name" value="${b.name}"></div>
-        <div class="form-group"><label class="form-label">${t('dmgBonus')}%</label>
-          <input class="form-input" type="number" data-build="${i}" data-field="dmgBonus" value="${(b.dmgBonus*100).toFixed(0)}" min="0"></div>
         <div class="form-group"><label class="form-label">${t('pen')}</label>
           <input class="form-input" type="number" data-build="${i}" data-field="pen" value="${b.pen}" min="0"></div>
         <div class="form-group"><label class="form-label">${t('pmPen')}</label>
           <input class="form-input" type="number" data-build="${i}" data-field="pmPen" value="${b.pmPen}" min="0"></div>
+      </div>
+      <div class="grid-2" style="display:${b.collapsed?'none':'grid'}; margin-top:8px; padding-top:8px; border-top:1px dashed ${LINE_COLORS[i%LINE_COLORS.length]}30">
+        <div class="form-group"><label class="form-label">${t('dmgBonus')}%</label>
+          <input class="form-input" type="number" data-build="${i}" data-field="dmgBonus" value="${(b.dmgBonus*100).toFixed(0)}" min="0"></div>
+        <div class="form-group"><label class="form-label">${t('eleAdvantage')}</label>
+          <div style="display:flex;align-items:center;height:32px"><input type="checkbox" data-build="${i}" data-field="eleAdvantage" ${b.eleAdvantage?'checked':''} style="width:16px;height:16px"></div></div>
         <div class="form-group"><label class="form-label">${t('defBonus')}%</label>
           <input class="form-input" type="number" data-build="${i}" data-field="defBonus" value="${(b.defBonus*100).toFixed(0)}"></div>
         <div class="form-group"><label class="form-label">${t('pmDefBonus')}%</label>
           <input class="form-input" type="number" data-build="${i}" data-field="pmDefBonus" value="${(b.pmDefBonus*100).toFixed(0)}"></div>
-        <div class="form-group"><label class="form-label">${t('eleAdvantage')}</label>
-          <div style="display:flex;align-items:center;height:32px"><input type="checkbox" data-build="${i}" data-field="eleAdvantage" ${b.eleAdvantage?'checked':''} style="width:16px;height:16px"></div></div>
       </div>
     </div>
   `).join('')
@@ -214,12 +218,19 @@ function attachCompareListeners(container) {
     refreshCompare()
   })
   container.querySelector('#cmp-builds')?.addEventListener('click', e => {
+    const toggleBtn = e.target.closest('[data-toggle-build]')
+    if (toggleBtn) {
+      const i = parseInt(toggleBtn.dataset.toggleBuild)
+      cs.builds[i].collapsed = !cs.builds[i].collapsed
+      renderBuildCards(container)
+      return
+    }
     const btn=e.target.closest('[data-remove-build]'); if(!btn) return
     cs.builds.splice(parseInt(btn.dataset.removeBuild),1); renderBuildCards(container); refreshCompare()
   })
   container.querySelector('#cmp-addBuild')?.addEventListener('click', () => {
     if(cs.builds.length>=6) return
-    cs.builds.push({ id:Date.now(), name:`${t('buildNamePrefix')} ${cs.builds.length+1}`, pen:18950, pmPen:31200, dmgBonus:0.3, defBonus:0, pmDefBonus:0, eleAdvantage:false })
+    cs.builds.push({ id:Date.now(), name:`${t('buildNamePrefix')} ${cs.builds.length+1}`, pen:18950, pmPen:31200, dmgBonus:0.3, defBonus:0, pmDefBonus:0, eleAdvantage:false, collapsed:false })
     renderBuildCards(container); refreshCompare()
   })
 
