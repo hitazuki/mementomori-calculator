@@ -139,8 +139,8 @@ export default {
 
   // Presets & Levels
   lv: 'Lv',
-  atkLevel: '攻撃側 {lvl}',
-  defLevel: '防御側 {lvl}',
+  atkLevel: '攻撃側レベル',
+  defLevel: '防御側レベル',
 
   scenarioPveEarly: 'PvE (20~22章) 5M防',
   scenarioPveMid: 'PvE (23~24章) 10M防',

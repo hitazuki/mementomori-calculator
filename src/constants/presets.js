@@ -40,8 +40,8 @@ export const getSweepVariables = () => [
   { key: 'pmPen',      label: t('pmPen'), min: 0, max: 60000 },
   { key: 'def',        label: t('targetDef'), min: 0, max: 20000000 },
   { key: 'pmDef',      label: t('targetPhysDef') + '/' + t('targetMagDef'), min: 0, max: 20000000 },
-  { key: 'atkLevel',   label: t('atkLevel', {lvl:''}), min: 1, max: 999 },
-  { key: 'defLevel',   label: t('defLevel', {lvl:''}), min: 1, max: 999 },
+  { key: 'atkLevel',   label: t('atkLevel'), min: 1, max: 999 },
+  { key: 'defLevel',   label: t('defLevel'), min: 1, max: 999 },
 ]
 
 export const getTableVariables = () => [
@@ -54,6 +54,6 @@ export const getTableVariables = () => [
   { key: 'dmgBonus',   label: t('dmgBonus'),   defaultValues: '0, 0.3, 0.5, 0.8, 1.0, 1.5' },
   { key: 'defDebuff',  label: t('defDebuff'), defaultValues: '0, 0.2, 0.4, 0.6, 0.8' },
   { key: 'critMult',   label: t('critMult'),   defaultValues: '1.5, 2.0, 2.5, 3.0' },
-  { key: 'atkLevel',   label: t('atkLevel', {lvl:''}), defaultValues: '240, 300, 400, 500, 600' },
-  { key: 'defLevel',   label: t('defLevel', {lvl:''}), defaultValues: '240, 300, 400, 500, 600' },
+  { key: 'atkLevel',   label: t('atkLevel'), defaultValues: '240, 300, 400, 500, 600' },
+  { key: 'defLevel',   label: t('defLevel'), defaultValues: '240, 300, 400, 500, 600' },
 ]

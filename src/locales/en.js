@@ -139,8 +139,8 @@ export default {
 
   // Presets & Levels
   lv: 'Lv',
-  atkLevel: 'Attacker {lvl}',
-  defLevel: 'Defender {lvl}',
+  atkLevel: 'Attacker Level',
+  defLevel: 'Defender Level',
 
   scenarioPveEarly: 'PvE (Ch20~22) 5M DEF',
   scenarioPveMid: 'PvE (Ch23~24) 10M DEF',

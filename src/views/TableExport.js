@@ -77,8 +77,8 @@ export function renderTableExport(container) {
           <div class="form-group"><label class="form-label text-xs">${t('defDebuff')}(%)</label><input class="form-input" type="number" data-param="defDebuff" value="${(tableState.baseParams.defDebuff*100).toFixed(0)}"></div>
           <div class="form-group"><label class="form-label text-xs">${t('pen')}</label><input class="form-input" type="number" data-param="pen" value="${tableState.baseParams.pen}"></div>
           <div class="form-group"><label class="form-label text-xs">${t('pmPen')}</label><input class="form-input" type="number" data-param="pmPen" value="${tableState.baseParams.pmPen}"></div>
-          <div class="form-group"><label class="form-label text-xs">${t('atkLevel', {lvl:''})}</label><input class="form-input" type="number" data-param="atkLevel" value="${tableState.baseParams.atkLevel}"></div>
-          <div class="form-group"><label class="form-label text-xs">${t('defLevel', {lvl:''})}</label><input class="form-input" type="number" data-param="defLevel" value="${tableState.baseParams.defLevel}"></div>
+          <div class="form-group"><label class="form-label text-xs">${t('atkLevel')}</label><input class="form-input" type="number" data-param="atkLevel" value="${tableState.baseParams.atkLevel}"></div>
+          <div class="form-group"><label class="form-label text-xs">${t('defLevel')}</label><input class="form-input" type="number" data-param="defLevel" value="${tableState.baseParams.defLevel}"></div>
         </div>
         <button class="btn btn-ghost btn-sm w-full mt-4" id="te-resetDefault">Reset (Lv500 Default)</button>
       </div>

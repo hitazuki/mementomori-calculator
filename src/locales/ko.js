@@ -139,8 +139,8 @@ export default {
 
   // Presets & Levels
   lv: 'Lv',
-  atkLevel: '공격자 {lvl}',
-  defLevel: '방어자 {lvl}',
+  atkLevel: '공격자 레벨',
+  defLevel: '방어자 레벨',
 
   scenarioPveEarly: 'PvE (20~22장) 5M 방어',
   scenarioPveMid: 'PvE (23~24장) 10M 방어',
