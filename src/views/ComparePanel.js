@@ -120,23 +120,24 @@ function renderBuildCards(container) {
   const el = container.querySelector('#cmp-builds'); if (!el) return
   el.innerHTML = cs.builds.map((b,i) => `
     <div style="padding:10px;border-radius:8px;border:1px solid ${LINE_COLORS[i%LINE_COLORS.length]}30;background:${LINE_COLORS[i%LINE_COLORS.length]}08">
-      <div style="display:flex; gap:6px; align-items:flex-end; flex-wrap:wrap">
-        <div class="form-group" style="flex:1; min-width:80px;">
-          <label class="form-label" style="color:${LINE_COLORS[i%LINE_COLORS.length]}">▌ ${t('buildName')}</label>
+      <div style="display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 8px; align-items: end;">
+        <div class="form-group" style="grid-column: 1 / 3; margin-bottom: 0;">
+          <label class="form-label" style="color:${LINE_COLORS[i%LINE_COLORS.length]};font-weight:600">▌ ${t('buildName')}</label>
           <input class="form-input" type="text" data-build="${i}" data-field="name" value="${b.name}">
         </div>
-        <div class="form-group" style="width:65px;">
+        <button class="btn ${b.collapsed ? 'btn-primary' : 'btn-ghost'} btn-sm" style="grid-column: 3; height: 32px; padding: 0 12px; margin-bottom: 0;" data-toggle-build="${i}">
+          ⚙ ${b.collapsed ? '▼' : '▲'}
+        </button>
+        <button class="btn btn-danger btn-sm" style="grid-column: 4; height: 32px; padding: 0 10px; margin-bottom: 0;" data-remove-build="${i}">×</button>
+        
+        <div class="form-group" style="grid-column: 1 / 3; margin-bottom: 0; margin-top: 4px;">
           <label class="form-label">${t('pen')}</label>
           <input class="form-input" type="number" data-build="${i}" data-field="pen" value="${b.pen}" min="0">
         </div>
-        <div class="form-group" style="width:65px;">
+        <div class="form-group" style="grid-column: 3 / 5; margin-bottom: 0; margin-top: 4px;">
           <label class="form-label">${t('pmPen')}</label>
           <input class="form-input" type="number" data-build="${i}" data-field="pmPen" value="${b.pmPen}" min="0">
         </div>
-        <button class="btn ${b.collapsed ? 'btn-primary' : 'btn-ghost'} btn-sm" style="height:32px; padding:0 8px; align-self:flex-end;" data-toggle-build="${i}">
-          ⚙ ${b.collapsed ? '▼' : '▲'}
-        </button>
-        <button class="btn btn-danger btn-sm" style="height:32px; padding:0 8px; align-self:flex-end;" data-remove-build="${i}">×</button>
       </div>
       <div class="grid-2" style="display:${b.collapsed?'none':'grid'}; margin-top:10px; padding-top:10px; border-top:1px dashed ${LINE_COLORS[i%LINE_COLORS.length]}30">
         <div class="form-group"><label class="form-label">${t('dmgBonus')}%</label>
