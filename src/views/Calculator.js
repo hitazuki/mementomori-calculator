@@ -10,7 +10,7 @@ const DEFAULT = {
   pen: 11950, pmPen: 31200,
   cDef: 834953, cPen: 1725,
   cPmDef: 1382434, cPmPen: 16660,
-  dmgBonus: 0.3, defDebuff: 0, critMult: 1.5, factionBonus: 1.0,
+  dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, factionBonus: 1.0,
   damageType: 'phys', // 'phys' for P.DEF, 'mag' for M.DEF
   atkLevelPresetIdx: 4, // 默认选中 Lv500
   defLevelPresetIdx: 4,
@@ -122,9 +122,15 @@ export function renderCalculator(container) {
             <input class="form-input" type="number" id="fi-pmDef" value="${s.pmDef}" min="0">
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">${t('defDebuff')} <span class="value-display" id="dv-debuff">${fmtPct(s.defDebuff)}</span></label>
-          <input class="form-range" type="range" id="fi-defDebuff" value="${s.defDebuff}" min="0" max="0.9" step="0.05">
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">${t('defBonus')} <span class="value-display" id="dv-defBonus">${fmtPct(s.defBonus)}</span></label>
+            <input class="form-range" type="range" id="fi-defBonus" value="${s.defBonus}" min="-1.0" max="1.0" step="0.05">
+          </div>
+          <div class="form-group">
+            <label class="form-label">${t('pmDefBonus')} <span class="value-display" id="dv-pmDefBonus">${fmtPct(s.pmDefBonus)}</span></label>
+            <input class="form-range" type="range" id="fi-pmDefBonus" value="${s.pmDefBonus}" min="-1.0" max="1.0" step="0.05">
+          </div>
         </div>
         <div class="divider"></div>
         <div class="text-xs text-muted mb-8">${t('cDefDefLabel')}</div>
@@ -179,7 +185,8 @@ function attachCalcListeners(container) {
     { id:'fi-dmgBonus',     key:'dmgBonus',     disp:'dv-bonus',  fmt:fmtPct },
     { id:'fi-critMult',     key:'critMult',     disp:'dv-crit',   fmt:v=>`${(v*100).toFixed(0)}%` },
     { id:'fi-factionBonus', key:'factionBonus', disp:'dv-faction',fmt:v=>`×${v.toFixed(2)}` },
-    { id:'fi-defDebuff',    key:'defDebuff',    disp:'dv-debuff', fmt:fmtPct },
+    { id:'fi-defBonus',     key:'defBonus',     disp:'dv-defBonus',   fmt:fmtPct },
+    { id:'fi-pmDefBonus',   key:'pmDefBonus',   disp:'dv-pmDefBonus', fmt:fmtPct },
   ]
 
   ;[...numFields, ...rangeFields].forEach(({ id, key, disp, fmt: f }) => {

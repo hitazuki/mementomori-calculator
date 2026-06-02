@@ -133,8 +133,10 @@ function renderBuildCards(container) {
           <input class="form-input" type="number" data-build="${i}" data-field="pen" value="${b.pen}" min="0"></div>
         <div class="form-group"><label class="form-label">${t('pmPen')}</label>
           <input class="form-input" type="number" data-build="${i}" data-field="pmPen" value="${b.pmPen}" min="0"></div>
-        <div class="form-group"><label class="form-label">${t('defDebuff')}%</label>
-          <input class="form-input" type="number" data-build="${i}" data-field="defDebuff" value="${(b.defDebuff*100).toFixed(0)}" min="0"></div>
+        <div class="form-group"><label class="form-label">${t('defBonus')}%</label>
+          <input class="form-input" type="number" data-build="${i}" data-field="defBonus" value="${(b.defBonus*100).toFixed(0)}"></div>
+        <div class="form-group"><label class="form-label">${t('pmDefBonus')}%</label>
+          <input class="form-input" type="number" data-build="${i}" data-field="pmDefBonus" value="${(b.pmDefBonus*100).toFixed(0)}"></div>
         <div class="form-group"><label class="form-label">${t('factionBonus')}</label>
           <input class="form-input" type="number" data-build="${i}" data-field="factionBonus" value="${b.factionBonus||1}" step="0.05" min="1"></div>
       </div>
@@ -206,7 +208,7 @@ function attachCompareListeners(container) {
     const i=parseInt(e.target.dataset.build), field=e.target.dataset.field
     if(isNaN(i)||!field) return
     if(field==='name') cs.builds[i][field]=e.target.value
-    else if(['dmgBonus','defDebuff'].includes(field)) cs.builds[i][field]=parseFloat(e.target.value)/100||0
+    else if(['dmgBonus','defBonus','pmDefBonus'].includes(field)) cs.builds[i][field]=parseFloat(e.target.value)/100||0
     else cs.builds[i][field]=parseFloat(e.target.value)||0
     refreshCompare()
   })
@@ -216,7 +218,7 @@ function attachCompareListeners(container) {
   })
   container.querySelector('#cmp-addBuild')?.addEventListener('click', () => {
     if(cs.builds.length>=6) return
-    cs.builds.push({ id:Date.now(), name:`${t('buildNamePrefix')} ${cs.builds.length+1}`, pen:18950, pmPen:31200, dmgBonus:0.3, defDebuff:0, factionBonus:1.0 })
+    cs.builds.push({ id:Date.now(), name:`${t('buildNamePrefix')} ${cs.builds.length+1}`, pen:18950, pmPen:31200, dmgBonus:0.3, defBonus:0, pmDefBonus:0, factionBonus:1.0 })
     renderBuildCards(container); refreshCompare()
   })
 
@@ -243,7 +245,7 @@ function calcAll() {
       pen:build.pen, pmPen:build.pmPen,
       cDef:cs.cDef, cPen:cs.cPen,
       cPmDef:cs.cPmDef, cPmPen:cs.cPmPen,
-      dmgBonus:build.dmgBonus, defDebuff:build.defDebuff||0,
+      dmgBonus:build.dmgBonus, defBonus:build.defBonus||0, pmDefBonus:build.pmDefBonus||0,
     })),
   }))
 }

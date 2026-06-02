@@ -11,7 +11,7 @@ export const getScenarioPresets = () => [
       def: 1_699_102, pmDef: 3_150_893,
       pen: 11950, pmPen: 47700,
       cDef: 147654, cPmDef: 256027, cPen: 873, cPmPen: 10718,
-      dmgBonus: 0.3, defDebuff: 0, critMult: 1.5, factionBonus: 1.0, damageType: 'phys',
+      dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, factionBonus: 1.0, damageType: 'phys',
     }
   },
   {
@@ -23,16 +23,16 @@ export const getScenarioPresets = () => [
       def: 5_000_000, pmDef: 10_000_000,
       pen: 18950, pmPen: 55000,
       cDef: 834953, cPmDef: 1382434, cPen: 1725, cPmPen: 16660,
-      dmgBonus: 0.8, defDebuff: 0.2, critMult: 2.0, factionBonus: 1.15, damageType: 'phys',
+      dmgBonus: 0.8, defBonus: -0.2, pmDefBonus: -0.2, critMult: 2.0, factionBonus: 1.15, damageType: 'phys',
     }
   }
 ]
 
 export const getCompareBuildsDefault = () => [
-  { id: 1, name: t('buildNamePrefix') + '1', pen: 11950, pmPen: 31200, dmgBonus: 0.3,  defDebuff: 0 },
-  { id: 2, name: t('buildNamePrefix') + '2',  pen: 4950,  pmPen: 48500, dmgBonus: 0.3,  defDebuff: 0 },
-  { id: 3, name: t('buildNamePrefix') + '3',   pen: 11950, pmPen: 31200, dmgBonus: 0.8,  defDebuff: 0 },
-  { id: 4, name: t('buildNamePrefix') + '4', pen: 11950, pmPen: 31200, dmgBonus: 0.3,  defDebuff: 0.2 },
+  { id: 1, name: t('buildNamePrefix') + '1', pen: 11950, pmPen: 31200, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
+  { id: 2, name: t('buildNamePrefix') + '2',  pen: 4950,  pmPen: 48500, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
+  { id: 3, name: t('buildNamePrefix') + '3',   pen: 11950, pmPen: 31200, dmgBonus: 0.8,  defBonus: 0, pmDefBonus: 0 },
+  { id: 4, name: t('buildNamePrefix') + '4', pen: 11950, pmPen: 31200, dmgBonus: 0.3,  defBonus: -0.2, pmDefBonus: -0.2 },
 ]
 
 export const getSweepVariables = () => [
@@ -52,7 +52,8 @@ export const getTableVariables = () => [
   { key: 'pen',        label: t('pen'), defaultValues: '0, 4950, 11950, 18950, 25000' },
   { key: 'pmPen',      label: t('pmPen'), defaultValues: '0, 15000, 31200, 55000, 80000' },
   { key: 'dmgBonus',   label: t('dmgBonus'),   defaultValues: '0, 0.3, 0.5, 0.8, 1.0, 1.5' },
-  { key: 'defDebuff',  label: t('defDebuff'), defaultValues: '0, 0.2, 0.4, 0.6, 0.8' },
+  { key: 'defBonus',   label: t('defBonus'), defaultValues: '-0.8, -0.6, -0.4, -0.2, 0' },
+  { key: 'pmDefBonus', label: t('pmDefBonus'), defaultValues: '-0.8, -0.6, -0.4, -0.2, 0' },
   { key: 'critMult',   label: t('critMult'),   defaultValues: '1.5, 2.0, 2.5, 3.0' },
   { key: 'atkLevel',   label: t('atkLevel'), defaultValues: '240, 300, 400, 500, 600' },
   { key: 'defLevel',   label: t('defLevel'), defaultValues: '240, 300, 400, 500, 600' },

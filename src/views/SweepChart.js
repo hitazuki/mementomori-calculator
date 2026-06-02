@@ -12,7 +12,7 @@ const DEFAULT_PARAMS = {
   def: 5_000_000, pmDef: 5_000_000,
   pen: 11950, pmPen: 31200,
   cDef: 834953, cPmDef: 1382434, cPen: 1725, cPmPen: 16660,
-  dmgBonus: 0.3, defDebuff: 0, critMult: 1.5, factionBonus: 1.0, damageType: 'phys',
+  dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, factionBonus: 1.0, damageType: 'phys',
 }
 let ss = {
   sweepKey: 'pen',

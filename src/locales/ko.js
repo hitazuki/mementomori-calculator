@@ -53,7 +53,8 @@ export default {
   targetDef: '대상 방어력 (DEF)',
   targetPhysDef: '대상 물리 방어력',
   targetMagDef: '대상 마법 방어력',
-  defDebuff: '방어력 감소',
+  defBonus: '방어력 보너스',
+  pmDefBonus: '물리/마법 방어력 보너스',
   cDefConst: 'C_def 상수',
   cPmDefConst: 'C_pmdef 상수',
 

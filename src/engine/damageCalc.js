@@ -27,15 +27,16 @@ export function calcDamage({
   cPen         = 1725,      // 防御贯通定数
   cPmPen       = 16660,     // 物魔防御贯通定数
   dmgBonus     = 0.3,
-  defDebuff    = 0,
+  defBonus     = 0,
+  pmDefBonus   = 0,
   critMult     = 1.5,
   factionBonus = 1.0,
 }) {
   const rawDmg = baseAtk * skillCoeff
 
-  // 减防Debuff作用于目标的最终面板防御值
-  const actualDef   = def   * (1 - Math.max(0, Math.min(1, defDebuff)))
-  const actualPmDef = pmDef * (1 - Math.max(0, Math.min(1, defDebuff)))
+  // 减防/加防作用于目标的最终面板防御值
+  const actualDef   = Math.max(0, def   * (1 + defBonus))
+  const actualPmDef = Math.max(0, pmDef * (1 + pmDefBonus))
 
   // 计算两条路的伤害通过率（Damage Rate）
   const drDef = calcDamageRate(actualDef,   pen,   cDef,   cPen)

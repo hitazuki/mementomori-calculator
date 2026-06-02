@@ -15,7 +15,7 @@ let tableState = {
     pen: 11950, pmPen: 31200,
     cDef: 834953, cPen: 1725,
     cPmDef: 1382434, cPmPen: 16660,
-    dmgBonus: 0.3, defDebuff: 0,
+    dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0,
     damageType: 'phys',
     atkLevel: 500, defLevel: 500,
   },
@@ -74,7 +74,8 @@ export function renderTableExport(container) {
           <div class="form-group"><label class="form-label text-xs">${t('baseAtk')}</label><input class="form-input" type="number" data-param="baseAtk" value="${tableState.baseParams.baseAtk}"></div>
           <div class="form-group"><label class="form-label text-xs">${t('dmgBonus')}(%)</label><input class="form-input" type="number" data-param="dmgBonus" value="${(tableState.baseParams.dmgBonus*100).toFixed(0)}"></div>
           <div class="form-group"><label class="form-label text-xs">${t('targetDef')}</label><input class="form-input" type="number" data-param="def" value="${tableState.baseParams.def}"></div>
-          <div class="form-group"><label class="form-label text-xs">${t('defDebuff')}(%)</label><input class="form-input" type="number" data-param="defDebuff" value="${(tableState.baseParams.defDebuff*100).toFixed(0)}"></div>
+          <div class="form-group"><label class="form-label text-xs">${t('defBonus')}(%)</label><input class="form-input" type="number" data-param="defBonus" value="${(tableState.baseParams.defBonus*100).toFixed(0)}"></div>
+          <div class="form-group"><label class="form-label text-xs">${t('pmDefBonus')}(%)</label><input class="form-input" type="number" data-param="pmDefBonus" value="${(tableState.baseParams.pmDefBonus*100).toFixed(0)}"></div>
           <div class="form-group"><label class="form-label text-xs">${t('pen')}</label><input class="form-input" type="number" data-param="pen" value="${tableState.baseParams.pen}"></div>
           <div class="form-group"><label class="form-label text-xs">${t('pmPen')}</label><input class="form-input" type="number" data-param="pmPen" value="${tableState.baseParams.pmPen}"></div>
           <div class="form-group"><label class="form-label text-xs">${t('atkLevel')}</label><input class="form-input" type="number" data-param="atkLevel" value="${tableState.baseParams.atkLevel}"></div>
@@ -141,7 +142,7 @@ function attachTableListeners(container) {
   q('#te-params')?.addEventListener('input', e => {
     const p = e.target.dataset.param; if (!p) return
     let val = parseFloat(e.target.value) || 0
-    if (p === 'dmgBonus' || p === 'defDebuff') val = val / 100
+    if (p === 'dmgBonus' || p === 'defBonus' || p === 'pmDefBonus') val = val / 100
     tableState.baseParams[p] = val
 
     if (p === 'atkLevel') {
@@ -158,7 +159,7 @@ function attachTableListeners(container) {
       baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, factionBonus: 1.0,
       def: 5_000_000, pmDef: 5_000_000, pen: 11950, pmPen: 31200,
       cDef: 834953, cPen: 1725, cPmDef: 1382434, cPmPen: 16660,
-      dmgBonus: 0.3, defDebuff: 0, damageType: 'phys', atkLevel: 500, defLevel: 500
+      dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, damageType: 'phys', atkLevel: 500, defLevel: 500
     }
     renderTableExport(container)
   })
