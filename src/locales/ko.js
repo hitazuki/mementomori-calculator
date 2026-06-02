@@ -154,7 +154,9 @@ export default {
   
   // Mysterium Panel
   navGroupMysterium: '📂 미스테리움 시스템',
-  navMysterium: '미스테리움 가성비',
+  navMysterium: '✨ 미스테리움 가성비',
+  navGroupDamage: '📂 데미지 계산',
+  navSkillCalc: '⚔️ 스킬 데미지',
   mysteriumTitle: '🔮 미스테리움 가성비 분석',
   mysteriumDesc: '다양한 알고리즘과 동적 가중치를 기반으로 미스테리움을 해방하기 위한 한정 캐릭터 뽑기 최적해를 평가합니다.',
   ui_tab_chars: '캐릭터 뽑기 추천',
