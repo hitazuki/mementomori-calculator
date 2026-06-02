@@ -1,0 +1,156 @@
+export default {
+  // Common
+  appTitle: 'メメントモリ ダメージ計算機',
+  appDesc: 'メメントモリ 多次元ダメージ計算＆可視化：貫通スキャン、ヒートマップ、構成比較、テーブル出力',
+  appName: 'メメントモリ',
+  appSub: 'ダメージ計算',
+
+  // Navigation
+  navCalc: '単体計算',
+  navSweep: '貫通スキャン',
+  navHeatmap: 'DEF×PENヒートマップ',
+  navCompare: '構成比較',
+  navTable: 'テーブル出力',
+
+  formula: '計算式:',
+  propPen: '割合貫通',
+
+  // Views & Headers
+  calcTitle: '🎯 単体ダメージ計算機',
+  calcDesc: '実際の計算式：effective_DEF = DEF × C_pen / (PEN + C_pen), ダメージ率 = C_def / (effective_DEF + C_def)。防御路と物魔路を乗算。',
+  sweepTitle: '📈 貫通ダメージスキャン',
+  sweepDesc: '指定した防御力での「防御貫通 vs ダメージ」曲線をスキャン。複数の防御目標を比較可能。',
+  heatmapTitle: '🔥 DEF × PEN ヒートマップ',
+  heatmapDesc: '防御力と防御貫通の交点における総合通過率を色で示し、最適な貫通のしきい値を見つけます。',
+  compareTitle: '⚖ 構成比較',
+  compareDesc: '「高攻撃力・低貫通」vs「低攻撃力・高貫通」などの複数のステータス構成を作成し、ダメージや通過率を比較。',
+  tableTitle: '📋 貫通データ出力',
+  tableDesc: '固定パラメータを設定し、異なる貫通値での詳細なダメージデータを生成。CSVまたはExcel用にコピー可能。',
+
+  // Form Sections
+  atkParams: '⚔ 攻撃側ステータス',
+  defParams: '🛡 防御側ステータス',
+  atkPresetLabel: '攻撃側レベルプリセット (貫通定数に影響)',
+  defPresetLabel: '防御側レベルプリセット (防御定数に影響)',
+  manualAdjust: '手動で調整',
+
+  // Form Fields
+  baseAtk: '攻撃力 (ATK)',
+  skillCoeff: 'スキル倍率',
+  atkType: '攻撃タイプ',
+  typePhys: '物理攻撃 (P.DEF)',
+  typeMag: '魔法攻撃 (M.DEF)',
+  pen: '防御貫通',
+  pmPen: '物/魔防御貫通',
+  dmgBonus: 'ダメージ増加',
+  critMult: 'クリティカル倍率',
+  factionBonus: '属性相性',
+  cPenDefLabel: '貫通定数 (攻撃側のレベルで変動)',
+  cDefDefLabel: '防御定数 (防御側のレベルで変動)',
+  cPenConst: 'C_pen 定数',
+  cPmPenConst: 'C_pmpen 定数',
+  
+  targetDef: '目標防御力 (DEF)',
+  targetPhysDef: '目標物理防御力',
+  targetMagDef: '目標魔法防御力',
+  defDebuff: '防御力ダウン',
+  cDefConst: 'C_def 定数',
+  cPmDefConst: 'C_pmdef 定数',
+
+  // Stats
+  finalDmg: '最終ダメージ',
+  overallPenRate: '総合通過率 (ダメージ率)',
+  defMitRate: '防御路軽減率',
+  pmMitRate: '物魔路軽減率',
+  rawDmg: 'スキル基礎ダメージ',
+  totalMitRate: '総合防御軽減率',
+  effDef: '有効防御力 (防御路)',
+  effPmDef: '有効物/魔防御 (物魔路)',
+
+  // Breakdown
+  dmgBreakdown: '📊 ダメージ内訳',
+  addBonus: '+ ダメージ増加',
+  mulDefPass: '× 防御路通過',
+  mulPmPass: '× 物魔路通過',
+  mulCrit: '× クリティカル',
+  mulFaction: '× 属性相性',
+
+  // Quick Table
+  quickTableTitle: '📐 クイックチェック：防御貫通 × 目標防御力',
+  quickTableDesc: '現在の倍率と物魔貫通を固定し、防御貫通のみをスキャン。',
+  quickTableHeadX: '防御貫通↓ / 目標防御力→',
+
+  // Sweep Chart
+  xPen: '防御貫通 (PEN)',
+  yFinalDmg: '最終ダメージ',
+  scanRange: 'スキャン範囲',
+  minPen: '最小貫通',
+  maxPen: '最大貫通',
+  stepSpan: '刻み幅',
+  addTargetDef: '+ 防御力曲線を追加',
+  defLine: '防 {def}',
+  scanNotice: 'パラメータを変更すると自動的に再計算されます。',
+
+  // Heatmap Chart
+  defRange: '防御力範囲',
+  minDef: '最小防御力',
+  maxDef: '最大防御力',
+  defStep: '防御力刻み',
+  penRange: '貫通範囲',
+  penStep: '貫通刻み',
+  genHeatmap: 'ヒートマップ生成',
+  heatmapLoading: '計算中...',
+  xAxisPen: '防御貫通 (PEN)',
+  yAxisDef: '目標防御力 (DEF)',
+
+  // Compare Panel
+  addBuild: '+ 構成を追加',
+  addBench: '+ 目標を追加',
+  buildNamePrefix: '構成 ',
+  benchNamePrefix: '目標 ',
+  buildName: '構成名',
+  buildBaseAtk: '攻撃力',
+  buildPen: '貫通',
+  buildPmPen: '物魔貫通',
+  buildBonus: 'ダメ増',
+  benchName: '目標名',
+  benchDef: '防御力',
+  benchPmDef: '物魔防',
+  evalMetric: '評価指標',
+  metricFinalDmg: '最終ダメージ',
+  metricDmgRate: '通過率 (%)',
+  removeTitle: '削除',
+
+  // Table Export
+  tableCols: '表示カラム',
+  colPen: '防御貫通',
+  colFinal: '最終ダメージ',
+  colDiff: 'ダメージ上昇量',
+  colRatio: 'ダメージ上昇率',
+  colRate: '通過率',
+  colDr1: '防路軽減',
+  colDr2: '魔路軽減',
+  colEff1: '有効防',
+  colEff2: '有効物魔防',
+  genTable: 'データ生成',
+  copyCSV: 'CSVをコピー',
+  copyTable: 'テーブルをコピー',
+  copied: 'クリップボードにコピーしました！',
+
+  // Presets & Levels
+  lv: 'Lv',
+  atkLevel: '攻撃側 {lvl}',
+  defLevel: '防御側 {lvl}',
+
+  scenarioPveEarly: 'PvE (20~22章) 5M防',
+  scenarioPveMid: 'PvE (23~24章) 10M防',
+  scenarioPvpMage: 'PvP (魔法対決)',
+  scenarioPvpTank: 'PvP (対タンク)',
+  scenarioGuildBoss: 'ギルドボス',
+  
+  scenarioDescPveEarly: '防御5M、物/魔防5M、基礎貫通11950',
+  scenarioDescPveMid: '防御10M、物/魔防10M、高い定数要求',
+  scenarioDescPvpMage: '低防御力、高い貫通は不要',
+  scenarioDescPvpTank: '超高防御力、極限の貫通が必要',
+  scenarioDescGuildBoss: '防御2M、防御デバフ有効、火力特化',
+}

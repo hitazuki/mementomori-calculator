@@ -1,7 +1,8 @@
 // src/views/Calculator.js
 import { calcDamage } from '../engine/damageCalc.js'
-import { LEVEL_PRESETS } from '../constants/levelTable.js'
-import { SCENARIO_PRESETS } from '../constants/presets.js'
+import { getLevelPresets } from '../constants/levelTable.js'
+import { getScenarioPresets } from '../constants/presets.js'
+import { t } from '../i18n/index.js'
 
 const DEFAULT = {
   baseAtk: 1_000_000, skillCoeff: 5.25,
@@ -22,11 +23,13 @@ function fmtPct(v, d=1) { return `${(v*100).toFixed(d)}%` }
 
 export function renderCalculator(container) {
   if (!s) s = { ...DEFAULT }
+  const LEVEL_PRESETS = getLevelPresets()
+  const SCENARIO_PRESETS = getScenarioPresets()
 
   container.innerHTML = `
   <div class="view-header animate-fadeup">
-    <h1 class="view-title">🎯 单体伤害计算器</h1>
-    <p class="view-desc">基于真实公式：effective_DEF = DEF × C_pen / (PEN + C_pen)，伤害率 = C_def / (effective_DEF + C_def)。物理魔法双路相乘。</p>
+    <h1 class="view-title">${t('calcTitle')}</h1>
+    <p class="view-desc">${t('calcDesc')}</p>
   </div>
 
   <div class="chip-row animate-fadeup" id="calc-presets">
@@ -38,62 +41,62 @@ export function renderCalculator(container) {
 
       <!-- 攻击方 -->
       <div class="card">
-        <div class="card-title">⚔ 攻击方参数</div>
+        <div class="card-title">${t('atkParams')}</div>
         <div class="form-group">
-          <label class="form-label">攻击方等级预设 (影响贯通定数)</label>
+          <label class="form-label">${t('atkPresetLabel')}</label>
           <select class="form-select" id="fi-atkLevelPreset">
-            <option value="-1" ${s.atkLevelPresetIdx===-1?'selected':''}>手动调整系数</option>
+            <option value="-1" ${s.atkLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
             ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${s.atkLevelPresetIdx===i?'selected':''}>${p.label} (C_pen=${p.cPen})</option>`).join('')}
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">面板攻击力 <span class="value-display" id="dv-atk">${fmt(s.baseAtk)}</span></label>
+          <label class="form-label">${t('baseAtk')} <span class="value-display" id="dv-atk">${fmt(s.baseAtk)}</span></label>
           <input class="form-input" type="number" id="fi-baseAtk" value="${s.baseAtk}" min="0">
         </div>
         <div class="form-group">
-          <label class="form-label">技能倍率 <span class="value-display" id="dv-coeff">${fmtPct(s.skillCoeff/1,'0')}</span></label>
+          <label class="form-label">${t('skillCoeff')} <span class="value-display" id="dv-coeff">${fmtPct(s.skillCoeff/1,'0')}</span></label>
           <input class="form-range" type="range" id="fi-skillCoeff" value="${s.skillCoeff}" min="1" max="20" step="0.25">
         </div>
         <div class="form-group">
-          <label class="form-label">攻击类型</label>
+          <label class="form-label">${t('atkType')}</label>
           <div style="display:flex;gap:8px">
-            <button class="btn ${s.damageType==='phys'?'btn-primary':'btn-ghost'} btn-sm" style="flex:1" data-type="phys">物理攻击 (P.DEF)</button>
-            <button class="btn ${s.damageType==='mag' ?'btn-primary':'btn-ghost'} btn-sm" style="flex:1" data-type="mag">魔法攻击 (M.DEF)</button>
+            <button class="btn ${s.damageType==='phys'?'btn-primary':'btn-ghost'} btn-sm" style="flex:1" data-type="phys">${t('typePhys')}</button>
+            <button class="btn ${s.damageType==='mag' ?'btn-primary':'btn-ghost'} btn-sm" style="flex:1" data-type="mag">${t('typeMag')}</button>
           </div>
         </div>
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">防御贯通 <span class="value-display" id="dv-pen">${s.pen.toLocaleString()}</span></label>
+            <label class="form-label">${t('pen')} <span class="value-display" id="dv-pen">${s.pen.toLocaleString()}</span></label>
             <input class="form-input" type="number" id="fi-pen" value="${s.pen}" min="0">
           </div>
           <div class="form-group">
-            <label class="form-label">物魔防御贯通 <span class="value-display" id="dv-pmpen">${s.pmPen.toLocaleString()}</span></label>
+            <label class="form-label">${t('pmPen')} <span class="value-display" id="dv-pmpen">${s.pmPen.toLocaleString()}</span></label>
             <input class="form-input" type="number" id="fi-pmPen" value="${s.pmPen}" min="0">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">增伤加成 <span class="value-display" id="dv-bonus">${fmtPct(s.dmgBonus)}</span></label>
+          <label class="form-label">${t('dmgBonus')} <span class="value-display" id="dv-bonus">${fmtPct(s.dmgBonus)}</span></label>
           <input class="form-range" type="range" id="fi-dmgBonus" value="${s.dmgBonus}" min="0" max="3" step="0.05">
         </div>
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">爆击倍率 <span class="value-display" id="dv-crit">${fmtPct(s.critMult)}</span></label>
+            <label class="form-label">${t('critMult')} <span class="value-display" id="dv-crit">${fmtPct(s.critMult)}</span></label>
             <input class="form-range" type="range" id="fi-critMult" value="${s.critMult}" min="1.5" max="5" step="0.1">
           </div>
           <div class="form-group">
-            <label class="form-label">阵营克制 <span class="value-display" id="dv-faction">${fmtPct(s.factionBonus)}</span></label>
+            <label class="form-label">${t('factionBonus')} <span class="value-display" id="dv-faction">${fmtPct(s.factionBonus)}</span></label>
             <input class="form-range" type="range" id="fi-factionBonus" value="${s.factionBonus}" min="1" max="1.5" step="0.05">
           </div>
         </div>
         <div class="divider"></div>
-        <div class="text-xs text-muted mb-8">贯通定数 (受攻击方等级影响，可手动微调)</div>
+        <div class="text-xs text-muted mb-8">${t('cPenDefLabel')}</div>
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">C_pen 定数 <span class="value-display" id="dv-cp">${s.cPen}</span></label>
+            <label class="form-label">${t('cPenConst')} <span class="value-display" id="dv-cp">${s.cPen}</span></label>
             <input class="form-input" type="number" id="fi-cPen" value="${s.cPen}" min="1">
           </div>
           <div class="form-group">
-            <label class="form-label">C_pmpen 定数 <span class="value-display" id="dv-cmp">${s.cPmPen}</span></label>
+            <label class="form-label">${t('cPmPenConst')} <span class="value-display" id="dv-cmp">${s.cPmPen}</span></label>
             <input class="form-input" type="number" id="fi-cPmPen" value="${s.cPmPen}" min="1">
           </div>
         </div>
@@ -101,37 +104,37 @@ export function renderCalculator(container) {
 
       <!-- 防守方 -->
       <div class="card">
-        <div class="card-title">🛡 防守方参数</div>
+        <div class="card-title">${t('defParams')}</div>
         <div class="form-group">
-          <label class="form-label">防守方等级预设 (影响防御定数)</label>
+          <label class="form-label">${t('defPresetLabel')}</label>
           <select class="form-select" id="fi-defLevelPreset">
-            <option value="-1" ${s.defLevelPresetIdx===-1?'selected':''}>手动调整系数</option>
+            <option value="-1" ${s.defLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
             ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${s.defLevelPresetIdx===i?'selected':''}>${p.label} (C_def=${fmt(p.cDef)} / C_pm=${fmt(s.damageType==='mag'?p.cMdef:p.cPdef)})</option>`).join('')}
           </select>
         </div>
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">目标防御力 (DEF)</label>
+            <label class="form-label">${t('targetDef')}</label>
             <input class="form-input" type="number" id="fi-def" value="${s.def}" min="0">
           </div>
           <div class="form-group">
-            <label class="form-label">目标${s.damageType==='phys'?'物理':'魔法'}防御力</label>
+            <label class="form-label" id="lbl-pmDef">${s.damageType==='phys'?t('targetPhysDef'):t('targetMagDef')}</label>
             <input class="form-input" type="number" id="fi-pmDef" value="${s.pmDef}" min="0">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">减防Debuff <span class="value-display" id="dv-debuff">${fmtPct(s.defDebuff)}</span></label>
+          <label class="form-label">${t('defDebuff')} <span class="value-display" id="dv-debuff">${fmtPct(s.defDebuff)}</span></label>
           <input class="form-range" type="range" id="fi-defDebuff" value="${s.defDebuff}" min="0" max="0.9" step="0.05">
         </div>
         <div class="divider"></div>
-        <div class="text-xs text-muted mb-8">防御定数 (受防守方等级影响，可手动微调)</div>
+        <div class="text-xs text-muted mb-8">${t('cDefDefLabel')}</div>
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">C_def 定数 <span class="value-display" id="dv-cd">${s.cDef.toLocaleString()}</span></label>
+            <label class="form-label">${t('cDefConst')} <span class="value-display" id="dv-cd">${s.cDef.toLocaleString()}</span></label>
             <input class="form-input" type="number" id="fi-cDef" value="${s.cDef}" min="1">
           </div>
           <div class="form-group">
-            <label class="form-label">C_pmdef 定数 <span class="value-display" id="dv-cmd">${s.cPmDef.toLocaleString()}</span></label>
+            <label class="form-label">${t('cPmDefConst')} <span class="value-display" id="dv-cmd">${s.cPmDef.toLocaleString()}</span></label>
             <input class="form-input" type="number" id="fi-cPmDef" value="${s.cPmDef}" min="1">
           </div>
         </div>
@@ -142,15 +145,15 @@ export function renderCalculator(container) {
     <div class="flex-col gap-12">
       <div id="calc-stats" class="grid-2 gap-12"></div>
       <div class="card">
-        <div class="card-title">📊 伤害拆解</div>
+        <div class="card-title">${t('dmgBreakdown')}</div>
         <div id="calc-breakdown" class="breakdown-list"></div>
       </div>
       <div class="card">
-        <div class="card-title">📐 快查：防御贯通 × 目标防御力</div>
+        <div class="card-title">${t('quickTableTitle')}</div>
         <div style="overflow-x:auto">
           <table class="data-table" id="quick-table"><thead></thead><tbody></tbody></table>
         </div>
-        <p class="text-xs text-muted mt-8">固定当前系数和物魔路贯通，仅扫描防御贯通(DEF Break)</p>
+        <p class="text-xs text-muted mt-8">${t('quickTableDesc')}</p>
       </div>
     </div>
   </div>`
@@ -205,11 +208,12 @@ function attachCalcListeners(container) {
       container.querySelectorAll('[data-type]').forEach(b => b.className = b.className.replace('btn-primary','btn-ghost'))
       btn.className = btn.className.replace('btn-ghost','btn-primary')
 
-      const titleEl = container.querySelector('#fi-pmDef').previousElementSibling
-      if (titleEl) titleEl.textContent = `目标${s.damageType==='phys'?'物理':'魔法'}防御力`
+      const titleEl = container.querySelector('#lbl-pmDef')
+      if (titleEl) titleEl.textContent = s.damageType==='phys'?t('targetPhysDef'):t('targetMagDef')
 
       // 重新加载对应的预设系数 (仅防守方定数受影响)
       if (s.defLevelPresetIdx !== -1) {
+        const LEVEL_PRESETS = getLevelPresets()
         const p = LEVEL_PRESETS[s.defLevelPresetIdx]
         if (p) {
           s.cPmDef = s.damageType === 'mag' ? p.cMdef : p.cPdef
@@ -219,7 +223,7 @@ function attachCalcListeners(container) {
           // 更新 select 里的 label (C_pm=xxx)
           const sel = container.querySelector('#fi-defLevelPreset')
           if (sel) {
-            sel.innerHTML = `<option value="-1" ${s.defLevelPresetIdx===-1?'selected':''}>手动调整系数</option>` +
+            sel.innerHTML = `<option value="-1" ${s.defLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>` +
               LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${s.defLevelPresetIdx===i?'selected':''}>${p.label} (C_def=${fmt(p.cDef)} / C_pm=${fmt(s.damageType==='mag'?p.cMdef:p.cPdef)})</option>`).join('')
           }
         }
@@ -232,6 +236,7 @@ function attachCalcListeners(container) {
     const idx = parseInt(e.target.value)
     s.atkLevelPresetIdx = idx
     if (idx === -1) return
+    const LEVEL_PRESETS = getLevelPresets()
     const p = LEVEL_PRESETS[idx]
     if (!p) return
     s.cPen = p.cPen; s.cPmPen = p.cPmPen
@@ -247,6 +252,7 @@ function attachCalcListeners(container) {
     const idx = parseInt(e.target.value)
     s.defLevelPresetIdx = idx
     if (idx === -1) return
+    const LEVEL_PRESETS = getLevelPresets()
     const p = LEVEL_PRESETS[idx]
     if (!p) return
     s.cDef = p.cDef; s.cPmDef = s.damageType === 'mag' ? p.cMdef : p.cPdef
@@ -261,6 +267,7 @@ function attachCalcListeners(container) {
   container.querySelector('#calc-presets')?.addEventListener('click', e => {
     const btn = e.target.closest('[data-preset]')
     if (!btn) return
+    const SCENARIO_PRESETS = getScenarioPresets()
     const preset = SCENARIO_PRESETS.find(p => p.id === btn.dataset.preset)
     if (preset) {
       s = { ...s, ...preset.params }
@@ -275,14 +282,14 @@ function updateCalcResults() {
   const r = calcDamage(s)
   const statsEl = document.querySelector('#calc-stats')
   if (statsEl) statsEl.innerHTML = `
-    <div class="stat-box"><div class="stat-value is-danger">${fmt(r.finalDmg)}</div><div class="stat-label">最终伤害</div></div>
-    <div class="stat-box"><div class="stat-value">${r.dmgRatePct}%</div><div class="stat-label">综合穿透率 (伤害通过率)</div></div>
-    <div class="stat-box"><div class="stat-value is-purple">${r.defMitPct}%</div><div class="stat-label">防御路减伤率</div></div>
-    <div class="stat-box"><div class="stat-value is-info">${r.pmMitPct}%</div><div class="stat-label">物魔路减伤率</div></div>
-    <div class="stat-box"><div class="stat-value">${fmt(r.rawDmg)}</div><div class="stat-label">技能原始伤害</div></div>
-    <div class="stat-box"><div class="stat-value is-success">${r.totalMitPct}%</div><div class="stat-label">综合防御减伤率</div></div>
-    <div class="stat-box"><div class="stat-value">${fmt(r.effectiveDef)}</div><div class="stat-label">有效防御 (防御路)</div></div>
-    <div class="stat-box"><div class="stat-value">${fmt(r.effectivePmDef)}</div><div class="stat-label">有效物魔防御 (物魔路)</div></div>
+    <div class="stat-box"><div class="stat-value is-danger">${fmt(r.finalDmg)}</div><div class="stat-label">${t('finalDmg')}</div></div>
+    <div class="stat-box"><div class="stat-value">${r.dmgRatePct}%</div><div class="stat-label">${t('overallPenRate')}</div></div>
+    <div class="stat-box"><div class="stat-value is-purple">${r.defMitPct}%</div><div class="stat-label">${t('defMitRate')}</div></div>
+    <div class="stat-box"><div class="stat-value is-info">${r.pmMitPct}%</div><div class="stat-label">${t('pmMitRate')}</div></div>
+    <div class="stat-box"><div class="stat-value">${fmt(r.rawDmg)}</div><div class="stat-label">${t('rawDmg')}</div></div>
+    <div class="stat-box"><div class="stat-value is-success">${r.totalMitPct}%</div><div class="stat-label">${t('totalMitRate')}</div></div>
+    <div class="stat-box"><div class="stat-value">${fmt(r.effectiveDef)}</div><div class="stat-label">${t('effDef')}</div></div>
+    <div class="stat-box"><div class="stat-value">${fmt(r.effectivePmDef)}</div><div class="stat-label">${t('effPmDef')}</div></div>
   `
 
   const bkEl = document.querySelector('#calc-breakdown')
@@ -295,12 +302,12 @@ function updateCalcResults() {
     const final      = afterCrit  * s.factionBonus
 
     const steps = [
-      { label: '技能原始伤害', val: base,       color: '#c9a84c' },
-      { label: `+ 增伤 (+${fmtPct(s.dmgBonus)})`, val: afterBonus, color: '#e8c96a' },
-      { label: `× 防御通过 (${r.defDmgPct}%)`, val: afterDef, color: '#9b59b6' },
-      { label: `× 物魔防御通过 (${r.pmDmgPct}%)`,  val: afterPm,  color: '#3498db' },
-      { label: `× 爆击 (${fmtPct(s.critMult)})`, val: afterCrit, color: '#e07820' },
-      { label: `× 阵营克制 (×${s.factionBonus.toFixed(2)})`, val: final, color: '#2ecc71' },
+      { label: t('rawDmg'), val: base,       color: '#c9a84c' },
+      { label: `${t('addBonus')} (+${fmtPct(s.dmgBonus)})`, val: afterBonus, color: '#e8c96a' },
+      { label: `${t('mulDefPass')} (${r.defDmgPct}%)`, val: afterDef, color: '#9b59b6' },
+      { label: `${t('mulPmPass')} (${r.pmDmgPct}%)`,  val: afterPm,  color: '#3498db' },
+      { label: `${t('mulCrit')} (${fmtPct(s.critMult)})`, val: afterCrit, color: '#e07820' },
+      { label: `${t('mulFaction')} (×${s.factionBonus.toFixed(2)})`, val: final, color: '#2ecc71' },
     ]
     bkEl.innerHTML = steps.map((st, i) => `
       <div class="breakdown-item">
@@ -315,12 +322,12 @@ function updateCalcResults() {
   const defVals = [1e6, 3e6, 5e6, 10e6, 20e6]
   const table = document.querySelector('#quick-table')
   if (table) {
-    table.querySelector('thead').innerHTML = `<tr><th>防御贯通↓/目标防御→</th>${defVals.map(d=>`<th>${fmt(d)}</th>`).join('')}</tr>`
+    table.querySelector('thead').innerHTML = `<tr><th>${t('quickTableHeadX')}</th>${defVals.map(d=>`<th>${fmt(d)}</th>`).join('')}</tr>`
     table.querySelector('tbody').innerHTML = penVals.map(pen => `
       <tr><td>${pen.toLocaleString()}</td>${defVals.map(d=>{
         const rr = calcDamage({...s, pen, def:d})
         const cls = rr.defMitPct < 40 ? 'cell-high' : rr.defMitPct > 70 ? 'cell-low' : ''
-        return `<td class="${cls}">减${rr.defMitPct}%</td>`
+        return `<td class="${cls}">${rr.defMitPct}%</td>`
       }).join('')}</tr>
     `).join('')
   }

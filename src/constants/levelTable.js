@@ -1,5 +1,6 @@
 // src/constants/levelTable.js
 import csvRaw from './level_coefficient.csv?raw'
+import { t } from '../i18n/index.js'
 
 const lines = csvRaw.trim().split('\n')
 const LEVEL_TABLE_MAP = new Map()
@@ -48,8 +49,8 @@ export function getCoeffByLevel(level) {
   return sorted[sorted.length - 1]
 }
 
-export const LEVEL_PRESETS = [
-  { label: '自定义',   ...getCoeffByLevel(1) },
+export const getLevelPresets = () => [
+  { label: t('manualAdjust'),   ...getCoeffByLevel(1) },
   { label: 'Lv200',   ...getCoeffByLevel(200) },
   { label: 'Lv300',   ...getCoeffByLevel(300) },
   { label: 'Lv400',   ...getCoeffByLevel(400) },
@@ -61,11 +62,11 @@ export const LEVEL_PRESETS = [
   { label: 'Lv720',   ...getCoeffByLevel(720) },
 ]
 
-export const DEF_BENCHMARKS = [
-  { label: '100万防',  def:  1_000_000, pmDef:  1_000_000 },
-  { label: '300万防',  def:  3_000_000, pmDef:  3_000_000 },
-  { label: '500万防',  def:  5_000_000, pmDef:  5_000_000 },
-  { label: '1000万防', def: 10_000_000, pmDef: 10_000_000 },
-  { label: '2000万防', def: 20_000_000, pmDef: 20_000_000 },
-  { label: '5000万防', def: 50_000_000, pmDef: 50_000_000 },
+export const getDefBenchmarks = () => [
+  { label: '1M DEF',  def:  1_000_000, pmDef:  1_000_000 },
+  { label: '3M DEF',  def:  3_000_000, pmDef:  3_000_000 },
+  { label: '5M DEF',  def:  5_000_000, pmDef:  5_000_000 },
+  { label: '10M DEF', def: 10_000_000, pmDef: 10_000_000 },
+  { label: '20M DEF', def: 20_000_000, pmDef: 20_000_000 },
+  { label: '50M DEF', def: 50_000_000, pmDef: 50_000_000 },
 ]

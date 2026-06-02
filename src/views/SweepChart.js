@@ -1,8 +1,9 @@
 // src/views/SweepChart.js
 import { buildSweepData } from '../engine/damageCalc.js'
-import { SWEEP_VARIABLES } from '../constants/presets.js'
-import { LEVEL_PRESETS } from '../constants/levelTable.js'
+import { getSweepVariables } from '../constants/presets.js'
+import { getLevelPresets } from '../constants/levelTable.js'
 import { MORI_THEME, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
+import { t } from '../i18n/index.js'
 
 let sweepChart = null
 
@@ -25,92 +26,95 @@ let ss = {
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
 
 export function renderSweepChart(container) {
+  const SWEEP_VARIABLES = getSweepVariables()
+  const LEVEL_PRESETS = getLevelPresets()
+
   container.innerHTML = `
   <div class="view-header animate-fadeup">
-    <h1 class="view-title">📈 单变量收益扫描</h1>
-    <p class="view-desc">固定其他所有参数，扫描单一变量（如穿透、面板、减防等）的收益曲线</p>
+    <h1 class="view-title">${t('sweepTitle')}</h1>
+    <p class="view-desc">${t('sweepDesc')}</p>
   </div>
   <div class="grid-sidebar-right animate-fadeup" style="height:calc(100vh - 110px)">
     <div class="card" style="height:100%;display:flex;flex-direction:column">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="card-title" style="margin:0">趋势图 · 综合穿透率 %</div>
-        <button class="btn btn-ghost btn-sm" id="sc-download">⬇ 保存PNG</button>
+        <div class="card-title" style="margin:0">${t('overallPenRate')}</div>
+        <button class="btn btn-ghost btn-sm" id="sc-download">⬇ PNG</button>
       </div>
       <div id="sweep-chart" style="flex:1;min-height:400px"></div>
     </div>
     
     <div class="flex-col gap-12" style="overflow-y:auto">
       <div class="card">
-        <div class="card-title">🔍 扫描变量</div>
+        <div class="card-title">🔍 ${t('scanRange')}</div>
         <div class="form-group">
-          <label class="form-label">变量选择</label>
+          <label class="form-label">${t('scanRange')}</label>
           <select class="form-select" id="sc-sweepKey">
             ${SWEEP_VARIABLES.map(v => `<option value="${v.key}" ${ss.sweepKey===v.key?'selected':''}>${v.label}</option>`).join('')}
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">最小值 <span class="value-display" id="sc-vMin">${fmt(ss.min)}</span></label>
+          <label class="form-label">${t('minPen')} <span class="value-display" id="sc-vMin">${fmt(ss.min)}</span></label>
           <input class="form-input" type="number" id="sc-min" value="${ss.min}">
         </div>
         <div class="form-group">
-          <label class="form-label">最大值 <span class="value-display" id="sc-vMax">${fmt(ss.max)}</span></label>
+          <label class="form-label">${t('maxPen')} <span class="value-display" id="sc-vMax">${fmt(ss.max)}</span></label>
           <input class="form-input" type="number" id="sc-max" value="${ss.max}">
         </div>
         <div class="form-group">
-          <label class="form-label">采样点数 <span class="value-display" id="sc-vSteps">${ss.steps}</span></label>
+          <label class="form-label">${t('stepSpan')} <span class="value-display" id="sc-vSteps">${ss.steps}</span></label>
           <input class="form-range" type="range" id="sc-steps" value="${ss.steps}" min="5" max="100">
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">⚙ 固定参数 (未扫描的变量使用此值)</div>
+        <div class="card-title">⚙ ${t('manualAdjust')}</div>
         <div class="form-group">
-          <label class="form-label">攻击类型</label>
+          <label class="form-label">${t('atkType')}</label>
           <div style="display:flex;gap:8px">
-            <button class="btn ${ss.baseParams.damageType==='phys'?'btn-primary':'btn-ghost'} btn-sm" style="flex:1" data-type="phys">物理(P.DEF)</button>
-            <button class="btn ${ss.baseParams.damageType==='mag' ?'btn-primary':'btn-ghost'} btn-sm" style="flex:1" data-type="mag">魔法(M.DEF)</button>
+            <button class="btn ${ss.baseParams.damageType==='phys'?'btn-primary':'btn-ghost'} btn-sm" style="flex:1" data-type="phys">${t('typePhys')}</button>
+            <button class="btn ${ss.baseParams.damageType==='mag' ?'btn-primary':'btn-ghost'} btn-sm" style="flex:1" data-type="mag">${t('typeMag')}</button>
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">攻击方等级 (影响贯通定数)</label>
+          <label class="form-label">${t('atkPresetLabel')}</label>
           <select class="form-select" id="sc-atkLevelPreset">
-            <option value="-1" ${ss.atkLevelPresetIdx===-1?'selected':''}>当前自定义系数</option>
+            <option value="-1" ${ss.atkLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
             ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${ss.atkLevelPresetIdx===i?'selected':''}>${p.label} (C_pen=${p.cPen})</option>`).join('')}
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">防守方等级 (影响防御定数)</label>
+          <label class="form-label">${t('defPresetLabel')}</label>
           <select class="form-select" id="sc-defLevelPreset">
-            <option value="-1" ${ss.defLevelPresetIdx===-1?'selected':''}>当前自定义系数</option>
+            <option value="-1" ${ss.defLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
             ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${ss.defLevelPresetIdx===i?'selected':''}>${p.label} (C_def=${fmt(p.cDef)})</option>`).join('')}
           </select>
         </div>
         
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">目标防御 <span class="value-display" id="sc-vDef">${fmt(ss.baseParams.def)}</span></label>
+            <label class="form-label">${t('targetDef')} <span class="value-display" id="sc-vDef">${fmt(ss.baseParams.def)}</span></label>
             <input class="form-input" type="number" id="sc-baseDef" value="${ss.baseParams.def}">
           </div>
           <div class="form-group">
-            <label class="form-label">物魔防御 <span class="value-display" id="sc-vPmDef">${fmt(ss.baseParams.pmDef)}</span></label>
+            <label class="form-label" id="lbl-pmDef">${ss.baseParams.damageType==='phys'?t('targetPhysDef'):t('targetMagDef')} <span class="value-display" id="sc-vPmDef">${fmt(ss.baseParams.pmDef)}</span></label>
             <input class="form-input" type="number" id="sc-basePmDef" value="${ss.baseParams.pmDef}">
           </div>
           <div class="form-group">
-            <label class="form-label">防御贯通 <span class="value-display" id="sc-vPen">${fmt(ss.baseParams.pen)}</span></label>
+            <label class="form-label">${t('pen')} <span class="value-display" id="sc-vPen">${fmt(ss.baseParams.pen)}</span></label>
             <input class="form-input" type="number" id="sc-basePen" value="${ss.baseParams.pen}">
           </div>
           <div class="form-group">
-            <label class="form-label">物魔贯通 <span class="value-display" id="sc-vPmPen">${fmt(ss.baseParams.pmPen)}</span></label>
+            <label class="form-label">${t('pmPen')} <span class="value-display" id="sc-vPmPen">${fmt(ss.baseParams.pmPen)}</span></label>
             <input class="form-input" type="number" id="sc-basePmPen" value="${ss.baseParams.pmPen}">
           </div>
         </div>
         
-        <div class="text-xs text-muted mb-4 mt-8">攻击方生效定数</div>
+        <div class="text-xs text-muted mb-4 mt-8">${t('cPenDefLabel')}</div>
         <div class="grid-2">
           <div class="form-group"><label class="form-label">C_pen</label><input class="form-input" type="number" id="sc-cPen" value="${ss.baseParams.cPen}"></div>
           <div class="form-group"><label class="form-label">C_pmpen</label><input class="form-input" type="number" id="sc-cPmPen" value="${ss.baseParams.cPmPen}"></div>
         </div>
-        <div class="text-xs text-muted mb-4 mt-4">防守方生效定数</div>
+        <div class="text-xs text-muted mb-4 mt-4">${t('cDefDefLabel')}</div>
         <div class="grid-2">
           <div class="form-group"><label class="form-label">C_def</label><input class="form-input" type="number" id="sc-cDef" value="${ss.baseParams.cDef}"></div>
           <div class="form-group"><label class="form-label">C_pmdef</label><input class="form-input" type="number" id="sc-cPmDef" value="${ss.baseParams.cPmDef}"></div>
@@ -130,9 +134,12 @@ function attachSweepListeners(container) {
   
   q('#sc-sweepKey')?.addEventListener('change', e => {
     ss.sweepKey = e.target.value
+    const SWEEP_VARIABLES = getSweepVariables()
     const preset = SWEEP_VARIABLES.find(v => v.key === ss.sweepKey)
     if (preset) {
-      ss.min = preset.min; ss.max = preset.max;
+      // NOTE: For simplicity, keeping previous min/max state per variable isn't implemented
+      // but we should reset min/max based on the preset bounds if available
+      ss.min = 0; ss.max = ss.sweepKey.includes('Def') ? 20000000 : 25000;
       q('#sc-min').value = ss.min; q('#sc-max').value = ss.max
       q('#sc-vMin').textContent = fmt(ss.min); q('#sc-vMax').textContent = fmt(ss.max)
     }
@@ -174,6 +181,7 @@ function attachSweepListeners(container) {
       container.querySelectorAll('[data-type]').forEach(b => b.className = b.className.replace('btn-primary','btn-ghost'))
       btn.className = btn.className.replace('btn-ghost','btn-primary')
 
+      const LEVEL_PRESETS = getLevelPresets()
       if (ss.defLevelPresetIdx !== -1) {
         const p = LEVEL_PRESETS[ss.defLevelPresetIdx]
         if (p) {
@@ -181,6 +189,15 @@ function attachSweepListeners(container) {
           const cmdEl = q('#sc-cPmDef'); if (cmdEl) cmdEl.value = ss.baseParams.cPmDef
         }
       }
+      
+      const titleEl = container.querySelector('#lbl-pmDef')
+      if (titleEl) {
+        const titleSpan = titleEl.querySelector('span');
+        titleEl.textContent = ss.baseParams.damageType==='phys'?t('targetPhysDef'):t('targetMagDef')
+        titleEl.appendChild(document.createTextNode(' '))
+        titleEl.appendChild(titleSpan)
+      }
+
       drawSweep()
     })
   })
@@ -189,6 +206,7 @@ function attachSweepListeners(container) {
     const idx = parseInt(e.target.value)
     ss.atkLevelPresetIdx = idx
     if (idx === -1) return
+    const LEVEL_PRESETS = getLevelPresets()
     const p = LEVEL_PRESETS[idx]
     if (!p) return
     ss.baseParams.cPen = p.cPen; ss.baseParams.cPmPen = p.cPmPen
@@ -204,6 +222,7 @@ function attachSweepListeners(container) {
     const idx = parseInt(e.target.value)
     ss.defLevelPresetIdx = idx
     if (idx === -1) return
+    const LEVEL_PRESETS = getLevelPresets()
     const p = LEVEL_PRESETS[idx]
     if (!p) return
     ss.baseParams.cDef = p.cDef
@@ -226,10 +245,11 @@ function attachSweepListeners(container) {
 function drawSweep() {
   if (!sweepChart) return
   const { xData, yData } = buildSweepData(ss)
+  const SWEEP_VARIABLES = getSweepVariables()
   const varLabel = SWEEP_VARIABLES.find(v=>v.key===ss.sweepKey)?.label || ss.sweepKey
 
   sweepChart.setOption({
-    ...baseChartOption(`扫描 · ${varLabel}`),
+    ...baseChartOption(varLabel),
     tooltip: { ...MORI_THEME.tooltip, trigger: 'axis', formatter: p => {
       let s = `<b style="color:var(--gold)">${varLabel}: ${fmt(p[0].axisValue)}</b><br>`
       p.forEach(pp => s += `<span style="color:${pp.color}">● ${pp.seriesName}</span>: <b>${pp.value}%</b><br>`)
@@ -238,7 +258,7 @@ function drawSweep() {
     xAxis: { type: 'category', data: xData.map(v=>fmt(v)), axisLabel: MORI_THEME.axisLabel, axisLine: MORI_THEME.axisLine, splitLine:{show:true,lineStyle:{color:'rgba(255,255,255,0.02)'}} },
     yAxis: { type: 'value', min: 'dataMin', max: 100, axisLabel: { ...MORI_THEME.axisLabel, formatter: '{value}%' }, splitLine: MORI_THEME.splitLine },
     series: [
-      { name: '综合穿透率', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6,
+      { name: t('overallPenRate'), type: 'line', smooth: true, symbol: 'circle', symbolSize: 6,
         itemStyle: { color: LINE_COLORS[0] }, lineStyle: { width: 3, shadowBlur: 8, shadowColor: LINE_COLORS[0]+'80' },
         areaStyle: { color: new window.echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:LINE_COLORS[0]+'66'},{offset:1,color:LINE_COLORS[0]+'00'}]) },
         data: yData

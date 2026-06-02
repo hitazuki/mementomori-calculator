@@ -4,6 +4,7 @@ import { renderSweepChart } from './views/SweepChart.js'
 import { renderHeatmap }    from './views/HeatmapChart.js'
 import { renderCompare }    from './views/ComparePanel.js'
 import { renderTableExport } from './views/TableExport.js'
+import { getLang, setLang, updateDOMTranslations } from './i18n/index.js'
 
 const views = {
   calculator: renderCalculator,
@@ -42,6 +43,25 @@ function init() {
     if (item?.dataset.view) switchView(item.dataset.view)
   })
 
+  // Language switch
+  const langSwitch = document.getElementById('lang-switch')
+  if (langSwitch) {
+    langSwitch.value = getLang();
+    langSwitch.addEventListener('change', (e) => {
+      setLang(e.target.value);
+    });
+  }
+  
+  // Re-render current view when language changes
+  window.addEventListener('languagechanged', () => {
+    rendered.clear();
+    const container = document.getElementById(`view-${currentView}`);
+    if (container) {
+      views[currentView](container);
+      rendered.add(currentView);
+    }
+  });
+
   // Hide the old formula toggle if it exists
   const formulaToggle = document.getElementById('formula-toggle')
   if (formulaToggle) {
@@ -52,6 +72,7 @@ function init() {
     formulaDisplay.style.display = 'none'
   }
 
+  updateDOMTranslations();
   switchView('calculator')
 }
 
