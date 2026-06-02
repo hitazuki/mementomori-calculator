@@ -171,14 +171,26 @@ function renderBuildModal(container) {
 
 function renderBenchRows(container) {
   const el = container.querySelector('#cmp-benchmarks'); if (!el) return
-  el.innerHTML = cs.benchmarks.map((b,i) => `
-    <div class="flex items-center gap-8">
-      <span class="text-gold text-mono text-xs" style="width:70px;flex-shrink:0">${b.label}</span>
-      <input class="form-input" type="number" data-bench="${i}" data-field="def" value="${b.def}" style="flex:1" placeholder="${t('targetDef')}">
-      <input class="form-input" type="number" data-bench="${i}" data-field="pmDef" value="${b.pmDef}" style="flex:1" placeholder="${t('targetPhysDef')}/${t('targetMagDef')}">
-      <button class="btn btn-danger btn-sm" data-remove-bench="${i}">×</button>
+  
+  const header = `
+    <div style="display: grid; grid-template-columns: 70px 1fr 1fr 28px; gap: 8px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+      <span style="font-size:11px;color:var(--text-secondary);">${t('buildName')}</span>
+      <span style="font-size:11px;color:var(--text-secondary);">${t('targetDef')}</span>
+      <span style="font-size:11px;color:var(--text-secondary);">${t('targetPhysDef')}/${t('targetMagDef')}</span>
+      <span></span>
+    </div>
+  `
+
+  const rows = cs.benchmarks.map((b,i) => `
+    <div style="display: grid; grid-template-columns: 70px 1fr 1fr 28px; gap: 8px; align-items: center; margin-bottom: 8px;">
+      <span class="text-gold text-mono text-xs" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.label}</span>
+      <input class="form-input" type="number" data-bench="${i}" data-field="def" value="${b.def}" placeholder="${t('targetDef')}">
+      <input class="form-input" type="number" data-bench="${i}" data-field="pmDef" value="${b.pmDef}" placeholder="${t('targetPhysDef')}/${t('targetMagDef')}">
+      <button class="btn btn-danger btn-sm" data-remove-bench="${i}" style="height:32px;padding:0;">×</button>
     </div>
   `).join('')
+  
+  el.innerHTML = header + rows
 }
 
 function attachCompareListeners(container) {
