@@ -1,0 +1,877 @@
+{
+  "1": {
+    "id": 1,
+    "nameKey": "[CharacterName1]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "2": {
+    "id": 2,
+    "nameKey": "[CharacterName2]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "3": {
+    "id": 3,
+    "nameKey": "[CharacterName3]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "4": {
+    "id": 4,
+    "nameKey": "[CharacterName4]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "5": {
+    "id": 5,
+    "nameKey": "[CharacterName5]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "6": {
+    "id": 6,
+    "nameKey": "[CharacterName6]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "7": {
+    "id": 7,
+    "nameKey": "[CharacterName7]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "8": {
+    "id": 8,
+    "nameKey": "[CharacterName8]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "9": {
+    "id": 9,
+    "nameKey": "[CharacterName9]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "10": {
+    "id": 10,
+    "nameKey": "[CharacterName10]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
+  "11": {
+    "id": 11,
+    "nameKey": "[CharacterName11]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "12": {
+    "id": 12,
+    "nameKey": "[CharacterName12]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "13": {
+    "id": 13,
+    "nameKey": "[CharacterName13]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "14": {
+    "id": 14,
+    "nameKey": "[CharacterName14]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "15": {
+    "id": 15,
+    "nameKey": "[CharacterName15]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "16": {
+    "id": 16,
+    "nameKey": "[CharacterName16]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "17": {
+    "id": 17,
+    "nameKey": "[CharacterName17]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "18": {
+    "id": 18,
+    "nameKey": "[CharacterName18]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "19": {
+    "id": 19,
+    "nameKey": "[CharacterName19]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "20": {
+    "id": 20,
+    "nameKey": "[CharacterName20]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": false
+  },
+  "21": {
+    "id": 21,
+    "nameKey": "[CharacterName21]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "22": {
+    "id": 22,
+    "nameKey": "[CharacterName22]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "23": {
+    "id": 23,
+    "nameKey": "[CharacterName23]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "24": {
+    "id": 24,
+    "nameKey": "[CharacterName24]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "25": {
+    "id": 25,
+    "nameKey": "[CharacterName25]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "26": {
+    "id": 26,
+    "nameKey": "[CharacterName26]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "27": {
+    "id": 27,
+    "nameKey": "[CharacterName27]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "28": {
+    "id": 28,
+    "nameKey": "[CharacterName28]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "29": {
+    "id": 29,
+    "nameKey": "[CharacterName29]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": false
+  },
+  "30": {
+    "id": 30,
+    "nameKey": "[CharacterName30]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "31": {
+    "id": 31,
+    "nameKey": "[CharacterName31]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "32": {
+    "id": 32,
+    "nameKey": "[CharacterName32]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "33": {
+    "id": 33,
+    "nameKey": "[CharacterName33]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "34": {
+    "id": 34,
+    "nameKey": "[CharacterName34]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "35": {
+    "id": 35,
+    "nameKey": "[CharacterName35]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "36": {
+    "id": 36,
+    "nameKey": "[CharacterName36]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "37": {
+    "id": 37,
+    "nameKey": "[CharacterName37]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "38": {
+    "id": 38,
+    "nameKey": "[CharacterName38]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "39": {
+    "id": 39,
+    "nameKey": "[CharacterName39]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": false
+  },
+  "40": {
+    "id": 40,
+    "nameKey": "[CharacterName40]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "41": {
+    "id": 41,
+    "nameKey": "[CharacterName41]",
+    "name2Key": "[CharacterSubName41]",
+    "elementType": 5,
+    "isLimited": false
+  },
+  "42": {
+    "id": 42,
+    "nameKey": "[CharacterName42]",
+    "name2Key": "[CharacterSubName42]",
+    "elementType": 5,
+    "isLimited": true
+  },
+  "43": {
+    "id": 43,
+    "nameKey": "[CharacterName43]",
+    "name2Key": "[CharacterSubName43]",
+    "elementType": 5,
+    "isLimited": true
+  },
+  "44": {
+    "id": 44,
+    "nameKey": "[CharacterName44]",
+    "name2Key": "[CharacterSubName44]",
+    "elementType": 5,
+    "isLimited": true
+  },
+  "45": {
+    "id": 45,
+    "nameKey": "[CharacterName45]",
+    "name2Key": "[CharacterSubName45]",
+    "elementType": 5,
+    "isLimited": true
+  },
+  "46": {
+    "id": 46,
+    "nameKey": "[CharacterName46]",
+    "name2Key": "[CharacterSubName46]",
+    "elementType": 6,
+    "isLimited": false
+  },
+  "47": {
+    "id": 47,
+    "nameKey": "[CharacterName47]",
+    "name2Key": "[CharacterSubName47]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "48": {
+    "id": 48,
+    "nameKey": "[CharacterName48]",
+    "name2Key": "[CharacterSubName48]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "49": {
+    "id": 49,
+    "nameKey": "[CharacterName49]",
+    "name2Key": "[CharacterSubName49]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "50": {
+    "id": 50,
+    "nameKey": "[CharacterName50]",
+    "name2Key": "[CharacterSubName50]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "51": {
+    "id": 51,
+    "nameKey": "[CharacterName51]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "52": {
+    "id": 52,
+    "nameKey": "[CharacterName52]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "53": {
+    "id": 53,
+    "nameKey": "[CharacterName53]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "54": {
+    "id": 54,
+    "nameKey": "[CharacterName54]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "55": {
+    "id": 55,
+    "nameKey": "[CharacterName55]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "56": {
+    "id": 56,
+    "nameKey": "[CharacterName56]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "57": {
+    "id": 57,
+    "nameKey": "[CharacterName57]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "58": {
+    "id": 58,
+    "nameKey": "[CharacterName58]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "59": {
+    "id": 59,
+    "nameKey": "[CharacterName59]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "60": {
+    "id": 60,
+    "nameKey": "[CharacterName60]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "61": {
+    "id": 61,
+    "nameKey": "[CharacterName61]",
+    "name2Key": "[CharacterSubName61]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "62": {
+    "id": 62,
+    "nameKey": "[CharacterName62]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "63": {
+    "id": 63,
+    "nameKey": "[CharacterName63]",
+    "name2Key": "[CharacterSubName63]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "64": {
+    "id": 64,
+    "nameKey": "[CharacterName64]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "65": {
+    "id": 65,
+    "nameKey": "[CharacterName65]",
+    "name2Key": null,
+    "elementType": 5,
+    "isLimited": true
+  },
+  "66": {
+    "id": 66,
+    "nameKey": "[CharacterName66]",
+    "name2Key": "[CharacterSubName66]",
+    "elementType": 4,
+    "isLimited": true
+  },
+  "67": {
+    "id": 67,
+    "nameKey": "[CharacterName67]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "68": {
+    "id": 68,
+    "nameKey": "[CharacterName68]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "69": {
+    "id": 69,
+    "nameKey": "[CharacterName69]",
+    "name2Key": "[CharacterSubName69]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "70": {
+    "id": 70,
+    "nameKey": "[CharacterName70]",
+    "name2Key": "[CharacterSubName70]",
+    "elementType": 3,
+    "isLimited": true
+  },
+  "71": {
+    "id": 71,
+    "nameKey": "[CharacterName71]",
+    "name2Key": "[CharacterSubName71]",
+    "elementType": 4,
+    "isLimited": true
+  },
+  "72": {
+    "id": 72,
+    "nameKey": "[CharacterName72]",
+    "name2Key": "[CharacterSubName72]",
+    "elementType": 2,
+    "isLimited": true
+  },
+  "73": {
+    "id": 73,
+    "nameKey": "[CharacterName73]",
+    "name2Key": "[CharacterSubName73]",
+    "elementType": 4,
+    "isLimited": true
+  },
+  "74": {
+    "id": 74,
+    "nameKey": "[CharacterName74]",
+    "name2Key": "[CharacterSubName74]",
+    "elementType": 1,
+    "isLimited": true
+  },
+  "75": {
+    "id": 75,
+    "nameKey": "[CharacterName75]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "76": {
+    "id": 76,
+    "nameKey": "[CharacterName76]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "77": {
+    "id": 77,
+    "nameKey": "[CharacterName77]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "78": {
+    "id": 78,
+    "nameKey": "[CharacterName78]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "79": {
+    "id": 79,
+    "nameKey": "[CharacterName79]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "80": {
+    "id": 80,
+    "nameKey": "[CharacterName80]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "81": {
+    "id": 81,
+    "nameKey": "[CharacterName81]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "82": {
+    "id": 82,
+    "nameKey": "[CharacterName82]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "83": {
+    "id": 83,
+    "nameKey": "[CharacterName83]",
+    "name2Key": "[CharacterSubName83]",
+    "elementType": 4,
+    "isLimited": true
+  },
+  "84": {
+    "id": 84,
+    "nameKey": "[CharacterName84]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "85": {
+    "id": 85,
+    "nameKey": "[CharacterName85]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "86": {
+    "id": 86,
+    "nameKey": "[CharacterName86]",
+    "name2Key": "[CharacterSubName86]",
+    "elementType": 5,
+    "isLimited": true
+  },
+  "87": {
+    "id": 87,
+    "nameKey": "[CharacterName87]",
+    "name2Key": "[CharacterSubName87]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "88": {
+    "id": 88,
+    "nameKey": "[CharacterName88]",
+    "name2Key": "[CharacterSubName88]",
+    "elementType": 5,
+    "isLimited": true
+  },
+  "89": {
+    "id": 89,
+    "nameKey": "[CharacterName89]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "93": {
+    "id": 93,
+    "nameKey": "[CharacterName93]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "95": {
+    "id": 95,
+    "nameKey": "[CharacterName95]",
+    "name2Key": "[CharacterSubName95]",
+    "elementType": 1,
+    "isLimited": true
+  },
+  "96": {
+    "id": 96,
+    "nameKey": "[CharacterName96]",
+    "name2Key": "[CharacterSubName96]",
+    "elementType": 4,
+    "isLimited": true
+  },
+  "99": {
+    "id": 99,
+    "nameKey": "[CharacterName99]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "100": {
+    "id": 100,
+    "nameKey": "[CharacterName100]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "101": {
+    "id": 101,
+    "nameKey": "[CharacterName101]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "102": {
+    "id": 102,
+    "nameKey": "[CharacterName102]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "103": {
+    "id": 103,
+    "nameKey": "[CharacterName103]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "105": {
+    "id": 105,
+    "nameKey": "[CharacterName105]",
+    "name2Key": "[CharacterSubName105]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "106": {
+    "id": 106,
+    "nameKey": "[CharacterName106]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": true
+  },
+  "107": {
+    "id": 107,
+    "nameKey": "[CharacterName107]",
+    "name2Key": "[CharacterSubName107]",
+    "elementType": 2,
+    "isLimited": true
+  },
+  "108": {
+    "id": 108,
+    "nameKey": "[CharacterName108]",
+    "name2Key": "[CharacterSubName108]",
+    "elementType": 3,
+    "isLimited": true
+  },
+  "109": {
+    "id": 109,
+    "nameKey": "[CharacterName109]",
+    "name2Key": null,
+    "elementType": 5,
+    "isLimited": true
+  },
+  "111": {
+    "id": 111,
+    "nameKey": "[CharacterName111]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "112": {
+    "id": 112,
+    "nameKey": "[CharacterName112]",
+    "name2Key": "[CharacterSubName112]",
+    "elementType": 2,
+    "isLimited": true
+  },
+  "113": {
+    "id": 113,
+    "nameKey": "[CharacterName113]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "114": {
+    "id": 114,
+    "nameKey": "[CharacterName114]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "115": {
+    "id": 115,
+    "nameKey": "[CharacterName115]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "116": {
+    "id": 116,
+    "nameKey": "[CharacterName116]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "117": {
+    "id": 117,
+    "nameKey": "[CharacterName117]",
+    "name2Key": "[CharacterSubName117]",
+    "elementType": 5,
+    "isLimited": true
+  },
+  "121": {
+    "id": 121,
+    "nameKey": "[CharacterName121]",
+    "name2Key": null,
+    "elementType": 5,
+    "isLimited": true
+  },
+  "122": {
+    "id": 122,
+    "nameKey": "[CharacterName122]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "123": {
+    "id": 123,
+    "nameKey": "[CharacterName123]",
+    "name2Key": "[CharacterSubName123]",
+    "elementType": 1,
+    "isLimited": true
+  },
+  "124": {
+    "id": 124,
+    "nameKey": "[CharacterName124]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
+  "125": {
+    "id": 125,
+    "nameKey": "[CharacterName125]",
+    "name2Key": null,
+    "elementType": 6,
+    "isLimited": true
+  },
+  "126": {
+    "id": 126,
+    "nameKey": "[CharacterName126]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "128": {
+    "id": 128,
+    "nameKey": "[CharacterName128]",
+    "name2Key": "[CharacterSubName128]",
+    "elementType": 5,
+    "isLimited": true
+  },
+  "129": {
+    "id": 129,
+    "nameKey": "[CharacterName129]",
+    "name2Key": "[CharacterSubName129]",
+    "elementType": 6,
+    "isLimited": true
+  },
+  "130": {
+    "id": 130,
+    "nameKey": "[CharacterName130]",
+    "name2Key": null,
+    "elementType": 2,
+    "isLimited": true
+  },
+  "131": {
+    "id": 131,
+    "nameKey": "[CharacterName131]",
+    "name2Key": "[CharacterSubName131]",
+    "elementType": 1,
+    "isLimited": true
+  },
+  "132": {
+    "id": 132,
+    "nameKey": "[CharacterName132]",
+    "name2Key": "[CharacterSubName132]",
+    "elementType": 3,
+    "isLimited": true
+  },
+  "134": {
+    "id": 134,
+    "nameKey": "[CharacterName134]",
+    "name2Key": "[CharacterSubName134]",
+    "elementType": 1,
+    "isLimited": true
+  },
+  "135": {
+    "id": 135,
+    "nameKey": "[CharacterName135]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "137": {
+    "id": 137,
+    "nameKey": "[CharacterName137]",
+    "name2Key": null,
+    "elementType": 6,
+    "isLimited": true
+  },
+  "139": {
+    "id": 139,
+    "nameKey": "[CharacterName139]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "141": {
+    "id": 141,
+    "nameKey": "[CharacterName141]",
+    "name2Key": null,
+    "elementType": 5,
+    "isLimited": false
+  }
+}

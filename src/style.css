@@ -108,6 +108,15 @@ html, body {
 /* Nav */
 .nav-list { list-style: none; padding: 10px 8px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
 
+.nav-group-title {
+  padding: 16px 20px 8px 20px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
 .nav-item {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px;
@@ -396,20 +405,20 @@ html, body {
   padding: 8px 12px;
   background: rgba(201,168,76,0.07);
   color: var(--gold); font-weight: 600;
-  text-align: right;
+  text-align: center;
   border-bottom: 1px solid var(--border-subtle);
   font-family: var(--font-mono);
   position: sticky; top: 0; z-index: 1;
 }
-.data-table th:first-child { text-align: left; }
+.data-table th:first-child { text-align: center; }
 .data-table td {
-  padding: 7px 12px; text-align: right;
+  padding: 7px 12px; text-align: center;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   font-family: var(--font-mono);
   color: var(--text-secondary);
   transition: background 0.15s;
 }
-.data-table td:first-child { text-align: left; color: var(--gold); font-weight: 500; }
+.data-table td:first-child { text-align: center; color: var(--gold); font-weight: 500; }
 .data-table tr:hover td { background: rgba(255,255,255,0.03); }
 .data-table .cell-high { color: var(--success); }
 .data-table .cell-low { color: var(--danger); }

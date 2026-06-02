@@ -4,6 +4,7 @@ import { renderSweepChart } from './views/SweepChart.js'
 import { renderHeatmap }    from './views/HeatmapChart.js'
 import { renderCompare }    from './views/ComparePanel.js'
 import { renderTableExport } from './views/TableExport.js'
+import { renderMysterium }  from './views/MysteriumPanel.js'
 import { getLang, setLang, updateDOMTranslations } from './i18n/index.js'
 
 const views = {
@@ -12,6 +13,7 @@ const views = {
   heatmap:    renderHeatmap,
   compare:    renderCompare,
   table:      renderTableExport,
+  mysterium:  renderMysterium,
 }
 
 let currentView = 'calculator'

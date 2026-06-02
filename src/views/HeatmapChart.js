@@ -35,7 +35,7 @@ export function renderHeatmap(container) {
 
     <div class="flex-col gap-12" style="overflow-y:auto">
       <div class="card">
-        <div class="card-title">🛤 计算路线</div>
+        <div class="card-title">🛤 ${t('hmCalcMode')}</div>
         <div style="display:flex;gap:8px">
           <button class="btn ${hs.mode==='phys'?'btn-primary':'btn-ghost'} btn-sm" data-mode="phys">DEF</button>
           <button class="btn ${hs.mode==='mag' ?'btn-primary':'btn-ghost'} btn-sm" data-mode="mag">P.DEF / M.DEF</button>

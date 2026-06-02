@@ -3,13 +3,14 @@ import zhTW from '../locales/zh-TW.js';
 import en from '../locales/en.js';
 import ja from '../locales/ja.js';
 import ko from '../locales/ko.js';
+import masterDict from '../locales/master_dict.json';
 
 const messages = {
-  'zh-CN': zhCN,
-  'zh-TW': zhTW,
-  'en': en,
-  'ja': ja,
-  'ko': ko
+  'zh-CN': { ...zhCN, ...(masterDict['zh-CN'] || {}) },
+  'zh-TW': { ...zhTW, ...(masterDict['zh-TW'] || {}) },
+  'en': { ...en, ...(masterDict['en'] || {}) },
+  'ja': { ...ja, ...(masterDict['ja'] || {}) },
+  'ko': { ...ko, ...(masterDict['ko'] || {}) }
 };
 
 let currentLang = localStorage.getItem('mmt-calc-lang') || 'zh-CN';

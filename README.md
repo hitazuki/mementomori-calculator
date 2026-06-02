@@ -74,10 +74,10 @@ mmt-calculator/
 
 ### 📊 数据与公式来源参考
 
-本计算器使用的数据和推导过程已随附在 `data/` 目录下，以便于社区核对与二次验证：
-1. **公式推导 (`data/excel_formulas.txt` & `data/combat_formula_analysis.md`)**：
+本计算器使用的数据和推导过程已随附在 `doc/damage/` 目录下，以便于社区核对与二次验证：
+1. **公式推导 (`doc/damage/excel_formulas.txt` & `doc/damage/combat_formula_analysis.md`)**：
    详尽还原了客户端内部攻击判定的计算过程，重点确立了 `Damage Rate = 1 - DR` 及两路独立乘算的算法结构。
-2. **常量数据 (`data/level_coefficient.csv` & `data/IMG_4312.png`)**：
+2. **常量数据 (`doc/damage/level_coefficient.csv` & `doc/damage/IMG_4312.png`)**：
    提取自客户端原始表结构，收录了完整的 Lv1 - Lv900 敌方各类防御定数和贯通定数。
    - `C_def` 对应表中的 `防御力(DEF)`
    - `C_pdef / C_mdef` 对应表中的 `物理防御力(P.DEF) / 魔法防御力(M.DEF)`

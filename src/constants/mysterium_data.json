@@ -1,0 +1,2120 @@
+[
+  {
+    "id": 1,
+    "nameKey": "[CharacterCollectionName1]",
+    "reqCids": [
+      6,
+      10
+    ],
+    "params": [
+      {
+        "ptype": 3,
+        "nameKey": "[BattleParameterTypePhysicalDamageRelax]",
+        "ctype": 1,
+        "val": 3000
+      },
+      {
+        "ptype": 4,
+        "nameKey": "[BattleParameterTypeMagicDamageRelax]",
+        "ctype": 1,
+        "val": 3000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 2,
+    "nameKey": "[CharacterCollectionName2]",
+    "reqCids": [
+      35,
+      37
+    ],
+    "params": [
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1500
+      },
+      {
+        "ptype": 8,
+        "nameKey": "[BattleParameterTypeCriticalResist]",
+        "ctype": 1,
+        "val": 1500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 3,
+    "nameKey": "[CharacterCollectionName3]",
+    "reqCids": [
+      16,
+      18,
+      20
+    ],
+    "params": [
+      {
+        "ptype": 6,
+        "nameKey": "[BattleParameterTypeAvoidance]",
+        "ctype": 1,
+        "val": 1500
+      },
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 2,
+        "val": 100
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 4,
+    "nameKey": "[CharacterCollectionName4]",
+    "reqCids": [
+      26,
+      27,
+      29
+    ],
+    "params": [
+      {
+        "ptype": 16,
+        "nameKey": "[BattleParameterTypeDebuffResist]",
+        "ctype": 1,
+        "val": 1500
+      },
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 100
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 5,
+    "nameKey": "[CharacterCollectionName5]",
+    "reqCids": [
+      15,
+      17,
+      25,
+      28
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 1,
+        "val": 5000
+      },
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 6,
+    "nameKey": "[CharacterCollectionName6]",
+    "reqCids": [
+      36,
+      38,
+      39,
+      41
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 100
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 1,
+        "val": 3000
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "nameKey": "[CharacterCollectionName7]",
+    "reqCids": [
+      5,
+      7,
+      8,
+      46
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 100
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 1,
+        "val": 3000
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "nameKey": "[CharacterCollectionName8]",
+    "reqCids": [
+      49,
+      6,
+      8
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 9,
+    "nameKey": "[CharacterCollectionName9]",
+    "reqCids": [
+      53,
+      35,
+      28
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 3,
+        "val": 70
+      },
+      {
+        "ptype": 11,
+        "nameKey": "[BattleParameterTypeMagicCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 10,
+    "nameKey": "[CharacterCollectionName10]",
+    "reqCids": [
+      42,
+      38
+    ],
+    "params": [
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 3,
+        "val": 15
+      },
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 11,
+    "nameKey": "[CharacterCollectionName11]",
+    "reqCids": [
+      55,
+      17,
+      25
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 160
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "nameKey": "[CharacterCollectionName12]",
+    "reqCids": [
+      54,
+      7,
+      10
+    ],
+    "params": [
+      {
+        "ptype": 18,
+        "nameKey": "[BattleParameterTypeHpDrain]",
+        "ctype": 2,
+        "val": 500
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "nameKey": "[CharacterCollectionName13]",
+    "reqCids": [
+      19,
+      16,
+      41
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 7,
+        "nameKey": "[BattleParameterTypeCritical]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 14,
+    "nameKey": "[CharacterCollectionName14]",
+    "reqCids": [
+      44,
+      39
+    ],
+    "params": [
+      {
+        "ptype": 14,
+        "nameKey": "[BattleParameterTypeDamageEnhance]",
+        "ctype": 1,
+        "val": 500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 15,
+    "nameKey": "[CharacterCollectionName15]",
+    "reqCids": [
+      52,
+      36
+    ],
+    "params": [
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 3,
+        "val": 15
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "nameKey": "[CharacterCollectionName16]",
+    "reqCids": [
+      30,
+      18
+    ],
+    "params": [
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "nameKey": "[CharacterCollectionName17]",
+    "reqCids": [
+      58,
+      29
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 100
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "nameKey": "[CharacterCollectionName18]",
+    "reqCids": [
+      47,
+      5
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 19,
+    "nameKey": "[CharacterCollectionName19]",
+    "reqCids": [
+      67,
+      20
+    ],
+    "params": [
+      {
+        "ptype": 6,
+        "nameKey": "[BattleParameterTypeAvoidance]",
+        "ctype": 3,
+        "val": 50
+      },
+      {
+        "ptype": 3,
+        "nameKey": "[BattleParameterTypePhysicalDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 20,
+    "nameKey": "[CharacterCollectionName20]",
+    "reqCids": [
+      70,
+      15
+    ],
+    "params": [
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "nameKey": "[CharacterCollectionName21]",
+    "reqCids": [
+      71,
+      10
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 150
+      },
+      {
+        "ptype": 4,
+        "nameKey": "[BattleParameterTypeMagicDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 22,
+    "nameKey": "[CharacterCollectionName22]",
+    "reqCids": [
+      40,
+      16,
+      26
+    ],
+    "params": [
+      {
+        "ptype": 11,
+        "nameKey": "[BattleParameterTypeMagicCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 23,
+    "nameKey": "[CharacterCollectionName24]",
+    "reqCids": [
+      60,
+      6
+    ],
+    "params": [
+      {
+        "ptype": 17,
+        "nameKey": "[BattleParameterTypeDamageReflect]",
+        "ctype": 2,
+        "val": 300
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 24,
+    "nameKey": "[CharacterCollectionName23]",
+    "reqCids": [
+      72,
+      27
+    ],
+    "params": [
+      {
+        "ptype": 7,
+        "nameKey": "[BattleParameterTypeCritical]",
+        "ctype": 3,
+        "val": 70
+      },
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 25,
+    "nameKey": "[CharacterCollectionName25]",
+    "reqCids": [
+      50,
+      37
+    ],
+    "params": [
+      {
+        "ptype": 7,
+        "nameKey": "[BattleParameterTypeCritical]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "nameKey": "[CharacterCollectionName26]",
+    "reqCids": [
+      9,
+      5
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 27,
+    "nameKey": "[CharacterCollectionName27]",
+    "reqCids": [
+      57,
+      26,
+      46
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 28,
+    "nameKey": "[CharacterCollectionName28]",
+    "reqCids": [
+      62,
+      18
+    ],
+    "params": [
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 3,
+        "val": 15
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "nameKey": "[CharacterCollectionName29]",
+    "reqCids": [
+      45,
+      41,
+      46
+    ],
+    "params": [
+      {
+        "ptype": 18,
+        "nameKey": "[BattleParameterTypeHpDrain]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 30,
+    "nameKey": "[CharacterCollectionName30]",
+    "reqCids": [
+      51,
+      38
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 3,
+        "nameKey": "[BattleParameterTypePhysicalDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 31,
+    "nameKey": "[CharacterCollectionName31]",
+    "reqCids": [
+      61,
+      45
+    ],
+    "params": [
+      {
+        "ptype": 12,
+        "nameKey": "[BattleParameterTypeDefensePenetration]",
+        "ctype": 1,
+        "val": 200
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 32,
+    "nameKey": "[CharacterCollectionName32]",
+    "reqCids": [
+      68,
+      20
+    ],
+    "params": [
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 3,
+        "val": 70
+      },
+      {
+        "ptype": 8,
+        "nameKey": "[BattleParameterTypeCriticalResist]",
+        "ctype": 3,
+        "val": 30
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 33,
+    "nameKey": "[CharacterCollectionName33]",
+    "reqCids": [
+      43,
+      7
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 34,
+    "nameKey": "[CharacterCollectionName34]",
+    "reqCids": [
+      73,
+      17
+    ],
+    "params": [
+      {
+        "ptype": 7,
+        "nameKey": "[BattleParameterTypeCritical]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 35,
+    "nameKey": "[CharacterCollectionName35]",
+    "reqCids": [
+      74,
+      36
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 36,
+    "nameKey": "[CharacterCollectionName36]",
+    "reqCids": [
+      48,
+      29
+    ],
+    "params": [
+      {
+        "ptype": 11,
+        "nameKey": "[BattleParameterTypeMagicCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "nameKey": "[CharacterCollectionName37]",
+    "reqCids": [
+      66,
+      25
+    ],
+    "params": [
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 38,
+    "nameKey": "[CharacterCollectionName38]",
+    "reqCids": [
+      64,
+      35,
+      37
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 150
+      },
+      {
+        "ptype": 4,
+        "nameKey": "[BattleParameterTypeMagicDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 39,
+    "nameKey": "[CharacterCollectionName39]",
+    "reqCids": [
+      56,
+      27
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 40,
+    "nameKey": "[CharacterCollectionName40]",
+    "reqCids": [
+      84,
+      8
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 14,
+        "nameKey": "[BattleParameterTypeDamageEnhance]",
+        "ctype": 1,
+        "val": 250
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 41,
+    "nameKey": "[CharacterCollectionName41]",
+    "reqCids": [
+      85,
+      28
+    ],
+    "params": [
+      {
+        "ptype": 17,
+        "nameKey": "[BattleParameterTypeDamageReflect]",
+        "ctype": 2,
+        "val": 300
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 42,
+    "nameKey": "[CharacterCollectionName42]",
+    "reqCids": [
+      76,
+      39
+    ],
+    "params": [
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 3,
+        "val": 15
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "nameKey": "[CharacterCollectionName43]",
+    "reqCids": [
+      59,
+      20
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 150
+      },
+      {
+        "ptype": 7,
+        "nameKey": "[BattleParameterTypeCritical]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 44,
+    "nameKey": "[CharacterCollectionName44]",
+    "reqCids": [
+      63,
+      46
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "nameKey": "[CharacterCollectionName45]",
+    "reqCids": [
+      75,
+      15
+    ],
+    "params": [
+      {
+        "ptype": 3,
+        "nameKey": "[BattleParameterTypePhysicalDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 1,
+        "val": 1500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 46,
+    "nameKey": "[CharacterCollectionName46]",
+    "reqCids": [
+      88,
+      16
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 47,
+    "nameKey": "[CharacterCollectionName47]",
+    "reqCids": [
+      78,
+      5
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 6,
+        "nameKey": "[BattleParameterTypeAvoidance]",
+        "ctype": 1,
+        "val": 1500
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 48,
+    "nameKey": "[CharacterCollectionName48]",
+    "reqCids": [
+      82,
+      30
+    ],
+    "params": [
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 3,
+        "val": 15
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 49,
+    "nameKey": "[CharacterCollectionName49]",
+    "reqCids": [
+      77,
+      25
+    ],
+    "params": [
+      {
+        "ptype": 4,
+        "nameKey": "[BattleParameterTypeMagicDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 1,
+        "val": 3000
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "nameKey": "[CharacterCollectionName50]",
+    "reqCids": [
+      69,
+      17
+    ],
+    "params": [
+      {
+        "ptype": 11,
+        "nameKey": "[BattleParameterTypeMagicCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 51,
+    "nameKey": "[CharacterCollectionName51]",
+    "reqCids": [
+      95,
+      28
+    ],
+    "params": [
+      {
+        "ptype": 8,
+        "nameKey": "[BattleParameterTypeCriticalResist]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 1,
+        "val": 3000
+      }
+    ]
+  },
+  {
+    "id": 52,
+    "nameKey": "[CharacterCollectionName52]",
+    "reqCids": [
+      96,
+      6
+    ],
+    "params": [
+      {
+        "ptype": 12,
+        "nameKey": "[BattleParameterTypeDefensePenetration]",
+        "ctype": 1,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "nameKey": "[CharacterCollectionName53]",
+    "reqCids": [
+      80,
+      37
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 54,
+    "nameKey": "[CharacterCollectionName54]",
+    "reqCids": [
+      65,
+      39
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 300
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 55,
+    "nameKey": "[CharacterCollectionName55]",
+    "reqCids": [
+      79,
+      29
+    ],
+    "params": [
+      {
+        "ptype": 16,
+        "nameKey": "[BattleParameterTypeDebuffResist]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 56,
+    "nameKey": "[CharacterCollectionName56]",
+    "reqCids": [
+      81,
+      35
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 57,
+    "nameKey": "[CharacterCollectionName57]",
+    "reqCids": [
+      86,
+      26
+    ],
+    "params": [
+      {
+        "ptype": 18,
+        "nameKey": "[BattleParameterTypeHpDrain]",
+        "ctype": 2,
+        "val": 500
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 58,
+    "nameKey": "[CharacterCollectionName58]",
+    "reqCids": [
+      2,
+      12,
+      22,
+      32
+    ],
+    "params": [],
+    "baseParams": []
+  },
+  {
+    "id": 59,
+    "nameKey": "[CharacterCollectionName59]",
+    "reqCids": [
+      105,
+      41
+    ],
+    "params": [
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 2,
+        "val": 100
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 60,
+    "nameKey": "[CharacterCollectionName60]",
+    "reqCids": [
+      106,
+      36
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "nameKey": "[CharacterCollectionName61]",
+    "reqCids": [
+      61,
+      2
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 70
+      }
+    ]
+  },
+  {
+    "id": 62,
+    "nameKey": "[CharacterCollectionName62]",
+    "reqCids": [
+      107,
+      5
+    ],
+    "params": [
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 3,
+        "nameKey": "[BattleParameterTypePhysicalDamageRelax]",
+        "ctype": 1,
+        "val": 3000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 63,
+    "nameKey": "[CharacterCollectionName63]",
+    "reqCids": [
+      108,
+      46
+    ],
+    "params": [
+      {
+        "ptype": 11,
+        "nameKey": "[BattleParameterTypeMagicCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 4,
+        "nameKey": "[BattleParameterTypeMagicDamageRelax]",
+        "ctype": 1,
+        "val": 3000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 64,
+    "nameKey": "[CharacterCollectionName64]",
+    "reqCids": [
+      109,
+      2
+    ],
+    "params": [
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 65,
+    "nameKey": "[CharacterCollectionName65]",
+    "reqCids": [
+      93,
+      75
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 300
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 66,
+    "nameKey": "[CharacterCollectionName66]",
+    "reqCids": [
+      111,
+      113
+    ],
+    "params": [
+      {
+        "ptype": 6,
+        "nameKey": "[BattleParameterTypeAvoidance]",
+        "ctype": 3,
+        "val": 15
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "nameKey": "[CharacterCollectionName67]",
+    "reqCids": [
+      112,
+      56
+    ],
+    "params": [
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 1,
+        "val": 3000
+      }
+    ]
+  },
+  {
+    "id": 68,
+    "nameKey": "[CharacterCollectionName68]",
+    "reqCids": [
+      114,
+      89,
+      87
+    ],
+    "params": [
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 17,
+        "nameKey": "[BattleParameterTypeDamageReflect]",
+        "ctype": 2,
+        "val": 300
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 69,
+    "nameKey": "[CharacterCollectionName69]",
+    "reqCids": [
+      115,
+      26
+    ],
+    "params": [
+      {
+        "ptype": 7,
+        "nameKey": "[BattleParameterTypeCritical]",
+        "ctype": 3,
+        "val": 70
+      },
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 3,
+        "val": 15
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 70,
+    "nameKey": "[CharacterCollectionName70]",
+    "reqCids": [
+      116,
+      48
+    ],
+    "params": [
+      {
+        "ptype": 18,
+        "nameKey": "[BattleParameterTypeHpDrain]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 4,
+        "nameKey": "[BattleParameterTypeMagicDamageRelax]",
+        "ctype": 2,
+        "val": 100
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 71,
+    "nameKey": "[CharacterCollectionName71]",
+    "reqCids": [
+      3,
+      13,
+      23,
+      33
+    ],
+    "params": [],
+    "baseParams": []
+  },
+  {
+    "id": 72,
+    "nameKey": "[CharacterCollectionName72]",
+    "reqCids": [
+      117,
+      48,
+      29
+    ],
+    "params": [
+      {
+        "ptype": 12,
+        "nameKey": "[BattleParameterTypeDefensePenetration]",
+        "ctype": 1,
+        "val": 200
+      },
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 73,
+    "nameKey": "[CharacterCollectionName73]",
+    "reqCids": [
+      100,
+      30
+    ],
+    "params": [
+      {
+        "ptype": 16,
+        "nameKey": "[BattleParameterTypeDebuffResist]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
+  },
+  {
+    "id": 74,
+    "nameKey": "[CharacterCollectionName74]",
+    "reqCids": [
+      121,
+      88
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 75,
+    "nameKey": "[CharacterCollectionName75]",
+    "reqCids": [
+      122,
+      72
+    ],
+    "params": [
+      {
+        "ptype": 15,
+        "nameKey": "[BattleParameterTypeDebuffHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 76,
+    "nameKey": "[CharacterCollectionName76]",
+    "reqCids": [
+      123,
+      27
+    ],
+    "params": [
+      {
+        "ptype": 9,
+        "nameKey": "[BattleParameterTypeCriticalDamageEnhance]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 77,
+    "nameKey": "[CharacterCollectionName77]",
+    "reqCids": [
+      124,
+      126
+    ],
+    "params": [
+      {
+        "ptype": 11,
+        "nameKey": "[BattleParameterTypeMagicCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 8,
+        "nameKey": "[BattleParameterTypeCriticalResist]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 78,
+    "nameKey": "[CharacterCollectionName78]",
+    "reqCids": [
+      125,
+      109
+    ],
+    "params": [
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 16,
+        "nameKey": "[BattleParameterTypeDebuffResist]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 79,
+    "nameKey": "[CharacterCollectionName79]",
+    "reqCids": [
+      102,
+      40
+    ],
+    "params": [
+      {
+        "ptype": 3,
+        "nameKey": "[BattleParameterTypePhysicalDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 6,
+        "nameKey": "[BattleParameterTypeAvoidance]",
+        "ctype": 3,
+        "val": 50
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 81,
+    "nameKey": "[CharacterCollectionName81]",
+    "reqCids": [
+      83,
+      7
+    ],
+    "params": [
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 82,
+    "nameKey": "[CharacterCollectionName82]",
+    "reqCids": [
+      129,
+      43
+    ],
+    "params": [
+      {
+        "ptype": 14,
+        "nameKey": "[BattleParameterTypeDamageEnhance]",
+        "ctype": 1,
+        "val": 250
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 83,
+    "nameKey": "[CharacterCollectionName83]",
+    "reqCids": [
+      130,
+      128
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 84,
+    "nameKey": "[CharacterCollectionName84]",
+    "reqCids": [
+      131,
+      132
+    ],
+    "params": [
+      {
+        "ptype": 12,
+        "nameKey": "[BattleParameterTypeDefensePenetration]",
+        "ctype": 1,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 70
+      }
+    ]
+  },
+  {
+    "id": 85,
+    "nameKey": "[CharacterCollectionName85]",
+    "reqCids": [
+      132,
+      57
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 16,
+        "nameKey": "[BattleParameterTypeDebuffResist]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 86,
+    "nameKey": "[CharacterCollectionName86]",
+    "reqCids": [
+      101,
+      100
+    ],
+    "params": [
+      {
+        "ptype": 4,
+        "nameKey": "[BattleParameterTypeMagicDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 1,
+        "val": 3000
+      }
+    ]
+  },
+  {
+    "id": 87,
+    "nameKey": "[CharacterCollectionName87]",
+    "reqCids": [
+      135,
+      93,
+      75
+    ],
+    "params": [
+      {
+        "ptype": 18,
+        "nameKey": "[BattleParameterTypeHpDrain]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 7,
+        "nameKey": "[BattleParameterTypeCritical]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 88,
+    "nameKey": "[CharacterCollectionName88]",
+    "reqCids": [
+      4,
+      14,
+      24,
+      34
+    ],
+    "params": [],
+    "baseParams": []
+  },
+  {
+    "id": 89,
+    "nameKey": "[CharacterCollectionName89]",
+    "reqCids": [
+      103,
+      43
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 8,
+        "nameKey": "[BattleParameterTypeCriticalResist]",
+        "ctype": 3,
+        "val": 50
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 90,
+    "nameKey": "[CharacterCollectionName90]",
+    "reqCids": [
+      137,
+      125
+    ],
+    "params": [
+      {
+        "ptype": 11,
+        "nameKey": "[BattleParameterTypeMagicCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  },
+  {
+    "id": 91,
+    "nameKey": "[CharacterCollectionName91]",
+    "reqCids": [
+      99,
+      25
+    ],
+    "params": [
+      {
+        "ptype": 3,
+        "nameKey": "[BattleParameterTypePhysicalDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 6,
+        "nameKey": "[BattleParameterTypeAvoidance]",
+        "ctype": 3,
+        "val": 50
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 92,
+    "nameKey": "[CharacterCollectionName92]",
+    "reqCids": [
+      139,
+      0
+    ],
+    "params": [
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 3,
+        "nameKey": "appBasicMag",
+        "ctype": 3,
+        "val": 70
+      }
+    ]
+  },
+  {
+    "id": 93,
+    "nameKey": "[CharacterCollectionName93]",
+    "reqCids": [
+      134,
+      60
+    ],
+    "params": [
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 40
+      }
+    ]
+  }
+]
