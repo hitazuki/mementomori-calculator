@@ -82,19 +82,19 @@ export default {
 
   // Sweep Chart
   xPen: 'DEF Break (PEN)',
-  yFinalDmg: 'Final Damage',
+  yFinalDmg: 'Final DMG',
   scanRange: 'Scan Range',
-  minPen: 'Min PEN',
-  maxPen: 'Max PEN',
+  minVal: 'Min',
+  maxVal: 'Max',
+  minVar: 'Min {var}',
+  maxVar: 'Max {var}',
   stepSpan: 'Step Span',
   addTargetDef: '+ Add Target DEF Line',
   defLine: '{def} DEF',
-  scanNotice: 'Chart redraws automatically upon param changes.',
+  scanNotice: 'Curves will be recalculated and drawn automatically upon parameter changes.',
 
   // Heatmap Chart
   defRange: 'DEF Range',
-  minDef: 'Min DEF',
-  maxDef: 'Max DEF',
   defStep: 'DEF Step',
   penRange: 'PEN Range',
   penStep: 'PEN Step',

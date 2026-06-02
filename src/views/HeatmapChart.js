@@ -45,11 +45,11 @@ export function renderHeatmap(container) {
       <div class="card">
         <div class="card-title">🛡 ${t('defRange')}</div>
         <div class="form-group">
-          <label class="form-label">${t('minDef')} <span class="value-display" id="hv-defMin">${fmt(hs.defMin)}</span></label>
+          <label class="form-label">${t('minVar', {var: t('targetDef')})} <span class="value-display" id="hv-defMin">${fmt(hs.defMin)}</span></label>
           <input class="form-range" type="range" id="hi-defMin" value="${hs.defMin}" min="0" max="5000000" step="100000">
         </div>
         <div class="form-group">
-          <label class="form-label">${t('maxDef')} <span class="value-display" id="hv-defMax">${fmt(hs.defMax)}</span></label>
+          <label class="form-label">${t('maxVar', {var: t('targetDef')})} <span class="value-display" id="hv-defMax">${fmt(hs.defMax)}</span></label>
           <input class="form-range" type="range" id="hi-defMax" value="${hs.defMax}" min="1000000" max="100000000" step="1000000">
         </div>
         <div class="form-group">
@@ -61,7 +61,7 @@ export function renderHeatmap(container) {
       <div class="card">
         <div class="card-title">⚔ ${t('penRange')}</div>
         <div class="form-group">
-          <label class="form-label">${t('maxPen')} <span class="value-display" id="hv-penMax">${fmt(hs.penMax)}</span></label>
+          <label class="form-label">${t('maxVar', {var: t('pen')})} <span class="value-display" id="hv-penMax">${fmt(hs.penMax)}</span></label>
           <input class="form-range" type="range" id="hi-penMax" value="${hs.penMax}" min="5000" max="150000" step="1000">
         </div>
         <div class="form-group">

@@ -53,11 +53,11 @@ export function renderSweepChart(container) {
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">${t('minPen')} <span class="value-display" id="sc-vMin">${fmt(ss.min)}</span></label>
+          <label class="form-label"><span id="txt-minVar">${t('minVar', {var: SWEEP_VARIABLES.find(v=>v.key===ss.sweepKey)?.label || ss.sweepKey})}</span> <span class="value-display" id="sc-vMin">${fmt(ss.min)}</span></label>
           <input class="form-input" type="number" id="sc-min" value="${ss.min}">
         </div>
         <div class="form-group">
-          <label class="form-label">${t('maxPen')} <span class="value-display" id="sc-vMax">${fmt(ss.max)}</span></label>
+          <label class="form-label"><span id="txt-maxVar">${t('maxVar', {var: SWEEP_VARIABLES.find(v=>v.key===ss.sweepKey)?.label || ss.sweepKey})}</span> <span class="value-display" id="sc-vMax">${fmt(ss.max)}</span></label>
           <input class="form-input" type="number" id="sc-max" value="${ss.max}">
         </div>
         <div class="form-group">
@@ -140,6 +140,8 @@ function attachSweepListeners(container) {
       ss.min = preset.min; ss.max = preset.max;
       q('#sc-min').value = ss.min; q('#sc-max').value = ss.max
       q('#sc-vMin').textContent = fmt(ss.min); q('#sc-vMax').textContent = fmt(ss.max)
+      const lblMin = q('#txt-minVar'); if (lblMin) lblMin.textContent = t('minVar', {var: preset.label});
+      const lblMax = q('#txt-maxVar'); if (lblMax) lblMax.textContent = t('maxVar', {var: preset.label});
     }
     drawSweep()
   })

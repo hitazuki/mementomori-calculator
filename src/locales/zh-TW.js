@@ -84,8 +84,10 @@ export default {
   xPen: '防禦貫通 (PEN)',
   yFinalDmg: '最終傷害',
   scanRange: '掃描範圍',
-  minPen: '最小貫通',
-  maxPen: '最大貫通',
+  minVal: '最小值',
+  maxVal: '最大值',
+  minVar: '最小 {var}',
+  maxVar: '最大 {var}',
   stepSpan: '步長',
   addTargetDef: '+ 添加目標防禦曲線',
   defLine: '防 {def}',
@@ -93,8 +95,6 @@ export default {
 
   // Heatmap Chart
   defRange: '防禦力區間',
-  minDef: '最小防禦',
-  maxDef: '最大防禦',
   defStep: '防禦步長',
   penRange: '貫通區間',
   penStep: '貫通步長',
