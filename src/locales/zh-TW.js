@@ -156,7 +156,6 @@ export default {
   navGroupMysterium: '📂 秘儀系統',
   navMysterium: '✨ 秘儀性價比',
   navGroupDamage: '📂 傷害計算',
-  navSkillCalc: '⚔️ 技能傷害',
   mysteriumTitle: '🔮 秘儀性價比分析',
   mysteriumDesc: '基於不同的算法與動態權重，評估抽取限定角色以點亮秘儀組合的最優解。',
   ui_tab_chars: '角色抽取推薦',

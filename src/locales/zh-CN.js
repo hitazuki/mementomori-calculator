@@ -155,7 +155,6 @@ export default {
   navGroupMysterium: '📂 秘仪系统',
   navMysterium: '✨ 秘仪性价比',
   navGroupDamage: '📂 伤害计算',
-  navSkillCalc: '⚔️ 技能伤害',
   mysteriumTitle: '🔮 秘仪性价比分析',
   mysteriumDesc: '基于不同的算法与动态权重，评估抽取限定角色以点亮秘仪组合的最优解。',
   ui_tab_chars: '角色抽取推荐',

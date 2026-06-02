@@ -156,7 +156,7 @@ export default {
   navGroupMysterium: '📂 秘儀システム',
   navMysterium: '✨ 秘儀コスパ',
   navGroupDamage: '📂 ダメージ計算',
-  navSkillCalc: '⚔️ スキルダメージ',
+  mysteriumTitle: '🔮 秘儀コスパ分析',
   mysteriumDesc: '異なるアルゴリズムと動的重みに基づき、秘儀を解放するための限定キャラガチャ最適解を評価します。',
   ui_tab_chars: 'キャラガチャ推奨',
   ui_tab_colls: '秘儀セット順位',
