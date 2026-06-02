@@ -137,9 +137,7 @@ function attachSweepListeners(container) {
     const SWEEP_VARIABLES = getSweepVariables()
     const preset = SWEEP_VARIABLES.find(v => v.key === ss.sweepKey)
     if (preset) {
-      // NOTE: For simplicity, keeping previous min/max state per variable isn't implemented
-      // but we should reset min/max based on the preset bounds if available
-      ss.min = 0; ss.max = ss.sweepKey.includes('Def') ? 20000000 : 25000;
+      ss.min = preset.min; ss.max = preset.max;
       q('#sc-min').value = ss.min; q('#sc-max').value = ss.max
       q('#sc-vMin').textContent = fmt(ss.min); q('#sc-vMax').textContent = fmt(ss.max)
     }

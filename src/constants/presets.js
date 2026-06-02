@@ -36,12 +36,12 @@ export const getCompareBuildsDefault = () => [
 ]
 
 export const getSweepVariables = () => [
-  { key: 'pen',        label: t('xPen') },
-  { key: 'pmPen',      label: t('pmPen') },
-  { key: 'def',        label: t('targetDef') },
-  { key: 'pmDef',      label: t('targetPhysDef') + '/' + t('targetMagDef') },
-  { key: 'atkLevel',   label: t('atkLevel', {lvl:''}) },
-  { key: 'defLevel',   label: t('defLevel', {lvl:''}) },
+  { key: 'pen',        label: t('xPen'), min: 0, max: 20000 },
+  { key: 'pmPen',      label: t('pmPen'), min: 0, max: 60000 },
+  { key: 'def',        label: t('targetDef'), min: 0, max: 20000000 },
+  { key: 'pmDef',      label: t('targetPhysDef') + '/' + t('targetMagDef'), min: 0, max: 20000000 },
+  { key: 'atkLevel',   label: t('atkLevel', {lvl:''}), min: 1, max: 999 },
+  { key: 'defLevel',   label: t('defLevel', {lvl:''}), min: 1, max: 999 },
 ]
 
 export const getTableVariables = () => [
