@@ -23,8 +23,8 @@ let cs = {
 const getMetrics = () => ({
   dmgRatePct: { label: t('overallPenRate'), fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
   finalDmg:   { label: t('finalDmg'),       fmt: v=>fmt(v),                 unit:''  },
-  defMitRate: { label: t('defMitRate'),     fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
-  pmMitRate:  { label: t('pmMitRate'),      fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
+  defMitPct:  { label: t('defMitRate'),     fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
+  pmMitPct:   { label: t('pmMitRate'),      fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
 })
 
 export function renderCompare(container) {
