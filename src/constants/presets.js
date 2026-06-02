@@ -54,7 +54,7 @@ export const getTableVariables = () => [
   { key: 'dmgBonus',   label: t('dmgBonus'),   defaultValues: '0, 0.3, 0.5, 0.8, 1.0, 1.5' },
   { key: 'defBonus',   label: t('defBonus'), defaultValues: '-0.8, -0.6, -0.4, -0.2, 0' },
   { key: 'pmDefBonus', label: t('pmDefBonus'), defaultValues: '-0.8, -0.6, -0.4, -0.2, 0' },
-  { key: 'critMult',   label: t('critMult'),   defaultValues: '1.5, 2.0, 2.5, 3.0' },
+  { key: 'critMult',   label: t('critMult'),   defaultValues: '1.0, 1.5, 2.0, 2.5, 3.0' },
   { key: 'atkLevel',   label: t('atkLevel'), defaultValues: '240, 300, 400, 500, 600' },
   { key: 'defLevel',   label: t('defLevel'), defaultValues: '240, 300, 400, 500, 600' },
 ]

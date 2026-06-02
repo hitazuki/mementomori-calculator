@@ -81,7 +81,7 @@ export function renderCalculator(container) {
         <div class="grid-2">
           <div class="form-group">
             <label class="form-label">${t('critMult')} <span class="value-display" id="dv-crit">${fmtPct(s.critMult)}</span></label>
-            <input class="form-range" type="range" id="fi-critMult" value="${s.critMult}" min="1.5" max="5" step="0.1">
+            <input class="form-range" type="range" id="fi-critMult" value="${s.critMult}" min="1.0" max="5" step="0.1">
           </div>
           <div class="form-group" style="display:flex;align-items:center;padding-top:28px">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
