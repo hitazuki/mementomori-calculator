@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MementoMori 伤害计算器</title>
+  <meta name="description" content="MementoMori 多维伤害计算与可视化分析：穿透扫描、热力图、多方案对比、拉表导出" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">⚔</div>
+        <div class="logo-text">
+          <span class="logo-title">MementoMori</span>
+          <span class="logo-sub">伤害计算器</span>
+        </div>
+      </div>
+
+      <ul class="nav-list" id="nav-list">
+        <li class="nav-item active" data-view="calculator" title="单体计算">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label">单体计算</span>
+        </li>
+        <li class="nav-item" data-view="sweep" title="穿透扫描">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label">穿透扫描</span>
+        </li>
+        <li class="nav-item" data-view="heatmap" title="热力图">
+          <span class="nav-icon">🔥</span>
+          <span class="nav-label">DEF×PEN热力图</span>
+        </li>
+        <li class="nav-item" data-view="compare" title="方案对比">
+          <span class="nav-icon">⚖</span>
+          <span class="nav-label">方案对比</span>
+        </li>
+        <li class="nav-item" data-view="table" title="拉表导出">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">拉表导出</span>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="formula-badge" id="formula-toggle" title="点击切换公式类型">
+          <span class="formula-label">公式:</span>
+          <span class="formula-value" id="formula-display">比例穿透</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div id="view-calculator" class="view active"></div>
+      <div id="view-sweep" class="view"></div>
+      <div id="view-heatmap" class="view"></div>
+      <div id="view-compare" class="view"></div>
+      <div id="view-table" class="view"></div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
