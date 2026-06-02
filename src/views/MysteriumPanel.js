@@ -55,6 +55,9 @@ const getCtypeStr = (ctype) => {
 
 export function renderMysterium(container) {
   let algo = 3
+  let mainTab = 'colls'
+  let collSortBy = 'ce'
+  let collSortDesc = true
   // Copy default template to state
   const stateTemplate = JSON.parse(JSON.stringify(defaultScoringTemplate))
 
@@ -111,11 +114,20 @@ export function renderMysterium(container) {
 
       <!-- Right Main: Results -->
       <div style="display: flex; flex-direction: column; gap: 16px; max-height: calc(100vh - 120px);">
-        <div class="panel">
-          <div style="display: flex; gap: 8px;">
-            <button class="btn ${algo === 1 ? 'btn-primary' : 'btn-ghost'} btn-sm" data-algo="1">${t('ui_algo1')}</button>
-            <button class="btn ${algo === 2 ? 'btn-primary' : 'btn-ghost'} btn-sm" data-algo="2">${t('ui_algo2')}</button>
-            <button class="btn ${algo === 3 ? 'btn-primary' : 'btn-ghost'} btn-sm" data-algo="3">${t('ui_algo3')}</button>
+        <div class="panel" style="padding-bottom: 0; border-bottom: none;">
+          <div style="display: flex; gap: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+            <button class="btn ${mainTab === 'colls' ? 'btn-primary' : 'btn-ghost'} btn-sm" data-maintab="colls">${t('ui_tab_colls')}</button>
+            <button class="btn ${mainTab === 'chars' ? 'btn-primary' : 'btn-ghost'} btn-sm" data-maintab="chars">${t('ui_tab_chars')}</button>
+          </div>
+          <div id="algo-tabs-container" style="display: ${mainTab === 'chars' ? 'flex' : 'none'}; flex-direction: column; gap: 8px; padding-top: 12px; padding-bottom: 12px;">
+            <div style="display: flex; gap: 8px;">
+              <button class="btn ${algo === 1 ? 'btn-primary' : 'btn-ghost'} btn-sm" data-algo="1">${t('ui_algo1')}</button>
+              <button class="btn ${algo === 2 ? 'btn-primary' : 'btn-ghost'} btn-sm" data-algo="2">${t('ui_algo2')}</button>
+              <button class="btn ${algo === 3 ? 'btn-primary' : 'btn-ghost'} btn-sm" data-algo="3">${t('ui_algo3')}</button>
+            </div>
+            <div id="algo-desc-box" style="font-size: 12px; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border-left: 2px solid var(--gold); margin-top: 4px; line-height: 1.5; animation: fadeIn 0.3s ease;">
+              ${t('ui_algo' + algo + '_desc')}
+            </div>
           </div>
         </div>
         
@@ -185,6 +197,63 @@ export function renderMysterium(container) {
     
     let html = '<table class="data-table"><thead><tr>'
     
+    if (mainTab === 'colls') {
+      let sortedColls = [...result.collections]
+      sortedColls.sort((a, b) => {
+        let valA = collSortBy === 'ce' ? a.ce : a.totalScore
+        let valB = collSortBy === 'ce' ? b.ce : b.totalScore
+        return collSortDesc ? valB - valA : valA - valB
+      })
+
+      const getSortIcon = (key) => {
+        if (collSortBy !== key) return '<span style="opacity:0.3;font-size:10px;margin-left:4px;">↕</span>'
+        return collSortDesc ? '<span style="font-size:10px;color:var(--gold);margin-left:4px;">▼</span>' : '<span style="font-size:10px;color:var(--gold);margin-left:4px;">▲</span>'
+      }
+
+      html += `
+        <th>${t('ui_rank')}</th>
+        <th>${t('ui_collection')}</th>
+        <th>${t('ui_characters')}</th>
+        <th>${t('ui_cost')}</th>
+        <th class="sortable-th" data-sort="score" style="cursor:pointer;">${t('ui_score')} ${getSortIcon('score')}</th>
+        <th class="sortable-th" data-sort="ce" style="cursor:pointer;">${t('ui_ce')} ${getSortIcon('ce')}</th>
+      </tr></thead><tbody>
+      `
+      
+      sortedColls.forEach((c, i) => {
+        const charNames = c.chars.map(ch => t(ch.nameKey)).join(' + ')
+        const dummyR = { chars: c.chars, activated: [{ col: c, portion: 1, score: c.totalScore }] }
+
+        html += `
+          <tr style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background=''" onclick="const n=this.nextElementSibling; n.style.display = n.style.display === 'none' ? 'table-row' : 'none'">
+            <td>${i + 1}</td>
+            <td style="color: var(--text-primary); font-weight: bold;">${t(c.nameKey)}</td>
+            <td style="font-size: 12px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${charNames}">${charNames}</td>
+            <td>${c.cost}</td>
+            <td>${c.totalScore.toFixed(1)}</td>
+            <td style="color:var(--gold); font-weight:bold;">${c.ce === Infinity ? '∞' : c.ce.toFixed(2)}</td>
+          </tr>
+          ${getDetailRow(dummyR, i, 6)}
+        `
+      })
+      html += '</tbody></table>'
+      resultsContainer.innerHTML = html
+      
+      resultsContainer.querySelectorAll('.sortable-th').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.sort
+          if (collSortBy === key) {
+            collSortDesc = !collSortDesc
+          } else {
+            collSortBy = key
+            collSortDesc = true
+          }
+          renderResults()
+        })
+      })
+      return
+    }
+
     if (algo === 1) {
       html += `
         <th>${t('ui_rank')}</th>
@@ -266,11 +335,28 @@ export function renderMysterium(container) {
   renderResults()
 
   // Bind Events
+  container.querySelectorAll('[data-maintab]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      mainTab = e.target.dataset.maintab
+      container.querySelectorAll('[data-maintab]').forEach(b => b.className = b.className.replace('btn-primary', 'btn-ghost'))
+      e.target.className = e.target.className.replace('btn-ghost', 'btn-primary')
+      
+      const algoTabs = container.querySelector('#algo-tabs-container')
+      if (algoTabs) algoTabs.style.display = mainTab === 'chars' ? 'flex' : 'none'
+      
+      renderResults()
+    })
+  })
+
   container.querySelectorAll('[data-algo]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       algo = parseInt(e.target.dataset.algo)
       container.querySelectorAll('[data-algo]').forEach(b => b.className = b.className.replace('btn-primary', 'btn-ghost'))
       e.target.className = e.target.className.replace('btn-ghost', 'btn-primary')
+      
+      const descBox = container.querySelector('#algo-desc-box')
+      if (descBox) descBox.innerHTML = t('ui_algo' + algo + '_desc')
+      
       renderResults()
     })
   })

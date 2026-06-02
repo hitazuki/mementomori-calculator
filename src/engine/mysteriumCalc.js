@@ -304,5 +304,24 @@ export function calculateMysteriumRankings(characters, collections, scoringTempl
     }
   }
 
+  // 6. Format collections ranking
+  result.collections = scoredCols.map(col => {
+    let cost = 0
+    let chars = []
+    for (const cid of col.reqCids) {
+      if (charMap.has(cid)) {
+        const char = charMap.get(cid)
+        cost += char.cost
+        chars.push(char)
+      }
+    }
+    return {
+      ...col,
+      chars,
+      cost,
+      ce: cost > 0 ? col.totalScore / cost : col.totalScore // If cost is 0, use totalScore to represent its value (technically infinity)
+    }
+  }).sort((a, b) => b.ce - a.ce) // Sort by CE descending by default
+
   return result
 }
