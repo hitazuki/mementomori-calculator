@@ -7,7 +7,7 @@ export default {
 
   // Navigation
   navCalc: '단일 계산',
-  navSweep: '방관 스캔',
+  navSweep: '단일 변수 스캔',
   navHeatmap: 'DEF×PEN 히트맵',
   navCompare: '빌드 비교',
   navTable: '표 출력',
@@ -18,8 +18,8 @@ export default {
   // Views & Headers
   calcTitle: '🎯 단일 대상 데미지 계산기',
   calcDesc: '공식: effective_DEF = DEF × C_pen / (PEN + C_pen), 데미지 비율 = C_def / (effective_DEF + C_def). 물리 및 마법 방어 적용.',
-  sweepTitle: '📈 방어 관통 스캔',
-  sweepDesc: '지정된 대상의 "방어 관통 vs 데미지" 곡선을 스캔합니다. 여러 방어력을 비교할 수 있습니다.',
+  sweepTitle: '📈 단일 변수 스캔',
+  sweepDesc: '단일 변수의 변화 범위를 지정하여 수익 곡선을 스캔하고 생성합니다 (최종 데미지, 경감률 등의 지표 전환 지원).',
   heatmapTitle: '🔥 DEF × PEN 히트맵',
   heatmapDesc: '서로 다른 방어력과 방어 관통의 교차점에서의 종합 통과율을 보여주어 최적의 관통 임계점을 찾습니다.',
   compareTitle: '⚖ 빌드 비교',

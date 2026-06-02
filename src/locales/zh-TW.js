@@ -7,7 +7,7 @@ export default {
 
   // Navigation
   navCalc: '單體計算',
-  navSweep: '穿透掃描',
+  navSweep: '單變量收益掃描',
   navHeatmap: 'DEF×PEN熱力圖',
   navCompare: '方案對比',
   navTable: '拉表匯出',
@@ -18,8 +18,8 @@ export default {
   // Views & Headers
   calcTitle: '🎯 單體傷害計算機',
   calcDesc: '基於真實公式：effective_DEF = DEF × C_pen / (PEN + C_pen)，傷害率 = C_def / (effective_DEF + C_def)。物理魔法雙路相乘。',
-  sweepTitle: '📈 穿透收益掃描',
-  sweepDesc: '掃描指定防守方狀態下的「貫通 vs 傷害」曲線。可橫向對比不同防禦目標。',
+  sweepTitle: '📈 單變量收益掃描',
+  sweepDesc: '指定單一變量的變化範圍，掃描並生成相應的收益曲線（支持切換不同的評估指標，如最終傷害、減傷率等）。',
   heatmapTitle: '🔥 DEF × PEN 熱力圖',
   heatmapDesc: '展示不同防禦力與不同防禦貫通交會點的綜合減傷率(綜合防禦通過率)，更直觀地找到最佳破防閾值。',
   compareTitle: '⚖ 多方案對比',

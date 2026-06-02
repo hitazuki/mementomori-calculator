@@ -7,7 +7,7 @@ export default {
 
   // Navigation
   navCalc: 'Calculator',
-  navSweep: 'PEN Scan',
+  navSweep: 'Yield Sweep',
   navHeatmap: 'DEF×PEN Heatmap',
   navCompare: 'Compare Builds',
   navTable: 'Export Table',
@@ -18,8 +18,8 @@ export default {
   // Views & Headers
   calcTitle: '🎯 Single Target Calculator',
   calcDesc: 'Formula: effective_DEF = DEF × C_pen / (PEN + C_pen), Dmg Rate = C_def / (effective_DEF + C_def). P.DEF & M.DEF multiplied.',
-  sweepTitle: '📈 PEN Yield Scan',
-  sweepDesc: 'Scan "PEN vs Damage" curve on a specific target. Compare multiple targets horizontally.',
+  sweepTitle: '📈 Single Variable Yield Sweep',
+  sweepDesc: 'Scan a single variable across a range and plot the yield curve (supports evaluating Final Damage, Penetration Rate, etc.).',
   heatmapTitle: '🔥 DEF × PEN Heatmap',
   heatmapDesc: 'Shows damage mitigation rate (dmg passing rate) across different DEF and PEN combinations to find the optimal break threshold.',
   compareTitle: '⚖ Compare Builds',

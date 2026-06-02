@@ -7,7 +7,7 @@ export default {
 
   // Navigation
   navCalc: '単体計算',
-  navSweep: '貫通スキャン',
+  navSweep: '単一変数スキャン',
   navHeatmap: 'DEF×PENヒートマップ',
   navCompare: '構成比較',
   navTable: 'テーブル出力',
@@ -18,8 +18,8 @@ export default {
   // Views & Headers
   calcTitle: '🎯 単体ダメージ計算機',
   calcDesc: '実際の計算式：effective_DEF = DEF × C_pen / (PEN + C_pen), ダメージ率 = C_def / (effective_DEF + C_def)。防御路と物魔路を乗算。',
-  sweepTitle: '📈 貫通ダメージスキャン',
-  sweepDesc: '指定した防御力での「防御貫通 vs ダメージ」曲線をスキャン。複数の防御目標を比較可能。',
+  sweepTitle: '📈 単一変数スキャン',
+  sweepDesc: '単一変数の変化範囲を指定し、対応する収益曲線をスキャンして生成します（最終ダメージ、軽減率などの指標切替をサポート）。',
   heatmapTitle: '🔥 DEF × PEN ヒートマップ',
   heatmapDesc: '防御力と防御貫通の交点における総合通過率を色で示し、最適な貫通のしきい値を見つけます。',
   compareTitle: '⚖ 構成比較',

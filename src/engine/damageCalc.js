@@ -96,7 +96,7 @@ export function buildSweepData({ sweepKey, min, max, steps, baseParams }) {
 
     const r = calcDamage(params)
     xData.push(Math.round(val))
-    yData.push(r.dmgRatePct)
+    yData.push(r)
   }
   return { xData, yData }
 }

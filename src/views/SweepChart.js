@@ -16,6 +16,7 @@ const DEFAULT_PARAMS = {
 }
 let ss = {
   sweepKey: 'pen',
+  metric: 'dmgRatePct',
   min: 0, max: 20000, steps: 21,
   baseParams: { ...DEFAULT_PARAMS },
   showMit: true,
@@ -24,6 +25,13 @@ let ss = {
 }
 
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
+
+const getMetrics = () => ({
+  dmgRatePct: { label: t('overallPenRate'), fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
+  finalDmg:   { label: t('finalDmg'),       fmt: v=>fmt(v),                 unit:''  },
+  defMitRate: { label: t('defMitRate'),     fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
+  pmMitRate:  { label: t('pmMitRate'),      fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
+})
 
 export function renderSweepChart(container) {
   const SWEEP_VARIABLES = getSweepVariables()
@@ -37,7 +45,9 @@ export function renderSweepChart(container) {
   <div class="grid-sidebar-right animate-fadeup" style="height:calc(100vh - 110px)">
     <div class="card" style="height:100%;display:flex;flex-direction:column">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="card-title" style="margin:0">${t('overallPenRate')}</div>
+        <select class="form-select" id="sc-metric" style="width:160px;margin:0">
+          ${Object.entries(getMetrics()).map(([k,v])=>`<option value="${k}" ${ss.metric===k?'selected':''}>${v.label}</option>`).join('')}
+        </select>
         <button class="btn btn-ghost btn-sm" id="sc-download">⬇ PNG</button>
       </div>
       <div id="sweep-chart" style="flex:1;min-height:400px"></div>
@@ -146,6 +156,8 @@ function attachSweepListeners(container) {
     drawSweep()
   })
 
+  q('#sc-metric')?.addEventListener('change', e => { ss.metric = e.target.value; drawSweep() })
+
   q('#sc-min')?.addEventListener('input', e => { ss.min = parseFloat(e.target.value)||0; q('#sc-vMin').textContent=fmt(ss.min); drawSweep() })
   q('#sc-max')?.addEventListener('input', e => { ss.max = parseFloat(e.target.value)||0; q('#sc-vMax').textContent=fmt(ss.max); drawSweep() })
   q('#sc-steps')?.addEventListener('input', e => { ss.steps = parseInt(e.target.value)||20; q('#sc-vSteps').textContent=ss.steps; drawSweep() })
@@ -248,20 +260,26 @@ function drawSweep() {
   const SWEEP_VARIABLES = getSweepVariables()
   const varLabel = SWEEP_VARIABLES.find(v=>v.key===ss.sweepKey)?.label || ss.sweepKey
 
+  const METRICS = getMetrics()
+  const metric = METRICS[ss.metric]
+
+  const seriesData = yData.map(r => r[ss.metric])
+  const yAxisMax = ss.metric === 'finalDmg' ? null : 100
+
   sweepChart.setOption({
     ...baseChartOption(varLabel),
     tooltip: { ...MORI_THEME.tooltip, trigger: 'axis', formatter: p => {
       let s = `<b style="color:var(--gold)">${varLabel}: ${fmt(p[0].axisValue)}</b><br>`
-      p.forEach(pp => s += `<span style="color:${pp.color}">● ${pp.seriesName}</span>: <b>${pp.value}%</b><br>`)
+      p.forEach(pp => s += `<span style="color:${pp.color}">● ${pp.seriesName}</span>: <b>${metric.fmt(pp.value)}</b><br>`)
       return s
     }},
     xAxis: { type: 'category', data: xData.map(v=>fmt(v)), axisLabel: MORI_THEME.axisLabel, axisLine: MORI_THEME.axisLine, splitLine:{show:true,lineStyle:{color:'rgba(255,255,255,0.02)'}} },
-    yAxis: { type: 'value', min: 'dataMin', max: 100, axisLabel: { ...MORI_THEME.axisLabel, formatter: '{value}%' }, splitLine: MORI_THEME.splitLine },
+    yAxis: { type: 'value', min: ss.metric === 'finalDmg' ? null : 'dataMin', max: yAxisMax, axisLabel: { ...MORI_THEME.axisLabel, formatter: `{value}${metric.unit}` }, splitLine: MORI_THEME.splitLine },
     series: [
-      { name: t('overallPenRate'), type: 'line', smooth: true, symbol: 'circle', symbolSize: 6,
+      { name: metric.label, type: 'line', smooth: true, symbol: 'circle', symbolSize: 6,
         itemStyle: { color: LINE_COLORS[0] }, lineStyle: { width: 3, shadowBlur: 8, shadowColor: LINE_COLORS[0]+'80' },
         areaStyle: { color: new window.echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:LINE_COLORS[0]+'66'},{offset:1,color:LINE_COLORS[0]+'00'}]) },
-        data: yData
+        data: seriesData
       }
     ]
   }, true)
