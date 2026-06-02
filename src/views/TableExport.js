@@ -166,8 +166,11 @@ function attachTableListeners(container) {
   q('#te-btnMd')?.addEventListener('click', () => {
     const tableData = doCalc()
     if (!tableData) return
+    const TABLE_VARIABLES = getTableVariables()
+    const xLabel = TABLE_VARIABLES.find(v => v.key === tableState.xKey)?.label || tableState.xKey
+    const yLabel = TABLE_VARIABLES.find(v => v.key === tableState.yKey)?.label || tableState.yKey
     const METRICS = getMetrics()
-    let md = `| ${tableState.yKey} ↓ \\ ${tableState.xKey} → | ` + tableData.xVals.join(' | ') + ' |\n'
+    let md = `| ${yLabel} ↓ \\ ${xLabel} → | ` + tableData.xVals.join(' | ') + ' |\n'
     md += '| :--- | ' + tableData.xVals.map(() => ':---').join(' | ') + ' |\n'
     tableData.rows.forEach(r => {
       md += `| **${r.yVal}** | ` + r.cols.map(c => METRICS[tableState.metric].fmt(c[tableState.metric])).join(' | ') + ' |\n'
@@ -178,7 +181,10 @@ function attachTableListeners(container) {
   q('#te-btnCsv')?.addEventListener('click', () => {
     const tableData = doCalc()
     if (!tableData) return
-    let csv = `${tableState.yKey} \\ ${tableState.xKey},` + tableData.xVals.join(',') + '\n'
+    const TABLE_VARIABLES = getTableVariables()
+    const xLabel = TABLE_VARIABLES.find(v => v.key === tableState.xKey)?.label || tableState.xKey
+    const yLabel = TABLE_VARIABLES.find(v => v.key === tableState.yKey)?.label || tableState.yKey
+    let csv = `${yLabel} \\ ${xLabel},` + tableData.xVals.join(',') + '\n'
     tableData.rows.forEach(r => {
       csv += `${r.yVal},` + r.cols.map(c => c[tableState.metric]).join(',') + '\n'
     })
@@ -203,11 +209,15 @@ function generateTable() {
   const tableEl = document.querySelector('#te-tableContainer')
   if (!tableData || !tableEl) return
 
+  const TABLE_VARIABLES = getTableVariables()
+  const xLabel = TABLE_VARIABLES.find(v => v.key === tableState.xKey)?.label || tableState.xKey
+  const yLabel = TABLE_VARIABLES.find(v => v.key === tableState.yKey)?.label || tableState.yKey
+
   const METRICS = getMetrics()
   const metric = METRICS[tableState.metric]
   tableEl.querySelector('thead').innerHTML = `
     <tr>
-      <th style="min-width:120px;color:var(--gold)">${tableState.yKey} ↓<br><span style="color:#888">${tableState.xKey} →</span></th>
+      <th style="min-width:120px;color:var(--gold)">${yLabel} ↓<br><span style="color:#888">${xLabel} →</span></th>
       ${tableData.xVals.map(x => `<th>${x.toLocaleString()}</th>`).join('')}
     </tr>`
 
