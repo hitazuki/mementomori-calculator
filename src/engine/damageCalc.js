@@ -30,7 +30,7 @@ export function calcDamage({
   defBonus     = 0,
   pmDefBonus   = 0,
   critMult     = 1.5,
-  factionBonus = 1.0,
+  eleAdvantage = false,
 }) {
   const rawDmg = baseAtk * skillCoeff
 
@@ -46,7 +46,8 @@ export function calcDamage({
   const defMitMultiplier = drDef * drPm
 
   // 计算最终伤害
-  const dmgMultiplier = (1 + dmgBonus) * critMult * factionBonus * defMitMultiplier
+  const actualDmgBonus = dmgBonus + (eleAdvantage ? 0.25 : 0)
+  const dmgMultiplier = (1 + actualDmgBonus) * critMult * defMitMultiplier
   const finalDmg = rawDmg * dmgMultiplier
 
   return {

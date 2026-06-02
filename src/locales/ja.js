@@ -44,7 +44,7 @@ export default {
   pmPen: '物/魔防御貫通',
   dmgBonus: 'ダメージ増加',
   critMult: 'クリティカル倍率',
-  factionBonus: '属性相性',
+  eleAdvantage: '属性相性',
   cPenDefLabel: '貫通定数 (攻撃側のレベルで変動)',
   cDefDefLabel: '防御定数 (防御側のレベルで変動)',
   cPenConst: 'C_pen 定数',

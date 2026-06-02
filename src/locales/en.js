@@ -44,7 +44,7 @@ export default {
   pmPen: 'P/M.DEF Break',
   dmgBonus: 'Damage Bonus',
   critMult: 'Crit Multiplier',
-  factionBonus: 'Faction Bonus',
+  eleAdvantage: 'Elemental Advantage',
   cPenDefLabel: 'PEN Constants (Influenced by attacker level)',
   cDefDefLabel: 'DEF Constants (Influenced by defender level)',
   cPenConst: 'C_pen Const',

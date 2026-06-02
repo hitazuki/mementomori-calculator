@@ -10,7 +10,7 @@ const DEFAULT = {
   pen: 11950, pmPen: 31200,
   cDef: 834953, cPen: 1725,
   cPmDef: 1382434, cPmPen: 16660,
-  dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, factionBonus: 1.0,
+  dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, eleAdvantage: false,
   damageType: 'phys', // 'phys' for P.DEF, 'mag' for M.DEF
   atkLevelPresetIdx: 4, // 默认选中 Lv500
   defLevelPresetIdx: 4,
@@ -83,9 +83,11 @@ export function renderCalculator(container) {
             <label class="form-label">${t('critMult')} <span class="value-display" id="dv-crit">${fmtPct(s.critMult)}</span></label>
             <input class="form-range" type="range" id="fi-critMult" value="${s.critMult}" min="1.5" max="5" step="0.1">
           </div>
-          <div class="form-group">
-            <label class="form-label">${t('factionBonus')} <span class="value-display" id="dv-faction">${fmtPct(s.factionBonus)}</span></label>
-            <input class="form-range" type="range" id="fi-factionBonus" value="${s.factionBonus}" min="1" max="1.5" step="0.05">
+          <div class="form-group" style="display:flex;align-items:center;padding-top:28px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="fi-eleAdvantage" ${s.eleAdvantage?'checked':''} style="width:18px;height:18px">
+              <span class="form-label" style="margin:0">${t('eleAdvantage')} (+25%)</span>
+            </label>
           </div>
         </div>
         <div class="divider"></div>
@@ -184,7 +186,6 @@ function attachCalcListeners(container) {
     { id:'fi-skillCoeff',   key:'skillCoeff',   disp:'dv-coeff',  fmt:v=>`${(v*100).toFixed(0)}%` },
     { id:'fi-dmgBonus',     key:'dmgBonus',     disp:'dv-bonus',  fmt:fmtPct },
     { id:'fi-critMult',     key:'critMult',     disp:'dv-crit',   fmt:v=>`${(v*100).toFixed(0)}%` },
-    { id:'fi-factionBonus', key:'factionBonus', disp:'dv-faction',fmt:v=>`×${v.toFixed(2)}` },
     { id:'fi-defBonus',     key:'defBonus',     disp:'dv-defBonus',   fmt:fmtPct },
     { id:'fi-pmDefBonus',   key:'pmDefBonus',   disp:'dv-pmDefBonus', fmt:fmtPct },
   ]
@@ -207,6 +208,11 @@ function attachCalcListeners(container) {
       }
       updateCalcResults()
     })
+  })
+
+  container.querySelector('#fi-eleAdvantage')?.addEventListener('change', e => {
+    s.eleAdvantage = e.target.checked
+    updateCalcResults()
   })
 
   container.querySelectorAll('[data-type]').forEach(btn => {
@@ -302,19 +308,19 @@ function updateCalcResults() {
   const bkEl = document.querySelector('#calc-breakdown')
   if (bkEl) {
     const base = r.rawDmg
-    const afterBonus = base * (1 + s.dmgBonus)
+    const actualDmgBonus = s.dmgBonus + (s.eleAdvantage ? 0.25 : 0)
+    const afterBonus = base * (1 + actualDmgBonus)
     const afterDef   = afterBonus * r.drDef
     const afterPm    = afterDef   * r.drPm
     const afterCrit  = afterPm    * s.critMult
-    const final      = afterCrit  * s.factionBonus
+    const final      = afterCrit
 
     const steps = [
       { label: t('rawDmg'), val: base,       color: '#c9a84c' },
-      { label: `${t('addBonus')} (+${fmtPct(s.dmgBonus)})`, val: afterBonus, color: '#e8c96a' },
+      { label: `${t('addBonus')} (+${fmtPct(actualDmgBonus)})`, val: afterBonus, color: '#e8c96a' },
       { label: `${t('mulDefPass')} (${r.defDmgPct}%)`, val: afterDef, color: '#9b59b6' },
       { label: `${t('mulPmPass')} (${r.pmDmgPct}%)`,  val: afterPm,  color: '#3498db' },
       { label: `${t('mulCrit')} (${fmtPct(s.critMult)})`, val: afterCrit, color: '#e07820' },
-      { label: `${t('mulFaction')} (×${s.factionBonus.toFixed(2)})`, val: final, color: '#2ecc71' },
     ]
     bkEl.innerHTML = steps.map((st, i) => `
       <div class="breakdown-item">

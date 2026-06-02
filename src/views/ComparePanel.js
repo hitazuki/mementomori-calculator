@@ -11,7 +11,7 @@ const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(2)}M` : v >= 1e3 ? `${(v/1e3).toF
 let cs = {
   builds: getCompareBuildsDefault(),
   benchmarks: getDefBenchmarks().slice(0,4),
-  baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, factionBonus: 1.0,
+  baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, eleAdvantage: false,
   cDef: 834953, cPen: 1725,
   cPmDef: 1382434, cPmPen: 16660,
   damageType: 'phys',
@@ -137,8 +137,8 @@ function renderBuildCards(container) {
           <input class="form-input" type="number" data-build="${i}" data-field="defBonus" value="${(b.defBonus*100).toFixed(0)}"></div>
         <div class="form-group"><label class="form-label">${t('pmDefBonus')}%</label>
           <input class="form-input" type="number" data-build="${i}" data-field="pmDefBonus" value="${(b.pmDefBonus*100).toFixed(0)}"></div>
-        <div class="form-group"><label class="form-label">${t('factionBonus')}</label>
-          <input class="form-input" type="number" data-build="${i}" data-field="factionBonus" value="${b.factionBonus||1}" step="0.05" min="1"></div>
+        <div class="form-group"><label class="form-label">${t('eleAdvantage')}</label>
+          <div style="display:flex;align-items:center;height:32px"><input type="checkbox" data-build="${i}" data-field="eleAdvantage" ${b.eleAdvantage?'checked':''} style="width:16px;height:16px"></div></div>
       </div>
     </div>
   `).join('')
@@ -208,6 +208,7 @@ function attachCompareListeners(container) {
     const i=parseInt(e.target.dataset.build), field=e.target.dataset.field
     if(isNaN(i)||!field) return
     if(field==='name') cs.builds[i][field]=e.target.value
+    else if(field==='eleAdvantage') cs.builds[i][field]=e.target.checked
     else if(['dmgBonus','defBonus','pmDefBonus'].includes(field)) cs.builds[i][field]=parseFloat(e.target.value)/100||0
     else cs.builds[i][field]=parseFloat(e.target.value)||0
     refreshCompare()
@@ -218,7 +219,7 @@ function attachCompareListeners(container) {
   })
   container.querySelector('#cmp-addBuild')?.addEventListener('click', () => {
     if(cs.builds.length>=6) return
-    cs.builds.push({ id:Date.now(), name:`${t('buildNamePrefix')} ${cs.builds.length+1}`, pen:18950, pmPen:31200, dmgBonus:0.3, defBonus:0, pmDefBonus:0, factionBonus:1.0 })
+    cs.builds.push({ id:Date.now(), name:`${t('buildNamePrefix')} ${cs.builds.length+1}`, pen:18950, pmPen:31200, dmgBonus:0.3, defBonus:0, pmDefBonus:0, eleAdvantage:false })
     renderBuildCards(container); refreshCompare()
   })
 
@@ -240,7 +241,7 @@ function calcAll() {
   return cs.builds.map((build, bi) => ({
     ...build, color: LINE_COLORS[bi%LINE_COLORS.length],
     benchResults: cs.benchmarks.map(bench => calcDamage({
-      baseAtk:cs.baseAtk, skillCoeff:cs.skillCoeff, critMult:cs.critMult, factionBonus:build.factionBonus||1,
+      baseAtk:cs.baseAtk, skillCoeff:cs.skillCoeff, critMult:cs.critMult, eleAdvantage:build.eleAdvantage||false,
       def:bench.def, pmDef:bench.pmDef,
       pen:build.pen, pmPen:build.pmPen,
       cDef:cs.cDef, cPen:cs.cPen,

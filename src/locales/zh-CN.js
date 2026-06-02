@@ -44,7 +44,7 @@ export default {
   pmPen: '物魔防御贯通',
   dmgBonus: '增伤加成',
   critMult: '爆击倍率',
-  factionBonus: '阵营克制',
+  eleAdvantage: '属性克制',
   cPenDefLabel: '贯通定数 (受攻击方等级影响，可手动微调)',
   cDefDefLabel: '防御定数 (受防守方等级影响，可手动微调)',
   cPenConst: 'C_pen 定数',
@@ -74,7 +74,7 @@ export default {
   mulDefPass: '× 防御通过',
   mulPmPass: '× 物魔防御通过',
   mulCrit: '× 爆击',
-  mulFaction: '× 阵营克制',
+  mulFaction: '× 属性克制',
 
   // Quick Table
   quickTableTitle: '📐 快查：防御贯通 × 目标防御力',

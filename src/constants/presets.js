@@ -11,7 +11,7 @@ export const getScenarioPresets = () => [
       def: 1_699_102, pmDef: 3_150_893,
       pen: 11950, pmPen: 47700,
       cDef: 147654, cPmDef: 256027, cPen: 873, cPmPen: 10718,
-      dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, factionBonus: 1.0, damageType: 'phys',
+      dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, eleAdvantage: false, damageType: 'phys',
     }
   },
   {
@@ -23,7 +23,7 @@ export const getScenarioPresets = () => [
       def: 5_000_000, pmDef: 10_000_000,
       pen: 18950, pmPen: 55000,
       cDef: 834953, cPmDef: 1382434, cPen: 1725, cPmPen: 16660,
-      dmgBonus: 0.8, defBonus: -0.2, pmDefBonus: -0.2, critMult: 2.0, factionBonus: 1.15, damageType: 'phys',
+      dmgBonus: 0.8, defBonus: -0.2, pmDefBonus: -0.2, critMult: 2.0, eleAdvantage: true, damageType: 'phys',
     }
   }
 ]

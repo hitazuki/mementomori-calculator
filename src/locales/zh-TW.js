@@ -44,7 +44,7 @@ export default {
   pmPen: '物魔防禦貫通',
   dmgBonus: '增傷加成',
   critMult: '爆擊倍率',
-  factionBonus: '陣營剋制',
+  eleAdvantage: '屬性剋制',
   cPenDefLabel: '貫通定數 (受攻擊方等級影響，可手動微調)',
   cDefDefLabel: '防禦定數 (受防守方等級影響，可手動微調)',
   cPenConst: 'C_pen 定數',
@@ -74,7 +74,7 @@ export default {
   mulDefPass: '× 防禦通過',
   mulPmPass: '× 物魔防禦通過',
   mulCrit: '× 爆擊',
-  mulFaction: '× 陣營剋制',
+  mulFaction: '× 屬性剋制',
 
   // Quick Table
   quickTableTitle: '📐 快查：防禦貫通 × 目標防禦力',

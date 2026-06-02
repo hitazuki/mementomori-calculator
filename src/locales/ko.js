@@ -44,7 +44,7 @@ export default {
   pmPen: '물/마방 관통',
   dmgBonus: '데미지 증가',
   critMult: '크리티컬 배율',
-  factionBonus: '속성 상성',
+  eleAdvantage: '속성 상성',
   cPenDefLabel: '관통 상수 (공격자 레벨에 영향 받음)',
   cDefDefLabel: '방어 상수 (방어자 레벨에 영향 받음)',
   cPenConst: 'C_pen 상수',

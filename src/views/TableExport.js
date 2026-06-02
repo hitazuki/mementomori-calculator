@@ -10,7 +10,7 @@ let tableState = {
   xVals: '1000000, 3000000, 5000000, 10000000, 20000000, 50000000',
   yVals: '0, 4950, 11950, 18950',
   baseParams: {
-    baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, factionBonus: 1.0,
+    baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, eleAdvantage: false,
     def: 5_000_000, pmDef: 5_000_000,
     pen: 11950, pmPen: 31200,
     cDef: 834953, cPen: 1725,
@@ -156,7 +156,7 @@ function attachTableListeners(container) {
 
   q('#te-resetDefault')?.addEventListener('click', () => {
     tableState.baseParams = {
-      baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, factionBonus: 1.0,
+      baseAtk: 1_000_000, skillCoeff: 5.25, critMult: 1.5, eleAdvantage: false,
       def: 5_000_000, pmDef: 5_000_000, pen: 11950, pmPen: 31200,
       cDef: 834953, cPen: 1725, cPmDef: 1382434, cPmPen: 16660,
       dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, damageType: 'phys', atkLevel: 500, defLevel: 500
