@@ -174,9 +174,9 @@ function renderBenchRows(container) {
   
   const header = `
     <div style="display: grid; grid-template-columns: 70px 1fr 1fr 28px; gap: 8px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
-      <span style="font-size:11px;color:var(--text-secondary);">${t('buildName')}</span>
-      <span style="font-size:11px;color:var(--text-secondary);">${t('targetDef')}</span>
-      <span style="font-size:11px;color:var(--text-secondary);">${t('targetPhysDef')}/${t('targetMagDef')}</span>
+      <span style="font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t('buildName')}</span>
+      <span style="font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DEF</span>
+      <span style="font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">P/M.DEF</span>
       <span></span>
     </div>
   `
