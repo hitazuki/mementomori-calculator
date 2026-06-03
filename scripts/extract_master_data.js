@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
 // Default Master data directory
-const MASTER_DIR = process.argv[2] || path.resolve(PROJECT_ROOT, '../mmth-analyzer/data/Master');
+const MASTER_DIR = process.argv[2] || path.resolve(PROJECT_ROOT, 'data/Master');
 
 console.log(`Reading Master data from: ${MASTER_DIR}`);
 
