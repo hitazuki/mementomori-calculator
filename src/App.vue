@@ -68,7 +68,9 @@
 
       <!-- Dynamic View Rendering -->
       <div class="view active">
-        <component :is="activeComponent" />
+        <KeepAlive>
+          <component :is="activeComponent" />
+        </KeepAlive>
       </div>
     </main>
   </div>

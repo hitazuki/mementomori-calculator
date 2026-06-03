@@ -21,7 +21,7 @@ export default {
 
   // Views & Headers
   calcTitle: '🎯 Single Target Calculator',
-  calcDesc: 'Simulates the real physical and magical dual-layer defense mitigation mechanics.',
+  calcDesc: 'Simulates the real dual-layer defense (DEF and P/M.DEF) independent mitigation mechanics.',
   calcFormulaBtn: 'Formulas',
   
   // Modal Formula Details

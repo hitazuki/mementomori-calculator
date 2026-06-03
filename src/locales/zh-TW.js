@@ -17,7 +17,7 @@ export default {
 
   // Views & Headers
   calcTitle: '🎯 單體傷害計算器',
-  calcDesc: '模擬真實的物理與魔法雙路防禦減傷機制。',
+  calcDesc: '模擬真實的雙路防禦（防禦力與物魔防）獨立計算減傷機制。',
   calcFormulaBtn: '計算公式說明',
   
   // Modal Formula Details

@@ -17,7 +17,7 @@ export default {
 
   // Views & Headers
   calcTitle: '🎯 단일 대상 데미지 계산기',
-  calcDesc: '실제 물리 및 마법 이중 방어 감소 메커니즘을 시뮬레이션합니다.',
+  calcDesc: '실제 이중 방어 (방어력 및 물리/마법 방어) 독립 감소 메커니즘을 시뮬레이션합니다.',
   calcFormulaBtn: '계산식 설명',
   
   // Modal Formula Details

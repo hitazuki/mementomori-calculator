@@ -17,7 +17,7 @@ export default {
 
   // Views & Headers
   calcTitle: '🎯 単体ダメージ計算機',
-  calcDesc: '実際の物理と魔法の二重防御軽減メカニズムをシミュレートします。',
+  calcDesc: '実際の二重防御（防御力と物/魔防御）による独立した軽減メカニズムをシミュレートします。',
   calcFormulaBtn: '計算式の説明',
   
   // Modal Formula Details
