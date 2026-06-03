@@ -31,7 +31,7 @@
         </div>
         
         <div class="text-xs text-muted mb-8">{{ $t('cPenDefLabel') }}</div>
-        <div class="grid-2">
+        <div class="grid-2 items-end">
           <div class="form-group">
             <label class="form-label">{{ $t('cPenConst') }} <span class="value-display">{{ store.cPen }}</span></label>
             <input class="form-input" type="number" v-model.number="store.cPen" min="1">
@@ -62,7 +62,7 @@
           </div>
         </div>
         
-        <div class="grid-2">
+        <div class="grid-2 items-end">
           <div class="form-group">
             <label class="form-label">{{ $t('pen') }} <span class="value-display">{{ store.pen.toLocaleString() }}</span></label>
             <input class="form-input" type="number" v-model.number="store.pen" min="0">
@@ -78,12 +78,12 @@
           <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1.0" max="2.0" step="0.05">
         </div>
         
-        <div class="grid-2">
+        <div class="grid-2 items-end">
           <div class="form-group">
             <label class="form-label">{{ $t('critMult') }} <span class="value-display">{{ fmtPct(store.critMult) }}</span></label>
             <input class="form-range" type="range" v-model.number="store.critMult" min="1.0" max="5" step="0.1">
           </div>
-          <div class="form-group" style="display:flex;align-items:center;padding-top:28px">
+          <div class="form-group" style="display:flex;align-items:center;padding-bottom:6px">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
               <input type="checkbox" v-model="store.eleAdvantage" style="width:18px;height:18px">
               <span class="form-label" style="margin:0">{{ $t('eleAdvantage') }} (+25%)</span>
@@ -105,7 +105,7 @@
         </div>
         
         <div class="text-xs text-muted mb-8">{{ $t('cDefDefLabel') }}</div>
-        <div class="grid-2">
+        <div class="grid-2 items-end">
           <div class="form-group">
             <label class="form-label">{{ $t('cDefConst') }} <span class="value-display">{{ store.cDef.toLocaleString() }}</span></label>
             <input class="form-input" type="number" v-model.number="store.cDef" min="1">
@@ -118,7 +118,7 @@
         
         <div class="divider"></div>
         
-        <div class="grid-2">
+        <div class="grid-2 items-end">
           <div class="form-group">
             <label class="form-label">{{ $t('targetDef') }}</label>
             <input class="form-input" type="number" v-model.number="store.def" min="0">
@@ -129,7 +129,7 @@
           </div>
         </div>
         
-        <div class="grid-2">
+        <div class="grid-2 items-end">
           <div class="form-group">
             <label class="form-label">{{ $t('defBonus') }} <span class="value-display">{{ fmtPct(store.defBonus) }}</span></label>
             <input class="form-range" type="range" v-model.number="store.defBonus" min="-1.0" max="2.5" step="0.05">
