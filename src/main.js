@@ -1,81 +1,15 @@
-// src/main.js — 入口，路由
-import { renderCalculator } from './views/Calculator.js'
-import { renderSweepChart } from './views/SweepChart.js'
-import { renderHeatmap }    from './views/HeatmapChart.js'
-import { renderCompare }    from './views/ComparePanel.js'
-import { renderTableExport } from './views/TableExport.js'
-import { renderMysterium }  from './views/MysteriumPanel.js'
-import { getLang, setLang, updateDOMTranslations } from './i18n/index.js'
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import i18n from './i18n/index.js'
 
-const views = {
-  calculator: renderCalculator,
-  sweep:      renderSweepChart,
-  heatmap:    renderHeatmap,
-  compare:    renderCompare,
-  table:      renderTableExport,
-  mysterium:  renderMysterium,
-}
+// Vue ECharts
+import 'echarts'
 
-let currentView = 'calculator'
-const rendered = new Set()
+const app = createApp(App)
+const pinia = createPinia()
 
-function switchView(name) {
-  if (!(name in views)) return
+app.use(pinia)
+app.use(i18n)
 
-  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'))
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
-
-  document.getElementById(`view-${name}`)?.classList.add('active')
-  document.querySelector(`[data-view="${name}"]`)?.classList.add('active')
-
-  currentView = name
-
-  if (!rendered.has(name)) {
-    const container = document.getElementById(`view-${name}`)
-    if (container) {
-      views[name](container)
-      rendered.add(name)
-    }
-  }
-}
-
-function init() {
-  document.getElementById('nav-list')?.addEventListener('click', e => {
-    const item = e.target.closest('.nav-item')
-    if (item?.dataset.view) switchView(item.dataset.view)
-  })
-
-  // Language switch
-  const langSwitch = document.getElementById('lang-switch')
-  if (langSwitch) {
-    langSwitch.value = getLang();
-    langSwitch.addEventListener('change', (e) => {
-      setLang(e.target.value);
-    });
-  }
-  
-  // Re-render current view when language changes
-  window.addEventListener('languagechanged', () => {
-    rendered.clear();
-    const container = document.getElementById(`view-${currentView}`);
-    if (container) {
-      views[currentView](container);
-      rendered.add(currentView);
-    }
-  });
-
-  // Hide the old formula toggle if it exists
-  const formulaToggle = document.getElementById('formula-toggle')
-  if (formulaToggle) {
-    formulaToggle.style.display = 'none'
-  }
-  const formulaDisplay = document.getElementById('formula-display')
-  if (formulaDisplay) {
-    formulaDisplay.style.display = 'none'
-  }
-
-  updateDOMTranslations();
-  switchView('calculator')
-}
-
-init()
+app.mount('#app')
