@@ -54,16 +54,16 @@ export default {
   eleAdvantage: 'Elemental Advantage',
   cPenDefLabel: 'PEN Constants (Influenced by attacker level)',
   cDefDefLabel: 'DEF Constants (Influenced by defender level)',
-  cPenConst: 'C_pen Const',
-  cPmPenConst: 'C_pmpen Const',
+  cPenConst: 'C_pen',
+  cPmPenConst: 'C_pmpen',
   
   targetDef: 'Target DEF',
   targetPhysDef: 'Target P.DEF',
   targetMagDef: 'Target M.DEF',
   defBonus: 'DEF Bonus',
   pmDefBonus: 'P.DEF/M.DEF Bonus',
-  cDefConst: 'C_def Const',
-  cPmDefConst: 'C_pmdef Const',
+  cDefConst: 'C_def',
+  cPmDefConst: 'C_pmdef',
 
   // Stats
   finalDmg: 'Final Damage',
