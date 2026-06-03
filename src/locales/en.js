@@ -21,7 +21,26 @@ export default {
 
   // Views & Headers
   calcTitle: '🎯 Single Target Calculator',
-  calcDesc: 'Formula: effective_DEF = DEF × C_pen / (PEN + C_pen), Dmg Rate = C_def / (effective_DEF + C_def). P.DEF & M.DEF multiplied.',
+  calcDesc: 'Simulates the real physical and magical dual-layer defense mitigation mechanics.',
+  calcFormulaBtn: 'Formulas',
+  
+  // Modal Formula Details
+  formulaModalTitle: 'Calculation Principles & Formulas',
+  formulaModalP1: 'Damage calculation employs independent damage reduction across two defensive layers (DEF and P/M.DEF), multiplying their pass rates for the final result. Both penetration formulas share the same structure, scaling with corresponding level-based constants and penetration values.',
+  formulaModalH1: '1. Notation & Parameters',
+  formulaModalH2: '2. Basic Calculation',
+  formulaModalH3: '3. DEF Layer Calculation',
+  formulaModalH4: '4. P/M.DEF Layer Calculation',
+  formulaModalH5: '5. Final Damage',
+  formulaModalNote: 'Note: DEF Down/Up (DEF Bonus %) applies directly to target base DEF before penetration is calculated. Formula architecture is derived from doc/damage/excel_formulas.txt.',
+  
+  formulaModalTargetPmDef: 'Target P/M.DEF',
+  formulaModalBonusIncl: '(Includes Elemental Advantage)',
+  formulaModalEleTrigger: '1 if triggered, else 0',
+  formulaModalBdmgDesc: 'Final DMG Multiplier (Includes bonus & elemental adv)',
+  formulaModalRdefDesc: 'DEF Pass Rate / P/M.DEF Pass Rate',
+  formulaModalRtotalDesc: 'Overall Pass Rate',
+  
   sweepTitle: '📈 Single Variable Yield Sweep',
   sweepDesc: 'Scan a single variable across a range and plot the yield curve (supports evaluating Final Damage, Penetration Rate, etc.).',
   heatmapTitle: '🔥 DEF × PEN Heatmap',

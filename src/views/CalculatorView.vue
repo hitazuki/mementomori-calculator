@@ -2,6 +2,11 @@
   <div class="view-header animate-fadeup">
     <h1 class="view-title">{{ $t('calcTitle') }}</h1>
     <p class="view-desc">{{ $t('calcDesc') }}</p>
+    <div style="margin-top: 12px;">
+      <button class="btn btn-secondary btn-sm" @click="showFormulaModal = true">
+        <span style="font-size:14px;">💡</span> {{ $t('calcFormulaBtn') }}
+      </button>
+    </div>
   </div>
 
   <div class="chip-row animate-fadeup">
@@ -215,10 +220,62 @@
       </div>
     </div>
   </div>
+
+  <!-- Formula Explanation Modal -->
+  <Teleport to="body">
+    <div class="modal-overlay" :class="{ active: showFormulaModal }" @click.self="showFormulaModal = false">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title">{{ $t('formulaModalTitle') }}</div>
+          <button class="modal-close" @click="showFormulaModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>{{ $t('formulaModalP1') }}</p>
+          
+          <h3>{{ $t('formulaModalH1') }}</h3>
+          <ul style="list-style-type:none; margin-left:0; padding-left:12px; border-left:2px solid var(--border-subtle); margin-bottom: 20px;">
+            <li><code>ATK</code> : {{ $t('baseAtk') }}</li>
+            <li><code>S_coeff</code> : {{ $t('skillCoeff') }}</li>
+            <li><code>D_raw</code> : {{ $t('rawDmg') }}</li>
+            <li><code>Bonus</code> : {{ $t('dmgBonus') }}</li>
+            <li><code>Ele_Adv</code> : {{ $t('eleAdvantage') }} ({{ $t('formulaModalEleTrigger') }})</li>
+            <li><code>B_dmg</code> : {{ $t('formulaModalBdmgDesc') }}</li>
+            <li><code>C_dmg</code> : {{ $t('critMult') }}</li>
+            <li><code>DEF</code> / <code>PM_DEF</code> : {{ $t('targetDef') }} / {{ $t('formulaModalTargetPmDef') }}</li>
+            <li><code>PEN</code> / <code>PM_PEN</code> : {{ $t('pen') }} / {{ $t('pmPen') }}</li>
+            <li><code>C_def</code> / <code>C_pmdef</code> : {{ $t('cDefConst') }} / {{ $t('cPmDefConst') }}</li>
+            <li><code>C_pen</code> / <code>C_pmpen</code> : {{ $t('cPenConst') }} / {{ $t('cPmPenConst') }}</li>
+            <li><code>DEF_eff</code> / <code>PM_DEF_eff</code> : {{ $t('effDef') }} / {{ $t('effPmDef') }}</li>
+            <li><code>R_def</code> / <code>R_pmdef</code> : {{ $t('formulaModalRdefDesc') }}</li>
+            <li><code>R_total</code> : {{ $t('formulaModalRtotalDesc') }}</li>
+            <li><code>D_final</code> : {{ $t('finalDmg') }}</li>
+          </ul>
+          
+          <h3>{{ $t('formulaModalH2') }}</h3>
+          <code class="formula-highlight">D_raw = ATK × S_coeff</code>
+          <code class="formula-highlight">B_dmg = 1 + Bonus + (Ele_Adv × 0.25)</code>
+          
+          <h3>{{ $t('formulaModalH3') }}</h3>
+          <code class="formula-highlight">DEF_eff = DEF × [ C_pen / (PEN + C_pen) ]</code>
+          <code class="formula-highlight">R_def = C_def / (DEF_eff + C_def)</code>
+          
+          <h3>{{ $t('formulaModalH4') }}</h3>
+          <code class="formula-highlight">PM_DEF_eff = PM_DEF × [ C_pmpen / (PM_PEN + C_pmpen) ]</code>
+          <code class="formula-highlight">R_pmdef = C_pmdef / (PM_DEF_eff + C_pmdef)</code>
+          
+          <h3>{{ $t('formulaModalH5') }}</h3>
+          <code class="formula-highlight">R_total = R_def × R_pmdef</code>
+          <code class="formula-highlight">D_final = D_raw × B_dmg × C_dmg × R_total</code>
+          
+          <p style="margin-top:16px; font-size:12px; color:var(--text-muted);">{{ $t('formulaModalNote') }}</p>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCalcStore } from '../store/calculator.js'
 import { calcDamage } from '../engine/damageCalc.js'
@@ -227,6 +284,8 @@ import { getScenarioPresets } from '../constants/presets.js'
 
 const { t } = useI18n()
 const store = useCalcStore()
+
+const showFormulaModal = ref(false)
 
 const scenarioPresets = getScenarioPresets()
 

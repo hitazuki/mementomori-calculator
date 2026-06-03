@@ -17,7 +17,26 @@ export default {
 
   // Views & Headers
   calcTitle: '🎯 単体ダメージ計算機',
-  calcDesc: '実際の計算式：effective_DEF = DEF × C_pen / (PEN + C_pen), ダメージ率 = C_def / (effective_DEF + C_def)。防御路と物魔路を乗算。',
+  calcDesc: '実際の物理と魔法の二重防御軽減メカニズムをシミュレートします。',
+  calcFormulaBtn: '計算式の説明',
+  
+  // Modal Formula Details
+  formulaModalTitle: '計算の原理と式',
+  formulaModalP1: 'ダメージ計算は、2つの防御層（防御力DEFと物/魔防御PM.DEF）で独立して軽減率を計算し、最後に通過率を乗算します。各防御貫通式の構造は同一であり、レベルに応じた定数と貫通値の影響を受けます。',
+  formulaModalH1: '1. 記号とパラメータ',
+  formulaModalH2: '2. 基礎計算',
+  formulaModalH3: '3. 防御路の計算 (DEF)',
+  formulaModalH4: '4. 物/魔路の計算 (PM.DEF)',
+  formulaModalH5: '5. 最終ダメージ',
+  formulaModalNote: '注：防御力低下/増加（防御力ボーナス％）は、貫通が計算される前にターゲットの基礎防御力に直接適用されます。数式の構造は doc/damage/excel_formulas.txt の理論的分解に基づいています。',
+  
+  formulaModalTargetPmDef: '目標物/魔防',
+  formulaModalBonusIncl: '(属性相性を含む)',
+  formulaModalEleTrigger: '発動時は1、それ以外は0',
+  formulaModalBdmgDesc: '最終ダメージ増加係数 (ダメ増と属性相性を含む)',
+  formulaModalRdefDesc: '防御路通過率 / 物魔路通過率',
+  formulaModalRtotalDesc: '総合ダメージ通過率',
+  
   sweepTitle: '📈 単一変数スキャン',
   sweepDesc: '単一変数の変化範囲を指定し、対応する収益曲線をスキャンして生成します（最終ダメージ、軽減率などの指標切替をサポート）。',
   heatmapTitle: '🔥 DEF × PEN ヒートマップ',

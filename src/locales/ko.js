@@ -17,7 +17,26 @@ export default {
 
   // Views & Headers
   calcTitle: '🎯 단일 대상 데미지 계산기',
-  calcDesc: '공식: effective_DEF = DEF × C_pen / (PEN + C_pen), 데미지 비율 = C_def / (effective_DEF + C_def). 물리 및 마법 방어 적용.',
+  calcDesc: '실제 물리 및 마법 이중 방어 감소 메커니즘을 시뮬레이션합니다.',
+  calcFormulaBtn: '계산식 설명',
+  
+  // Modal Formula Details
+  formulaModalTitle: '상세 계산 원리 및 공식',
+  formulaModalP1: '데미지 계산은 두 개의 방어 경로(방어력 DEF 및 물리/마법 방어력 PM.DEF)에서 독립적으로 경감률을 계산하고 최종적으로 통과율을 곱하는 방식을 사용합니다. 각 관통 공식의 구조는 동일하며 해당 레벨 상수와 관통 수치의 영향을 받습니다.',
+  formulaModalH1: '1. 기호 설명 (매개변수 정의)',
+  formulaModalH2: '2. 기본 계산',
+  formulaModalH3: '3. 방어 경로 계산 (DEF)',
+  formulaModalH4: '4. 물/마방 경로 계산 (PM.DEF)',
+  formulaModalH5: '5. 최종 데미지',
+  formulaModalNote: '참고: 방어력 감소/증가(방어력 보너스%)는 관통이 계산되기 전에 대상의 기본 방어력에 직접 적용됩니다. 공식 구조는 doc/damage/excel_formulas.txt 의 이론적 분석에서 파생되었습니다.',
+  
+  formulaModalTargetPmDef: '대상 물/마방',
+  formulaModalBonusIncl: '(속성 상성 포함)',
+  formulaModalEleTrigger: '발동 시 1, 아닐 시 0',
+  formulaModalBdmgDesc: '최종 데미지 증가 계수 (뎀증 및 속성 포함)',
+  formulaModalRdefDesc: '방어 경로 통과율 / 물/마방 경로 통과율',
+  formulaModalRtotalDesc: '종합 데미지 통과율',
+  
   sweepTitle: '📈 단일 변수 스캔',
   sweepDesc: '단일 변수의 변화 범위를 지정하여 수익 곡선을 스캔하고 생성합니다 (최종 데미지, 경감률 등의 지표 전환 지원).',
   heatmapTitle: '🔥 DEF × PEN 히트맵',
