@@ -116,11 +116,14 @@ function renderBuildsList(container) {
   if (!cont) return
   cont.innerHTML = tableState.builds.map((b, i) => `
     <div style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:6px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <input class="form-input" style="font-weight:bold;width:160px;padding:2px 8px;font-size:14px" data-bidx="${i}" data-key="name" value="${b.name}">
-        ${tableState.builds.length > 1 ? `<button class="btn btn-ghost btn-sm" data-remove="${i}">🗑</button>` : ''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${b._expanded ? '12px' : '0'}">
+        <input class="form-input" style="font-weight:bold;width:130px;padding:2px 8px;font-size:14px" data-bidx="${i}" data-key="name" value="${b.name}">
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-secondary btn-sm" data-toggle="${i}" style="padding:4px 8px;font-size:12px">${b._expanded ? '▲' : '▼ ' + (t('ui_details') || 'Details')}</button>
+          ${tableState.builds.length > 1 ? `<button class="btn btn-ghost btn-sm" data-remove="${i}" style="padding:4px 8px">🗑</button>` : ''}
+        </div>
       </div>
-      <div class="grid-2">
+      <div class="grid-2" style="display:${b._expanded ? 'grid' : 'none'};padding-top:12px;border-top:1px dashed rgba(255,255,255,0.1)">
         <div class="form-group"><label class="form-label text-xs">${t('baseAtk')}</label><input class="form-input" type="number" data-bidx="${i}" data-param="baseAtk" value="${b.params.baseAtk}"></div>
         <div class="form-group"><label class="form-label text-xs">${t('dmgBonus')}(%)</label><input class="form-input" type="number" data-bidx="${i}" data-param="dmgBonus" value="${(b.params.dmgBonus*100).toFixed(0)}"></div>
         <div class="form-group"><label class="form-label text-xs">${t('targetDef')}</label><input class="form-input" type="number" data-bidx="${i}" data-param="def" value="${b.params.def}"></div>
@@ -183,6 +186,15 @@ function attachTableListeners(container) {
   })
 
   q('#te-builds-container')?.addEventListener('click', e => {
+    const btnToggle = e.target.closest('[data-toggle]')
+    if (btnToggle) {
+      const idx = parseInt(btnToggle.dataset.toggle)
+      const build = tableState.builds[idx]
+      build._expanded = !build._expanded
+      renderBuildsList(container)
+      return
+    }
+
     const btn = e.target.closest('[data-remove]')
     if (btn) {
       const idx = parseInt(btn.dataset.remove)
