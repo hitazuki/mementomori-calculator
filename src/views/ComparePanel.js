@@ -1,6 +1,6 @@
 // src/views/ComparePanel.js
 import { calcDamage } from '../engine/damageCalc.js'
-import { getDefBenchmarks, getLevelPresets } from '../constants/levelTable.js'
+import { getDefBenchmarks, getLevelPresets, getCoeffByLevel } from '../constants/levelTable.js'
 import { getCompareBuildsDefault } from '../constants/presets.js'
 import { MORI_THEME, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { t } from '../i18n/index.js'
@@ -17,8 +17,8 @@ let cs = {
   cPmDef: 1382434, cPmPen: 16660,
   damageType: 'phys',
   chartMode: 'bar', metric: 'dmgRatePct',
-  atkLevelPresetIdx: 4,
-  defLevelPresetIdx: 4,
+  atkLevel: 500,
+  defLevel: 500,
 }
 
 const getMetrics = () => ({
@@ -57,18 +57,12 @@ export function renderCompare(container) {
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">${t('atkPresetLabel')}</label>
-          <select class="form-select" id="ci-atkLevelPreset">
-            <option value="-1" ${cs.atkLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
-            ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${cs.atkLevelPresetIdx===i?'selected':''}>${p.label}</option>`).join('')}
-          </select>
+          <label class="form-label">${t('atkLevel')}</label>
+          <input class="form-input" type="number" id="ci-atkLevel" value="${cs.atkLevel}" min="1" max="999">
         </div>
         <div class="form-group">
-          <label class="form-label">${t('defPresetLabel')}</label>
-          <select class="form-select" id="ci-defLevelPreset">
-            <option value="-1" ${cs.defLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
-            ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${cs.defLevelPresetIdx===i?'selected':''}>${p.label}</option>`).join('')}
-          </select>
+          <label class="form-label">${t('defLevel') || t('defPresetLabel')}</label>
+          <input class="form-input" type="number" id="ci-defLevel" value="${cs.defLevel}" min="1" max="999">
         </div>
       </div>
 
@@ -206,26 +200,21 @@ function attachCompareListeners(container) {
     container.querySelectorAll('[data-type]').forEach(b => b.className=b.className.replace('btn-primary','btn-ghost'))
     btn.className = btn.className.replace('btn-ghost','btn-primary')
     
-    if (cs.defLevelPresetIdx !== -1) {
-      const LEVEL_PRESETS = getLevelPresets()
-      const p = LEVEL_PRESETS[cs.defLevelPresetIdx]
-      if (p) cs.cPmDef = cs.damageType === 'mag' ? p.cMdef : p.cPdef
-    }
+    const p = getCoeffByLevel(cs.defLevel)
+    if (p) cs.cPmDef = cs.damageType === 'mag' ? p.cMdef : p.cPdef
     refreshCompare()
   }))
 
-  container.querySelector('#ci-atkLevelPreset')?.addEventListener('change', e => {
-    const idx = parseInt(e.target.value); cs.atkLevelPresetIdx = idx; if(idx===-1) return
-    const LEVEL_PRESETS = getLevelPresets()
-    const p = LEVEL_PRESETS[idx]; if(!p) return
+  container.querySelector('#ci-atkLevel')?.addEventListener('input', e => {
+    const val = parseInt(e.target.value) || 1; cs.atkLevel = val
+    const p = getCoeffByLevel(val); if(!p) return
     cs.cPen = p.cPen; cs.cPmPen = p.cPmPen;
     refreshCompare()
   })
 
-  container.querySelector('#ci-defLevelPreset')?.addEventListener('change', e => {
-    const idx = parseInt(e.target.value); cs.defLevelPresetIdx = idx; if(idx===-1) return
-    const LEVEL_PRESETS = getLevelPresets()
-    const p = LEVEL_PRESETS[idx]; if(!p) return
+  container.querySelector('#ci-defLevel')?.addEventListener('input', e => {
+    const val = parseInt(e.target.value) || 1; cs.defLevel = val
+    const p = getCoeffByLevel(val); if(!p) return
     cs.cDef = p.cDef; cs.cPmDef = cs.damageType === 'mag' ? p.cMdef : p.cPdef;
     refreshCompare()
   })

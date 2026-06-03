@@ -1,6 +1,6 @@
 // src/views/HeatmapChart.js
 import { buildHeatmapData } from '../engine/damageCalc.js'
-import { getLevelPresets } from '../constants/levelTable.js'
+import { getLevelPresets, getCoeffByLevel } from '../constants/levelTable.js'
 import { MORI_THEME, HEATMAP_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { t } from '../i18n/index.js'
 
@@ -10,8 +10,8 @@ let hs = {
   penMin: 0, penMax: 70000,      penSteps: 24,
   cDef: 834953, cPen: 1725,
   mode: 'phys', // 'phys' for DEF vs DEF Break, 'mag' for P.DEF/M.DEF vs PM.DEF Break
-  atkLevelPresetIdx: 4,
-  defLevelPresetIdx: 4,
+  atkLevel: 500,
+  defLevel: 500,
 }
 
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(v)
@@ -73,11 +73,11 @@ export function renderHeatmap(container) {
       <div class="card">
         <div class="card-title">⚙ ${t('manualAdjust')}</div>
         <div class="form-group">
-          <label class="form-label">${t('atkPresetLabel')}</label>
-          <select class="form-select" id="hi-atkLevelPreset">
-            <option value="-1" ${hs.atkLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
-            ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${hs.atkLevelPresetIdx===i?'selected':''}>${p.label}</option>`).join('')}
-          </select>
+          <label class="form-label" style="display:flex;justify-content:space-between">
+            <span>${t('atkLevel')}</span>
+            <span class="text-xs text-muted" id="hi-atkLevel-custom" style="display:none">(Custom)</span>
+          </label>
+          <input class="form-input" type="number" id="hi-atkLevel" value="${hs.atkLevel}" min="1" max="999">
         </div>
         <div class="form-group" style="margin-bottom:12px">
           <label class="form-label text-xs text-muted">${t('cPenConst')} <span class="value-display" id="hv-cpen">${hs.cPen}</span></label>
@@ -87,11 +87,11 @@ export function renderHeatmap(container) {
         <div class="divider"></div>
         
         <div class="form-group">
-          <label class="form-label">${t('defPresetLabel')}</label>
-          <select class="form-select" id="hi-defLevelPreset">
-            <option value="-1" ${hs.defLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
-            ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${hs.defLevelPresetIdx===i?'selected':''}>${p.label}</option>`).join('')}
-          </select>
+          <label class="form-label" style="display:flex;justify-content:space-between">
+            <span>${t('defLevel') || t('defPresetLabel')}</span>
+            <span class="text-xs text-muted" id="hi-defLevel-custom" style="display:none">(Custom)</span>
+          </label>
+          <input class="form-input" type="number" id="hi-defLevel" value="${hs.defLevel}" min="1" max="999">
         </div>
         <div class="form-group">
           <label class="form-label text-xs text-muted">${t('cDefConst')} <span class="value-display" id="hv-cdef">${hs.cDef.toLocaleString()}</span></label>
@@ -105,6 +105,7 @@ export function renderHeatmap(container) {
   const chartEl = container.querySelector('#heatmap-chart')
   if (chartEl && window.echarts) { if (heatChart) heatChart.dispose(); heatChart = window.echarts.init(chartEl) }
   attachHeatmapListeners(container)
+  updateHeatmapCustomFlags(container)
   drawHeatmap()
 }
 
@@ -115,23 +116,20 @@ function attachHeatmapListeners(container) {
       container.querySelectorAll('[data-mode]').forEach(b => b.className = b.className.replace('btn-primary','btn-ghost'))
       btn.className = btn.className.replace('btn-ghost','btn-primary')
       
-      const LEVEL_PRESETS = getLevelPresets()
-      if (hs.atkLevelPresetIdx !== -1) {
-        const p = LEVEL_PRESETS[hs.atkLevelPresetIdx]
-        if (p) {
-          hs.cPen = hs.mode === 'phys' ? p.cPen : p.cPmPen
-          container.querySelector('#hi-cPen').value = hs.cPen
-          container.querySelector('#hv-cpen').textContent = hs.cPen
-        }
+      const pA = getCoeffByLevel(hs.atkLevel)
+      if (pA) {
+        hs.cPen = hs.mode === 'phys' ? pA.cPen : pA.cPmPen
+        container.querySelector('#hi-cPen').value = hs.cPen
+        container.querySelector('#hv-cpen').textContent = hs.cPen
       }
-      if (hs.defLevelPresetIdx !== -1) {
-        const p = LEVEL_PRESETS[hs.defLevelPresetIdx]
-        if (p) {
-          hs.cDef = hs.mode === 'phys' ? p.cDef : p.cPdef
-          container.querySelector('#hi-cDef').value = hs.cDef
-          container.querySelector('#hv-cdef').textContent = hs.cDef.toLocaleString()
-        }
+      
+      const pD = getCoeffByLevel(hs.defLevel)
+      if (pD) {
+        hs.cDef = hs.mode === 'phys' ? pD.cDef : pD.cPdef
+        container.querySelector('#hi-cDef').value = hs.cDef
+        container.querySelector('#hv-cdef').textContent = hs.cDef.toLocaleString()
       }
+      updateHeatmapCustomFlags(container)
       drawHeatmap()
     })
   })
@@ -153,38 +151,34 @@ function attachHeatmapListeners(container) {
   container.querySelector('#hi-cDef')?.addEventListener('input', e => {
     hs.cDef = parseInt(e.target.value) || 1
     const d = container.querySelector('#hv-cdef'); if (d) d.textContent = hs.cDef.toLocaleString()
-    hs.defLevelPresetIdx = -1
-    const sel = container.querySelector('#hi-defLevelPreset'); if (sel) sel.value = "-1"
+    updateHeatmapCustomFlags(container)
   })
   container.querySelector('#hi-cPen')?.addEventListener('input', e => {
     hs.cPen = parseInt(e.target.value) || 1
     const d = container.querySelector('#hv-cpen'); if (d) d.textContent = hs.cPen
-    hs.atkLevelPresetIdx = -1
-    const sel = container.querySelector('#hi-atkLevelPreset'); if (sel) sel.value = "-1"
+    updateHeatmapCustomFlags(container)
   })
 
-  container.querySelector('#hi-atkLevelPreset')?.addEventListener('change', e => {
-    const idx = parseInt(e.target.value)
-    hs.atkLevelPresetIdx = idx
-    if (idx === -1) return
-    const LEVEL_PRESETS = getLevelPresets()
-    const p = LEVEL_PRESETS[idx]
+  container.querySelector('#hi-atkLevel')?.addEventListener('input', e => {
+    const val = parseInt(e.target.value) || 1
+    hs.atkLevel = val
+    const p = getCoeffByLevel(val)
     if (!p) return
     hs.cPen = hs.mode === 'phys' ? p.cPen : p.cPmPen
     const cpenEl = container.querySelector('#hi-cPen'); if (cpenEl) cpenEl.value = hs.cPen
     const d2 = container.querySelector('#hv-cpen'); if (d2) d2.textContent = hs.cPen
+    updateHeatmapCustomFlags(container)
   })
 
-  container.querySelector('#hi-defLevelPreset')?.addEventListener('change', e => {
-    const idx = parseInt(e.target.value)
-    hs.defLevelPresetIdx = idx
-    if (idx === -1) return
-    const LEVEL_PRESETS = getLevelPresets()
-    const p = LEVEL_PRESETS[idx]
+  container.querySelector('#hi-defLevel')?.addEventListener('input', e => {
+    const val = parseInt(e.target.value) || 1
+    hs.defLevel = val
+    const p = getCoeffByLevel(val)
     if (!p) return
     hs.cDef = hs.mode === 'phys' ? p.cDef : p.cPdef
     const cdefEl = container.querySelector('#hi-cDef'); if (cdefEl) cdefEl.value = hs.cDef
     const d1 = container.querySelector('#hv-cdef'); if (d1) d1.textContent = hs.cDef.toLocaleString()
+    updateHeatmapCustomFlags(container)
   })
 
   container.querySelector('#hi-redraw')?.addEventListener('click', drawHeatmap)
@@ -194,6 +188,18 @@ function attachHeatmapListeners(container) {
     const a = document.createElement('a'); a.href = url
     a.download = `mmt-heatmap-cdef${hs.cDef}.png`; a.click()
   })
+}
+
+function updateHeatmapCustomFlags(container) {
+  const pA = getCoeffByLevel(hs.atkLevel)
+  const isAtkCustom = hs.cPen !== (hs.mode === 'phys' ? pA.cPen : pA.cPmPen)
+  const elA = container.querySelector('#hi-atkLevel-custom')
+  if (elA) elA.style.display = isAtkCustom ? 'inline' : 'none'
+
+  const pD = getCoeffByLevel(hs.defLevel)
+  const isDefCustom = hs.cDef !== (hs.mode === 'phys' ? pD.cDef : pD.cPdef)
+  const elD = container.querySelector('#hi-defLevel-custom')
+  if (elD) elD.style.display = isDefCustom ? 'inline' : 'none'
 }
 
 function drawHeatmap() {

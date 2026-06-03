@@ -1,7 +1,7 @@
 // src/views/SweepChart.js
 import { buildSweepData } from '../engine/damageCalc.js'
 import { getSweepVariables } from '../constants/presets.js'
-import { getLevelPresets } from '../constants/levelTable.js'
+import { getLevelPresets, getCoeffByLevel } from '../constants/levelTable.js'
 import { MORI_THEME, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { t } from '../i18n/index.js'
 
@@ -20,8 +20,8 @@ let ss = {
   min: 0, max: 20000, steps: 21,
   baseParams: { ...DEFAULT_PARAMS },
   showMit: true,
-  atkLevelPresetIdx: 4, // 默认 Lv500
-  defLevelPresetIdx: 4,
+  atkLevel: 500,
+  defLevel: 500,
 }
 
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
@@ -86,18 +86,26 @@ export function renderSweepChart(container) {
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">${t('atkPresetLabel')}</label>
-          <select class="form-select" id="sc-atkLevelPreset">
-            <option value="-1" ${ss.atkLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
-            ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${ss.atkLevelPresetIdx===i?'selected':''}>${p.label} (C_pen=${p.cPen})</option>`).join('')}
-          </select>
+          <label class="form-label" style="display:flex;justify-content:space-between">
+            <span>${t('atkLevel')}</span>
+            <span class="text-xs text-muted" id="sc-atkLevel-custom" style="display:none">(Custom)</span>
+          </label>
+          <input class="form-input" type="number" id="sc-atkLevel" value="${ss.atkLevel}" min="1" max="999">
+        </div>
+        <div class="grid-2 mb-8">
+          <div class="form-group"><label class="form-label">C_pen</label><input class="form-input" type="number" id="sc-cPen" value="${ss.baseParams.cPen}"></div>
+          <div class="form-group"><label class="form-label">C_pmpen</label><input class="form-input" type="number" id="sc-cPmPen" value="${ss.baseParams.cPmPen}"></div>
         </div>
         <div class="form-group">
-          <label class="form-label">${t('defPresetLabel')}</label>
-          <select class="form-select" id="sc-defLevelPreset">
-            <option value="-1" ${ss.defLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
-            ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${ss.defLevelPresetIdx===i?'selected':''}>${p.label} (C_def=${fmt(p.cDef)})</option>`).join('')}
-          </select>
+          <label class="form-label" style="display:flex;justify-content:space-between">
+            <span>${t('defLevel') || t('defPresetLabel')}</span>
+            <span class="text-xs text-muted" id="sc-defLevel-custom" style="display:none">(Custom)</span>
+          </label>
+          <input class="form-input" type="number" id="sc-defLevel" value="${ss.defLevel}" min="1" max="999">
+        </div>
+        <div class="grid-2 mb-8">
+          <div class="form-group"><label class="form-label">C_def</label><input class="form-input" type="number" id="sc-cDef" value="${ss.baseParams.cDef}"></div>
+          <div class="form-group"><label class="form-label">C_pmdef</label><input class="form-input" type="number" id="sc-cPmDef" value="${ss.baseParams.cPmDef}"></div>
         </div>
         
         <div class="grid-2">
@@ -119,16 +127,6 @@ export function renderSweepChart(container) {
           </div>
         </div>
         
-        <div class="text-xs text-muted mb-4 mt-8">${t('cPenDefLabel')}</div>
-        <div class="grid-2">
-          <div class="form-group"><label class="form-label">C_pen</label><input class="form-input" type="number" id="sc-cPen" value="${ss.baseParams.cPen}"></div>
-          <div class="form-group"><label class="form-label">C_pmpen</label><input class="form-input" type="number" id="sc-cPmPen" value="${ss.baseParams.cPmPen}"></div>
-        </div>
-        <div class="text-xs text-muted mb-4 mt-4">${t('cDefDefLabel')}</div>
-        <div class="grid-2">
-          <div class="form-group"><label class="form-label">C_def</label><input class="form-input" type="number" id="sc-cDef" value="${ss.baseParams.cDef}"></div>
-          <div class="form-group"><label class="form-label">C_pmdef</label><input class="form-input" type="number" id="sc-cPmDef" value="${ss.baseParams.cPmDef}"></div>
-        </div>
       </div>
     </div>
   </div>`
@@ -136,6 +134,7 @@ export function renderSweepChart(container) {
   const chartEl = container.querySelector('#sweep-chart')
   if (chartEl && window.echarts) { if(sweepChart) sweepChart.dispose(); sweepChart = window.echarts.init(chartEl) }
   attachSweepListeners(container)
+  updateSweepCustomFlags(container)
   drawSweep()
 }
 
@@ -175,14 +174,8 @@ function attachSweepListeners(container) {
   baseBinds.forEach(b => q(`#${b.id}`)?.addEventListener('input', e => {
     ss.baseParams[b.key] = parseFloat(e.target.value)||0
     if (b.disp) { q(`#${b.disp}`).textContent = fmt(ss.baseParams[b.key]) }
-    // 如果修改了常数，取消选中预设
-    if (['cPen', 'cPmPen'].includes(b.key)) {
-      ss.atkLevelPresetIdx = -1
-      const sel = q('#sc-atkLevelPreset'); if (sel) sel.value = "-1"
-    }
-    if (['cDef', 'cPmDef'].includes(b.key)) {
-      ss.defLevelPresetIdx = -1
-      const sel = q('#sc-defLevelPreset'); if (sel) sel.value = "-1"
+    if (['cPen', 'cPmPen', 'cDef', 'cPmDef'].includes(b.key)) {
+      updateSweepCustomFlags(container)
     }
     drawSweep()
   }))
@@ -193,10 +186,10 @@ function attachSweepListeners(container) {
       container.querySelectorAll('[data-type]').forEach(b => b.className = b.className.replace('btn-primary','btn-ghost'))
       btn.className = btn.className.replace('btn-ghost','btn-primary')
 
-      const LEVEL_PRESETS = getLevelPresets()
-      if (ss.defLevelPresetIdx !== -1) {
-        const p = LEVEL_PRESETS[ss.defLevelPresetIdx]
-        if (p) {
+      const p = getCoeffByLevel(ss.defLevel)
+      if (p) {
+        const isCustom = (ss.baseParams.cDef !== p.cDef) || (ss.baseParams.cPmDef !== (ss.baseParams.damageType === 'mag' ? p.cMdef : p.cPdef))
+        if (!isCustom) {
           ss.baseParams.cPmDef = ss.baseParams.damageType === 'mag' ? p.cMdef : p.cPdef
           const cmdEl = q('#sc-cPmDef'); if (cmdEl) cmdEl.value = ss.baseParams.cPmDef
         }
@@ -210,16 +203,15 @@ function attachSweepListeners(container) {
         titleEl.appendChild(titleSpan)
       }
 
+      updateSweepCustomFlags(container)
       drawSweep()
     })
   })
 
-  q('#sc-atkLevelPreset')?.addEventListener('change', e => {
-    const idx = parseInt(e.target.value)
-    ss.atkLevelPresetIdx = idx
-    if (idx === -1) return
-    const LEVEL_PRESETS = getLevelPresets()
-    const p = LEVEL_PRESETS[idx]
+  q('#sc-atkLevel')?.addEventListener('input', e => {
+    const val = parseInt(e.target.value) || 1
+    ss.atkLevel = val
+    const p = getCoeffByLevel(val)
     if (!p) return
     ss.baseParams.cPen = p.cPen; ss.baseParams.cPmPen = p.cPmPen
     
@@ -227,15 +219,14 @@ function attachSweepListeners(container) {
     for (const [k, s] of Object.entries(els)) {
       const el = q(s); if (el) el.value = ss.baseParams[k]
     }
+    updateSweepCustomFlags(container)
     drawSweep()
   })
 
-  q('#sc-defLevelPreset')?.addEventListener('change', e => {
-    const idx = parseInt(e.target.value)
-    ss.defLevelPresetIdx = idx
-    if (idx === -1) return
-    const LEVEL_PRESETS = getLevelPresets()
-    const p = LEVEL_PRESETS[idx]
+  q('#sc-defLevel')?.addEventListener('input', e => {
+    const val = parseInt(e.target.value) || 1
+    ss.defLevel = val
+    const p = getCoeffByLevel(val)
     if (!p) return
     ss.baseParams.cDef = p.cDef
     ss.baseParams.cPmDef = ss.baseParams.damageType === 'mag' ? p.cMdef : p.cPdef
@@ -244,6 +235,7 @@ function attachSweepListeners(container) {
     for (const [k, s] of Object.entries(els)) {
       const el = q(s); if (el) el.value = ss.baseParams[k]
     }
+    updateSweepCustomFlags(container)
     drawSweep()
   })
 
@@ -252,6 +244,18 @@ function attachSweepListeners(container) {
     const url = sweepChart.getDataURL({type:'png',pixelRatio:2,backgroundColor:'#0d0b14'})
     const a = document.createElement('a'); a.href=url; a.download=`mmt-sweep-${ss.sweepKey}.png`; a.click()
   })
+}
+
+function updateSweepCustomFlags(container) {
+  const pA = getCoeffByLevel(ss.atkLevel)
+  const isAtkCustom = ss.baseParams.cPen !== pA.cPen || ss.baseParams.cPmPen !== pA.cPmPen
+  const elA = container.querySelector('#sc-atkLevel-custom')
+  if (elA) elA.style.display = isAtkCustom ? 'inline' : 'none'
+
+  const pD = getCoeffByLevel(ss.defLevel)
+  const isDefCustom = ss.baseParams.cDef !== pD.cDef || ss.baseParams.cPmDef !== (ss.baseParams.damageType === 'mag' ? pD.cMdef : pD.cPdef)
+  const elD = container.querySelector('#sc-defLevel-custom')
+  if (elD) elD.style.display = isDefCustom ? 'inline' : 'none'
 }
 
 function drawSweep() {

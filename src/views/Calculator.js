@@ -1,6 +1,6 @@
 // src/views/Calculator.js
 import { calcDamage } from '../engine/damageCalc.js'
-import { getLevelPresets } from '../constants/levelTable.js'
+import { getLevelPresets, getCoeffByLevel } from '../constants/levelTable.js'
 import { getScenarioPresets } from '../constants/presets.js'
 import { t } from '../i18n/index.js'
 
@@ -12,8 +12,8 @@ const DEFAULT = {
   cPmDef: 1382434, cPmPen: 16660,
   dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, eleAdvantage: false,
   damageType: 'phys', // 'phys' for P.DEF, 'mag' for M.DEF
-  atkLevelPresetIdx: 4, // 默认选中 Lv500
-  defLevelPresetIdx: 4,
+  atkLevel: 500,
+  defLevel: 500,
 }
 
 let s = null
@@ -43,12 +43,24 @@ export function renderCalculator(container) {
       <div class="card">
         <div class="card-title">${t('atkParams')}</div>
         <div class="form-group">
-          <label class="form-label">${t('atkPresetLabel')}</label>
-          <select class="form-select" id="fi-atkLevelPreset">
-            <option value="-1" ${s.atkLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
-            ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${s.atkLevelPresetIdx===i?'selected':''}>${p.label} (C_pen=${p.cPen})</option>`).join('')}
-          </select>
+          <label class="form-label" style="display:flex;justify-content:space-between">
+            <span>${t('atkLevel')}</span>
+            <span class="text-xs text-muted" id="atkLevel-custom" style="display:none">(Custom)</span>
+          </label>
+          <input class="form-input" type="number" id="fi-atkLevel" value="${s.atkLevel}" min="1" max="999">
         </div>
+        <div class="text-xs text-muted mb-8">${t('cPenDefLabel')}</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">${t('cPenConst')} <span class="value-display" id="dv-cp">${s.cPen}</span></label>
+            <input class="form-input" type="number" id="fi-cPen" value="${s.cPen}" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">${t('cPmPenConst')} <span class="value-display" id="dv-cmp">${s.cPmPen}</span></label>
+            <input class="form-input" type="number" id="fi-cPmPen" value="${s.cPmPen}" min="1">
+          </div>
+        </div>
+        <div class="divider"></div>
         <div class="form-group">
           <label class="form-label">${t('baseAtk')} <span class="value-display" id="dv-atk">${fmt(s.baseAtk)}</span></label>
           <input class="form-input" type="number" id="fi-baseAtk" value="${s.baseAtk}" min="0">
@@ -76,7 +88,7 @@ export function renderCalculator(container) {
         </div>
         <div class="form-group">
           <label class="form-label">${t('dmgBonus')} <span class="value-display" id="dv-bonus">${fmtPct(s.dmgBonus)}</span></label>
-          <input class="form-range" type="range" id="fi-dmgBonus" value="${s.dmgBonus}" min="0" max="3" step="0.05">
+          <input class="form-range" type="range" id="fi-dmgBonus" value="${s.dmgBonus}" min="-1.0" max="2.0" step="0.05">
         </div>
         <div class="grid-2">
           <div class="form-group">
@@ -90,30 +102,30 @@ export function renderCalculator(container) {
             </label>
           </div>
         </div>
-        <div class="divider"></div>
-        <div class="text-xs text-muted mb-8">${t('cPenDefLabel')}</div>
-        <div class="grid-2">
-          <div class="form-group">
-            <label class="form-label">${t('cPenConst')} <span class="value-display" id="dv-cp">${s.cPen}</span></label>
-            <input class="form-input" type="number" id="fi-cPen" value="${s.cPen}" min="1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">${t('cPmPenConst')} <span class="value-display" id="dv-cmp">${s.cPmPen}</span></label>
-            <input class="form-input" type="number" id="fi-cPmPen" value="${s.cPmPen}" min="1">
-          </div>
-        </div>
       </div>
 
       <!-- 防守方 -->
       <div class="card">
         <div class="card-title">${t('defParams')}</div>
         <div class="form-group">
-          <label class="form-label">${t('defPresetLabel')}</label>
-          <select class="form-select" id="fi-defLevelPreset">
-            <option value="-1" ${s.defLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>
-            ${LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${s.defLevelPresetIdx===i?'selected':''}>${p.label} (C_def=${fmt(p.cDef)} / C_pm=${fmt(s.damageType==='mag'?p.cMdef:p.cPdef)})</option>`).join('')}
-          </select>
+          <label class="form-label" style="display:flex;justify-content:space-between">
+            <span>${t('defLevel') || t('defPresetLabel')}</span>
+            <span class="text-xs text-muted" id="defLevel-custom" style="display:none">(Custom)</span>
+          </label>
+          <input class="form-input" type="number" id="fi-defLevel" value="${s.defLevel}" min="1" max="999">
         </div>
+        <div class="text-xs text-muted mb-8">${t('cDefDefLabel')}</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">${t('cDefConst')} <span class="value-display" id="dv-cd">${s.cDef.toLocaleString()}</span></label>
+            <input class="form-input" type="number" id="fi-cDef" value="${s.cDef}" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">${t('cPmDefConst')} <span class="value-display" id="dv-cmd">${s.cPmDef.toLocaleString()}</span></label>
+            <input class="form-input" type="number" id="fi-cPmDef" value="${s.cPmDef}" min="1">
+          </div>
+        </div>
+        <div class="divider"></div>
         <div class="grid-2">
           <div class="form-group">
             <label class="form-label">${t('targetDef')}</label>
@@ -127,23 +139,11 @@ export function renderCalculator(container) {
         <div class="grid-2">
           <div class="form-group">
             <label class="form-label">${t('defBonus')} <span class="value-display" id="dv-defBonus">${fmtPct(s.defBonus)}</span></label>
-            <input class="form-range" type="range" id="fi-defBonus" value="${s.defBonus}" min="-1.0" max="1.0" step="0.05">
+            <input class="form-range" type="range" id="fi-defBonus" value="${s.defBonus}" min="-1.0" max="2.5" step="0.05">
           </div>
           <div class="form-group">
             <label class="form-label">${t('pmDefBonus')} <span class="value-display" id="dv-pmDefBonus">${fmtPct(s.pmDefBonus)}</span></label>
-            <input class="form-range" type="range" id="fi-pmDefBonus" value="${s.pmDefBonus}" min="-1.0" max="1.0" step="0.05">
-          </div>
-        </div>
-        <div class="divider"></div>
-        <div class="text-xs text-muted mb-8">${t('cDefDefLabel')}</div>
-        <div class="grid-2">
-          <div class="form-group">
-            <label class="form-label">${t('cDefConst')} <span class="value-display" id="dv-cd">${s.cDef.toLocaleString()}</span></label>
-            <input class="form-input" type="number" id="fi-cDef" value="${s.cDef}" min="1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">${t('cPmDefConst')} <span class="value-display" id="dv-cmd">${s.cPmDef.toLocaleString()}</span></label>
-            <input class="form-input" type="number" id="fi-cPmDef" value="${s.cPmDef}" min="1">
+            <input class="form-range" type="range" id="fi-pmDefBonus" value="${s.pmDefBonus}" min="-1.0" max="2.5" step="0.05">
           </div>
         </div>
       </div>
@@ -171,6 +171,7 @@ export function renderCalculator(container) {
   </div>`
 
   attachCalcListeners(container)
+  updateCustomFlags(container)
   updateCalcResults()
 }
 
@@ -199,16 +200,8 @@ function attachCalcListeners(container) {
     el.addEventListener('input', () => {
       s[key] = parseFloat(el.value) || 0
       if (disp && f) { const d = container.querySelector(`#${disp}`); if (d) d.textContent = f(s[key]) }
-      // 如果手动修改系数，将预设选项调成自定义
-      if (['cPen', 'cPmPen'].includes(key)) {
-        s.atkLevelPresetIdx = -1
-        const sel = container.querySelector('#fi-atkLevelPreset')
-        if (sel) sel.value = "-1"
-      }
-      if (['cDef', 'cPmDef'].includes(key)) {
-        s.defLevelPresetIdx = -1
-        const sel = container.querySelector('#fi-defLevelPreset')
-        if (sel) sel.value = "-1"
+      if (['cPen', 'cPmPen', 'cDef', 'cPmDef'].includes(key)) {
+        updateCustomFlags(container)
       }
       updateCalcResults()
     })
@@ -229,32 +222,24 @@ function attachCalcListeners(container) {
       if (titleEl) titleEl.textContent = s.damageType==='phys'?t('targetPhysDef'):t('targetMagDef')
 
       // 重新加载对应的预设系数 (仅防守方定数受影响)
-      if (s.defLevelPresetIdx !== -1) {
-        const LEVEL_PRESETS = getLevelPresets()
-        const p = LEVEL_PRESETS[s.defLevelPresetIdx]
-        if (p) {
+      const p = getCoeffByLevel(s.defLevel)
+      if (p) {
+        const isCustom = (s.cDef !== p.cDef) || (s.cPmDef !== (s.damageType === 'mag' ? p.cMdef : p.cPdef))
+        if (!isCustom) {
           s.cPmDef = s.damageType === 'mag' ? p.cMdef : p.cPdef
           const cmdEl = container.querySelector('#fi-cPmDef'); if (cmdEl) cmdEl.value = s.cPmDef
           const cmdDisp = container.querySelector('#dv-cmd'); if (cmdDisp) cmdDisp.textContent = s.cPmDef.toLocaleString()
-          
-          // 更新 select 里的 label (C_pm=xxx)
-          const sel = container.querySelector('#fi-defLevelPreset')
-          if (sel) {
-            sel.innerHTML = `<option value="-1" ${s.defLevelPresetIdx===-1?'selected':''}>${t('manualAdjust')}</option>` +
-              LEVEL_PRESETS.map((p,i)=>`<option value="${i}" ${s.defLevelPresetIdx===i?'selected':''}>${p.label} (C_def=${fmt(p.cDef)} / C_pm=${fmt(s.damageType==='mag'?p.cMdef:p.cPdef)})</option>`).join('')
-          }
         }
       }
+      updateCustomFlags(container)
       updateCalcResults()
     })
   })
 
-  container.querySelector('#fi-atkLevelPreset')?.addEventListener('change', e => {
-    const idx = parseInt(e.target.value)
-    s.atkLevelPresetIdx = idx
-    if (idx === -1) return
-    const LEVEL_PRESETS = getLevelPresets()
-    const p = LEVEL_PRESETS[idx]
+  container.querySelector('#fi-atkLevel')?.addEventListener('input', e => {
+    const val = parseInt(e.target.value) || 1
+    s.atkLevel = val
+    const p = getCoeffByLevel(val)
     if (!p) return
     s.cPen = p.cPen; s.cPmPen = p.cPmPen
     
@@ -262,15 +247,14 @@ function attachCalcListeners(container) {
     const elCPmPen = container.querySelector('#fi-cPmPen'); if (elCPmPen) elCPmPen.value = s.cPmPen
     const d2 = container.querySelector('#dv-cp'); if(d2) d2.textContent = s.cPen
     const d4 = container.querySelector('#dv-cmp'); if(d4) d4.textContent = s.cPmPen
+    updateCustomFlags(container)
     updateCalcResults()
   })
 
-  container.querySelector('#fi-defLevelPreset')?.addEventListener('change', e => {
-    const idx = parseInt(e.target.value)
-    s.defLevelPresetIdx = idx
-    if (idx === -1) return
-    const LEVEL_PRESETS = getLevelPresets()
-    const p = LEVEL_PRESETS[idx]
+  container.querySelector('#fi-defLevel')?.addEventListener('input', e => {
+    const val = parseInt(e.target.value) || 1
+    s.defLevel = val
+    const p = getCoeffByLevel(val)
     if (!p) return
     s.cDef = p.cDef; s.cPmDef = s.damageType === 'mag' ? p.cMdef : p.cPdef
     
@@ -278,6 +262,7 @@ function attachCalcListeners(container) {
     const elCPmDef = container.querySelector('#fi-cPmDef'); if (elCPmDef) elCPmDef.value = s.cPmDef
     const d1 = container.querySelector('#dv-cd'); if(d1) d1.textContent = s.cDef.toLocaleString()
     const d3 = container.querySelector('#dv-cmd'); if(d3) d3.textContent = s.cPmDef.toLocaleString()
+    updateCustomFlags(container)
     updateCalcResults()
   })
 
@@ -288,11 +273,23 @@ function attachCalcListeners(container) {
     const preset = SCENARIO_PRESETS.find(p => p.id === btn.dataset.preset)
     if (preset) {
       s = { ...s, ...preset.params }
-      s.atkLevelPresetIdx = -1
-      s.defLevelPresetIdx = -1
+      if (!preset.params.atkLevel) s.atkLevel = 500
+      if (!preset.params.defLevel) s.defLevel = 500
       renderCalculator(container)
     }
   })
+}
+
+function updateCustomFlags(container) {
+  const pA = getCoeffByLevel(s.atkLevel)
+  const isAtkCustom = s.cPen !== pA.cPen || s.cPmPen !== pA.cPmPen
+  const elA = container.querySelector('#atkLevel-custom')
+  if (elA) elA.style.display = isAtkCustom ? 'inline' : 'none'
+
+  const pD = getCoeffByLevel(s.defLevel)
+  const isDefCustom = s.cDef !== pD.cDef || s.cPmDef !== (s.damageType === 'mag' ? pD.cMdef : pD.cPdef)
+  const elD = container.querySelector('#defLevel-custom')
+  if (elD) elD.style.display = isDefCustom ? 'inline' : 'none'
 }
 
 function updateCalcResults() {

@@ -50,7 +50,7 @@ export function getCoeffByLevel(level) {
 }
 
 export const getLevelPresets = () => [
-  { label: t('manualAdjust'),   ...getCoeffByLevel(1) },
+  { label: 'Lv1',   ...getCoeffByLevel(1) },
   { label: 'Lv200',   ...getCoeffByLevel(200) },
   { label: 'Lv300',   ...getCoeffByLevel(300) },
   { label: 'Lv400',   ...getCoeffByLevel(400) },
