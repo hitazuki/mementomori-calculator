@@ -148,7 +148,7 @@
   </div>
 
   <!-- Modal for editing build -->
-  <div v-if="cs.editingBuildIdx !== null" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);" @mousedown.self="cs.editingBuildIdx = null">
+  <div v-if="cs.editingBuildIdx !== null" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:999; display:flex; align-items:center; justify-content:center;" @mousedown.self="cs.editingBuildIdx = null">
     <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; padding:20px; width:90%; max-width:400px; box-shadow:0 8px 32px rgba(0,0,0,0.8);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <h3 style="margin:0;font-size:16px;color:var(--text-primary)">⚙ {{ $t('manualAdjust') }}</h3>
