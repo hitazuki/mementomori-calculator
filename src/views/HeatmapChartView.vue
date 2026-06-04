@@ -160,6 +160,7 @@ const hs = reactive({
     defBonus: store.defBonus,
     pmDefBonus: store.pmDefBonus,
     baseAtk: store.baseAtk,
+    atkBonus: store.atkBonus,
     skillCoeff: store.skillCoeff,
     dmgBonus: store.dmgBonus,
     critMult: store.critMult,
@@ -190,10 +191,6 @@ function onYKeyChange() {
 
 function setDamageType(type) {
   hs.baseParams.damageType = type
-  const p = getCoeffByLevel(hs.baseParams.defLevel)
-  if (p) {
-    hs.baseParams.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
-  }
 }
 
 const chartOption = computed(() => {

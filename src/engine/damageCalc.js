@@ -23,16 +23,27 @@ export function calcDamage({
   pmDef        = 5000000,   // 目标物理/魔法防御力(P.DEF / M.DEF)
   pen          = 11950,     // 攻击方防御贯通(DEF Break)
   pmPen        = 31200,     // 攻击方物魔防御贯通(PM.DEF Break)
-  cDef         = 834953,    // 防御力定数
-  cPmDef       = 1382434,   // 物理/魔法防御定数
-  cPen         = 1725,      // 防御贯通定数
-  cPmPen       = 16660,     // 物魔防御贯通定数
+  cDef,
+  cPmDef,
+  cPen,
+  cPmPen,
   dmgBonus     = 0.3,
   defBonus     = 0,
   pmDefBonus   = 0,
   critMult     = 1.5,
   eleAdvantage = false,
+  damageType   = 'phys',
+  atkLevel     = 500,
+  defLevel     = 500,
 }) {
+  const coeffA = getCoeffByLevel(atkLevel)
+  const coeffD = getCoeffByLevel(defLevel)
+  
+  const finalCPen   = cPen   !== undefined ? cPen   : (coeffA ? coeffA.cPen   : 1725)
+  const finalCPmPen = cPmPen !== undefined ? cPmPen : (coeffA ? coeffA.cPmPen : 16660)
+  const finalCDef   = cDef   !== undefined ? cDef   : (coeffD ? coeffD.cDef   : 834953)
+  const finalCPmDef = cPmDef !== undefined ? cPmDef : (coeffD ? (damageType === 'mag' ? coeffD.cMdef : coeffD.cPdef) : 1382434)
+
   const actualAtk = baseAtk * (1 + atkBonus)
   const rawDmg = actualAtk * skillCoeff
 
@@ -41,8 +52,8 @@ export function calcDamage({
   const actualPmDef = Math.max(0, pmDef * (1 + pmDefBonus))
 
   // 计算两条路的伤害通过率（Damage Rate）
-  const drDef = calcDamageRate(actualDef,   pen,   cDef,   cPen)
-  const drPm  = calcDamageRate(actualPmDef, pmPen, cPmDef, cPmPen)
+  const drDef = calcDamageRate(actualDef,   pen,   finalCDef,   finalCPen)
+  const drPm  = calcDamageRate(actualPmDef, pmPen, finalCPmDef, finalCPmPen)
 
   // 综合防御通过率
   const defMitMultiplier = drDef * drPm
@@ -69,8 +80,8 @@ export function calcDamage({
     totalMitPct: +((1 - defMitMultiplier) * 100).toFixed(2),
 
     // 等效防御
-    effectiveDef:   Math.round(actualDef * cPen / (pen + cPen)),
-    effectivePmDef: Math.round(actualPmDef * cPmPen / (pmPen + cPmPen)),
+    effectiveDef:   Math.round(actualDef * finalCPen / (pen + finalCPen)),
+    effectivePmDef: Math.round(actualPmDef * finalCPmPen / (pmPen + finalCPmPen)),
   }
 }
 
@@ -84,17 +95,12 @@ export function buildSweepData({ sweepKey, min, max, steps, baseParams }) {
     const val = min + stepSize * i
     const params = { ...baseParams }
     
-    if (sweepKey === 'atkLevel') {
-      const coeff = getCoeffByLevel(Math.round(val))
-      params.cPen = coeff.cPen
-      params.cPmPen = coeff.cPmPen
-    } else if (sweepKey === 'defLevel') {
-      const coeff = getCoeffByLevel(Math.round(val))
-      params.cDef = coeff.cDef
-      params.cPmDef = params.damageType === 'mag' ? coeff.cMdef : coeff.cPdef
-    } else {
-      params[sweepKey] = val
-    }
+    delete params.cPen
+    delete params.cPmPen
+    delete params.cDef
+    delete params.cPmDef
+    
+    params[sweepKey] = val
 
     const r = calcDamage(params)
     if (sweepKey === 'defBonus' || sweepKey === 'pmDefBonus') {
@@ -131,22 +137,13 @@ export function buildDynamicHeatmapData({ xKey, yKey, zKey = 'dmgRatePct', xMin,
       
       const params = { ...baseParams }
       
-      const applyKey = (k, v) => {
-        if (k === 'atkLevel') {
-          const coeff = getCoeffByLevel(Math.round(v))
-          params.cPen = coeff.cPen
-          params.cPmPen = coeff.cPmPen
-        } else if (k === 'defLevel') {
-          const coeff = getCoeffByLevel(Math.round(v))
-          params.cDef = coeff.cDef
-          params.cPmDef = params.damageType === 'mag' ? coeff.cMdef : coeff.cPdef
-        } else {
-          params[k] = v
-        }
-      }
+      delete params.cPen
+      delete params.cPmPen
+      delete params.cDef
+      delete params.cPmDef
       
-      applyKey(xKey, xVal)
-      applyKey(yKey, yVal)
+      params[xKey] = xVal
+      params[yKey] = yVal
 
       const result = calcDamage(params)
       data.push([i, j, result[zKey]])
@@ -173,22 +170,13 @@ export function buildCrossTable(xVals, yVals, xKey, yKey, baseParams) {
     for (const x of xVals) {
       const params = { ...baseParams }
       
-      const applyKey = (k, v) => {
-        if (k === 'atkLevel') {
-          const coeff = getCoeffByLevel(Math.round(v))
-          params.cPen = coeff.cPen
-          params.cPmPen = coeff.cPmPen
-        } else if (k === 'defLevel') {
-          const coeff = getCoeffByLevel(Math.round(v))
-          params.cDef = coeff.cDef
-          params.cPmDef = params.damageType === 'mag' ? coeff.cMdef : coeff.cPdef
-        } else {
-          params[k] = v
-        }
-      }
+      delete params.cPen
+      delete params.cPmPen
+      delete params.cDef
+      delete params.cPmDef
       
-      applyKey(xKey, x)
-      applyKey(yKey, y)
+      params[xKey] = x
+      params[yKey] = y
 
       row.cols.push(calcDamage(params))
     }

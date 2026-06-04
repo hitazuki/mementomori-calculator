@@ -324,14 +324,13 @@ const results = computed(() => {
       pmDef: bench.pmDef,
       pen: build.pen, 
       pmPen: build.pmPen,
-      cDef: store.cDef, 
-      cPen: store.cPen,
-      cPmDef: store.cPmDef, 
-      cPmPen: store.cPmPen,
       atkBonus: build.atkBonus || 0,
       dmgBonus: build.dmgBonus, 
       defBonus: build.defBonus || 0, 
       pmDefBonus: build.pmDefBonus || 0,
+      damageType: store.damageType,
+      atkLevel: store.atkLevel,
+      defLevel: store.defLevel,
     }))
   }))
 })

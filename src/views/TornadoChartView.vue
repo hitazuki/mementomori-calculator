@@ -231,11 +231,22 @@ function setDamageType(type) {
   }
 }
 
-const baseResult = computed(() => calcDamage({ ...store.$state, eleAdvantage: false }))
+const baseResult = computed(() => {
+  const p = { ...store.$state, eleAdvantage: false }
+  delete p.cPen
+  delete p.cPmPen
+  delete p.cDef
+  delete p.cPmDef
+  return calcDamage(p)
+})
 
 // --- Tornado Chart Logic ---
 const tornadoResults = computed(() => {
   const baseParams = { ...store.$state, eleAdvantage: false }
+  delete baseParams.cPen
+  delete baseParams.cPmPen
+  delete baseParams.cDef
+  delete baseParams.cPmDef
   const bd = baseResult.value.finalDmg
   if (bd <= 0) return []
 
@@ -271,6 +282,10 @@ const waterfallData = computed(() => {
     pmDefBonus: store.pmDefBonus + deltas.pmDefBonus,
     eleAdvantage: false // 无UI控制，固定为false
   }
+  delete params.cPen
+  delete params.cPmPen
+  delete params.cDef
+  delete params.cPmDef
   const res = calcDamage(params)
   
   const rawDmg = Math.round(params.baseAtk * params.skillCoeff)

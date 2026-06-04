@@ -181,10 +181,14 @@ const getMetrics = () => ({
   pmMitRate:  { label: t('pmMitRate'), fmt: v => `${v.toFixed(2)}%` },
 })
 
-const getBaseParams = () => ({
-  ...store.$state,
-  eleAdvantage: false // 无UI控制，固定为false
-})
+const getBaseParams = () => {
+  const p = { ...store.$state, eleAdvantage: false }
+  delete p.cPen
+  delete p.cPmPen
+  delete p.cDef
+  delete p.cPmDef
+  return p
+}
 
 const ts = reactive({
   xKey: 'def',
@@ -214,27 +218,15 @@ function onYKeyChange() {
 }
 
 function onBuildAtkLevelChange(build) {
-  const c = getCoeffByLevel(Math.round(build.params.atkLevel))
-  if (c) { 
-    build.params.cPen = c.cPen
-    build.params.cPmPen = c.cPmPen 
-  }
+  // Calculated internally
 }
 
 function onBuildDefLevelChange(build) {
-  const c = getCoeffByLevel(Math.round(build.params.defLevel))
-  if (c) { 
-    build.params.cDef = c.cDef
-    build.params.cPmDef = build.params.damageType === 'mag' ? c.cMdef : c.cPdef 
-  }
+  // Calculated internally
 }
 
 function setBuildDamageType(build, type) {
   build.params.damageType = type
-  const c = getCoeffByLevel(Math.round(build.params.defLevel))
-  if (c) {
-    build.params.cPmDef = type === 'mag' ? c.cMdef : c.cPdef
-  }
 }
 
 function addBuild() {

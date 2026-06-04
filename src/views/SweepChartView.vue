@@ -150,11 +150,17 @@ const getMetrics = () => ({
 })
 
 // Local reactive state initialized from Pinia store
+const initialBaseParams = { ...store.$state }
+delete initialBaseParams.cPen
+delete initialBaseParams.cPmPen
+delete initialBaseParams.cDef
+delete initialBaseParams.cPmDef
+
 const ss = reactive({
   sweepKey: 'pen',
   metric: 'dmgRatePct',
   min: 0, max: 20000, steps: 21,
-  baseParams: { ...store.$state },
+  baseParams: initialBaseParams,
   atkLevel: store.atkLevel,
   defLevel: store.defLevel,
 })
@@ -170,39 +176,20 @@ function onSweepKeyChange() {
 }
 
 function setDamageType(type) {
-  const custom = isDefCustom.value
   ss.baseParams.damageType = type
-  const p = getCoeffByLevel(ss.defLevel)
-  if (p && !custom) {
-    ss.baseParams.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
-  }
 }
 
 function onAtkLevelChange() {
-  const p = getCoeffByLevel(ss.atkLevel)
-  if (p) {
-    ss.baseParams.cPen = p.cPen
-    ss.baseParams.cPmPen = p.cPmPen
-  }
+  ss.baseParams.atkLevel = ss.atkLevel
 }
 
 function onDefLevelChange() {
-  const p = getCoeffByLevel(ss.defLevel)
-  if (p) {
-    ss.baseParams.cDef = p.cDef
-    ss.baseParams.cPmDef = ss.baseParams.damageType === 'mag' ? p.cMdef : p.cPdef
-  }
+  ss.baseParams.defLevel = ss.defLevel
 }
 
-const isAtkCustom = computed(() => {
-  const pA = getCoeffByLevel(ss.atkLevel)
-  return ss.baseParams.cPen !== pA.cPen || ss.baseParams.cPmPen !== pA.cPmPen
-})
+const isAtkCustom = computed(() => false)
 
-const isDefCustom = computed(() => {
-  const pD = getCoeffByLevel(ss.defLevel)
-  return ss.baseParams.cDef !== pD.cDef || ss.baseParams.cPmDef !== (ss.baseParams.damageType === 'mag' ? pD.cMdef : pD.cPdef)
-})
+const isDefCustom = computed(() => false)
 
 const chartOption = computed(() => {
   const { xData, yData } = buildSweepData(ss)
