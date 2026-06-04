@@ -142,6 +142,8 @@ export default {
   exportCommaSeparated: "(쉼표로 구분)",
   exportBuildsConfig: "⚙ 빌드 설정",
   exportResetDefault: "기본값으로 초기화",
+  exportTableTitle: "표 제목",
+  defaultTableTitle: "{y} × {x} 대비 표",
 
   // Presets & Levels
   atkLevel: "공격자 레벨",

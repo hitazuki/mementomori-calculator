@@ -142,6 +142,8 @@ export default {
   exportCommaSeparated: "(カンマ区切り)",
   exportBuildsConfig: "⚙ ビルド設定",
   exportResetDefault: "デフォルトに戻す",
+  exportTableTitle: "表のタイトル",
+  defaultTableTitle: "{y} × {x} 対比テーブル",
 
   // Presets & Levels
   atkLevel: "攻撃側レベル",

@@ -33,6 +33,17 @@
           <label class="form-label">{{ $t('exportYValues') || 'Y Values' }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') || '(comma separated)' }}</span></label>
           <textarea class="form-input" v-model="ts.yValsStr" rows="2" style="resize:vertical"></textarea>
         </div>
+
+        <div class="divider"></div>
+
+        <div class="form-group">
+          <label class="form-label">{{ $t('exportTableTitle') }}</label>
+          <input 
+            class="form-input" 
+            v-model="displayTitle" 
+            :placeholder="defaultTitle"
+          >
+        </div>
       </div>
 
       <!-- Builds Configuration -->
@@ -124,9 +135,15 @@
     <div class="flex-col gap-12" style="min-width:0">
       <div class="card" style="overflow:hidden; display:flex; flex-direction:column;">
         <div class="flex justify-between items-center mb-12" style="flex-wrap:wrap; gap:12px;">
-          <div style="display:flex;align-items:center;gap:12px">
-            <span style="font-size: 16px;font-weight:600;color:var(--gold)">📊 {{ $t('tableTitle') }}</span>
-            <select class="form-select" v-model="ts.metric" style="width:140px;padding:4px 8px;font-size: 14px;min-height:28px">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:240px;">
+            <span style="font-size: 18px;">📊</span>
+            <input 
+              class="table-title-input" 
+              v-model="displayTitle" 
+              :placeholder="defaultTitle"
+              title="点击修改表格标题"
+            />
+            <select class="form-select" v-model="ts.metric" style="width:140px;padding:4px 8px;font-size: 14px;min-height:28px;margin-left:4px;">
               <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
             </select>
           </div>
@@ -227,10 +244,31 @@ const ts = reactive({
     }
   ],
   metric: 'dmgRatePct',
+  customTitle: '',
+  isTitleTouched: false,
 })
 
 const xLabel = computed(() => TABLE_VARIABLES.value.find(v => v.key === ts.xKey)?.label || ts.xKey)
 const yLabel = computed(() => TABLE_VARIABLES.value.find(v => v.key === ts.yKey)?.label || ts.yKey)
+
+const defaultTitle = computed(() => {
+  return t('defaultTableTitle', { y: yLabel.value, x: xLabel.value })
+})
+
+const displayTitle = computed({
+  get() {
+    return (ts.isTitleTouched && ts.customTitle.trim()) ? ts.customTitle : defaultTitle.value
+  },
+  set(val) {
+    if (!val || !val.trim()) {
+      ts.customTitle = ''
+      ts.isTitleTouched = false
+    } else {
+      ts.customTitle = val
+      ts.isTitleTouched = true
+    }
+  }
+})
 
 function onXKeyChange() {
   const preset = TABLE_VARIABLES.value.find(v => v.key === ts.xKey)
@@ -269,6 +307,8 @@ function removeBuild(idx) {
 }
 
 function resetDefault() {
+  ts.customTitle = ''
+  ts.isTitleTouched = false
   ts.builds = [
     {
       id: Date.now(),
@@ -355,7 +395,7 @@ function copyMarkdown() {
   if (!data) return
   const METRICS = getMetrics()
   
-  let md = ''
+  let md = `# ${displayTitle.value}\n\n`
   data.allTables.forEach(tData => {
     md += `### ${tData.isDiff ? tData.name : tData.build.name}\n`
     md += `| ${yLabel.value} ↓ \\ ${xLabel.value} → | ` + data.xVals.join(' | ') + ' |\n'
@@ -376,7 +416,7 @@ function downloadCsv() {
   const data = tableData.value
   if (!data) return
   
-  let csv = ''
+  let csv = `"${displayTitle.value}"\n\n`
   data.allTables.forEach(tData => {
     csv += `${tData.isDiff ? tData.name : tData.build.name}\n`
     csv += `${yLabel.value} \\ ${xLabel.value},` + data.xVals.join(',') + '\n'
@@ -389,7 +429,8 @@ function downloadCsv() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `mmt_export_${ts.xKey}_${ts.yKey}.csv`
+  const safeFilename = displayTitle.value.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_')
+  a.download = `${safeFilename}.csv`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -401,5 +442,25 @@ function downloadCsv() {
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+}
+.table-title-input {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 1px dashed rgba(212, 175, 55, 0.2);
+  padding: 2px 4px;
+  width: 100%;
+  max-width: 320px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.table-title-input:hover {
+  border-bottom: 1px dashed var(--gold);
+}
+.table-title-input:focus {
+  border-bottom: 1px solid var(--gold);
+  background: rgba(255, 255, 255, 0.03);
 }
 </style>

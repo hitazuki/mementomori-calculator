@@ -149,6 +149,8 @@ export default {
   exportCommaSeparated: "(comma separated)",
   exportBuildsConfig: "⚙ Builds Configuration",
   exportResetDefault: "Reset to Default",
+  exportTableTitle: "Table Title",
+  defaultTableTitle: "{y} × {x} Comparison Table",
 
   // Presets & Levels
   atkLevel: "Attacker Level",

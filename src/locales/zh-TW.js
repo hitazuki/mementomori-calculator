@@ -140,6 +140,8 @@ export default {
   exportCommaSeparated: "(逗號分隔)",
   exportBuildsConfig: "⚙ 方案設定",
   exportResetDefault: "恢復預設",
+  exportTableTitle: "表格標題",
+  defaultTableTitle: "{y} × {x} 對比拉表",
 
   // Presets & Levels
   atkLevel: "攻擊方等級",
