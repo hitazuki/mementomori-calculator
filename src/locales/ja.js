@@ -8,7 +8,7 @@ export default {
 
   // Navigation
   navCalc: "単体計算",
-  navSweep: "単一変数スキャン",
+  navSweep: "単一変数曲線スキャン",
   navHeatmap: "2変数ヒートマップ",
   navCompare: "構成比較",
   navTable: "テーブル出力",
@@ -40,12 +40,12 @@ export default {
   formulaModalRdefDesc: "防御路通過率 / 物魔路通過率",
   formulaModalRtotalDesc: "総合ダメージ通過率",
 
-  sweepTitle: "📈 単一変数スキャン",
+  sweepTitle: "📈 単一変数曲線スキャン",
   sweepDesc:
     "単一変数の変化範囲を指定し、対応する収益曲線をスキャンして生成します（最終ダメージ、軽減率などの指標切替をサポート）。",
   heatmapTitle: "🔥 2変数ヒートマップ",
   heatmapDesc:
-    "様々な防御力と貫通の交点における総合ダメージ軽減率を可視化し、最適な貫通の閾値を見つけます。",
+    "X軸とY軸の変数を自由に指定し、異なるステータス交点における通過率、最終ダメージ、または軽減率を2Dヒートマップで可視化。",
   compareTitle: "⚖ 構成比較",
   compareDesc:
     "「高攻撃力・低貫通」vs「低攻撃力・高貫通」などの複数のステータス構成を作成し、ダメージや通過率を比較。",

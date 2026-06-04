@@ -8,7 +8,7 @@ export default {
 
   // Navigation
   navCalc: "단일 계산",
-  navSweep: "단일 변수 스캔",
+  navSweep: "단일 변수 곡선 스캔",
   navHeatmap: "이변수 히트맵",
   navCompare: "빌드 비교",
   navTable: "표 출력",
@@ -40,12 +40,12 @@ export default {
   formulaModalRdefDesc: "방어 경로 통과율 / 물/마방 경로 통과율",
   formulaModalRtotalDesc: "종합 데미지 통과율",
 
-  sweepTitle: "📈 단일 변수 스캔",
+  sweepTitle: "📈 단일 변수 곡선 스캔",
   sweepDesc:
     "단일 변수의 변화 범위를 지정하여 수익 곡선을 스캔하고 생성합니다 (최종 데미지, 경감률 등의 지표 전환 지원).",
   heatmapTitle: "🔥 이변수 히트맵",
   heatmapDesc:
-    "다양한 방어력과 관통의 교차점에서 종합 대미지 감소율을 시각화하여 최적의 관통 임계값을 찾습니다.",
+    "X축과 Y축의 변수를 자유롭게 지정하여 다양한 스탯 교차점에서의 통과율, 최종 데미지 또는 경감률을 2D 히트맵으로 시각화합니다.",
   compareTitle: "⚖ 빌드 비교",
   compareDesc:
     '여러 스탯 빌드("고공격력 저관통" vs "저공격력 고관통")를 설정하고 최종 데미지 및 통과율을 비교합니다.',

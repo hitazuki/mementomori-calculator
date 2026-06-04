@@ -9,7 +9,7 @@ export default {
   // Navigation
   navGroupDamage: "📂 Damage Calc",
   navCalc: "Single Target",
-  navSweep: "Sweep Chart",
+  navSweep: "Single Variable Curve Sweep",
   navHeatmap: "Bi-variable Heatmap",
   navCompare: "Compare",
   navTable: "Data Table",
@@ -44,12 +44,12 @@ export default {
   formulaModalRdefDesc: "DEF Pass Rate / P/M.DEF Pass Rate",
   formulaModalRtotalDesc: "Overall Pass Rate",
 
-  sweepTitle: "📈 Single Variable Yield Sweep",
+  sweepTitle: "📈 Single Variable Curve Sweep",
   sweepDesc:
     "Scan a single variable across a range and plot the yield curve (supports evaluating Final Damage, Penetration Rate, etc.).",
   heatmapTitle: "🔥 Bi-variable Heatmap",
   heatmapDesc:
-    "Visualize overall damage reduction at various defense and penetration intersections to find the optimal penetration threshold.",
+    "Configure custom variables for X and Y axes to display visual intersections of pass rate, final damage, or damage reduction in a 2D heatmap.",
   compareTitle: "⚖ Compare Builds",
   compareDesc:
     'Configure multiple stats builds (e.g., "High ATK, Low PEN" vs "Low ATK, High PEN") and compare final damage or pass rate.',

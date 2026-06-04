@@ -2,13 +2,13 @@ export default {
   // Common
   appTitle: "MementoMori 各種計算機",
   appDesc:
-    "MementoMori 多維傷害計算與視覺化分析：穿透掃描、熱力圖、多方案對比、拉表匯出",
+    "MementoMori 多維傷害計算與視覺化分析：單變數曲線掃描、雙變數熱力圖、多方案對比、拉表匯出",
   appName: "MementoMori",
   appSub: "各種計算機",
 
   // Navigation
   navCalc: "單體計算",
-  navSweep: "單變量收益掃描",
+  navSweep: "單變數曲線掃描",
   navHeatmap: "雙變數熱力圖",
   navCompare: "方案對比",
   navTable: "拉表匯出",
@@ -38,12 +38,12 @@ export default {
   formulaModalRdefDesc: "防禦路傷害通過率 / 物魔路傷害通過率",
   formulaModalRtotalDesc: "綜合傷害通過率",
 
-  sweepTitle: "📈 單變數收益掃描",
+  sweepTitle: "📈 單變數曲線掃描",
   sweepDesc:
     "指定單一變量的變化範圍，掃描並生成相應的收益曲線（支持切換不同的評估指標，如最終傷害、減傷率等）。",
   heatmapTitle: "🔥 雙變數熱力圖",
   heatmapDesc:
-    "展示不同防禦力與不同防禦貫通交會點的綜合減傷率(綜合防禦通過率)，更直觀地找到最佳破防閾值。",
+    "自由設定橫縱軸的變數與範圍，以二維熱力圖展示不同數值交會點下的綜合穿透率、最終傷害或減傷率，直觀呈現屬性交互收益。",
   compareTitle: "⚖ 多方案對比",
   compareDesc:
     "配置多個不同的屬性方案（如「高攻低穿」vs「低攻高穿」），橫向對比最終傷害與通過率。",

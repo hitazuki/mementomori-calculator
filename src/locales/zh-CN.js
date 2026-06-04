@@ -2,13 +2,13 @@ export default {
   // Common
   appTitle: "MementoMori 各种计算器",
   appDesc:
-    "MementoMori 多维伤害计算与可视化分析：穿透扫描、热力图、多方案对比、拉表导出",
+    "MementoMori 多维伤害计算与可视化分析：单变量曲线扫描、双变量热力图、多方案对比、拉表导出",
   appName: "MementoMori",
   appSub: "各种计算器",
 
   // Navigation
   navCalc: "单体计算",
-  navSweep: "单变量收益扫描",
+  navSweep: "单变量曲线扫描",
   navHeatmap: "双变量热力图",
   navCompare: "方案对比",
   navTable: "拉表导出",
@@ -38,12 +38,12 @@ export default {
   formulaModalRdefDesc: "防御路伤害通过率 / 物魔路伤害通过率",
   formulaModalRtotalDesc: "综合伤害通过率",
 
-  sweepTitle: "📈 单变量收益扫描",
+  sweepTitle: "📈 单变量曲线扫描",
   sweepDesc:
     "指定单一变量的变化范围，扫描并生成相应的收益曲线（支持切换不同的评估指标，如最终伤害、减伤率等）。",
   heatmapTitle: "🔥 双变量热力图",
   heatmapDesc:
-    "展示不同防御力与不同防御贯通交会点的综合减伤率(综合防御通过率)，更直观地找到最优破防阈值。",
+    "自由设定横纵轴的变量与范围，以二维热力图展示不同数值交会点下的综合穿透率、最终伤害或减伤率，直观呈现属性交互收益。",
   compareTitle: "⚖ 多方案对比",
   compareDesc:
     "配置多个不同的属性方案（如「高攻低穿」vs「低攻高穿」），横向对比最终伤害与通过率。",
