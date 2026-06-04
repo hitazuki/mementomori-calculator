@@ -70,8 +70,8 @@ export default {
   baseAtk: "Base ATK",
   skillCoeff: "Skill Multiplier",
   atkType: "Attack Type",
-  typePhys: "Physical (P.DEF)",
-  typeMag: "Magical (M.DEF)",
+  typePhys: "Physical",
+  typeMag: "Magical",
   pen: "DEF Break",
   pmPen: "P/M.DEF Break",
   dmgBonus: "Damage Bonus",
@@ -230,5 +230,5 @@ export default {
   wfCatDefMit: "DEF Mitigated",
   wfCatPmDefMit: "PM.DEF Mitigated",
   wfCatFinal: "Actual Damage",
-  atkBonus: "ATK Bonus (%)",
+  atkBonus: "ATK Bonus",
 };

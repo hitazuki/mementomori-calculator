@@ -63,8 +63,8 @@ export default {
   baseAtk: "攻撃力 (ATK)",
   skillCoeff: "スキル倍率",
   atkType: "攻撃タイプ",
-  typePhys: "物理攻撃 (P.DEF)",
-  typeMag: "魔法攻撃 (M.DEF)",
+  typePhys: "物理攻撃",
+  typeMag: "魔法攻撃",
   pen: "防御貫通",
   pmPen: "物/魔防御貫通",
   dmgBonus: "ダメージ増加",
@@ -90,8 +90,8 @@ export default {
   pmMitRate: "物魔路軽減率",
   rawDmg: "スキル基礎ダメージ",
   totalMitRate: "総合防御軽減率",
-  effDef: "有効防御力 (防御路)",
-  effPmDef: "有効物/魔防御 (物魔路)",
+  effDef: "有効防御力",
+  effPmDef: "有効物/魔防御",
 
   // Breakdown
   dmgBreakdown: "📊 ダメージ内訳",
@@ -224,5 +224,5 @@ export default {
   wfCatDefMit: "防御による損失",
   wfCatPmDefMit: "物魔防による損失",
   wfCatFinal: "最終ダメージ",
-  atkBonus: "攻撃力ボーナス (%)",
+  atkBonus: "攻撃力ボーナス",
 };

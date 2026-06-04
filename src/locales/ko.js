@@ -63,8 +63,8 @@ export default {
   baseAtk: "공격력 (ATK)",
   skillCoeff: "스킬 계수",
   atkType: "공격 타입",
-  typePhys: "물리 공격 (P.DEF)",
-  typeMag: "마법 공격 (M.DEF)",
+  typePhys: "물리 공격",
+  typeMag: "마법 공격",
   pen: "방어 관통",
   pmPen: "물/마방 관통",
   dmgBonus: "데미지 증가",
@@ -224,5 +224,5 @@ export default {
   wfCatDefMit: "방어력 손실",
   wfCatPmDefMit: "물/마방 손실",
   wfCatFinal: "최종 데미지",
-  atkBonus: "공격력 보너스 (%)",
+  atkBonus: "공격력 보너스",
 };

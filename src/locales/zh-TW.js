@@ -61,8 +61,8 @@ export default {
   baseAtk: "面板攻擊力",
   skillCoeff: "技能倍率",
   atkType: "攻擊類型",
-  typePhys: "物理攻擊 (P.DEF)",
-  typeMag: "魔法攻擊 (M.DEF)",
+  typePhys: "物理攻擊",
+  typeMag: "魔法攻擊",
   pen: "防禦貫通",
   pmPen: "物魔防禦貫通",
   dmgBonus: "增傷加成",
@@ -88,8 +88,8 @@ export default {
   pmMitRate: "物魔路減傷率",
   rawDmg: "技能原始傷害",
   totalMitRate: "綜合防禦減傷率",
-  effDef: "有效防禦 (防禦路)",
-  effPmDef: "有效物魔防禦 (物魔路)",
+  effDef: "有效防禦",
+  effPmDef: "有效物魔防禦",
 
   // Breakdown
   dmgBreakdown: "📊 傷害拆解",
@@ -223,5 +223,5 @@ export default {
   wfCatDefMit: "目標防禦折損",
   wfCatPmDefMit: "物魔防折損",
   wfCatFinal: "最終落地傷害",
-  atkBonus: "攻擊力加成 (%)",
+  atkBonus: "攻擊力加成",
 };
