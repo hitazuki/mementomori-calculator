@@ -49,9 +49,9 @@ export default {
   compareTitle: "⚖ 빌드 비교",
   compareDesc:
     '여러 스탯 빌드("고공격력 저관통" vs "저공격력 고관통")를 설정하고 최종 데미지 및 통과율을 비교합니다.',
-  tableTitle: "📋 관통 데이터 표 출력",
+  tableTitle: "📋 크로스탭 데이터 표 출력",
   tableDesc:
-    "고정된 파라미터로 다양한 방어 관통 수치의 결과 표를 생성합니다. CSV 또는 HTML 표로 복사할 수 있습니다.",
+    "X축과 Y축의 변수와 범위를 자유롭게 지정하여 빌드 비교 표를 생성합니다. CSV 출력 또는 Excel 직접 붙여넣기를 지원합니다.",
 
   // Form Sections
   atkParams: "⚔ 공격자 스탯",

@@ -47,9 +47,9 @@ export default {
   compareTitle: "⚖ 多方案对比",
   compareDesc:
     "配置多个不同的属性方案（如「高攻低穿」vs「低攻高穿」），横向对比最终伤害与通过率。",
-  tableTitle: "📋 贯通收益拉表导出",
+  tableTitle: "📋 交叉数据拉表对比导出",
   tableDesc:
-    "设定固定参数，生成不同贯通值的详细收益表格。支持复制为CSV或直接复制表格粘贴到Excel。",
+    "自由设定横纵坐标轴变量，生成多方案交叉对比的详细收益数据表格。支持复制为 CSV 或直接粘贴至 Excel。",
 
   // Form Sections
   atkParams: "⚔ 攻击方参数",

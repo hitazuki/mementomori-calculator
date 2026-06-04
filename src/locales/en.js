@@ -53,9 +53,9 @@ export default {
   compareTitle: "⚖ Compare Builds",
   compareDesc:
     'Configure multiple stats builds (e.g., "High ATK, Low PEN" vs "Low ATK, High PEN") and compare final damage or pass rate.',
-  tableTitle: "📋 Data Table Export",
+  tableTitle: "📋 Cross-tab Data Export",
   tableDesc:
-    "Generate detailed tables for different penetration values. Supports CSV export or copying directly to Excel.",
+    "Configure custom variables for X and Y axes to generate multi-build comparison tables. Supports CSV export or copying directly to Excel.",
   mysteriumTitle: "🔮 Mysterium Cost-Efficiency",
   mysteriumDesc:
     "Evaluate the optimal limited character gacha plans for Mysterium collections using dynamic weights.",

@@ -49,9 +49,9 @@ export default {
   compareTitle: "⚖ 構成比較",
   compareDesc:
     "「高攻撃力・低貫通」vs「低攻撃力・高貫通」などの複数のステータス構成を作成し、ダメージや通過率を比較。",
-  tableTitle: "📋 貫通データ出力",
+  tableTitle: "📋 クロス集計データ出力",
   tableDesc:
-    "固定パラメータを設定し、異なる貫通値での詳細なダメージデータを生成。CSVまたはExcel用にコピー可能。",
+    "X軸とY軸の変数と範囲を自由に指定してカスタム比較テーブルを生成。CSV出力やExcelへの直接貼り付けに対応。",
 
   // Form Sections
   atkParams: "⚔ 攻撃側ステータス",
