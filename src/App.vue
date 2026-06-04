@@ -85,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLang } from './i18n/index.js'
 
@@ -98,12 +98,20 @@ import TornadoChartView from './views/TornadoChartView.vue'
 import TableExportView from './views/TableExportView.vue'
 import MysteriumPanelView from './views/MysteriumPanelView.vue'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const currentLanguage = ref(locale.value)
 
 const changeLanguage = () => {
   setLang(currentLanguage.value)
 }
+
+watchEffect(() => {
+  document.title = t('appTitle')
+  const metaDesc = document.querySelector('meta[name="description"]')
+  if (metaDesc) {
+    metaDesc.setAttribute('content', t('appDesc'))
+  }
+})
 
 import { currentTheme, toggleTheme } from './utils/themeStore.js'
 

@@ -1,5 +1,7 @@
 export default {
   // Common
+  appTitle: 'メメントモリ 各種計算機',
+  appDesc: 'メメントモリ 多次元ダメージ計算＆可視化：貫通スキャン、ヒートマップ、構成比較、テーブル出力',
   appName: 'メメントモリ',
   appSub: '各種計算機',
 

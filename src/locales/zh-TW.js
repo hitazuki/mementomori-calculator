@@ -1,5 +1,7 @@
 export default {
   // Common
+  appTitle: 'MementoMori 各種計算機',
+  appDesc: 'MementoMori 多維傷害計算與視覺化分析：穿透掃描、熱力圖、多方案對比、拉表匯出',
   appName: 'MementoMori',
   appSub: '各種計算機',
 

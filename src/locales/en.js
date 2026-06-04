@@ -1,5 +1,7 @@
 export default {
   // Common
+  appTitle: 'MementoMori Calculators',
+  appDesc: 'MementoMori Multidimensional Damage Calc & Visuals: PEN Scan, Heatmap, Compare, Export',
   appName: 'MementoMori',
   appSub: 'Calculators',
 
