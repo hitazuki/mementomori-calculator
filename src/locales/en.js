@@ -85,6 +85,7 @@ export default {
   targetDef: "Target DEF",
   targetPhysDef: "Target P.DEF",
   targetMagDef: "Target M.DEF",
+  targetPmDef: "Target P/M.DEF",
   defBonus: "DEF Bonus",
   pmDefBonus: "P.DEF/M.DEF Bonus",
   cDefConst: "C_def",

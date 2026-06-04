@@ -55,6 +55,13 @@
             </div>
             
             <div class="grid-2" v-show="b._expanded" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,0.1)">
+              <div class="form-group">
+                <label class="form-label text-xs">{{ $t('atkType') }}</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="btn btn-sm" :class="b.params.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setBuildDamageType(b, 'phys')">{{ $t('typePhys') }}</button>
+                  <button class="btn btn-sm" :class="b.params.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setBuildDamageType(b, 'mag')">{{ $t('typeMag') }}</button>
+                </div>
+              </div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('baseAtk') }}</label>
                 <BigNumberInput class="form-input" v-model="b.params.baseAtk" /></div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('atkBonus') }}</label>
@@ -202,6 +209,14 @@ function onBuildDefLevelChange(build) {
   if (c) { 
     build.params.cDef = c.cDef
     build.params.cPmDef = build.params.damageType === 'mag' ? c.cMdef : c.cPdef 
+  }
+}
+
+function setBuildDamageType(build, type) {
+  build.params.damageType = type
+  const c = getCoeffByLevel(Math.round(build.params.defLevel))
+  if (c) {
+    build.params.cPmDef = type === 'mag' ? c.cMdef : c.cPdef
   }
 }
 

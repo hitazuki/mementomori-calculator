@@ -11,6 +11,13 @@
         <div class="card-title">{{ $t('baseState') }}</div>
         <div class="grid-2">
           <div class="form-group">
+            <label class="form-label">{{ $t('atkType') }}</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+              <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+            </div>
+          </div>
+          <div class="form-group">
             <label class="form-label">{{ $t('baseAtk') }}</label>
             <BigNumberInput class="form-input" v-model="store.baseAtk" />
           </div>
@@ -213,6 +220,14 @@ function onDefLevelChange() {
   if (p) {
     store.cDef = p.cDef
     store.cPmDef = store.damageType === 'mag' ? p.cMdef : p.cPdef
+  }
+}
+
+function setDamageType(type) {
+  store.damageType = type
+  const p = getCoeffByLevel(store.defLevel)
+  if (p) {
+    store.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
   }
 }
 

@@ -76,6 +76,7 @@ export default {
   targetDef: "目标防御力",
   targetPhysDef: "目标物理防御力",
   targetMagDef: "目标魔法防御力",
+  targetPmDef: "目标物魔防御力",
   defBonus: "防御加成",
   pmDefBonus: "物魔防御加成",
   cDefConst: "C_def 定数",

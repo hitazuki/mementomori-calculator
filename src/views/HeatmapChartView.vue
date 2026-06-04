@@ -76,6 +76,15 @@
 
       <div class="card">
         <div class="card-title">⚙ {{ $t('hmFixedParams') || 'Fixed Params' }}</div>
+        
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label text-xs">{{ $t('atkType') }}</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-sm" :class="hs.baseParams.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+            <button class="btn btn-sm" :class="hs.baseParams.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+          </div>
+        </div>
+
         <div class="form-group" v-for="v in fixedVariables" :key="v.key" style="margin-bottom:8px">
           <label class="form-label text-xs">
             {{ v.label }} 
@@ -98,6 +107,7 @@ import { TooltipComponent, GridComponent, VisualMapComponent, TitleComponent } f
 import VChart from 'vue-echarts'
 
 import { buildDynamicHeatmapData } from '../engine/damageCalc.js'
+import { getCoeffByLevel } from '../constants/levelTable.js'
 import { getMoriTheme, HEATMAP_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
@@ -111,7 +121,7 @@ const chartRef = ref(null)
 
 const availableVariables = computed(() => [
   { key: 'def',        label: t('targetDef'),     rangeMin: 0, rangeMax: 50_000_000, step: 100_000, defaultMin: 0, defaultMax: 20_000_000 },
-  { key: 'pmDef',      label: t('targetPhysDef') + '/' + t('targetMagDef'), rangeMin: 0, rangeMax: 50_000_000, step: 100_000, defaultMin: 0, defaultMax: 20_000_000 },
+  { key: 'pmDef',      label: hs.baseParams.damageType === 'phys' ? t('targetPhysDef') : t('targetMagDef'), rangeMin: 0, rangeMax: 50_000_000, step: 100_000, defaultMin: 0, defaultMax: 20_000_000 },
   { key: 'pen',        label: t('pen'),           rangeMin: 0, rangeMax: 150_000,    step: 1_000,   defaultMin: 0, defaultMax: 70_000 },
   { key: 'pmPen',      label: t('pmPen'),         rangeMin: 0, rangeMax: 150_000,    step: 1_000,   defaultMin: 0, defaultMax: 70_000 },
   { key: 'atkLevel',   label: t('atkLevel'),      rangeMin: 1, rangeMax: 999,        step: 1,       defaultMin: 200, defaultMax: 600 },
@@ -175,6 +185,14 @@ function onYKeyChange() {
   if (currentYVar.value) {
     hs.yMin = currentYVar.value.defaultMin
     hs.yMax = currentYVar.value.defaultMax
+  }
+}
+
+function setDamageType(type) {
+  hs.baseParams.damageType = type
+  const p = getCoeffByLevel(hs.baseParams.defLevel)
+  if (p) {
+    hs.baseParams.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
   }
 }
 

@@ -86,7 +86,7 @@
         </div>
         <div class="form-group" v-show="ss.sweepKey !== 'pmDef'">
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-            <span>{{ ss.baseParams.damageType==='phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</span>
+            <span>{{ ss.baseParams.damageType === 'phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</span>
             <BigNumberInput class="form-input" v-model="ss.baseParams.pmDef" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
           </label>
           <input class="form-range" type="range" v-model.number="ss.baseParams.pmDef" min="0" max="20000000" step="10000">
