@@ -8,86 +8,90 @@
     <div class="flex-col gap-12">
       <!-- Base Params (Shared from Store) -->
       <div class="card">
-        <div class="card-title">⚙️ {{ $t('basePanelStats') || '基础面板参数' }}</div>
-        <div class="grid-2">
-          <div class="form-group">
-            <label class="form-label">{{ $t('atkType') }}</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-              <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+        <details open style="outline: none;">
+          <summary class="card-title" style="cursor: pointer; user-select: none; outline: none; margin-bottom: 0;">
+            ⚙️ {{ $t('basePanelStats') || '基础面板参数' }}
+          </summary>
+          <div class="grid-2" style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border-subtle);">
+            <div class="form-group">
+              <label class="form-label">{{ $t('atkType') }}</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+                <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('baseAtk') }}</label>
+              <BigNumberInput class="form-input" v-model="store.baseAtk" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('skillCoeff') }}</label>
+              <input class="form-input" type="number" v-model.number="store.skillCoeff" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('critMult') }}</label>
+              <input class="form-input" type="number" v-model.number="store.critMult" min="1" step="0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('pen') }}</label>
+              <BigNumberInput class="form-input" v-model="store.pen" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('pmPen') }}</label>
+              <BigNumberInput class="form-input" v-model="store.pmPen" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('targetDef') }}</label>
+              <BigNumberInput class="form-input" v-model="store.def" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ store.damageType==='phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</label>
+              <BigNumberInput class="form-input" v-model="store.pmDef" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('atkLevel') }}</label>
+              <input class="form-input" type="number" v-model.number="store.atkLevel" @input="onAtkLevelChange" min="1" max="999">
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('defLevel') }}</label>
+              <input class="form-input" type="number" v-model.number="store.defLevel" @input="onDefLevelChange" min="1" max="999">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;justify-content:space-between">
+                <span>{{ $t('atkBonus') }}</span>
+                <span class="value-display">{{ +(store.atkBonus*100).toFixed(0) }}%</span>
+              </label>
+              <input class="form-range" type="range" v-model.number="store.atkBonus" min="-1" max="2.5" step="0.05">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;justify-content:space-between">
+                <span>{{ $t('dmgBonus') }}</span>
+                <span class="value-display">{{ +(store.dmgBonus*100).toFixed(0) }}%</span>
+              </label>
+              <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1" max="2" step="0.05">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;justify-content:space-between">
+                <span>{{ $t('defBonus') }}</span>
+                <span class="value-display">{{ +(store.defBonus*100).toFixed(0) }}%</span>
+              </label>
+              <input class="form-range" type="range" v-model.number="store.defBonus" min="-1" max="2.5" step="0.05">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;justify-content:space-between">
+                <span>{{ $t('pmDefBonus') }}</span>
+                <span class="value-display">{{ +(store.pmDefBonus*100).toFixed(0) }}%</span>
+              </label>
+              <input class="form-range" type="range" v-model.number="store.pmDefBonus" min="-1" max="2.5" step="0.05">
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;justify-content:flex-start;height:32px;padding-top:4px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;">
+                <input type="checkbox" v-model="store.eleAdvantage" style="width:16px;height:16px;">
+                <span class="form-label" style="margin:0;">{{ $t('eleAdvantage') }}</span>
+              </label>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('baseAtk') }}</label>
-            <BigNumberInput class="form-input" v-model="store.baseAtk" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('skillCoeff') }}</label>
-            <input class="form-input" type="number" v-model.number="store.skillCoeff" min="0" step="0.1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('critMult') }}</label>
-            <input class="form-input" type="number" v-model.number="store.critMult" min="1" step="0.1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('pen') }}</label>
-            <BigNumberInput class="form-input" v-model="store.pen" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('pmPen') }}</label>
-            <BigNumberInput class="form-input" v-model="store.pmPen" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('targetDef') }}</label>
-            <BigNumberInput class="form-input" v-model="store.def" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ store.damageType==='phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</label>
-            <BigNumberInput class="form-input" v-model="store.pmDef" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('atkLevel') }}</label>
-            <input class="form-input" type="number" v-model.number="store.atkLevel" @input="onAtkLevelChange" min="1" max="999">
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('defLevel') }}</label>
-            <input class="form-input" type="number" v-model.number="store.defLevel" @input="onDefLevelChange" min="1" max="999">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="display:flex;justify-content:space-between">
-              <span>{{ $t('atkBonus') }}</span>
-              <span class="value-display">{{ +(store.atkBonus*100).toFixed(0) }}%</span>
-            </label>
-            <input class="form-range" type="range" v-model.number="store.atkBonus" min="-1" max="2.5" step="0.05">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="display:flex;justify-content:space-between">
-              <span>{{ $t('dmgBonus') }}</span>
-              <span class="value-display">{{ +(store.dmgBonus*100).toFixed(0) }}%</span>
-            </label>
-            <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1" max="2" step="0.05">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="display:flex;justify-content:space-between">
-              <span>{{ $t('defBonus') }}</span>
-              <span class="value-display">{{ +(store.defBonus*100).toFixed(0) }}%</span>
-            </label>
-            <input class="form-range" type="range" v-model.number="store.defBonus" min="-1" max="2.5" step="0.05">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="display:flex;justify-content:space-between">
-              <span>{{ $t('pmDefBonus') }}</span>
-              <span class="value-display">{{ +(store.pmDefBonus*100).toFixed(0) }}%</span>
-            </label>
-            <input class="form-range" type="range" v-model.number="store.pmDefBonus" min="-1" max="2.5" step="0.05">
-          </div>
-          <div class="form-group" style="display:flex;align-items:center;justify-content:flex-start;height:32px;padding-top:4px;">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;">
-              <input type="checkbox" v-model="store.eleAdvantage" style="width:16px;height:16px;">
-              <span class="form-label" style="margin:0;">{{ $t('eleAdvantage') }}</span>
-            </label>
-          </div>
-        </div>
+        </details>
       </div>
 
       <!-- Delta Increments (Available for both charts) -->
