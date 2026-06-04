@@ -95,33 +95,72 @@ export function buildSweepData({ sweepKey, min, max, steps, baseParams }) {
     }
 
     const r = calcDamage(params)
-    xData.push(Math.round(val))
+    if (sweepKey === 'defBonus' || sweepKey === 'pmDefBonus') {
+      xData.push(+(val * 100).toFixed(1))
+    } else {
+      xData.push(Math.round(val))
+    }
     yData.push(r)
   }
   return { xData, yData }
 }
 
-/** 为热力图生成二维数据 */
-export function buildHeatmapData({ defMin, defMax, defSteps, penMin, penMax, penSteps, cDef, cPen }) {
+/** 为动态热力图生成二维数据 */
+export function buildDynamicHeatmapData({ xKey, yKey, zKey = 'dmgRatePct', xMin, xMax, xSteps, yMin, yMax, ySteps, baseParams }) {
   const xLabels = []
   const yLabels = []
   const data = []
 
-  const defStepSize = (defMax - defMin) / Math.max(1, defSteps - 1)
-  const penStepSize = (penMax - penMin) / Math.max(1, penSteps - 1)
+  const xStepSize = (xMax - xMin) / Math.max(1, xSteps - 1)
+  const yStepSize = (yMax - yMin) / Math.max(1, ySteps - 1)
 
-  for (let i = 0; i < defSteps; i++) xLabels.push(Math.round(defMin + defStepSize * i))
-  for (let j = 0; j < penSteps; j++) yLabels.push(Math.round(penMin + penStepSize * j))
+  const formatLabel = (key, val) => {
+    if (key === 'defBonus' || key === 'pmDefBonus') return +(val * 100).toFixed(1)
+    return Math.round(val)
+  }
 
-  for (let i = 0; i < defSteps; i++) {
-    for (let j = 0; j < penSteps; j++) {
-      const def = xLabels[i]
-      const pen = yLabels[j]
-      const dr = calcDamageRate(def, pen, cDef, cPen)
-      data.push([i, j, +(dr * 100).toFixed(1)])
+  for (let i = 0; i < xSteps; i++) xLabels.push(xMin + xStepSize * i)
+  for (let j = 0; j < ySteps; j++) yLabels.push(yMin + yStepSize * j)
+
+  for (let i = 0; i < xSteps; i++) {
+    for (let j = 0; j < ySteps; j++) {
+      const xVal = xLabels[i]
+      const yVal = yLabels[j]
+      
+      const params = { ...baseParams }
+      
+      const applyKey = (k, v) => {
+        if (k === 'atkLevel') {
+          const coeff = getCoeffByLevel(Math.round(v))
+          params.cPen = coeff.cPen
+          params.cPmPen = coeff.cPmPen
+        } else if (k === 'defLevel') {
+          const coeff = getCoeffByLevel(Math.round(v))
+          params.cDef = coeff.cDef
+          params.cPmDef = params.damageType === 'mag' ? coeff.cMdef : coeff.cPdef
+        } else {
+          params[k] = v
+        }
+      }
+      
+      applyKey(xKey, xVal)
+      applyKey(yKey, yVal)
+
+      const result = calcDamage(params)
+      data.push([i, j, result[zKey]])
     }
   }
-  return { data, xLabels, yLabels }
+
+  let zMin = Infinity, zMax = -Infinity
+  for (let i = 0; i < data.length; i++) {
+    if (data[i][2] < zMin) zMin = data[i][2]
+    if (data[i][2] > zMax) zMax = data[i][2]
+  }
+
+  const formattedXLabels = xLabels.map(v => formatLabel(xKey, v))
+  const formattedYLabels = yLabels.map(v => formatLabel(yKey, v))
+
+  return { data, xLabels: formattedXLabels, yLabels: formattedYLabels, zMin, zMax }
 }
 
 /** 生成交叉对比表 */

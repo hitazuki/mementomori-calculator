@@ -8,7 +8,7 @@ export default {
   // Navigation
   navCalc: '単体計算',
   navSweep: '単一変数スキャン',
-  navHeatmap: 'DEF×PENヒートマップ',
+  navHeatmap: '2変数ヒートマップ',
   navCompare: '構成比較',
   navTable: 'テーブル出力',
 
@@ -39,7 +39,7 @@ export default {
   
   sweepTitle: '📈 単一変数スキャン',
   sweepDesc: '単一変数の変化範囲を指定し、対応する収益曲線をスキャンして生成します（最終ダメージ、軽減率などの指標切替をサポート）。',
-  heatmapTitle: '🔥 DEF × PEN ヒートマップ',
+  heatmapTitle: '🔥 2変数ヒートマップ',
   heatmapDesc: '様々な防御力と貫通の交点における総合ダメージ軽減率を可視化し、最適な貫通の閾値を見つけます。',
   hmCalcMode: '計算モード',
   compareTitle: '⚖ 構成比較',
@@ -123,6 +123,10 @@ export default {
   penStep: '貫通ステップ',
   genHeatmap: 'ヒートマップ生成',
   heatmapLoading: '計算中...',
+  hmAxisConfig: '軸の設定',
+  xAxisConfig: 'X軸の変数',
+  yAxisConfig: 'Y軸の変数',
+  hmFixedParams: '固定パラメータ（グローバル定数）',
   xAxisPen: '防御貫通 (PEN)',
   yAxisDef: '目標防御力 (DEF)',
 

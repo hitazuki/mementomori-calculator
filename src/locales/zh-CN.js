@@ -8,7 +8,7 @@ export default {
   // Navigation
   navCalc: '单体计算',
   navSweep: '单变量收益扫描',
-  navHeatmap: 'DEF×PEN热力图',
+  navHeatmap: '双变量热力图',
   navCompare: '方案对比',
   navTable: '拉表导出',
 
@@ -46,7 +46,7 @@ export default {
 
   sweepTitle: '📈 单变量收益扫描',
   sweepDesc: '指定单一变量的变化范围，扫描并生成相应的收益曲线（支持切换不同的评估指标，如最终伤害、减伤率等）。',
-  heatmapTitle: '🔥 DEF × PEN 热力图',
+  heatmapTitle: '🔥 双变量热力图',
   heatmapDesc: '展示不同防御力与不同防御贯通交会点的综合减伤率(综合防御通过率)，更直观地找到最优破防阈值。',
   hmCalcMode: '计算路线',
   compareTitle: '⚖ 多方案对比',
@@ -130,6 +130,10 @@ export default {
   penStep: '贯通步长',
   genHeatmap: '生成热力图',
   heatmapLoading: '计算中...',
+  hmAxisConfig: '坐标轴配置',
+  xAxisConfig: 'X轴变量',
+  yAxisConfig: 'Y轴变量',
+  hmFixedParams: '固定参数 (全局常量)',
   xAxisPen: '防御贯通 (PEN)',
   yAxisDef: '目标防御 (DEF)',
 

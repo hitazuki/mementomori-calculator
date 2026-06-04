@@ -8,7 +8,7 @@ export default {
   // Navigation
   navCalc: '단일 계산',
   navSweep: '단일 변수 스캔',
-  navHeatmap: 'DEF×PEN 히트맵',
+  navHeatmap: '이변수 히트맵',
   navCompare: '빌드 비교',
   navTable: '표 출력',
 
@@ -39,7 +39,7 @@ export default {
   
   sweepTitle: '📈 단일 변수 스캔',
   sweepDesc: '단일 변수의 변화 범위를 지정하여 수익 곡선을 스캔하고 생성합니다 (최종 데미지, 경감률 등의 지표 전환 지원).',
-  heatmapTitle: '🔥 DEF × PEN 히트맵',
+  heatmapTitle: '🔥 이변수 히트맵',
   heatmapDesc: '다양한 방어력과 관통의 교차점에서 종합 대미지 감소율을 시각화하여 최적의 관통 임계값을 찾습니다.',
   hmCalcMode: '계산 모드',
   compareTitle: '⚖ 빌드 비교',
@@ -123,6 +123,10 @@ export default {
   penStep: '관통 간격',
   genHeatmap: '히트맵 생성',
   heatmapLoading: '계산 중...',
+  hmAxisConfig: '축 설정',
+  xAxisConfig: 'X축 변수',
+  yAxisConfig: 'Y축 변수',
+  hmFixedParams: '고정 매개변수 (전역 상수)',
   xAxisPen: '방어 관통 (PEN)',
   yAxisDef: '대상 방어력 (DEF)',
 

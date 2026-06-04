@@ -9,7 +9,7 @@ export default {
   navGroupDamage: '📂 Damage Calc',
   navCalc: 'Single Target',
   navSweep: 'Sweep Chart',
-  navHeatmap: 'Heatmap',
+  navHeatmap: 'Bi-variable Heatmap',
   navCompare: 'Compare',
   navTable: 'Data Table',
 
@@ -43,7 +43,7 @@ export default {
   
   sweepTitle: '📈 Single Variable Yield Sweep',
   sweepDesc: 'Scan a single variable across a range and plot the yield curve (supports evaluating Final Damage, Penetration Rate, etc.).',
-  heatmapTitle: '🔥 DEF × PEN Heatmap',
+  heatmapTitle: '🔥 Bi-variable Heatmap',
   heatmapDesc: 'Visualize overall damage reduction at various defense and penetration intersections to find the optimal penetration threshold.',
   hmCalcMode: 'Calculation Mode',
   compareTitle: '⚖ Compare Builds',
@@ -129,6 +129,10 @@ export default {
   penStep: 'PEN Step',
   genHeatmap: 'Generate Heatmap',
   heatmapLoading: 'Calculating...',
+  hmAxisConfig: 'Axis Configuration',
+  xAxisConfig: 'X-Axis Variable',
+  yAxisConfig: 'Y-Axis Variable',
+  hmFixedParams: 'Fixed Parameters (Global Constants)',
   xAxisPen: 'DEF Break (PEN)',
   yAxisDef: 'Target DEF',
 

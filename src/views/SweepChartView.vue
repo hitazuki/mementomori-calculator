@@ -28,16 +28,16 @@
         <div class="form-group">
           <label class="form-label">
             <span>{{ $t('minVar', {var: currentSweepVarLabel}) }}</span> 
-            <span class="value-display">{{ fmt(ss.min) }}</span>
+            <span class="value-display">{{ fmt(ss.min, currentSweepVar.value?.isBonus) }}</span>
           </label>
-          <input class="form-input" type="number" v-model.number="ss.min">
+          <input class="form-input" type="number" v-model.number="ss.min" :step="currentSweepVar.value?.isBonus ? 0.05 : 100">
         </div>
         <div class="form-group">
           <label class="form-label">
             <span>{{ $t('maxVar', {var: currentSweepVarLabel}) }}</span> 
-            <span class="value-display">{{ fmt(ss.max) }}</span>
+            <span class="value-display">{{ fmt(ss.max, currentSweepVar.value?.isBonus) }}</span>
           </label>
-          <input class="form-input" type="number" v-model.number="ss.max">
+          <input class="form-input" type="number" v-model.number="ss.max" :step="currentSweepVar.value?.isBonus ? 0.05 : 100">
         </div>
         <div class="form-group">
           <label class="form-label">{{ $t('stepSpan') }} <span class="value-display">{{ ss.steps }}</span></label>
@@ -127,8 +127,12 @@ const store = useCalcStore()
 
 const chartRef = ref(null)
 const SWEEP_VARIABLES = computed(() => getSweepVariables(t))
+const currentSweepVar = computed(() => SWEEP_VARIABLES.value.find(v=>v.key===ss.sweepKey))
 
-const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
+const fmt = (v, isBonus) => {
+  if (isBonus) return +(v * 100).toFixed(1) + '%'
+  return v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
+}
 
 const getMetrics = () => ({
   dmgRatePct: { label: t('overallPenRate'), fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
@@ -208,14 +212,14 @@ const chartOption = computed(() => {
       ...MORI_THEME.tooltip, 
       trigger: 'axis', 
       formatter: p => {
-        let s = `<b style="color:var(--gold)">${varLabel}: ${fmt(p[0].axisValue)}</b><br>`
+        let s = `<b style="color:var(--gold)">${varLabel}: ${currentSweepVar.value?.isBonus ? p[0].axisValue : fmt(p[0].axisValue)}</b><br>`
         p.forEach(pp => s += `<span style="color:${pp.color}">● ${pp.seriesName}</span>: <b>${metric.fmt(pp.value)}</b><br>`)
         return s
       }
     },
     xAxis: { 
       type: 'category', 
-      data: xData.map(v=>fmt(v)), 
+      data: xData.map(v=>currentSweepVar.value?.isBonus ? v + '%' : fmt(v)), 
       axisLabel: MORI_THEME.axisLabel, 
       axisLine: MORI_THEME.axisLine, 
       splitLine:{show:true,lineStyle:{color:isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}} 
