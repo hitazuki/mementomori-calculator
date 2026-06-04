@@ -17,9 +17,9 @@
     <div class="flex-col gap-12" style="overflow-y:auto; padding-bottom: 24px;">
       <div class="card">
         <div class="card-title">🛤 {{ $t('hmCalcMode') }}</div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-sm" :class="hs.mode==='phys'?'btn-primary':'btn-ghost'" @click="setMode('phys')">DEF</button>
-          <button class="btn btn-sm" :class="hs.mode==='mag' ?'btn-primary':'btn-ghost'" @click="setMode('mag')">P.DEF / M.DEF</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm" :class="hs.mode==='phys'?'btn-primary':'btn-ghost'" style="flex:1" @click="setMode('phys')">DEF</button>
+          <button class="btn btn-sm" :class="hs.mode==='mag' ?'btn-primary':'btn-ghost'" style="flex:1" @click="setMode('mag')">P.DEF / M.DEF</button>
         </div>
       </div>
 

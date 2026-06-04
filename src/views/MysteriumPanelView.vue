@@ -40,7 +40,7 @@
           <button class="btn btn-sm" :class="mainTab === 'chars' ? 'btn-primary' : 'btn-ghost'" @click="mainTab = 'chars'">{{ $t('ui_tab_chars') }}</button>
         </div>
         <div v-show="mainTab === 'chars'" style="display: flex; flex-direction: column; gap: 8px; padding-top: 12px; padding-bottom: 12px;">
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button class="btn btn-sm" :class="algo === 1 ? 'btn-primary' : 'btn-ghost'" @click="algo = 1">{{ $t('ui_algo1') }}</button>
             <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" @click="algo = 2">{{ $t('ui_algo2') }}</button>
             <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" @click="algo = 3">{{ $t('ui_algo3') }}</button>
