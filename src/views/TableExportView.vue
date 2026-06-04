@@ -54,31 +54,47 @@
               </div>
             </div>
             
-            <div class="grid-2" v-show="b._expanded" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,0.1)">
-              <div class="form-group">
-                <label class="form-label text-xs">{{ $t('atkType') }}</label>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                  <button class="btn btn-sm" :class="b.params.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setBuildDamageType(b, 'phys')">{{ $t('typePhys') }}</button>
-                  <button class="btn btn-sm" :class="b.params.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setBuildDamageType(b, 'mag')">{{ $t('typeMag') }}</button>
+            <div v-show="b._expanded" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:8px;">
+              <!-- 攻击类型 + 面板攻击力 -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;">
+                <div class="form-group">
+                  <label class="form-label text-xs">{{ $t('atkType') }}</label>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-sm" :class="b.params.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1;font-size:11px;padding:5px 2px;" @click="setBuildDamageType(b, 'phys')">{{ $t('typePhys') }}</button>
+                    <button class="btn btn-sm" :class="b.params.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1;font-size:11px;padding:5px 2px;" @click="setBuildDamageType(b, 'mag')">{{ $t('typeMag') }}</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label text-xs">{{ $t('baseAtk') }}</label>
+                  <BigNumberInput class="form-input" v-model="b.params.baseAtk" />
                 </div>
               </div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('baseAtk') }}</label>
-                <BigNumberInput class="form-input" v-model="b.params.baseAtk" /></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('atkBonus') }}(%)</label>
-                <input class="form-input" type="number" :value="(b.params.atkBonus*100).toFixed(0)" @input="e => b.params.atkBonus = parseFloat(e.target.value)/100||0"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('dmgBonus') }}(%)</label>
-                <input class="form-input" type="number" :value="(b.params.dmgBonus*100).toFixed(0)" @input="e => b.params.dmgBonus = parseFloat(e.target.value)/100||0"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('targetDef') }}</label><BigNumberInput class="form-input" v-model="b.params.def" /></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('defBonus') }}(%)</label>
-                <input class="form-input" type="number" :value="(b.params.defBonus*100).toFixed(0)" @input="e => b.params.defBonus = parseFloat(e.target.value)/100||0"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('pmDefBonus') }}(%)</label>
-                <input class="form-input" type="number" :value="(b.params.pmDefBonus*100).toFixed(0)" @input="e => b.params.pmDefBonus = parseFloat(e.target.value)/100||0"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('pen') }}</label><BigNumberInput class="form-input" v-model="b.params.pen" /></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('pmPen') }}</label><BigNumberInput class="form-input" v-model="b.params.pmPen" /></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('atkLevel') }}</label>
-                <input class="form-input" type="number" v-model.number="b.params.atkLevel" @input="onBuildAtkLevelChange(b)"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('defLevel') }}</label>
-                <input class="form-input" type="number" v-model.number="b.params.defLevel" @input="onBuildDefLevelChange(b)"></div>
+              <!-- 等级 -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="form-group"><label class="form-label text-xs">{{ $t('atkLevel') }}</label>
+                  <input class="form-input" type="number" v-model.number="b.params.atkLevel" @input="onBuildAtkLevelChange(b)"></div>
+                <div class="form-group"><label class="form-label text-xs">{{ $t('defLevel') }}</label>
+                  <input class="form-input" type="number" v-model.number="b.params.defLevel" @input="onBuildDefLevelChange(b)"></div>
+              </div>
+              <!-- 贯通 -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="form-group"><label class="form-label text-xs">{{ $t('pen') }}</label><BigNumberInput class="form-input" v-model="b.params.pen" /></div>
+                <div class="form-group"><label class="form-label text-xs">{{ $t('pmPen') }}</label><BigNumberInput class="form-input" v-model="b.params.pmPen" /></div>
+              </div>
+              <!-- 加成 -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="form-group"><label class="form-label text-xs">{{ $t('atkBonus') }}(%)</label>
+                  <input class="form-input" type="number" :value="(b.params.atkBonus*100).toFixed(0)" @input="e => b.params.atkBonus = parseFloat(e.target.value)/100||0"></div>
+                <div class="form-group"><label class="form-label text-xs">{{ $t('dmgBonus') }}(%)</label>
+                  <input class="form-input" type="number" :value="(b.params.dmgBonus*100).toFixed(0)" @input="e => b.params.dmgBonus = parseFloat(e.target.value)/100||0"></div>
+              </div>
+              <!-- 防御 -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="form-group"><label class="form-label text-xs">{{ $t('defBonus') }}(%)</label>
+                  <input class="form-input" type="number" :value="(b.params.defBonus*100).toFixed(0)" @input="e => b.params.defBonus = parseFloat(e.target.value)/100||0"></div>
+                <div class="form-group"><label class="form-label text-xs">{{ $t('pmDefBonus') }}(%)</label>
+                  <input class="form-input" type="number" :value="(b.params.pmDefBonus*100).toFixed(0)" @input="e => b.params.pmDefBonus = parseFloat(e.target.value)/100||0"></div>
+              </div>
             </div>
           </div>
         </div>
