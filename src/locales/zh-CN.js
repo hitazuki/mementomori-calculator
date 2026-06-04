@@ -194,7 +194,7 @@ export default {
   ui_score: '总价值',
   ui_ce: '性价比',
   ui_marginal_ce: '边际CE',
-  ui_bottleneck: '前置短板',
+  ui_bottleneck: '前置方案',
   ui_algo1: '独立分摊法',
   ui_algo2: '成套绑定法',
   ui_algo3: '方案枚举法 (推荐)',

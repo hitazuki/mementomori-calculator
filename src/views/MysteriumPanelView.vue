@@ -9,19 +9,19 @@
     <div style="display: flex; flex-direction: column; max-height: calc(100vh - 120px);">
       <div class="panel" style="margin-bottom: 16px; background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.3);">
         <h3 class="panel-title" style="color: var(--gold);">{{ $t('ui_weight_title') }}</h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">
           {{ $t('ui_weight_desc') }}
         </p>
       </div>
       <div style="flex:1; overflow-y: auto; padding-right: 4px; padding-bottom: 32px;">
         <div v-for="(items, group) in groupedTemplate" :key="group" class="panel" style="margin-bottom: 12px; padding: 12px;">
-          <h3 class="panel-title" style="margin-bottom: 8px; font-size: 13px;">{{ $t(group) }}</h3>
+          <h3 class="panel-title" style="margin-bottom: 8px; font-size: 15px;">{{ $t(group) }}</h3>
           <div class="form-group" style="gap: 4px;">
-            <div v-for="item in items" :key="item.key + item.ctype" style="display: flex; align-items: center; justify-content: space-between; padding: 2px 0; font-size: 12px; gap: 8px;">
+            <div v-for="item in items" :key="item.key + item.ctype" style="display: flex; align-items: center; justify-content: space-between; padding: 2px 0; font-size: 14px; gap: 8px;">
               <div style="display: flex; gap: 6px; overflow: hidden; white-space: nowrap; flex: 1;">
                 <span style="overflow:hidden; text-overflow:ellipsis;" :title="(item.key === 'appLevelCap' ? $t('appLevelCap') : $t(item.key)) + ' ' + getCtypeStr(item.ctype)">
                   {{ item.key === 'appLevelCap' ? $t('appLevelCap') : $t(item.key) }} 
-                  <span style="color:var(--text-muted); font-size: 11px;">{{ getCtypeStr(item.ctype) }}</span>
+                  <span style="color:var(--text-muted); font-size: 13px;">{{ getCtypeStr(item.ctype) }}</span>
                 </span>
                 <span style="color:var(--gold); flex-shrink: 0;">+{{ item.ctype === 2 ? item.baseVal*100+'%' : item.baseVal }}</span>
               </div>
@@ -45,7 +45,7 @@
             <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" @click="algo = 2">{{ $t('ui_algo2') }}</button>
             <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" @click="algo = 3">{{ $t('ui_algo3') }}</button>
           </div>
-          <div style="font-size: 12px; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border-left: 2px solid var(--gold); margin-top: 4px; line-height: 1.5;">
+          <div style="font-size: 14px; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border-left: 2px solid var(--gold); margin-top: 4px; line-height: 1.5;">
             {{ $t('ui_algo' + algo + '_desc') }}
           </div>
         </div>
@@ -61,13 +61,13 @@
               <th>{{ $t('ui_cost') }}</th>
               <th @click="toggleSort('score')" style="cursor:pointer; user-select:none;">
                 {{ $t('ui_score') }} 
-                <span v-if="collSortBy !== 'score'" style="opacity:0.3;font-size:10px;margin-left:4px;">↕</span>
-                <span v-else style="font-size:10px;color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
+                <span v-if="collSortBy !== 'score'" style="opacity:0.3;font-size: 12px;margin-left:4px;">↕</span>
+                <span v-else style="font-size: 12px;color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
               </th>
               <th @click="toggleSort('ce')" style="cursor:pointer; user-select:none;">
                 {{ $t('ui_ce') }} 
-                <span v-if="collSortBy !== 'ce'" style="opacity:0.3;font-size:10px;margin-left:4px;">↕</span>
-                <span v-else style="font-size:10px;color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
+                <span v-if="collSortBy !== 'ce'" style="opacity:0.3;font-size: 12px;margin-left:4px;">↕</span>
+                <span v-else style="font-size: 12px;color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
               </th>
             </tr>
             <tr v-else-if="algo === 1 || algo === 2">
@@ -75,7 +75,7 @@
               <th>{{ $t('ui_characters') }}</th>
               <th>{{ $t('ui_cost') }}</th>
               <th>{{ $t('ui_score') }}</th>
-              <th>{{ $t('ui_ce') }} <span style="font-size: 10px; color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
+              <th>{{ $t('ui_ce') }} <span style="font-size: 12px; color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
             </tr>
             <tr v-else-if="algo === 3">
               <th>{{ $t('ui_rank') }}</th>
@@ -84,7 +84,7 @@
               <th>{{ $t('ui_score') }}</th>
               <th>{{ $t('ui_ce') }}</th>
               <th>{{ $t('ui_marginal_ce') }}</th>
-              <th>{{ $t('ui_bottleneck') }} <span style="font-size: 10px; color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
+              <th>{{ $t('ui_bottleneck') }} <span style="font-size: 12px; color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
             </tr>
           </thead>
           <tbody>
@@ -92,10 +92,23 @@
               <tr style="cursor: pointer; transition: background 0.2s;" class="hover-row" @click="r._expanded = !r._expanded">
                 <td>{{ i + 1 }}</td>
                 <td style="color: var(--text-primary); font-weight: bold;">
-                  {{ mainTab === 'colls' ? $t(r.nameKey) : getCharNames(r) }}
+                  <template v-if="mainTab === 'colls'">
+                    {{ $t(r.nameKey) }}
+                  </template>
+                  <template v-else>
+                    <div class="char-list-inline">
+                      <div v-for="c in (r.chars || [r])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
+                        <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                      </div>
+                    </div>
+                  </template>
                 </td>
-                <td v-if="mainTab === 'colls'" style="font-size: 12px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" :title="getCharNames(r)">
-                  {{ getCharNames(r) }}
+                <td v-if="mainTab === 'colls'" style="max-width: 250px;">
+                  <div class="char-avatar-group">
+                    <div v-for="c in (r.chars || [])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
+                      <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                    </div>
+                  </div>
                 </td>
                 <td>{{ r.cost }}</td>
                 <td>{{ (r.totalScore ?? r.score ?? 0).toFixed(1) }}</td>
@@ -105,20 +118,41 @@
                 <template v-if="mainTab === 'chars' && algo === 3">
                   <td>{{ r.ce.toFixed(2) }}</td>
                   <td style="color:var(--success); font-weight:bold;">{{ r.marginalCe.toFixed(2) }}</td>
-                  <td style="font-size:11px; color:var(--text-muted)">{{ getBottleneckNames(r) }}</td>
+                  <td>
+                    <div v-if="r.bottleneck && r.bottleneck.length > 0" class="char-avatar-group">
+                      <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-sm char-avatar-bw" :title="getCharFullName(c)">
+                        <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                      </div>
+                    </div>
+                    <span v-else style="font-size: 13px; color:var(--text-muted)">-</span>
+                  </td>
                 </template>
               </tr>
               <tr v-show="r._expanded" style="background: rgba(0,0,0,0.2);">
                 <td :colspan="mainTab === 'colls' ? 6 : (algo === 3 ? 7 : 5)" style="padding: 16px; border-bottom: 1px solid var(--border-subtle);">
-                  <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">
+                  <div style="display: flex; flex-wrap: wrap; gap: 12px; text-align: left; align-items: stretch;">
+                    
+                      <!-- Team Characters -->
+                      <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; min-width: min-content;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1; align-content: flex-start; justify-content: center;">
+                          <div v-for="c in (r.chars || [r])" :key="c.id" class="char-card">
+                            <img :src="getCharIconUrl(c.id)" class="char-card-img" @error="handleImgError" />
+                            <div class="char-card-name" :title="getCharFullName(c)">
+                              <div class="char-base-name">{{ $t(c.nameKey) }}</div>
+                              <div v-if="c.name2Key" class="char-sub-name">{{ $t(c.name2Key) }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    <div style="flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-content: flex-start;">
                       
                       <!-- Level Cap Card -->
                       <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-                        <div style="font-weight: bold; margin-bottom: 6px; font-size: 13px; color: var(--text-primary);">
-                          🏰 <span style="font-size: 11px; color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
+                        <div style="font-weight: bold; margin-bottom: 6px; font-size: 15px; color: var(--text-primary);">
+                          🏰 <span style="font-size: 13px; color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
                         </div>
-                        <div style="font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                        <div style="font-size: 14px; color: var(--text-secondary); display: flex; justify-content: space-between;">
                           <span>{{ $t('appLevelCap') }} +{{ (r.chars ? r.chars.length : 1) * levelCapBaseVal }}</span>
                           <span style="opacity: 0.6;">{{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
                         </div>
@@ -126,12 +160,21 @@
 
                       <!-- Activation Cards -->
                       <div v-for="(act, actIndex) in getActivatedList(r)" :key="actIndex" style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-                        <div style="font-weight: bold; margin-bottom: 6px; font-size: 13px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="$t(getCol(act).nameKey)">
-                          {{ $t(getCol(act).nameKey) }}
-                          <span v-if="act.portion !== undefined && act.portion < 1" style="font-size: 10px; color: var(--text-muted);">x{{ act.portion.toFixed(2) }}</span>
-                          <span style="font-size: 11px; color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ (act.score !== undefined ? act.score : getCol(act).totalScore).toFixed(1) }}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px;">
+                          <div style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px;">
+                            <span style="font-weight: bold; font-size: 15px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="$t(getCol(act).nameKey)">
+                              {{ $t(getCol(act).nameKey) }}
+                            </span>
+                            <span v-if="act.portion !== undefined && act.portion < 1" style="font-size: 12px; color: var(--text-muted); flex-shrink: 0;">x{{ act.portion.toFixed(2) }}</span>
+                            <span style="font-size: 13px; color: var(--gold); flex-shrink: 0;">⭐ {{ (act.score !== undefined ? act.score : getCol(act).totalScore).toFixed(1) }}</span>
+                          </div>
+                          <div v-if="getCol(act).reqCids" class="char-avatar-group" style="gap: 2px; flex-wrap: nowrap; flex-shrink: 0;">
+                            <div v-for="cid in getCol(act).reqCids" :key="cid" class="char-avatar char-avatar-xs" :title="getCharFullNameById(cid)">
+                              <img :src="getCharIconUrl(cid)" @error="handleImgError" />
+                            </div>
+                          </div>
                         </div>
-                        <div v-for="(d, dIdx) in getCol(act).details" :key="dIdx" style="font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <div v-for="(d, dIdx) in getCol(act).details" :key="dIdx" style="font-size: 14px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-bottom: 2px;">
                           <span>{{ $t(d.nameKey) }} {{ d.ctype === 2 ? '+' + (d.val * 100) + '%' : (d.ctype === 3 ? '📈+' + d.val : '+' + d.val) }}</span>
                           <span style="opacity: 0.6;">{{ (act.portion !== undefined ? d.score * act.portion : d.score).toFixed(1) }}</span>
                         </div>
@@ -232,9 +275,23 @@ const levelCapBaseVal = computed(() => levelCapItem.value.baseVal)
 
 const getCharFullName = (c) => t(c.nameKey) + (c.name2Key ? ` (${t(c.name2Key)})` : '')
 
+const getCharFullNameById = (id) => {
+  const c = charactersRaw[id]
+  if (!c) return ''
+  return getCharFullName(c)
+}
+
+const getCharIconUrl = (id) => `${import.meta.env.BASE_URL}images/characters/${id}.png`
+
 const getCharNames = (r) => {
   if (r.chars) return r.chars.map(c => getCharFullName(c)).join(' + ')
   return getCharFullName(r)
+}
+
+const handleImgError = (e) => {
+  e.target.style.display = 'none';
+  e.target.parentElement.classList.add('char-avatar-fallback');
+  e.target.parentElement.innerText = '?';
 }
 
 const getBottleneckNames = (r) => {
@@ -289,5 +346,106 @@ function toggleSort(key) {
 <style scoped>
 .hover-row:hover {
   background: rgba(255,255,255,0.05);
+}
+
+.char-avatar-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+.char-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.char-avatar:hover {
+  transform: scale(1.3);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+.char-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.char-avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+.char-avatar-xs {
+  width: 20px;
+  height: 20px;
+}
+.char-avatar-bw {
+  filter: grayscale(100%) opacity(0.7);
+}
+.char-avatar-fallback {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--text-muted);
+}
+.char-list-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.char-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.2);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+  min-width: 72px;
+  max-width: 84px;
+}
+.char-card-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: rgba(255,255,255,0.05);
+}
+.char-card-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+}
+.char-base-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+.char-sub-name {
+  font-size: 12px;
+  color: var(--gold);
+  text-align: center;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.2);
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

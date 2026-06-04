@@ -45,9 +45,9 @@
             style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:6px;"
           >
             <div :style="{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: b._expanded ? '12px' : '0' }">
-              <input class="form-input" style="font-weight:bold;width:130px;padding:2px 8px;font-size:14px" v-model="b.name">
+              <input class="form-input" style="font-weight:bold;width:130px;padding:2px 8px;font-size: 16px" v-model="b.name">
               <div style="display:flex;gap:4px">
-                <button class="btn btn-secondary btn-sm" @click="b._expanded = !b._expanded" style="padding:4px 8px;font-size:12px">
+                <button class="btn btn-secondary btn-sm" @click="b._expanded = !b._expanded" style="padding:4px 8px;font-size: 14px">
                   {{ b._expanded ? '▲' : '▼ ' + ($t('ui_details') || 'Details') }}
                 </button>
                 <button v-if="ts.builds.length > 1" class="btn btn-ghost btn-sm" @click="removeBuild(i)" style="padding:4px 8px">🗑</button>
@@ -82,8 +82,8 @@
       <div class="card" style="overflow:hidden; display:flex; flex-direction:column;">
         <div class="flex justify-between items-center mb-12" style="flex-wrap:wrap; gap:12px;">
           <div style="display:flex;align-items:center;gap:12px">
-            <span style="font-size:14px;font-weight:600;color:var(--gold)">📊 {{ $t('tableTitle') }}</span>
-            <select class="form-select" v-model="ts.metric" style="width:140px;padding:4px 8px;font-size:12px;min-height:28px">
+            <span style="font-size: 16px;font-weight:600;color:var(--gold)">📊 {{ $t('tableTitle') }}</span>
+            <select class="form-select" v-model="ts.metric" style="width:140px;padding:4px 8px;font-size: 14px;min-height:28px">
               <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
             </select>
           </div>
@@ -99,7 +99,7 @@
             :key="index"
             style="background:rgba(0,0,0,0.1); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.05)"
           >
-            <div style="font-size:15px;font-weight:600;margin-bottom:12px">
+            <div style="font-size: 17px;font-weight:600;margin-bottom:12px">
               <span v-if="tData.isDiff" style="color:var(--purple-light)">⚖ {{ tData.name }}</span>
               <span v-else style="color:var(--gold)">📊 {{ tData.build.name }}</span>
             </div>

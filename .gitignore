@@ -27,3 +27,5 @@ dist-ssr
 doc/mysterium/
 data/
 
+# Raw Assets
+asset_downloader/

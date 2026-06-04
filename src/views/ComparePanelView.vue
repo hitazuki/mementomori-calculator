@@ -47,7 +47,7 @@
               <span :style="{ color: LINE_COLORS[i%LINE_COLORS.length], fontWeight:600, fontSize:'12px', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden' }">
                 ▌ {{ b.name }}
               </span>
-              <span style="font-size:11px; color:var(--text-secondary); whiteSpace:nowrap;">
+              <span style="font-size: 13px; color:var(--text-secondary); whiteSpace:nowrap;">
                 PEN: {{ b.pen }} | P/M: {{ b.pmPen }}
               </span>
             </div>
@@ -65,9 +65,9 @@
         <div class="card-title">🏹 {{ $t('targetDef') }}</div>
         <div class="flex-col gap-8">
           <div style="display: grid; grid-template-columns: 60px 1fr 1fr 32px; gap: 8px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
-            <span style="font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $t('buildName') }}</span>
-            <span style="font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DEF</span>
-            <span style="font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">P/M.DEF</span>
+            <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $t('buildName') }}</span>
+            <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DEF</span>
+            <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">P/M.DEF</span>
             <span></span>
           </div>
           <div 
@@ -151,7 +151,7 @@
   <div v-if="cs.editingBuildIdx !== null" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:999; display:flex; align-items:center; justify-content:center;" @mousedown.self="cs.editingBuildIdx = null">
     <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; padding:20px; width:90%; max-width:400px; box-shadow:0 8px 32px rgba(0,0,0,0.8);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="margin:0;font-size:16px;color:var(--text-primary)">⚙ {{ $t('manualAdjust') }}</h3>
+        <h3 style="margin:0;font-size: 18px;color:var(--text-primary)">⚙ {{ $t('manualAdjust') }}</h3>
         <button class="btn btn-ghost btn-sm" @click="cs.editingBuildIdx = null" style="padding:0 8px">✕</button>
       </div>
       

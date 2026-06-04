@@ -195,7 +195,7 @@ export default {
   ui_score: '總價值',
   ui_ce: '性價比',
   ui_marginal_ce: '邊際CE',
-  ui_bottleneck: '前置短板',
+  ui_bottleneck: '前置方案',
   ui_algo1: '獨立分攤法',
   ui_algo2: '成套綁定法',
   ui_algo3: '方案枚舉法 (推薦)',

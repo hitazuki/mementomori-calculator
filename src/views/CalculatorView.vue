@@ -4,7 +4,7 @@
     <p class="view-desc">{{ $t('calcDesc') }}</p>
     <div style="margin-top: 12px;">
       <button class="btn btn-secondary btn-sm" @click="showFormulaModal = true">
-        <span style="font-size:14px;">💡</span> {{ $t('calcFormulaBtn') }}
+        <span style="font-size: 16px;">💡</span> {{ $t('calcFormulaBtn') }}
       </button>
     </div>
   </div>
@@ -267,7 +267,7 @@
           <code class="formula-highlight">R_total = R_def × R_pmdef</code>
           <code class="formula-highlight">D_final = D_raw × B_dmg × C_dmg × R_total</code>
           
-          <p style="margin-top:16px; font-size:12px; color:var(--text-muted);">{{ $t('formulaModalNote') }}</p>
+          <p style="margin-top:16px; font-size: 14px; color:var(--text-muted);">{{ $t('formulaModalNote') }}</p>
         </div>
       </div>
     </div>

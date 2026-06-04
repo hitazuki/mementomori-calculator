@@ -51,12 +51,12 @@
     <!-- Main Content -->
     <main class="main-content">
       <div class="global-actions" style="position: absolute; top: 22px; right: 24px; z-index: 100; display: flex; align-items: center; gap: 12px;">
-        <span style="font-size: 16px;">🌐</span>
+        <span style="font-size: 18px;">🌐</span>
         <select 
           class="form-select" 
           v-model="currentLanguage" 
           @change="changeLanguage"
-          style="background: rgba(0,0,0,0.85); color: var(--gold); border: 1px solid var(--border-subtle); font-size: 13px; width: auto; padding-right: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
+          style="background: rgba(0,0,0,0.85); color: var(--gold); border: 1px solid var(--border-subtle); font-size: 15px; width: auto; padding-right: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
         >
           <option value="zh-CN">简体中文</option>
           <option value="zh-TW">繁體中文</option>

@@ -193,7 +193,7 @@ export default {
   ui_score: 'Score',
   ui_ce: 'CE',
   ui_marginal_ce: 'Marginal CE',
-  ui_bottleneck: 'Bottleneck',
+  ui_bottleneck: 'Prerequisite Plan',
   ui_algo1: 'Independent Sharing',
   ui_algo2: 'Set Binding',
   ui_algo3: 'Plan Enumeration',

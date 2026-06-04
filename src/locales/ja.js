@@ -188,7 +188,7 @@ export default {
   ui_score: 'スコア',
   ui_ce: 'コスパ',
   ui_marginal_ce: '限界コスパ',
-  ui_bottleneck: 'ボトルネック',
+  ui_bottleneck: '前提プラン',
   ui_algo1: '個別配分法',
   ui_algo2: 'セットバインド',
   ui_algo3: 'プラン列挙 (推奨)',
