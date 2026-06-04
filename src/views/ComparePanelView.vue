@@ -102,7 +102,7 @@
 
       <div class="card" style="min-height:420px">
         <div v-show="cs.chartMode !== 'table'" style="width:100%;height:400px;position:relative">
-          <v-chart class="chart" :option="chartOption" autoresize />
+          <v-chart class="chart" :option="chartOption" :update-options="{ notMerge: true }" autoresize />
         </div>
         
         <div v-if="cs.chartMode === 'table'" style="overflow-x:auto">
@@ -352,10 +352,10 @@ const chartOption = computed(() => {
       ...baseChartOption('Radar · ' + metric.label, '', isDark),
       radar: {
         indicator: cs.benchmarks.map(b => ({ name: b.label, max: maxVal })),
-        name: { textStyle: { color: 'var(--text-muted)', fontSize: 11 } },
-        axisLine: { lineStyle: { color: 'var(--border-hover)' } },
-        splitLine: { lineStyle: { color: 'var(--border-subtle)' } },
-        splitArea: { areaStyle: { color: ['rgba(var(--color-invert-rgb),0.02)', 'transparent'] } },
+        axisName: { color: MORI_THEME.axisLabel.color, fontSize: 11 },
+        axisLine: MORI_THEME.axisLine,
+        splitLine: MORI_THEME.splitLine,
+        splitArea: MORI_THEME.splitArea,
       },
       legend: { ...MORI_THEME.legend, bottom: 4, left: 'center', data: results.value.map(r => ({ name: r.name, itemStyle: { color: r.color } })) },
       tooltip: MORI_THEME.tooltip,
