@@ -76,6 +76,11 @@
                 <div class="form-group"><label class="form-label text-xs">{{ $t('defLevel') }}</label>
                   <input class="form-input" type="number" v-model.number="b.params.defLevel" @input="onBuildDefLevelChange(b)"></div>
               </div>
+              <!-- 防御力 -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="form-group"><label class="form-label text-xs">{{ $t('targetDef') }}</label><BigNumberInput class="form-input" v-model="b.params.def" /></div>
+                <div class="form-group"><label class="form-label text-xs">{{ b.params.damageType === 'phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</label><BigNumberInput class="form-input" v-model="b.params.pmDef" /></div>
+              </div>
               <!-- 贯通 -->
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div class="form-group"><label class="form-label text-xs">{{ $t('pen') }}</label><BigNumberInput class="form-input" v-model="b.params.pen" /></div>
