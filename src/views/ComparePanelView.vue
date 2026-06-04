@@ -20,8 +20,8 @@
         <div class="form-group">
           <label class="form-label">{{ $t('atkType') }}</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-sm" :class="store.damageType==='phys'?'btn-primary':'btn-ghost'" style="flex:1" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-            <button class="btn btn-sm" :class="store.damageType==='mag' ?'btn-primary':'btn-ghost'" style="flex:1" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+            <button class="btn btn-sm" :class="store.damageType==='phys'?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+            <button class="btn btn-sm" :class="store.damageType==='mag' ?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
           </div>
         </div>
         <div class="form-group">

@@ -18,8 +18,8 @@
       <div class="card">
         <div class="card-title">🛤 {{ $t('hmCalcMode') }}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-sm" :class="hs.mode==='phys'?'btn-primary':'btn-ghost'" style="flex:1" @click="setMode('phys')">DEF</button>
-          <button class="btn btn-sm" :class="hs.mode==='mag' ?'btn-primary':'btn-ghost'" style="flex:1" @click="setMode('mag')">P.DEF / M.DEF</button>
+          <button class="btn btn-sm" :class="hs.mode==='phys'?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setMode('phys')">DEF</button>
+          <button class="btn btn-sm" :class="hs.mode==='mag' ?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setMode('mag')">P.DEF / M.DEF</button>
         </div>
       </div>
 
@@ -132,13 +132,15 @@ const hs = reactive({
 })
 
 function setMode(mode) {
+  const customA = isAtkCustom.value
+  const customD = isDefCustom.value
   hs.mode = mode
   const pA = getCoeffByLevel(hs.atkLevel)
-  if (pA) {
+  if (pA && !customA) {
     hs.cPen = mode === 'phys' ? pA.cPen : pA.cPmPen
   }
   const pD = getCoeffByLevel(hs.defLevel)
-  if (pD) {
+  if (pD && !customD) {
     hs.cDef = mode === 'phys' ? pD.cDef : pD.cPdef
   }
 }

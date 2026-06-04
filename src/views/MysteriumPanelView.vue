@@ -41,9 +41,9 @@
         </div>
         <div v-show="mainTab === 'chars'" style="display: flex; flex-direction: column; gap: 8px; padding-top: 12px; padding-bottom: 12px;">
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn btn-sm" :class="algo === 1 ? 'btn-primary' : 'btn-ghost'" @click="algo = 1">{{ $t('ui_algo1') }}</button>
-            <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" @click="algo = 2">{{ $t('ui_algo2') }}</button>
-            <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" @click="algo = 3">{{ $t('ui_algo3') }}</button>
+            <button class="btn btn-sm" :class="algo === 1 ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="algo = 1">{{ $t('ui_algo1') }}</button>
+            <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="algo = 2">{{ $t('ui_algo2') }}</button>
+            <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="algo = 3">{{ $t('ui_algo3') }}</button>
           </div>
           <div style="font-size: 14px; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border-left: 2px solid var(--gold); margin-top: 4px; line-height: 1.5;">
             {{ $t('ui_algo' + algo + '_desc') }}
