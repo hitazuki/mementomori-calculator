@@ -64,7 +64,7 @@
           class="form-select" 
           v-model="currentLanguage" 
           @change="changeLanguage"
-          style="background: rgba(0,0,0,0.85); color: var(--gold); border: 1px solid var(--border-subtle); font-size: 15px; width: auto; padding-right: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);"
+          style="background: var(--bg-card); color: var(--gold); border: 1px solid var(--border-subtle); font-size: 15px; width: auto; padding-right: 32px; box-shadow: var(--shadow-card);"
         >
           <option value="zh-CN">简体中文</option>
           <option value="zh-TW">繁體中文</option>
