@@ -232,4 +232,6 @@ export default {
   wfCatPmDefMit: "PM.DEF Mitigated",
   wfCatFinal: "Actual Damage",
   atkBonus: "ATK Bonus",
+  basePanelStats: "Base Panel Stats",
+  baseCoefficients: "Other Base Stats (Expand/Collapse)",
 };

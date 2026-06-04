@@ -233,4 +233,6 @@ export default {
   wfCatPmDefMit: "物魔防折损",
   wfCatFinal: "最终落地伤害",
   atkBonus: "攻击加成",
+  basePanelStats: "基础面板参数",
+  baseCoefficients: "其他基础面板参数 (展开/折叠)",
 };

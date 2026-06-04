@@ -226,4 +226,6 @@ export default {
   wfCatPmDefMit: "物魔防による損失",
   wfCatFinal: "最終ダメージ",
   atkBonus: "攻撃力ボーナス",
+  basePanelStats: "基礎パラメータ",
+  baseCoefficients: "その他基礎パラメータ (展開/折畳)",
 };

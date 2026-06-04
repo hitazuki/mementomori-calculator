@@ -226,4 +226,6 @@ export default {
   wfCatPmDefMit: "물/마방 손실",
   wfCatFinal: "최종 데미지",
   atkBonus: "공격력 보너스",
+  basePanelStats: "기본 패널 매개변수",
+  baseCoefficients: "기타 기본 매개변수 (접기/펼치기)",
 };
