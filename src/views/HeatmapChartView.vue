@@ -80,17 +80,17 @@
         <div class="form-group" style="margin-bottom:12px">
           <label class="form-label text-xs">{{ $t('atkType') }}</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-sm" :class="hs.baseParams.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-            <button class="btn btn-sm" :class="hs.baseParams.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+            <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+            <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
           </div>
         </div>
 
         <div class="form-group" v-for="v in fixedVariables" :key="v.key" style="margin-bottom:8px">
           <label class="form-label text-xs">
             {{ v.label }} 
-            <span class="value-display">{{ fmt(hs.baseParams[v.key], v) }}</span>
+            <span class="value-display">{{ fmt(store[v.key], v) }}</span>
           </label>
-          <input class="form-range" type="range" v-model.number="hs.baseParams[v.key]" :min="v.rangeMin" :max="v.rangeMax" :step="v.step">
+          <input class="form-range" type="range" v-model.number="store[v.key]" :min="v.rangeMin" :max="v.rangeMax" :step="v.step">
         </div>
 
         <!-- Collapsible non-sweepable stats -->
@@ -102,52 +102,52 @@
             <div class="form-group">
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('baseAtk') }}</span>
-                <BigNumberInput class="form-input" v-model="hs.baseParams.baseAtk" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+                <BigNumberInput class="form-input" v-model="store.baseAtk" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
               </label>
-              <input class="form-range" type="range" v-model.number="hs.baseParams.baseAtk" min="10000" max="200000000" step="10000">
+              <input class="form-range" type="range" v-model.number="store.baseAtk" min="10000" max="200000000" step="10000">
             </div>
             <div class="form-group">
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('skillCoeff') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(hs.baseParams.skillCoeff*100).toFixed(1)" @change="e => hs.baseParams.skillCoeff = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <input class="inline-num" type="number" step="0.5" :value="+(store.skillCoeff*100).toFixed(1)" @change="e => store.skillCoeff = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
                   <span class="value-display" style="font-size:12px">%</span>
                 </div>
               </label>
-              <input class="form-range" type="range" v-model.number="hs.baseParams.skillCoeff" min="0.1" max="25" step="0.1">
+              <input class="form-range" type="range" v-model.number="store.skillCoeff" min="0.1" max="25" step="0.1">
             </div>
             <div class="form-group">
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('critMult') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(hs.baseParams.critMult*100).toFixed(1)" @change="e => hs.baseParams.critMult = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <input class="inline-num" type="number" step="0.5" :value="+(store.critMult*100).toFixed(1)" @change="e => store.critMult = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
                   <span class="value-display" style="font-size:12px">%</span>
                 </div>
               </label>
-              <input class="form-range" type="range" v-model.number="hs.baseParams.critMult" min="1" max="5" step="0.05">
+              <input class="form-range" type="range" v-model.number="store.critMult" min="1" max="5" step="0.05">
             </div>
             <div class="form-group">
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('atkBonus') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(hs.baseParams.atkBonus*100).toFixed(1)" @change="e => hs.baseParams.atkBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <input class="inline-num" type="number" step="0.5" :value="+(store.atkBonus*100).toFixed(1)" @change="e => store.atkBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
                   <span class="value-display" style="font-size:12px">%</span>
                 </div>
               </label>
-              <input class="form-range" type="range" v-model.number="hs.baseParams.atkBonus" min="-1" max="2.5" step="0.05">
+              <input class="form-range" type="range" v-model.number="store.atkBonus" min="-1" max="2.5" step="0.05">
             </div>
             <div class="form-group">
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('dmgBonus') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(hs.baseParams.dmgBonus*100).toFixed(1)" @change="e => hs.baseParams.dmgBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <input class="inline-num" type="number" step="0.5" :value="+(store.dmgBonus*100).toFixed(1)" @change="e => store.dmgBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
                   <span class="value-display" style="font-size:12px">%</span>
                 </div>
               </label>
-              <input class="form-range" type="range" v-model.number="hs.baseParams.dmgBonus" min="-1" max="2" step="0.05">
+              <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1" max="2" step="0.05">
             </div>
             <div class="form-group" style="display:flex;flex-direction:row;align-items:center;gap:8px;padding-top:4px;">
-              <input type="checkbox" v-model="hs.baseParams.eleAdvantage" id="heatmap-ele" style="width:16px;height:16px;">
+              <input type="checkbox" v-model="store.eleAdvantage" id="heatmap-ele" style="width:16px;height:16px;">
               <label for="heatmap-ele" class="form-label text-xs" style="margin:0;cursor:pointer;">{{ $t('eleAdvantage') }}</label>
             </div>
           </div>
@@ -182,7 +182,7 @@ const chartRef = ref(null)
 
 const availableVariables = computed(() => [
   { key: 'def',        label: t('targetDef'),     rangeMin: 0, rangeMax: 50_000_000, step: 100_000, defaultMin: 0, defaultMax: 20_000_000 },
-  { key: 'pmDef',      label: hs.baseParams.damageType === 'phys' ? t('targetPhysDef') : t('targetMagDef'), rangeMin: 0, rangeMax: 50_000_000, step: 100_000, defaultMin: 0, defaultMax: 20_000_000 },
+  { key: 'pmDef',      label: store.damageType === 'phys' ? t('targetPhysDef') : t('targetMagDef'), rangeMin: 0, rangeMax: 50_000_000, step: 100_000, defaultMin: 0, defaultMax: 20_000_000 },
   { key: 'pen',        label: t('pen'),           rangeMin: 0, rangeMax: 150_000,    step: 1_000,   defaultMin: 0, defaultMax: 70_000 },
   { key: 'pmPen',      label: t('pmPen'),         rangeMin: 0, rangeMax: 150_000,    step: 1_000,   defaultMin: 0, defaultMax: 70_000 },
   { key: 'atkLevel',   label: t('atkLevel'),      rangeMin: 1, rangeMax: 999,        step: 1,       defaultMin: 200, defaultMax: 600 },
@@ -210,24 +210,6 @@ const hs = reactive({
   
   yKey: 'pen',
   yMin: 0, yMax: 70_000, ySteps: 24,
-
-  baseParams: {
-    def: store.def,
-    pmDef: store.pmDef,
-    pen: store.pen,
-    pmPen: store.pmPen,
-    atkLevel: store.atkLevel,
-    defLevel: store.defLevel,
-    defBonus: store.defBonus,
-    pmDefBonus: store.pmDefBonus,
-    baseAtk: store.baseAtk,
-    atkBonus: store.atkBonus,
-    skillCoeff: store.skillCoeff,
-    dmgBonus: store.dmgBonus,
-    critMult: store.critMult,
-    eleAdvantage: store.eleAdvantage,
-    damageType: store.damageType
-  }
 })
 
 const currentXVar = computed(() => availableVariables.value.find(v => v.key === hs.xKey))
@@ -251,7 +233,11 @@ function onYKeyChange() {
 }
 
 function setDamageType(type) {
-  hs.baseParams.damageType = type
+  store.damageType = type
+  const p = getCoeffByLevel(store.defLevel)
+  if (p) {
+    store.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
+  }
 }
 
 const chartOption = computed(() => {
@@ -259,7 +245,7 @@ const chartOption = computed(() => {
     xKey: hs.xKey, yKey: hs.yKey, zKey: hs.metric,
     xMin: hs.xMin, xMax: hs.xMax, xSteps: hs.xSteps,
     yMin: hs.yMin, yMax: hs.yMax, ySteps: hs.ySteps,
-    baseParams: hs.baseParams,
+    baseParams: store.$state,
   })
 
   const isDark = currentTheme.value === 'dark'

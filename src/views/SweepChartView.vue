@@ -50,8 +50,8 @@
         <div class="form-group">
           <label class="form-label">{{ $t('atkType') }}</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-sm" :class="ss.baseParams.damageType==='phys'?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-            <button class="btn btn-sm" :class="ss.baseParams.damageType==='mag' ?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+            <button class="btn btn-sm" :class="store.damageType==='phys'?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+            <button class="btn btn-sm" :class="store.damageType==='mag' ?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
           </div>
         </div>
         <div class="form-group" v-show="ss.sweepKey !== 'atkLevel'">
@@ -59,10 +59,10 @@
             <span>{{ $t('atkLevel') }}</span>
             <div style="display:flex;align-items:center;gap:4px">
               <span class="text-xs text-muted" v-show="isAtkCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
-              <input class="form-input" type="number" v-model.number="ss.atkLevel" @input="onAtkLevelChange" min="1" max="999" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;">
+              <input class="form-input" type="number" v-model.number="store.atkLevel" @input="onAtkLevelChange" min="1" max="999" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;">
             </div>
           </label>
-          <input class="form-range" type="range" v-model.number="ss.atkLevel" @input="onAtkLevelChange" min="1" max="999" step="1">
+          <input class="form-range" type="range" v-model.number="store.atkLevel" @input="onAtkLevelChange" min="1" max="999" step="1">
         </div>
 
         <div class="form-group" v-show="ss.sweepKey !== 'defLevel'">
@@ -70,59 +70,59 @@
             <span>{{ $t('defLevel') || $t('defPresetLabel') }}</span>
             <div style="display:flex;align-items:center;gap:4px">
               <span class="text-xs text-muted" v-show="isDefCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
-              <input class="form-input" type="number" v-model.number="ss.defLevel" @input="onDefLevelChange" min="1" max="999" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;">
+              <input class="form-input" type="number" v-model.number="store.defLevel" @input="onDefLevelChange" min="1" max="999" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;">
             </div>
           </label>
-          <input class="form-range" type="range" v-model.number="ss.defLevel" @input="onDefLevelChange" min="1" max="999" step="1">
+          <input class="form-range" type="range" v-model.number="store.defLevel" @input="onDefLevelChange" min="1" max="999" step="1">
         </div>
 
         <div class="form-group" v-show="ss.sweepKey !== 'def'">
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('targetDef') }}</span>
-            <BigNumberInput class="form-input" v-model="ss.baseParams.def" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+            <BigNumberInput class="form-input" v-model="store.def" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
           </label>
-          <input class="form-range" type="range" v-model.number="ss.baseParams.def" min="0" max="20000000" step="10000">
+          <input class="form-range" type="range" v-model.number="store.def" min="0" max="20000000" step="10000">
         </div>
         <div class="form-group" v-show="ss.sweepKey !== 'pmDef'">
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-            <span>{{ ss.baseParams.damageType === 'phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</span>
-            <BigNumberInput class="form-input" v-model="ss.baseParams.pmDef" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+            <span>{{ store.damageType === 'phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</span>
+            <BigNumberInput class="form-input" v-model="store.pmDef" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
           </label>
-          <input class="form-range" type="range" v-model.number="ss.baseParams.pmDef" min="0" max="20000000" step="10000">
+          <input class="form-range" type="range" v-model.number="store.pmDef" min="0" max="20000000" step="10000">
         </div>
         <div class="form-group" v-show="ss.sweepKey !== 'pen'">
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('pen') }}</span>
-            <BigNumberInput class="form-input" v-model="ss.baseParams.pen" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+            <BigNumberInput class="form-input" v-model="store.pen" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
           </label>
-          <input class="form-range" type="range" v-model.number="ss.baseParams.pen" min="0" max="30000" step="100">
+          <input class="form-range" type="range" v-model.number="store.pen" min="0" max="30000" step="100">
         </div>
         <div class="form-group" v-show="ss.sweepKey !== 'pmPen'">
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('pmPen') }}</span>
-            <BigNumberInput class="form-input" v-model="ss.baseParams.pmPen" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+            <BigNumberInput class="form-input" v-model="store.pmPen" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
           </label>
-          <input class="form-range" type="range" v-model.number="ss.baseParams.pmPen" min="0" max="80000" step="100">
+          <input class="form-range" type="range" v-model.number="store.pmPen" min="0" max="80000" step="100">
         </div>
         <div class="form-group" v-show="ss.sweepKey !== 'defBonus'">
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('defBonus') }}</span>
             <div style="display:flex;align-items:center;gap:1px">
-              <input class="inline-num" type="number" step="0.5" :value="+(ss.baseParams.defBonus*100).toFixed(1)" @change="e => ss.baseParams.defBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+              <input class="inline-num" type="number" step="0.5" :value="+(store.defBonus*100).toFixed(1)" @change="e => store.defBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
               <span class="value-display" style="font-size:12px">%</span>
             </div>
           </label>
-          <input class="form-range" type="range" v-model.number="ss.baseParams.defBonus" min="-1" max="2.5" step="0.05">
+          <input class="form-range" type="range" v-model.number="store.defBonus" min="-1" max="2.5" step="0.05">
         </div>
         <div class="form-group" v-show="ss.sweepKey !== 'pmDefBonus'">
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('pmDefBonus') }}</span>
             <div style="display:flex;align-items:center;gap:1px">
-              <input class="inline-num" type="number" step="0.5" :value="+(ss.baseParams.pmDefBonus*100).toFixed(1)" @change="e => ss.baseParams.pmDefBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+              <input class="inline-num" type="number" step="0.5" :value="+(store.pmDefBonus*100).toFixed(1)" @change="e => store.pmDefBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
               <span class="value-display" style="font-size:12px">%</span>
             </div>
           </label>
-          <input class="form-range" type="range" v-model.number="ss.baseParams.pmDefBonus" min="-1" max="2.5" step="0.05">
+          <input class="form-range" type="range" v-model.number="store.pmDefBonus" min="-1" max="2.5" step="0.05">
         </div>
 
         <!-- Collapsible non-sweepable advanced stats -->
@@ -134,52 +134,52 @@
             <div class="form-group">
               <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('baseAtk') }}</span>
-                <BigNumberInput class="form-input" v-model="ss.baseParams.baseAtk" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+                <BigNumberInput class="form-input" v-model="store.baseAtk" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
               </label>
-              <input class="form-range" type="range" v-model.number="ss.baseParams.baseAtk" min="10000" max="200000000" step="10000">
+              <input class="form-range" type="range" v-model.number="store.baseAtk" min="10000" max="200000000" step="10000">
             </div>
             <div class="form-group">
               <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('skillCoeff') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(ss.baseParams.skillCoeff*100).toFixed(1)" @change="e => ss.baseParams.skillCoeff = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <input class="inline-num" type="number" step="0.5" :value="+(store.skillCoeff*100).toFixed(1)" @change="e => store.skillCoeff = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
                   <span class="value-display" style="font-size:12px">%</span>
                 </div>
               </label>
-              <input class="form-range" type="range" v-model.number="ss.baseParams.skillCoeff" min="0.1" max="25" step="0.1">
+              <input class="form-range" type="range" v-model.number="store.skillCoeff" min="0.1" max="25" step="0.1">
             </div>
             <div class="form-group">
               <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('critMult') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(ss.baseParams.critMult*100).toFixed(1)" @change="e => ss.baseParams.critMult = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <input class="inline-num" type="number" step="0.5" :value="+(store.critMult*100).toFixed(1)" @change="e => store.critMult = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
                   <span class="value-display" style="font-size:12px">%</span>
                 </div>
               </label>
-              <input class="form-range" type="range" v-model.number="ss.baseParams.critMult" min="1" max="5" step="0.05">
+              <input class="form-range" type="range" v-model.number="store.critMult" min="1" max="5" step="0.05">
             </div>
             <div class="form-group">
               <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('atkBonus') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(ss.baseParams.atkBonus*100).toFixed(1)" @change="e => ss.baseParams.atkBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <input class="inline-num" type="number" step="0.5" :value="+(store.atkBonus*100).toFixed(1)" @change="e => store.atkBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
                   <span class="value-display" style="font-size:12px">%</span>
                 </div>
               </label>
-              <input class="form-range" type="range" v-model.number="ss.baseParams.atkBonus" min="-1" max="2.5" step="0.05">
+              <input class="form-range" type="range" v-model.number="store.atkBonus" min="-1" max="2.5" step="0.05">
             </div>
             <div class="form-group">
               <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('dmgBonus') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(ss.baseParams.dmgBonus*100).toFixed(1)" @change="e => ss.baseParams.dmgBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <input class="inline-num" type="number" step="0.5" :value="+(store.dmgBonus*100).toFixed(1)" @change="e => store.dmgBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
                   <span class="value-display" style="font-size:12px">%</span>
                 </div>
               </label>
-              <input class="form-range" type="range" v-model.number="ss.baseParams.dmgBonus" min="-1" max="2" step="0.05">
+              <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1" max="2" step="0.05">
             </div>
             <div class="form-group" style="display:flex;flex-direction:row;align-items:center;gap:8px;padding-top:4px;">
-              <input type="checkbox" v-model="ss.baseParams.eleAdvantage" id="sweep-ele" style="width:16px;height:16px;">
+              <input type="checkbox" v-model="store.eleAdvantage" id="sweep-ele" style="width:16px;height:16px;">
               <label for="sweep-ele" class="form-label" style="margin:0;cursor:pointer;">{{ $t('eleAdvantage') }}</label>
             </div>
           </div>
@@ -228,20 +228,10 @@ const getMetrics = () => ({
   pmMitPct:   { label: t('pmMitRate'),      fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
 })
 
-// Local reactive state initialized from Pinia store
-const initialBaseParams = { ...store.$state }
-delete initialBaseParams.cPen
-delete initialBaseParams.cPmPen
-delete initialBaseParams.cDef
-delete initialBaseParams.cPmDef
-
 const ss = reactive({
   sweepKey: 'pen',
   metric: 'dmgRatePct',
   min: 0, max: 20000, steps: 21,
-  baseParams: initialBaseParams,
-  atkLevel: store.atkLevel,
-  defLevel: store.defLevel,
 })
 
 const currentSweepVarLabel = computed(() => SWEEP_VARIABLES.value.find(v=>v.key===ss.sweepKey)?.label || ss.sweepKey)
@@ -255,23 +245,47 @@ function onSweepKeyChange() {
 }
 
 function setDamageType(type) {
-  ss.baseParams.damageType = type
+  store.damageType = type
+  const p = getCoeffByLevel(store.defLevel)
+  if (p) {
+    store.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
+  }
 }
 
 function onAtkLevelChange() {
-  ss.baseParams.atkLevel = ss.atkLevel
+  const p = getCoeffByLevel(store.atkLevel)
+  if (p) {
+    store.cPen = p.cPen
+    store.cPmPen = p.cPmPen
+  }
 }
 
 function onDefLevelChange() {
-  ss.baseParams.defLevel = ss.defLevel
+  const p = getCoeffByLevel(store.defLevel)
+  if (p) {
+    store.cDef = p.cDef
+    store.cPmDef = store.damageType === 'mag' ? p.cMdef : p.cPdef
+  }
 }
 
-const isAtkCustom = computed(() => false)
+const isAtkCustom = computed(() => {
+  const p = getCoeffByLevel(store.atkLevel)
+  return !p || store.cPen !== p.cPen || store.cPmPen !== p.cPmPen
+})
 
-const isDefCustom = computed(() => false)
+const isDefCustom = computed(() => {
+  const p = getCoeffByLevel(store.defLevel)
+  return !p || store.cDef !== p.cDef || store.cPmDef !== (store.damageType === 'mag' ? p.cMdef : p.cPdef)
+})
 
 const chartOption = computed(() => {
-  const { xData, yData } = buildSweepData(ss)
+  const { xData, yData } = buildSweepData({
+    sweepKey: ss.sweepKey,
+    min: ss.min,
+    max: ss.max,
+    steps: ss.steps,
+    baseParams: store.$state
+  })
   const varLabel = currentSweepVarLabel.value
   const metric = getMetrics()[ss.metric]
 
