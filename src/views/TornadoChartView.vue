@@ -95,18 +95,25 @@
         <div class="card-title">{{ $t('upgradesToTest') }}</div>
         <div class="flex-col gap-8">
           <div class="form-group">
-            <label class="form-label">{{ $t('baseAtk') }} {{ $t('increment') }}</label>
-            <BigNumberInput class="form-input" v-model="deltas.baseAtk" />
+            <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>{{ $t('baseAtk') }} {{ $t('increment') }}</span>
+              <BigNumberInput class="form-input" v-model="deltas.baseAtk" style="width: 100px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+            </label>
+            <input class="form-range" type="range" v-model.number="deltas.baseAtk" min="0" max="10000000" step="10000">
           </div>
-          <div class="grid-2">
-            <div class="form-group">
-              <label class="form-label">{{ $t('pen') }} {{ $t('increment') }}</label>
-              <BigNumberInput class="form-input" v-model="deltas.pen" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">{{ $t('pmPen') }} {{ $t('increment') }}</label>
-              <BigNumberInput class="form-input" v-model="deltas.pmPen" />
-            </div>
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>{{ $t('pen') }} {{ $t('increment') }}</span>
+              <BigNumberInput class="form-input" v-model="deltas.pen" style="width: 100px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+            </label>
+            <input class="form-range" type="range" v-model.number="deltas.pen" min="0" max="30000" step="100">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>{{ $t('pmPen') }} {{ $t('increment') }}</span>
+              <BigNumberInput class="form-input" v-model="deltas.pmPen" style="width: 100px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+            </label>
+            <input class="form-range" type="range" v-model.number="deltas.pmPen" min="0" max="80000" step="100">
           </div>
           <div class="form-group">
             <label class="form-label" style="display:flex;justify-content:space-between">
