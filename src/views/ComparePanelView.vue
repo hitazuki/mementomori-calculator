@@ -192,6 +192,8 @@
         <div class="grid-2">
           <div class="form-group"><label class="form-label">{{ $t('pmDefBonus') }}(%)</label>
             <input class="form-input" type="number" v-model.number="editingBuild.pmDefBonusPct"></div>
+          <div class="form-group"><label class="form-label">{{ $t('critMult') }}(%)</label>
+            <input class="form-input" type="number" v-model.number="editingBuild.critMultPct"></div>
         </div>
       </div>
     </div>
@@ -231,7 +233,7 @@ const getMetrics = () => ({
 })
 
 const cs = reactive({
-  builds: getCompareBuildsDefault(),
+  builds: getCompareBuildsDefault().map(b => ({ critMult: store.critMult || 1.5, ...b })),
   editingBuildIdx: null,
   benchmarks: getDefBenchmarks().slice(0, 4),
   chartMode: 'bar', 
@@ -253,6 +255,8 @@ const editingBuild = computed(() => {
     get eleAdvantage() { return b.eleAdvantage }, set eleAdvantage(v) { b.eleAdvantage = v },
     get defBonusPct() { return (b.defBonus * 100).toFixed(0) }, set defBonusPct(v) { b.defBonus = parseFloat(v) / 100 || 0 },
     get pmDefBonusPct() { return (b.pmDefBonus * 100).toFixed(0) }, set pmDefBonusPct(v) { b.pmDefBonus = parseFloat(v) / 100 || 0 },
+    get critMult() { return b.critMult }, set critMult(v) { b.critMult = v },
+    get critMultPct() { return (b.critMult * 100).toFixed(0) }, set critMultPct(v) { b.critMult = parseFloat(v) / 100 || 0 },
   }
 })
 
@@ -275,7 +279,8 @@ function addBuild() {
     dmgBonus: 0.3, 
     defBonus: 0, 
     pmDefBonus: 0, 
-    eleAdvantage: false 
+    eleAdvantage: false,
+    critMult: store.critMult || 1.5
   })
 }
 
@@ -318,7 +323,7 @@ const results = computed(() => {
     benchResults: cs.benchmarks.map(bench => calcDamage({
       baseAtk: store.baseAtk, 
       skillCoeff: store.skillCoeff, 
-      critMult: store.critMult, 
+      critMult: build.critMult || 1.5, 
       eleAdvantage: build.eleAdvantage || false,
       def: bench.def, 
       pmDef: bench.pmDef,

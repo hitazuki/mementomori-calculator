@@ -8,7 +8,7 @@
     <div class="flex-col gap-12">
       <!-- Base Params (Shared from Store) -->
       <div class="card">
-        <div class="card-title">{{ $t('baseState') }}</div>
+        <div class="card-title">⚙️ {{ $t('basePanelStats') || '基础面板参数' }}</div>
         <div class="grid-2">
           <div class="form-group">
             <label class="form-label">{{ $t('atkType') }}</label>
@@ -52,6 +52,34 @@
           <div class="form-group">
             <label class="form-label">{{ $t('defLevel') }}</label>
             <input class="form-input" type="number" v-model.number="store.defLevel" @input="onDefLevelChange" min="1" max="999">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('atkBonus') }}</span>
+              <span class="value-display">{{ +(store.atkBonus*100).toFixed(0) }}%</span>
+            </label>
+            <input class="form-range" type="range" v-model.number="store.atkBonus" min="-1" max="2.5" step="0.05">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('dmgBonus') }}</span>
+              <span class="value-display">{{ +(store.dmgBonus*100).toFixed(0) }}%</span>
+            </label>
+            <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1" max="2" step="0.05">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('defBonus') }}</span>
+              <span class="value-display">{{ +(store.defBonus*100).toFixed(0) }}%</span>
+            </label>
+            <input class="form-range" type="range" v-model.number="store.defBonus" min="-1" max="2.5" step="0.05">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('pmDefBonus') }}</span>
+              <span class="value-display">{{ +(store.pmDefBonus*100).toFixed(0) }}%</span>
+            </label>
+            <input class="form-range" type="range" v-model.number="store.pmDefBonus" min="-1" max="2.5" step="0.05">
           </div>
         </div>
       </div>

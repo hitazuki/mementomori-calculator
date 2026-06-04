@@ -95,6 +95,18 @@
                 <div class="form-group"><label class="form-label text-xs">{{ $t('pmDefBonus') }}(%)</label>
                   <input class="form-input" type="number" :value="(b.params.pmDefBonus*100).toFixed(0)" @input="e => b.params.pmDefBonus = parseFloat(e.target.value)/100||0"></div>
               </div>
+              <!-- 暴击倍率 + 技能倍率 -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="form-group"><label class="form-label text-xs">{{ $t('critMult') }}(%)</label>
+                  <input class="form-input" type="number" :value="(b.params.critMult*100).toFixed(0)" @input="e => b.params.critMult = parseFloat(e.target.value)/100||0"></div>
+                <div class="form-group"><label class="form-label text-xs">{{ $t('skillCoeff') }}(%)</label>
+                  <input class="form-input" type="number" :value="(b.params.skillCoeff*100).toFixed(0)" @input="e => b.params.skillCoeff = parseFloat(e.target.value)/100||0"></div>
+              </div>
+              <!-- 属性克制 -->
+              <div style="display:flex;align-items:center;gap:8px;padding-top:4px;">
+                <input type="checkbox" v-model="b.params.eleAdvantage" :id="'export-ele-' + b.id" style="width:16px;height:16px;">
+                <label :for="'export-ele-' + b.id" class="form-label text-xs" style="margin:0;cursor:pointer;">{{ $t('eleAdvantage') }}</label>
+              </div>
             </div>
           </div>
         </div>
@@ -182,7 +194,7 @@ const getMetrics = () => ({
 })
 
 const getBaseParams = () => {
-  const p = { ...store.$state, eleAdvantage: false }
+  const p = { ...store.$state }
   delete p.cPen
   delete p.cPmPen
   delete p.cDef

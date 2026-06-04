@@ -75,7 +75,7 @@
       </div>
 
       <div class="card">
-        <div class="card-title">⚙ {{ $t('hmFixedParams') || 'Fixed Params' }}</div>
+        <div class="card-title">⚙️ {{ $t('basePanelStats') || '基础面板参数' }}</div>
         
         <div class="form-group" style="margin-bottom:12px">
           <label class="form-label text-xs">{{ $t('atkType') }}</label>
@@ -92,6 +92,66 @@
           </label>
           <input class="form-range" type="range" v-model.number="hs.baseParams[v.key]" :min="v.rangeMin" :max="v.rangeMax" :step="v.step">
         </div>
+
+        <!-- Collapsible non-sweepable stats -->
+        <details class="advanced-panel-details" style="margin-top: 12px; border-top: 1px dashed var(--border-subtle); padding-top: 12px;">
+          <summary style="font-size: 13px; color: var(--gold); cursor: pointer; user-select: none; font-weight: 500; outline:none;">
+            ⚙️ {{ $t('baseCoefficients') || '其他基础面板参数 (展开/折叠)' }}
+          </summary>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+            <div class="form-group">
+              <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>{{ $t('baseAtk') }}</span>
+                <BigNumberInput class="form-input" v-model="hs.baseParams.baseAtk" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+              </label>
+              <input class="form-range" type="range" v-model.number="hs.baseParams.baseAtk" min="10000" max="200000000" step="10000">
+            </div>
+            <div class="form-group">
+              <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>{{ $t('skillCoeff') }}</span>
+                <div style="display:flex;align-items:center;gap:1px">
+                  <input class="inline-num" type="number" step="0.5" :value="+(hs.baseParams.skillCoeff*100).toFixed(1)" @change="e => hs.baseParams.skillCoeff = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <span class="value-display" style="font-size:12px">%</span>
+                </div>
+              </label>
+              <input class="form-range" type="range" v-model.number="hs.baseParams.skillCoeff" min="0.1" max="25" step="0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>{{ $t('critMult') }}</span>
+                <div style="display:flex;align-items:center;gap:1px">
+                  <input class="inline-num" type="number" step="0.5" :value="+(hs.baseParams.critMult*100).toFixed(1)" @change="e => hs.baseParams.critMult = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <span class="value-display" style="font-size:12px">%</span>
+                </div>
+              </label>
+              <input class="form-range" type="range" v-model.number="hs.baseParams.critMult" min="1" max="5" step="0.05">
+            </div>
+            <div class="form-group">
+              <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>{{ $t('atkBonus') }}</span>
+                <div style="display:flex;align-items:center;gap:1px">
+                  <input class="inline-num" type="number" step="0.5" :value="+(hs.baseParams.atkBonus*100).toFixed(1)" @change="e => hs.baseParams.atkBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <span class="value-display" style="font-size:12px">%</span>
+                </div>
+              </label>
+              <input class="form-range" type="range" v-model.number="hs.baseParams.atkBonus" min="-1" max="2.5" step="0.05">
+            </div>
+            <div class="form-group">
+              <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>{{ $t('dmgBonus') }}</span>
+                <div style="display:flex;align-items:center;gap:1px">
+                  <input class="inline-num" type="number" step="0.5" :value="+(hs.baseParams.dmgBonus*100).toFixed(1)" @change="e => hs.baseParams.dmgBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
+                  <span class="value-display" style="font-size:12px">%</span>
+                </div>
+              </label>
+              <input class="form-range" type="range" v-model.number="hs.baseParams.dmgBonus" min="-1" max="2" step="0.05">
+            </div>
+            <div class="form-group" style="display:flex;flex-direction:row;align-items:center;gap:8px;padding-top:4px;">
+              <input type="checkbox" v-model="hs.baseParams.eleAdvantage" id="heatmap-ele" style="width:16px;height:16px;">
+              <label for="heatmap-ele" class="form-label text-xs" style="margin:0;cursor:pointer;">{{ $t('eleAdvantage') }}</label>
+            </div>
+          </div>
+        </details>
       </div>
     </div>
   </div>
@@ -100,6 +160,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import BigNumberInput from '../components/BigNumberInput.vue'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { HeatmapChart } from 'echarts/charts'
