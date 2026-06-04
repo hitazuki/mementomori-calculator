@@ -54,48 +54,56 @@
             <button class="btn btn-sm" :class="ss.baseParams.damageType==='mag' ?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" style="display:flex;justify-content:space-between">
+        <div class="form-group" v-show="ss.sweepKey !== 'atkLevel'">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('atkLevel') }}</span>
-            <span class="text-xs text-muted" v-show="isAtkCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <span class="text-xs text-muted" v-show="isAtkCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
+              <input class="form-input" type="number" v-model.number="ss.atkLevel" @input="onAtkLevelChange" min="1" max="999" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;">
+            </div>
           </label>
-          <input class="form-input" type="number" v-model.number="ss.atkLevel" @input="onAtkLevelChange" min="1" max="999">
+          <input class="form-range" type="range" v-model.number="ss.atkLevel" @input="onAtkLevelChange" min="1" max="999" step="1">
         </div>
-        <div class="grid-2 mb-8">
-          <div class="form-group"><label class="form-label">C_pen</label><BigNumberInput class="form-input" v-model="ss.baseParams.cPen" /></div>
-          <div class="form-group"><label class="form-label">C_pmpen</label><BigNumberInput class="form-input" v-model="ss.baseParams.cPmPen" /></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="display:flex;justify-content:space-between">
+
+        <div class="form-group" v-show="ss.sweepKey !== 'defLevel'">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('defLevel') || $t('defPresetLabel') }}</span>
-            <span class="text-xs text-muted" v-show="isDefCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <span class="text-xs text-muted" v-show="isDefCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
+              <input class="form-input" type="number" v-model.number="ss.defLevel" @input="onDefLevelChange" min="1" max="999" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;">
+            </div>
           </label>
-          <input class="form-input" type="number" v-model.number="ss.defLevel" @input="onDefLevelChange" min="1" max="999">
+          <input class="form-range" type="range" v-model.number="ss.defLevel" @input="onDefLevelChange" min="1" max="999" step="1">
         </div>
-        <div class="grid-2 mb-8">
-          <div class="form-group"><label class="form-label">C_def</label><BigNumberInput class="form-input" v-model="ss.baseParams.cDef" /></div>
-          <div class="form-group"><label class="form-label">C_pmdef</label><BigNumberInput class="form-input" v-model="ss.baseParams.cPmDef" /></div>
-        </div>
+
         
-        <div class="grid-2">
-          <div class="form-group">
-            <label class="form-label">{{ $t('targetDef') }}</label>
-            <BigNumberInput class="form-input" v-model="ss.baseParams.def" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">
-              {{ ss.baseParams.damageType==='phys' ? $t('targetPhysDef') : $t('targetMagDef') }} 
-            </label>
-            <BigNumberInput class="form-input" v-model="ss.baseParams.pmDef" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('pen') }}</label>
-            <BigNumberInput class="form-input" v-model="ss.baseParams.pen" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ $t('pmPen') }}</label>
-            <BigNumberInput class="form-input" v-model="ss.baseParams.pmPen" />
-          </div>
+        <div class="form-group" v-show="ss.sweepKey !== 'def'">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>{{ $t('targetDef') }}</span>
+            <BigNumberInput class="form-input" v-model="ss.baseParams.def" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+          </label>
+          <input class="form-range" type="range" v-model.number="ss.baseParams.def" min="0" max="20000000" step="10000">
+        </div>
+        <div class="form-group" v-show="ss.sweepKey !== 'pmDef'">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>{{ ss.baseParams.damageType==='phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</span>
+            <BigNumberInput class="form-input" v-model="ss.baseParams.pmDef" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+          </label>
+          <input class="form-range" type="range" v-model.number="ss.baseParams.pmDef" min="0" max="20000000" step="10000">
+        </div>
+        <div class="form-group" v-show="ss.sweepKey !== 'pen'">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>{{ $t('pen') }}</span>
+            <BigNumberInput class="form-input" v-model="ss.baseParams.pen" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+          </label>
+          <input class="form-range" type="range" v-model.number="ss.baseParams.pen" min="0" max="30000" step="100">
+        </div>
+        <div class="form-group" v-show="ss.sweepKey !== 'pmPen'">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>{{ $t('pmPen') }}</span>
+            <BigNumberInput class="form-input" v-model="ss.baseParams.pmPen" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+          </label>
+          <input class="form-range" type="range" v-model.number="ss.baseParams.pmPen" min="0" max="80000" step="100">
         </div>
       </div>
     </div>

@@ -46,7 +46,6 @@ export const getSweepVariables = (t_fn = t) => [
   { key: 'defLevel',   label: t_fn('defLevel'), min: 1, max: 999 },
   { key: 'defBonus',   label: t_fn('defBonus'), min: -1, max: 2.5, isBonus: true },
   { key: 'pmDefBonus', label: t_fn('pmDefBonus'), min: -1, max: 2.5, isBonus: true },
-  { key: 'atkBonus',   label: t_fn('atkBonus'), min: -1, max: 2.5, isBonus: true },
 ]
 
 export const getTableVariables = (t_fn = t) => [
