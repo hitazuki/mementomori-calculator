@@ -116,7 +116,8 @@ import VChart from 'vue-echarts'
 import { buildSweepData } from '../engine/damageCalc.js'
 import { getSweepVariables } from '../constants/presets.js'
 import { getCoeffByLevel } from '../constants/levelTable.js'
-import { MORI_THEME, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
+import { getMoriTheme, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
+import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
 
 use([CanvasRenderer, LineChart, TooltipComponent, GridComponent, GraphicComponent])
@@ -198,9 +199,11 @@ const chartOption = computed(() => {
 
   const seriesData = yData.map(r => r[ss.metric])
   const yAxisMax = ss.metric === 'finalDmg' ? null : 100
+  const isDark = currentTheme.value === 'dark'
+  const MORI_THEME = getMoriTheme(isDark)
 
   return {
-    ...baseChartOption(varLabel),
+    ...baseChartOption(varLabel, isDark),
     tooltip: { 
       ...MORI_THEME.tooltip, 
       trigger: 'axis', 
@@ -215,7 +218,7 @@ const chartOption = computed(() => {
       data: xData.map(v=>fmt(v)), 
       axisLabel: MORI_THEME.axisLabel, 
       axisLine: MORI_THEME.axisLine, 
-      splitLine:{show:true,lineStyle:{color:'rgba(255,255,255,0.02)'}} 
+      splitLine:{show:true,lineStyle:{color:isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}} 
     },
     yAxis: { 
       type: 'value', 

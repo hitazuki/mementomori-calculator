@@ -64,7 +64,7 @@
       <div class="card">
         <div class="card-title">🏹 {{ $t('targetDef') }}</div>
         <div class="flex-col gap-8">
-          <div style="display: grid; grid-template-columns: 60px 1fr 1fr 32px; gap: 8px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+          <div style="display: grid; grid-template-columns: 60px 1fr 1fr 32px; gap: 8px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed rgba(var(--color-invert-rgb),0.1);">
             <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $t('buildName') }}</span>
             <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DEF</span>
             <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">P/M.DEF</span>
@@ -148,8 +148,8 @@
   </div>
 
   <!-- Modal for editing build -->
-  <div v-if="cs.editingBuildIdx !== null" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:999; display:flex; align-items:center; justify-content:center;" @mousedown.self="cs.editingBuildIdx = null">
-    <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; padding:20px; width:90%; max-width:400px; box-shadow:0 8px 32px rgba(0,0,0,0.8);">
+  <div v-if="cs.editingBuildIdx !== null" style="position:fixed; inset:0; background:rgba(var(--color-base-rgb),0.85); z-index:999; display:flex; align-items:center; justify-content:center;" @mousedown.self="cs.editingBuildIdx = null">
+    <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; padding:20px; width:90%; max-width:400px; box-shadow:0 8px 32px rgba(var(--color-base-rgb),0.8);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <h3 style="margin:0;font-size: 18px;color:var(--text-primary)">⚙ {{ $t('manualAdjust') }}</h3>
         <button class="btn btn-ghost btn-sm" @click="cs.editingBuildIdx = null" style="padding:0 8px">✕</button>
@@ -193,7 +193,8 @@ import VChart from 'vue-echarts'
 import { calcDamage } from '../engine/damageCalc.js'
 import { getDefBenchmarks, getCoeffByLevel } from '../constants/levelTable.js'
 import { getCompareBuildsDefault } from '../constants/presets.js'
-import { MORI_THEME, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
+import { getMoriTheme, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
+import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
 
 use([CanvasRenderer, BarChart, RadarChart, TooltipComponent, GridComponent, LegendComponent, TitleComponent])
@@ -316,10 +317,12 @@ const chartOption = computed(() => {
   
   const METRICS = getMetrics()
   const metric = METRICS[cs.metric]
+  const isDark = currentTheme.value === 'dark'
+  const MORI_THEME = getMoriTheme(isDark)
   
   if (cs.chartMode === 'bar') {
     return {
-      ...baseChartOption(t('compareTitle') + ' · ' + metric.label),
+      ...baseChartOption(t('compareTitle') + ' · ' + metric.label, '', isDark),
       xAxis: { type: 'category', data: cs.benchmarks.map(b => b.label), axisLabel: MORI_THEME.axisLabel, axisLine: MORI_THEME.axisLine },
       yAxis: { type: 'value', axisLabel: { ...MORI_THEME.axisLabel, formatter: v => `${v}${metric.unit}` }, splitLine: MORI_THEME.splitLine },
       legend: { ...MORI_THEME.legend, bottom: 4, left: 'center', data: results.value.map(r => ({ name: r.name, itemStyle: { color: r.color } })) },
@@ -343,18 +346,16 @@ const chartOption = computed(() => {
     }
   } else {
     // Radar mode
-    const maxVal = cs.metric === 'finalDmg'
-      ? Math.max(...results.value.flatMap(r => r.benchResults.map(x => x.finalDmg))) * 1.1 
-      : 100
+    const maxVal = Math.max(...results.value.flatMap(r => r.benchResults.map(br => br[cs.metric]))) * 1.1
       
     return {
-      ...baseChartOption('Radar · ' + metric.label),
+      ...baseChartOption('Radar · ' + metric.label, '', isDark),
       radar: {
         indicator: cs.benchmarks.map(b => ({ name: b.label, max: maxVal })),
-        name: { textStyle: { color: 'rgba(240,230,200,0.5)', fontSize: 11 } },
-        axisLine: { lineStyle: { color: 'rgba(201,168,76,0.15)' } },
-        splitLine: { lineStyle: { color: 'rgba(201,168,76,0.1)' } },
-        splitArea: { areaStyle: { color: ['rgba(201,168,76,0.02)', 'transparent'] } },
+        name: { textStyle: { color: 'var(--text-muted)', fontSize: 11 } },
+        axisLine: { lineStyle: { color: 'var(--border-hover)' } },
+        splitLine: { lineStyle: { color: 'var(--border-subtle)' } },
+        splitArea: { areaStyle: { color: ['rgba(var(--color-invert-rgb),0.02)', 'transparent'] } },
       },
       legend: { ...MORI_THEME.legend, bottom: 4, left: 'center', data: results.value.map(r => ({ name: r.name, itemStyle: { color: r.color } })) },
       tooltip: MORI_THEME.tooltip,

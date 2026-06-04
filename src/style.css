@@ -1,20 +1,22 @@
 /* ============================================================
-   MementoMori 伤害计算器 — 主样式 (Gothic Dark Gold Theme)
+   MementoMori 浼ゅ璁＄畻鍣?鈥?涓绘牱寮?(Gothic Dark Gold Theme)
    ============================================================ */
-:root {
+:root, [data-theme="dark"] {
+  --color-base-rgb: 0, 0, 0;
+  --color-invert-rgb: 255, 255, 255;
   --bg-base: #0d0b14;
-  --bg-surface: #13101f;
-  --bg-card: rgba(255, 255, 255, 0.04);
-  --bg-card-hover: rgba(255, 255, 255, 0.07);
-  --border-subtle: rgba(201, 168, 76, 0.15);
-  --border-hover: rgba(201, 168, 76, 0.35);
+  --bg-surface: rgba(19, 16, 31, 0.85);
+  --bg-card: rgba(25, 22, 35, 0.88);
+  --bg-card-hover: rgba(35, 32, 45, 0.95);
+  --border-subtle: rgba(212, 186, 112, 0.25);
+  --border-hover: rgba(212, 186, 112, 0.5);
 
-  --gold: #c9a84c;
-  --gold-light: #e8c96a;
-  --gold-dim: rgba(201, 168, 76, 0.25);
-  --purple: #9b59b6;
-  --purple-light: #b983d4;
-  --purple-dim: rgba(155, 89, 182, 0.18);
+  --gold: #d4ba70;
+  --gold-light: #f5df9a;
+  --gold-dim: rgba(212, 186, 112, 0.3);
+  --purple: #866b96;
+  --purple-light: #ab93ba;
+  --purple-dim: rgba(134, 107, 150, 0.25);
 
   --text-primary: #f0e6c8;
   --text-secondary: rgba(240, 230, 200, 0.62);
@@ -32,20 +34,48 @@
   --r-sm: 6px;
   --r-md: 12px;
   --r-lg: 20px;
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.5), 0 1px 0 rgba(201,168,76,0.08);
+  --shadow-card: 0 4px 24px rgba(var(--color-base-rgb),0.5), 0 1px 0 rgba(201,168,76,0.08);
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+  --color-base-rgb: 255, 255, 255;
+  --color-invert-rgb: 0, 0, 0;
+  --bg-base: #f4f3ee;
+  --bg-surface: #e9e6df;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fbfbf9;
+  --border-subtle: rgba(184, 156, 85, 0.3);
+  --border-hover: rgba(184, 156, 85, 0.5);
+
+  --gold: #9e791b;
+  --gold-light: #755912;
+  --gold-dim: rgba(158, 121, 27, 0.25);
+  --purple: #5c436b;
+  --purple-light: #422e4d;
+  --purple-dim: rgba(92, 67, 107, 0.15);
+
+  --text-primary: #3d3532;
+  --text-secondary: rgba(61, 53, 50, 0.7);
+  --text-muted: rgba(61, 53, 50, 0.45);
+
+  --shadow-card: 0 4px 16px rgba(0,0,0,0.06), 0 1px 0 rgba(184, 156, 85, 0.15);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   height: 100%;
-  background: var(--bg-base);
+  background-color: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  display: none;
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -54,18 +84,25 @@ html, body {
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
 /* ── App Shell ── */
-.app-shell { display: flex; height: 100vh; overflow: hidden; }
+.app-shell { 
+  display: flex; height: 100vh; overflow: hidden; 
+  background-color: var(--bg-base);
+  background-image: var(--body-bg-img, none);
+  background-size: cover;
+  background-position: center;
+}
 
-/* ── Sidebar ── */
+/* 鈹€鈹€ Sidebar 鈹€鈹€ */
 .sidebar {
   width: var(--sidebar-w);
-  background: linear-gradient(170deg, #110e1c 0%, #0d0b14 100%);
+  background: var(--bg-surface);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   position: relative;
   z-index: 10;
+  box-shadow: 2px 0 15px rgba(var(--color-base-rgb), 0.5);
 }
 
 .sidebar::after {
@@ -74,17 +111,17 @@ html, body {
   top: 10%; right: 0;
   width: 1px; height: 80%;
   background: linear-gradient(180deg, transparent, var(--gold), transparent);
-  opacity: 0.25;
+  opacity: 0.35;
 }
 
 .sidebar-logo {
-  display: flex; align-items: center; gap: 10px;
-  padding: 18px 14px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 24px 12px 20px 12px;
   border-bottom: 1px solid var(--border-subtle);
 }
 
 .logo-icon {
-  font-size: 28px;
+  font-size: 26px;
   color: var(--gold);
   text-shadow: 0 0 12px var(--gold-dim);
   animation: glow-pulse 3s ease-in-out infinite;
@@ -93,9 +130,9 @@ html, body {
 .logo-title {
   display: block;
   font-family: var(--font-display);
-  font-size: 22px; font-weight: 700;
+  font-size: 19px; font-weight: 700;
   color: var(--gold);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
 }
 
 .logo-sub {
@@ -138,7 +175,7 @@ html, body {
   transition: transform 0.2s var(--ease);
 }
 
-.nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+.nav-item:hover { background: rgba(var(--color-invert-rgb), 0.05); color: var(--text-primary); }
 
 .nav-item.active {
   background: linear-gradient(90deg, rgba(201,168,76,0.14), transparent);
@@ -170,7 +207,7 @@ html, body {
 .formula-label { color: var(--text-muted); }
 .formula-value { color: var(--purple-light); font-weight: 600; }
 
-/* ── Main Content ── */
+/* 鈹€鈹€ Main Content 鈹€鈹€ */
 .main-content { flex: 1; overflow: hidden; position: relative; }
 
 .view {
@@ -183,7 +220,7 @@ html, body {
 }
 .view.active { opacity: 1; pointer-events: all; transform: translateY(0); }
 
-/* ── View Header ── */
+/* 鈹€鈹€ View Header 鈹€鈹€ */
 .view-header { margin-bottom: 20px; }
 .view-title {
   font-family: var(--font-display);
@@ -191,19 +228,20 @@ html, body {
   color: var(--gold);
   margin-bottom: 3px;
   letter-spacing: 0.03em;
+  text-shadow: 0 2px 8px rgba(var(--color-base-rgb), 0.8);
 }
 .view-desc { font-size: 14px; color: var(--text-muted); }
 
-/* ── Cards ── */
+/* 鈹€鈹€ Cards 鈹€鈹€ */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--r-md);
   padding: 18px 20px;
   box-shadow: var(--shadow-card);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 }
-.card:hover { border-color: var(--border-hover); }
+.card:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
 
 .card-title {
   font-size: 15px; font-weight: 600;
@@ -220,14 +258,14 @@ html, body {
   flex-shrink: 0;
 }
 
-/* ── Grid Helpers ── */
+/* 鈹€鈹€ Grid Helpers 鈹€鈹€ */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .grid-sidebar { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
 .grid-sidebar-right { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
 
-/* ── Forms ── */
+/* 鈹€鈹€ Forms 鈹€鈹€ */
 .form-group { margin-bottom: 12px; }
 .form-label {
   display: flex; justify-content: space-between; align-items: center;
@@ -243,8 +281,8 @@ html, body {
 .form-input {
   width: 100%;
   padding: 7px 11px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(var(--color-invert-rgb), 0.05);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.09);
   border-radius: var(--r-sm);
   color: var(--text-primary);
   font-family: var(--font-mono); font-size: 15px;
@@ -264,7 +302,7 @@ html, body {
   width: 100%;
   -webkit-appearance: none;
   height: 4px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(var(--color-invert-rgb), 0.1);
   border-radius: 2px;
   cursor: pointer; outline: none;
 }
@@ -281,8 +319,8 @@ html, body {
 .form-select {
   width: 100%;
   padding: 7px 32px 7px 11px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(var(--color-invert-rgb), 0.05);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.09);
   border-radius: var(--r-sm);
   color: var(--text-primary);
   font-size: 14px; cursor: pointer; outline: none;
@@ -298,7 +336,7 @@ html, body {
   color: var(--text-primary);
 }
 
-/* ── Buttons ── */
+/* 鈹€鈹€ Buttons 鈹€鈹€ */
 .btn {
   padding: 8px 16px;
   border-radius: var(--r-sm); border: none;
@@ -326,7 +364,7 @@ html, body {
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.1);
 }
 .btn-ghost:hover { background: var(--bg-card-hover); color: var(--text-primary); }
 .btn-danger {
@@ -337,9 +375,9 @@ html, body {
 .btn-sm { padding: 5px 11px; font-size: 13px; }
 .btn-sm { padding: 6px 12px; } /* Override button padding to match larger text */
 
-/* ── Stat Boxes ── */
+/* 鈹€鈹€ Stat Boxes 鈹€鈹€ */
 .stat-box {
-  background: rgba(0,0,0,0.35);
+  background: rgba(var(--color-base-rgb), 0.35);
   border: 1px solid var(--border-subtle);
   border-radius: var(--r-sm);
   padding: 14px 12px;
@@ -365,7 +403,7 @@ html, body {
   text-transform: uppercase; letter-spacing: 0.1em;
 }
 
-/* ── Breakdown List ── */
+/* 鈹€鈹€ Breakdown List 鈹€鈹€ */
 .breakdown-list { display: flex; flex-direction: column; gap: 2px; }
 .breakdown-item {
   display: flex; align-items: center; justify-content: space-between;
@@ -373,7 +411,7 @@ html, body {
   border-radius: var(--r-sm);
   font-size: 14px;
 }
-.breakdown-item:hover { background: rgba(255,255,255,0.03); }
+.breakdown-item:hover { background: rgba(var(--color-invert-rgb), 0.03); }
 .breakdown-label { color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
 .breakdown-value { font-family: var(--font-mono); font-weight: 500; color: var(--text-primary); }
 .breakdown-bar {
@@ -384,7 +422,7 @@ html, body {
   transition: width 0.5s var(--ease);
 }
 
-/* ── Tag / Badge ── */
+/* 鈹€鈹€ Tag / Badge 鈹€鈹€ */
 .tag {
   display: inline-flex; align-items: center;
   padding: 2px 8px;
@@ -396,10 +434,10 @@ html, body {
 .tag-red { background: rgba(231,76,60,0.12); color: var(--danger); border: 1px solid rgba(231,76,60,0.22); }
 .tag-green { background: rgba(46,204,113,0.1); color: var(--success); border: 1px solid rgba(46,204,113,0.22); }
 
-/* ── Chart ── */
+/* 鈹€鈹€ Chart 鈹€鈹€ */
 .chart-wrap { width: 100%; position: relative; }
 
-/* ── Data Table ── */
+/* 鈹€鈹€ Data Table 鈹€鈹€ */
 .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .data-table th {
   padding: 8px 12px;
@@ -413,22 +451,22 @@ html, body {
 .data-table th:first-child { text-align: center; }
 .data-table td {
   padding: 7px 12px; text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(var(--color-invert-rgb), 0.04);
   font-family: var(--font-mono);
   color: var(--text-secondary);
   transition: background 0.15s;
 }
 .data-table td:first-child { text-align: center; color: var(--gold); font-weight: 500; }
-.data-table tr:hover td { background: rgba(255,255,255,0.03); }
+.data-table tr:hover td { background: rgba(var(--color-invert-rgb), 0.03); }
 .data-table .cell-high { color: var(--success); }
 .data-table .cell-low { color: var(--danger); }
 
-/* ── Chip row ── */
+/* 鈹€鈹€ Chip row 鈹€鈹€ */
 .chip-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
 .chip {
   padding: 3px 10px; border-radius: 20px;
   font-size: 13px; cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.1);
   background: transparent; color: var(--text-secondary);
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
@@ -437,14 +475,14 @@ html, body {
   background: rgba(201,168,76,0.1);
 }
 
-/* ── Divider ── */
+/* 鈹€鈹€ Divider 鈹€鈹€ */
 .divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
   margin: 14px 0;
 }
 
-/* ── Utils ── */
+/* 鈹€鈹€ Utils 鈹€鈹€ */
 .flex { display: flex; }
 .flex-col { display: flex; flex-direction: column; }
 .items-center { align-items: center; }
@@ -469,12 +507,12 @@ html, body {
 .mt-12 { margin-top: 12px; }
 .scroll-y { overflow-y: auto; }
 
-/* ── Textarea ── */
+/* 鈹€鈹€ Textarea 鈹€鈹€ */
 .form-textarea {
   width: 100%;
   padding: 8px 11px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(var(--color-invert-rgb), 0.05);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.09);
   border-radius: var(--r-sm);
   color: var(--text-primary);
   font-family: var(--font-mono); font-size: 14px;
@@ -486,7 +524,7 @@ html, body {
   box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
 }
 
-/* ── Compare card ── */
+/* 鈹€鈹€ Compare card 鈹€鈹€ */
 .compare-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -507,7 +545,7 @@ html, body {
 }
 .compare-remove:hover { color: var(--danger); }
 
-/* ── Alert ── */
+/* 鈹€鈹€ Alert 鈹€鈹€ */
 .alert {
   padding: 10px 14px;
   border-radius: var(--r-sm);
@@ -524,7 +562,7 @@ html, body {
 /* ── Modal ── */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(var(--color-base-rgb), 0.85);
   z-index: 1000;
   display: flex; align-items: center; justify-content: center;
   padding: 20px;
@@ -541,7 +579,7 @@ html, body {
   width: 100%; max-width: 700px;
   max-height: 85vh;
   display: flex; flex-direction: column;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,168,76,0.1);
+  box-shadow: 0 10px 40px rgba(var(--color-base-rgb), 0.8), 0 0 0 1px rgba(201,168,76,0.1);
   transform: translateY(15px) scale(0.98);
   transition: transform 0.3s var(--ease);
 }
@@ -552,7 +590,7 @@ html, body {
   padding: 16px 24px;
   border-bottom: 1px solid var(--border-subtle);
   display: flex; justify-content: space-between; align-items: center;
-  background: rgba(255,255,255,0.02);
+  background: rgba(var(--color-invert-rgb), 0.02);
   border-radius: var(--r-md) var(--r-md) 0 0;
 }
 .modal-title {
@@ -567,7 +605,7 @@ html, body {
 .modal-body {
   padding: 24px; overflow-y: auto; color: var(--text-secondary); font-size: 15px; line-height: 1.7;
 }
-.modal-body h3 { color: var(--text-primary); margin-top: 20px; margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; }
+.modal-body h3 { color: var(--text-primary); margin-top: 20px; margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid rgba(var(--color-invert-rgb), 0.05); padding-bottom: 6px; }
 .modal-body h3:first-child { margin-top: 0; }
 .modal-body p { margin-bottom: 12px; }
 .modal-body code {
@@ -576,10 +614,10 @@ html, body {
 .modal-body ul { margin-left: 20px; margin-bottom: 12px; }
 .modal-body li { margin-bottom: 6px; }
 .formula-highlight {
-  display: block; padding: 12px; background: rgba(0,0,0,0.4); border-left: 3px solid var(--purple); border-radius: 0 var(--r-sm) var(--r-sm) 0; margin: 12px 0; font-family: var(--font-mono); color: var(--purple-light); font-size: 14px;
+  display: block; padding: 12px; background: rgba(var(--color-base-rgb), 0.4); border-left: 3px solid var(--purple); border-radius: 0 var(--r-sm) var(--r-sm) 0; margin: 12px 0; font-family: var(--font-mono); color: var(--purple-light); font-size: 14px;
 }
 
-/* ── Animations ── */
+/* 鈹€鈹€ Animations 鈹€鈹€ */
 @keyframes glow-pulse {
   0%, 100% { text-shadow: 0 0 6px var(--gold-dim); }
   50% { text-shadow: 0 0 16px rgba(201,168,76,0.5); }
@@ -590,7 +628,7 @@ html, body {
 }
 .animate-fadeup { animation: fadeUp 0.3s ease forwards; }
 
-/* ── Responsive ── */
+/* 鈹€鈹€ Responsive 鈹€鈹€ */
 @media (max-width: 900px) {
   .sidebar { width: 56px; }
   .logo-text, .nav-label, .sidebar-footer { display: none; }
@@ -598,3 +636,4 @@ html, body {
   .grid-sidebar, .grid-sidebar-right { grid-template-columns: 1fr; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
 }
+

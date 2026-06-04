@@ -1,9 +1,9 @@
 export default {
   // Common
-  appTitle: 'MementoMori 伤害计算器',
+  appTitle: 'MementoMori 各种计算器',
   appDesc: 'MementoMori 多维伤害计算与可视化分析：穿透扫描、热力图、多方案对比、拉表导出',
   appName: 'MementoMori',
-  appSub: '伤害计算器',
+  appSub: '各种计算器',
 
   // Navigation
   navCalc: '单体计算',

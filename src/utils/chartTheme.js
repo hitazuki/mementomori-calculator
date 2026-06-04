@@ -1,37 +1,37 @@
 // src/utils/chartTheme.js
 // ECharts 自定义主题：哥特暗金
 
-export const MORI_THEME = {
+export const getMoriTheme = (isDark) => ({
   backgroundColor: 'transparent',
-  textStyle: { fontFamily: 'Inter, sans-serif', color: '#b0a080' },
+  textStyle: { fontFamily: 'Inter, sans-serif', color: isDark ? 'rgba(240, 230, 200, 0.62)' : 'rgba(61, 53, 50, 0.7)' },
   title: {
-    textStyle: { color: '#c9a84c', fontFamily: 'Cinzel, serif', fontSize: 14 },
-    subtextStyle: { color: '#7a6a50' },
+    textStyle: { color: isDark ? '#d4ba70' : '#9e791b', fontFamily: 'Cinzel, serif', fontSize: 14 },
+    subtextStyle: { color: isDark ? 'rgba(240, 230, 200, 0.35)' : 'rgba(61, 53, 50, 0.45)' },
   },
   legend: {
-    textStyle: { color: '#b0a080' },
-    pageTextStyle: { color: '#b0a080' },
+    textStyle: { color: isDark ? 'rgba(240, 230, 200, 0.62)' : 'rgba(61, 53, 50, 0.7)' },
+    pageTextStyle: { color: isDark ? 'rgba(240, 230, 200, 0.62)' : 'rgba(61, 53, 50, 0.7)' },
   },
   tooltip: {
-    backgroundColor: '#1a1628',
-    borderColor: '#c9a84c',
+    backgroundColor: isDark ? 'rgba(19, 16, 31, 0.85)' : '#e9e6df',
+    borderColor: isDark ? 'rgba(212, 186, 112, 0.25)' : 'rgba(184, 156, 85, 0.3)',
     borderWidth: 1,
-    textStyle: { color: '#f0e6c8', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 },
+    textStyle: { color: isDark ? '#f0e6c8' : '#3d3532', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 },
     extraCssText: 'box-shadow: 0 4px 20px rgba(0,0,0,0.6)',
   },
   grid: {
-    borderColor: 'rgba(201,168,76,0.1)',
+    borderColor: isDark ? 'rgba(212, 186, 112, 0.25)' : 'rgba(184, 156, 85, 0.3)',
   },
-  axisLine: { lineStyle: { color: 'rgba(201,168,76,0.25)' } },
-  axisTick: { lineStyle: { color: 'rgba(201,168,76,0.15)' } },
+  axisLine: { lineStyle: { color: isDark ? 'rgba(212, 186, 112, 0.25)' : 'rgba(184, 156, 85, 0.3)' } },
+  axisTick: { lineStyle: { color: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)' } },
   axisLabel: {
-    color: 'rgba(240,230,200,0.5)',
+    color: isDark ? 'rgba(240, 230, 200, 0.6)' : 'rgba(61, 53, 50, 0.6)',
     fontFamily: 'JetBrains Mono, monospace',
     fontSize: 11,
   },
-  splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)', type: 'dashed' } },
-  splitArea: { areaStyle: { color: ['rgba(255,255,255,0.01)', 'transparent'] } },
-}
+  splitLine: { lineStyle: { color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)', type: 'dashed' } },
+  splitArea: { areaStyle: { color: [isDark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)', 'transparent'] } },
+})
 
 // 伤害热力图色阶（低→高 蓝紫金橙红）
 export const HEATMAP_COLORS = [
@@ -58,19 +58,20 @@ export const LINE_COLORS = [
 /**
  * 通用图表基础配置工厂
  */
-export function baseChartOption(titleText, subtitleText = '') {
+export function baseChartOption(titleText, subtitleText = '', isDark = true) {
+  const theme = getMoriTheme(isDark)
   return {
     backgroundColor: 'transparent',
     title: {
       text: titleText,
       subtext: subtitleText,
-      textStyle: MORI_THEME.title.textStyle,
-      subtextStyle: MORI_THEME.title.subtextStyle,
+      textStyle: theme.title.textStyle,
+      subtextStyle: theme.title.subtextStyle,
       top: 8, left: 16,
     },
-    tooltip: MORI_THEME.tooltip,
+    tooltip: theme.tooltip,
     legend: {
-      ...MORI_THEME.legend,
+      ...theme.legend,
       top: 8, right: 16,
     },
     grid: {

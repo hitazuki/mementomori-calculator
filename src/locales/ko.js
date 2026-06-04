@@ -1,9 +1,9 @@
 export default {
   // Common
-  appTitle: '메멘토모리 데미지 계산기',
+  appTitle: '메멘토모리 각종 계산기',
   appDesc: '메멘토모리 다차원 데미지 계산 및 시각화: 방관 스캔, 히트맵, 빌드 비교, 표 출력',
   appName: '메멘토모리',
-  appSub: '데미지 계산기',
+  appSub: '각종 계산기',
 
   // Navigation
   navCalc: '단일 계산',

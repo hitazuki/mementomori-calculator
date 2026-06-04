@@ -51,6 +51,14 @@
     <!-- Main Content -->
     <main class="main-content">
       <div class="global-actions" style="position: absolute; top: 22px; right: 24px; z-index: 100; display: flex; align-items: center; gap: 12px;">
+        <button 
+          @click="toggleTheme" 
+          class="btn btn-ghost" 
+          style="padding: 6px 12px; font-size: 16px; border-color: var(--border-subtle);"
+          :title="currentTheme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'"
+        >
+          {{ currentTheme === 'dark' ? '🌙' : '☀️' }}
+        </button>
         <span style="font-size: 18px;">🌐</span>
         <select 
           class="form-select" 
@@ -77,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLang } from './i18n/index.js'
 
@@ -95,6 +103,13 @@ const currentLanguage = ref(locale.value)
 const changeLanguage = () => {
   setLang(currentLanguage.value)
 }
+
+import { currentTheme, toggleTheme } from './utils/themeStore.js'
+
+onMounted(() => {
+  const basePath = import.meta.env.BASE_URL || '/'
+  document.documentElement.style.setProperty('--body-bg-img', `linear-gradient(to bottom, rgba(var(--color-base-rgb), 0.82), rgba(var(--color-base-rgb), 0.94)), url('${basePath}assets/bg/bg.png')`)
+})
 
 const currentView = ref('calculator')
 

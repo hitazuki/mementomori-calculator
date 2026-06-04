@@ -109,7 +109,8 @@ import VChart from 'vue-echarts'
 
 import { buildHeatmapData } from '../engine/damageCalc.js'
 import { getCoeffByLevel } from '../constants/levelTable.js'
-import { MORI_THEME, HEATMAP_COLORS } from '../utils/chartTheme.js'
+import { getMoriTheme, HEATMAP_COLORS, baseChartOption } from '../utils/chartTheme.js'
+import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
 
 use([CanvasRenderer, HeatmapChart, TooltipComponent, GridComponent, VisualMapComponent, TitleComponent])
@@ -178,8 +179,15 @@ const chartOption = computed(() => {
     cDef: hs.cDef, cPen: hs.cPen,
   })
 
+  const isDark = currentTheme.value === 'dark'
+  const MORI_THEME = getMoriTheme(isDark)
+
   return {
-    backgroundColor: 'transparent',
+    ...baseChartOption(
+      t('heatmapTitle') + `（${hs.mode==='phys'?'DEF':'P.DEF/M.DEF'}）`, 
+      `C_def=${hs.cDef.toLocaleString()} | C_pen=${hs.cPen}`,
+      isDark
+    ),
     title: {
       text: t('heatmapTitle') + `（${hs.mode==='phys'?'DEF':'P.DEF/M.DEF'}）`,
       subtext: `C_def=${hs.cDef.toLocaleString()} | C_pen=${hs.cPen}`,
@@ -199,22 +207,22 @@ const chartOption = computed(() => {
     grid: { top: 72, right: 110, bottom: 60, left: 88 },
     xAxis: {
       type: 'category', name: t('yAxisDef'), nameLocation: 'middle', nameGap: 32,
-      nameTextStyle: { color: 'rgba(240,230,200,0.5)', fontSize: 11 },
+      nameTextStyle: { color: MORI_THEME.axisLabel.color, fontSize: 11 },
       data: xLabels.map(fmt),
       axisLabel: { ...MORI_THEME.axisLabel, rotate: 35 },
-      splitArea: { show: true, areaStyle: { color: ['rgba(255,255,255,0.01)','transparent'] }},
+      splitArea: { show: true, areaStyle: { color: [isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)','transparent'] }},
     },
     yAxis: {
       type: 'category', name: t('xAxisPen'), nameLocation: 'middle', nameGap: 52,
-      nameTextStyle: { color: 'rgba(240,230,200,0.5)', fontSize: 11 },
+      nameTextStyle: { color: MORI_THEME.axisLabel.color, fontSize: 11 },
       data: yLabels.map(fmt),
       axisLabel: MORI_THEME.axisLabel,
-      splitArea: { show: true, areaStyle: { color: ['rgba(255,255,255,0.01)','transparent'] }},
+      splitArea: { show: true, areaStyle: { color: [isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)','transparent'] }},
     },
     visualMap: {
       type: 'continuous', min: 0, max: 100, calculable: true,
       orient: 'vertical', right: 8, top: 'middle',
-      text: ['MAX', 'MIN'], textStyle: { color: 'rgba(240,230,200,0.5)', fontSize: 10 },
+      text: ['MAX', 'MIN'], textStyle: { color: MORI_THEME.axisLabel.color, fontSize: 10 },
       inRange: { color: HEATMAP_COLORS.map(c => c[1]) },
     },
     series: [{ 
@@ -224,11 +232,11 @@ const chartOption = computed(() => {
       label: { 
         show: hs.defSteps <= 16 && hs.penSteps <= 16, 
         fontSize: 9, 
-        color: '#ffffff99', 
+        color: MORI_THEME.textStyle.color, 
         formatter: p => `${p.data[2]}` 
       },
       emphasis: { 
-        itemStyle: { borderWidth: 2, borderColor: '#ffffff80', shadowBlur: 8, shadowColor: 'rgba(255,255,255,0.3)' }
+        itemStyle: { borderWidth: 2, borderColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', shadowBlur: 8, shadowColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }
       },
     }],
   }

@@ -33,25 +33,29 @@
     </div>
 
     <!-- Right Main: Results -->
-    <div style="display: flex; flex-direction: column; gap: 16px; max-height: calc(100vh - 120px); min-width: 0;">
-      <div class="panel" style="padding-bottom: 0; border-bottom: none;">
-        <div style="display: flex; gap: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
-          <button class="btn btn-sm" :class="mainTab === 'colls' ? 'btn-primary' : 'btn-ghost'" @click="mainTab = 'colls'">{{ $t('ui_tab_colls') }}</button>
-          <button class="btn btn-sm" :class="mainTab === 'chars' ? 'btn-primary' : 'btn-ghost'" @click="mainTab = 'chars'">{{ $t('ui_tab_chars') }}</button>
+    <div style="display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 120px); min-width: 0;">
+      <!-- Top Controls -->
+      <div style="display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <!-- Tabs -->
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-sm" :class="mainTab === 'colls' ? 'btn-primary' : 'btn-ghost'" @click="mainTab = 'colls'">{{ $t('ui_tab_colls') }}</button>
+            <button class="btn btn-sm" :class="mainTab === 'chars' ? 'btn-primary' : 'btn-ghost'" @click="mainTab = 'chars'">{{ $t('ui_tab_chars') }}</button>
+          </div>
+          <!-- Algorithms -->
+          <div v-show="mainTab === 'chars'" style="display: flex; gap: 4px;">
+            <button class="btn btn-sm" :class="algo === 1 ? 'btn-primary' : 'btn-ghost'" style="font-size:12px; padding:4px 12px;" @click="algo = 1">{{ $t('ui_algo1') }}</button>
+            <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" style="font-size:12px; padding:4px 12px;" @click="algo = 2">{{ $t('ui_algo2') }}</button>
+            <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" style="font-size:12px; padding:4px 12px;" @click="algo = 3">{{ $t('ui_algo3') }}</button>
+          </div>
         </div>
-        <div v-show="mainTab === 'chars'" style="display: flex; flex-direction: column; gap: 8px; padding-top: 12px; padding-bottom: 12px;">
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn btn-sm" :class="algo === 1 ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="algo = 1">{{ $t('ui_algo1') }}</button>
-            <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="algo = 2">{{ $t('ui_algo2') }}</button>
-            <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="algo = 3">{{ $t('ui_algo3') }}</button>
-          </div>
-          <div style="font-size: 14px; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border-left: 2px solid var(--gold); margin-top: 4px; line-height: 1.5;">
-            {{ $t('ui_algo' + algo + '_desc') }}
-          </div>
+        <!-- Description -->
+        <div v-show="mainTab === 'chars'" style="font-size: 13px; color: var(--text-muted); background: rgba(var(--color-invert-rgb),0.02); border: 1px solid rgba(var(--color-invert-rgb),0.05); padding: 6px 10px; border-radius: 4px; line-height: 1.4;" v-html="$t('ui_algo' + algo + '_desc')">
         </div>
       </div>
       
-      <div class="panel" style="flex: 1; overflow-y: auto;">
+      <!-- Table Panel -->
+      <div class="panel" style="flex: 1; overflow-y: auto; padding: 0;">
         <table class="data-table">
           <thead>
             <tr v-if="mainTab === 'colls'">
@@ -132,12 +136,12 @@
                   </td>
                 </template>
               </tr>
-              <tr v-show="r._expanded" style="background: rgba(0,0,0,0.2);">
-                <td :colspan="mainTab === 'colls' ? 6 : (algo === 3 ? 7 : 5)" style="padding: 16px; border-bottom: 1px solid var(--border-subtle);">
+              <tr v-show="r._expanded" style="background: rgba(var(--color-invert-rgb),0.04);">
+                <td :colspan="mainTab === 'colls' ? 6 : (algo === 3 ? 7 : 5)" style="padding: 16px; background: rgba(var(--color-invert-rgb),0.02);">
                   <div style="display: flex; flex-wrap: wrap; gap: 12px; text-align: left; align-items: stretch;">
                     
                       <!-- Team Characters -->
-                      <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; min-width: min-content;">
+                      <div style="background: rgba(var(--color-invert-rgb),0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(var(--color-invert-rgb),0.05); display: flex; flex-direction: column; min-width: min-content;">
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1; align-content: flex-start; justify-content: center;">
                           <div v-for="c in (r.chars || [r])" :key="c.id" class="char-card">
                             <img :src="getCharIconUrl(c.id)" class="char-card-img" @error="handleImgError" />
@@ -152,7 +156,7 @@
                     <div style="flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-content: flex-start;">
                       
                       <!-- Level Cap Card -->
-                      <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                      <div style="background: rgba(var(--color-invert-rgb),0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(var(--color-invert-rgb),0.05);">
                         <div style="font-weight: bold; margin-bottom: 6px; font-size: 15px; color: var(--text-primary);">
                           🏰 <span style="font-size: 13px; color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
                         </div>
@@ -163,7 +167,7 @@
                       </div>
 
                       <!-- Activation Cards -->
-                      <div v-for="(act, actIndex) in getActivatedList(r)" :key="actIndex" style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                      <div v-for="(act, actIndex) in getActivatedList(r)" :key="actIndex" style="background: rgba(var(--color-invert-rgb),0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(var(--color-invert-rgb),0.05);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px;">
                           <div style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px;">
                             <span style="font-weight: bold; font-size: 15px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="$t(getCol(act).nameKey)">
@@ -349,7 +353,7 @@ function toggleSort(key) {
 
 <style scoped>
 .hover-row:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--color-invert-rgb),0.05);
 }
 
 .char-avatar-group {
@@ -363,8 +367,8 @@ function toggleSort(key) {
   height: 36px;
   border-radius: 50%;
   overflow: hidden;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(var(--color-invert-rgb),0.1);
+  border: 1px solid rgba(var(--color-invert-rgb),0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -373,7 +377,7 @@ function toggleSort(key) {
 }
 .char-avatar:hover {
   transform: scale(1.3);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 8px rgba(var(--color-base-rgb),0.5);
   z-index: 10;
 }
 .char-avatar img {
@@ -409,10 +413,10 @@ function toggleSort(key) {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--color-invert-rgb),0.06);
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(var(--color-invert-rgb),0.05);
   min-width: 72px;
   max-width: 84px;
 }
@@ -421,7 +425,7 @@ function toggleSort(key) {
   height: 52px;
   border-radius: 8px;
   object-fit: cover;
-  background: rgba(255,255,255,0.05);
+  background: rgba(var(--color-invert-rgb),0.05);
 }
 .char-card-name {
   display: flex;
@@ -440,10 +444,10 @@ function toggleSort(key) {
 }
 .char-sub-name {
   font-size: 12px;
-  color: var(--gold);
+  color: var(--text-primary);
   text-align: center;
-  background: rgba(201,168,76,0.1);
-  border: 1px solid rgba(201,168,76,0.2);
+  background: var(--gold-dim);
+  border: 1px solid var(--border-subtle);
   padding: 2px 4px;
   border-radius: 4px;
   line-height: 1.1;
