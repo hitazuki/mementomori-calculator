@@ -175,11 +175,11 @@
         </div>
         <div class="grid-2">
             <div class="form-group">
-              <label class="form-label">{{ $t('atkBonus') }}</label>
+              <label class="form-label">{{ $t('atkBonus') }}(%)</label>
               <input class="form-input" type="number" v-model.number="editingBuild.atkBonusPct">
             </div>
             <div class="form-group">
-              <label class="form-label">{{ $t('dmgBonus') }}</label>
+              <label class="form-label">{{ $t('dmgBonus') }}(%)</label>
               <input class="form-input" type="number" v-model.number="editingBuild.dmgBonusPct">
             </div>
         </div>
