@@ -35,26 +35,26 @@ export const getCompareBuildsDefault = () => [
   { id: 4, name: t('buildNamePrefix') + '4', pen: 11950, pmPen: 31200, dmgBonus: 0.3,  defBonus: -0.2, pmDefBonus: -0.2 },
 ]
 
-export const getSweepVariables = () => [
-  { key: 'pen',        label: t('xPen'), min: 0, max: 20000 },
-  { key: 'pmPen',      label: t('pmPen'), min: 0, max: 60000 },
-  { key: 'def',        label: t('targetDef'), min: 0, max: 20000000 },
-  { key: 'pmDef',      label: t('targetPhysDef') + '/' + t('targetMagDef'), min: 0, max: 20000000 },
-  { key: 'atkLevel',   label: t('atkLevel'), min: 1, max: 999 },
-  { key: 'defLevel',   label: t('defLevel'), min: 1, max: 999 },
+export const getSweepVariables = (t_fn = t) => [
+  { key: 'pen',        label: t_fn('xPen'), min: 0, max: 20000 },
+  { key: 'pmPen',      label: t_fn('pmPen'), min: 0, max: 60000 },
+  { key: 'def',        label: t_fn('targetDef'), min: 0, max: 20000000 },
+  { key: 'pmDef',      label: t_fn('targetPhysDef') + '/' + t_fn('targetMagDef'), min: 0, max: 20000000 },
+  { key: 'atkLevel',   label: t_fn('atkLevel'), min: 1, max: 999 },
+  { key: 'defLevel',   label: t_fn('defLevel'), min: 1, max: 999 },
 ]
 
-export const getTableVariables = () => [
-  { key: 'baseAtk',    label: t('baseAtk'),   defaultValues: '1000000, 2000000, 5000000, 10000000' },
-  { key: 'skillCoeff', label: t('skillCoeff'),   defaultValues: '3.0, 5.25, 8.0, 15.0' },
-  { key: 'def',        label: t('targetDef'), defaultValues: '1000000, 3000000, 5000000, 10000000, 20000000' },
-  { key: 'pmDef',      label: t('targetPhysDef') + '/' + t('targetMagDef'), defaultValues: '1000000, 5000000, 10000000, 20000000' },
-  { key: 'pen',        label: t('pen'), defaultValues: '0, 4950, 11950, 18950, 25000' },
-  { key: 'pmPen',      label: t('pmPen'), defaultValues: '0, 15000, 31200, 55000, 80000' },
-  { key: 'dmgBonus',   label: t('dmgBonus'),   defaultValues: '0, 0.3, 0.5, 0.8, 1.0, 1.5' },
-  { key: 'defBonus',   label: t('defBonus'), defaultValues: '-0.8, -0.6, -0.4, -0.2, 0' },
-  { key: 'pmDefBonus', label: t('pmDefBonus'), defaultValues: '-0.8, -0.6, -0.4, -0.2, 0' },
-  { key: 'critMult',   label: t('critMult'),   defaultValues: '1.0, 1.5, 2.0, 2.5, 3.0' },
-  { key: 'atkLevel',   label: t('atkLevel'), defaultValues: '240, 300, 400, 500, 600' },
-  { key: 'defLevel',   label: t('defLevel'), defaultValues: '240, 300, 400, 500, 600' },
+export const getTableVariables = (t_fn = t) => [
+  { key: 'baseAtk',    label: t_fn('baseAtk'),   defaultValues: '1000000, 2000000, 5000000, 10000000' },
+  { key: 'skillCoeff', label: t_fn('skillCoeff'),   defaultValues: '3.0, 5.25, 8.0, 15.0' },
+  { key: 'def',        label: t_fn('targetDef'), defaultValues: '1000000, 3000000, 5000000, 10000000, 20000000' },
+  { key: 'pmDef',      label: t_fn('targetPhysDef') + '/' + t_fn('targetMagDef'), defaultValues: '1000000, 5000000, 10000000, 20000000' },
+  { key: 'pen',        label: t_fn('pen'), defaultValues: '0, 4950, 11950, 18950, 25000' },
+  { key: 'pmPen',      label: t_fn('pmPen'), defaultValues: '0, 15000, 31200, 55000, 80000' },
+  { key: 'dmgBonus',   label: t_fn('dmgBonus'),   defaultValues: '0, 0.3, 0.5, 0.8, 1.0, 1.5' },
+  { key: 'defBonus',   label: t_fn('defBonus'), defaultValues: '-0.8, -0.6, -0.4, -0.2, 0' },
+  { key: 'pmDefBonus', label: t_fn('pmDefBonus'), defaultValues: '-0.8, -0.6, -0.4, -0.2, 0' },
+  { key: 'critMult',   label: t_fn('critMult'),   defaultValues: '1.0, 1.5, 2.0, 2.5, 3.0' },
+  { key: 'atkLevel',   label: t_fn('atkLevel'), defaultValues: '240, 300, 400, 500, 600' },
+  { key: 'defLevel',   label: t_fn('defLevel'), defaultValues: '240, 300, 400, 500, 600' },
 ]

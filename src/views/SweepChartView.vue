@@ -125,7 +125,7 @@ const { t } = useI18n()
 const store = useCalcStore()
 
 const chartRef = ref(null)
-const SWEEP_VARIABLES = getSweepVariables()
+const SWEEP_VARIABLES = computed(() => getSweepVariables(t))
 
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
 
@@ -146,10 +146,10 @@ const ss = reactive({
   defLevel: store.defLevel,
 })
 
-const currentSweepVarLabel = computed(() => SWEEP_VARIABLES.find(v=>v.key===ss.sweepKey)?.label || ss.sweepKey)
+const currentSweepVarLabel = computed(() => SWEEP_VARIABLES.value.find(v=>v.key===ss.sweepKey)?.label || ss.sweepKey)
 
 function onSweepKeyChange() {
-  const preset = SWEEP_VARIABLES.find(v => v.key === ss.sweepKey)
+  const preset = SWEEP_VARIABLES.value.find(v => v.key === ss.sweepKey)
   if (preset) {
     ss.min = preset.min
     ss.max = preset.max

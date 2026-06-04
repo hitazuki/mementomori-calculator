@@ -145,7 +145,7 @@ import { useCalcStore } from '../store/calculator.js'
 const { t } = useI18n()
 const store = useCalcStore()
 
-const TABLE_VARIABLES = getTableVariables()
+const TABLE_VARIABLES = computed(() => getTableVariables(t))
 
 const getMetrics = () => ({
   dmgRatePct: { label: t('overallPenRate'), fmt: v => `${v.toFixed(2)}%` },
@@ -172,16 +172,16 @@ const ts = reactive({
   metric: 'dmgRatePct',
 })
 
-const xLabel = computed(() => TABLE_VARIABLES.find(v => v.key === ts.xKey)?.label || ts.xKey)
-const yLabel = computed(() => TABLE_VARIABLES.find(v => v.key === ts.yKey)?.label || ts.yKey)
+const xLabel = computed(() => TABLE_VARIABLES.value.find(v => v.key === ts.xKey)?.label || ts.xKey)
+const yLabel = computed(() => TABLE_VARIABLES.value.find(v => v.key === ts.yKey)?.label || ts.yKey)
 
 function onXKeyChange() {
-  const preset = TABLE_VARIABLES.find(v => v.key === ts.xKey)
+  const preset = TABLE_VARIABLES.value.find(v => v.key === ts.xKey)
   if (preset) ts.xValsStr = preset.defaultValues
 }
 
 function onYKeyChange() {
-  const preset = TABLE_VARIABLES.find(v => v.key === ts.yKey)
+  const preset = TABLE_VARIABLES.value.find(v => v.key === ts.yKey)
   if (preset) ts.yValsStr = preset.defaultValues
 }
 
