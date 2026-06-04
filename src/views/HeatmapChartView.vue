@@ -163,7 +163,7 @@ const hs = reactive({
     skillCoeff: store.skillCoeff,
     dmgBonus: store.dmgBonus,
     critMult: store.critMult,
-    eleAdvantage: store.eleAdvantage,
+    eleAdvantage: false, // 无UI控制，固定为false
     damageType: store.damageType
   }
 })

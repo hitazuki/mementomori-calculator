@@ -182,7 +182,8 @@ const getMetrics = () => ({
 })
 
 const getBaseParams = () => ({
-  ...store.$state
+  ...store.$state,
+  eleAdvantage: false // 无UI控制，固定为false
 })
 
 const ts = reactive({

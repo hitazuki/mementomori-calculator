@@ -231,11 +231,11 @@ function setDamageType(type) {
   }
 }
 
-const baseResult = computed(() => calcDamage({ ...store.$state }))
+const baseResult = computed(() => calcDamage({ ...store.$state, eleAdvantage: false }))
 
 // --- Tornado Chart Logic ---
 const tornadoResults = computed(() => {
-  const baseParams = store.$state
+  const baseParams = { ...store.$state, eleAdvantage: false }
   const bd = baseResult.value.finalDmg
   if (bd <= 0) return []
 
@@ -268,7 +268,8 @@ const waterfallData = computed(() => {
     pen: store.pen + deltas.pen,
     pmPen: store.pmPen + deltas.pmPen,
     defBonus: store.defBonus + deltas.defBonus,
-    pmDefBonus: store.pmDefBonus + deltas.pmDefBonus
+    pmDefBonus: store.pmDefBonus + deltas.pmDefBonus,
+    eleAdvantage: false // 无UI控制，固定为false
   }
   const res = calcDamage(params)
   
