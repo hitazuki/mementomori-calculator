@@ -58,7 +58,11 @@
               <th>{{ $t('ui_rank') }}</th>
               <th>{{ $t('ui_collection') }}</th>
               <th>{{ $t('ui_characters') }}</th>
-              <th>{{ $t('ui_cost') }}</th>
+              <th @click="toggleSort('cost')" style="cursor:pointer; user-select:none;">
+                {{ $t('ui_cost') }}
+                <span v-if="collSortBy !== 'cost'" style="opacity:0.3;font-size: 12px;margin-left:4px;">↕</span>
+                <span v-else style="font-size: 12px;color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
+              </th>
               <th @click="toggleSort('score')" style="cursor:pointer; user-select:none;">
                 {{ $t('ui_score') }} 
                 <span v-if="collSortBy !== 'score'" style="opacity:0.3;font-size: 12px;margin-left:4px;">↕</span>
@@ -317,8 +321,8 @@ watch([result, mainTab, collSortBy, collSortDesc], () => {
   if (mainTab.value === 'colls') {
     list = [...result.value.collections]
     list.sort((a, b) => {
-      let valA = collSortBy.value === 'ce' ? a.ce : a.totalScore
-      let valB = collSortBy.value === 'ce' ? b.ce : b.totalScore
+      let valA = collSortBy.value === 'ce' ? a.ce : (collSortBy.value === 'cost' ? a.cost : a.totalScore)
+      let valB = collSortBy.value === 'ce' ? b.ce : (collSortBy.value === 'cost' ? b.cost : b.totalScore)
       return collSortDesc.value ? valB - valA : valA - valB
     })
   } else {
@@ -337,7 +341,7 @@ function toggleSort(key) {
     collSortDesc.value = !collSortDesc.value
   } else {
     collSortBy.value = key
-    collSortDesc.value = true
+    collSortDesc.value = key === 'cost' ? false : true
   }
 }
 
