@@ -163,7 +163,7 @@
               <span v-if="tData.isDiff" style="color:var(--purple-light)">⚖ {{ tData.name }}</span>
               <span v-else style="color:var(--gold)">📊 {{ tData.build.name }}</span>
             </div>
-            <div style="overflow-x:auto">
+            <div class="table-scroll-container">
               <table class="data-table">
                 <thead>
                   <tr>
@@ -462,5 +462,52 @@ function downloadCsv() {
 .table-title-input:focus {
   border-bottom: 1px solid var(--gold);
   background: rgba(255, 255, 255, 0.03);
+}
+
+.table-scroll-container {
+  max-height: 480px;
+  overflow: auto;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Enable sticky table headers and solid backgrounds */
+.table-scroll-container :deep(.data-table) {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-scroll-container :deep(.data-table th) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.12)), var(--bg-card);
+  box-shadow: inset 0 -1px 0 var(--border-subtle);
+  border-bottom: none;
+}
+
+/* Enable sticky first column (Y-axis labels) */
+.table-scroll-container :deep(.data-table th:first-child),
+.table-scroll-container :deep(.data-table td:first-child) {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--bg-card);
+  box-shadow: inset -1px 0 0 rgba(var(--color-invert-rgb), 0.08);
+}
+
+.table-scroll-container :deep(.data-table th:first-child) {
+  z-index: 15;
+  background: linear-gradient(rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.12)), var(--bg-card);
+  box-shadow: inset -1px -1px 0 var(--border-subtle);
+}
+
+/* Row Hover styles with solid sticky background overlays */
+.table-scroll-container :deep(.data-table tr:hover td) {
+  background: rgba(var(--color-invert-rgb), 0.03);
+}
+
+.table-scroll-container :deep(.data-table tr:hover td:first-child) {
+  background: linear-gradient(rgba(var(--color-invert-rgb), 0.03), rgba(var(--color-invert-rgb), 0.03)), var(--bg-card);
 }
 </style>
