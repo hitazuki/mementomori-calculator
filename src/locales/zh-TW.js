@@ -180,8 +180,8 @@ export default {
   atkLevel: '攻擊方等級',
   defLevel: '防守方等級',
 
-  scenarioPveEarly: 'PvE (20~22章) 5M防',
-  scenarioPveMid: 'PvE (23~24章) 10M防',
+  scenarioPveEarly: '模板1',
+  scenarioPveMid: '模板2',
   scenarioPvpMage: 'PvP (法師對決)',
   scenarioPvpTank: 'PvP (打大肉)',
   scenarioGuildBoss: '公會戰 Boss',

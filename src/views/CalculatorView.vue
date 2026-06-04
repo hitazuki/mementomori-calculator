@@ -2,23 +2,20 @@
   <div class="view-header animate-fadeup">
     <h1 class="view-title">{{ $t('calcTitle') }}</h1>
     <p class="view-desc">{{ $t('calcDesc') }}</p>
-    <div style="margin-top: 12px;">
+    <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
       <button class="btn btn-secondary btn-sm" @click="showFormulaModal = true">
         <span style="font-size: 16px;">💡</span> {{ $t('calcFormulaBtn') }}
       </button>
+      <button 
+        v-for="preset in scenarioPresets" 
+        :key="preset.id"
+        class="chip" 
+        :title="preset.desc"
+        @click="applyPreset(preset)"
+      >
+        {{ preset.label }}
+      </button>
     </div>
-  </div>
-
-  <div class="chip-row animate-fadeup">
-    <button 
-      v-for="preset in scenarioPresets" 
-      :key="preset.id"
-      class="chip" 
-      :title="preset.desc"
-      @click="applyPreset(preset)"
-    >
-      {{ preset.label }}
-    </button>
   </div>
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">

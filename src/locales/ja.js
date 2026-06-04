@@ -173,8 +173,8 @@ export default {
   atkLevel: '攻撃側レベル',
   defLevel: '防御側レベル',
 
-  scenarioPveEarly: 'PvE (20~22章) 5M防',
-  scenarioPveMid: 'PvE (23~24章) 10M防',
+  scenarioPveEarly: 'テンプレート 1',
+  scenarioPveMid: 'テンプレート 2',
   scenarioPvpMage: 'PvP (魔法対決)',
   scenarioPvpTank: 'PvP (対タンク)',
   scenarioGuildBoss: 'ギルドボス',

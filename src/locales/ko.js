@@ -173,8 +173,8 @@ export default {
   atkLevel: '공격자 레벨',
   defLevel: '방어자 레벨',
 
-  scenarioPveEarly: 'PvE (20~22장) 5M 방어',
-  scenarioPveMid: 'PvE (23~24장) 10M 방어',
+  scenarioPveEarly: '템플릿 1',
+  scenarioPveMid: '템플릿 2',
   scenarioPvpMage: 'PvP (마법사 대결)',
   scenarioPvpTank: 'PvP (탱커 잡기)',
   scenarioGuildBoss: '길드 보스',

@@ -7,6 +7,7 @@ export const getScenarioPresets = () => [
     label: t('scenarioPveEarly'),
     desc: t('scenarioDescPveEarly'),
     params: {
+      atkLevel: 240, defLevel: 240,
       baseAtk: 13_000_000, skillCoeff: 5.25,
       def: 1_699_102, pmDef: 3_150_893,
       pen: 11950, pmPen: 47700,
@@ -19,6 +20,7 @@ export const getScenarioPresets = () => [
     label: t('scenarioPveMid'),
     desc: t('scenarioDescPveMid'),
     params: {
+      atkLevel: 500, defLevel: 500,
       baseAtk: 50_000_000, skillCoeff: 5.25,
       def: 5_000_000, pmDef: 10_000_000,
       pen: 18950, pmPen: 55000,

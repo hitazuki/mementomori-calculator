@@ -179,8 +179,8 @@ export default {
   atkLevel: 'Attacker Level',
   defLevel: 'Defender Level',
 
-  scenarioPveEarly: 'PvE (Ch20~22) 5M DEF',
-  scenarioPveMid: 'PvE (Ch23~24) 10M DEF',
+  scenarioPveEarly: 'Template 1',
+  scenarioPveMid: 'Template 2',
   scenarioPvpMage: 'PvP (Mage Duel)',
   scenarioPvpTank: 'PvP (Tank Buster)',
   scenarioGuildBoss: 'Guild Boss',
