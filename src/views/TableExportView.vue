@@ -4,8 +4,8 @@
     <p class="view-desc">{{ $t('tableDesc') }}</p>
   </div>
 
-  <div class="grid-sidebar animate-fadeup" style="align-items:start">
-    <div class="flex-col gap-12">
+  <div class="grid-sidebar export-layout animate-fadeup">
+    <div class="flex-col gap-12 export-sidebar">
       <!-- Variables -->
       <div class="card">
         <div class="card-title">{{ $t('exportVariables') || '📐 Variables' }}</div>
@@ -132,8 +132,8 @@
     </div>
 
     <!-- Main Output -->
-    <div class="flex-col gap-12" style="min-width:0">
-      <div class="card" style="overflow:hidden; display:flex; flex-direction:column;">
+    <div class="flex-col gap-12 export-main" style="min-width:0">
+      <div class="card" style="display:flex; flex-direction:column;">
         <div class="flex justify-between items-center mb-12" style="flex-wrap:wrap; gap:12px;">
           <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:240px;">
             <span style="font-size: 18px;">📊</span>
@@ -464,20 +464,47 @@ function downloadCsv() {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.table-scroll-container {
-  max-height: 480px;
-  overflow: auto;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+/* Layout scroll rules */
+@media (min-width: 1025px) {
+  .export-layout {
+    height: calc(100vh - 130px);
+    overflow: hidden;
+    align-items: stretch !important;
+  }
+  .export-sidebar {
+    max-height: 100%;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .export-main {
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding-right: 6px;
+  }
+  .table-scroll-container {
+    overflow: visible;
+    max-height: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .table-scroll-container {
+    overflow-x: auto;
+    overflow-y: visible;
+    max-height: none;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+  }
 }
 
 /* Enable sticky table headers and solid backgrounds */
-.table-scroll-container :deep(.data-table) {
+:deep(.data-table) {
   border-collapse: separate;
   border-spacing: 0;
 }
 
-.table-scroll-container :deep(.data-table th) {
+:deep(.data-table th) {
   position: sticky;
   top: 0;
   z-index: 10;
@@ -487,8 +514,8 @@ function downloadCsv() {
 }
 
 /* Enable sticky first column (Y-axis labels) */
-.table-scroll-container :deep(.data-table th:first-child),
-.table-scroll-container :deep(.data-table td:first-child) {
+:deep(.data-table th:first-child),
+:deep(.data-table td:first-child) {
   position: sticky;
   left: 0;
   z-index: 5;
@@ -496,18 +523,27 @@ function downloadCsv() {
   box-shadow: inset -1px 0 0 rgba(var(--color-invert-rgb), 0.08);
 }
 
-.table-scroll-container :deep(.data-table th:first-child) {
+:deep(.data-table th:first-child) {
   z-index: 15;
   background: linear-gradient(rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.12)), var(--bg-card);
   box-shadow: inset -1px -1px 0 var(--border-subtle);
 }
 
 /* Row Hover styles with solid sticky background overlays */
-.table-scroll-container :deep(.data-table tr:hover td) {
+:deep(.data-table tr:hover td) {
   background: rgba(var(--color-invert-rgb), 0.03);
 }
 
-.table-scroll-container :deep(.data-table tr:hover td:first-child) {
+:deep(.data-table tr:hover td:first-child) {
   background: linear-gradient(rgba(var(--color-invert-rgb), 0.03), rgba(var(--color-invert-rgb), 0.03)), var(--bg-card);
+}
+</style>
+
+<style>
+/* Global style to disable view scrolling when Table Export page is active */
+@media (min-width: 1025px) {
+  .app-shell:has(.export-layout) .view {
+    overflow: hidden !important;
+  }
 }
 </style>
