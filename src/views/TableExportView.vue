@@ -207,12 +207,20 @@ const ts = reactive({
   yKey: 'pen',
   xValsStr: '1000000, 3000000, 5000000, 10000000, 20000000, 50000000',
   yValsStr: '0, 4950, 11950, 18950',
-  builds: [{
-    id: Date.now(),
-    name: t('buildNamePrefix') + ' 1',
-    params: getBaseParams(),
-    _expanded: false
-  }],
+  builds: [
+    {
+      id: Date.now(),
+      name: t('buildNamePrefix') + ' 1',
+      params: getBaseParams(),
+      _expanded: false
+    },
+    {
+      id: Date.now() + 1,
+      name: t('buildNamePrefix') + ' 2',
+      params: getBaseParams(),
+      _expanded: false
+    }
+  ],
   metric: 'dmgRatePct',
 })
 
@@ -256,12 +264,20 @@ function removeBuild(idx) {
 }
 
 function resetDefault() {
-  ts.builds = [{
-    id: Date.now(),
-    name: t('buildNamePrefix') + ' 1',
-    params: getBaseParams(),
-    _expanded: false
-  }]
+  ts.builds = [
+    {
+      id: Date.now(),
+      name: t('buildNamePrefix') + ' 1',
+      params: getBaseParams(),
+      _expanded: false
+    },
+    {
+      id: Date.now() + 1,
+      name: t('buildNamePrefix') + ' 2',
+      params: getBaseParams(),
+      _expanded: false
+    }
+  ]
 }
 
 function parseVals(str) {
