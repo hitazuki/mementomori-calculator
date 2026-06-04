@@ -64,9 +64,9 @@
               </div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('baseAtk') }}</label>
                 <BigNumberInput class="form-input" v-model="b.params.baseAtk" /></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('atkBonus') }}</label>
+              <div class="form-group"><label class="form-label text-xs">{{ $t('atkBonus') }}(%)</label>
                 <input class="form-input" type="number" :value="(b.params.atkBonus*100).toFixed(0)" @input="e => b.params.atkBonus = parseFloat(e.target.value)/100||0"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('dmgBonus') }}</label>
+              <div class="form-group"><label class="form-label text-xs">{{ $t('dmgBonus') }}(%)</label>
                 <input class="form-input" type="number" :value="(b.params.dmgBonus*100).toFixed(0)" @input="e => b.params.dmgBonus = parseFloat(e.target.value)/100||0"></div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('targetDef') }}</label><BigNumberInput class="form-input" v-model="b.params.def" /></div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('defBonus') }}(%)</label>
