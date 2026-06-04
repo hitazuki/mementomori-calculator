@@ -12,6 +12,7 @@ export const useCalcStore = defineStore('calculator', {
     cPen: 1725,
     cPmDef: 1382434,
     cPmPen: 16660,
+    atkBonus: 0,
     dmgBonus: 0.3,
     defBonus: 0,
     pmDefBonus: 0,

@@ -1,7 +1,5 @@
 export default {
   // Common
-  appTitle: '메멘토모리 각종 계산기',
-  appDesc: '메멘토모리 다차원 데미지 계산 및 시각화: 방관 스캔, 히트맵, 빌드 비교, 표 출력',
   appName: '메멘토모리',
   appSub: '각종 계산기',
 
@@ -10,6 +8,7 @@ export default {
   navSweep: '단일 변수 스캔',
   navHeatmap: '이변수 히트맵',
   navCompare: '빌드 비교',
+  navTornado: '한계 이익 분석',
   navTable: '표 출력',
 
   formula: '계산식:',
@@ -31,7 +30,6 @@ export default {
   formulaModalNote: '참고: 방어력 감소/증가(방어력 보너스%)는 관통이 계산되기 전에 대상의 기본 방어력에 직접 적용됩니다. 공식 구조는 doc/damage/excel_formulas.txt 의 이론적 분석에서 파생되었습니다.',
   
   formulaModalTargetPmDef: '대상 물/마방',
-  formulaModalBonusIncl: '(속성 상성 포함)',
   formulaModalEleTrigger: '발동 시 1, 아닐 시 0',
   formulaModalBdmgDesc: '최종 데미지 증가 계수 (뎀증 및 속성 포함)',
   formulaModalRdefDesc: '방어 경로 통과율 / 물/마방 경로 통과율',
@@ -41,16 +39,36 @@ export default {
   sweepDesc: '단일 변수의 변화 범위를 지정하여 수익 곡선을 스캔하고 생성합니다 (최종 데미지, 경감률 등의 지표 전환 지원).',
   heatmapTitle: '🔥 이변수 히트맵',
   heatmapDesc: '다양한 방어력과 관통의 교차점에서 종합 대미지 감소율을 시각화하여 최적의 관통 임계값을 찾습니다.',
-  hmCalcMode: '계산 모드',
   compareTitle: '⚖ 빌드 비교',
   compareDesc: '여러 스탯 빌드("고공격력 저관통" vs "저공격력 고관통")를 설정하고 최종 데미지 및 통과율을 비교합니다.',
-  tableTitle: '📋 관통 데이터 표 출력',
+  tornadoTitle: '🌪 한계 이익 분석 (토네이도 차트)',
+  tornadoDesc: '다양한 속성 증감분이 최종 데미지에 미치는 영향을 퍼센트로 비교하여 가장 효율적인 업그레이드 경로를 찾습니다.',
+  tabTornado: '🌪 토네이도 차트',
+  tabWaterfall: '🌊 워터폴 차트',
+  baseState: '⚙ 기본 스탯',
+  upgradesToTest: '📈 속성 증분 분석',
+  increment: '증분',
+  baseDmgDisplay: '현재 기준 데미지:',
+  basePassRateDisplay: '기준 통과율:',
+  tornadoInstTitle: '💡 토네이도 차트 설명',
+  tornadoInstDesc: '토네이도 차트는 **배타적인 업그레이드 옵션들을 비교**하는 데 사용됩니다. 시스템은 왼쪽의 "증분"을 기본 스탯에 **개별적으로** 적용하여 이익을 계산합니다.<br/>가장 상단에 금색으로 강조된 막대는 현재 환경에서 가장 높은 수익률(증가율)을 가진 최적의 선택을 나타냅니다.',
+  waterfallInstTitle: '💡 워터폴 차트 설명',
+  waterfallInstDesc: '워터폴 차트는 **기본 스탯에 왼쪽의 증분을 적용**한 후 데미지가 어떻게 단계적으로 증감하는지를 보여줍니다.<br/>초록색 막대는 승수 이익을 나타내고 빨간색 막대는 데미지 손실을 나타냅니다. 빨간색 막대의 높이를 통해 어떤 방어층이 데미지를 가장 많이 흡수하는지 직관적으로 판단할 수 있습니다.',
+  tooltipFinalDmg: '최종 데미지:',
+  tooltipIncrease: '상승폭:',
+  wfCatBase: '기본 이론 데미지',
+  wfCatAtkBonus: '공격력 보너스',
+  wfCatDmgBonus: '데미지 보너스',
+  wfCatCrit: '크리티컬 증폭',
+  wfCatDefMit: '방어력 손실',
+  wfCatPmDefMit: '물/마방 손실',
+  wfCatFinal: '최종 데미지',
+  tableTitle: '📋 관통 수익 표 출력',
   tableDesc: '고정된 파라미터로 다양한 방어 관통 수치의 결과 표를 생성합니다. CSV 또는 HTML 표로 복사할 수 있습니다.',
 
   // Form Sections
   atkParams: '⚔ 공격자 스탯',
   defParams: '🛡 방어자 스탯',
-  atkPresetLabel: '공격자 레벨 프리셋 (관통 상수에 영향)',
   defPresetLabel: '방어자 레벨 프리셋 (방어 상수에 영향)',
   manualAdjust: '수동 조절',
 
@@ -58,11 +76,13 @@ export default {
   baseAtk: '공격력 (ATK)',
   skillCoeff: '스킬 계수',
   atkType: '공격 타입',
-  typePhys: '물리 공격 (P.DEF)',
-  typeMag: '마법 공격 (M.DEF)',
-  pen: '방어 관통 (PEN)',
+  typePhys: '물리 공격',
+  typeMag: '마법 공격',
+  pen: '방어 관통',
+  defLevel: '방어 레벨',
+  atkBonus: '공격력 보너스 (%)',
   pmPen: '물/마방 관통',
-  dmgBonus: '데미지 증가',
+  dmgBonus: '데미지 보너스 (%)',
   critMult: '크리티컬 배율',
   eleAdvantage: '속성 상성',
   cPenDefLabel: '관통 상수 (공격자 레벨에 영향 받음)',
@@ -70,7 +90,7 @@ export default {
   cPenConst: 'C_pen 상수',
   cPmPenConst: 'C_pmpen 상수',
   
-  targetDef: '대상 방어력 (DEF)',
+  targetDef: '대상 방어력',
   targetPhysDef: '대상 물리 방어력',
   targetMagDef: '대상 마법 방어력',
   defBonus: '방어력 보너스',
@@ -94,7 +114,6 @@ export default {
   mulDefPass: '× 방어 통과',
   mulPmPass: '× 물/마방 통과',
   mulCrit: '× 크리티컬',
-  mulFaction: '× 속성 상성',
 
   // Quick Table
   quickTableTitle: '📐 빠른 확인: 방어 관통 × 대상 방어력',
@@ -104,31 +123,18 @@ export default {
   quickTableHeadXPm: '물/마방 관통↓ / 대상 물/마방→',
 
   // Sweep Chart
-  xPen: '방어 관통 (PEN)',
-  yFinalDmg: '최종 데미지',
+  xPen: '방어 관통',
   scanRange: '스캔 범위',
-  minVal: '최소값',
   maxVal: '최대값',
   minVar: '최소 {var}',
   maxVar: '최대 {var}',
   stepSpan: '간격',
-  addTargetDef: '+ 대상 방어력 곡선 추가',
-  defLine: '방 {def}',
-  scanNotice: '매개변수를 변경하면 자동으로 다시 계산되어 곡선이 그려집니다.',
 
   // Heatmap Chart
-  defRange: '방어력 구간',
-  defStep: '방어 간격',
-  penRange: '관통 구간',
-  penStep: '관통 간격',
-  genHeatmap: '히트맵 생성',
-  heatmapLoading: '계산 중...',
   hmAxisConfig: '축 설정',
   xAxisConfig: 'X축 변수',
   yAxisConfig: 'Y축 변수',
   hmFixedParams: '고정 매개변수 (전역 상수)',
-  xAxisPen: '방어 관통 (PEN)',
-  yAxisDef: '대상 방어력 (DEF)',
 
   // Compare Panel
   addBuild: '+ 빌드 추가',
@@ -136,32 +142,10 @@ export default {
   buildNamePrefix: '빌드 ',
   benchNamePrefix: '대상 ',
   buildName: '빌드 이름',
-  buildBaseAtk: '공격력',
-  buildPen: '관통',
-  buildPmPen: '물/마 관통',
-  buildBonus: '뎀증',
   benchName: '대상 이름',
-  benchDef: '방어력',
-  benchPmDef: '물/마방',
-  evalMetric: '평가 지표',
-  metricFinalDmg: '최종 데미지',
-  metricDmgRate: '통과율 (%)',
-  removeTitle: '삭제',
 
   // Table Export
-  tableCols: '표시 열',
-  colPen: '방어 관통',
-  colFinal: '최종 데미지',
-  colDiff: '데미지 증가량',
-  colRatio: '데미지 증가율',
-  colRate: '통과율',
-  colDr1: '방어 경감',
-  colDr2: '마법 경감',
-  colEff1: '유효 방어',
-  colEff2: '유효 물마방',
-  genTable: '데이터 생성',
   copyCSV: 'CSV 복사',
-  copyTable: 'HTML 표 복사',
   copied: '클립보드에 복사되었습니다!',
   exportVariables: '📐 변수 설정',
   exportXAxis: 'X축',
@@ -173,14 +157,12 @@ export default {
   exportResetDefault: '기본값으로 초기화',
 
   // Presets & Levels
-  lv: 'Lv',
   atkLevel: '공격자 레벨',
   defLevel: '방어자 레벨',
 
   scenarioPveEarly: '템플릿 1',
   scenarioPveMid: '템플릿 2',
-  scenarioPvpMage: 'PvP (마법사 대결)',
-  scenarioPvpTank: 'PvP (탱커 잡기)',
+
   scenarioGuildBoss: '길드 보스',
   
   // Mysterium Panel
@@ -223,7 +205,6 @@ export default {
 
   scenarioDescPveEarly: '방어 5M, 물마방 5M, 기본 관통 11950',
   scenarioDescPveMid: '방어 10M, 물/마방 10M, 높은 상수 요구',
-  scenarioDescPvpMage: '낮은 방어력, 높은 관통 불필요',
-  scenarioDescPvpTank: '매우 높은 방어력, 극한의 관통 필요',
+
   scenarioDescGuildBoss: '방어 2M, 방어 깎기 유효, 화력 집중',
 }

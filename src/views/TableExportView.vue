@@ -55,16 +55,19 @@
             </div>
             
             <div class="grid-2" v-show="b._expanded" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,0.1)">
-              <div class="form-group"><label class="form-label text-xs">{{ $t('baseAtk') }}</label><input class="form-input" type="number" v-model.number="b.params.baseAtk"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('dmgBonus') }}(%)</label>
+              <div class="form-group"><label class="form-label text-xs">{{ $t('baseAtk') }}</label>
+                <BigNumberInput class="form-input" v-model="b.params.baseAtk" /></div>
+              <div class="form-group"><label class="form-label text-xs">{{ $t('atkBonus') }}</label>
+                <input class="form-input" type="number" :value="(b.params.atkBonus*100).toFixed(0)" @input="e => b.params.atkBonus = parseFloat(e.target.value)/100||0"></div>
+              <div class="form-group"><label class="form-label text-xs">{{ $t('dmgBonus') }}</label>
                 <input class="form-input" type="number" :value="(b.params.dmgBonus*100).toFixed(0)" @input="e => b.params.dmgBonus = parseFloat(e.target.value)/100||0"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('targetDef') }}</label><input class="form-input" type="number" v-model.number="b.params.def"></div>
+              <div class="form-group"><label class="form-label text-xs">{{ $t('targetDef') }}</label><BigNumberInput class="form-input" v-model="b.params.def" /></div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('defBonus') }}(%)</label>
                 <input class="form-input" type="number" :value="(b.params.defBonus*100).toFixed(0)" @input="e => b.params.defBonus = parseFloat(e.target.value)/100||0"></div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('pmDefBonus') }}(%)</label>
                 <input class="form-input" type="number" :value="(b.params.pmDefBonus*100).toFixed(0)" @input="e => b.params.pmDefBonus = parseFloat(e.target.value)/100||0"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('pen') }}</label><input class="form-input" type="number" v-model.number="b.params.pen"></div>
-              <div class="form-group"><label class="form-label text-xs">{{ $t('pmPen') }}</label><input class="form-input" type="number" v-model.number="b.params.pmPen"></div>
+              <div class="form-group"><label class="form-label text-xs">{{ $t('pen') }}</label><BigNumberInput class="form-input" v-model="b.params.pen" /></div>
+              <div class="form-group"><label class="form-label text-xs">{{ $t('pmPen') }}</label><BigNumberInput class="form-input" v-model="b.params.pmPen" /></div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('atkLevel') }}</label>
                 <input class="form-input" type="number" v-model.number="b.params.atkLevel" @input="onBuildAtkLevelChange(b)"></div>
               <div class="form-group"><label class="form-label text-xs">{{ $t('defLevel') }}</label>
@@ -137,6 +140,7 @@
 <script setup>
 import { reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import BigNumberInput from '../components/BigNumberInput.vue'
 import { buildCrossTable } from '../engine/damageCalc.js'
 import { getTableVariables } from '../constants/presets.js'
 import { getCoeffByLevel } from '../constants/levelTable.js'
@@ -333,3 +337,12 @@ function downloadCsv() {
   URL.revokeObjectURL(url)
 }
 </script>
+
+<style scoped>
+.grid-2 .form-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+</style>

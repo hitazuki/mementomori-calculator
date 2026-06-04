@@ -62,8 +62,8 @@
           <input class="form-input" type="number" v-model.number="ss.atkLevel" @input="onAtkLevelChange" min="1" max="999">
         </div>
         <div class="grid-2 mb-8">
-          <div class="form-group"><label class="form-label">C_pen</label><input class="form-input" type="number" v-model.number="ss.baseParams.cPen"></div>
-          <div class="form-group"><label class="form-label">C_pmpen</label><input class="form-input" type="number" v-model.number="ss.baseParams.cPmPen"></div>
+          <div class="form-group"><label class="form-label">C_pen</label><BigNumberInput class="form-input" v-model="ss.baseParams.cPen" /></div>
+          <div class="form-group"><label class="form-label">C_pmpen</label><BigNumberInput class="form-input" v-model="ss.baseParams.cPmPen" /></div>
         </div>
         <div class="form-group">
           <label class="form-label" style="display:flex;justify-content:space-between">
@@ -73,29 +73,28 @@
           <input class="form-input" type="number" v-model.number="ss.defLevel" @input="onDefLevelChange" min="1" max="999">
         </div>
         <div class="grid-2 mb-8">
-          <div class="form-group"><label class="form-label">C_def</label><input class="form-input" type="number" v-model.number="ss.baseParams.cDef"></div>
-          <div class="form-group"><label class="form-label">C_pmdef</label><input class="form-input" type="number" v-model.number="ss.baseParams.cPmDef"></div>
+          <div class="form-group"><label class="form-label">C_def</label><BigNumberInput class="form-input" v-model="ss.baseParams.cDef" /></div>
+          <div class="form-group"><label class="form-label">C_pmdef</label><BigNumberInput class="form-input" v-model="ss.baseParams.cPmDef" /></div>
         </div>
         
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">{{ $t('targetDef') }} <span class="value-display">{{ fmt(ss.baseParams.def) }}</span></label>
-            <input class="form-input" type="number" v-model.number="ss.baseParams.def">
+            <label class="form-label">{{ $t('targetDef') }}</label>
+            <BigNumberInput class="form-input" v-model="ss.baseParams.def" />
           </div>
           <div class="form-group">
             <label class="form-label">
               {{ ss.baseParams.damageType==='phys' ? $t('targetPhysDef') : $t('targetMagDef') }} 
-              <span class="value-display">{{ fmt(ss.baseParams.pmDef) }}</span>
             </label>
-            <input class="form-input" type="number" v-model.number="ss.baseParams.pmDef">
+            <BigNumberInput class="form-input" v-model="ss.baseParams.pmDef" />
           </div>
           <div class="form-group">
-            <label class="form-label">{{ $t('pen') }} <span class="value-display">{{ fmt(ss.baseParams.pen) }}</span></label>
-            <input class="form-input" type="number" v-model.number="ss.baseParams.pen">
+            <label class="form-label">{{ $t('pen') }}</label>
+            <BigNumberInput class="form-input" v-model="ss.baseParams.pen" />
           </div>
           <div class="form-group">
-            <label class="form-label">{{ $t('pmPen') }} <span class="value-display">{{ fmt(ss.baseParams.pmPen) }}</span></label>
-            <input class="form-input" type="number" v-model.number="ss.baseParams.pmPen">
+            <label class="form-label">{{ $t('pmPen') }}</label>
+            <BigNumberInput class="form-input" v-model="ss.baseParams.pmPen" />
           </div>
         </div>
       </div>
@@ -106,6 +105,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import BigNumberInput from '../components/BigNumberInput.vue'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'

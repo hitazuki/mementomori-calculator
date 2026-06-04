@@ -12,7 +12,7 @@ export const getScenarioPresets = () => [
       def: 1_699_102, pmDef: 3_150_893,
       pen: 11950, pmPen: 47700,
       cDef: 147654, cPmDef: 256027, cPen: 873, cPmPen: 10718,
-      dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, eleAdvantage: false, damageType: 'phys',
+      atkBonus: 0, dmgBonus: 0.3, defBonus: 0, pmDefBonus: 0, critMult: 1.5, eleAdvantage: false, damageType: 'phys',
     }
   },
   {
@@ -25,16 +25,16 @@ export const getScenarioPresets = () => [
       def: 5_000_000, pmDef: 10_000_000,
       pen: 18950, pmPen: 55000,
       cDef: 834953, cPmDef: 1382434, cPen: 1725, cPmPen: 16660,
-      dmgBonus: 0.8, defBonus: -0.2, pmDefBonus: -0.2, critMult: 2.0, eleAdvantage: true, damageType: 'phys',
+      atkBonus: 0, dmgBonus: 0.8, defBonus: -0.2, pmDefBonus: -0.2, critMult: 2.0, eleAdvantage: true, damageType: 'phys',
     }
   }
 ]
 
 export const getCompareBuildsDefault = () => [
-  { id: 1, name: t('buildNamePrefix') + '1', pen: 11950, pmPen: 31200, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
-  { id: 2, name: t('buildNamePrefix') + '2',  pen: 4950,  pmPen: 48500, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
-  { id: 3, name: t('buildNamePrefix') + '3',   pen: 11950, pmPen: 31200, dmgBonus: 0.8,  defBonus: 0, pmDefBonus: 0 },
-  { id: 4, name: t('buildNamePrefix') + '4', pen: 11950, pmPen: 31200, dmgBonus: 0.3,  defBonus: -0.2, pmDefBonus: -0.2 },
+  { id: 1, name: t('buildNamePrefix') + '1', pen: 11950, pmPen: 31200, atkBonus: 0, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
+  { id: 2, name: t('buildNamePrefix') + '2',  pen: 4950,  pmPen: 48500, atkBonus: 0, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
+  { id: 3, name: t('buildNamePrefix') + '3',   pen: 11950, pmPen: 31200, atkBonus: 0, dmgBonus: 0.8,  defBonus: 0, pmDefBonus: 0 },
+  { id: 4, name: t('buildNamePrefix') + '4', pen: 11950, pmPen: 31200, atkBonus: 0, dmgBonus: 0.3,  defBonus: -0.2, pmDefBonus: -0.2 },
 ]
 
 export const getSweepVariables = (t_fn = t) => [
@@ -46,6 +46,7 @@ export const getSweepVariables = (t_fn = t) => [
   { key: 'defLevel',   label: t_fn('defLevel'), min: 1, max: 999 },
   { key: 'defBonus',   label: t_fn('defBonus'), min: -1, max: 2.5, isBonus: true },
   { key: 'pmDefBonus', label: t_fn('pmDefBonus'), min: -1, max: 2.5, isBonus: true },
+  { key: 'atkBonus',   label: t_fn('atkBonus'), min: -1, max: 2.5, isBonus: true },
 ]
 
 export const getTableVariables = (t_fn = t) => [

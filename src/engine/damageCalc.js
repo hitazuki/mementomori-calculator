@@ -17,6 +17,7 @@ export function calcDamageRate(def, pen, cDef, cPen) {
  */
 export function calcDamage({
   baseAtk      = 1000000,
+  atkBonus     = 0,
   skillCoeff   = 5.25,
   def          = 5000000,   // 目标防御力(DEF)
   pmDef        = 5000000,   // 目标物理/魔法防御力(P.DEF / M.DEF)
@@ -32,7 +33,8 @@ export function calcDamage({
   critMult     = 1.5,
   eleAdvantage = false,
 }) {
-  const rawDmg = baseAtk * skillCoeff
+  const actualAtk = baseAtk * (1 + atkBonus)
+  const rawDmg = actualAtk * skillCoeff
 
   // 减防/加防作用于目标的最终面板防御值
   const actualDef   = Math.max(0, def   * (1 + defBonus))

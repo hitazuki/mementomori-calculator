@@ -94,6 +94,7 @@ import CalculatorView from './views/CalculatorView.vue'
 import SweepChartView from './views/SweepChartView.vue'
 import HeatmapChartView from './views/HeatmapChartView.vue'
 import ComparePanelView from './views/ComparePanelView.vue'
+import TornadoChartView from './views/TornadoChartView.vue'
 import TableExportView from './views/TableExportView.vue'
 import MysteriumPanelView from './views/MysteriumPanelView.vue'
 
@@ -118,6 +119,7 @@ const viewMap = {
   sweep: SweepChartView,
   heatmap: HeatmapChartView,
   compare: ComparePanelView,
+  tornado: TornadoChartView,
   table: TableExportView,
   mysterium: MysteriumPanelView
 }
@@ -128,6 +130,7 @@ const navDamageItems = [
   { id: 'calculator', icon: '🎯', i18nLabel: 'navCalc', i18nTitle: 'navCalc' },
   { id: 'sweep', icon: '📈', i18nLabel: 'navSweep', i18nTitle: 'navSweep' },
   { id: 'heatmap', icon: '🔥', i18nLabel: 'navHeatmap', i18nTitle: 'navHeatmap' },
+  { id: 'tornado', icon: '🌪', i18nLabel: 'navTornado', i18nTitle: 'navTornado' },
   { id: 'compare', icon: '⚖', i18nLabel: 'navCompare', i18nTitle: 'navCompare' },
   { id: 'table', icon: '📋', i18nLabel: 'navTable', i18nTitle: 'navTable' }
 ]

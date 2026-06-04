@@ -10,8 +10,8 @@
       <div class="card">
         <div class="card-title">⚙ {{ $t('manualAdjust') }} {{ $t('ui_common') || '(Common)' }}</div>
         <div class="form-group">
-          <label class="form-label">{{ $t('baseAtk') }} <span class="value-display">{{ fmt(store.baseAtk) }}</span></label>
-          <input class="form-input" type="number" v-model.number="store.baseAtk" min="0">
+          <label class="form-label">{{ $t('baseAtk') }}</label>
+          <BigNumberInput class="form-input" v-model="store.baseAtk" />
         </div>
         <div class="form-group">
           <label class="form-label">{{ $t('skillCoeff') }} <span class="value-display">{{ (store.skillCoeff*100).toFixed(0) }}%</span></label>
@@ -64,21 +64,29 @@
       <div class="card">
         <div class="card-title">🏹 {{ $t('targetDef') }}</div>
         <div class="flex-col gap-8">
-          <div style="display: grid; grid-template-columns: 60px 1fr 1fr 32px; gap: 8px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed rgba(var(--color-invert-rgb),0.1);">
-            <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $t('buildName') }}</span>
-            <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">DEF</span>
-            <span style="font-size: 15px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">P/M.DEF</span>
-            <span></span>
-          </div>
           <div 
             v-for="(b, i) in cs.benchmarks" 
             :key="i"
-            style="display: grid; grid-template-columns: 60px 1fr 1fr 32px; gap: 8px; align-items: center; margin-bottom: 8px;"
+            style="background: rgba(var(--color-invert-rgb), 0.02); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px;"
           >
-            <span class="text-gold text-mono text-xs" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ b.label }}</span>
-            <input class="form-input" type="number" v-model.number="b.def" style="min-width:0; padding:7px 6px;" placeholder="DEF">
-            <input class="form-input" type="number" v-model.number="b.pmDef" style="min-width:0; padding:7px 6px;" placeholder="P/M.DEF">
-            <button class="btn btn-danger btn-sm" @click="removeBench(i)" style="width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; line-height:1;">×</button>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <input type="text" v-model="b.label" style="background: transparent; border: none; border-bottom: 1px dashed var(--gold-dim); color: var(--gold); font-family: var(--font-mono); font-size: 14px; font-weight: 600; outline: none; width: 140px; padding: 2px 4px;" placeholder="Name">
+              <button class="btn btn-ghost btn-sm" @click="removeBench(i)" style="padding: 0 8px; height: 24px; color: var(--danger); font-size: 14px; line-height: 1;">✕</button>
+            </div>
+            <div class="grid-2" style="gap: 8px;">
+              <div class="flex-col">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2px;">
+                  <span style="font-size: 11px; color: var(--text-muted);">DEF</span>
+                </div>
+                <BigNumberInput class="form-input" v-model="b.def" style="min-width:0; padding:5px 8px; font-size:13px;" placeholder="DEF" />
+              </div>
+              <div class="flex-col">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2px;">
+                  <span style="font-size: 11px; color: var(--text-muted);">P/M.DEF</span>
+                </div>
+                <BigNumberInput class="form-input" v-model="b.pmDef" style="min-width:0; padding:5px 8px; font-size:13px;" placeholder="P/M.DEF" />
+              </div>
+            </div>
           </div>
         </div>
         <button class="btn btn-ghost btn-sm mt-8 w-full" @click="addBench">{{ $t('addBench') }}</button>
@@ -86,7 +94,7 @@
     </div>
 
     <!-- Main Right Content -->
-    <div class="flex-col gap-12">
+    <div class="flex-col gap-12" style="position: sticky; top: 24px; z-index: 10; min-width: 0;">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
           <div style="display:flex;gap:6px">
@@ -148,42 +156,53 @@
   </div>
 
   <!-- Modal for editing build -->
-  <div v-if="cs.editingBuildIdx !== null" style="position:fixed; inset:0; background:rgba(var(--color-base-rgb),0.85); z-index:999; display:flex; align-items:center; justify-content:center;" @mousedown.self="cs.editingBuildIdx = null">
-    <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; padding:20px; width:90%; max-width:400px; box-shadow:0 8px 32px rgba(var(--color-base-rgb),0.8);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+  <Teleport to="body">
+    <div v-if="cs.editingBuildIdx !== null" style="position:fixed; inset:0; background:rgba(var(--color-base-rgb),0.85); z-index:9999; display:flex; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;" @mousedown.self="cs.editingBuildIdx = null">
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; width:100%; max-width:400px; box-shadow:0 8px 32px rgba(var(--color-base-rgb),0.8); display:flex; flex-direction:column; max-height: 100%;">
+      <div style="display:flex;justify-content:space-between;align-items:center; padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;">
         <h3 style="margin:0;font-size: 18px;color:var(--text-primary)">⚙ {{ $t('manualAdjust') }}</h3>
         <button class="btn btn-ghost btn-sm" @click="cs.editingBuildIdx = null" style="padding:0 8px">✕</button>
       </div>
       
-      <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;flex-direction:column;gap:8px; padding: 0 20px 20px; overflow-y: auto;">
         <div class="form-group"><label class="form-label">{{ $t('buildName') }}</label>
           <input class="form-input" type="text" v-model="editingBuild.name"></div>
         <div class="grid-2">
           <div class="form-group"><label class="form-label">{{ $t('pen') }}</label>
-            <input class="form-input" type="number" v-model.number="editingBuild.pen" min="0"></div>
+            <BigNumberInput class="form-input" v-model="editingBuild.pen" /></div>
           <div class="form-group"><label class="form-label">{{ $t('pmPen') }}</label>
-            <input class="form-input" type="number" v-model.number="editingBuild.pmPen" min="0"></div>
+            <BigNumberInput class="form-input" v-model="editingBuild.pmPen" /></div>
         </div>
         <div class="grid-2">
-          <div class="form-group"><label class="form-label">{{ $t('dmgBonus') }}%</label>
-            <input class="form-input" type="number" v-model.number="editingBuild.dmgBonusPct" min="0"></div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('atkBonus') }}</label>
+              <input class="form-input" type="number" v-model.number="editingBuild.atkBonusPct">
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ $t('dmgBonus') }}</label>
+              <input class="form-input" type="number" v-model.number="editingBuild.dmgBonusPct">
+            </div>
+        </div>
+        <div class="grid-2">
           <div class="form-group"><label class="form-label">{{ $t('eleAdvantage') }}</label>
             <div style="display:flex;align-items:center;height:32px"><input type="checkbox" v-model="editingBuild.eleAdvantage" style="width:16px;height:16px"></div></div>
-        </div>
-        <div class="grid-2">
           <div class="form-group"><label class="form-label">{{ $t('defBonus') }}%</label>
             <input class="form-input" type="number" v-model.number="editingBuild.defBonusPct"></div>
+        </div>
+        <div class="grid-2">
           <div class="form-group"><label class="form-label">{{ $t('pmDefBonus') }}%</label>
             <input class="form-input" type="number" v-model.number="editingBuild.pmDefBonusPct"></div>
         </div>
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import BigNumberInput from '../components/BigNumberInput.vue'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart, RadarChart } from 'echarts/charts'
@@ -227,8 +246,11 @@ const editingBuild = computed(() => {
     get name() { return b.name }, set name(v) { b.name = v },
     get pen() { return b.pen }, set pen(v) { b.pen = v },
     get pmPen() { return b.pmPen }, set pmPen(v) { b.pmPen = v },
-    get eleAdvantage() { return b.eleAdvantage }, set eleAdvantage(v) { b.eleAdvantage = v },
+    get atkBonus() { return b.atkBonus }, set atkBonus(v) { b.atkBonus = v },
+    get dmgBonus() { return b.dmgBonus }, set dmgBonus(v) { b.dmgBonus = v },
+    get atkBonusPct() { return (b.atkBonus * 100).toFixed(0) }, set atkBonusPct(v) { b.atkBonus = parseFloat(v) / 100 || 0 },
     get dmgBonusPct() { return (b.dmgBonus * 100).toFixed(0) }, set dmgBonusPct(v) { b.dmgBonus = parseFloat(v) / 100 || 0 },
+    get eleAdvantage() { return b.eleAdvantage }, set eleAdvantage(v) { b.eleAdvantage = v },
     get defBonusPct() { return (b.defBonus * 100).toFixed(0) }, set defBonusPct(v) { b.defBonus = parseFloat(v) / 100 || 0 },
     get pmDefBonusPct() { return (b.pmDefBonus * 100).toFixed(0) }, set pmDefBonusPct(v) { b.pmDefBonus = parseFloat(v) / 100 || 0 },
   }
@@ -249,6 +271,7 @@ function addBuild() {
     name: `${t('buildNamePrefix')} ${cs.builds.length + 1}`, 
     pen: 18950, 
     pmPen: 31200, 
+    atkBonus: 0,
     dmgBonus: 0.3, 
     defBonus: 0, 
     pmDefBonus: 0, 
@@ -305,6 +328,7 @@ const results = computed(() => {
       cPen: store.cPen,
       cPmDef: store.cPmDef, 
       cPmPen: store.cPmPen,
+      atkBonus: build.atkBonus || 0,
       dmgBonus: build.dmgBonus, 
       defBonus: build.defBonus || 0, 
       pmDefBonus: build.pmDefBonus || 0,

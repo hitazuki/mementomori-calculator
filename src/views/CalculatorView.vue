@@ -35,25 +35,31 @@
         <div class="text-xs text-muted mb-8">{{ $t('cPenDefLabel') }}</div>
         <div class="grid-2 items-end">
           <div class="form-group">
-            <label class="form-label">{{ $t('cPenConst') }} <span class="value-display">{{ store.cPen }}</span></label>
-            <input class="form-input" type="number" v-model.number="store.cPen" min="1">
+            <label class="form-label">{{ $t('cPenConst') }}</label>
+            <BigNumberInput class="form-input" v-model="store.cPen" />
           </div>
           <div class="form-group">
-            <label class="form-label">{{ $t('cPmPenConst') }} <span class="value-display">{{ store.cPmPen }}</span></label>
-            <input class="form-input" type="number" v-model.number="store.cPmPen" min="1">
+            <label class="form-label">{{ $t('cPmPenConst') }}</label>
+            <BigNumberInput class="form-input" v-model="store.cPmPen" />
           </div>
         </div>
         
         <div class="divider"></div>
         
         <div class="form-group">
-          <label class="form-label">{{ $t('baseAtk') }} <span class="value-display">{{ fmt(store.baseAtk) }}</span></label>
-          <input class="form-input" type="number" v-model.number="store.baseAtk" min="0">
+          <label class="form-label">{{ $t('baseAtk') }}</label>
+          <BigNumberInput class="form-input" v-model="store.baseAtk" />
         </div>
         
         <div class="form-group">
-          <label class="form-label">{{ $t('skillCoeff') }} <span class="value-display">{{ fmtPct(store.skillCoeff, 0) }}</span></label>
-          <input class="form-range" type="range" v-model.number="store.skillCoeff" min="1" max="20" step="0.25">
+          <label class="form-label" style="display:flex;justify-content:space-between">
+            <span>{{ $t('skillCoeff') }}</span>
+            <div style="display:flex;align-items:center;gap:1px">
+              <input class="inline-num" type="number" step="0.5" :value="+(store.skillCoeff*100).toFixed(1)" @change="e => store.skillCoeff = parseFloat(e.target.value)/100||0">
+              <span class="value-display">%</span>
+            </div>
+          </label>
+          <input class="form-range" type="range" v-model.number="store.skillCoeff" min="1" max="20" step="0.05">
         </div>
         
         <div class="form-group">
@@ -66,24 +72,48 @@
         
         <div class="grid-2 items-end">
           <div class="form-group">
-            <label class="form-label">{{ $t('pen') }} <span class="value-display">{{ store.pen.toLocaleString() }}</span></label>
-            <input class="form-input" type="number" v-model.number="store.pen" min="0">
+            <label class="form-label">{{ $t('pen') }}</label>
+            <BigNumberInput class="form-input" v-model="store.pen" />
           </div>
           <div class="form-group">
-            <label class="form-label">{{ $t('pmPen') }} <span class="value-display">{{ store.pmPen.toLocaleString() }}</span></label>
-            <input class="form-input" type="number" v-model.number="store.pmPen" min="0">
+            <label class="form-label">{{ $t('pmPen') }}</label>
+            <BigNumberInput class="form-input" v-model="store.pmPen" />
           </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">{{ $t('dmgBonus') }} <span class="value-display">{{ fmtPct(store.dmgBonus) }}</span></label>
-          <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1.0" max="2.0" step="0.05">
         </div>
         
         <div class="grid-2 items-end">
           <div class="form-group">
-            <label class="form-label">{{ $t('critMult') }} <span class="value-display">{{ fmtPct(store.critMult) }}</span></label>
-            <input class="form-range" type="range" v-model.number="store.critMult" min="1.0" max="5" step="0.1">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('atkBonus') }}</span>
+              <div style="display:flex;align-items:center;gap:1px">
+                <input class="inline-num" type="number" step="0.5" :value="+(store.atkBonus*100).toFixed(1)" @change="e => store.atkBonus = parseFloat(e.target.value)/100||0">
+                <span class="value-display">%</span>
+              </div>
+            </label>
+            <input class="form-range" type="range" v-model.number="store.atkBonus" min="-1.0" max="2.5" step="0.05">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('dmgBonus') }}</span>
+              <div style="display:flex;align-items:center;gap:1px">
+                <input class="inline-num" type="number" step="0.5" :value="+(store.dmgBonus*100).toFixed(1)" @change="e => store.dmgBonus = parseFloat(e.target.value)/100||0">
+                <span class="value-display">%</span>
+              </div>
+            </label>
+            <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1.0" max="2.0" step="0.05">
+          </div>
+        </div>
+        
+        <div class="grid-2 items-end">
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('critMult') }}</span>
+              <div style="display:flex;align-items:center;gap:1px">
+                <input class="inline-num" type="number" step="0.5" :value="+(store.critMult*100).toFixed(1)" @change="e => store.critMult = parseFloat(e.target.value)/100||0">
+                <span class="value-display">%</span>
+              </div>
+            </label>
+            <input class="form-range" type="range" v-model.number="store.critMult" min="1.0" max="5" step="0.05">
           </div>
           <div class="form-group" style="display:flex;align-items:center;padding-bottom:6px">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
@@ -109,12 +139,12 @@
         <div class="text-xs text-muted mb-8">{{ $t('cDefDefLabel') }}</div>
         <div class="grid-2 items-end">
           <div class="form-group">
-            <label class="form-label">{{ $t('cDefConst') }} <span class="value-display">{{ store.cDef.toLocaleString() }}</span></label>
-            <input class="form-input" type="number" v-model.number="store.cDef" min="1">
+            <label class="form-label">{{ $t('cDefConst') }}</label>
+            <BigNumberInput class="form-input" v-model="store.cDef" />
           </div>
           <div class="form-group">
-            <label class="form-label">{{ $t('cPmDefConst') }} <span class="value-display">{{ store.cPmDef.toLocaleString() }}</span></label>
-            <input class="form-input" type="number" v-model.number="store.cPmDef" min="1">
+            <label class="form-label">{{ $t('cPmDefConst') }}</label>
+            <BigNumberInput class="form-input" v-model="store.cPmDef" />
           </div>
         </div>
         
@@ -123,21 +153,33 @@
         <div class="grid-2 items-end">
           <div class="form-group">
             <label class="form-label">{{ $t('targetDef') }}</label>
-            <input class="form-input" type="number" v-model.number="store.def" min="0">
+            <BigNumberInput class="form-input" v-model="store.def" />
           </div>
           <div class="form-group">
             <label class="form-label">{{ store.damageType === 'phys' ? $t('targetPhysDef') : $t('targetMagDef') }}</label>
-            <input class="form-input" type="number" v-model.number="store.pmDef" min="0">
+            <BigNumberInput class="form-input" v-model="store.pmDef" />
           </div>
         </div>
         
         <div class="grid-2 items-end">
           <div class="form-group">
-            <label class="form-label">{{ $t('defBonus') }} <span class="value-display">{{ fmtPct(store.defBonus) }}</span></label>
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('defBonus') }}</span>
+              <div style="display:flex;align-items:center;gap:1px">
+                <input class="inline-num" type="number" step="0.5" :value="+(store.defBonus*100).toFixed(1)" @change="e => store.defBonus = parseFloat(e.target.value)/100||0">
+                <span class="value-display">%</span>
+              </div>
+            </label>
             <input class="form-range" type="range" v-model.number="store.defBonus" min="-1.0" max="2.5" step="0.05">
           </div>
           <div class="form-group">
-            <label class="form-label">{{ $t('pmDefBonus') }} <span class="value-display">{{ fmtPct(store.pmDefBonus) }}</span></label>
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              <span>{{ $t('pmDefBonus') }}</span>
+              <div style="display:flex;align-items:center;gap:1px">
+                <input class="inline-num" type="number" step="0.5" :value="+(store.pmDefBonus*100).toFixed(1)" @change="e => store.pmDefBonus = parseFloat(e.target.value)/100||0">
+                <span class="value-display">%</span>
+              </div>
+            </label>
             <input class="form-range" type="range" v-model.number="store.pmDefBonus" min="-1.0" max="2.5" step="0.05">
           </div>
         </div>
@@ -233,6 +275,7 @@
           <ul style="list-style-type:none; margin-left:0; padding-left:12px; border-left:2px solid var(--border-subtle); margin-bottom: 20px;">
             <li><code>ATK</code> : {{ $t('baseAtk') }}</li>
             <li><code>S_coeff</code> : {{ $t('skillCoeff') }}</li>
+            <li><code>ATK_bonus</code> : {{ $t('atkBonus') }}</li>
             <li><code>D_raw</code> : {{ $t('rawDmg') }}</li>
             <li><code>Bonus</code> : {{ $t('dmgBonus') }}</li>
             <li><code>Ele_Adv</code> : {{ $t('eleAdvantage') }} ({{ $t('formulaModalEleTrigger') }})</li>
@@ -249,7 +292,7 @@
           </ul>
           
           <h3>{{ $t('formulaModalH2') }}</h3>
-          <code class="formula-highlight">D_raw = ATK × S_coeff</code>
+          <code class="formula-highlight">D_raw = ATK × (1 + ATK_bonus) × S_coeff</code>
           <code class="formula-highlight">B_dmg = 1 + Bonus + (Ele_Adv × 0.25)</code>
           
           <h3>{{ $t('formulaModalH3') }}</h3>
@@ -274,6 +317,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import BigNumberInput from '../components/BigNumberInput.vue'
 import { useCalcStore } from '../store/calculator.js'
 import { calcDamage } from '../engine/damageCalc.js'
 import { getCoeffByLevel } from '../constants/levelTable.js'
