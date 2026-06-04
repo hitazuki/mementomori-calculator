@@ -8,36 +8,36 @@
     <div class="flex-col gap-12">
       <!-- Variables -->
       <div class="card">
-        <div class="card-title">📐 Variables</div>
+        <div class="card-title">{{ $t('exportVariables') || '📐 Variables' }}</div>
         
         <div class="form-group">
-          <label class="form-label">X Axis</label>
+          <label class="form-label">{{ $t('exportXAxis') || 'X Axis' }}</label>
           <select class="form-select" v-model="ts.xKey" @change="onXKeyChange">
             <option v-for="v in TABLE_VARIABLES" :key="v.key" :value="v.key">{{ v.label }}</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">X Values <span class="text-xs text-muted">(comma separated)</span></label>
+          <label class="form-label">{{ $t('exportXValues') || 'X Values' }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') || '(comma separated)' }}</span></label>
           <textarea class="form-input" v-model="ts.xValsStr" rows="2" style="resize:vertical"></textarea>
         </div>
 
         <div class="divider"></div>
 
         <div class="form-group">
-          <label class="form-label">Y Axis</label>
+          <label class="form-label">{{ $t('exportYAxis') || 'Y Axis' }}</label>
           <select class="form-select" v-model="ts.yKey" @change="onYKeyChange">
             <option v-for="v in TABLE_VARIABLES" :key="v.key" :value="v.key">{{ v.label }}</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Y Values <span class="text-xs text-muted">(comma separated)</span></label>
+          <label class="form-label">{{ $t('exportYValues') || 'Y Values' }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') || '(comma separated)' }}</span></label>
           <textarea class="form-input" v-model="ts.yValsStr" rows="2" style="resize:vertical"></textarea>
         </div>
       </div>
 
       <!-- Builds Configuration -->
       <div class="card">
-        <div class="card-title">⚙ Builds Configuration</div>
+        <div class="card-title">{{ $t('exportBuildsConfig') || '⚙ Builds Configuration' }}</div>
         <div class="flex-col gap-8">
           <div 
             v-for="(b, i) in ts.builds" 
@@ -73,7 +73,7 @@
           </div>
         </div>
         <button class="btn btn-secondary btn-sm w-full mt-8" @click="addBuild">+ {{ $t('addBuild') || 'Add Build' }}</button>
-        <button class="btn btn-ghost btn-sm w-full mt-4" @click="resetDefault">Reset to Default</button>
+        <button class="btn btn-ghost btn-sm w-full mt-4" @click="resetDefault">{{ $t('exportResetDefault') || 'Reset to Default' }}</button>
       </div>
     </div>
 

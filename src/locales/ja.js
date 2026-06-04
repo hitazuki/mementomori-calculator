@@ -157,8 +157,16 @@ export default {
   colEff2: '有効物魔防',
   genTable: 'データ生成',
   copyCSV: 'CSVをコピー',
-  copyTable: 'テーブルをコピー',
+  copyTable: 'HTMLテーブルをコピー',
   copied: 'クリップボードにコピーしました！',
+  exportVariables: '📐 変数設定',
+  exportXAxis: 'X軸',
+  exportYAxis: 'Y軸',
+  exportXValues: 'X軸の値',
+  exportYValues: 'Y軸の値',
+  exportCommaSeparated: '(カンマ区切り)',
+  exportBuildsConfig: '⚙ ビルド設定',
+  exportResetDefault: 'デフォルトに戻す',
 
   // Presets & Levels
   lv: 'Lv',

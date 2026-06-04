@@ -157,8 +157,16 @@ export default {
   colEff2: '유효 물마방',
   genTable: '데이터 생성',
   copyCSV: 'CSV 복사',
-  copyTable: '표 복사',
+  copyTable: 'HTML 표 복사',
   copied: '클립보드에 복사되었습니다!',
+  exportVariables: '📐 변수 설정',
+  exportXAxis: 'X축',
+  exportYAxis: 'Y축',
+  exportXValues: 'X축 값',
+  exportYValues: 'Y축 값',
+  exportCommaSeparated: '(쉼표로 구분)',
+  exportBuildsConfig: '⚙ 빌드 설정',
+  exportResetDefault: '기본값으로 초기화',
 
   // Presets & Levels
   lv: 'Lv',

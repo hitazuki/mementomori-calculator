@@ -165,6 +165,14 @@ export default {
   copyCSV: 'Copy CSV',
   copyTable: 'Copy HTML Table',
   copied: 'Copied to clipboard!',
+  exportVariables: '📐 Variables',
+  exportXAxis: 'X Axis',
+  exportYAxis: 'Y Axis',
+  exportXValues: 'X Values',
+  exportYValues: 'Y Values',
+  exportCommaSeparated: '(comma separated)',
+  exportBuildsConfig: '⚙ Builds Configuration',
+  exportResetDefault: 'Reset to Default',
 
   // Presets & Levels
   lv: 'Lv',

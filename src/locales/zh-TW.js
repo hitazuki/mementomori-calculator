@@ -166,6 +166,14 @@ export default {
   copyCSV: '複製 CSV',
   copyTable: '複製 HTML 表格',
   copied: '已複製到剪貼簿！',
+  exportVariables: '📐 變數設定',
+  exportXAxis: 'X 軸',
+  exportYAxis: 'Y 軸',
+  exportXValues: 'X 軸取值',
+  exportYValues: 'Y 軸取值',
+  exportCommaSeparated: '(逗號分隔)',
+  exportBuildsConfig: '⚙ 方案設定',
+  exportResetDefault: '恢復預設',
 
   // Presets & Levels
   lv: 'Lv',
