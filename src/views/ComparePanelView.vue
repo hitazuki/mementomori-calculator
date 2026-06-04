@@ -186,11 +186,11 @@
         <div class="grid-2">
           <div class="form-group"><label class="form-label">{{ $t('eleAdvantage') }}</label>
             <div style="display:flex;align-items:center;height:32px"><input type="checkbox" v-model="editingBuild.eleAdvantage" style="width:16px;height:16px"></div></div>
-          <div class="form-group"><label class="form-label">{{ $t('defBonus') }}%</label>
+          <div class="form-group"><label class="form-label">{{ $t('defBonus') }}(%)</label>
             <input class="form-input" type="number" v-model.number="editingBuild.defBonusPct"></div>
         </div>
         <div class="grid-2">
-          <div class="form-group"><label class="form-label">{{ $t('pmDefBonus') }}%</label>
+          <div class="form-group"><label class="form-label">{{ $t('pmDefBonus') }}(%)</label>
             <input class="form-input" type="number" v-model.number="editingBuild.pmDefBonusPct"></div>
         </div>
       </div>
