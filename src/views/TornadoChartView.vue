@@ -8,9 +8,10 @@
     <div class="flex-col gap-12">
       <!-- Base Params (Shared from Store) -->
       <div class="card">
-        <details open style="outline: none;">
-          <summary class="card-title" style="cursor: pointer; user-select: none; outline: none; margin-bottom: 0;">
+        <details :open="isBaseOpen" @toggle="e => isBaseOpen = e.target.open" style="outline: none;">
+          <summary class="card-title" style="cursor: pointer; user-select: none; outline: none; margin-bottom: 0; display: flex; align-items: center; gap: 8px; width: 100%;">
             ⚙️ {{ $t('basePanelStats') || '基础面板参数' }}
+            <span style="margin-left: auto; font-size: 12px; color: var(--gold); transition: transform 0.2s;" :style="{ transform: isBaseOpen ? 'rotate(180deg)' : 'rotate(0deg)' }">▼</span>
           </summary>
           <div class="grid-2" style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border-subtle);">
             <div class="form-group">
@@ -238,6 +239,7 @@ const store = useCalcStore()
 const chartRef = ref(null)
 
 const activeTab = ref('tornado') // 'tornado' | 'waterfall'
+const isBaseOpen = ref(false)
 
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(2)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
 
@@ -457,4 +459,10 @@ function downloadChart() {
 .tab-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-base); }
 .tab-btn.active { background: rgba(201,168,76,0.15); color: var(--gold); border-bottom: 2px solid var(--gold); border-radius: 6px 6px 0 0; }
 .grid-2 .form-group { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+summary::-webkit-details-marker {
+  display: none;
+}
+summary {
+  list-style: none;
+}
 </style>
