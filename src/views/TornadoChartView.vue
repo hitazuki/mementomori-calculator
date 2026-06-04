@@ -81,6 +81,12 @@
             </label>
             <input class="form-range" type="range" v-model.number="store.pmDefBonus" min="-1" max="2.5" step="0.05">
           </div>
+          <div class="form-group" style="display:flex;align-items:center;justify-content:flex-start;height:32px;padding-top:4px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;">
+              <input type="checkbox" v-model="store.eleAdvantage" style="width:16px;height:16px;">
+              <span class="form-label" style="margin:0;">{{ $t('eleAdvantage') }}</span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -260,7 +266,7 @@ function setDamageType(type) {
 }
 
 const baseResult = computed(() => {
-  const p = { ...store.$state, eleAdvantage: false }
+  const p = { ...store.$state }
   delete p.cPen
   delete p.cPmPen
   delete p.cDef
@@ -270,7 +276,7 @@ const baseResult = computed(() => {
 
 // --- Tornado Chart Logic ---
 const tornadoResults = computed(() => {
-  const baseParams = { ...store.$state, eleAdvantage: false }
+  const baseParams = { ...store.$state }
   delete baseParams.cPen
   delete baseParams.cPmPen
   delete baseParams.cDef
@@ -307,8 +313,7 @@ const waterfallData = computed(() => {
     pen: store.pen + deltas.pen,
     pmPen: store.pmPen + deltas.pmPen,
     defBonus: store.defBonus + deltas.defBonus,
-    pmDefBonus: store.pmDefBonus + deltas.pmDefBonus,
-    eleAdvantage: false // 无UI控制，固定为false
+    pmDefBonus: store.pmDefBonus + deltas.pmDefBonus
   }
   delete params.cPen
   delete params.cPmPen
