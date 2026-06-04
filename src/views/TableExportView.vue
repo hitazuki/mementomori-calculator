@@ -222,7 +222,7 @@ const ts = reactive({
     {
       id: Date.now() + 1,
       name: t('buildNamePrefix') + ' 2',
-      params: getBaseParams(),
+      params: { ...getBaseParams(), pmPen: 47700 },
       _expanded: false
     }
   ],
@@ -279,7 +279,7 @@ function resetDefault() {
     {
       id: Date.now() + 1,
       name: t('buildNamePrefix') + ' 2',
-      params: getBaseParams(),
+      params: { ...getBaseParams(), pmPen: 47700 },
       _expanded: false
     }
   ]

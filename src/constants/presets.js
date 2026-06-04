@@ -32,7 +32,7 @@ export const getScenarioPresets = () => [
 
 export const getCompareBuildsDefault = () => [
   { id: 1, name: t('buildNamePrefix') + '1', pen: 11950, pmPen: 31200, atkBonus: 0, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
-  { id: 2, name: t('buildNamePrefix') + '2',  pen: 4950,  pmPen: 48500, atkBonus: 0, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
+  { id: 2, name: t('buildNamePrefix') + '2',  pen: 4950,  pmPen: 47700, atkBonus: 0, dmgBonus: 0.3,  defBonus: 0, pmDefBonus: 0 },
   { id: 3, name: t('buildNamePrefix') + '3',   pen: 11950, pmPen: 31200, atkBonus: 0, dmgBonus: 0.8,  defBonus: 0, pmDefBonus: 0 },
   { id: 4, name: t('buildNamePrefix') + '4', pen: 11950, pmPen: 31200, atkBonus: 0, dmgBonus: 0.3,  defBonus: -0.2, pmDefBonus: -0.2 },
 ]
