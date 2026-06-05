@@ -44,32 +44,32 @@
     <!-- Right Panel: Results Table -->
     <div class="flex-col gap-12" style="min-width:0;">
       <!-- Filters -->
-      <div class="card" style="display:flex; flex-direction:column; gap:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div class="card-title" style="margin-bottom:0;">🔍 {{ $t('packFilterTitle') }}</div>
-          <div style="font-size:13px; color:var(--text-muted);">{{ $t('packResultCount', { n: filteredPacks.length }) }}</div>
+      <div class="card" style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding: 12px 16px;">
+        <div style="font-weight:bold; font-size:15px; color:var(--text-primary); display:flex; align-items:center;">
+          🔍 {{ $t('packFilterTitle') }}
         </div>
-        <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end;">
-          <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">{{ $t('packFilterCategory') }}</label>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="btn btn-sm" :class="filter.cat==='tower'?'btn-primary':'btn-ghost'" @click="filter.cat='tower'">{{ $t('[TowerTypeInfinite]') }}</button>
-              <button class="btn btn-sm" :class="filter.cat==='rank'?'btn-primary':'btn-ghost'" @click="filter.cat='rank'">{{ $t('[CommonPlayerRankLabel]') }}</button>
-              <button class="btn btn-sm" :class="filter.cat==='quest'?'btn-primary':'btn-ghost'" @click="filter.cat='quest'">{{ $t('[CommonQuestLabel]') }}</button>
-            </div>
-          </div>
-          <div class="form-group" v-if="filter.cat==='tower'" style="margin-bottom:0; min-width:140px;">
-            <label class="form-label">{{ $t('packFilterTower') }}</label>
-            <select class="form-select" v-model="filter.tower">
-              <option v-for="t in towerOptions" :key="t" :value="t">{{ towerName(t) }}</option>
-            </select>
-          </div>
-          <div class="form-group" style="margin-bottom:0; min-width:140px;">
-            <label class="form-label">{{ $t('packFilterPrice') }}</label>
-            <select class="form-select" v-model="filter.price">
-              <option v-for="p in priceOptions" :key="p" :value="p">¥{{ p.toLocaleString() }}</option>
-            </select>
-          </div>
+        
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <button class="btn btn-sm" :class="filter.cat==='tower'?'btn-primary':'btn-ghost'" @click="filter.cat='tower'">{{ $t('[TowerTypeInfinite]') }}</button>
+          <button class="btn btn-sm" :class="filter.cat==='rank'?'btn-primary':'btn-ghost'" @click="filter.cat='rank'">{{ $t('[CommonPlayerRankLabel]') }}</button>
+          <button class="btn btn-sm" :class="filter.cat==='quest'?'btn-primary':'btn-ghost'" @click="filter.cat='quest'">{{ $t('[CommonQuestLabel]') }}</button>
+        </div>
+
+        <div v-if="filter.cat==='tower'" style="display:flex; align-items:center; gap:8px;">
+          <select class="form-select" v-model="filter.tower" style="min-width:120px; padding-top:4px; padding-bottom:4px; font-size:13px;">
+            <option v-for="t in towerOptions" :key="t" :value="t">{{ towerName(t) }}</option>
+          </select>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:13px; color:var(--text-muted);">{{ $t('packFilterPrice') }}</span>
+          <select class="form-select" v-model="filter.price" style="min-width:100px; padding-top:4px; padding-bottom:4px; font-size:13px;">
+            <option v-for="p in priceOptions" :key="p" :value="p">¥{{ p.toLocaleString() }}</option>
+          </select>
+        </div>
+
+        <div style="margin-left:auto; font-size:13px; color:var(--text-muted); white-space:nowrap;">
+          {{ $t('packResultCount', { n: filteredPacks.length }) }}
         </div>
       </div>
 
