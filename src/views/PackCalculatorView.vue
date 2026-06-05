@@ -44,26 +44,26 @@
     <!-- Right Panel: Results Table -->
     <div class="flex-col gap-12" style="min-width:0;">
       <!-- Filters -->
-      <div class="card" style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding: 12px 16px;">
-        <div style="font-weight:bold; font-size:15px; color:var(--text-primary); display:flex; align-items:center;">
+      <div class="card" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding: 10px 14px;">
+        <div style="font-weight:bold; font-size:14px; color:var(--text-primary); display:flex; align-items:center; white-space:nowrap;">
           🔍 {{ $t('packFilterTitle') }}
         </div>
         
-        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-          <button class="btn btn-sm" :class="filter.cat==='tower'?'btn-primary':'btn-ghost'" @click="filter.cat='tower'">{{ $t('[TowerTypeInfinite]') }}</button>
-          <button class="btn btn-sm" :class="filter.cat==='rank'?'btn-primary':'btn-ghost'" @click="filter.cat='rank'">{{ $t('[CommonPlayerRankLabel]') }}</button>
-          <button class="btn btn-sm" :class="filter.cat==='quest'?'btn-primary':'btn-ghost'" @click="filter.cat='quest'">{{ $t('[CommonQuestLabel]') }}</button>
+        <div style="display:flex; gap:4px; align-items:center;">
+          <button class="btn btn-sm" :class="filter.cat==='tower'?'btn-primary':'btn-ghost'" @click="filter.cat='tower'" style="padding:4px 10px; white-space:nowrap;">{{ $t('[TowerTypeInfinite]') }}</button>
+          <button class="btn btn-sm" :class="filter.cat==='rank'?'btn-primary':'btn-ghost'" @click="filter.cat='rank'" style="padding:4px 10px; white-space:nowrap;">{{ $t('[CommonPlayerRankLabel]') }}</button>
+          <button class="btn btn-sm" :class="filter.cat==='quest'?'btn-primary':'btn-ghost'" @click="filter.cat='quest'" style="padding:4px 10px; white-space:nowrap;">{{ $t('[CommonQuestLabel]') }}</button>
         </div>
 
-        <div v-if="filter.cat==='tower'" style="display:flex; align-items:center; gap:8px;">
-          <select class="form-select" v-model="filter.tower" style="min-width:120px; padding-top:4px; padding-bottom:4px; font-size:13px;">
+        <div v-if="filter.cat==='tower'" style="display:flex; align-items:center; gap:6px;">
+          <select class="form-select" v-model="filter.tower" style="min-width:110px; padding:4px 28px 4px 8px; font-size:13px; height:28px;">
             <option v-for="t in towerOptions" :key="t" :value="t">{{ towerName(t) }}</option>
           </select>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:13px; color:var(--text-muted);">{{ $t('packFilterPrice') }}</span>
-          <select class="form-select" v-model="filter.price" style="min-width:100px; padding-top:4px; padding-bottom:4px; font-size:13px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">{{ $t('packFilterPrice') }}</span>
+          <select class="form-select" v-model="filter.price" style="min-width:80px; padding:4px 28px 4px 8px; font-size:13px; height:28px;">
             <option v-for="p in priceOptions" :key="p" :value="p">¥{{ p.toLocaleString() }}</option>
           </select>
         </div>
