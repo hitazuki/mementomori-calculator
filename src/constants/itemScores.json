@@ -347,9 +347,57 @@
     "nameKo": "미감정 룬 Lv2",
     "isBase": true
   },
+  "[17,17]": {
+    "name": "魔女的来信(R)",
+    "score": 80,
+    "batch": 1,
+    "iconId": 66,
+    "nameZh": "魔女的来信(R・忧蓝)",
+    "nameTw": "魔女的來信(R．憂藍)",
+    "nameEn": "Witch’s Letter (R/Azure)",
+    "nameJa": "魔女の手紙（R・藍）",
+    "nameKo": "마녀의 편지 (R・남청)",
+    "isBase": true
+  },
+  "[17,18]": {
+    "name": "魔女的来信(R・业红)",
+    "score": 80,
+    "batch": 1,
+    "iconId": 66,
+    "nameZh": "魔女的来信(R・业红)",
+    "nameTw": "魔女的來信(R．業紅)",
+    "nameEn": "Witch’s Letter (R/Crimson)",
+    "nameJa": "魔女の手紙（R・紅）",
+    "nameKo": "마녀의 편지 (R・홍염)",
+    "isBase": false
+  },
+  "[17,19]": {
+    "name": "魔女的来信(R・苍翠)",
+    "score": 80,
+    "batch": 1,
+    "iconId": 66,
+    "nameZh": "魔女的来信(R・苍翠)",
+    "nameTw": "魔女的來信(R．蒼翠)",
+    "nameEn": "Witch’s Letter (R/Emerald)",
+    "nameJa": "魔女の手紙（R・翠）",
+    "nameKo": "마녀의 편지 (R・비취)",
+    "isBase": false
+  },
+  "[17,20]": {
+    "name": "魔女的来信(R・流金)",
+    "score": 80,
+    "batch": 1,
+    "iconId": 66,
+    "nameZh": "魔女的来信(R・流金)",
+    "nameTw": "魔女的來信(R．流金)",
+    "nameEn": "Witch’s Letter (R/Amber)",
+    "nameJa": "魔女の手紙（R・黄）",
+    "nameKo": "마녀의 편지 (R・황철)",
+    "isBase": false
+  },
   "[17,21]": {
     "name": "魔女的来信(SR)",
-    "score": 500,
+    "score": 720,
     "batch": 1,
     "iconId": 67,
     "nameZh": "魔女的来信(SR・忧蓝)",
@@ -359,9 +407,45 @@
     "nameKo": "마녀의 편지 (SR・남청)",
     "isBase": true
   },
+  "[17,22]": {
+    "name": "魔女的来信(SR・业红)",
+    "score": 720,
+    "batch": 1,
+    "iconId": 67,
+    "nameZh": "魔女的来信(SR・业红)",
+    "nameTw": "魔女的來信(SR．業紅)",
+    "nameEn": "Witch’s Letter (SR/Crimson)",
+    "nameJa": "魔女の手紙（SR・紅）",
+    "nameKo": "마녀의 편지 (SR・홍염)",
+    "isBase": false
+  },
+  "[17,23]": {
+    "name": "魔女的来信(SR・苍翠)",
+    "score": 720,
+    "batch": 1,
+    "iconId": 67,
+    "nameZh": "魔女的来信(SR・苍翠)",
+    "nameTw": "魔女的來信(SR．蒼翠)",
+    "nameEn": "Witch’s Letter (SR/Emerald)",
+    "nameJa": "魔女の手紙（SR・翠）",
+    "nameKo": "마녀의 편지 (SR・비취)",
+    "isBase": false
+  },
+  "[17,24]": {
+    "name": "魔女的来信(SR・流金)",
+    "score": 720,
+    "batch": 1,
+    "iconId": 67,
+    "nameZh": "魔女的来信(SR・流金)",
+    "nameTw": "魔女的來信(SR．流金)",
+    "nameEn": "Witch’s Letter (SR/Amber)",
+    "nameJa": "魔女の手紙（SR・黄）",
+    "nameKo": "마녀의 편지 (SR・황철)",
+    "isBase": false
+  },
   "[17,25]": {
     "name": "魔女的来信(SR・任选属性)",
-    "score": 500,
+    "score": 720,
     "batch": 1,
     "iconId": 68,
     "nameZh": "魔女的来信(SR・任选属性)",
@@ -371,9 +455,21 @@
     "nameKo": "마녀의 편지 (SR・속성 선택)",
     "isBase": true
   },
+  "[17,27]": {
+    "name": "魔女的心片(R)",
+    "score": 80,
+    "batch": 60,
+    "iconId": 70,
+    "nameZh": "魔女的心片(R)",
+    "nameTw": "魔女的心片(R)",
+    "nameEn": "Witch’s Shard (R)",
+    "nameJa": "魔女の心片（R）",
+    "nameKo": "마녀의 마음 조각 (R)",
+    "isBase": true
+  },
   "[17,28]": {
     "name": "魔女的心片(SR) [60枚]",
-    "score": 600,
+    "score": 800,
     "batch": 60,
     "iconId": 71,
     "nameZh": "魔女的心片(SR)",
@@ -575,42 +671,6 @@
     "nameKo": "육성 세트 (2시간)",
     "isBase": false
   },
-  "[17,22]": {
-    "name": "魔女的来信(SR・业红)",
-    "score": 0,
-    "batch": 1,
-    "iconId": 67,
-    "nameZh": "魔女的来信(SR・业红)",
-    "nameTw": "魔女的來信(SR．業紅)",
-    "nameEn": "Witch’s Letter (SR/Crimson)",
-    "nameJa": "魔女の手紙（SR・紅）",
-    "nameKo": "마녀의 편지 (SR・홍염)",
-    "isBase": false
-  },
-  "[17,23]": {
-    "name": "魔女的来信(SR・苍翠)",
-    "score": 0,
-    "batch": 1,
-    "iconId": 67,
-    "nameZh": "魔女的来信(SR・苍翠)",
-    "nameTw": "魔女的來信(SR．蒼翠)",
-    "nameEn": "Witch’s Letter (SR/Emerald)",
-    "nameJa": "魔女の手紙（SR・翠）",
-    "nameKo": "마녀의 편지 (SR・비취)",
-    "isBase": false
-  },
-  "[17,24]": {
-    "name": "魔女的来信(SR・流金)",
-    "score": 0,
-    "batch": 1,
-    "iconId": 67,
-    "nameZh": "魔女的来信(SR・流金)",
-    "nameTw": "魔女的來信(SR．流金)",
-    "nameEn": "Witch’s Letter (SR/Amber)",
-    "nameJa": "魔女の手紙（SR・黄）",
-    "nameKo": "마녀의 편지 (SR・황철)",
-    "isBase": false
-  },
   "[10,10]": {
     "name": "经验珠(24小时)",
     "score": 0,
@@ -657,65 +717,5 @@
     "nameEn": "Character Body",
     "nameJa": "キャラクター本体",
     "nameKo": "캐릭터 본체"
-  },
-  "[17,17]": {
-    "name": "魔女的来信(R)",
-    "score": 0,
-    "batch": 1,
-    "iconId": 66,
-    "nameZh": "魔女的来信(R・忧蓝)",
-    "nameTw": "魔女的來信(R．憂藍)",
-    "nameEn": "Witch’s Letter (R/Azure)",
-    "nameJa": "魔女の手紙（R・藍）",
-    "nameKo": "마녀의 편지 (R・남청)",
-    "isBase": true
-  },
-  "[17,18]": {
-    "name": "魔女的来信(R・业红)",
-    "score": 0,
-    "batch": 1,
-    "iconId": 66,
-    "nameZh": "魔女的来信(R・业红)",
-    "nameTw": "魔女的來信(R．業紅)",
-    "nameEn": "Witch’s Letter (R/Crimson)",
-    "nameJa": "魔女の手紙（R・紅）",
-    "nameKo": "마녀의 편지 (R・홍염)",
-    "isBase": false
-  },
-  "[17,19]": {
-    "name": "魔女的来信(R・苍翠)",
-    "score": 0,
-    "batch": 1,
-    "iconId": 66,
-    "nameZh": "魔女的来信(R・苍翠)",
-    "nameTw": "魔女的來信(R．蒼翠)",
-    "nameEn": "Witch’s Letter (R/Emerald)",
-    "nameJa": "魔女の手紙（R・翠）",
-    "nameKo": "마녀의 편지 (R・비취)",
-    "isBase": false
-  },
-  "[17,20]": {
-    "name": "魔女的来信(R・流金)",
-    "score": 0,
-    "batch": 1,
-    "iconId": 66,
-    "nameZh": "魔女的来信(R・流金)",
-    "nameTw": "魔女的來信(R．流金)",
-    "nameEn": "Witch’s Letter (R/Amber)",
-    "nameJa": "魔女の手紙（R・黄）",
-    "nameKo": "마녀의 편지 (R・황철)",
-    "isBase": false
-  },
-  "[17,27]": {
-    "name": "魔女的心片(R)",
-    "score": 0,
-    "batch": 1,
-    "iconId": 70,
-    "nameZh": "魔女的心片(R)",
-    "nameTw": "魔女的心片(R)",
-    "nameEn": "Witch’s Shard (R)",
-    "nameJa": "魔女の心片（R）",
-    "nameKo": "마녀의 마음 조각 (R)",
-    "isBase": true
   }
 }
