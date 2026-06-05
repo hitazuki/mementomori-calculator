@@ -246,6 +246,7 @@ export default {
   packFilterTower: "塔類型",
   packFilterPrice: "價格",
   packScoreTitle: "道具評分",
+  packScoreDesc: "設定您認為1個基準單位的道具價值多少分。修改後將自動重新計算所有禮包的性價比。",
   packResultCount: "共 {n} 個禮包",
   packColTrigger: "層級/等級",
   packColPrice: "價格",

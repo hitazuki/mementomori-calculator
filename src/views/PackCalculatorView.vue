@@ -38,6 +38,9 @@
           📊 {{ $t('packScoreTitle') }}
           <span style="margin-left:auto;font-size:12px;color:var(--gold);">{{ showScores ? '▼' : '▶' }}</span>
         </div>
+        <div v-show="showScores" style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
+          {{ $t('packScoreDesc') }}
+        </div>
         <div v-show="showScores" class="flex-col gap-8" style="overflow-y:auto; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-subtle); padding-right:4px;">
           <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:13px;">
             <img
