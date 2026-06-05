@@ -6,9 +6,9 @@
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
     <!-- Left Panel: Filters + Scores -->
-    <div class="flex-col gap-12" style="position:sticky;top:24px;max-height:calc(100vh - 130px);overflow-y:auto;">
+    <div class="flex-col gap-12" style="position:sticky;top:24px;height:calc(100vh - 48px);">
       <!-- Filters -->
-      <div class="card">
+      <div class="card" style="flex-shrink:0;">
         <div class="card-title">🔍 {{ $t('packFilterTitle') }}</div>
         <div class="form-group">
           <label class="form-label">{{ $t('packFilterCategory') }}</label>
@@ -33,34 +33,32 @@
       </div>
 
       <!-- Scores Panel -->
-      <div class="card">
-        <details open style="outline:none;">
-          <summary class="card-title" style="cursor:pointer;user-select:none;margin-bottom:0;">
-            📊 {{ $t('packScoreTitle') }}
-            <span style="margin-left:auto;font-size:12px;color:var(--gold);">▼</span>
-          </summary>
-          <div class="flex-col gap-8" style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border-subtle);">
-            <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:13px;">
-              <img
-                :src="`${baseUrl}images/items/Item_${String(s.iconId).padStart(4,'0')}.png`"
-                style="width:24px;height:24px;flex-shrink:0;"
-                @error="e => e.target.style.display='none'"
-              />
-              <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="itemDisplayName(s)">{{ itemDisplayName(s) }}</span>
-              <input
-                v-if="!isLocked(key)"
-                class="form-input"
-                type="number"
-                v-model.number="s.score"
-                style="width:60px;padding:2px 4px;font-size:12px;height:22px;text-align:right;"
-                min="0"
-                step="1"
-              />
-              <span v-else style="width:60px;text-align:right;font-size:12px;font-weight:bold;color:var(--gold);">1</span>
-              <span v-if="s.batch > 1" style="font-size:11px;color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
-            </div>
+      <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
+        <div class="card-title" @click="showScores = !showScores" style="cursor:pointer;user-select:none;margin-bottom:0;display:flex;align-items:center;">
+          📊 {{ $t('packScoreTitle') }}
+          <span style="margin-left:auto;font-size:12px;color:var(--gold);">{{ showScores ? '▼' : '▶' }}</span>
+        </div>
+        <div v-show="showScores" class="flex-col gap-8" style="overflow-y:auto; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-subtle); padding-right:4px;">
+          <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <img
+              :src="`${baseUrl}images/items/Item_${String(s.iconId).padStart(4,'0')}.png`"
+              style="width:24px;height:24px;flex-shrink:0;"
+              @error="e => e.target.style.display='none'"
+            />
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="itemDisplayName(s)">{{ itemDisplayName(s) }}</span>
+            <input
+              v-if="!isLocked(key)"
+              class="form-input"
+              type="number"
+              v-model.number="s.score"
+              style="width:60px;padding:2px 4px;font-size:12px;height:22px;text-align:right;"
+              min="0"
+              step="1"
+            />
+            <span v-else style="width:60px;text-align:right;font-size:12px;font-weight:bold;color:var(--gold);">1</span>
+            <span v-if="s.batch > 1" style="font-size:11px;color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
           </div>
-        </details>
+        </div>
       </div>
     </div>
 
@@ -141,6 +139,8 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+const showScores = ref(true)
+
 import packsRaw from '../constants/ultraSalePacks.json'
 import scoresRaw from '../constants/itemScores.json'
 import { calculatePackCE, normalizeScores } from '../engine/packCalc.js'
@@ -172,7 +172,19 @@ function towerName(jpName) {
 // --- Scores (reactive, persisted) ---
 const STORAGE_KEY = 'mmt-pack-scores-v2'
 const stored = localStorage.getItem(STORAGE_KEY)
-const initialScores = stored ? JSON.parse(stored) : scoresRaw
+let initialScores = JSON.parse(JSON.stringify(scoresRaw)) // deep copy
+if (stored) {
+  try {
+    const parsed = JSON.parse(stored)
+    for (const key in parsed) {
+      if (initialScores[key]) {
+        initialScores[key].score = parsed[key].score
+      }
+    }
+  } catch(e) {
+    console.error('Failed to parse stored scores', e)
+  }
+}
 const editableScores = reactive(initialScores)
 
 watch(editableScores, (v) => {
