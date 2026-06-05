@@ -151,7 +151,7 @@ export default {
 
   // Mysterium Panel
   navGroupMysterium: "秘儀系統",
-  navMysterium: "✨ 秘儀性價比",
+  navMysterium: "秘儀性價比",
   navGroupDamage: "傷害計算",
   mysteriumTitle: "🔮 秘儀性價比分析",
   mysteriumDesc:

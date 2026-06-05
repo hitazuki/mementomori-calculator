@@ -153,7 +153,7 @@ export default {
 
   // Mysterium Panel
   navGroupMysterium: "미스테리움 시스템",
-  navMysterium: "✨ 미스테리움 가성비",
+  navMysterium: "미스테리움 가성비",
   navGroupDamage: "데미지 계산",
   mysteriumTitle: "🔮 미스테리움 가성비 분석",
   mysteriumDesc:

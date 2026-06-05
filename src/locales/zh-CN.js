@@ -150,7 +150,7 @@ export default {
   scenarioPveMid: "模板2",
 
   navGroupMysterium: "秘仪系统",
-  navMysterium: "✨ 秘仪性价比",
+  navMysterium: "秘仪性价比",
   navGroupDamage: "伤害计算",
   mysteriumTitle: "🔮 秘仪性价比分析",
   mysteriumDesc:

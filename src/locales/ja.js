@@ -153,7 +153,7 @@ export default {
 
   // Mysterium Panel
   navGroupMysterium: "秘儀システム",
-  navMysterium: "✨ 秘儀コスパ",
+  navMysterium: "秘儀コスパ",
   navGroupDamage: "ダメージ計算",
   mysteriumTitle: "🔮 秘儀コスパ分析",
   mysteriumDesc:
