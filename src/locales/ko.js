@@ -121,7 +121,6 @@ export default {
   hmAxisConfig: "축 설정",
   xAxisConfig: "X축 변수",
   yAxisConfig: "Y축 변수",
-  hmFixedParams: "고정 매개변수 (전역 상수)",
 
   // Compare Panel
   addBuild: "+ 빌드 추가",
@@ -151,12 +150,11 @@ export default {
 
   scenarioPveEarly: "템플릿 1",
   scenarioPveMid: "템플릿 2",
-  scenarioGuildBoss: "길드 보스",
 
   // Mysterium Panel
-  navGroupMysterium: "📂 미스테리움 시스템",
+  navGroupMysterium: "미스테리움 시스템",
   navMysterium: "✨ 미스테리움 가성비",
-  navGroupDamage: "📂 데미지 계산",
+  navGroupDamage: "데미지 계산",
   mysteriumTitle: "🔮 미스테리움 가성비 분석",
   mysteriumDesc:
     "다양한 알고리즘과 동적 가중치를 기반으로 미스테리움을 해방하기 위한 한정 캐릭터 뽑기 최적해를 평가합니다.",
@@ -198,9 +196,6 @@ export default {
 
   scenarioDescPveEarly: "방어 5M, 물마방 5M, 기본 관통 11950",
   scenarioDescPveMid: "방어 10M, 물/마방 10M, 높은 상수 요구",
-  scenarioDescPvpMage: "낮은 방어력, 높은 관통 불필요",
-  scenarioDescPvpTank: "매우 높은 방어력, 극한의 관통 필요",
-  scenarioDescGuildBoss: "방어 2M, 방어 깎기 유효, 화력 집중",
   navTornado: "한계 이익 분석",
   ui_custom: "(커스텀)",
   ui_common: "(공통)",
@@ -215,7 +210,6 @@ export default {
     "다양한 속성 증감분이 최종 데미지에 미치는 영향을 퍼센트로 비교하여 가장 효율적인 업그레이드 경로를 찾습니다.",
   tabTornado: "🌪 토네이도 차트",
   tabWaterfall: "🌊 워터폴 차트",
-  baseState: "⚙ 기본 스탯",
   upgradesToTest: "📈 속성 증분 분석",
   increment: "증분",
   baseDmgDisplay: "현재 기준 데미지:",

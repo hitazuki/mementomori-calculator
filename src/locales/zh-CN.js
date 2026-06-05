@@ -119,7 +119,6 @@ export default {
   hmAxisConfig: "坐标轴配置",
   xAxisConfig: "X轴变量",
   yAxisConfig: "Y轴变量",
-  hmFixedParams: "固定参数 (全局常量)",
 
   // Compare Panel
   addBuild: "+ 添加方案",
@@ -149,11 +148,10 @@ export default {
 
   scenarioPveEarly: "模板1",
   scenarioPveMid: "模板2",
-  scenarioGuildBoss: "公会战 Boss",
 
-  navGroupMysterium: "📂 秘仪系统",
+  navGroupMysterium: "秘仪系统",
   navMysterium: "✨ 秘仪性价比",
-  navGroupDamage: "📂 伤害计算",
+  navGroupDamage: "伤害计算",
   mysteriumTitle: "🔮 秘仪性价比分析",
   mysteriumDesc:
     "基于不同的算法与动态权重，评估抽取限定角色以点亮秘仪组合的最优解。",
@@ -168,7 +166,6 @@ export default {
   ui_cost: "成本",
   ui_score: "总价值",
   ui_ce: "性价比",
-  ui_marginal_ce: "边际CE",
   ui_bottleneck: "前置方案",
   ui_algo1: "独立分摊法",
   ui_algo2: "成套绑定法",
@@ -196,9 +193,6 @@ export default {
 
   scenarioDescPveEarly: "防御5M，物魔防5M，基础穿透11950",
   scenarioDescPveMid: "防御10M，物魔防10M，较高定数要求",
-  scenarioDescPvpMage: "防御低，物魔防低，无需高穿透",
-  scenarioDescPvpTank: "防御超高，极限穿透需求",
-  scenarioDescGuildBoss: "防御2M，吃破甲，伤害最大化",
   // Misc
   ui_custom: "(自定义)",
   ui_common: "(通用)",
@@ -214,7 +208,6 @@ export default {
     "横向对比各项属性增量（或减量）对最终伤害产生的百分比影响，寻找性价比最高的升级方案。",
   tabTornado: "🌪 龙卷风图",
   tabWaterfall: "🌊 瀑布图",
-  baseState: "⚙ 基础面板",
   upgradesToTest: "📈 属性增量分析",
   increment: "增量",
   baseDmgDisplay: "当前基准伤害:",

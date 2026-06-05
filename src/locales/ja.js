@@ -121,7 +121,6 @@ export default {
   hmAxisConfig: "軸の設定",
   xAxisConfig: "X軸の変数",
   yAxisConfig: "Y軸の変数",
-  hmFixedParams: "固定パラメータ（グローバル定数）",
 
   // Compare Panel
   addBuild: "+ 構成を追加",
@@ -151,12 +150,11 @@ export default {
 
   scenarioPveEarly: "テンプレート 1",
   scenarioPveMid: "テンプレート 2",
-  scenarioGuildBoss: "ギルドボス",
 
   // Mysterium Panel
-  navGroupMysterium: "📂 秘儀システム",
+  navGroupMysterium: "秘儀システム",
   navMysterium: "✨ 秘儀コスパ",
-  navGroupDamage: "📂 ダメージ計算",
+  navGroupDamage: "ダメージ計算",
   mysteriumTitle: "🔮 秘儀コスパ分析",
   mysteriumDesc:
     "異なるアルゴリズムと動的重みに基づき、秘儀を解放するための限定キャラガチャ最適解を評価します。",
@@ -198,9 +196,6 @@ export default {
 
   scenarioDescPveEarly: "防御5M, 物魔防5M, 基礎貫通11950",
   scenarioDescPveMid: "防御10M、物/魔防10M、高い定数要求",
-  scenarioDescPvpMage: "低防御力、高い貫通は不要",
-  scenarioDescPvpTank: "超高防御力、極限の貫通が必要",
-  scenarioDescGuildBoss: "防御2M、防御デバフ有効、火力特化",
   navTornado: "限界利益分析",
   ui_custom: "(カスタム)",
   ui_common: "(共通)",
@@ -215,7 +210,6 @@ export default {
     "様々な属性の増減が最終ダメージに与えるパーセンテージの影響を横並びで比較し、最も費用対効果の高いアップグレード経路を見つけます。",
   tabTornado: "🌪 トルネード図",
   tabWaterfall: "🌊 ウォーターフォール図",
-  baseState: "⚙ 基礎ステータス",
   upgradesToTest: "📈 属性増分分析",
   increment: "増分",
   baseDmgDisplay: "現在の基準ダメージ:",

@@ -7,15 +7,12 @@ export default {
   appSub: "Calculators",
 
   // Navigation
-  navGroupDamage: "📂 Damage Calc",
+  navGroupDamage: "Damage Calc",
   navCalc: "Single Target",
   navSweep: "Single Variable Curve Sweep",
   navHeatmap: "Bi-variable Heatmap",
   navCompare: "Compare",
   navTable: "Data Table",
-
-  navGroupMysterium: "📂 Mysterium",
-  navMysterium: "Mysterium CE",
 
   formula: "Formula:",
   propPen: "Proportional PEN",
@@ -56,9 +53,6 @@ export default {
   tableTitle: "📋 Cross-tab Data Export",
   tableDesc:
     "Configure custom variables for X and Y axes to generate multi-build comparison tables. Supports CSV export or copying directly to Excel.",
-  mysteriumTitle: "🔮 Mysterium Cost-Efficiency",
-  mysteriumDesc:
-    "Evaluate the optimal limited character gacha plans for Mysterium collections using dynamic weights.",
 
   // Form Sections
   atkParams: "⚔ Attacker Stats",
@@ -128,7 +122,6 @@ export default {
   hmAxisConfig: "Axis Configuration",
   xAxisConfig: "X-Axis Variable",
   yAxisConfig: "Y-Axis Variable",
-  hmFixedParams: "Fixed Parameters (Global Constants)",
 
   // Compare Panel
   addBuild: "+ Add Build",
@@ -158,10 +151,9 @@ export default {
 
   scenarioPveEarly: "Template 1",
   scenarioPveMid: "Template 2",
-  scenarioGuildBoss: "Guild Boss",
 
   // Mysterium Panel
-  navGroupMysterium: "📂 Mysterium System",
+  navGroupMysterium: "Mysterium System",
   navMysterium: "Mysterium CE",
   mysteriumTitle: "🔮 Mysterium Cost-Efficiency",
   mysteriumDesc:
@@ -204,9 +196,6 @@ export default {
 
   scenarioDescPveEarly: "5M DEF, 5M P/M.DEF, base PEN 11950",
   scenarioDescPveMid: "10M DEF, 10M P/M.DEF, higher constant req",
-  scenarioDescPvpMage: "Low DEF, Low P/M.DEF, high PEN not needed",
-  scenarioDescPvpTank: "Super high DEF, max PEN required",
-  scenarioDescGuildBoss: "2M DEF, DEF debuffed, max dmg focus",
   navTornado: "Tornado Chart",
   ui_custom: "(Custom)",
   ui_common: "(Common)",
@@ -221,7 +210,6 @@ export default {
     "Compare the percentage impact of various attribute increments (or decrements) on final damage to find the most cost-effective upgrade path.",
   tabTornado: "🌪 Tornado Chart",
   tabWaterfall: "🌊 Waterfall Chart",
-  baseState: "⚙ Base State",
   upgradesToTest: "📈 Upgrades to test",
   increment: "Increment",
   baseDmgDisplay: "Current Base DMG:",

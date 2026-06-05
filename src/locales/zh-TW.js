@@ -119,7 +119,6 @@ export default {
   hmAxisConfig: "座標軸設定",
   xAxisConfig: "X軸變數",
   yAxisConfig: "Y軸變數",
-  hmFixedParams: "固定參數 (全域常數)",
 
   // Compare Panel
   addBuild: "+ 添加方案",
@@ -149,12 +148,11 @@ export default {
 
   scenarioPveEarly: "模板1",
   scenarioPveMid: "模板2",
-  scenarioGuildBoss: "公會戰 Boss",
 
   // Mysterium Panel
-  navGroupMysterium: "📂 秘儀系統",
+  navGroupMysterium: "秘儀系統",
   navMysterium: "✨ 秘儀性價比",
-  navGroupDamage: "📂 傷害計算",
+  navGroupDamage: "傷害計算",
   mysteriumTitle: "🔮 秘儀性價比分析",
   mysteriumDesc:
     "基於不同的算法與動態權重，評估抽取限定角色以點亮秘儀組合的最優解。",
@@ -169,7 +167,6 @@ export default {
   ui_cost: "成本",
   ui_score: "總價值",
   ui_ce: "性價比",
-  ui_marginal_ce: "邊際CE",
   ui_bottleneck: "前置方案",
   ui_algo1: "獨立分攤法",
   ui_algo2: "成套綁定法",
@@ -197,9 +194,6 @@ export default {
 
   scenarioDescPveEarly: "防禦5M，物魔防5M，基礎穿透11950",
   scenarioDescPveMid: "防禦10M，物魔防10M，較高定數要求",
-  scenarioDescPvpMage: "防禦低，物魔防低，無需高穿透",
-  scenarioDescPvpTank: "防禦超高，極限穿透需求",
-  scenarioDescGuildBoss: "防禦2M，吃破甲，傷害最大化",
   navTornado: "邊際收益分析",
   ui_custom: "(自訂)",
   ui_common: "(通用)",
@@ -214,7 +208,6 @@ export default {
     "橫向對比各項屬性增量（或減量）對最終傷害產生的百分比影響，尋找性價比最高的升級方案。",
   tabTornado: "🌪 龍捲風圖",
   tabWaterfall: "🌊 瀑布圖",
-  baseState: "⚙ 基礎面板",
   upgradesToTest: "📈 屬性增量分析",
   increment: "增量",
   baseDmgDisplay: "當前基準傷害:",

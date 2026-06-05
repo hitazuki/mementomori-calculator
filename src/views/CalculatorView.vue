@@ -328,7 +328,7 @@ const store = useCalcStore()
 
 const showFormulaModal = ref(false)
 
-const scenarioPresets = getScenarioPresets()
+const scenarioPresets = computed(() => getScenarioPresets())
 
 function fmt(n) { return n >= 1e6 ? `${(n/1e6).toFixed(2)}M` : n >= 1e3 ? `${(n/1e3).toFixed(0)}K` : String(n) }
 function fmtPct(v, d=1) { return `${(v*100).toFixed(d)}%` }
