@@ -160,6 +160,7 @@ export function normalizeScores(rawScores) {
   const result = {}
   for (const [key, val] of Object.entries(rawScores)) {
     result[key] = {
+      ...val,
       name: val.name || '',
       score: val.score || 0,
       batch: val.batch || 1,
