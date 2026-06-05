@@ -18,7 +18,7 @@
           {{ $t('packScoreDesc') }}
         </div>
         <div v-show="showScores" class="flex-col gap-8" style="overflow-y:auto; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-subtle); padding-right:4px;">
-          <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:13px;">
+          <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:14px;">
             <img
               :src="`${baseUrl}images/items/Item_${String(s.iconId).padStart(4,'0')}.png`"
               style="width:24px;height:24px;flex-shrink:0;"
@@ -30,12 +30,12 @@
               class="form-input"
               type="number"
               v-model.number="s.score"
-              style="width:60px;padding:2px 4px;font-size:12px;height:22px;text-align:right;"
+              style="width:60px;padding:2px 4px;font-size:14px;height:24px;text-align:right;"
               min="0"
               step="1"
             />
-            <span v-else style="width:60px;text-align:right;font-size:12px;font-weight:bold;color:var(--gold);">1</span>
-            <span v-if="s.batch > 1" style="font-size:11px;color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
+            <span v-else style="width:60px;text-align:right;font-size:14px;font-weight:bold;color:var(--gold);">1</span>
+            <span v-if="s.batch > 1" style="font-size:12px;color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
           </div>
         </div>
       </div>
@@ -74,7 +74,7 @@
       </div>
 
       <div class="card" style="overflow-x:auto;padding:8px;">
-        <table class="data-table" style="font-size:12px;">
+        <table class="data-table">
           <thead>
             <tr>
               <th @click="toggleSort('trigger')" style="cursor:pointer;">{{ $t('packColTrigger') }} {{ sortIcon('trigger') }}</th>
@@ -88,7 +88,7 @@
             <template v-for="(p, i) in sortedPacks" :key="i">
               <tr @click="toggleExpand(i)" style="cursor:pointer;" :class="{ 'row-expanded': expanded.has(i) }">
                 <td style="white-space:nowrap;">
-                  <span style="font-size:10px;margin-right:4px;">{{ expanded.has(i) ? '▼' : '▶' }}</span>
+                  <span style="font-size:12px;margin-right:6px;">{{ expanded.has(i) ? '▼' : '▶' }}</span>
                   {{ p.trigger }}
                 </td>
                 <td style="white-space:nowrap;">¥{{ p.price.toLocaleString() }}</td>
@@ -100,7 +100,7 @@
                       v-for="(item, j) in p.items"
                       :key="j"
                       :title="itemDisplayName(item)"
-                      style="display:flex;align-items:center;gap:2px;font-size:12px;"
+                      style="display:flex;align-items:center;gap:4px;font-size:13px;"
                     >
                       <img
                         :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
@@ -113,16 +113,16 @@
                 </td>
               </tr>
               <tr v-if="expanded.has(i)" style="background:rgba(255,255,255,0.02);">
-                <td :colspan="5" style="padding:4px 16px;">
-                  <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;align-items:flex-start;">
+                <td :colspan="5" style="padding:6px 16px;">
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:13px;align-items:flex-start;">
                     <div
                       v-for="(item, j) in p.items"
                       :key="j"
-                      style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.03);padding:3px 8px;border-radius:4px;"
+                      style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.03);padding:4px 10px;border-radius:4px;"
                     >
                       <img
                         :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
-                        style="width:22px;height:22px;"
+                        style="width:24px;height:24px;"
                         @error="e => e.target.style.display='none'"
                       />
                       <span style="min-width:60px;">{{ itemDisplayName(item) }}</span>
