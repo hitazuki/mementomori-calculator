@@ -5,32 +5,8 @@
   </div>
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
-    <!-- Left Panel: Filters + Scores -->
+    <!-- Left Panel: Scores -->
     <div class="flex-col gap-12" style="position:sticky;top:24px;height:calc(100vh - 48px);">
-      <!-- Filters -->
-      <div class="card" style="flex-shrink:0;">
-        <div class="card-title">🔍 {{ $t('packFilterTitle') }}</div>
-        <div class="form-group">
-          <label class="form-label">{{ $t('packFilterCategory') }}</label>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="btn btn-sm" :class="filter.cat==='tower'?'btn-primary':'btn-ghost'" @click="filter.cat='tower'">{{ $t('[TowerTypeInfinite]') }}</button>
-            <button class="btn btn-sm" :class="filter.cat==='rank'?'btn-primary':'btn-ghost'" @click="filter.cat='rank'">{{ $t('[CommonPlayerRankLabel]') }}</button>
-            <button class="btn btn-sm" :class="filter.cat==='quest'?'btn-primary':'btn-ghost'" @click="filter.cat='quest'">{{ $t('[CommonQuestLabel]') }}</button>
-          </div>
-        </div>
-        <div class="form-group" v-if="filter.cat==='tower'">
-          <label class="form-label">{{ $t('packFilterTower') }}</label>
-          <select class="form-select" v-model="filter.tower">
-            <option v-for="t in towerOptions" :key="t" :value="t">{{ towerName(t) }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ $t('packFilterPrice') }}</label>
-          <select class="form-select" v-model="filter.price">
-            <option v-for="p in priceOptions" :key="p" :value="p">¥{{ p.toLocaleString() }}</option>
-          </select>
-        </div>
-      </div>
 
       <!-- Scores Panel -->
       <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
@@ -67,8 +43,34 @@
 
     <!-- Right Panel: Results Table -->
     <div class="flex-col gap-12" style="min-width:0;">
-      <div class="card" style="padding:8px 16px;display:flex;align-items:center;gap:12px;">
-        <span style="font-size:14px;">{{ $t('packResultCount', { n: filteredPacks.length }) }}</span>
+      <!-- Filters -->
+      <div class="card" style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="card-title" style="margin-bottom:0;">🔍 {{ $t('packFilterTitle') }}</div>
+          <div style="font-size:13px; color:var(--text-muted);">{{ $t('packResultCount', { n: filteredPacks.length }) }}</div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">{{ $t('packFilterCategory') }}</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-sm" :class="filter.cat==='tower'?'btn-primary':'btn-ghost'" @click="filter.cat='tower'">{{ $t('[TowerTypeInfinite]') }}</button>
+              <button class="btn btn-sm" :class="filter.cat==='rank'?'btn-primary':'btn-ghost'" @click="filter.cat='rank'">{{ $t('[CommonPlayerRankLabel]') }}</button>
+              <button class="btn btn-sm" :class="filter.cat==='quest'?'btn-primary':'btn-ghost'" @click="filter.cat='quest'">{{ $t('[CommonQuestLabel]') }}</button>
+            </div>
+          </div>
+          <div class="form-group" v-if="filter.cat==='tower'" style="margin-bottom:0; min-width:140px;">
+            <label class="form-label">{{ $t('packFilterTower') }}</label>
+            <select class="form-select" v-model="filter.tower">
+              <option v-for="t in towerOptions" :key="t" :value="t">{{ towerName(t) }}</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0; min-width:140px;">
+            <label class="form-label">{{ $t('packFilterPrice') }}</label>
+            <select class="form-select" v-model="filter.price">
+              <option v-for="p in priceOptions" :key="p" :value="p">¥{{ p.toLocaleString() }}</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div class="card" style="overflow-x:auto;padding:8px;">
