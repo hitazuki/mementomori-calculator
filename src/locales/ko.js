@@ -240,7 +240,7 @@ export default {
   tooltipEditTableTitle: "클릭하여 표 제목 수정",
 
   navGroupItemSystem: "아이템 시스템",
-  navPackCalc: "기간 한정 패키지 검색",
+  navPackCalc: "울트라 세일 팩 검색",
   packCalcDesc: "아이템 점수에 기반하여 울트라 세일 팩의 가성비를 계산합니다.",
   packCalcSource: "데이터 출처: tamamo.dev, 내용물 오류 가능성 있음",
   packFilterTitle: "필터",

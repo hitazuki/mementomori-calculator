@@ -240,7 +240,7 @@ export default {
   tooltipEditTableTitle: "クリックで表タイトルを編集",
 
   navGroupItemSystem: "アイテムシステム",
-  navPackCalc: "期間限定パック検索",
+  navPackCalc: "ウルトラセールパック検索",
   packCalcDesc: "アイテムスコアに基づいてウルトラセールパックのコスパを計算します。",
   packCalcSource: "データ元: tamamo.dev、内容物に誤りがある可能性あり",
   packFilterTitle: "フィルター",

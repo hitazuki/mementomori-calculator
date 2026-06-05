@@ -238,7 +238,7 @@ export default {
   tooltipEditTableTitle: "点击修改表格标题",
 
   navGroupItemSystem: "道具系统",
-  navPackCalc: "限时组合包查询",
+  navPackCalc: "超值限时组合包查询",
   packCalcDesc: "根据道具评分计算超值限时组合包的性价比。",
   packCalcSource: "数据来源 tamamo.dev，内容物可能有误，注意辨别",
   packFilterTitle: "筛选",
