@@ -335,6 +335,18 @@
     "nameKo": "생명의 나무의 물방울",
     "isBase": true
   },
+  "[-1,1]": {
+    "name": "角色本体",
+    "score": 17000,
+    "batch": 1,
+    "iconId": 0,
+    "nameZh": "角色本体",
+    "nameTw": "角色本體",
+    "nameEn": "Character Body",
+    "nameJa": "キャラクター本体",
+    "nameKo": "캐릭터 본체",
+    "isBase": true
+  },
   "[17,5]": {
     "name": "未鉴定符石 Lv2",
     "score": 16,
@@ -706,16 +718,5 @@
     "nameJa": "経験珠（6時間）",
     "nameKo": "경험치 구슬 (6시간)",
     "isBase": false
-  },
-  "[-1, 1]": {
-    "name": "角色本体",
-    "score": 17000,
-    "batch": 1,
-    "iconId": 0,
-    "nameZh": "角色本体",
-    "nameTw": "角色本體",
-    "nameEn": "Character Body",
-    "nameJa": "キャラクター本体",
-    "nameKo": "캐릭터 본체"
   }
 }
