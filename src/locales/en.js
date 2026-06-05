@@ -241,7 +241,7 @@ export default {
 
   // Pack Calculator
   navGroupItemSystem: "Item System",
-  navPackCalc: "Pack CE Calc",
+  navPackCalc: "Limited Packs Search",
   packCalcDesc: "Calculate the cost-efficiency of Ultra Sale Packs based on item scores.",
   packCalcSource: "Data from tamamo.dev, contents may be inaccurate",
   packFilterTitle: "Filter",
