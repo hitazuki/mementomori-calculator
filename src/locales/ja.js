@@ -202,6 +202,14 @@ export default {
   scenarioDescPvpTank: "超高防御力、極限の貫通が必要",
   scenarioDescGuildBoss: "防御2M、防御デバフ有効、火力特化",
   navTornado: "限界利益分析",
+  ui_custom: "(カスタム)",
+  ui_common: "(共通)",
+  ui_max6: "(最大6)",
+  ui_compare: "比較",
+  ui_vsBuild1: "構成1との比較 (差分)",
+  ui_bar: "棒グラフ",
+  ui_radar: "レーダー図",
+  ui_table: "データ表",
   tornadoTitle: "🌪 限界利益分析 (トルネード図)",
   tornadoDesc:
     "様々な属性の増減が最終ダメージに与えるパーセンテージの影響を横並びで比較し、最も費用対効果の高いアップグレード経路を見つけます。",
@@ -230,4 +238,10 @@ export default {
   atkBonus: "攻撃力ボーナス",
   basePanelStats: "基礎パラメータ",
   baseCoefficients: "その他基礎パラメータ (展開/折畳)",
+
+  // Tooltips
+  tooltipToggleFormula: "クリックで計算式タイプを切替",
+  tooltipSwitchLight: "ライトテーマに切替",
+  tooltipSwitchDark: "ダークテーマに切替",
+  tooltipEditTableTitle: "クリックで表タイトルを編集",
 };

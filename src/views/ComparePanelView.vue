@@ -8,7 +8,7 @@
     <div class="flex-col gap-12">
       <!-- Common Params -->
       <div class="card">
-        <div class="card-title">⚙ {{ $t('manualAdjust') }} {{ $t('ui_common') || '(Common)' }}</div>
+        <div class="card-title">⚙ {{ $t('manualAdjust') }} {{ $t('ui_common') }}</div>
         <div class="form-group">
           <label class="form-label">{{ $t('baseAtk') }}</label>
           <BigNumberInput class="form-input" v-model="store.baseAtk" />
@@ -36,7 +36,7 @@
 
       <!-- Builds -->
       <div class="card">
-        <div class="card-title">🔧 {{ $t('compareTitle') }} <span class="text-xs text-muted">{{ $t('ui_max6') || '(Max 6)' }}</span></div>
+        <div class="card-title">🔧 {{ $t('compareTitle') }} <span class="text-xs text-muted">{{ $t('ui_max6') }}</span></div>
         <div class="flex-col gap-8">
           <div 
             v-for="(b, i) in cs.builds" 
@@ -98,9 +98,9 @@
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
           <div style="display:flex;gap:6px">
-            <button class="btn btn-sm" :class="cs.chartMode==='bar'?'btn-primary':'btn-ghost'" @click="cs.chartMode='bar'">{{ $t('ui_bar') || 'Bar' }}</button>
-            <button class="btn btn-sm" :class="cs.chartMode==='radar'?'btn-primary':'btn-ghost'" @click="cs.chartMode='radar'">{{ $t('ui_radar') || 'Radar' }}</button>
-            <button class="btn btn-sm" :class="cs.chartMode==='table'?'btn-primary':'btn-ghost'" @click="cs.chartMode='table'">{{ $t('ui_table') || 'Table' }}</button>
+            <button class="btn btn-sm" :class="cs.chartMode==='bar'?'btn-primary':'btn-ghost'" @click="cs.chartMode='bar'">{{ $t('ui_bar') }}</button>
+            <button class="btn btn-sm" :class="cs.chartMode==='radar'?'btn-primary':'btn-ghost'" @click="cs.chartMode='radar'">{{ $t('ui_radar') }}</button>
+            <button class="btn btn-sm" :class="cs.chartMode==='table'?'btn-primary':'btn-ghost'" @click="cs.chartMode='table'">{{ $t('ui_table') }}</button>
           </div>
           <select class="form-select" v-model="cs.metric" style="width:160px">
             <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
@@ -132,12 +132,12 @@
       </div>
 
       <div class="card" v-if="results.length >= 2">
-        <div class="card-title">📊 {{ $t('ui_vsBuild1') || 'vs Build 1 (Delta)' }}</div>
+        <div class="card-title">📊 {{ $t('ui_vsBuild1') }}</div>
         <div style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
-                <th>{{ $t('ui_compare') || 'Compare' }}</th>
+                <th>{{ $t('ui_compare') }}</th>
                 <th v-for="b in cs.benchmarks" :key="b.label">{{ b.label }}</th>
               </tr>
             </thead>

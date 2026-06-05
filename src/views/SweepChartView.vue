@@ -46,7 +46,7 @@
       </div>
 
       <div class="card">
-        <div class="card-title">⚙️ {{ $t('basePanelStats') || '基础面板参数' }}</div>
+        <div class="card-title">⚙️ {{ $t('basePanelStats') }}</div>
         <div class="form-group">
           <label class="form-label">{{ $t('atkType') }}</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -58,7 +58,7 @@
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('atkLevel') }}</span>
             <div style="display:flex;align-items:center;gap:4px">
-              <span class="text-xs text-muted" v-show="isAtkCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
+              <span class="text-xs text-muted" v-show="isAtkCustom">{{ $t('ui_custom') }}</span>
               <input class="form-input" type="number" v-model.number="store.atkLevel" @input="onAtkLevelChange" min="1" max="999" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;">
             </div>
           </label>
@@ -69,7 +69,7 @@
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
             <span>{{ $t('defLevel') || $t('defPresetLabel') }}</span>
             <div style="display:flex;align-items:center;gap:4px">
-              <span class="text-xs text-muted" v-show="isDefCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
+              <span class="text-xs text-muted" v-show="isDefCustom">{{ $t('ui_custom') }}</span>
               <input class="form-input" type="number" v-model.number="store.defLevel" @input="onDefLevelChange" min="1" max="999" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;">
             </div>
           </label>
@@ -128,7 +128,7 @@
         <!-- Collapsible non-sweepable advanced stats -->
         <details class="advanced-panel-details" style="margin-top: 12px; border-top: 1px dashed var(--border-subtle); padding-top: 12px;">
           <summary style="font-size: 13px; color: var(--gold); cursor: pointer; user-select: none; font-weight: 500; outline:none;">
-            ⚙️ {{ $t('baseCoefficients') || '其他基础面板参数 (展开/折叠)' }}
+            ⚙️ {{ $t('baseCoefficients') }}
           </summary>
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
             <div class="form-group">

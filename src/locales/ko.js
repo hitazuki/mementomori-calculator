@@ -202,6 +202,14 @@ export default {
   scenarioDescPvpTank: "매우 높은 방어력, 극한의 관통 필요",
   scenarioDescGuildBoss: "방어 2M, 방어 깎기 유효, 화력 집중",
   navTornado: "한계 이익 분석",
+  ui_custom: "(커스텀)",
+  ui_common: "(공통)",
+  ui_max6: "(최대 6개)",
+  ui_compare: "비교",
+  ui_vsBuild1: "빌드 1과 비교 (차이)",
+  ui_bar: "막대 그래프",
+  ui_radar: "레이더 차트",
+  ui_table: "데이터 표",
   tornadoTitle: "🌪 한계 이익 분석 (토네이도 차트)",
   tornadoDesc:
     "다양한 속성 증감분이 최종 데미지에 미치는 영향을 퍼센트로 비교하여 가장 효율적인 업그레이드 경로를 찾습니다.",
@@ -230,4 +238,10 @@ export default {
   atkBonus: "공격력 보너스",
   basePanelStats: "기본 패널 매개변수",
   baseCoefficients: "기타 기본 매개변수 (접기/펼치기)",
+
+  // Tooltips
+  tooltipToggleFormula: "클릭하여 공식 유형 전환",
+  tooltipSwitchLight: "라이트 테마로 전환",
+  tooltipSwitchDark: "다크 테마로 전환",
+  tooltipEditTableTitle: "클릭하여 표 제목 수정",
 };

@@ -8,29 +8,29 @@
     <div class="flex-col gap-12 export-sidebar">
       <!-- Variables -->
       <div class="card">
-        <div class="card-title">{{ $t('exportVariables') || '📐 Variables' }}</div>
+        <div class="card-title">{{ $t('exportVariables') }}</div>
         
         <div class="form-group">
-          <label class="form-label">{{ $t('exportXAxis') || 'X Axis' }}</label>
+          <label class="form-label">{{ $t('exportXAxis') }}</label>
           <select class="form-select" v-model="ts.xKey" @change="onXKeyChange">
             <option v-for="v in TABLE_VARIABLES" :key="v.key" :value="v.key">{{ v.label }}</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">{{ $t('exportXValues') || 'X Values' }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') || '(comma separated)' }}</span></label>
+          <label class="form-label">{{ $t('exportXValues') }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') }}</span></label>
           <textarea class="form-input" v-model="ts.xValsStr" rows="2" style="resize:vertical"></textarea>
         </div>
 
         <div class="divider"></div>
 
         <div class="form-group">
-          <label class="form-label">{{ $t('exportYAxis') || 'Y Axis' }}</label>
+          <label class="form-label">{{ $t('exportYAxis') }}</label>
           <select class="form-select" v-model="ts.yKey" @change="onYKeyChange">
             <option v-for="v in TABLE_VARIABLES" :key="v.key" :value="v.key">{{ v.label }}</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">{{ $t('exportYValues') || 'Y Values' }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') || '(comma separated)' }}</span></label>
+          <label class="form-label">{{ $t('exportYValues') }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') }}</span></label>
           <textarea class="form-input" v-model="ts.yValsStr" rows="2" style="resize:vertical"></textarea>
         </div>
 
@@ -48,7 +48,7 @@
 
       <!-- Builds Configuration -->
       <div class="card">
-        <div class="card-title">{{ $t('exportBuildsConfig') || '⚙ Builds Configuration' }}</div>
+        <div class="card-title">{{ $t('exportBuildsConfig') }}</div>
         <div class="flex-col gap-8">
           <div 
             v-for="(b, i) in ts.builds" 
@@ -59,7 +59,7 @@
               <input class="form-input" style="font-weight:bold;width:130px;padding:2px 8px;font-size: 16px" v-model="b.name">
               <div style="display:flex;gap:4px">
                 <button class="btn btn-secondary btn-sm" @click="b._expanded = !b._expanded" style="padding:4px 8px;font-size: 14px">
-                  {{ b._expanded ? '▲' : '▼ ' + ($t('ui_details') || 'Details') }}
+                  {{ b._expanded ? '▲' : '▼ ' + $t('ui_details') }}
                 </button>
                 <button v-if="ts.builds.length > 1" class="btn btn-ghost btn-sm" @click="removeBuild(i)" style="padding:4px 8px">🗑</button>
               </div>
@@ -126,8 +126,8 @@
             </div>
           </div>
         </div>
-        <button class="btn btn-secondary btn-sm w-full mt-8" @click="addBuild">+ {{ $t('addBuild') || 'Add Build' }}</button>
-        <button class="btn btn-ghost btn-sm w-full mt-4" @click="resetDefault">{{ $t('exportResetDefault') || 'Reset to Default' }}</button>
+        <button class="btn btn-secondary btn-sm w-full mt-8" @click="addBuild">+ {{ $t('addBuild') }}</button>
+        <button class="btn btn-ghost btn-sm w-full mt-4" @click="resetDefault">{{ $t('exportResetDefault') }}</button>
       </div>
     </div>
 
@@ -141,7 +141,7 @@
               class="table-title-input" 
               v-model="displayTitle" 
               :placeholder="defaultTitle"
-              title="点击修改表格标题"
+              :title="$t('tooltipEditTableTitle')"
             />
             <select class="form-select" v-model="ts.metric" style="width:140px;padding:4px 8px;font-size: 14px;min-height:28px;margin-left:4px;">
               <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
@@ -409,7 +409,7 @@ function copyMarkdown() {
     })
     md += '\n'
   })
-  navigator.clipboard.writeText(md).then(() => alert(t('copied') || 'Copied!'))
+  navigator.clipboard.writeText(md).then(() => alert(t('copied')))
 }
 
 function downloadCsv() {

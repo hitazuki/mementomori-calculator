@@ -1,7 +1,7 @@
 <template>
   <div class="view-header animate-fadeup">
-    <h1 class="view-title">{{ $t('tornadoTitle') || '🌪 边际收益分析' }}</h1>
-    <p class="view-desc">{{ $t('tornadoDesc') || '横向对比各项属性增量（或减量）对最终伤害产生的百分比影响，寻找性价比最高的升级方案。' }}</p>
+    <h1 class="view-title">{{ $t('tornadoTitle') }}</h1>
+    <p class="view-desc">{{ $t('tornadoDesc') }}</p>
   </div>
   
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
@@ -10,7 +10,7 @@
       <div class="card">
         <details :open="isBaseOpen" @toggle="e => isBaseOpen = e.target.open" style="outline: none;">
           <summary class="card-title" style="cursor: pointer; user-select: none; outline: none; margin-bottom: 0; display: flex; align-items: center; gap: 8px; width: 100%;">
-            ⚙️ {{ $t('basePanelStats') || '基础面板参数' }}
+            ⚙️ {{ $t('basePanelStats') }}
             <span style="margin-left: auto; font-size: 12px; color: var(--gold); transition: transform 0.2s;" :style="{ transform: isBaseOpen ? 'rotate(180deg)' : 'rotate(0deg)' }">▼</span>
           </summary>
           <div class="grid-2" style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border-subtle);">
@@ -184,8 +184,8 @@
       <!-- Tabs & Actions -->
       <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px">
         <div class="chart-tabs">
-          <button class="tab-btn" :class="{active: activeTab==='tornado'}" @click="activeTab='tornado'">{{ $t('tabTornado') || '🌪 龙卷风图 (Tornado)' }}</button>
-          <button class="tab-btn" :class="{active: activeTab==='waterfall'}" @click="activeTab='waterfall'">{{ $t('tabWaterfall') || '🌊 瀑布图 (Waterfall)' }}</button>
+          <button class="tab-btn" :class="{active: activeTab==='tornado'}" @click="activeTab='tornado'">{{ $t('tabTornado') }}</button>
+          <button class="tab-btn" :class="{active: activeTab==='waterfall'}" @click="activeTab='waterfall'">{{ $t('tabWaterfall') }}</button>
         </div>
         <div style="display:flex;align-items:center;gap:16px">
           <div style="font-size:14px">

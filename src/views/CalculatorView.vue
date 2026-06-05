@@ -27,7 +27,7 @@
         <div class="form-group">
           <label class="form-label" style="display:flex;justify-content:space-between">
             <span>{{ $t('atkLevel') }}</span>
-            <span class="text-xs text-muted" v-show="isAtkCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
+            <span class="text-xs text-muted" v-show="isAtkCustom">{{ $t('ui_custom') }}</span>
           </label>
           <input class="form-input" type="number" v-model.number="store.atkLevel" @input="onAtkLevelChange" min="1" max="999">
         </div>
@@ -131,7 +131,7 @@
         <div class="form-group">
           <label class="form-label" style="display:flex;justify-content:space-between">
             <span>{{ $t('defLevel') || $t('defPresetLabel') }}</span>
-            <span class="text-xs text-muted" v-show="isDefCustom">{{ $t('ui_custom') || '(Custom)' }}</span>
+            <span class="text-xs text-muted" v-show="isDefCustom">{{ $t('ui_custom') }}</span>
           </label>
           <input class="form-input" type="number" v-model.number="store.defLevel" @input="onDefLevelChange" min="1" max="999">
         </div>

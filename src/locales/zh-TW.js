@@ -201,6 +201,14 @@ export default {
   scenarioDescPvpTank: "防禦超高，極限穿透需求",
   scenarioDescGuildBoss: "防禦2M，吃破甲，傷害最大化",
   navTornado: "邊際收益分析",
+  ui_custom: "(自訂)",
+  ui_common: "(通用)",
+  ui_max6: "(最多6個)",
+  ui_compare: "對比",
+  ui_vsBuild1: "與方案1對比 (差值)",
+  ui_bar: "長條圖",
+  ui_radar: "雷達圖",
+  ui_table: "資料表",
   tornadoTitle: "🌪 邊際收益分析",
   tornadoDesc:
     "橫向對比各項屬性增量（或減量）對最終傷害產生的百分比影響，尋找性價比最高的升級方案。",
@@ -229,4 +237,10 @@ export default {
   atkBonus: "攻擊力加成",
   basePanelStats: "基礎面板參數",
   baseCoefficients: "其他基礎面板參數 (展開/折疊)",
+
+  // Tooltips
+  tooltipToggleFormula: "點擊切換公式類型",
+  tooltipSwitchLight: "切換到亮色主題",
+  tooltipSwitchDark: "切換到暗色主題",
+  tooltipEditTableTitle: "點擊修改表格標題",
 };

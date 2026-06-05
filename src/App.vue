@@ -41,7 +41,7 @@
       </ul>
 
       <div class="sidebar-footer">
-        <div class="formula-badge" id="formula-toggle" title="点击切换公式类型" style="display:none">
+        <div class="formula-badge" id="formula-toggle" :title="$t('tooltipToggleFormula')" style="display:none">
           <span class="formula-label">{{ $t('formula') }}</span>
           <span class="formula-value" id="formula-display">{{ $t('propPen') }}</span>
         </div>
@@ -55,7 +55,7 @@
           @click="toggleTheme" 
           class="btn btn-ghost" 
           style="padding: 6px 12px; font-size: 16px; border-color: var(--border-subtle);"
-          :title="currentTheme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'"
+          :title="currentTheme === 'dark' ? $t('tooltipSwitchLight') : $t('tooltipSwitchDark')"
         >
           {{ currentTheme === 'dark' ? '🌙' : '☀️' }}
         </button>

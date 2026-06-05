@@ -22,10 +22,10 @@
     <div class="flex-col gap-12" style="overflow-y:auto; padding-bottom: 24px;">
       
       <div class="card">
-        <div class="card-title">🔀 {{ $t('hmAxisConfig') || 'Axis Config' }}</div>
+        <div class="card-title">🔀 {{ $t('hmAxisConfig') }}</div>
         
         <div class="form-group">
-          <label class="form-label text-purple-light">{{ $t('yAxisConfig') || 'Y-Axis' }}</label>
+          <label class="form-label text-purple-light">{{ $t('yAxisConfig') }}</label>
           <select class="form-select" v-model="hs.yKey" @change="onYKeyChange">
             <option v-for="v in availableVariables" :key="v.key" :value="v.key" :disabled="v.key === hs.xKey">{{ v.label }}</option>
           </select>
@@ -42,7 +42,7 @@
             <input class="form-range" type="range" v-model.number="hs.yMax" :min="currentYVar?.rangeMin" :max="currentYVar?.rangeMax" :step="currentYVar?.step">
           </div>
           <div style="margin-top:4px">
-            <label class="form-label text-xs">Steps <span class="value-display">{{ hs.ySteps }}</span></label>
+            <label class="form-label text-xs">{{ $t('stepSpan') }} <span class="value-display">{{ hs.ySteps }}</span></label>
             <input class="form-range" type="range" v-model.number="hs.ySteps" min="5" max="40" step="1">
           </div>
         </div>
@@ -50,7 +50,7 @@
         <div class="divider"></div>
 
         <div class="form-group">
-          <label class="form-label text-gold">{{ $t('xAxisConfig') || 'X-Axis' }}</label>
+          <label class="form-label text-gold">{{ $t('xAxisConfig') }}</label>
           <select class="form-select" v-model="hs.xKey" @change="onXKeyChange">
             <option v-for="v in availableVariables" :key="v.key" :value="v.key" :disabled="v.key === hs.yKey">{{ v.label }}</option>
           </select>
@@ -67,7 +67,7 @@
             <input class="form-range" type="range" v-model.number="hs.xMax" :min="currentXVar?.rangeMin" :max="currentXVar?.rangeMax" :step="currentXVar?.step">
           </div>
           <div style="margin-top:4px">
-            <label class="form-label text-xs">Steps <span class="value-display">{{ hs.xSteps }}</span></label>
+            <label class="form-label text-xs">{{ $t('stepSpan') }} <span class="value-display">{{ hs.xSteps }}</span></label>
             <input class="form-range" type="range" v-model.number="hs.xSteps" min="5" max="40" step="1">
           </div>
         </div>
@@ -75,7 +75,7 @@
       </div>
 
       <div class="card">
-        <div class="card-title">⚙️ {{ $t('basePanelStats') || '基础面板参数' }}</div>
+        <div class="card-title">⚙️ {{ $t('basePanelStats') }}</div>
         
         <div class="form-group" style="margin-bottom:12px">
           <label class="form-label text-xs">{{ $t('atkType') }}</label>
@@ -96,7 +96,7 @@
         <!-- Collapsible non-sweepable stats -->
         <details class="advanced-panel-details" style="margin-top: 12px; border-top: 1px dashed var(--border-subtle); padding-top: 12px;">
           <summary style="font-size: 13px; color: var(--gold); cursor: pointer; user-select: none; font-weight: 500; outline:none;">
-            ⚙️ {{ $t('baseCoefficients') || '其他基础面板参数 (展开/折叠)' }}
+            ⚙️ {{ $t('baseCoefficients') }}
           </summary>
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
             <div class="form-group">

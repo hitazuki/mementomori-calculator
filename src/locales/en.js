@@ -208,6 +208,14 @@ export default {
   scenarioDescPvpTank: "Super high DEF, max PEN required",
   scenarioDescGuildBoss: "2M DEF, DEF debuffed, max dmg focus",
   navTornado: "Tornado Chart",
+  ui_custom: "(Custom)",
+  ui_common: "(Common)",
+  ui_max6: "(Max 6)",
+  ui_compare: "Compare",
+  ui_vsBuild1: "vs Build 1 (Delta)",
+  ui_bar: "Bar",
+  ui_radar: "Radar",
+  ui_table: "Table",
   tornadoTitle: "🌪 Marginal Gain Analysis",
   tornadoDesc:
     "Compare the percentage impact of various attribute increments (or decrements) on final damage to find the most cost-effective upgrade path.",
@@ -236,4 +244,10 @@ export default {
   atkBonus: "ATK Bonus",
   basePanelStats: "Base Panel Stats",
   baseCoefficients: "Other Base Stats (Expand/Collapse)",
+
+  // Tooltips
+  tooltipToggleFormula: "Click to toggle formula type",
+  tooltipSwitchLight: "Switch to light theme",
+  tooltipSwitchDark: "Switch to dark theme",
+  tooltipEditTableTitle: "Click to edit table title",
 };

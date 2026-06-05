@@ -237,4 +237,10 @@ export default {
   atkBonus: "攻击加成",
   basePanelStats: "基础面板参数",
   baseCoefficients: "其他基础面板参数 (展开/折叠)",
+
+  // Tooltips
+  tooltipToggleFormula: "点击切换公式类型",
+  tooltipSwitchLight: "切换到亮色主题",
+  tooltipSwitchDark: "切换到暗色主题",
+  tooltipEditTableTitle: "点击修改表格标题",
 };
