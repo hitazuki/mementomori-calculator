@@ -25,6 +25,20 @@
           <span class="nav-label">{{ $t(item.i18nLabel) }}</span>
         </li>
 
+        <li class="nav-group-title">📦 {{ $t('navGroupItemSystem') }}</li>
+
+        <li
+          v-for="item in navItemSystemItems"
+          :key="item.id"
+          class="nav-item"
+          :class="{ active: currentView === item.id }"
+          @click="currentView = item.id"
+          :title="$t(item.i18nTitle)"
+        >
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ $t(item.i18nLabel) }}</span>
+        </li>
+
         <li class="nav-group-title">📂 {{ $t('navGroupMysterium') }}</li>
         
         <li 
@@ -97,6 +111,7 @@ import ComparePanelView from './views/ComparePanelView.vue'
 import TornadoChartView from './views/TornadoChartView.vue'
 import TableExportView from './views/TableExportView.vue'
 import MysteriumPanelView from './views/MysteriumPanelView.vue'
+import PackCalculatorView from './views/PackCalculatorView.vue'
 
 const { locale, t } = useI18n()
 const currentLanguage = ref(locale.value)
@@ -129,7 +144,8 @@ const viewMap = {
   compare: ComparePanelView,
   tornado: TornadoChartView,
   table: TableExportView,
-  mysterium: MysteriumPanelView
+  mysterium: MysteriumPanelView,
+  packCalc: PackCalculatorView
 }
 
 const activeComponent = computed(() => viewMap[currentView.value])
@@ -141,6 +157,10 @@ const navDamageItems = [
   { id: 'tornado', icon: '🌪', i18nLabel: 'navTornado', i18nTitle: 'navTornado' },
   { id: 'compare', icon: '⚖', i18nLabel: 'navCompare', i18nTitle: 'navCompare' },
   { id: 'table', icon: '📋', i18nLabel: 'navTable', i18nTitle: 'navTable' }
+]
+
+const navItemSystemItems = [
+  { id: 'packCalc', icon: '💰', i18nLabel: 'navPackCalc', i18nTitle: 'navPackCalc' }
 ]
 
 const navMysteriumItems = [

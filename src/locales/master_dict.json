@@ -275,7 +275,15 @@
     "[CharacterCollectionName90]": "蜘蛛座的噩梦",
     "[CharacterCollectionName91]": "玫瑰座的棘刺",
     "[CharacterCollectionName92]": "公鸡座的奇巧",
-    "[CharacterCollectionName93]": "射手座的光源"
+    "[CharacterCollectionName93]": "射手座的光源",
+    "[CommonPlayerRankLabel]": "等级",
+    "[CommonQuestLabel]": "冒险",
+    "[TowerTypeInfinite]": "无穷之塔",
+    "[TowerTypeBlue]": "忧蓝之塔",
+    "[TowerTypeRed]": "业红之塔",
+    "[TowerTypeGreen]": "苍翠之塔",
+    "[TowerTypeYellow]": "流金之塔",
+    "[TowerTypeAllElement]": "全属性塔"
   },
   "zh-TW": {
     "appBasicStr": "腕力",
@@ -553,7 +561,15 @@
     "[CharacterCollectionName90]": "蜘蛛座的惡夢",
     "[CharacterCollectionName91]": "玫瑰座的棘刺",
     "[CharacterCollectionName92]": "公雞座的把戲",
-    "[CharacterCollectionName93]": "射手座的光源"
+    "[CharacterCollectionName93]": "射手座的光源",
+    "[CommonPlayerRankLabel]": "等级",
+    "[CommonQuestLabel]": "冒险",
+    "[TowerTypeInfinite]": "无穷之塔",
+    "[TowerTypeBlue]": "忧蓝之塔",
+    "[TowerTypeRed]": "业红之塔",
+    "[TowerTypeGreen]": "苍翠之塔",
+    "[TowerTypeYellow]": "流金之塔",
+    "[TowerTypeAllElement]": "全屬性塔"
   },
   "en": {
     "appBasicStr": "STR",
@@ -831,7 +847,15 @@
     "[CharacterCollectionName90]": "Aranea’s Nightmare",
     "[CharacterCollectionName91]": "Rosa’s Thorns",
     "[CharacterCollectionName92]": "Tarlugallu’s Trick",
-    "[CharacterCollectionName93]": "Sagittarius’s Light"
+    "[CharacterCollectionName93]": "Sagittarius’s Light",
+    "[CommonPlayerRankLabel]": "Rank",
+    "[CommonQuestLabel]": "Quest",
+    "[TowerTypeInfinite]": "Tower of Infinity",
+    "[TowerTypeBlue]": "Tower of Azure",
+    "[TowerTypeRed]": "Tower of Crimson",
+    "[TowerTypeGreen]": "Tower of Emerald",
+    "[TowerTypeYellow]": "Tower of Amber",
+    "[TowerTypeAllElement]": "All-Element Tower"
   },
   "ja": {
     "appBasicStr": "腕力",
@@ -1109,7 +1133,15 @@
     "[CharacterCollectionName90]": "アラネアの悪夢​",
     "[CharacterCollectionName91]": "ロサの花棘​",
     "[CharacterCollectionName92]": "タルルガルルの奇術​",
-    "[CharacterCollectionName93]": "サジテリアスの光源​"
+    "[CharacterCollectionName93]": "サジテリアスの光源​",
+    "[CommonPlayerRankLabel]": "ランク",
+    "[CommonQuestLabel]": "クエスト",
+    "[TowerTypeInfinite]": "無窮の塔",
+    "[TowerTypeBlue]": "藍の塔",
+    "[TowerTypeRed]": "紅の塔",
+    "[TowerTypeGreen]": "翠の塔",
+    "[TowerTypeYellow]": "黄の塔",
+    "[TowerTypeAllElement]": "全属性の塔"
   },
   "ko": {
     "appBasicStr": "완력",
@@ -1387,6 +1419,14 @@
     "[CharacterCollectionName90]": "아라네아의 악몽",
     "[CharacterCollectionName91]": "로사의 가시",
     "[CharacterCollectionName92]": "타를루갈루의 요술",
-    "[CharacterCollectionName93]": "사지타리우스의 광원"
+    "[CharacterCollectionName93]": "사지타리우스의 광원",
+    "[CommonPlayerRankLabel]": "랭크",
+    "[CommonQuestLabel]": "퀘스트",
+    "[TowerTypeInfinite]": "무한의 탑",
+    "[TowerTypeBlue]": "남청의 탑",
+    "[TowerTypeRed]": "홍염의 탑",
+    "[TowerTypeGreen]": "비취의 탑",
+    "[TowerTypeYellow]": "황철의 탑",
+    "[TowerTypeAllElement]": "전속성 탑"
   }
 }

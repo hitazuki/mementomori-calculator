@@ -238,4 +238,20 @@ export default {
   tooltipSwitchLight: "Switch to light theme",
   tooltipSwitchDark: "Switch to dark theme",
   tooltipEditTableTitle: "Click to edit table title",
+
+  // Pack Calculator
+  navGroupItemSystem: "Item System",
+  navPackCalc: "Pack CE Calc",
+  packCalcDesc: "Calculate the cost-efficiency of Ultra Sale Packs based on item scores.",
+  packCalcSource: "Data from tamamo.dev, contents may be inaccurate",
+  packFilterTitle: "Filter",
+  packFilterCategory: "Category",
+  packFilterTower: "Tower Type",
+  packFilterPrice: "Price",
+  packScoreTitle: "Item Scores",
+  packResultCount: "{n} packs total",
+  packColTrigger: "Floor/Rank",
+  packColPrice: "Price",
+  packColValue: "Value",
+  packColItems: "Items",
 };
