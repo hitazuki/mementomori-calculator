@@ -1,3 +1,6 @@
+/** Script: copy_character_icons.js
+ * Purpose: Copies character icon assets from the raw asset directory to the public assets directory.
+ */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -56,3 +59,4 @@ for (const srcPath of files) {
 }
 
 console.log(`Successfully copied ${count} character icons to ${DEST_DIR}`);
+

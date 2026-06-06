@@ -1,3 +1,6 @@
+/** Script: extract_master_data.js
+ * Purpose: Extracts and processes game master data (e.g. dictionaries, localized text) into lightweight JSON files.
+ */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -137,10 +140,8 @@ for (const cl of colLevelsMB) {
       // Map base parameters to custom keys
       let key = '';
       if (ptype === 1) key = 'appBasicStr'; // 腕力
-      else if (ptype === 2) key = 'appBasicDex'; // 技力
-      else if (ptype === 3) key = 'appBasicMag'; // 魔力
-      else if (ptype === 4) key = 'appBasicStm'; // 耐久力
-      else key = `[UnknownBaseParam_${ptype}]`;
+      else if (ptype === 2) key = 'appBasicDex'; // 技�?      else if (ptype === 3) key = 'appBasicMag'; // 魔力
+      else if (ptype === 4) key = 'appBasicStm'; // 耐久�?      else key = `[UnknownBaseParam_${ptype}]`;
       
       baseParams.push({
         ptype,
@@ -179,15 +180,15 @@ for (const col of collectionsMB) {
 const masterDict = {
   'zh-CN': {
     'appBasicStr': '腕力',
-    'appBasicDex': '技力',
+    'appBasicDex': '技�?,
     'appBasicMag': '魔力',
-    'appBasicStm': '耐久力'
+    'appBasicStm': '耐久�?
   },
   'zh-TW': {
     'appBasicStr': '腕力',
-    'appBasicDex': '技力',
+    'appBasicDex': '技�?,
     'appBasicMag': '魔力',
-    'appBasicStm': '耐久力'
+    'appBasicStm': '耐久�?
   },
   'en': {
     'appBasicStr': 'STR',
@@ -197,15 +198,15 @@ const masterDict = {
   },
   'ja': {
     'appBasicStr': '腕力',
-    'appBasicDex': '技力',
+    'appBasicDex': '技�?,
     'appBasicMag': '魔力',
-    'appBasicStm': '耐久力'
+    'appBasicStm': '耐久�?
   },
   'ko': {
     'appBasicStr': '완력',
     'appBasicDex': '기력',
     'appBasicMag': '마력',
-    'appBasicStm': '내구력'
+    'appBasicStm': '내구�?
   }
 };
 
@@ -236,3 +237,4 @@ console.log(`Wrote mysteriums -> ${MYSTERIUM_OUT}`);
 
 fs.writeFileSync(LOCALES_OUT, JSON.stringify(masterDict, null, 2), 'utf8');
 console.log(`Wrote dictionary -> ${LOCALES_OUT}`);
+

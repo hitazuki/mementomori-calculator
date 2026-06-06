@@ -1,3 +1,6 @@
+/** Script: fetch_ultra_sale.js
+ * Purpose: Fetches the latest Ultra Sale Pack data from the Tamamo API and saves it locally as JSON.
+ */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,10 +17,10 @@ const OUT_PATH = path.join(PROJECT_ROOT, 'doc', 'items', 'UltraSalePack', 'ultra
   const prices = [11800, 6000, 3000, 1500, 1000, 650, 160];
   const towerTypes = [
     { id: 2, name: '無窮の塔' },
-    { id: 3, name: '藍の塔' },
-    { id: 4, name: '紅の塔' },
-    { id: 5, name: '翠の塔' },
-    { id: 6, name: '黄の塔' },
+    { id: 3, name: '藍の�? },
+    { id: 4, name: '紅の�? },
+    { id: 5, name: '翠の�? },
+    { id: 6, name: '黄の�? },
     { id: 7, name: '全塔' },
   ];
   const categories = [
@@ -69,3 +72,4 @@ const OUT_PATH = path.join(PROJECT_ROOT, 'doc', 'items', 'UltraSalePack', 'ultra
   console.log(`\n🎉 Successfully fetched and saved to:`);
   console.log(OUT_PATH);
 })();
+

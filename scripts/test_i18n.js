@@ -1,3 +1,6 @@
+/** Script: test_i18n.js
+ * Purpose: Validates the consistency of i18n translation keys across all locale files to prevent missing strings before builds.
+ */
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -33,7 +36,7 @@ for (const k of allKeys) {
 }
 
 if (hasError) {
-  console.error('\nâŒ i18n Translation Consistency Check Failed!\n')
+  console.error('\nâ?i18n Translation Consistency Check Failed!\n')
   for (const [lang, missingKeys] of Object.entries(missing)) {
     console.error(`Missing in ${lang}:`)
     missingKeys.forEach(k => console.error(`  - ${k}`))
@@ -41,5 +44,6 @@ if (hasError) {
   console.error('')
   process.exit(1)
 } else {
-  console.log('âœ… i18n Translation Consistency Check Passed!')
+  console.log('âœ?i18n Translation Consistency Check Passed!')
 }
+
