@@ -1,5 +1,5 @@
-/** Script: extract_master_data.js
- * Purpose: Extracts and processes game master data (e.g. dictionaries, localized text) into lightweight JSON files.
+/** 脚本: extract_master_data.js
+ * 用途: 从游戏主数据(Master Data)中提取并处理所需的字典、本地化文本等，生成轻量级的 JSON 数据供项目使用。
  */
 import fs from 'fs';
 import path from 'path';
@@ -237,4 +237,5 @@ console.log(`Wrote mysteriums -> ${MYSTERIUM_OUT}`);
 
 fs.writeFileSync(LOCALES_OUT, JSON.stringify(masterDict, null, 2), 'utf8');
 console.log(`Wrote dictionary -> ${LOCALES_OUT}`);
+
 

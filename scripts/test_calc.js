@@ -1,5 +1,5 @@
-/** Script: test_calc.js
- * Purpose: A standalone testing script to verify the logic of the pack value calculation engine locally.
+/** 脚本: test_calc.js
+ * 用途: 独立的本地测试脚本，用于验证礼包性价比核心计算引擎(packCalc.js)的逻辑是否正确。
  */
 import fs from 'fs'
 import { calculateMysteriumRankings } from '../src/engine/mysteriumCalc.js'
@@ -57,4 +57,5 @@ for (let i = 0; i < 15; i++) {
   const names = r.chars.map(c => dict[c.nameKey] + (c.name2Key ? `(${dict[c.name2Key]})` : '')).join(' + ')
   console.log(`${i+1}. ${names} | CE: ${r.marginalCe.toFixed(1)} | Score: ${r.score.toFixed(1)} | Cost: ${r.cost}`)
 }
+
 

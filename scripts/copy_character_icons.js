@@ -1,5 +1,5 @@
-/** Script: copy_character_icons.js
- * Purpose: Copies character icon assets from the raw asset directory to the public assets directory.
+/** 脚本: copy_character_icons.js
+ * 用途: 将原始的角色头像资源复制到项目的公开资源(public assets)目录中。
  */
 import fs from 'fs';
 import path from 'path';
@@ -59,4 +59,5 @@ for (const srcPath of files) {
 }
 
 console.log(`Successfully copied ${count} character icons to ${DEST_DIR}`);
+
 

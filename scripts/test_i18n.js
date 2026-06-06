@@ -1,5 +1,5 @@
-/** Script: test_i18n.js
- * Purpose: Validates the consistency of i18n translation keys across all locale files to prevent missing strings before builds.
+/** 脚本: test_i18n.js
+ * 用途: 单元测试脚本，在打包前校验各多语言翻译文件的键值一致性，防止漏翻。
  */
 import fs from 'fs'
 import path from 'path'
@@ -46,4 +46,5 @@ if (hasError) {
 } else {
   console.log('鉁?i18n Translation Consistency Check Passed!')
 }
+
 

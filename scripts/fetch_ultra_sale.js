@@ -1,5 +1,5 @@
-/** Script: fetch_ultra_sale.js
- * Purpose: Fetches the latest Ultra Sale Pack data from the Tamamo API and saves it locally as JSON.
+/** 脚本: fetch_ultra_sale.js
+ * 用途: 通过请求 Tamamo API 批量抓取最新的限时组合包数据，并保存到本地 JSON 文件中。
  */
 import fs from 'fs';
 import path from 'path';
@@ -72,4 +72,5 @@ const OUT_PATH = path.join(PROJECT_ROOT, 'doc', 'items', 'UltraSalePack', 'ultra
   console.log(`\n馃帀 Successfully fetched and saved to:`);
   console.log(OUT_PATH);
 })();
+
 

@@ -1,5 +1,5 @@
-/** Script: gen_all_packs.js
- * Purpose: Parses raw pack data (ultra sale, witch gift), deduplicates identical packs by price and content, and outputs the final allPacks.json for the calculator.
+/** 脚本: gen_all_packs.js
+ * 用途: 解析抓取回来的原始礼包数据，对价格和内容物完全一致的礼包进行去重清洗，最后输出供计算器使用的主数据(allPacks.json)。
  */
 import fs from 'fs'
 import path from 'path'
@@ -225,4 +225,5 @@ generateTable(rerunLightDark, '澶嶅埢 - 鍏夋殫')
 const mdOutPath = path.join(root, 'doc', 'items', 'Pack', 'WitchGiftPacks.md')
 fs.writeFileSync(mdOutPath, mdLines.join('\n'))
 console.log('Auto-generated WitchGiftPacks.md')
+
 
