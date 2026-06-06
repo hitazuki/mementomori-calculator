@@ -2,7 +2,7 @@
 !items-calc-formula.md
 !item-score-template.md
 !Pack/
-!Pack/WitchGiftPacks.md
+!Pack/*
 !UltraSalePack/
 !UltraSalePack/ultra-sale-packs.json
 !.gitignore

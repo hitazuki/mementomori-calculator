@@ -718,5 +718,17 @@
     "nameJa": "経験珠（6時間）",
     "nameKo": "경험치 구슬 (6시간)",
     "isBase": false
+  },
+  "[13,44]": {
+    "name": "红色金刚石",
+    "score": 32,
+    "batch": 1,
+    "iconId": 40,
+    "nameZh": "红色金刚石",
+    "nameTw": "紅色金剛石",
+    "nameEn": "Scarlet Jewels",
+    "nameJa": "紅の金剛石",
+    "nameKo": "붉은 금강석",
+    "isBase": true
   }
 }
