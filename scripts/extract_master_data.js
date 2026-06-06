@@ -140,8 +140,10 @@ for (const cl of colLevelsMB) {
       // Map base parameters to custom keys
       let key = '';
       if (ptype === 1) key = 'appBasicStr'; // 腕力
-      else if (ptype === 2) key = 'appBasicDex'; // 技�?      else if (ptype === 3) key = 'appBasicMag'; // 魔力
-      else if (ptype === 4) key = 'appBasicStm'; // 耐久�?      else key = `[UnknownBaseParam_${ptype}]`;
+      else if (ptype === 2) key = 'appBasicDex'; // 技力
+      else if (ptype === 3) key = 'appBasicMag'; // 魔力
+      else if (ptype === 4) key = 'appBasicStm'; // 耐久力
+      else key = `[UnknownBaseParam_${ptype}]`;
       
       baseParams.push({
         ptype,
@@ -180,15 +182,15 @@ for (const col of collectionsMB) {
 const masterDict = {
   'zh-CN': {
     'appBasicStr': '腕力',
-    'appBasicDex': '技�?,
+    'appBasicDex': '技力',
     'appBasicMag': '魔力',
-    'appBasicStm': '耐久�?
+    'appBasicStm': '耐久力'
   },
   'zh-TW': {
     'appBasicStr': '腕力',
-    'appBasicDex': '技�?,
+    'appBasicDex': '技力',
     'appBasicMag': '魔力',
-    'appBasicStm': '耐久�?
+    'appBasicStm': '耐久力'
   },
   'en': {
     'appBasicStr': 'STR',
@@ -198,15 +200,15 @@ const masterDict = {
   },
   'ja': {
     'appBasicStr': '腕力',
-    'appBasicDex': '技�?,
+    'appBasicDex': '技力',
     'appBasicMag': '魔力',
-    'appBasicStm': '耐久�?
+    'appBasicStm': '耐久力'
   },
   'ko': {
     'appBasicStr': '완력',
     'appBasicDex': '기력',
     'appBasicMag': '마력',
-    'appBasicStm': '내구�?
+    'appBasicStm': '내구력'
   }
 };
 
@@ -237,5 +239,3 @@ console.log(`Wrote mysteriums -> ${MYSTERIUM_OUT}`);
 
 fs.writeFileSync(LOCALES_OUT, JSON.stringify(masterDict, null, 2), 'utf8');
 console.log(`Wrote dictionary -> ${LOCALES_OUT}`);
-
-

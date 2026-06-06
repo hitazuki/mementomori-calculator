@@ -59,5 +59,3 @@ for (const srcPath of files) {
 }
 
 console.log(`Successfully copied ${count} character icons to ${DEST_DIR}`);
-
-

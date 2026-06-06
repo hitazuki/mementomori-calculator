@@ -36,7 +36,7 @@ for (const k of allKeys) {
 }
 
 if (hasError) {
-  console.error('\n�?i18n Translation Consistency Check Failed!\n')
+  console.error('\n❌ i18n Translation Consistency Check Failed!\n')
   for (const [lang, missingKeys] of Object.entries(missing)) {
     console.error(`Missing in ${lang}:`)
     missingKeys.forEach(k => console.error(`  - ${k}`))
@@ -44,7 +44,5 @@ if (hasError) {
   console.error('')
   process.exit(1)
 } else {
-  console.log('�?i18n Translation Consistency Check Passed!')
+  console.log('✅ i18n Translation Consistency Check Passed!')
 }
-
-

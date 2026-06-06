@@ -171,24 +171,24 @@ console.log(`Generated allPacks.json with ${finalPacks.length} totally unique pa
 // 4. Auto-generate WitchGiftPacks.md
 const mdLines = [
   '<!-- 自动生成，请勿手动修改此文件 -->',
-  '<!-- 礼包数据源在 src/constants/witchGiftPacks.json 中维�?-->',
+  '<!-- 礼包数据源在 src/constants/witchGiftPacks.json 中维护 -->',
   '',
-  '# 魔女的赠�?(Witch\'s Gift) 礼包记录',
+  '# 魔女的赠礼 (Witch\'s Gift) 礼包记录',
   '',
-  '本文档用于记录“魔女的赠礼”各个阶段触发的礼包内容与价格�?,
+  '本文档用于记录“魔女的赠礼”各个阶段触发的礼包内容与价格。',
   ''
 ]
 
 function formatItem(item) {
   let name = idToNameMap.get(`${item.ItemType}_${item.ItemId}`) || `未知物品[${item.ItemType},${item.ItemId}]`
   let count = item.ItemCount
-  if (count >= 100000 && count % 10000 === 0) count = (count / 10000) + '�?
+  if (count >= 100000 && count % 10000 === 0) count = (count / 10000) + '万'
   return `${name} x${count}`
 }
 
 function generateTable(packs, title) {
   mdLines.push(`## ${title}`)
-  mdLines.push('| 序号 | 触发条件 / 阶段 | 价格 | 内容�?1 | 内容�?2 | 内容�?3 | 备注 |')
+  mdLines.push('| 序号 | 触发条件 / 阶段 | 价格 | 内容物 1 | 内容物 2 | 内容物 3 | 备注 |')
   mdLines.push('| :--- | :--- | :--- | :--- | :--- | :--- | :--- |')
   
   if (packs.length === 0) {
@@ -217,13 +217,11 @@ const firstLightDark = witchGiftRaw.filter(p => p.type === 'first' && p.element 
 const rerunFour = witchGiftRaw.filter(p => p.type === 'rerun' && p.element === 'four_elements')
 const rerunLightDark = witchGiftRaw.filter(p => p.type === 'rerun' && p.element === 'light_dark')
 
-generateTable(firstFour, '首次 - 四属（蓝/�?�?黄）')
+generateTable(firstFour, '首次 - 四属（蓝/红/翠/黄）')
 generateTable(firstLightDark, '首次 - 光暗')
-generateTable(rerunFour, '复刻 - 四属（蓝/�?�?黄）')
+generateTable(rerunFour, '复刻 - 四属（蓝/红/翠/黄）')
 generateTable(rerunLightDark, '复刻 - 光暗')
 
 const mdOutPath = path.join(root, 'doc', 'items', 'Pack', 'WitchGiftPacks.md')
 fs.writeFileSync(mdOutPath, mdLines.join('\n'))
 console.log('Auto-generated WitchGiftPacks.md')
-
-
