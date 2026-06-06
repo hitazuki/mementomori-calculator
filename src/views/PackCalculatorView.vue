@@ -94,7 +94,7 @@
                 </td>
                 <td style="white-space:nowrap;">{{ formatPrice(p.price) }}</td>
                 <td :style="{color: p.ce >= 1 ? '#2ecc71' : '#e74c3c', fontWeight:'bold'}">{{ p.ce.toFixed(1) }}</td>
-                <td>{{ p.value.toLocaleString() }}</td>
+                <td style="white-space:nowrap;">{{ p.originalValue.toLocaleString() }} <span style="font-size:12px;color:var(--gold);">+ {{ p.rechargeValue.toLocaleString() }}</span></td>
                 <td>
                   <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;">
                     <div
@@ -148,8 +148,8 @@ import { useI18n } from 'vue-i18n'
 const showScores = ref(true)
 
 import packsRaw from '../constants/ultraSalePacks.json'
-import scoresRaw from '../constants/itemScores.json'
 import { calculatePackCE, normalizeScores } from '../engine/packCalc.js'
+import { editableScores } from '../store/itemScores.js'
 
 const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
@@ -170,27 +170,8 @@ function formatPrice(p) {
   return '¥' + p.toLocaleString()
 }
 
-// --- Scores (reactive, persisted) ---
-const STORAGE_KEY = 'mmt-pack-scores-v2'
-const stored = localStorage.getItem(STORAGE_KEY)
-let initialScores = JSON.parse(JSON.stringify(scoresRaw)) // deep copy
-if (stored) {
-  try {
-    const parsed = JSON.parse(stored)
-    for (const key in parsed) {
-      if (initialScores[key]) {
-        initialScores[key].score = parsed[key].score
-      }
-    }
-  } catch(e) {
-    console.error('Failed to parse stored scores', e)
-  }
-}
-const editableScores = reactive(initialScores)
-
-watch(editableScores, (v) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(v))
-}, { deep: true })
+// --- Scores (shared) ---
+// editableScores is now imported from store/itemScores.js
 
 // --- Filters ---
 const filter = reactive({

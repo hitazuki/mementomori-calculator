@@ -2,8 +2,15 @@
   {
     "type": "first",
     "element": "four_elements",
-    "stage": 1,
+    "stage": "SR",
     "price": 650,
+    "freeItems": [
+      {
+        "ItemType": 17,
+        "ItemId": 28,
+        "ItemCount": 10
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -17,29 +24,6 @@
       },
       {
         "ItemType": 10,
-        "ItemId": 15,
-        "ItemCount": 2
-      }
-    ]
-  },
-  {
-    "type": "first",
-    "element": "four_elements",
-    "stage": 2,
-    "price": 1500,
-    "items": [
-      {
-        "ItemType": 2,
-        "ItemId": 1,
-        "ItemCount": 750
-      },
-      {
-        "ItemType": 17,
-        "ItemId": 17,
-        "ItemCount": 9
-      },
-      {
-        "ItemType": 10,
         "ItemId": 10,
         "ItemCount": 2
       }
@@ -48,8 +32,45 @@
   {
     "type": "first",
     "element": "four_elements",
-    "stage": 3,
+    "stage": "SR+",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 17,
+        "ItemId": 17,
+        "ItemCount": 9
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 17,
+        "ItemCount": 9
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 2
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "four_elements",
+    "stage": "SSR",
     "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 3,
+        "ItemCount": 10
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -57,22 +78,29 @@
         "ItemCount": 3000
       },
       {
+        "ItemType": -1,
+        "ItemId": 1,
+        "ItemCount": 2
+      },
+      {
         "ItemType": 17,
         "ItemId": 118,
         "ItemCount": 4
-      },
-      {
-        "ItemType": -1,
-        "ItemId": 1,
-        "ItemCount": 1
       }
     ]
   },
   {
     "type": "first",
     "element": "four_elements",
-    "stage": 4,
+    "stage": "SSR+",
     "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 36000
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -94,8 +122,15 @@
   {
     "type": "first",
     "element": "four_elements",
-    "stage": 5,
+    "stage": "UR",
     "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 3,
+        "ItemCount": 6000
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -109,7 +144,7 @@
       },
       {
         "ItemType": 10,
-        "ItemId": 10,
+        "ItemId": 15,
         "ItemCount": 5
       }
     ]
@@ -117,8 +152,15 @@
   {
     "type": "first",
     "element": "four_elements",
-    "stage": 6,
+    "stage": "UR+",
     "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -140,8 +182,351 @@
   {
     "type": "first",
     "element": "four_elements",
-    "stage": 7,
+    "stage": "LR",
     "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 4,
+        "ItemCount": 5
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 100000
+      },
+      {
+        "ItemType": 12,
+        "ItemId": 2,
+        "ItemCount": 300
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "four_elements",
+    "stage": "LR+1",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 3,
+        "ItemCount": 10
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 100000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 2
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "four_elements",
+    "stage": "LR+2",
+    "price": 6000,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 4
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "four_elements",
+    "stage": "LR+3",
+    "price": 11800,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 100
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 500
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "four_elements",
+    "stage": "LR+4",
+    "price": 6000,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 4
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "four_elements",
+    "stage": "LR+5",
+    "price": 11800,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 16,
+        "ItemId": 3,
+        "ItemCount": 10
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 20
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "SR",
+    "price": 650,
+    "freeItems": [
+      {
+        "ItemType": -2,
+        "ItemId": 1,
+        "ItemCount": 1
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 325
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 28,
+        "ItemCount": 60
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 10,
+        "ItemCount": 2
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "SR+",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 2,
+        "ItemCount": 20
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 107,
+        "ItemCount": 4
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 5
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "SSR",
+    "price": 11800,
+    "freeItems": [
+      {
+        "ItemType": -2,
+        "ItemId": 1,
+        "ItemCount": 1
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": -1,
+        "ItemId": 1,
+        "ItemCount": 2
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 107,
+        "ItemCount": 12
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "SSR+",
+    "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 36000
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 107,
+        "ItemCount": 8
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 10
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "UR",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 3,
+        "ItemCount": 6000
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 100000
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 5
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "UR+",
+    "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 4,
+        "ItemCount": 15
+      },
+      {
+        "ItemType": 15,
+        "ItemId": 2,
+        "ItemCount": 3
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "LR",
+    "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": -2,
+        "ItemId": 1,
+        "ItemCount": 1
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -161,10 +546,143 @@
     ]
   },
   {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "LR+1",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 5
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 100000
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 5
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "LR+2",
+    "price": 6000,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 10
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "LR+3",
+    "price": 11800,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 100
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 500
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "LR+4",
+    "price": 6000,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 10
+      }
+    ]
+  },
+  {
+    "type": "first",
+    "element": "light_dark",
+    "stage": "LR+5",
+    "price": 11800,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 10
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 20
+      }
+    ]
+  },
+  {
     "type": "rerun",
     "element": "four_elements",
-    "stage": 1,
+    "stage": "SR",
     "price": 650,
+    "freeItems": [
+      {
+        "ItemType": 17,
+        "ItemId": 28,
+        "ItemCount": 10
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -178,29 +696,6 @@
       },
       {
         "ItemType": 10,
-        "ItemId": 15,
-        "ItemCount": 2
-      }
-    ]
-  },
-  {
-    "type": "rerun",
-    "element": "four_elements",
-    "stage": 2,
-    "price": 1500,
-    "items": [
-      {
-        "ItemType": 2,
-        "ItemId": 1,
-        "ItemCount": 750
-      },
-      {
-        "ItemType": 17,
-        "ItemId": 17,
-        "ItemCount": 9
-      },
-      {
-        "ItemType": 10,
         "ItemId": 10,
         "ItemCount": 2
       }
@@ -209,8 +704,45 @@
   {
     "type": "rerun",
     "element": "four_elements",
-    "stage": 3,
+    "stage": "SR+",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 17,
+        "ItemId": 17,
+        "ItemCount": 9
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 17,
+        "ItemCount": 9
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 2
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "four_elements",
+    "stage": "SSR",
     "price": 11800,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 3,
+        "ItemCount": 10
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -224,16 +756,23 @@
       },
       {
         "ItemType": 17,
-        "ItemId": 107,
-        "ItemCount": 8
+        "ItemId": 118,
+        "ItemCount": 6
       }
     ]
   },
   {
     "type": "rerun",
     "element": "four_elements",
-    "stage": 4,
+    "stage": "SSR+",
     "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 36000
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -255,8 +794,15 @@
   {
     "type": "rerun",
     "element": "four_elements",
-    "stage": 5,
+    "stage": "UR",
     "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 3,
+        "ItemCount": 6000
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -270,7 +816,7 @@
       },
       {
         "ItemType": 10,
-        "ItemId": 10,
+        "ItemId": 15,
         "ItemCount": 5
       }
     ]
@@ -278,8 +824,15 @@
   {
     "type": "rerun",
     "element": "four_elements",
-    "stage": 6,
+    "stage": "UR+",
     "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -301,8 +854,357 @@
   {
     "type": "rerun",
     "element": "four_elements",
-    "stage": 7,
+    "stage": "LR",
     "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 4,
+        "ItemCount": 5
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 12,
+        "ItemId": 2,
+        "ItemCount": 300
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 10
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "four_elements",
+    "stage": "LR+1",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 3,
+        "ItemCount": 10
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 100000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 2
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "four_elements",
+    "stage": "LR+2",
+    "price": 6000,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 4
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "four_elements",
+    "stage": "LR+3",
+    "price": 11800,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 100
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 500
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 10,
+        "ItemCount": 10
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "four_elements",
+    "stage": "LR+4",
+    "price": 6000,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 4
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "four_elements",
+    "stage": "LR+5",
+    "price": 11800,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 16,
+        "ItemId": 3,
+        "ItemCount": 10
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 20
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "SR",
+    "price": 650,
+    "freeItems": [
+      {
+        "ItemType": 17,
+        "ItemId": 28,
+        "ItemCount": 10
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 325
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 28,
+        "ItemCount": 60
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 10,
+        "ItemCount": 2
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "SR+",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 2,
+        "ItemCount": 20
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 107,
+        "ItemCount": 4
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 5
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "SSR",
+    "price": 11800,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 50
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 500
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 8
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "SSR+",
+    "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 36000
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 107,
+        "ItemCount": 8
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 10
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "UR",
+    "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 3,
+        "ItemCount": 6000
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 100000
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 5
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "UR+",
+    "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      }
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 4,
+        "ItemCount": 15
+      },
+      {
+        "ItemType": 15,
+        "ItemId": 2,
+        "ItemCount": 3
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "LR",
+    "price": 6000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 4,
+        "ItemCount": 5
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -324,31 +1226,15 @@
   {
     "type": "rerun",
     "element": "light_dark",
-    "stage": 1,
-    "price": 650,
-    "items": [
-      {
-        "ItemType": 2,
-        "ItemId": 1,
-        "ItemCount": 325
-      },
-      {
-        "ItemType": 17,
-        "ItemId": 28,
-        "ItemCount": 60
-      },
-      {
-        "ItemType": 10,
-        "ItemId": 15,
-        "ItemCount": 2
-      }
-    ]
-  },
-  {
-    "type": "rerun",
-    "element": "light_dark",
-    "stage": 2,
+    "stage": "LR+1",
     "price": 3000,
+    "freeItems": [
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 5
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -356,13 +1242,13 @@
         "ItemCount": 1500
       },
       {
-        "ItemType": 17,
-        "ItemId": 107,
-        "ItemCount": 4
+        "ItemType": 12,
+        "ItemId": 2,
+        "ItemCount": 150
       },
       {
-        "ItemType": 10,
-        "ItemId": 10,
+        "ItemType": 16,
+        "ItemId": 1,
         "ItemCount": 5
       }
     ]
@@ -370,8 +1256,39 @@
   {
     "type": "rerun",
     "element": "light_dark",
-    "stage": 3,
+    "stage": "LR+2",
+    "price": 6000,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      },
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 7,
+        "ItemCount": 10
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "LR+3",
     "price": 11800,
+    "freeItems": [
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 100
+      }
+    ],
     "items": [
       {
         "ItemType": 2,
@@ -385,29 +1302,6 @@
       },
       {
         "ItemType": 17,
-        "ItemId": 107,
-        "ItemCount": 8
-      }
-    ]
-  },
-  {
-    "type": "rerun",
-    "element": "light_dark",
-    "stage": 4,
-    "price": 6000,
-    "items": [
-      {
-        "ItemType": 2,
-        "ItemId": 1,
-        "ItemCount": 3000
-      },
-      {
-        "ItemType": 17,
-        "ItemId": 107,
-        "ItemCount": 8
-      },
-      {
-        "ItemType": 10,
         "ItemId": 10,
         "ItemCount": 10
       }
@@ -416,23 +1310,48 @@
   {
     "type": "rerun",
     "element": "light_dark",
-    "stage": 5,
-    "price": 3000,
+    "stage": "LR+4",
+    "price": 6000,
+    "freeItems": [],
     "items": [
+      {
+        "ItemType": 12,
+        "ItemId": 1,
+        "ItemCount": 1000
+      },
       {
         "ItemType": 2,
         "ItemId": 1,
-        "ItemCount": 1500
+        "ItemCount": 3000
       },
       {
-        "ItemType": 13,
-        "ItemId": 2,
-        "ItemCount": 100000
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 10
+      }
+    ]
+  },
+  {
+    "type": "rerun",
+    "element": "light_dark",
+    "stage": "LR+5",
+    "price": 11800,
+    "freeItems": [],
+    "items": [
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 10
       },
       {
-        "ItemType": 10,
-        "ItemId": 10,
-        "ItemCount": 5
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 1,
+        "ItemCount": 20
       }
     ]
   }

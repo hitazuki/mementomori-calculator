@@ -121,7 +121,7 @@
                 </td>
                 <td style="white-space:nowrap;">¥{{ p.price.toLocaleString() }}</td>
                 <td :style="{color: getCeColor(p.ce), fontWeight:'bold', fontSize: p.ce >= 1.5 ? '15px' : '14px'}">{{ p.ce.toFixed(2) }}</td>
-                <td>{{ p.value.toLocaleString() }}</td>
+                <td style="white-space:nowrap;">{{ p.originalValue.toLocaleString() }} <span style="font-size:12px;color:var(--gold);">+ {{ p.rechargeValue.toLocaleString() }}</span></td>
                 <td>
                   <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;">
                     <div
@@ -177,8 +177,8 @@ import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import packsRaw from '../constants/allPacks.json'
-import scoresRaw from '../constants/itemScores.json'
 import { calculatePackCE, normalizeScores, getItemInfo, getBaseItemKey } from '../engine/packCalc.js'
+import { editableScores } from '../store/itemScores.js'
 
 const showScores = ref(true)
 const { t, locale } = useI18n()
@@ -247,28 +247,8 @@ function getCeColor(ce) {
   return '#e74c3c' // Red
 }
 
-// --- Scores (reactive, persisted) ---
-// Note: using the same key as old page to sync scores
-const STORAGE_KEY = 'mmt-pack-scores-v2'
-const stored = localStorage.getItem(STORAGE_KEY)
-let initialScores = JSON.parse(JSON.stringify(scoresRaw)) // deep copy
-if (stored) {
-  try {
-    const parsed = JSON.parse(stored)
-    for (const key in parsed) {
-      if (initialScores[key]) {
-        initialScores[key].score = parsed[key].score
-      }
-    }
-  } catch(e) {
-    console.error('Failed to parse stored scores', e)
-  }
-}
-const editableScores = reactive(initialScores)
-
-watch(editableScores, (v) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(v))
-}, { deep: true })
+// --- Scores (shared) ---
+// editableScores is now imported from store/itemScores.js
 
 // --- Filters ---
 const filter = reactive({

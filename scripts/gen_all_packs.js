@@ -188,25 +188,26 @@ function formatItem(item) {
 
 function generateTable(packs, title) {
   mdLines.push(`## ${title}`)
-  mdLines.push('| 序号 | 触发条件 / 阶段 | 价格 | 内容物 1 | 内容物 2 | 内容物 3 | 备注 |')
-  mdLines.push('| :--- | :--- | :--- | :--- | :--- | :--- | :--- |')
+  mdLines.push('| 阶段(稀有度) | 免费赠送 | 礼包价格(日元) | 钻石 | 内容物 1 | 内容物 2 |')
+  mdLines.push('| :--- | :--- | :--- | :--- | :--- | :--- |')
   
   if (packs.length === 0) {
-    mdLines.push('| 1 | | | | | | |')
-    mdLines.push('| 2 | | | | | | |')
-    mdLines.push('| 3 | | | | | | |')
-    mdLines.push('| 4 | | | | | | |')
-    mdLines.push('| 5 | | | | | | |')
-    mdLines.push('| 6 | | | | | | |')
-    mdLines.push('| 7 | | | | | | |')
+    mdLines.push('| SR | | | | | |')
+    mdLines.push('| SR+ | | | | | |')
+    mdLines.push('| SSR | | | | | |')
+    mdLines.push('| SSR+ | | | | | |')
+    mdLines.push('| UR | | | | | |')
+    mdLines.push('| UR+ | | | | | |')
+    mdLines.push('| LR | | | | | |')
   } else {
     for (let i = 0; i < packs.length; i++) {
       const p = packs[i]
-      const items = p.items
+      const items = p.items || []
+      const free = (p.freeItems && p.freeItems[0]) ? formatItem(p.freeItems[0]) : ''
       const i1 = items[0] ? formatItem(items[0]) : ''
       const i2 = items[1] ? formatItem(items[1]) : ''
       const i3 = items[2] ? formatItem(items[2]) : ''
-      mdLines.push(`| ${p.stage} | | | ${i1} | ${i2} | ${i3} | |`)
+      mdLines.push(`| ${p.stage} | ${free} | ${p.price} | ${i1} | ${i2} | ${i3} |`)
     }
   }
   mdLines.push('')
