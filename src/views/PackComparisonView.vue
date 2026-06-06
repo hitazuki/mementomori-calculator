@@ -1,7 +1,9 @@
 <template>
   <div class="view-header animate-fadeup">
     <h1 class="view-title">💰 {{ $t('navPackCompare') }}</h1>
-    <p class="view-desc">{{ $t('packCompareDesc') }} — {{ $t('packCalcSource') }}</p>
+    <p class="view-desc">
+      {{ $t('packCompareDesc') }} — <span v-html="$t('packCalcSource')"></span>
+    </p>
   </div>
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
