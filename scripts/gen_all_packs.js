@@ -139,28 +139,6 @@ function synthesizeI18nKeys(rawPacks) {
     }
   }
 
-  // Synthesize group keys
-  const towerNames = ['origin_tower_infinite', 'origin_tower_blue', 'origin_tower_red', 'origin_tower_green', 'origin_tower_yellow']
-  let allTowers = true
-  for (const t of towerNames) {
-    if (!keys.has(t)) allTowers = false
-  }
-
-  if (allTowers) {
-    for (const t of towerNames) keys.delete(t)
-    keys.add('origin_group_all_towers')
-  }
-
-  const fourTowers = ['origin_tower_blue', 'origin_tower_red', 'origin_tower_green', 'origin_tower_yellow']
-  let allFour = true
-  for (const t of fourTowers) {
-    if (!keys.has(t)) allFour = false
-  }
-  if (allFour && !allTowers) {
-    for (const t of fourTowers) keys.delete(t)
-    keys.add('origin_group_four_elements')
-  }
-
   let sourceBadge = 'mixed'
   if (hasUltra && !hasWitch) sourceBadge = 'ultra_sale'
   if (!hasUltra && hasWitch) sourceBadge = 'witch_gift'

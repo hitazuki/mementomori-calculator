@@ -48,17 +48,53 @@
           🔍 {{ $t('packFilterTitle') }}
         </div>
         
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">{{ $t('packCompareFilterSource') }}</span>
-          <select class="form-select" v-model="filter.source" style="min-width:110px; padding:4px 28px 4px 8px; font-size:13px; height:28px;">
-            <option value="all">{{ $t('packCompareAllSources') }}</option>
-            <option value="ultra_sale">{{ $t('sourceTypeUltra') }}</option>
-            <option value="witch_gift">{{ $t('sourceTypeWitch') }}</option>
-          </select>
-        </div>
-
         <div style="margin-left:auto; font-size:13px; color:var(--text-muted); white-space:nowrap;">
           {{ $t('packResultCount', { n: filteredPacks.length }) }}
+        </div>
+
+        <div style="width: 100%; height: 1px; background: var(--border-subtle); margin: 2px 0;"></div>
+
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+          <!-- Sources -->
+          <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">{{ $t('packCompareFilterSource') }}</div>
+            <div class="chip-row">
+              <button class="chip" :class="{active: filter.sources.length === 0}" @click="filter.sources = []">{{ $t('ui_all') }}</button>
+              <button v-for="src in availableSources" :key="src.key"
+                      class="chip" :class="{active: filter.sources.includes(src.key)}"
+                      @click="toggleSource(src.key)">
+                {{ src.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Prices -->
+          <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">{{ $t('packFilterPrice') }}</div>
+            <div class="chip-row">
+              <button class="chip" :class="{active: filter.prices.length === 0}" @click="filter.prices = []">{{ $t('ui_all') }}</button>
+              <button v-for="price in availablePrices" :key="price"
+                      class="chip" :class="{active: filter.prices.includes(price)}"
+                      @click="togglePrice(price)">
+                ¥{{ price.toLocaleString() }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Contents -->
+          <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">{{ $t('packFilterContentsOr') }}</div>
+            <div class="chip-row" style="max-height: 120px; overflow-y: auto;">
+              <button class="chip" :class="{active: filter.contents.length === 0}" @click="filter.contents = []">{{ $t('ui_all') }}</button>
+              <button v-for="item in availableItems" :key="item.key"
+                      class="chip" :class="{active: filter.contents.includes(item.key)}"
+                      @click="toggleContent(item.key)"
+                      style="display: flex; align-items: center; gap: 4px; padding-left: 6px;">
+                <img :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`" style="width: 16px; height: 16px;" @error="e => e.target.style.display='none'">
+                <span>{{ cleanItemName(itemDisplayName(item)) }}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -142,7 +178,7 @@ import { useI18n } from 'vue-i18n'
 
 import packsRaw from '../constants/allPacks.json'
 import scoresRaw from '../constants/itemScores.json'
-import { calculatePackCE, normalizeScores } from '../engine/packCalc.js'
+import { calculatePackCE, normalizeScores, getItemInfo, getBaseItemKey } from '../engine/packCalc.js'
 
 const showScores = ref(true)
 const { t, locale } = useI18n()
@@ -153,6 +189,14 @@ const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', 'en': 'nameEn', 'j
 function itemDisplayName(s) {
   const field = localeNameMap[locale.value] || 'nameZh'
   return s[field] || s.name || s.ItemName || ''
+}
+
+function cleanItemName(name) {
+  return name
+    .replace(/\s*Lv\s*\d+/ig, '')
+    .replace(/\s*[(（]\d+\s*(?:小时|小時|hrs?|時間|시간)[)）]/ig, '')
+    .replace(/(R|SR)[/・．][^)）]+/ig, '$1')
+    .trim()
 }
 
 function sourceBadgeClass(source) {
@@ -228,8 +272,71 @@ watch(editableScores, (v) => {
 
 // --- Filters ---
 const filter = reactive({
-  source: 'all',
+  sources: [],
+  prices: [],
+  contents: [],
 })
+
+const availableSources = computed(() => {
+  const set = new Set()
+  packsRaw.forEach(p => {
+    if (p.source === 'witch_gift') {
+      set.add('witch_gift')
+    } else if (p.source === 'ultra_sale' && p.originKeys) {
+      p.originKeys.forEach(k => {
+        set.add(k.includes('|') ? k.split('|')[0] : k)
+      })
+    } else {
+      set.add(p.source)
+    }
+  })
+  
+  return Array.from(set).map(k => {
+    if (k === 'witch_gift') return { key: k, label: t('sourceTypeWitch') }
+    if (k === 'ultra_sale') return { key: k, label: t('sourceTypeUltra') }
+    return { key: k, label: t(k) }
+  })
+})
+
+const availablePrices = computed(() => {
+  const prices = new Set(packsRaw.map(p => p.price))
+  return Array.from(prices).sort((a, b) => a - b)
+})
+
+const availableItems = computed(() => {
+  const map = new Map()
+  const scores = normalizeScores(editableScores)
+  
+  packsRaw.forEach(pack => {
+    pack.items.forEach(item => {
+      const baseKey = getBaseItemKey(item.ItemType, item.ItemId)
+      if (!map.has(baseKey)) {
+        const [bType, bId] = JSON.parse(baseKey)
+        const info = getItemInfo(scores, bType, bId)
+        map.set(baseKey, { key: baseKey, ...info })
+      }
+    })
+  })
+  return Array.from(map.values()).sort((a, b) => b.score - a.score)
+})
+
+function toggleSource(src) {
+  const idx = filter.sources.indexOf(src)
+  if (idx === -1) filter.sources.push(src)
+  else filter.sources.splice(idx, 1)
+}
+
+function togglePrice(price) {
+  const idx = filter.prices.indexOf(price)
+  if (idx === -1) filter.prices.push(price)
+  else filter.prices.splice(idx, 1)
+}
+
+function toggleContent(key) {
+  const idx = filter.contents.indexOf(key)
+  if (idx === -1) filter.contents.push(key)
+  else filter.contents.splice(idx, 1)
+}
 
 // --- Sort ---
 const sortState = reactive({ by: 'ce', asc: false })
@@ -245,8 +352,30 @@ function sortIcon(field) {
 // --- Calculation ---
 const filteredPacks = computed(() => {
   let result = packsRaw
-  if (filter.source !== 'all') {
-    result = result.filter(p => p.source === filter.source)
+  if (filter.sources.length > 0) {
+    result = result.filter(p => {
+      if (p.source === 'witch_gift') return filter.sources.includes('witch_gift')
+      
+      if (p.source === 'ultra_sale') {
+        if (!p.originKeys) return filter.sources.includes('ultra_sale')
+        return p.originKeys.some(k => {
+          const baseKey = k.includes('|') ? k.split('|')[0] : k
+          return filter.sources.includes(baseKey)
+        })
+      }
+      return filter.sources.includes(p.source)
+    })
+  }
+
+  if (filter.prices.length > 0) {
+    result = result.filter(p => filter.prices.includes(p.price))
+  }
+
+  if (filter.contents.length > 0) {
+    result = result.filter(p => {
+      const packBaseKeys = p.items.map(i => getBaseItemKey(i.ItemType, i.ItemId))
+      return filter.contents.some(key => packBaseKeys.includes(key))
+    })
   }
 
   const scores = normalizeScores(editableScores)

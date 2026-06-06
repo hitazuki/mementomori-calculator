@@ -95,7 +95,29 @@ function getScore(scores, itype, iid) {
   return 0
 }
 
-function getItemInfo(scores, itype, iid) {
+export function getBaseItemKey(itype, iid) {
+  // 1. 挂机资源按时长 (金币/经验/潜能)
+  const ts = DERIVED_RULES.resourceTimeScale[iid]
+  if (itype === 10 && ts) return `[${itype},${ts.base}]`
+  
+  // 2. 培育材料组 (统一映射为 24h [10,20] 代表)
+  if (itype === 10 && DERIVED_RULES.growthSet[iid]) return `[10,20]`
+  
+  // 3. 魔装高级香油 -> 普通香油
+  if (itype === 15 && iid === 2) return `[15,1]`
+  
+  // 4. 未鉴定符石 (Lv3-7 映射到 Lv2 [17,5])
+  if (itype === 17 && DERIVED_RULES.runeLevelMult[iid]) return `[17,5]`
+  
+  // 5. 魔女的来信 (红翠黄 映射到 蓝)
+  if (itype === 17 && DERIVED_RULES.witchLetterSame.includes(iid)) return `[17,21]` // SR
+  if (itype === 17 && [18,19,20].includes(iid)) return `[17,17]` // R
+
+  // 其他物品没有同质衍生，直接返回自身
+  return `[${itype},${iid}]`
+}
+
+export function getItemInfo(scores, itype, iid) {
   const key = scoreKey(itype, iid)
   const s = scores[key]
   return {

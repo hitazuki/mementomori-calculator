@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:i18n": "node scripts/test_i18n.js",
     "predev": "node scripts/gen_all_packs.js",
     "dev": "vite",
-    "prebuild": "node scripts/gen_all_packs.js",
+    "prebuild": "npm run test:i18n && node scripts/gen_all_packs.js",
     "build": "vite build",
     "preview": "vite preview",
     "fetch-packs": "node scripts/fetch_ultra_sale.js",
