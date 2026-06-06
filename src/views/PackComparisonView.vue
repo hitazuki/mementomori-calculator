@@ -204,6 +204,7 @@ function cleanItemName(name) {
 function sourceBadgeClass(source) {
   if (source === 'witch_gift') return 'badge-witch'
   if (source === 'ultra_sale') return 'badge-ultra'
+  if (source === 'permanent_pack') return 'badge-permanent'
   return 'badge-other'
 }
 
@@ -211,6 +212,7 @@ function sourceBadgeText(source) {
   if (source === 'witch_gift') return t('packBadgeWitch')
   if (source === 'ultra_sale') return t('packBadgeUltra')
   if (source === 'mixed') return t('packBadgeMixed')
+  if (source === 'permanent_pack') return t('packBadgePermanent')
   return source
 }
 
@@ -264,6 +266,8 @@ const availableSources = computed(() => {
   packsRaw.forEach(p => {
     if (p.source === 'witch_gift') {
       set.add('witch_gift')
+    } else if (p.source === 'permanent_pack') {
+      set.add(p.source)
     } else if (p.source === 'ultra_sale' && p.originKeys) {
       p.originKeys.forEach(k => {
         set.add(k.includes('|') ? k.split('|')[0] : k)
@@ -276,6 +280,7 @@ const availableSources = computed(() => {
   return Array.from(set).map(k => {
     if (k === 'witch_gift') return { key: k, label: t('sourceTypeWitch') }
     if (k === 'ultra_sale') return { key: k, label: t('sourceTypeUltra') }
+    if (k === 'permanent_pack') return { key: k, label: t('sourceTypePermanent') }
     return { key: k, label: t(k) }
   })
 })
@@ -337,6 +342,7 @@ const filteredPacks = computed(() => {
   if (filter.sources.length > 0) {
     result = result.filter(p => {
       if (p.source === 'witch_gift') return filter.sources.includes('witch_gift')
+      if (p.source === 'permanent_pack') return filter.sources.includes('permanent_pack')
       
       if (p.source === 'ultra_sale') {
         if (!p.originKeys) return filter.sources.includes('ultra_sale')
@@ -407,9 +413,11 @@ function isLocked(key) { return !!LOCKED_SCORES[key] }
   background-color: #8e44ad;
   color: white;
 }
-.badge-ultra {
-  background-color: #2980b9;
+.badge-ultra { background-color: #f57c00; color: white; border: 1px solid #e65100; }
+.badge-permanent {
+  background-color: #2e7d32;
   color: white;
+  border: 1px solid #1b5e20;
 }
 .badge-other {
   background-color: #7f8c8d;

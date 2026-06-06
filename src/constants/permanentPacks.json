@@ -1,0 +1,575 @@
+[
+  {
+    "name": "钻石组合包 80",
+    "price": 160,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 80
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 68
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 80 (首次双倍)",
+    "price": 160,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 80
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 148
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 325",
+    "price": 650,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 325
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 193
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 2
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 325 (首次双倍)",
+    "price": 650,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 325
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 518
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 2
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 500",
+    "price": 1000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 500
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 315
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 4
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 500 (首次双倍)",
+    "price": 1000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 500
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 815
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 4
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 750",
+    "price": 1500,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 750
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 480
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 6
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 750 (首次双倍)",
+    "price": 1500,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 750
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 1230
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 6
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 1500",
+    "price": 3000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 1035
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 12
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 1500 (首次双倍)",
+    "price": 3000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 2535
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 12
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 3000",
+    "price": 6000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 2095
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 26
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 3000 (首次双倍)",
+    "price": 6000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 5095
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 26
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 5900",
+    "price": 11800,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 4220
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 18,
+        "ItemCount": 2
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 80
+      }
+    ]
+  },
+  {
+    "name": "钻石组合包 5900 (首次双倍)",
+    "price": 11800,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 10120
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 18,
+        "ItemCount": 2
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 44,
+        "ItemCount": 80
+      }
+    ]
+  },
+  {
+    "name": "强化秘药 组合包",
+    "price": 1000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 500
+      },
+      {
+        "ItemType": 12,
+        "ItemId": 2,
+        "ItemCount": 50
+      }
+    ]
+  },
+  {
+    "name": "强化秘药 (大) 组合包",
+    "price": 3000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 12,
+        "ItemId": 2,
+        "ItemCount": 160
+      }
+    ]
+  },
+  {
+    "name": "赤红秘药 组合包",
+    "price": 3000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 13,
+        "ItemCount": 6
+      },
+      {
+        "ItemType": 12,
+        "ItemId": 2,
+        "ItemCount": 120
+      }
+    ]
+  },
+  {
+    "name": "圣装钢 组合包",
+    "price": 1500,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 750
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 3,
+        "ItemCount": 2
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 3,
+        "ItemCount": 3000
+      }
+    ]
+  },
+  {
+    "name": "精炼钢 组合包",
+    "price": 1500,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 750
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 3,
+        "ItemCount": 2
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 2,
+        "ItemCount": 40000
+      }
+    ]
+  },
+  {
+    "name": "符石兑换券 (大) 组合包",
+    "price": 11800,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 512
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 5,
+        "ItemCount": 20
+      }
+    ]
+  },
+  {
+    "name": "魔女的信爱 组合包",
+    "price": 11800,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 2,
+        "ItemCount": 50
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 4
+      }
+    ]
+  },
+  {
+    "name": "祝福之光 组合包",
+    "price": 6000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 2
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 4
+      }
+    ]
+  },
+  {
+    "name": "天使的教谕 组合包",
+    "price": 11800,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 4
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 107,
+        "ItemCount": 3
+      }
+    ]
+  },
+  {
+    "name": "女神的恩宠 组合包",
+    "price": 11800,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 4,
+        "ItemCount": 25
+      }
+    ]
+  },
+  {
+    "name": "圣骑士 组合包",
+    "price": 6000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 15,
+        "ItemCount": 16
+      },
+      {
+        "ItemType": 12,
+        "ItemId": 2,
+        "ItemCount": 90
+      }
+    ]
+  },
+  {
+    "name": "天使的指引 组合包",
+    "price": 11800,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 11,
+        "ItemId": 2,
+        "ItemCount": 6000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 7
+      }
+    ]
+  },
+  {
+    "name": "天使的羽翼 组合包",
+    "price": 6000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 10,
+        "ItemId": 5,
+        "ItemCount": 20
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 107,
+        "ItemCount": 5
+      }
+    ]
+  },
+  {
+    "name": "奇迹的恩赐 组合包",
+    "price": 6000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 118,
+        "ItemCount": 3
+      },
+      {
+        "ItemType": 17,
+        "ItemId": 27,
+        "ItemCount": 1620
+      }
+    ]
+  }
+]

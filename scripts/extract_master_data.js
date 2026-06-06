@@ -178,6 +178,26 @@ for (const col of collectionsMB) {
   });
 }
 
+// Extract Shop names for packs
+for (const lang of Object.keys(langFiles)) {
+  if (texts[lang]) {
+    for (const key of Object.keys(texts[lang])) {
+      if (key.startsWith('[ShopCommonProductName')) {
+        requiredKeys.add(key);
+      }
+    }
+  }
+}
+requiredKeys.add('[ItemName1]'); // Diamond Paid
+requiredKeys.add('[ItemName2]'); // Diamond
+requiredKeys.add('[ShopFirstRewardLabel]'); // First time
+requiredKeys.add('[ShopProductCurrencyBonusText]'); // Double
+
+// Add ChargeBonus texts to extract Diamond Packs
+for (let i = 1; i <= 7; i++) {
+  requiredKeys.add(`[ChargeBonusText${i}]`);
+}
+
 // 4. Generate Dictionary
 const masterDict = {
   'zh-CN': {
@@ -216,8 +236,37 @@ for (const key of requiredKeys) {
   for (const lang of Object.keys(langFiles)) {
     if (texts[lang] && texts[lang][key]) {
       masterDict[lang] = masterDict[lang] || {};
-      masterDict[lang][key] = texts[lang][key];
+      masterDict[lang][key] = texts[lang][key].replace(/<br>/g, ' ');
     }
+  }
+}
+
+// Dynamically extract and concatenate Diamond Packs
+const diamondPackMap = {
+  1: 80, 2: 325, 3: 500, 4: 750, 5: 1500, 6: 3000, 7: 5900
+};
+
+for (const lang of Object.keys(langFiles)) {
+  if (!masterDict[lang]) continue;
+  
+  const firstTime = masterDict[lang]['[ShopFirstRewardLabel]'] || '';
+  const doubleStr = masterDict[lang]['[ShopProductCurrencyBonusText]'] || '';
+  const firstDoubleStr = ` (${firstTime}${doubleStr})`;
+  
+  for (let i = 1; i <= 7; i++) {
+    const rawText = masterDict[lang][`[ChargeBonusText${i}]`];
+    if (!rawText) continue;
+    
+    let packName = rawText;
+    if (lang === 'zh-CN') packName = rawText.replace(/购买(.*)即可获得/, '$1');
+    else if (lang === 'zh-TW') packName = rawText.replace(/購買(.*)​即可獲得/, '$1');
+    else if (lang === 'en') packName = rawText.replace(/Buy (.*)/, '$1');
+    else if (lang === 'ja') packName = rawText.replace(/(.*)​を購入で獲得/, '$1');
+    else if (lang === 'ko') packName = rawText.replace(/(.*) 구매 시 획득/, '$1');
+    
+    const amt = diamondPackMap[i];
+    masterDict[lang][`origin_perm_diamond_${amt}`] = packName;
+    masterDict[lang][`origin_perm_diamond_${amt}_double`] = packName + firstDoubleStr;
   }
 }
 

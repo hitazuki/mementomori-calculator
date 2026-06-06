@@ -17,6 +17,12 @@ const ultraSaleRawDict = JSON.parse(fs.readFileSync(rawUltraSalePath, 'utf8'))
 const witchGiftRaw = JSON.parse(fs.readFileSync(witchGiftPath, 'utf8'))
 const itemScores = JSON.parse(fs.readFileSync(itemScoresPath, 'utf8'))
 
+const permanentPacksPath = path.join(root, 'src', 'constants', 'permanentPacks.json')
+let permanentPacksRaw = []
+if (fs.existsSync(permanentPacksPath)) {
+  permanentPacksRaw = JSON.parse(fs.readFileSync(permanentPacksPath, 'utf8'))
+}
+
 // 1.5 Flatten Ultra Sale Packs
 const ultraSaleRaw = []
 const towerIdMap = {
@@ -100,6 +106,15 @@ for (const p of witchGiftRaw) {
   })
 }
 
+for (const p of permanentPacksRaw) {
+  allRawPacks.push({
+    _type: 'permanent',
+    name: p.name,
+    price: p.price,
+    items: p.items
+  })
+}
+
 // 3. Deduplication
 const dedupMap = new Map()
 
@@ -117,10 +132,42 @@ for (const p of allRawPacks) {
   dedupMap.get(key).rawPacks.push(p)
 }
 
+const permPackNameMap = {
+  "强化秘药 组合包": "[ShopCommonProductName7]",
+  "强化秘药 (大) 组合包": "[ShopCommonProductName33]",
+  "赤红秘药 组合包": "[ShopCommonProductName22]",
+  "圣装钢 组合包": "[ShopCommonProductName10]",
+  "精炼钢 组合包": "[ShopCommonProductName11]",
+  "符石兑换券 (大) 组合包": "[ShopCommonProductName12]",
+  "魔女的信爱 组合包": "[ShopCommonProductName14]",
+  "祝福之光 组合包": "[ShopCommonProductName19]",
+  "天使的教谕 组合包": "[ShopCommonProductName20]",
+  "女神的恩宠 组合包": "[ShopCommonProductName21]",
+  "圣骑士 组合包": "[ShopCommonProductName27]",
+  "天使的指引 组合包": "[ShopCommonProductName31]",
+  "天使的羽翼 组合包": "[ShopCommonProductName39]",
+  "奇迹的恩赐 组合包": "[ShopCommonProductName40]",
+  "钻石组合包 80": "origin_perm_diamond_80",
+  "钻石组合包 80 (首次双倍)": "origin_perm_diamond_80_double",
+  "钻石组合包 325": "origin_perm_diamond_325",
+  "钻石组合包 325 (首次双倍)": "origin_perm_diamond_325_double",
+  "钻石组合包 500": "origin_perm_diamond_500",
+  "钻石组合包 500 (首次双倍)": "origin_perm_diamond_500_double",
+  "钻石组合包 750": "origin_perm_diamond_750",
+  "钻石组合包 750 (首次双倍)": "origin_perm_diamond_750_double",
+  "钻石组合包 1500": "origin_perm_diamond_1500",
+  "钻石组合包 1500 (首次双倍)": "origin_perm_diamond_1500_double",
+  "钻石组合包 3000": "origin_perm_diamond_3000",
+  "钻石组合包 3000 (首次双倍)": "origin_perm_diamond_3000_double",
+  "钻石组合包 5900": "origin_perm_diamond_5900",
+  "钻石组合包 5900 (首次双倍)": "origin_perm_diamond_5900_double"
+}
+
 function synthesizeI18nKeys(rawPacks) {
   const keys = new Set()
   let hasUltra = false
   let hasWitch = false
+  let hasPermanent = false
 
   for (const p of rawPacks) {
     if (p._type === 'witch') {
@@ -139,12 +186,17 @@ function synthesizeI18nKeys(rawPacks) {
       } else {
         keys.add('origin_unknown')
       }
+    } else if (p._type === 'permanent') {
+      hasPermanent = true
+      const mappedKey = permPackNameMap[p.name] || p.name
+      keys.add(mappedKey)
     }
   }
 
   let sourceBadge = 'mixed'
-  if (hasUltra && !hasWitch) sourceBadge = 'ultra_sale'
-  if (!hasUltra && hasWitch) sourceBadge = 'witch_gift'
+  if (hasUltra && !hasWitch && !hasPermanent) sourceBadge = 'ultra_sale'
+  if (!hasUltra && hasWitch && !hasPermanent) sourceBadge = 'witch_gift'
+  if (!hasUltra && !hasWitch && hasPermanent) sourceBadge = 'permanent_pack'
 
   return {
     source: sourceBadge,

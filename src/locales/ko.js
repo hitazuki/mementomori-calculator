@@ -252,6 +252,7 @@ export default {
   packScoreTitle: "아이템 점수",
   packScoreDesc: "1개의 기준 아이템 가치가 몇 점인지 설정합니다. 수정 후 모든 패키지의 가성비가 자동으로 재계산됩니다.",
   packResultCount: "{n}개의 패키지",
+  packBadgePermanent: "상시",
   packBadgeWitch: "마녀",
   packBadgeUltra: "한정",
   packBadgeMixed: "혼합",
@@ -276,6 +277,7 @@ export default {
   origin_quest: "메인 퀘스트",
   origin_unknown: "알 수 없음",
   sourceTypeUltra: "울트라 세일 팩",
+  sourceTypePermanent: "상시 패키지",
   sourceTypeWitch: "마녀의 선물",
   ui_all: "전체",
 

@@ -252,6 +252,7 @@ export default {
   packScoreTitle: "アイテムスコア",
   packScoreDesc: "1つの基準アイテムの価値を何ポイントとするかを設定します。変更後、すべてのパックのコストパフォーマンスが自動的に再計算されます。",
   packResultCount: "{n}件のパック",
+  packBadgePermanent: "常設",
   packBadgeWitch: "魔女",
   packBadgeUltra: "限定",
   packBadgeMixed: "混合",
@@ -260,6 +261,7 @@ export default {
   packColValue: "価値",
   packColItems: "内容物",
   sourceTypeUltra: "ウルトラセールパック",
+  sourceTypePermanent: "常設パック",
   sourceTypeWitch: "魔女の贈り物",
   ui_all: "全て",
 

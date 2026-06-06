@@ -266,6 +266,7 @@ export default {
   packCompareAndOthers: "{name} (+ {count} others)",
   packCompareFullSources: "Appears in triggers",
 
+  packBadgePermanent: "Perm",
   packBadgeWitch: "Witch",
   packBadgeUltra: "Ultra",
   packBadgeMixed: "Mixed",
@@ -285,6 +286,7 @@ export default {
   origin_quest: "Main Quest",
   origin_unknown: "Unknown",
   sourceTypeUltra: "Ultra Sale Packs",
+  sourceTypePermanent: "Permanent Packs",
   sourceTypeWitch: "Witch's Gift",
   ui_all: "All",
 };

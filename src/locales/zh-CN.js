@@ -263,6 +263,7 @@ export default {
   packCompareAndOthers: "{name} 等另外 {count} 处",
   packCompareFullSources: "包含如下触发条件",
   
+  packBadgePermanent: "常驻",
   packBadgeWitch: "魔女",
   packBadgeUltra: "限时",
   packBadgeMixed: "混合",
@@ -282,6 +283,7 @@ export default {
   origin_quest: "主线通关",
   origin_unknown: "未知",
   sourceTypeUltra: "超值限时组合包",
+  sourceTypePermanent: "常驻礼包",
   sourceTypeWitch: "魔女的赠礼",
   ui_all: "全部",
 };

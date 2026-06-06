@@ -4,11 +4,11 @@
     "score": 1,
     "batch": 1,
     "iconId": 9,
-    "nameZh": "钻石",
-    "nameTw": "鑽石",
-    "nameEn": "Diamonds",
-    "nameJa": "ダイヤ",
-    "nameKo": "다이아",
+    "nameZh": "付费钻石",
+    "nameTw": "付費鑽石",
+    "nameEn": "Paid Diamonds",
+    "nameJa": "有償ダイヤ",
+    "nameKo": "유료 다이아",
     "isBase": true
   },
   "[10,1]": {
@@ -729,6 +729,18 @@
     "nameEn": "Scarlet Jewels",
     "nameJa": "紅の金剛石",
     "nameKo": "붉은 금강석",
+    "isBase": true
+  },
+  "[1,1]": {
+    "name": "钻石 (无偿)",
+    "score": 1,
+    "batch": 1,
+    "iconId": 9,
+    "nameZh": "免费钻石",
+    "nameTw": "免費鑽石",
+    "nameEn": "Free Diamonds",
+    "nameJa": "無償ダイヤ",
+    "nameKo": "무료 다이아",
     "isBase": true
   }
 }
