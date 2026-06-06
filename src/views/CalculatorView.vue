@@ -1,7 +1,12 @@
 <template>
   <div class="view-header animate-fadeup">
     <h1 class="view-title">{{ $t('calcTitle') }}</h1>
-    <p class="view-desc">{{ $t('calcDesc') }}</p>
+    <p class="view-desc">
+      {{ $t('calcDesc') }}<br/>
+      <span style="font-size: 13px; opacity: 0.8; margin-top: 6px; display: inline-block;">
+        🔗 PVE数据查询入口: <a href="https://mmmr.huijiwiki.com" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;">https://mmmr.huijiwiki.com</a>
+      </span>
+    </p>
     <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
       <button class="btn btn-secondary btn-sm" @click="showFormulaModal = true">
         <span style="font-size: 16px;">💡</span> {{ $t('calcFormulaBtn') }}
