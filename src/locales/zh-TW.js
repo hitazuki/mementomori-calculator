@@ -240,7 +240,7 @@ export default {
   navGroupItemSystem: "道具系統",
   navPackCalc: "超值限時組合包查詢",
   packCalcDesc: "根據道具評分計算超值限時組合包的性價比。",
-  packCalcSource: "資料來源 tamamo.dev，內容物可能有誤，注意辨別",
+  packCalcSource: "資料來源 <a href='https://tamamo.dev/UltraSalePack' target='_blank' style='color:var(--gold);text-decoration:underline;'>tamamo.dev</a>，內容物可能有誤，注意辨別",
   packFilterTitle: "篩選",
   packFilterCategory: "類別",
   packFilterTower: "塔類型",

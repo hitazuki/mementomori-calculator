@@ -242,7 +242,7 @@ export default {
   navGroupItemSystem: "アイテムシステム",
   navPackCalc: "ウルトラセールパック検索",
   packCalcDesc: "アイテムスコアに基づいてウルトラセールパックのコスパを計算します。",
-  packCalcSource: "データ元: tamamo.dev、内容物に誤りがある可能性あり",
+  packCalcSource: "データ元: <a href='https://tamamo.dev/UltraSalePack' target='_blank' style='color:var(--gold);text-decoration:underline;'>tamamo.dev</a>、内容物に誤りがある可能性あり",
   packFilterTitle: "フィルター",
   packFilterCategory: "カテゴリ",
   packFilterTower: "塔の種類",

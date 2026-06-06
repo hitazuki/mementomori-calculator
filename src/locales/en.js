@@ -243,7 +243,7 @@ export default {
   navGroupItemSystem: "Item System",
   navPackCalc: "Ultra Sale Pack Search",
   packCalcDesc: "Calculate the cost-efficiency of Ultra Sale Packs based on item scores.",
-  packCalcSource: "Data from tamamo.dev, contents may be inaccurate",
+  packCalcSource: "Data from <a href='https://tamamo.dev/UltraSalePack' target='_blank' style='color:var(--gold);text-decoration:underline;'>tamamo.dev</a>, contents may be inaccurate",
   packFilterTitle: "Filter",
   packFilterCategory: "Category",
   packFilterTower: "Tower",
