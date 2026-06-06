@@ -19,6 +19,7 @@ export default {
   // Views & Headers
   calcTitle: "🎯 단일 대상 데미지 계산기",
   calcDesc:
+  pveDataEntry: "PVE 데이터 위키",
     "실제 이중 방어 (방어력 및 물리/마법 방어) 독립 감소 메커니즘을 시뮬레이션합니다.",
   calcFormulaBtn: "계산식 설명",
 

@@ -20,7 +20,7 @@
       <div style="width: 1px; height: 14px; background: var(--border-subtle); margin: 0 4px;"></div>
       
       <span style="font-size: 13px; opacity: 0.8;">
-        🔗 PVE数据查询入口: <a href="https://mmmr.huijiwiki.com" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;">https://mmmr.huijiwiki.com</a>
+        🔗 {{ $t('pveDataEntry') }}: <a href="https://mmmr.huijiwiki.com" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;">https://mmmr.huijiwiki.com</a>
       </span>
     </div>
   </div>

@@ -19,6 +19,7 @@ export default {
   // Views & Headers
   calcTitle: "🎯 單體傷害計算器",
   calcDesc: "模擬真實的雙路防禦（防禦力與物魔防）獨立計算減傷機制。",
+  pveDataEntry: "PVE資料查詢入口",
   calcFormulaBtn: "計算公式說明",
 
   // Modal Formula Details
