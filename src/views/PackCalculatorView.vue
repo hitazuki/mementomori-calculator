@@ -1,7 +1,12 @@
 <template>
   <div class="view-header animate-fadeup">
     <h1 class="view-title">💰 {{ $t('navPackCalc') }}</h1>
-    <p class="view-desc">{{ $t('packCalcDesc') }} — {{ $t('packCalcSource') }}</p>
+    <p class="view-desc">
+      {{ $t('packCalcDesc') }} — {{ $t('packCalcSource') }}<br/>
+      <span style="font-size: 13px; opacity: 0.8; margin-top: 6px; display: inline-block;">
+        🔗 PVE数据查询入口: <a href="https://mmmr.huijiwiki.com" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;">https://mmmr.huijiwiki.com</a>
+      </span>
+    </p>
   </div>
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
