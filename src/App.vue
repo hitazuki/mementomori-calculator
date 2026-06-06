@@ -112,6 +112,7 @@ import TornadoChartView from './views/TornadoChartView.vue'
 import TableExportView from './views/TableExportView.vue'
 import MysteriumPanelView from './views/MysteriumPanelView.vue'
 import PackCalculatorView from './views/PackCalculatorView.vue'
+import PackComparisonView from './views/PackComparisonView.vue'
 
 const { locale, t } = useI18n()
 const currentLanguage = ref(locale.value)
@@ -145,7 +146,8 @@ const viewMap = {
   tornado: TornadoChartView,
   table: TableExportView,
   mysterium: MysteriumPanelView,
-  packCalc: PackCalculatorView
+  packCalc: PackCalculatorView,
+  packCompare: PackComparisonView
 }
 
 const activeComponent = computed(() => viewMap[currentView.value])
@@ -160,6 +162,7 @@ const navDamageItems = [
 ]
 
 const navItemSystemItems = [
+  { id: 'packCompare', icon: '📊', i18nLabel: 'navPackCompare', i18nTitle: 'navPackCompare' },
   { id: 'packCalc', icon: '💰', i18nLabel: 'navPackCalc', i18nTitle: 'navPackCalc' }
 ]
 

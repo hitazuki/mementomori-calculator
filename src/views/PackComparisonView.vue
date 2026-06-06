@@ -1,13 +1,12 @@
 <template>
   <div class="view-header animate-fadeup">
-    <h1 class="view-title">💰 {{ $t('navPackCalc') }}</h1>
-    <p class="view-desc">{{ $t('packCalcDesc') }} — {{ $t('packCalcSource') }}</p>
+    <h1 class="view-title">💰 {{ $t('navPackCompare') }}</h1>
+    <p class="view-desc">{{ $t('packCompareDesc') }} — {{ $t('packCalcSource') }}</p>
   </div>
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
     <!-- Left Panel: Scores -->
     <div class="flex-col gap-12" style="position:sticky;top:24px;height:calc(100vh - 48px);">
-
       <!-- Scores Panel -->
       <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
         <div class="card-title" @click="showScores = !showScores" style="cursor:pointer;user-select:none;margin-bottom:0;display:flex;align-items:center;">
@@ -49,23 +48,12 @@
           🔍 {{ $t('packFilterTitle') }}
         </div>
         
-        <div style="display:flex; gap:4px; align-items:center;">
-          <button class="btn btn-sm" :class="filter.cat==='tower'?'btn-primary':'btn-ghost'" @click="filter.cat='tower'" style="padding:4px 10px; white-space:nowrap;">{{ $t('origin_tower_unknown') }}</button>
-          <button class="btn btn-sm" :class="filter.cat==='rank'?'btn-primary':'btn-ghost'" @click="filter.cat='rank'" style="padding:4px 10px; white-space:nowrap;">{{ $t('origin_rank') }}</button>
-          <button class="btn btn-sm" :class="filter.cat==='quest'?'btn-primary':'btn-ghost'" @click="filter.cat='quest'" style="padding:4px 10px; white-space:nowrap;">{{ $t('origin_quest') }}</button>
-        </div>
-
-        <div v-if="filter.cat==='tower'" style="display:flex; align-items:center; gap:6px;">
-          <select class="form-select" v-model="filter.tower" style="min-width:110px; padding:4px 28px 4px 8px; font-size:13px; height:28px;">
-            <option v-for="t in towerOptions" :key="t" :value="t">{{ towerName(t) }}</option>
-          </select>
-        </div>
-
         <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">{{ $t('packFilterPrice') }}</span>
-          <select class="form-select" v-model="filter.price" style="min-width:80px; padding:4px 28px 4px 8px; font-size:13px; height:28px;">
-            <option :value="0">-- {{ $t('ui_all') }} --</option>
-            <option v-for="p in priceOptions" :key="p" :value="p">{{ formatPrice(p) }}</option>
+          <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">{{ $t('packCompareFilterSource') }}</span>
+          <select class="form-select" v-model="filter.source" style="min-width:110px; padding:4px 28px 4px 8px; font-size:13px; height:28px;">
+            <option value="all">{{ $t('packCompareAllSources') }}</option>
+            <option value="ultra_sale">{{ $t('sourceTypeUltra') }}</option>
+            <option value="witch_gift">{{ $t('sourceTypeWitch') }}</option>
           </select>
         </div>
 
@@ -78,7 +66,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th @click="toggleSort('trigger')" style="cursor:pointer;">{{ $t('packColTrigger') }} {{ sortIcon('trigger') }}</th>
+              <th @click="toggleSort('name')" style="cursor:pointer;text-align:left;">{{ $t('packCompareColName') }} {{ sortIcon('name') }}</th>
               <th @click="toggleSort('price')" style="cursor:pointer;">{{ $t('packColPrice') }} {{ sortIcon('price') }}</th>
               <th @click="toggleSort('ce')" style="cursor:pointer;">CE {{ sortIcon('ce') }}</th>
               <th @click="toggleSort('value')" style="cursor:pointer;">{{ $t('packColValue') }} {{ sortIcon('value') }}</th>
@@ -88,12 +76,15 @@
           <tbody>
             <template v-for="(p, i) in sortedPacks" :key="i">
               <tr @click="toggleExpand(i)" style="cursor:pointer;" :class="{ 'row-expanded': expanded.has(i) }">
-                <td style="white-space:nowrap;">
+                <td style="white-space:nowrap; text-align:left;">
                   <span style="font-size:12px;margin-right:6px;">{{ expanded.has(i) ? '▼' : '▶' }}</span>
-                  {{ p.trigger }}
+                  <span :class="sourceBadgeClass(p.source)" style="margin-right:6px; font-size:10px; padding:2px 4px; border-radius:4px;">
+                    {{ sourceBadgeText(p.source) }}
+                  </span>
+                  <span style="font-weight:bold;">{{ getShortPackName(p) }}</span>
                 </td>
-                <td style="white-space:nowrap;">{{ formatPrice(p.price) }}</td>
-                <td :style="{color: p.ce >= 1 ? '#2ecc71' : '#e74c3c', fontWeight:'bold'}">{{ p.ce.toFixed(1) }}</td>
+                <td style="white-space:nowrap;">¥{{ p.price.toLocaleString() }}</td>
+                <td :style="{color: getCeColor(p.ce), fontWeight:'bold', fontSize: p.ce >= 1.5 ? '15px' : '14px'}">{{ p.ce.toFixed(2) }}</td>
                 <td>{{ p.value.toLocaleString() }}</td>
                 <td>
                   <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;">
@@ -114,7 +105,11 @@
                 </td>
               </tr>
               <tr v-if="expanded.has(i)" style="background:rgba(255,255,255,0.02);">
-                <td :colspan="5" style="padding:6px 16px;">
+                <td :colspan="5" style="padding:12px 16px;">
+                  <div v-if="p.originKeys.length > 1" style="margin-bottom:12px; font-size:13px; color:var(--text-muted); text-align:left; background:rgba(0,0,0,0.2); padding:6px 12px; border-radius:4px; border-left:3px solid var(--gold);">
+                    <strong style="color:var(--text-base); margin-right:8px;">{{ $t('packCompareFullSources') }}:</strong>
+                    {{ getFullPackName(p) }}
+                  </div>
                   <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:13px;align-items:flex-start;">
                     <div
                       v-for="(item, j) in p.items"
@@ -145,12 +140,11 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const showScores = ref(true)
-
-import packsRaw from '../constants/ultraSalePacks.json'
+import packsRaw from '../constants/allPacks.json'
 import scoresRaw from '../constants/itemScores.json'
 import { calculatePackCE, normalizeScores } from '../engine/packCalc.js'
 
+const showScores = ref(true)
 const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
 
@@ -158,19 +152,59 @@ const baseUrl = import.meta.env.BASE_URL || '/'
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', 'en': 'nameEn', 'ja': 'nameJa', 'ko': 'nameKo' }
 function itemDisplayName(s) {
   const field = localeNameMap[locale.value] || 'nameZh'
-  return s[field] || s.name || ''
+  return s[field] || s.name || s.ItemName || ''
 }
 
-// Tower names are now stored as i18n keys directly
-function towerName(key) {
-  return key ? t(key) : ''
+function sourceBadgeClass(source) {
+  if (source === 'witch_gift') return 'badge-witch'
+  if (source === 'ultra_sale') return 'badge-ultra'
+  return 'badge-other'
 }
 
-function formatPrice(p) {
-  return '¥' + p.toLocaleString()
+function sourceBadgeText(source) {
+  if (source === 'witch_gift') return t('packBadgeWitch')
+  if (source === 'ultra_sale') return t('packBadgeUltra')
+  if (source === 'mixed') return t('packBadgeMixed')
+  return source
+}
+
+function getShortPackName(p) {
+  if (!p.originKeys || p.originKeys.length === 0) return p.name || 'Unknown'
+  const firstKey = p.originKeys[0]
+  let firstName = ''
+  if (firstKey.includes('|')) {
+    const [key, param] = firstKey.split('|')
+    firstName = t(key, { stage: param })
+  } else {
+    firstName = t(firstKey)
+  }
+
+  if (p.originKeys.length > 1) {
+    return t('packCompareAndOthers', { name: firstName, count: p.originKeys.length - 1 })
+  }
+  return firstName
+}
+
+function getFullPackName(p) {
+  if (!p.originKeys || p.originKeys.length === 0) return p.name || 'Unknown'
+  return p.originKeys.map(k => {
+    if (k.includes('|')) {
+      const [key, param] = k.split('|')
+      return t(key, { stage: param })
+    }
+    return t(k)
+  }).join(' / ')
+}
+
+function getCeColor(ce) {
+  if (ce >= 1.5) return '#f1c40f' // Gold
+  if (ce >= 1.2) return '#2ecc71' // Green
+  if (ce >= 1.0) return '#3498db' // Blue
+  return '#e74c3c' // Red
 }
 
 // --- Scores (reactive, persisted) ---
+// Note: using the same key as old page to sync scores
 const STORAGE_KEY = 'mmt-pack-scores-v2'
 const stored = localStorage.getItem(STORAGE_KEY)
 let initialScores = JSON.parse(JSON.stringify(scoresRaw)) // deep copy
@@ -194,28 +228,14 @@ watch(editableScores, (v) => {
 
 // --- Filters ---
 const filter = reactive({
-  cat: 'tower',
-  tower: 'origin_tower_infinite',
-  price: 11800
-})
-
-const towerOptions = computed(() => {
-  const s = new Set()
-  packsRaw.forEach(p => { if (p.cat === 'tower' && p.tower) s.add(p.tower) })
-  return [...s].sort()
-})
-
-const priceOptions = computed(() => {
-  const s = new Set()
-  packsRaw.forEach(p => s.add(p.price))
-  return [...s].sort((a, b) => b - a)
+  source: 'all',
 })
 
 // --- Sort ---
-const sortState = reactive({ by: 'trigger', asc: true })
+const sortState = reactive({ by: 'ce', asc: false })
 function toggleSort(field) {
   if (sortState.by === field) sortState.asc = !sortState.asc
-  else { sortState.by = field; sortState.asc = true }
+  else { sortState.by = field; sortState.asc = false }
 }
 function sortIcon(field) {
   if (sortState.by !== field) return '↕'
@@ -225,9 +245,9 @@ function sortIcon(field) {
 // --- Calculation ---
 const filteredPacks = computed(() => {
   let result = packsRaw
-  if (filter.cat) result = result.filter(p => p.cat === filter.cat)
-  if (filter.cat === 'tower' && filter.tower) result = result.filter(p => p.tower === filter.tower)
-  if (filter.price > 0) result = result.filter(p => p.price === filter.price)
+  if (filter.source !== 'all') {
+    result = result.filter(p => p.source === filter.source)
+  }
 
   const scores = normalizeScores(editableScores)
   return calculatePackCE(result, scores)
@@ -238,11 +258,16 @@ const sortedPacks = computed(() => {
   const { by, asc } = sortState
   result.sort((a, b) => {
     let va, vb
-    if (by === 'trigger') { va = a.sortKey; vb = b.sortKey }
+    if (by === 'name') { va = a.name; vb = b.name }
     else if (by === 'price') { va = a.price; vb = b.price }
     else if (by === 'ce') { va = a.ce; vb = b.ce }
     else if (by === 'value') { va = a.value; vb = b.value }
-    else { va = a.cat + a.tower; vb = b.cat + b.tower }
+    else { va = a.name; vb = b.name }
+
+    if (va === vb) return 0
+    if (typeof va === 'string') {
+      return asc ? va.localeCompare(vb) : vb.localeCompare(va)
+    }
     return asc ? va - vb : vb - va
   })
   return result
@@ -257,11 +282,6 @@ function toggleExpand(i) {
 const LOCKED_SCORES = { '[2,1]': true }
 function isLocked(key) { return !!LOCKED_SCORES[key] }
 
-function fmtNum(n) {
-  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M'
-  if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K'
-  return String(Math.round(n))
-}
 </script>
 
 <style scoped>
@@ -271,5 +291,17 @@ function fmtNum(n) {
 }
 :deep(.data-table th) {
   text-align: center;
+}
+.badge-witch {
+  background-color: #8e44ad;
+  color: white;
+}
+.badge-ultra {
+  background-color: #2980b9;
+  color: white;
+}
+.badge-other {
+  background-color: #7f8c8d;
+  color: white;
 }
 </style>

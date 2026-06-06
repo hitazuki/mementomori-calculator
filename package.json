@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/gen_all_packs.js",
     "dev": "vite",
+    "prebuild": "node scripts/gen_all_packs.js",
     "build": "vite build",
     "preview": "vite preview",
+    "fetch-packs": "node scripts/fetch_ultra_sale.js",
     "sync:master": "node scripts/extract_master_data.js"
   },
   "devDependencies": {
