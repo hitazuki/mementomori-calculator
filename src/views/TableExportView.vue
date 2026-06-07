@@ -53,9 +53,10 @@
           <div 
             v-for="(b, i) in ts.builds" 
             :key="b.id"
+            class="export-build-card"
             style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:6px;"
           >
-            <div :style="{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: b._expanded ? '12px' : '0' }">
+            <div class="export-build-head" :style="{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: b._expanded ? '12px' : '0' }">
               <input class="form-input export-build-name" v-model="b.name">
               <div style="display:flex;gap:4px">
                 <button class="btn btn-secondary btn-sm" @click="b._expanded = !b._expanded" style="padding:4px 8px;">
@@ -65,7 +66,11 @@
               </div>
             </div>
             
-            <div v-show="b._expanded" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:8px;">
+            <div v-show="b._expanded" class="export-build-detail" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:8px;">
+              <div class="export-build-detail-head">
+                <strong>{{ b.name }}</strong>
+                <button class="modal-close" @click="b._expanded = false">&times;</button>
+              </div>
               <!-- 攻击类型 + 面板攻击力 -->
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;">
                 <div class="form-group">
@@ -496,6 +501,9 @@ function downloadCsv() {
 .export-table-heading {
   font-size: var(--fs-lg);
 }
+.export-build-detail-head {
+  display: none;
+}
 .table-title-input:hover {
   border-bottom: 1px dashed var(--gold);
 }
@@ -554,6 +562,44 @@ function downloadCsv() {
     flex: 1;
     width: auto;
     min-width: 0;
+  }
+  .export-build-head {
+    margin-bottom: 0 !important;
+  }
+  .export-build-detail {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    max-height: 100dvh;
+    overflow-y: auto;
+    padding: 0 14px max(18px, env(safe-area-inset-bottom)) !important;
+    border-top: none !important;
+    background: var(--bg-surface);
+    box-shadow: 0 0 0 1px var(--border-subtle);
+  }
+  .export-build-detail-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 -14px 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+  }
+  .export-build-detail-head strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--gold);
+    font-size: var(--fs-md);
+  }
+  .export-build-detail > div:not(.export-build-detail-head) {
+    grid-template-columns: 1fr !important;
   }
   .export-toolbar,
   .export-title-row,
