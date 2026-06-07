@@ -4,28 +4,28 @@
     <p class="view-desc">{{ $t('mysteriumDesc') }}</p>
   </div>
 
-  <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px;">
+  <div class="grid-sidebar mysterium-layout animate-fadeup" style="align-items:start;gap:16px;">
     <!-- Left Sidebar: Scoring Settings -->
-    <div style="display: flex; flex-direction: column; max-height: calc(100vh - 120px);">
+    <div class="mysterium-settings" style="display: flex; flex-direction: column; max-height: calc(100vh - 120px);">
       <div class="panel" style="margin-bottom: 16px; background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.3);">
         <h3 class="panel-title" style="color: var(--gold);">{{ $t('ui_weight_title') }}</h3>
-        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">
+        <p style="font-size: var(--fs-sm); color: var(--text-muted); margin-bottom: 12px;">
           {{ $t('ui_weight_desc') }}
         </p>
       </div>
       <div style="flex:1; overflow-y: auto; padding-right: 4px; padding-bottom: 32px;">
         <div v-for="(items, group) in groupedTemplate" :key="group" class="panel" style="margin-bottom: 12px; padding: 12px;">
-          <h3 class="panel-title" style="margin-bottom: 8px; font-size: 15px;">{{ $t(group) }}</h3>
+          <h3 class="panel-title" style="margin-bottom: 8px; font-size: var(--fs-md);">{{ $t(group) }}</h3>
           <div class="form-group" style="gap: 4px;">
-            <div v-for="item in items" :key="item.key + item.ctype" style="display: flex; align-items: center; justify-content: space-between; padding: 2px 0; font-size: 14px; gap: 8px;">
+            <div v-for="item in items" :key="item.key + item.ctype" style="display: flex; align-items: center; justify-content: space-between; padding: 2px 0; font-size: var(--fs-sm); gap: 8px;">
               <div style="display: flex; gap: 6px; overflow: hidden; white-space: nowrap; flex: 1;">
                 <span style="overflow:hidden; text-overflow:ellipsis;" :title="(item.key === 'appLevelCap' ? $t('appLevelCap') : $t(item.key)) + ' ' + getCtypeStr(item.ctype)">
                   {{ item.key === 'appLevelCap' ? $t('appLevelCap') : $t(item.key) }} 
-                  <span style="color:var(--text-muted); font-size: 13px;">{{ getCtypeStr(item.ctype) }}</span>
+                  <span style="color:var(--text-muted); font-size: var(--fs-xs);">{{ getCtypeStr(item.ctype) }}</span>
                 </span>
                 <span style="color:var(--gold); flex-shrink: 0;">+{{ item.ctype === 2 ? item.baseVal*100+'%' : item.baseVal }}</span>
               </div>
-              <input class="form-input score-input" type="number" step="1" v-model.number="item.score" style="width:48px; text-align:center; padding: 2px 4px; height: 24px; flex-shrink: 0;">
+              <input class="form-input score-input" type="number" step="1" v-model.number="item.score" style="width:52px; text-align:center; padding: 2px 4px; min-height: var(--control-h-sm); flex-shrink: 0;">
             </div>
           </div>
         </div>
@@ -33,29 +33,29 @@
     </div>
 
     <!-- Right Main: Results -->
-    <div style="display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 120px); min-width: 0;">
+    <div class="mysterium-results" style="display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 120px); min-width: 0;">
       <!-- Top Controls -->
       <div style="display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
           <!-- Tabs -->
-          <div style="display: flex; gap: 8px;">
+          <div class="segmented-control mysterium-tabs">
             <button class="btn btn-sm" :class="mainTab === 'colls' ? 'btn-primary' : 'btn-ghost'" @click="mainTab = 'colls'">{{ $t('ui_tab_colls') }}</button>
             <button class="btn btn-sm" :class="mainTab === 'chars' ? 'btn-primary' : 'btn-ghost'" @click="mainTab = 'chars'">{{ $t('ui_tab_chars') }}</button>
           </div>
           <!-- Algorithms -->
-          <div v-show="mainTab === 'chars'" style="display: flex; gap: 4px;">
-            <button class="btn btn-sm" :class="algo === 1 ? 'btn-primary' : 'btn-ghost'" style="font-size:12px; padding:4px 12px;" @click="algo = 1">{{ $t('ui_algo1') }}</button>
-            <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" style="font-size:12px; padding:4px 12px;" @click="algo = 2">{{ $t('ui_algo2') }}</button>
-            <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" style="font-size:12px; padding:4px 12px;" @click="algo = 3">{{ $t('ui_algo3') }}</button>
+          <div v-show="mainTab === 'chars'" class="segmented-control mysterium-algos">
+            <button class="btn btn-sm" :class="algo === 1 ? 'btn-primary' : 'btn-ghost'" @click="algo = 1">{{ $t('ui_algo1') }}</button>
+            <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" @click="algo = 2">{{ $t('ui_algo2') }}</button>
+            <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" @click="algo = 3">{{ $t('ui_algo3') }}</button>
           </div>
         </div>
         <!-- Description -->
-        <div v-show="mainTab === 'chars'" style="font-size: 13px; color: var(--text-muted); background: rgba(var(--color-invert-rgb),0.02); border: 1px solid rgba(var(--color-invert-rgb),0.05); padding: 6px 10px; border-radius: 4px; line-height: 1.4;" v-html="$t('ui_algo' + algo + '_desc')">
+        <div v-show="mainTab === 'chars'" class="mysterium-desc" style="font-size: var(--fs-xs); color: var(--text-muted); background: rgba(var(--color-invert-rgb),0.02); border: 1px solid rgba(var(--color-invert-rgb),0.05); padding: 6px 10px; border-radius: 4px; line-height: 1.4;" v-html="$t('ui_algo' + algo + '_desc')">
         </div>
       </div>
       
       <!-- Table Panel -->
-      <div class="panel" style="flex: 1; overflow-y: auto; padding: 0;">
+      <div class="panel desktop-mysterium-table" style="flex: 1; overflow-y: auto; padding: 0;">
         <table class="data-table">
           <thead>
             <tr v-if="mainTab === 'colls'">
@@ -64,18 +64,18 @@
               <th>{{ $t('ui_characters') }}</th>
               <th @click="toggleSort('cost')" style="cursor:pointer; user-select:none;">
                 {{ $t('ui_cost') }}
-                <span v-if="collSortBy !== 'cost'" style="opacity:0.3;font-size: 12px;margin-left:4px;">↕</span>
-                <span v-else style="font-size: 12px;color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
+                <span v-if="collSortBy !== 'cost'" style="opacity:0.3;font-size: var(--fs-xs);margin-left:4px;">↕</span>
+                <span v-else style="font-size: var(--fs-xs);color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
               </th>
               <th @click="toggleSort('score')" style="cursor:pointer; user-select:none;">
                 {{ $t('ui_score') }} 
-                <span v-if="collSortBy !== 'score'" style="opacity:0.3;font-size: 12px;margin-left:4px;">↕</span>
-                <span v-else style="font-size: 12px;color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
+                <span v-if="collSortBy !== 'score'" style="opacity:0.3;font-size: var(--fs-xs);margin-left:4px;">↕</span>
+                <span v-else style="font-size: var(--fs-xs);color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
               </th>
               <th @click="toggleSort('ce')" style="cursor:pointer; user-select:none;">
                 {{ $t('ui_ce') }} 
-                <span v-if="collSortBy !== 'ce'" style="opacity:0.3;font-size: 12px;margin-left:4px;">↕</span>
-                <span v-else style="font-size: 12px;color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
+                <span v-if="collSortBy !== 'ce'" style="opacity:0.3;font-size: var(--fs-xs);margin-left:4px;">↕</span>
+                <span v-else style="font-size: var(--fs-xs);color:var(--gold);margin-left:4px;">{{ collSortDesc ? '▼' : '▲' }}</span>
               </th>
             </tr>
             <tr v-else-if="algo === 1 || algo === 2">
@@ -83,7 +83,7 @@
               <th>{{ $t('ui_characters') }}</th>
               <th>{{ $t('ui_cost') }}</th>
               <th>{{ $t('ui_score') }}</th>
-              <th>{{ $t('ui_ce') }} <span style="font-size: 12px; color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
+              <th>{{ $t('ui_ce') }} <span style="font-size: var(--fs-xs); color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
             </tr>
             <tr v-else-if="algo === 3">
               <th>{{ $t('ui_rank') }}</th>
@@ -92,7 +92,7 @@
               <th>{{ $t('ui_score') }}</th>
               <th>{{ $t('ui_ce') }}</th>
               <th>{{ $t('ui_marginal_ce') }}</th>
-              <th>{{ $t('ui_bottleneck') }} <span style="font-size: 12px; color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
+              <th>{{ $t('ui_bottleneck') }} <span style="font-size: var(--fs-xs); color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
             </tr>
           </thead>
           <tbody>
@@ -132,7 +132,7 @@
                         <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
                       </div>
                     </div>
-                    <span v-else style="font-size: 13px; color:var(--text-muted)">-</span>
+                    <span v-else style="font-size: var(--fs-xs); color:var(--text-muted)">-</span>
                   </td>
                 </template>
               </tr>
@@ -158,7 +158,7 @@
                       <!-- Level Cap Card -->
                       <div style="background: rgba(var(--color-invert-rgb),0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(var(--color-invert-rgb),0.05);">
                         <div style="font-weight: bold; margin-bottom: 6px; font-size: 15px; color: var(--text-primary);">
-                          🏰 <span style="font-size: 13px; color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
+                          🏰 <span style="font-size: var(--fs-xs); color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
                         </div>
                         <div style="font-size: 14px; color: var(--text-secondary); display: flex; justify-content: space-between;">
                           <span>{{ $t('appLevelCap') }} +{{ (r.chars ? r.chars.length : 1) * levelCapBaseVal }}</span>
@@ -173,8 +173,8 @@
                             <span style="font-weight: bold; font-size: 15px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="$t(getCol(act).nameKey)">
                               {{ $t(getCol(act).nameKey) }}
                             </span>
-                            <span v-if="act.portion !== undefined && act.portion < 1" style="font-size: 12px; color: var(--text-muted); flex-shrink: 0;">x{{ act.portion.toFixed(2) }}</span>
-                            <span style="font-size: 13px; color: var(--gold); flex-shrink: 0;">⭐ {{ (act.score !== undefined ? act.score : getCol(act).totalScore).toFixed(1) }}</span>
+                            <span v-if="act.portion !== undefined && act.portion < 1" style="font-size: var(--fs-xs); color: var(--text-muted); flex-shrink: 0;">x{{ act.portion.toFixed(2) }}</span>
+                            <span style="font-size: var(--fs-xs); color: var(--gold); flex-shrink: 0;">⭐ {{ (act.score !== undefined ? act.score : getCol(act).totalScore).toFixed(1) }}</span>
                           </div>
                           <div v-if="getCol(act).reqCids" class="char-avatar-group" style="gap: 2px; flex-wrap: nowrap; flex-shrink: 0;">
                             <div v-for="cid in getCol(act).reqCids" :key="cid" class="char-avatar char-avatar-xs" :title="getCharFullNameById(cid)">
@@ -195,6 +195,69 @@
             </template>
           </tbody>
         </table>
+      </div>
+
+      <div class="mobile-mysterium-list">
+        <article
+          v-for="(r, i) in displayedResults"
+          :key="`mobile-${i}`"
+          class="mobile-mysterium-card"
+          @click="r._expanded = !r._expanded"
+        >
+          <div class="mobile-mysterium-head">
+            <div class="mobile-mysterium-rank">#{{ i + 1 }}</div>
+            <div class="mobile-mysterium-title">
+              <template v-if="mainTab === 'colls'">
+                {{ $t(r.nameKey) }}
+              </template>
+              <template v-else>
+                {{ getCharNames(r) }}
+              </template>
+            </div>
+            <div class="mobile-mysterium-ce">
+              {{ r.ce === Infinity ? '∞' : r.ce.toFixed(2) }}
+            </div>
+          </div>
+
+          <div class="mobile-mysterium-meta">
+            <span>{{ $t('ui_cost') }} <b>{{ r.cost }}</b></span>
+            <span>{{ $t('ui_score') }} <b>{{ (r.totalScore ?? r.score ?? 0).toFixed(1) }}</b></span>
+            <span v-if="mainTab === 'chars' && algo === 3">{{ $t('ui_marginal_ce') }} <b>{{ r.marginalCe.toFixed(2) }}</b></span>
+          </div>
+
+          <div class="mobile-mysterium-avatars">
+            <div v-for="c in (r.chars || [r])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
+              <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+            </div>
+          </div>
+
+          <div v-if="mainTab === 'chars' && algo === 3 && r.bottleneck && r.bottleneck.length > 0" class="mobile-mysterium-bottleneck">
+            <span>{{ $t('ui_bottleneck') }}</span>
+            <div class="char-avatar-group">
+              <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-xs char-avatar-bw" :title="getCharFullName(c)">
+                <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+              </div>
+            </div>
+          </div>
+
+          <div v-show="r._expanded" class="mobile-mysterium-detail">
+            <div class="char-avatar-group">
+              <div v-for="c in (r.chars || [r])" :key="c.id" class="char-card">
+                <img :src="getCharIconUrl(c.id)" class="char-card-img" @error="handleImgError" />
+                <div class="char-card-name" :title="getCharFullName(c)">
+                  <div class="char-base-name">{{ $t(c.nameKey) }}</div>
+                  <div v-if="c.name2Key" class="char-sub-name">{{ $t(c.name2Key) }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="mobile-mysterium-acts">
+              <div v-for="(act, actIndex) in getActivatedList(r)" :key="actIndex" class="mobile-mysterium-act">
+                <span>{{ $t(getCol(act).nameKey) }}</span>
+                <b>{{ (act.score !== undefined ? act.score : getCol(act).totalScore).toFixed(1) }}</b>
+              </div>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </div>
@@ -352,6 +415,103 @@ function toggleSort(key) {
 </script>
 
 <style scoped>
+.mobile-mysterium-list {
+  display: none;
+}
+.mobile-mysterium-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 12px;
+}
+.mobile-mysterium-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 10px;
+}
+.mobile-mysterium-rank {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-weight: 800;
+}
+.mobile-mysterium-title {
+  min-width: 0;
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.mobile-mysterium-ce {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.mobile-mysterium-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.mobile-mysterium-meta span {
+  min-width: 0;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+.mobile-mysterium-meta b {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.mobile-mysterium-avatars,
+.mobile-mysterium-bottleneck {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.mobile-mysterium-bottleneck {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+.mobile-mysterium-detail {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-subtle);
+}
+.mobile-mysterium-acts {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+.mobile-mysterium-act {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+}
+.mobile-mysterium-act span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+.mobile-mysterium-act b {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
 .hover-row:hover {
   background: rgba(var(--color-invert-rgb),0.05);
 }
@@ -435,7 +595,7 @@ function toggleSort(key) {
   width: 100%;
 }
 .char-base-name {
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-weight: bold;
   color: var(--text-primary);
   text-align: center;
@@ -443,7 +603,7 @@ function toggleSort(key) {
   word-break: keep-all;
 }
 .char-sub-name {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-primary);
   text-align: center;
   background: var(--gold-dim);
@@ -455,5 +615,38 @@ function toggleSort(key) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .mysterium-layout {
+    grid-template-columns: 1fr;
+    gap: 12px !important;
+  }
+  .mysterium-settings,
+  .mysterium-results {
+    max-height: none !important;
+    overflow: visible;
+  }
+  .mysterium-tabs,
+  .mysterium-algos {
+    width: 100%;
+  }
+  .mysterium-desc {
+    font-size: var(--fs-sm) !important;
+  }
+  .desktop-mysterium-table {
+    display: none;
+  }
+  .mobile-mysterium-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mobile-mysterium-meta {
+    grid-template-columns: 1fr;
+  }
+  .char-avatar:hover {
+    transform: none;
+  }
 }
 </style>
