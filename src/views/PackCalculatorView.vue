@@ -8,7 +8,7 @@
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
     <!-- Left Panel: Scores -->
-    <div class="flex-col gap-12" style="position:sticky;top:24px;height:calc(100vh - 48px);">
+    <div class="flex-col gap-12 pack-score-panel" style="position:sticky;top:24px;height:calc(100vh - 48px);">
 
       <!-- Scores Panel -->
       <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
@@ -46,7 +46,7 @@
     <!-- Right Panel: Results Table -->
     <div class="flex-col gap-12" style="min-width:0;">
       <!-- Filters -->
-      <div class="card" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding: 10px 14px;">
+      <div class="card pack-filters-card" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding: 10px 14px;">
         <div style="font-weight:bold; font-size:var(--fs-sm); color:var(--text-primary); display:flex; align-items:center; white-space:nowrap;">
           🔍 {{ $t('packFilterTitle') }}
         </div>
@@ -76,7 +76,7 @@
         </div>
       </div>
 
-      <div class="card" style="overflow-x:auto;padding:8px;">
+      <div class="card desktop-pack-table" style="overflow-x:auto;padding:8px;">
         <table class="data-table">
           <thead>
             <tr>
@@ -138,6 +138,44 @@
             </template>
           </tbody>
         </table>
+      </div>
+
+      <div class="mobile-pack-list">
+        <article
+          v-for="(p, i) in sortedPacks"
+          :key="`mobile-${i}`"
+          class="mobile-pack-card"
+          @click="toggleExpand(i)"
+        >
+          <div class="mobile-pack-head">
+            <div class="mobile-pack-title">
+              <span>{{ p.trigger }}</span>
+            </div>
+            <div class="mobile-pack-ce" :style="{ color: p.ce >= 1 ? '#2ecc71' : '#e74c3c' }">
+              CE {{ p.ce.toFixed(1) }}
+            </div>
+          </div>
+
+          <div class="mobile-pack-meta">
+            <span>{{ $t('packColPrice') }} <b>{{ formatPrice(p.price) }}</b></span>
+            <span>{{ $t('packColValue') }} <b>{{ p.originalValue.toLocaleString() }}</b> <em>+ {{ p.rechargeValue.toLocaleString() }}</em></span>
+          </div>
+
+          <div class="mobile-pack-items">
+            <div
+              v-for="(item, j) in p.items"
+              :key="j"
+              class="mobile-pack-item"
+              :title="itemDisplayName(item)"
+            >
+              <img
+                :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
+                @error="e => e.target.style.display='none'"
+              />
+              <span class="pack-item-qty"><span class="pack-item-qty-mark">×</span>{{ item.qty }}</span>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </div>
