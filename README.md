@@ -1,7 +1,7 @@
 # ⚔ MementoMori 各种计算器
 
 > 极具美感的多维交互式伤害分析工具 — 基于真实逆向公式打造
-> 包含：单体计算器 · 穿透扫描曲线 · 贯通×防御热力图 · 多方案对比 · 交叉拉表导出 · 秘仪模拟评分计算器
+> 包含：单体计算器 · 穿透扫描曲线 · 贯通×防御热力图 · 多方案对比 · 交叉拉表导出 · 礼包 CE 计算/对比 · 秘仪模拟评分计算器
 
 ---
 
@@ -19,6 +19,9 @@ npm run dev
 
 # 构建生产版本
 npm run build
+
+# 校验翻译与核心计算公式
+npm test
 ```
 
 ---
@@ -37,28 +40,47 @@ mmt-calculator/
 │   ├── store/
 │   │   └── calculator.js          # 【全局状态】基于 Pinia 的核心参数状态管理
 │   │
+│   ├── composables/
+│   │   └── useDamageParams.js     # 伤害参数、等级常量、攻击类型切换的复用逻辑
+│   │
 │   ├── constants/
 │   │   ├── level_coefficient.csv  # 【核心数据】1-900级官方防御及贯通定数表
 │   │   ├── levelTable.js          # 解析 CSV 系数、提供常用等级预设
 │   │   ├── presets.js             # 提供不同场景对标数值和方案默认值
+│   │   ├── itemScores.json        # 礼包 CE 基准道具评分
+│   │   ├── allPacks.json          # 去重后的礼包对比数据
+│   │   ├── ultraSalePacks.json    # 超值限时组合包数据（按页面异步加载）
 │   │   ├── characters.json        # 角色数据（用于秘仪计算）
 │   │   └── mysterium_data.json    # 秘仪组合数据（用于秘仪计算）
 │   │
 │   ├── engine/
 │   │   ├── damageCalc.js          # 【核心逻辑】真实双路贯通减伤公式计算
+│   │   ├── packCalc.js            # 【核心逻辑】礼包道具价值与 CE 计算
 │   │   └── mysteriumCalc.js       # 【核心逻辑】秘仪组合性价比算法
 │   │
 │   ├── i18n/                      # Vue-i18n 多语言系统
 │   ├── utils/
 │   │   └── chartTheme.js          # ECharts 统一主风格配置
 │   │
-│   └── views/                     # 六大功能模块（Vue 单文件组件）
+│   └── views/                     # 功能页面（Vue 单文件组件，按页面异步加载）
 │       ├── CalculatorView.vue     # 模块一：单体计算器
 │       ├── SweepChartView.vue     # 模块二：穿透扫描曲线
 │       ├── HeatmapChartView.vue   # 模块三：贯通×防御 热力图
 │       ├── ComparePanelView.vue   # 模块四：多方案配装对比
 │       ├── TableExportView.vue    # 模块五：交叉拉表 & 导出
-│       └── MysteriumPanelView.vue # 模块六：秘仪配置评级
+│       ├── PackComparisonView.vue # 模块六：礼包总表对比
+│       ├── PackCalculatorView.vue # 模块七：超值限时组合包 CE 计算
+│       └── MysteriumPanelView.vue # 模块八：秘仪配置评级
+│
+├── scripts/
+│   ├── gen_all_packs.js           # 生成礼包对比数据与文档
+│   ├── extract_master_data.js     # 从 Master 数据同步角色/秘仪/词典
+│   ├── test_i18n.js               # 多语言 key 一致性校验
+│   └── registerRawLoader.mjs      # Node 测试读取 Vite ?raw 资源的 loader 注册
+│
+└── test/
+    ├── damageCalc.test.js         # 伤害公式单元测试
+    └── packCalc.test.js           # 礼包 CE 与同质道具换算单元测试
 ```
 
 ---
@@ -98,7 +120,40 @@ mmt-calculator/
 
 ---
 
-## 🔧 六大功能模块指南
+## 💰 礼包 CE 计算口径
+
+礼包系统使用 `doc/items/items-calc-formula.md` 中定义的道具评分与同质道具换算规则。当前计算器采用“道具原始价值 + 充值价值补正”的口径：
+
+```
+OriginalValue(P) = Σ( S(item_i) × Qty_i )
+PaidDiamonds(P) = price > 0 ? price / 2 : DiamondCount(P)
+RechargeValue(P) = PaidDiamonds(P) × S(有償ダイヤ) × 1.2
+FinalValue(P) = OriginalValue(P) + RechargeValue(P)
+CE(P) = FinalValue(P) / PaidDiamonds(P)
+```
+
+道具评分可在礼包页面中编辑，并会保存到浏览器本地存储；礼包数据由 `scripts/gen_all_packs.js` 从文档与抓取数据生成。
+
+---
+
+## ✅ 质量校验
+
+```bash
+# 多语言 key 一致性
+npm run test:i18n
+
+# 伤害公式与礼包 CE 单元测试
+npm run test:unit
+
+# 完整测试
+npm test
+```
+
+`npm run build` 会先执行完整测试，再重新生成礼包数据并打包生产版本。
+
+---
+
+## 🔧 功能模块指南
 
 ### 🎯 一、单体计算器 (`CalculatorView.vue`)
 
@@ -158,7 +213,29 @@ mmt-calculator/
 
 ---
 
-### 🔮 六、秘仪配置评级 (`MysteriumPanelView.vue`)
+### 💰 六、礼包总表对比 (`PackComparisonView.vue`)
+
+聚合常驻礼包、魔女的赠礼和超值限时组合包，按照价格、来源、内容物和 CE 进行筛选、排序与展开查看。
+
+**使用方法：**
+- 在左侧编辑道具基准评分，钻石基准锁定为 1。
+- 使用来源、价格、内容物筛选快速定位目标礼包。
+- 表格中展示原始价值、充值价值补正、最终 CE 和包内道具明细。
+
+---
+
+### 📦 七、超值限时组合包 CE 计算 (`PackCalculatorView.vue`)
+
+面向无穷之塔等超值限时组合包的细分分析页面。礼包原始数据按页面异步加载，避免进入伤害计算首页时加载大体积礼包数据。
+
+**使用方法：**
+- 选择礼包类型、塔类别和价格档位。
+- 展开行查看单个礼包的道具构成、单项价值和总价值。
+- 修改道具评分后，CE 会实时重新计算。
+
+---
+
+### 🔮 八、秘仪配置评级 (`MysteriumPanelView.vue`)
 
 针对游戏内的“秘仪”（Mysterium）系统提供的收益评估和配对算法。
 
