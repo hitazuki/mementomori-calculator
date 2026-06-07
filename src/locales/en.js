@@ -2,7 +2,7 @@ export default {
   // Common
   appTitle: "MementoMori Calculators",
   appDesc:
-    "MementoMori Multidimensional Damage Calc & Visuals: PEN Scan, Heatmap, Compare, Export",
+    "MementoMori calculators for dual-path damage, curve scans, heatmaps, build comparison, table export, pack CE, and Mysterium scoring.",
   appName: "MementoMori",
   appSub: "Calculators",
 

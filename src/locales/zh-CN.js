@@ -2,7 +2,7 @@ export default {
   // Common
   appTitle: "MementoMori 各种计算器",
   appDesc:
-    "MementoMori 多维伤害计算与可视化分析：单变量曲线扫描、双变量热力图、多方案对比、拉表导出",
+    "MementoMori 多功能计算工具：双路伤害计算、曲线扫描、热力图、多方案对比、拉表导出、礼包 CE 与秘仪评分。",
   appName: "MementoMori",
   appSub: "各种计算器",
 
