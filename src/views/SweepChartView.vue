@@ -269,7 +269,7 @@ const chartOption = computed(() => {
   const MORI_THEME = getMoriTheme(isDark)
 
   return {
-    ...baseChartOption(varLabel, isDark),
+    ...baseChartOption(varLabel, '', isDark),
     tooltip: { 
       ...MORI_THEME.tooltip, 
       trigger: 'axis', 
@@ -316,7 +316,8 @@ const chartOption = computed(() => {
 
 function downloadChart() {
   if (chartRef.value) {
-    const url = chartRef.value.getDataURL({type:'png',pixelRatio:2,backgroundColor:'#0d0b14'})
+    const bg = currentTheme.value === 'dark' ? '#0d0b14' : '#f4f3ee'
+    const url = chartRef.value.getDataURL({type:'png',pixelRatio:2,backgroundColor:bg})
     const a = document.createElement('a')
     a.href = url
     a.download = `mmt-sweep-${ss.sweepKey}.png`

@@ -314,7 +314,8 @@ const chartOption = computed(() => {
 
 function downloadChart() {
   if (chartRef.value) {
-    const url = chartRef.value.getDataURL({ type:'png', pixelRatio:2, backgroundColor:'#0d0b14' })
+    const bg = currentTheme.value === 'dark' ? '#0d0b14' : '#f4f3ee'
+    const url = chartRef.value.getDataURL({ type:'png', pixelRatio:2, backgroundColor:bg })
     const a = document.createElement('a')
     a.href = url
     a.download = `mmt-heatmap-${hs.xKey}-${hs.yKey}.png`

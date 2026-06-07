@@ -346,6 +346,12 @@ const waterfallData = computed(() => {
 const chartOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const MORI_THEME = getMoriTheme(isDark)
+  const barLabelStyle = {
+    color: isDark ? '#ffffff' : '#1a1614',
+    textBorderColor: isDark ? '#000000' : '#ffffff',
+    textBorderWidth: 2,
+    fontFamily: 'JetBrains Mono',
+  }
 
   if (activeTab.value === 'tornado') {
     const yData = tornadoResults.value.map(r => r.label)
@@ -378,7 +384,7 @@ const chartOption = computed(() => {
         },
         label: {
           show: true, formatter: p => `${p.value > 0 ? '+' : ''}${p.value.toFixed(1)}%`,
-          color: '#ffffff', textBorderColor: '#000000', textBorderWidth: 2, fontFamily: 'JetBrains Mono', fontSize: 12, fontWeight: 'bold'
+          ...barLabelStyle, fontSize: 12, fontWeight: 'bold'
         }
       }]
     }
@@ -409,13 +415,13 @@ const chartOption = computed(() => {
         { 
           name: 'Gain', type: 'bar', stack: 'Total', barMaxWidth: 40, 
           itemStyle: { color: p => (p.name === t('wfCatBase') || p.name === t('wfCatFinal')) ? '#c9a84c' : '#2ecc71', borderRadius: 2 },
-          label: { show: true, position: 'top', formatter: p => p.value !== '-' ? fmt(p.value) : '', color: '#fff', textBorderColor: '#000', textBorderWidth: 2, fontSize: 10, fontFamily: 'JetBrains Mono' },
+          label: { show: true, position: 'top', formatter: p => p.value !== '-' ? fmt(p.value) : '', ...barLabelStyle, fontSize: 10 },
           data: positive 
         },
         { 
           name: 'Loss', type: 'bar', stack: 'Total', barMaxWidth: 40, 
           itemStyle: { color: '#e74c3c', borderRadius: 2 },
-          label: { show: true, position: 'bottom', formatter: p => p.value !== '-' ? `-${fmt(p.value)}` : '', color: '#fff', textBorderColor: '#000', textBorderWidth: 2, fontSize: 10, fontFamily: 'JetBrains Mono' },
+          label: { show: true, position: 'bottom', formatter: p => p.value !== '-' ? `-${fmt(p.value)}` : '', ...barLabelStyle, fontSize: 10 },
           data: negative 
         }
       ]
@@ -425,7 +431,8 @@ const chartOption = computed(() => {
 
 function downloadChart() {
   if (chartRef.value) {
-    const url = chartRef.value.getDataURL({type:'png',pixelRatio:2,backgroundColor:'#0d0b14'})
+    const bg = currentTheme.value === 'dark' ? '#0d0b14' : '#f4f3ee'
+    const url = chartRef.value.getDataURL({type:'png',pixelRatio:2,backgroundColor:bg})
     const a = document.createElement('a')
     a.href = url
     a.download = `mmt-${activeTab.value}.png`
