@@ -56,9 +56,9 @@
             style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:6px;"
           >
             <div :style="{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: b._expanded ? '12px' : '0' }">
-              <input class="form-input" style="font-weight:bold;width:130px;padding:2px 8px;font-size: 16px" v-model="b.name">
+              <input class="form-input export-build-name" v-model="b.name">
               <div style="display:flex;gap:4px">
-                <button class="btn btn-secondary btn-sm" @click="b._expanded = !b._expanded" style="padding:4px 8px;font-size: 14px">
+                <button class="btn btn-secondary btn-sm" @click="b._expanded = !b._expanded" style="padding:4px 8px;">
                   {{ b._expanded ? '▲' : '▼ ' + $t('ui_details') }}
                 </button>
                 <button v-if="ts.builds.length > 1" class="btn btn-ghost btn-sm" @click="removeBuild(i)" style="padding:4px 8px">🗑</button>
@@ -70,9 +70,9 @@
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;">
                 <div class="form-group">
                   <label class="form-label text-xs">{{ $t('atkType') }}</label>
-                  <div style="display:flex;gap:6px;">
-                    <button class="btn btn-sm" :class="b.params.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1;font-size:11px;padding:5px 2px;" @click="setBuildDamageType(b, 'phys')">{{ $t('typePhys') }}</button>
-                    <button class="btn btn-sm" :class="b.params.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1;font-size:11px;padding:5px 2px;" @click="setBuildDamageType(b, 'mag')">{{ $t('typeMag') }}</button>
+                  <div class="segmented-control">
+                    <button class="btn btn-sm" :class="b.params.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" @click="setBuildDamageType(b, 'phys')">{{ $t('typePhys') }}</button>
+                    <button class="btn btn-sm" :class="b.params.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" @click="setBuildDamageType(b, 'mag')">{{ $t('typeMag') }}</button>
                   </div>
                 </div>
                 <div class="form-group">
@@ -134,8 +134,8 @@
     <!-- Main Output -->
     <div class="flex-col gap-12 export-main" style="min-width:0">
       <div class="card" style="display:flex; flex-direction:column;">
-        <div class="flex justify-between items-center mb-12" style="flex-wrap:wrap; gap:12px;">
-          <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:240px;">
+        <div class="flex justify-between items-center mb-12 export-toolbar" style="flex-wrap:wrap; gap:12px;">
+          <div class="export-title-row" style="display:flex;align-items:center;gap:12px;flex:1;min-width:240px;">
             <span style="font-size: 18px;">📊</span>
             <input 
               class="table-title-input" 
@@ -143,23 +143,23 @@
               :placeholder="defaultTitle"
               :title="$t('tooltipEditTableTitle')"
             />
-            <select class="form-select" v-model="ts.metric" style="width:140px;padding:4px 8px;font-size: 14px;min-height:28px;margin-left:4px;">
+            <select class="form-select export-metric-select" v-model="ts.metric" style="width:140px;padding:4px 8px;min-height:var(--control-h-sm);margin-left:4px;">
               <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
             </select>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div class="export-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-ghost btn-sm" @click="copyMarkdown">Markdown</button>
             <button class="btn btn-ghost btn-sm" @click="downloadCsv">{{ $t('copyCSV') }}</button>
           </div>
         </div>
         
-        <div style="display:flex;flex-direction:column;gap:32px;overflow-x:auto" v-if="tableData">
+        <div class="export-table-list mobile-table-scroll" style="display:flex;flex-direction:column;gap:32px;overflow-x:auto" v-if="tableData">
           <div 
             v-for="(tData, index) in tableData.allTables" 
             :key="index"
             style="background:rgba(0,0,0,0.1); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.05)"
           >
-            <div style="font-size: 17px;font-weight:600;margin-bottom:12px">
+            <div class="export-table-heading" style="font-weight:600;margin-bottom:12px">
               <span v-if="tData.isDiff" style="color:var(--purple-light)">⚖ {{ tData.name }}</span>
               <span v-else style="color:var(--gold)">📊 {{ tData.build.name }}</span>
             </div>
@@ -443,7 +443,7 @@ function downloadCsv() {
   height: 100%;
 }
 .table-title-input {
-  font-size: 16px;
+  font-size: var(--fs-base);
   font-weight: 600;
   color: var(--gold);
   background: transparent;
@@ -454,6 +454,18 @@ function downloadCsv() {
   max-width: 320px;
   outline: none;
   transition: all 0.2s ease;
+}
+.export-build-name {
+  width: 130px;
+  padding: 2px 8px;
+  font-size: var(--fs-base);
+  font-weight: bold;
+}
+.export-metric-select {
+  font-size: var(--fs-sm);
+}
+.export-table-heading {
+  font-size: var(--fs-lg);
 }
 .table-title-input:hover {
   border-bottom: 1px dashed var(--gold);
@@ -494,6 +506,59 @@ function downloadCsv() {
     max-height: none;
     border: 1px solid rgba(255, 255, 255, 0.03);
     border-radius: 6px;
+  }
+}
+
+@media (max-width: 560px) {
+  .export-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .export-sidebar,
+  .export-main {
+    min-width: 0;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+  .export-build-name {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+  .export-toolbar,
+  .export-title-row,
+  .export-actions {
+    align-items: stretch !important;
+    flex-direction: column;
+    width: 100%;
+  }
+  .export-title-row {
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+  .table-title-input {
+    max-width: none;
+    min-height: var(--control-h-sm);
+  }
+  .export-metric-select {
+    width: 100% !important;
+    min-height: var(--control-h-sm) !important;
+    margin-left: 0 !important;
+    padding: 5px 30px 5px 10px !important;
+  }
+  .export-actions .btn {
+    width: 100%;
+  }
+  .export-table-list {
+    gap: 18px !important;
+    overflow-x: visible !important;
+  }
+  .table-scroll-container {
+    -webkit-overflow-scrolling: touch;
+  }
+  :deep(.data-table) {
+    min-width: 720px;
   }
 }
 
