@@ -64,6 +64,11 @@
 
     <!-- Main Content -->
     <main class="main-content">
+      <div class="mobile-current-view">
+        <span class="mobile-current-icon">{{ currentNavItem?.icon }}</span>
+        <span class="mobile-current-label">{{ currentNavItem ? $t(currentNavItem.i18nLabel) : '' }}</span>
+      </div>
+
       <div class="global-actions" style="position: absolute; top: 22px; right: 24px; z-index: 100; display: flex; align-items: center; gap: 12px;">
         <button 
           @click="toggleTheme" 
@@ -150,6 +155,14 @@ const viewMap = {
 }
 
 const activeComponent = computed(() => viewMap[currentView.value])
+
+const allNavItems = computed(() => [
+  ...navDamageItems,
+  ...navItemSystemItems,
+  ...navMysteriumItems
+])
+
+const currentNavItem = computed(() => allNavItems.value.find(item => item.id === currentView.value))
 
 const navDamageItems = [
   { id: 'calculator', icon: '🎯', i18nLabel: 'navCalc', i18nTitle: 'navCalc' },

@@ -180,14 +180,14 @@
 
   <!-- Modal for editing build -->
   <Teleport to="body">
-    <div v-if="cs.editingBuildIdx !== null" style="position:fixed; inset:0; background:rgba(var(--color-base-rgb),0.85); z-index:9999; display:flex; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;" @mousedown.self="cs.editingBuildIdx = null">
-      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; width:100%; max-width:400px; box-shadow:0 8px 32px rgba(var(--color-base-rgb),0.8); display:flex; flex-direction:column; max-height: 100%;">
-      <div style="display:flex;justify-content:space-between;align-items:center; padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;">
-        <h3 style="margin:0;font-size: 18px;color:var(--text-primary)">⚙ {{ $t('manualAdjust') }}</h3>
-        <button class="btn btn-ghost btn-sm" @click="cs.editingBuildIdx = null" style="padding:0 8px">✕</button>
+    <div v-if="cs.editingBuildIdx !== null" class="modal-overlay active compare-edit-overlay" @mousedown.self="cs.editingBuildIdx = null">
+      <div class="modal-content compare-edit-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙ {{ $t('manualAdjust') }}</h3>
+        <button class="modal-close" @click="cs.editingBuildIdx = null">&times;</button>
       </div>
       
-      <div style="display:flex;flex-direction:column;gap:8px; padding: 0 20px 20px; overflow-y: auto;">
+      <div class="modal-body compare-edit-body">
         <div class="form-group"><label class="form-label">{{ $t('buildName') }}</label>
           <input class="form-input" type="text" v-model="editingBuild.name"></div>
         <div class="grid-2">
@@ -420,5 +420,22 @@ function getDeltaClass(delta) {
 .chart {
   width: 100%;
   height: 100%;
+}
+.compare-edit-modal {
+  max-width: 420px;
+}
+.compare-edit-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .compare-edit-modal {
+    max-width: none;
+  }
+  .compare-edit-body {
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
 }
 </style>
