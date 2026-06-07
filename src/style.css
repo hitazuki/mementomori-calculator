@@ -476,6 +476,67 @@ body::before {
   width: 100%;
   height: 100%;
 }
+.chart-page-shell {
+  min-height: 0;
+}
+.chart-main-card {
+  min-width: 0;
+}
+.chart-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.chart-toolbar-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.chart-toolbar-main .card-title {
+  min-width: 0;
+}
+.chart-frame {
+  flex: 1;
+  min-height: 400px;
+  position: relative;
+}
+.chart-control-panel {
+  min-width: 0;
+}
+.chart-control-input {
+  width: 80px;
+  padding: 2px 4px;
+  font-size: var(--fs-xs);
+  height: 24px;
+  text-align: right;
+}
+.chart-control-input-wide {
+  width: 100px;
+}
+.chart-inline-percent {
+  width: 50px;
+  text-align: right;
+  font-size: var(--fs-xs);
+  height: 20px;
+}
+.chart-info-card {
+  padding: 16px 24px;
+}
+.chart-tabs-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+}
+.chart-base-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 .segmented-control {
   display: flex;
   gap: 8px;
@@ -1088,6 +1149,62 @@ body::before {
   .mobile-chart-frame {
     height: 330px !important;
     min-height: 330px;
+  }
+  .chart-page-shell {
+    height: auto !important;
+  }
+  .chart-main-card {
+    order: 2;
+    height: auto !important;
+    min-height: 0;
+  }
+  .chart-control-panel {
+    order: 1;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+  .chart-toolbar,
+  .chart-tabs-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 12px !important;
+  }
+  .chart-toolbar-main,
+  .chart-base-summary {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  .chart-toolbar .form-select,
+  .chart-toolbar-main .form-select,
+  .chart-tabs-toolbar .form-select {
+    width: 100% !important;
+    height: auto !important;
+    min-height: var(--control-h-sm);
+    font-size: var(--fs-sm) !important;
+    padding: 5px 30px 5px 10px !important;
+  }
+  .chart-frame {
+    height: 340px !important;
+    min-height: 340px !important;
+    flex: none;
+  }
+  .chart-control-panel .form-input {
+    min-height: var(--control-h-sm) !important;
+    height: auto !important;
+    font-size: var(--fs-sm) !important;
+    padding: 4px 8px !important;
+  }
+  .chart-control-panel .inline-num {
+    height: auto !important;
+    font-size: var(--fs-sm) !important;
+  }
+  .chart-control-panel .value-display {
+    font-size: var(--fs-sm) !important;
+  }
+  .chart-info-card {
+    padding: 12px !important;
   }
   .mobile-table-scroll {
     overflow-x: auto;

@@ -3,23 +3,23 @@
     <h1 class="view-title">{{ $t('heatmapTitle') }}</h1>
     <p class="view-desc">{{ $t('heatmapDesc') }}</p>
   </div>
-  <div class="grid-sidebar-right animate-fadeup" style="height:calc(100vh - 110px)">
-    <div class="card" style="height:100%;display:flex;flex-direction:column">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px">
+  <div class="grid-sidebar-right chart-page-shell animate-fadeup" style="height:calc(100vh - 110px)">
+    <div class="card chart-main-card" style="height:100%;display:flex;flex-direction:column">
+      <div class="chart-toolbar">
+        <div class="chart-toolbar-main">
           <div class="card-title" style="margin:0">{{ currentYVar?.label }} × {{ currentXVar?.label }}</div>
-          <select class="form-select btn-sm" v-model="hs.metric" style="width:160px;margin:0;height:28px;font-size:12px;padding:2px 24px 2px 8px;">
+          <select class="form-select btn-sm" v-model="hs.metric" style="width:160px;margin:0;">
             <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
           </select>
         </div>
         <button class="btn btn-ghost btn-sm" @click="downloadChart">⬇ PNG</button>
       </div>
-      <div style="flex:1;min-height:480px;position:relative">
+      <div class="chart-frame" style="min-height:480px;">
         <v-chart ref="chartRef" class="chart" :option="chartOption" autoresize />
       </div>
     </div>
 
-    <div class="flex-col gap-12" style="overflow-y:auto; padding-bottom: 24px;">
+    <div class="flex-col gap-12 chart-control-panel" style="overflow-y:auto; padding-bottom: 24px;">
       
       <div class="card">
         <div class="card-title">🔀 {{ $t('hmAxisConfig') }}</div>
@@ -79,9 +79,9 @@
         
         <div class="form-group" style="margin-bottom:12px">
           <label class="form-label text-xs">{{ $t('atkType') }}</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-            <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+          <div class="segmented-control">
+            <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+            <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
           </div>
         </div>
 
@@ -95,14 +95,14 @@
 
         <!-- Collapsible non-sweepable stats -->
         <details class="advanced-panel-details" style="margin-top: 12px; border-top: 1px dashed var(--border-subtle); padding-top: 12px;">
-          <summary style="font-size: 13px; color: var(--gold); cursor: pointer; user-select: none; font-weight: 500; outline:none;">
+          <summary style="font-size: var(--fs-sm); color: var(--gold); cursor: pointer; user-select: none; font-weight: 500; outline:none;">
             ⚙️ {{ $t('baseCoefficients') }}
           </summary>
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
             <div class="form-group">
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('baseAtk') }}</span>
-                <BigNumberInput class="form-input" v-model="store.baseAtk" style="width: 80px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+                <BigNumberInput class="form-input chart-control-input" v-model="store.baseAtk" />
               </label>
               <input class="form-range" type="range" v-model.number="store.baseAtk" min="10000" max="200000000" step="10000">
             </div>
@@ -110,8 +110,8 @@
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('skillCoeff') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(store.skillCoeff*100).toFixed(1)" @change="e => store.skillCoeff = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
-                  <span class="value-display" style="font-size:12px">%</span>
+                  <input class="inline-num chart-inline-percent" type="number" step="0.5" :value="+(store.skillCoeff*100).toFixed(1)" @change="e => store.skillCoeff = parseFloat(e.target.value)/100||0">
+                  <span class="value-display">%</span>
                 </div>
               </label>
               <input class="form-range" type="range" v-model.number="store.skillCoeff" min="0.1" max="25" step="0.1">
@@ -120,8 +120,8 @@
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('critMult') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(store.critMult*100).toFixed(1)" @change="e => store.critMult = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
-                  <span class="value-display" style="font-size:12px">%</span>
+                  <input class="inline-num chart-inline-percent" type="number" step="0.5" :value="+(store.critMult*100).toFixed(1)" @change="e => store.critMult = parseFloat(e.target.value)/100||0">
+                  <span class="value-display">%</span>
                 </div>
               </label>
               <input class="form-range" type="range" v-model.number="store.critMult" min="1" max="5" step="0.05">
@@ -130,8 +130,8 @@
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('atkBonus') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(store.atkBonus*100).toFixed(1)" @change="e => store.atkBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
-                  <span class="value-display" style="font-size:12px">%</span>
+                  <input class="inline-num chart-inline-percent" type="number" step="0.5" :value="+(store.atkBonus*100).toFixed(1)" @change="e => store.atkBonus = parseFloat(e.target.value)/100||0">
+                  <span class="value-display">%</span>
                 </div>
               </label>
               <input class="form-range" type="range" v-model.number="store.atkBonus" min="-1" max="2.5" step="0.05">
@@ -140,8 +140,8 @@
               <label class="form-label text-xs" style="display:flex;justify-content:space-between;align-items:center;">
                 <span>{{ $t('dmgBonus') }}</span>
                 <div style="display:flex;align-items:center;gap:1px">
-                  <input class="inline-num" type="number" step="0.5" :value="+(store.dmgBonus*100).toFixed(1)" @change="e => store.dmgBonus = parseFloat(e.target.value)/100||0" style="width: 50px; text-align:right; font-size:12px; height:20px;">
-                  <span class="value-display" style="font-size:12px">%</span>
+                  <input class="inline-num chart-inline-percent" type="number" step="0.5" :value="+(store.dmgBonus*100).toFixed(1)" @change="e => store.dmgBonus = parseFloat(e.target.value)/100||0">
+                  <span class="value-display">%</span>
                 </div>
               </label>
               <input class="form-range" type="range" v-model.number="store.dmgBonus" min="-1" max="2" step="0.05">

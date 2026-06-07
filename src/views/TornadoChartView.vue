@@ -4,21 +4,21 @@
     <p class="view-desc">{{ $t('tornadoDesc') }}</p>
   </div>
   
-  <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
-    <div class="flex-col gap-12">
+  <div class="grid-sidebar chart-page-shell animate-fadeup" style="align-items:start;gap:16px">
+    <div class="flex-col gap-12 chart-control-panel">
       <!-- Base Params (Shared from Store) -->
       <div class="card">
         <details :open="isBaseOpen" @toggle="e => isBaseOpen = e.target.open" style="outline: none;">
           <summary class="card-title" style="cursor: pointer; user-select: none; outline: none; margin-bottom: 0; display: flex; align-items: center; gap: 8px; width: 100%;">
             ⚙️ {{ $t('basePanelStats') }}
-            <span style="margin-left: auto; font-size: 12px; color: var(--gold); transition: transform 0.2s;" :style="{ transform: isBaseOpen ? 'rotate(180deg)' : 'rotate(0deg)' }">▼</span>
+            <span style="margin-left: auto; font-size: var(--fs-xs); color: var(--gold); transition: transform 0.2s;" :style="{ transform: isBaseOpen ? 'rotate(180deg)' : 'rotate(0deg)' }">▼</span>
           </summary>
           <div class="grid-2" style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border-subtle);">
             <div class="form-group">
               <label class="form-label">{{ $t('atkType') }}</label>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-                <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+              <div class="segmented-control">
+                <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+                <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
               </div>
             </div>
             <div class="form-group">
@@ -102,21 +102,21 @@
           <div class="form-group">
             <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
               <span>{{ $t('baseAtk') }} {{ $t('increment') }}</span>
-              <BigNumberInput class="form-input" v-model="deltas.baseAtk" style="width: 100px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+              <BigNumberInput class="form-input chart-control-input chart-control-input-wide" v-model="deltas.baseAtk" />
             </label>
             <input class="form-range" type="range" v-model.number="deltas.baseAtk" min="0" max="10000000" step="10000">
           </div>
           <div class="form-group">
             <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
               <span>{{ $t('pen') }} {{ $t('increment') }}</span>
-              <BigNumberInput class="form-input" v-model="deltas.pen" style="width: 100px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+              <BigNumberInput class="form-input chart-control-input chart-control-input-wide" v-model="deltas.pen" />
             </label>
             <input class="form-range" type="range" v-model.number="deltas.pen" min="0" max="30000" step="100">
           </div>
           <div class="form-group">
             <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
               <span>{{ $t('pmPen') }} {{ $t('increment') }}</span>
-              <BigNumberInput class="form-input" v-model="deltas.pmPen" style="width: 100px; padding: 2px 4px; font-size: 12px; height: 24px; text-align:right;" />
+              <BigNumberInput class="form-input chart-control-input chart-control-input-wide" v-model="deltas.pmPen" />
             </label>
             <input class="form-range" type="range" v-model.number="deltas.pmPen" min="0" max="80000" step="100">
           </div>
@@ -180,14 +180,14 @@
     </div>
 
     <!-- Main Right Content -->
-    <div class="flex-col gap-12" style="position: sticky; top: 24px; z-index: 10;">
+    <div class="flex-col gap-12 chart-main-card mobile-static-panel" style="position: sticky; top: 24px; z-index: 10;">
       <!-- Tabs & Actions -->
-      <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px">
+      <div class="card chart-tabs-toolbar" style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px">
         <div class="chart-tabs">
           <button class="tab-btn" :class="{active: activeTab==='tornado'}" @click="activeTab='tornado'">{{ $t('tabTornado') }}</button>
           <button class="tab-btn" :class="{active: activeTab==='waterfall'}" @click="activeTab='waterfall'">{{ $t('tabWaterfall') }}</button>
         </div>
-        <div style="display:flex;align-items:center;gap:16px">
+        <div class="chart-base-summary" style="display:flex;align-items:center;gap:16px">
           <div style="font-size:14px">
             {{ $t('baseDmgDisplay') }} <b style="color:var(--gold);font-size:18px">{{ fmt(baseResult.finalDmg) }}</b>
             <span style="color:var(--text-muted);margin-left:8px">{{ $t('basePassRateDisplay') }} {{ baseResult.dmgRatePct.toFixed(1) }}%</span>
@@ -197,18 +197,18 @@
       </div>
 
       <!-- Instructions for Tornado -->
-      <div class="card animate-fadeup" v-show="activeTab === 'tornado'" style="padding:16px 24px; border-left:4px solid #3498db; background:rgba(52,152,219,0.05)">
+      <div class="card chart-info-card animate-fadeup" v-show="activeTab === 'tornado'" style="padding:16px 24px; border-left:4px solid #3498db; background:rgba(52,152,219,0.05)">
         <div style="font-size:14px; font-weight:bold; color:#3498db; margin-bottom:6px">{{ $t('tornadoInstTitle') }}</div>
-        <p style="font-size:13px; color:var(--text-muted); margin:0; line-height:1.5" v-html="$t('tornadoInstDesc')"></p>
+        <p style="font-size:var(--fs-xs); color:var(--text-muted); margin:0; line-height:1.5" v-html="$t('tornadoInstDesc')"></p>
       </div>
 
       <!-- Instructions for Waterfall -->
-      <div class="card animate-fadeup" v-show="activeTab === 'waterfall'" style="padding:16px 24px; border-left:4px solid #2ecc71; background:rgba(46,204,113,0.05)">
+      <div class="card chart-info-card animate-fadeup" v-show="activeTab === 'waterfall'" style="padding:16px 24px; border-left:4px solid #2ecc71; background:rgba(46,204,113,0.05)">
         <div style="font-size:14px; font-weight:bold; color:#2ecc71; margin-bottom:6px">{{ $t('waterfallInstTitle') }}</div>
-        <p style="font-size:13px; color:var(--text-muted); margin:0; line-height:1.5" v-html="$t('waterfallInstDesc')"></p>
+        <p style="font-size:var(--fs-xs); color:var(--text-muted); margin:0; line-height:1.5" v-html="$t('waterfallInstDesc')"></p>
       </div>
 
-      <div class="card" style="height:500px;position:relative">
+      <div class="card mobile-chart-panel mobile-chart-frame" style="height:500px;position:relative">
         <v-chart ref="chartRef" class="chart" :option="chartOption" :update-options="{ notMerge: true }" autoresize />
       </div>
     </div>
