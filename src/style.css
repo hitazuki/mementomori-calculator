@@ -551,7 +551,8 @@ body::before {
   min-width: 0;
 }
 .mobile-summary-card,
-.mobile-compare-results {
+.mobile-compare-results,
+.mobile-chart-insights {
   display: none;
 }
 .mobile-summary-card {
@@ -835,6 +836,30 @@ body::before {
   color: var(--text-primary);
   font-family: var(--font-mono);
   font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.mobile-chart-insight {
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.05);
+}
+.mobile-chart-insight span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+.mobile-chart-insight b {
+  display: block;
+  margin-top: 3px;
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
   font-variant-numeric: tabular-nums;
 }
 .font-display { font-family: var(--font-display); }
@@ -1192,6 +1217,12 @@ body::before {
   .mobile-chart-panel {
     min-height: auto !important;
   }
+  .mobile-chart-insights {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
   .mobile-chart-frame {
     height: 330px !important;
     min-height: 330px;
@@ -1235,6 +1266,11 @@ body::before {
     height: 340px !important;
     min-height: 340px !important;
     flex: none;
+  }
+  .echarts-tooltip,
+  div[style*="z-index: 9999999"] {
+    font-size: var(--fs-sm) !important;
+    line-height: 1.55 !important;
   }
   .chart-control-panel .form-input {
     min-height: var(--control-h-sm) !important;

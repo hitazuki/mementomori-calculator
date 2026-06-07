@@ -195,6 +195,16 @@
           <button class="btn btn-ghost btn-sm" @click="downloadChart">⬇ PNG</button>
         </div>
       </div>
+      <div class="mobile-chart-insights">
+        <div class="mobile-chart-insight" v-if="activeTab === 'tornado'">
+          <span>{{ topTornadoResult.label }}</span>
+          <b>{{ topTornadoResult.pct > 0 ? '+' : '' }}{{ topTornadoResult.pct.toFixed(2) }}%</b>
+        </div>
+        <div class="mobile-chart-insight" v-else>
+          <span>{{ $t('wfCatFinal') }}</span>
+          <b>{{ fmt(waterfallFinalDmg) }}</b>
+        </div>
+      </div>
 
       <!-- Instructions for Tornado -->
       <div class="card chart-info-card animate-fadeup" v-show="activeTab === 'tornado'" style="padding:16px 24px; border-left:4px solid #3498db; background:rgba(52,152,219,0.05)">
@@ -340,6 +350,15 @@ const waterfallData = computed(() => {
   const negative = ['-', '-', '-', '-', defLoss, pmLoss, '-']
 
   return { categories, placeholder, positive, negative }
+})
+
+const topTornadoResult = computed(() => {
+  return tornadoResults.value.reduce((best, item) => item.pct > best.pct ? item : best, tornadoResults.value[0] || { label: '-', pct: 0 })
+})
+
+const waterfallFinalDmg = computed(() => {
+  const finalIndex = waterfallData.value.categories.length - 1
+  return waterfallData.value.positive[finalIndex] || 0
 })
 
 // --- Option Switcher ---

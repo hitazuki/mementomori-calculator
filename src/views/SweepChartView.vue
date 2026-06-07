@@ -11,6 +11,16 @@
         </select>
         <button class="btn btn-ghost btn-sm" @click="downloadChart">⬇ PNG</button>
       </div>
+      <div class="mobile-chart-insights">
+        <div class="mobile-chart-insight">
+          <span>{{ currentSweepVarLabel }} {{ sweepInsight.max.x }}</span>
+          <b>{{ sweepInsight.max.y }}</b>
+        </div>
+        <div class="mobile-chart-insight">
+          <span>{{ currentSweepVarLabel }} {{ sweepInsight.min.x }}</span>
+          <b>{{ sweepInsight.min.y }}</b>
+        </div>
+      </div>
       <div class="chart-frame">
         <v-chart ref="chartRef" class="chart" :option="chartOption" autoresize />
       </div>
@@ -236,6 +246,29 @@ const ss = reactive({
 
 const currentSweepVarLabel = computed(() => SWEEP_VARIABLES.value.find(v=>v.key===ss.sweepKey)?.label || ss.sweepKey)
 
+const sweepSeries = computed(() => buildSweepData({
+  sweepKey: ss.sweepKey,
+  min: ss.min,
+  max: ss.max,
+  steps: ss.steps,
+  baseParams: store.$state
+}))
+
+const sweepInsight = computed(() => {
+  const metric = getMetrics()[ss.metric]
+  const points = sweepSeries.value.xData.map((x, index) => ({
+    x,
+    y: sweepSeries.value.yData[index]?.[ss.metric] ?? 0
+  }))
+  const max = points.reduce((best, point) => point.y > best.y ? point : best, points[0] || { x: 0, y: 0 })
+  const min = points.reduce((best, point) => point.y < best.y ? point : best, points[0] || { x: 0, y: 0 })
+  const formatX = value => currentSweepVar.value?.isBonus ? `${value}%` : fmt(value)
+  return {
+    max: { x: formatX(max.x), y: metric.fmt(max.y) },
+    min: { x: formatX(min.x), y: metric.fmt(min.y) },
+  }
+})
+
 function onSweepKeyChange() {
   const preset = SWEEP_VARIABLES.value.find(v => v.key === ss.sweepKey)
   if (preset) {
@@ -253,13 +286,7 @@ const {
 } = useDamageParams(store)
 
 const chartOption = computed(() => {
-  const { xData, yData } = buildSweepData({
-    sweepKey: ss.sweepKey,
-    min: ss.min,
-    max: ss.max,
-    steps: ss.steps,
-    baseParams: store.$state
-  })
+  const { xData, yData } = sweepSeries.value
   const varLabel = currentSweepVarLabel.value
   const metric = getMetrics()[ss.metric]
 

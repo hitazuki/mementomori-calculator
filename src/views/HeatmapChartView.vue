@@ -14,6 +14,12 @@
         </div>
         <button class="btn btn-ghost btn-sm" @click="downloadChart">⬇ PNG</button>
       </div>
+      <div class="mobile-chart-insights">
+        <div class="mobile-chart-insight">
+          <span>{{ currentYVar?.label }} {{ heatmapInsight.y }} · {{ currentXVar?.label }} {{ heatmapInsight.x }}</span>
+          <b>{{ heatmapInsight.value }}</b>
+        </div>
+      </div>
       <div class="chart-frame" style="min-height:480px;">
         <v-chart ref="chartRef" class="chart" :option="chartOption" autoresize />
       </div>
@@ -215,6 +221,27 @@ const hs = reactive({
 const currentXVar = computed(() => availableVariables.value.find(v => v.key === hs.xKey))
 const currentYVar = computed(() => availableVariables.value.find(v => v.key === hs.yKey))
 
+const heatmapSeries = computed(() => buildDynamicHeatmapData({
+  xKey: hs.xKey, yKey: hs.yKey, zKey: hs.metric,
+  xMin: hs.xMin, xMax: hs.xMax, xSteps: hs.xSteps,
+  yMin: hs.yMin, yMax: hs.yMax, ySteps: hs.ySteps,
+  baseParams: store.$state,
+}))
+
+const heatmapInsight = computed(() => {
+  const metricObj = getMetrics()[hs.metric]
+  const best = heatmapSeries.value.data.reduce((currentBest, point) => {
+    return point[2] > currentBest[2] ? point : currentBest
+  }, heatmapSeries.value.data[0] || [0, 0, 0])
+  const xVal = heatmapSeries.value.xLabels[best[0]]
+  const yVal = heatmapSeries.value.yLabels[best[1]]
+  return {
+    x: currentXVar.value?.isBonus ? `${xVal}%` : xVal?.toLocaleString(),
+    y: currentYVar.value?.isBonus ? `${yVal}%` : yVal?.toLocaleString(),
+    value: metricObj.fmt(best[2] || 0),
+  }
+})
+
 const fixedVariables = computed(() => 
   availableVariables.value.filter(v => v.key !== hs.xKey && v.key !== hs.yKey)
 )
@@ -235,12 +262,7 @@ function onYKeyChange() {
 const { setDamageType } = useDamageParams(store)
 
 const chartOption = computed(() => {
-  const { data, xLabels, yLabels, zMin, zMax } = buildDynamicHeatmapData({
-    xKey: hs.xKey, yKey: hs.yKey, zKey: hs.metric,
-    xMin: hs.xMin, xMax: hs.xMax, xSteps: hs.xSteps,
-    yMin: hs.yMin, yMax: hs.yMax, ySteps: hs.ySteps,
-    baseParams: store.$state,
-  })
+  const { data, xLabels, yLabels, zMin, zMax } = heatmapSeries.value
 
   const isDark = currentTheme.value === 'dark'
   const MORI_THEME = getMoriTheme(isDark)
