@@ -337,7 +337,7 @@
           <code class="formula-highlight">R_total = R_def × R_pmdef</code>
           <code class="formula-highlight">D_final = D_raw × B_dmg × C_dmg × R_total</code>
           
-          <p style="margin-top:16px; font-size: 14px; color:var(--text-muted);">{{ $t('formulaModalNote') }}</p>
+          <p style="margin-top:16px; font-size: var(--fs-sm); color:var(--text-muted);">{{ $t('formulaModalNote') }}</p>
         </div>
       </div>
     </div>

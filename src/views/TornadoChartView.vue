@@ -188,7 +188,7 @@
           <button class="tab-btn" :class="{active: activeTab==='waterfall'}" @click="activeTab='waterfall'">{{ $t('tabWaterfall') }}</button>
         </div>
         <div class="chart-base-summary" style="display:flex;align-items:center;gap:16px">
-          <div style="font-size:14px">
+          <div style="font-size:var(--fs-sm)">
             {{ $t('baseDmgDisplay') }} <b style="color:var(--gold);font-size:18px">{{ fmt(baseResult.finalDmg) }}</b>
             <span style="color:var(--text-muted);margin-left:8px">{{ $t('basePassRateDisplay') }} {{ baseResult.dmgRatePct.toFixed(1) }}%</span>
           </div>
@@ -198,13 +198,13 @@
 
       <!-- Instructions for Tornado -->
       <div class="card chart-info-card animate-fadeup" v-show="activeTab === 'tornado'" style="padding:16px 24px; border-left:4px solid #3498db; background:rgba(52,152,219,0.05)">
-        <div style="font-size:14px; font-weight:bold; color:#3498db; margin-bottom:6px">{{ $t('tornadoInstTitle') }}</div>
+        <div style="font-size:var(--fs-sm); font-weight:bold; color:#3498db; margin-bottom:6px">{{ $t('tornadoInstTitle') }}</div>
         <p style="font-size:var(--fs-xs); color:var(--text-muted); margin:0; line-height:1.5" v-html="$t('tornadoInstDesc')"></p>
       </div>
 
       <!-- Instructions for Waterfall -->
       <div class="card chart-info-card animate-fadeup" v-show="activeTab === 'waterfall'" style="padding:16px 24px; border-left:4px solid #2ecc71; background:rgba(46,204,113,0.05)">
-        <div style="font-size:14px; font-weight:bold; color:#2ecc71; margin-bottom:6px">{{ $t('waterfallInstTitle') }}</div>
+        <div style="font-size:var(--fs-sm); font-weight:bold; color:#2ecc71; margin-bottom:6px">{{ $t('waterfallInstTitle') }}</div>
         <p style="font-size:var(--fs-xs); color:var(--text-muted); margin:0; line-height:1.5" v-html="$t('waterfallInstDesc')"></p>
       </div>
 
@@ -444,7 +444,7 @@ function downloadChart() {
 <style scoped>
 .chart { width: 100%; height: 100%; }
 .chart-tabs { display: flex; gap: 8px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 8px; border: 1px solid var(--border-subtle); }
-.tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 14px; font-weight: 500; }
+.tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: var(--fs-sm); font-weight: 500; }
 .tab-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-base); }
 .tab-btn.active { background: rgba(201,168,76,0.15); color: var(--gold); border-bottom: 2px solid var(--gold); border-radius: 6px 6px 0 0; }
 .grid-2 .form-group { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }

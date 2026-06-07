@@ -160,7 +160,7 @@
                         <div style="font-weight: bold; margin-bottom: 6px; font-size: 15px; color: var(--text-primary);">
                           🏰 <span style="font-size: var(--fs-xs); color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
                         </div>
-                        <div style="font-size: 14px; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                        <div style="font-size: var(--fs-sm); color: var(--text-secondary); display: flex; justify-content: space-between;">
                           <span>{{ $t('appLevelCap') }} +{{ (r.chars ? r.chars.length : 1) * levelCapBaseVal }}</span>
                           <span style="opacity: 0.6;">{{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
                         </div>
@@ -182,7 +182,7 @@
                             </div>
                           </div>
                         </div>
-                        <div v-for="(d, dIdx) in getCol(act).details" :key="dIdx" style="font-size: 14px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <div v-for="(d, dIdx) in getCol(act).details" :key="dIdx" style="font-size: var(--fs-sm); color: var(--text-secondary); display: flex; justify-content: space-between; margin-bottom: 2px;">
                           <span>{{ $t(d.nameKey) }} {{ d.ctype === 2 ? '+' + (d.val * 100) + '%' : (d.ctype === 3 ? '📈+' + d.val : '+' + d.val) }}</span>
                           <span style="opacity: 0.6;">{{ (act.portion !== undefined ? d.score * act.portion : d.score).toFixed(1) }}</span>
                         </div>
@@ -557,7 +557,7 @@ function toggleSort(key) {
   filter: grayscale(100%) opacity(0.7);
 }
 .char-avatar-fallback {
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-weight: bold;
   color: var(--text-muted);
 }

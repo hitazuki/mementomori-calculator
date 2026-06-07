@@ -70,7 +70,7 @@
             style="background: rgba(var(--color-invert-rgb), 0.02); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px;"
           >
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <input type="text" v-model="b.label" style="background: transparent; border: none; border-bottom: 1px dashed var(--gold-dim); color: var(--gold); font-family: var(--font-mono); font-size: 14px; font-weight: 600; outline: none; width: 140px; padding: 2px 4px;" placeholder="Name">
+              <input type="text" v-model="b.label" style="background: transparent; border: none; border-bottom: 1px dashed var(--gold-dim); color: var(--gold); font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 600; outline: none; width: 140px; padding: 2px 4px;" placeholder="Name">
               <button class="btn btn-ghost btn-sm" @click="removeBench(i)" style="padding: 0 8px; min-height: 30px; color: var(--danger); font-size: var(--fs-sm); line-height: 1;">✕</button>
             </div>
             <div class="grid-2" style="gap: 8px;">
