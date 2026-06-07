@@ -1107,13 +1107,19 @@ body::before {
     font-size: var(--fs-md);
     line-height: 1;
   }
-  .mobile-current-label {
+  .mobile-view-select {
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 100%;
+    padding: 0 18px 0 0;
+    border: 0;
+    background: transparent;
+    color: var(--gold);
+    appearance: none;
+    outline: none;
     font-size: var(--fs-sm);
     font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
   }
   .global-actions {
     top: 10px !important;

@@ -66,7 +66,11 @@
     <main class="main-content">
       <div class="mobile-current-view">
         <span class="mobile-current-icon">{{ currentNavItem?.icon }}</span>
-        <span class="mobile-current-label">{{ currentNavItem ? $t(currentNavItem.i18nLabel) : '' }}</span>
+        <select class="mobile-view-select" v-model="currentView" :aria-label="currentNavItem ? $t(currentNavItem.i18nLabel) : ''">
+          <option v-for="item in allNavItems" :key="item.id" :value="item.id">
+            {{ item.icon }} {{ $t(item.i18nLabel) }}
+          </option>
+        </select>
       </div>
 
       <div class="global-actions" style="position: absolute; top: 22px; right: 24px; z-index: 100; display: flex; align-items: center; gap: 12px;">
