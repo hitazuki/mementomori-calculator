@@ -13,13 +13,13 @@
       <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
         <div class="card-title" @click="showScores = !showScores" style="cursor:pointer;user-select:none;margin-bottom:0;display:flex;align-items:center;">
           📊 {{ $t('packScoreTitle') }}
-          <span style="margin-left:auto;font-size:12px;color:var(--gold);">{{ showScores ? '▼' : '▶' }}</span>
+          <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--gold);">{{ showScores ? '▼' : '▶' }}</span>
         </div>
-        <div v-show="showScores" style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
+        <div v-show="showScores" style="font-size: var(--fs-sm); color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
           {{ $t('packScoreDesc') }}
         </div>
         <div v-show="showScores" class="flex-col gap-8" style="overflow-y:auto; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-subtle); padding-right:4px;">
-          <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:14px;">
+          <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);">
             <img
               :src="`${baseUrl}images/items/Item_${String(s.iconId).padStart(4,'0')}.png`"
               style="width:24px;height:24px;flex-shrink:0;"
@@ -31,12 +31,12 @@
               class="form-input"
               type="number"
               v-model.number="s.score"
-              style="width:60px;padding:2px 4px;font-size:14px;height:24px;text-align:right;"
+              style="width:64px;padding:2px 6px;font-size:var(--fs-sm);min-height:var(--control-h-sm);text-align:right;"
               min="0"
               step="1"
             />
-            <span v-else style="width:60px;text-align:right;font-size:14px;font-weight:bold;color:var(--gold);">1</span>
-            <span v-if="s.batch > 1" style="font-size:12px;color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
+            <span v-else class="num-value" style="width:64px;text-align:right;font-size:var(--fs-sm);color:var(--gold);">1</span>
+            <span v-if="s.batch > 1" style="font-size:var(--fs-xs);color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
           </div>
         </div>
       </div>
@@ -46,11 +46,11 @@
     <div class="flex-col gap-12" style="min-width:0;">
       <!-- Filters -->
       <div class="card" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding: 10px 14px;">
-        <div style="font-weight:bold; font-size:14px; color:var(--text-primary); display:flex; align-items:center; white-space:nowrap;">
+        <div style="font-weight:bold; font-size:var(--fs-sm); color:var(--text-primary); display:flex; align-items:center; white-space:nowrap;">
           🔍 {{ $t('packFilterTitle') }}
         </div>
         
-        <div style="margin-left:auto; font-size:13px; color:var(--text-muted); white-space:nowrap;">
+        <div style="margin-left:auto; font-size:var(--fs-sm); color:var(--text-muted); white-space:nowrap;">
           {{ $t('packResultCount', { n: filteredPacks.length }) }}
         </div>
 
@@ -59,7 +59,7 @@
         <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
           <!-- Sources -->
           <div>
-            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">{{ $t('packCompareFilterSource') }}</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted); margin-bottom: 6px;">{{ $t('packCompareFilterSource') }}</div>
             <div class="chip-row">
               <button class="chip" :class="{active: filter.sources.length === 0}" @click="filter.sources = []">{{ $t('ui_all') }}</button>
               <button v-for="src in availableSources" :key="src.key"
@@ -72,7 +72,7 @@
 
           <!-- Prices -->
           <div>
-            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">{{ $t('packFilterPrice') }}</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted); margin-bottom: 6px;">{{ $t('packFilterPrice') }}</div>
             <div class="chip-row">
               <button class="chip" :class="{active: filter.prices.length === 0}" @click="filter.prices = []">{{ $t('ui_all') }}</button>
               <button v-for="price in availablePrices" :key="price"
@@ -85,7 +85,7 @@
 
           <!-- Contents -->
           <div>
-            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">{{ $t('packFilterContentsOr') }}</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted); margin-bottom: 6px;">{{ $t('packFilterContentsOr') }}</div>
             <div class="chip-row" style="max-height: 120px; overflow-y: auto;">
               <button class="chip" :class="{active: filter.contents.length === 0}" @click="filter.contents = []">{{ $t('ui_all') }}</button>
               <button v-for="item in availableItems" :key="item.key"
@@ -115,40 +115,40 @@
             <template v-for="(p, i) in sortedPacks" :key="i">
               <tr @click="toggleExpand(i)" style="cursor:pointer;" :class="{ 'row-expanded': expanded.has(i) }">
                 <td style="white-space:nowrap; text-align:left;">
-                  <span style="font-size:12px;margin-right:6px;">{{ expanded.has(i) ? '▼' : '▶' }}</span>
-                  <span :class="sourceBadgeClass(p.source)" style="margin-right:6px; font-size:10px; padding:2px 4px; border-radius:4px;">
+                  <span style="font-size:var(--fs-xs);margin-right:6px;">{{ expanded.has(i) ? '▼' : '▶' }}</span>
+                  <span :class="sourceBadgeClass(p.source)" style="margin-right:6px; font-size:var(--fs-xs); padding:2px 5px; border-radius:4px;">
                     {{ sourceBadgeText(p.source) }}
                   </span>
                   <span style="font-weight:bold;">{{ getShortPackName(p) }}</span>
                 </td>
                 <td style="white-space:nowrap;">¥{{ p.price.toLocaleString() }}</td>
-                <td :style="{color: getCeColor(p.ce), fontWeight:'bold', fontSize: p.ce >= 1.5 ? '15px' : '14px'}">{{ p.ce.toFixed(2) }}</td>
-                <td style="white-space:nowrap;">{{ p.originalValue.toLocaleString() }} <span style="font-size:12px;color:var(--gold);">+ {{ p.rechargeValue.toLocaleString() }}</span></td>
+                <td :style="{color: getCeColor(p.ce), fontWeight:'bold', fontSize: p.ce >= 1.5 ? 'var(--fs-md)' : 'var(--fs-sm)'}">{{ p.ce.toFixed(2) }}</td>
+                <td style="white-space:nowrap;">{{ p.originalValue.toLocaleString() }} <span style="font-size:var(--fs-xs);color:var(--gold);">+ {{ p.rechargeValue.toLocaleString() }}</span></td>
                 <td>
                   <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;">
                     <div
                       v-for="(item, j) in p.items"
                       :key="j"
                       :title="itemDisplayName(item)"
-                      style="display:flex;align-items:center;gap:4px;font-size:13px;"
+                      style="display:flex;align-items:center;gap:4px;font-size:var(--fs-sm);"
                     >
                       <img
                         :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
                         style="width:24px;height:24px;"
                         @error="e => e.target.style.display='none'"
                       />
-                      <span style="font-weight:bold;color:var(--text-base);">×{{ item.qty }}</span>
+                      <span class="pack-item-qty"><span class="pack-item-qty-mark">×</span>{{ item.qty }}</span>
                     </div>
                   </div>
                 </td>
               </tr>
               <tr v-if="expanded.has(i)" style="background:rgba(255,255,255,0.02);">
                 <td :colspan="5" style="padding:12px 16px;">
-                  <div v-if="p.originKeys.length > 1" style="margin-bottom:12px; font-size:13px; color:var(--text-muted); text-align:left; background:rgba(0,0,0,0.2); padding:6px 12px; border-radius:4px; border-left:3px solid var(--gold);">
+                  <div v-if="p.originKeys.length > 1" style="margin-bottom:12px; font-size:var(--fs-sm); color:var(--text-muted); text-align:left; background:rgba(0,0,0,0.2); padding:6px 12px; border-radius:4px; border-left:3px solid var(--gold);">
                     <strong style="color:var(--text-base); margin-right:8px;">{{ $t('packCompareFullSources') }}:</strong>
                     {{ getFullPackName(p) }}
                   </div>
-                  <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:13px;align-items:flex-start;">
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:var(--fs-sm);align-items:flex-start;">
                     <div
                       v-for="(item, j) in p.items"
                       :key="j"
@@ -160,7 +160,7 @@
                         @error="e => e.target.style.display='none'"
                       />
                       <span style="min-width:60px;">{{ itemDisplayName(item) }}</span>
-                      <span style="color:var(--text-muted);">×{{ item.qty }}</span>
+                      <span class="pack-item-qty pack-item-qty-muted"><span class="pack-item-qty-mark">×</span>{{ item.qty }}</span>
                       <span style="color:var(--gold);font-weight:bold;">{{ Math.round(item.value).toLocaleString() }}</span>
                     </div>
                   </div>
@@ -422,4 +422,5 @@ function isLocked(key) { return !!LOCKED_SCORES[key] }
   background-color: #7f8c8d;
   color: white;
 }
+
 </style>

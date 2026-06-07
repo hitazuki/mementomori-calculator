@@ -14,13 +14,13 @@
       <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
         <div class="card-title" @click="showScores = !showScores" style="cursor:pointer;user-select:none;margin-bottom:0;display:flex;align-items:center;">
           📊 {{ $t('packScoreTitle') }}
-          <span style="margin-left:auto;font-size:12px;color:var(--gold);">{{ showScores ? '▼' : '▶' }}</span>
+          <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--gold);">{{ showScores ? '▼' : '▶' }}</span>
         </div>
-        <div v-show="showScores" style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
+        <div v-show="showScores" style="font-size: var(--fs-sm); color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
           {{ $t('packScoreDesc') }}
         </div>
         <div v-show="showScores" class="flex-col gap-8" style="overflow-y:auto; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-subtle); padding-right:4px;">
-          <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:14px;">
+          <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);">
             <img
               :src="`${baseUrl}images/items/Item_${String(s.iconId).padStart(4,'0')}.png`"
               style="width:24px;height:24px;flex-shrink:0;"
@@ -32,12 +32,12 @@
               class="form-input"
               type="number"
               v-model.number="s.score"
-              style="width:60px;padding:2px 4px;font-size:14px;height:24px;text-align:right;"
+              style="width:64px;padding:2px 6px;font-size:var(--fs-sm);min-height:var(--control-h-sm);text-align:right;"
               min="0"
               step="1"
             />
-            <span v-else style="width:60px;text-align:right;font-size:14px;font-weight:bold;color:var(--gold);">1</span>
-            <span v-if="s.batch > 1" style="font-size:12px;color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
+            <span v-else class="num-value" style="width:64px;text-align:right;font-size:var(--fs-sm);color:var(--gold);">1</span>
+            <span v-if="s.batch > 1" style="font-size:var(--fs-xs);color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
           </div>
         </div>
       </div>
@@ -47,7 +47,7 @@
     <div class="flex-col gap-12" style="min-width:0;">
       <!-- Filters -->
       <div class="card" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding: 10px 14px;">
-        <div style="font-weight:bold; font-size:14px; color:var(--text-primary); display:flex; align-items:center; white-space:nowrap;">
+        <div style="font-weight:bold; font-size:var(--fs-sm); color:var(--text-primary); display:flex; align-items:center; white-space:nowrap;">
           🔍 {{ $t('packFilterTitle') }}
         </div>
         
@@ -58,20 +58,20 @@
         </div>
 
         <div v-if="filter.cat==='tower'" style="display:flex; align-items:center; gap:6px;">
-          <select class="form-select" v-model="filter.tower" style="min-width:110px; padding:4px 28px 4px 8px; font-size:13px; height:28px;">
+          <select class="form-select" v-model="filter.tower" style="min-width:110px; padding:4px 28px 4px 8px; font-size:var(--fs-sm); min-height:var(--control-h-sm);">
             <option v-for="t in towerOptions" :key="t" :value="t">{{ towerName(t) }}</option>
           </select>
         </div>
 
         <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:13px; color:var(--text-muted); white-space:nowrap;">{{ $t('packFilterPrice') }}</span>
-          <select class="form-select" v-model="filter.price" style="min-width:80px; padding:4px 28px 4px 8px; font-size:13px; height:28px;">
+          <span style="font-size:var(--fs-sm); color:var(--text-muted); white-space:nowrap;">{{ $t('packFilterPrice') }}</span>
+          <select class="form-select" v-model="filter.price" style="min-width:80px; padding:4px 28px 4px 8px; font-size:var(--fs-sm); min-height:var(--control-h-sm);">
             <option :value="0">-- {{ $t('ui_all') }} --</option>
             <option v-for="p in priceOptions" :key="p" :value="p">{{ formatPrice(p) }}</option>
           </select>
         </div>
 
-        <div style="margin-left:auto; font-size:13px; color:var(--text-muted); white-space:nowrap;">
+        <div style="margin-left:auto; font-size:var(--fs-sm); color:var(--text-muted); white-space:nowrap;">
           {{ $t('packResultCount', { n: filteredPacks.length }) }}
         </div>
       </div>
@@ -91,33 +91,33 @@
             <template v-for="(p, i) in sortedPacks" :key="i">
               <tr @click="toggleExpand(i)" style="cursor:pointer;" :class="{ 'row-expanded': expanded.has(i) }">
                 <td style="white-space:nowrap;">
-                  <span style="font-size:12px;margin-right:6px;">{{ expanded.has(i) ? '▼' : '▶' }}</span>
+                  <span style="font-size:var(--fs-xs);margin-right:6px;">{{ expanded.has(i) ? '▼' : '▶' }}</span>
                   {{ p.trigger }}
                 </td>
                 <td style="white-space:nowrap;">{{ formatPrice(p.price) }}</td>
                 <td :style="{color: p.ce >= 1 ? '#2ecc71' : '#e74c3c', fontWeight:'bold'}">{{ p.ce.toFixed(1) }}</td>
-                <td style="white-space:nowrap;">{{ p.originalValue.toLocaleString() }} <span style="font-size:12px;color:var(--gold);">+ {{ p.rechargeValue.toLocaleString() }}</span></td>
+                <td style="white-space:nowrap;">{{ p.originalValue.toLocaleString() }} <span style="font-size:var(--fs-xs);color:var(--gold);">+ {{ p.rechargeValue.toLocaleString() }}</span></td>
                 <td>
                   <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;">
                     <div
                       v-for="(item, j) in p.items"
                       :key="j"
                       :title="itemDisplayName(item)"
-                      style="display:flex;align-items:center;gap:4px;font-size:13px;"
+                      style="display:flex;align-items:center;gap:4px;font-size:var(--fs-sm);"
                     >
                       <img
                         :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
                         style="width:24px;height:24px;"
                         @error="e => e.target.style.display='none'"
                       />
-                      <span style="font-weight:bold;color:var(--text-base);">×{{ item.qty }}</span>
+                      <span class="pack-item-qty"><span class="pack-item-qty-mark">×</span>{{ item.qty }}</span>
                     </div>
                   </div>
                 </td>
               </tr>
               <tr v-if="expanded.has(i)" style="background:rgba(255,255,255,0.02);">
                 <td :colspan="5" style="padding:6px 16px;">
-                  <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:13px;align-items:flex-start;">
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:var(--fs-sm);align-items:flex-start;">
                     <div
                       v-for="(item, j) in p.items"
                       :key="j"
@@ -129,7 +129,7 @@
                         @error="e => e.target.style.display='none'"
                       />
                       <span style="min-width:60px;">{{ itemDisplayName(item) }}</span>
-                      <span style="color:var(--text-muted);">×{{ item.qty }}</span>
+                      <span class="pack-item-qty pack-item-qty-muted"><span class="pack-item-qty-mark">×</span>{{ item.qty }}</span>
                       <span style="color:var(--gold);font-weight:bold;">{{ Math.round(item.value).toLocaleString() }}</span>
                     </div>
                   </div>
@@ -259,4 +259,5 @@ function fmtNum(n) {
 :deep(.data-table th) {
   text-align: center;
 }
+
 </style>
