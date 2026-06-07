@@ -99,20 +99,19 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watchEffect } from 'vue'
+import { ref, computed, onMounted, watchEffect, defineAsyncComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLang } from './i18n/index.js'
 
-// Import View Components
-import CalculatorView from './views/CalculatorView.vue'
-import SweepChartView from './views/SweepChartView.vue'
-import HeatmapChartView from './views/HeatmapChartView.vue'
-import ComparePanelView from './views/ComparePanelView.vue'
-import TornadoChartView from './views/TornadoChartView.vue'
-import TableExportView from './views/TableExportView.vue'
-import MysteriumPanelView from './views/MysteriumPanelView.vue'
-import PackCalculatorView from './views/PackCalculatorView.vue'
-import PackComparisonView from './views/PackComparisonView.vue'
+const CalculatorView = defineAsyncComponent(() => import('./views/CalculatorView.vue'))
+const SweepChartView = defineAsyncComponent(() => import('./views/SweepChartView.vue'))
+const HeatmapChartView = defineAsyncComponent(() => import('./views/HeatmapChartView.vue'))
+const ComparePanelView = defineAsyncComponent(() => import('./views/ComparePanelView.vue'))
+const TornadoChartView = defineAsyncComponent(() => import('./views/TornadoChartView.vue'))
+const TableExportView = defineAsyncComponent(() => import('./views/TableExportView.vue'))
+const MysteriumPanelView = defineAsyncComponent(() => import('./views/MysteriumPanelView.vue'))
+const PackCalculatorView = defineAsyncComponent(() => import('./views/PackCalculatorView.vue'))
+const PackComparisonView = defineAsyncComponent(() => import('./views/PackComparisonView.vue'))
 
 const { locale, t } = useI18n()
 const currentLanguage = ref(locale.value)

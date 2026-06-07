@@ -168,10 +168,10 @@ import { TooltipComponent, GridComponent, VisualMapComponent, TitleComponent } f
 import VChart from 'vue-echarts'
 
 import { buildDynamicHeatmapData } from '../engine/damageCalc.js'
-import { getCoeffByLevel } from '../constants/levelTable.js'
 import { getMoriTheme, HEATMAP_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
+import { useDamageParams } from '../composables/useDamageParams.js'
 
 use([CanvasRenderer, HeatmapChart, TooltipComponent, GridComponent, VisualMapComponent, TitleComponent])
 
@@ -232,13 +232,7 @@ function onYKeyChange() {
   }
 }
 
-function setDamageType(type) {
-  store.damageType = type
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    store.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
-  }
-}
+const { setDamageType } = useDamageParams(store)
 
 const chartOption = computed(() => {
   const { data, xLabels, yLabels, zMin, zMax } = buildDynamicHeatmapData({

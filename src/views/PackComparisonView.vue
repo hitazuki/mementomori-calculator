@@ -253,6 +253,7 @@ function getCeColor(ce) {
 
 // --- Scores (shared) ---
 // editableScores is now imported from store/itemScores.js
+const normalizedScores = computed(() => normalizeScores(editableScores))
 
 // --- Filters ---
 const filter = reactive({
@@ -292,14 +293,13 @@ const availablePrices = computed(() => {
 
 const availableItems = computed(() => {
   const map = new Map()
-  const scores = normalizeScores(editableScores)
   
   packsRaw.forEach(pack => {
     pack.items.forEach(item => {
       const baseKey = getBaseItemKey(item.ItemType, item.ItemId)
       if (!map.has(baseKey)) {
         const [bType, bId] = JSON.parse(baseKey)
-        const info = getItemInfo(scores, bType, bId)
+        const info = getItemInfo(normalizedScores.value, bType, bId)
         map.set(baseKey, { key: baseKey, ...info })
       }
     })
@@ -366,8 +366,7 @@ const filteredPacks = computed(() => {
     })
   }
 
-  const scores = normalizeScores(editableScores)
-  return calculatePackCE(result, scores)
+  return calculatePackCE(result, normalizedScores.value)
 })
 
 const sortedPacks = computed(() => {

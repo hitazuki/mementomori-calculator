@@ -77,12 +77,21 @@ V(P) = Σ( S(item_i) × Qty_i )
 
 ## 3. 性价比 (Cost-Efficiency)
 
+当前计算器采用“道具原始价值 + 充值价值补正”的口径：
+
 ```
-CE(P) = V(P) / DiamondCount(P)
+OriginalValue(P) = Σ( S(item_i) × Qty_i )
+PaidDiamonds(P) = price > 0 ? price / 2 : DiamondCount(P)
+RechargeValue(P) = PaidDiamonds(P) × S(有償ダイヤ) × 1.2
+FinalValue(P) = OriginalValue(P) + RechargeValue(P)
+CE(P) = FinalValue(P) / PaidDiamonds(P)
 ```
 
+- `OriginalValue(P)` = 包内每种道具的评分 × 数量，求和
 - `DiamondCount(P)` = 包内含有的**有償ダイヤ**数量（ItemType=2, ItemId=1）
-- `CE(P) > 1` 表示组合包价值超过所含钻石本身，即"划算"
+- `PaidDiamonds(P)` = 有价格礼包按 `price / 2` 作为付费钻石基数；无价格礼包回退使用包内 `DiamondCount(P)`
+- `RechargeValue(P)` = 充值本身带来的价值补正，目前按付费钻石价值的 `1.2` 倍计算
+- `CE(P) > 1` 表示组合包最终价值超过付费钻石基数，即"划算"
 
 ## 4. 示例
 

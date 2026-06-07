@@ -202,10 +202,10 @@ import VChart from 'vue-echarts'
 
 import { buildSweepData } from '../engine/damageCalc.js'
 import { getSweepVariables } from '../constants/presets.js'
-import { getCoeffByLevel } from '../constants/levelTable.js'
 import { getMoriTheme, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
+import { useDamageParams } from '../composables/useDamageParams.js'
 
 use([CanvasRenderer, LineChart, TooltipComponent, GridComponent, GraphicComponent])
 
@@ -244,39 +244,13 @@ function onSweepKeyChange() {
   }
 }
 
-function setDamageType(type) {
-  store.damageType = type
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    store.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
-  }
-}
-
-function onAtkLevelChange() {
-  const p = getCoeffByLevel(store.atkLevel)
-  if (p) {
-    store.cPen = p.cPen
-    store.cPmPen = p.cPmPen
-  }
-}
-
-function onDefLevelChange() {
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    store.cDef = p.cDef
-    store.cPmDef = store.damageType === 'mag' ? p.cMdef : p.cPdef
-  }
-}
-
-const isAtkCustom = computed(() => {
-  const p = getCoeffByLevel(store.atkLevel)
-  return !p || store.cPen !== p.cPen || store.cPmPen !== p.cPmPen
-})
-
-const isDefCustom = computed(() => {
-  const p = getCoeffByLevel(store.defLevel)
-  return !p || store.cDef !== p.cDef || store.cPmDef !== (store.damageType === 'mag' ? p.cMdef : p.cPdef)
-})
+const {
+  isAtkCustom,
+  isDefCustom,
+  onAtkLevelChange,
+  onDefLevelChange,
+  setDamageType,
+} = useDamageParams(store)
 
 const chartOption = computed(() => {
   const { xData, yData } = buildSweepData({

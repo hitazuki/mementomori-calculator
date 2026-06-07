@@ -200,7 +200,6 @@ import { useI18n } from 'vue-i18n'
 import BigNumberInput from '../components/BigNumberInput.vue'
 import { buildCrossTable } from '../engine/damageCalc.js'
 import { getTableVariables } from '../constants/presets.js'
-import { getCoeffByLevel } from '../constants/levelTable.js'
 import { useCalcStore } from '../store/calculator.js'
 
 const { t } = useI18n()

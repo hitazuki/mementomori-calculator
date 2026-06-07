@@ -144,17 +144,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const showScores = ref(true)
 
-import packsRaw from '../constants/ultraSalePacks.json'
 import { calculatePackCE, normalizeScores } from '../engine/packCalc.js'
 import { editableScores } from '../store/itemScores.js'
 
 const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
+const packsRaw = ref([])
+
+onMounted(async () => {
+  packsRaw.value = (await import('../constants/ultraSalePacks.json')).default
+})
 
 // Map locale to itemScores name field
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', 'en': 'nameEn', 'ja': 'nameJa', 'ko': 'nameKo' }
@@ -174,6 +178,7 @@ function formatPrice(p) {
 
 // --- Scores (shared) ---
 // editableScores is now imported from store/itemScores.js
+const normalizedScores = computed(() => normalizeScores(editableScores))
 
 // --- Filters ---
 const filter = reactive({
@@ -184,13 +189,13 @@ const filter = reactive({
 
 const towerOptions = computed(() => {
   const s = new Set()
-  packsRaw.forEach(p => { if (p.cat === 'tower' && p.tower) s.add(p.tower) })
+  packsRaw.value.forEach(p => { if (p.cat === 'tower' && p.tower) s.add(p.tower) })
   return [...s].sort()
 })
 
 const priceOptions = computed(() => {
   const s = new Set()
-  packsRaw.forEach(p => s.add(p.price))
+  packsRaw.value.forEach(p => s.add(p.price))
   return [...s].sort((a, b) => b - a)
 })
 
@@ -207,13 +212,12 @@ function sortIcon(field) {
 
 // --- Calculation ---
 const filteredPacks = computed(() => {
-  let result = packsRaw
+  let result = packsRaw.value
   if (filter.cat) result = result.filter(p => p.cat === filter.cat)
   if (filter.cat === 'tower' && filter.tower) result = result.filter(p => p.tower === filter.tower)
   if (filter.price > 0) result = result.filter(p => p.price === filter.price)
 
-  const scores = normalizeScores(editableScores)
-  return calculatePackCE(result, scores)
+  return calculatePackCE(result, normalizedScores.value)
 })
 
 const sortedPacks = computed(() => {

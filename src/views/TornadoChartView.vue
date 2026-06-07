@@ -227,10 +227,10 @@ import * as echarts from 'echarts/core'
 import VChart from 'vue-echarts'
 
 import { calcDamage } from '../engine/damageCalc.js'
-import { getCoeffByLevel } from '../constants/levelTable.js'
 import { getMoriTheme, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
+import { useDamageParams } from '../composables/useDamageParams.js'
 
 use([CanvasRenderer, BarChart, TooltipComponent, GridComponent, GraphicComponent, TitleComponent, LegendComponent])
 
@@ -254,29 +254,11 @@ const deltas = reactive({
   pmDefBonus: -0.2,
 })
 
-function onAtkLevelChange() {
-  const p = getCoeffByLevel(store.atkLevel)
-  if (p) {
-    store.cPen = p.cPen
-    store.cPmPen = p.cPmPen
-  }
-}
-
-function onDefLevelChange() {
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    store.cDef = p.cDef
-    store.cPmDef = store.damageType === 'mag' ? p.cMdef : p.cPdef
-  }
-}
-
-function setDamageType(type) {
-  store.damageType = type
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    store.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
-  }
-}
+const {
+  onAtkLevelChange,
+  onDefLevelChange,
+  setDamageType,
+} = useDamageParams(store)
 
 const baseResult = computed(() => {
   const p = { ...store.$state }

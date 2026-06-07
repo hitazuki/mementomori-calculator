@@ -327,8 +327,8 @@ import { useI18n } from 'vue-i18n'
 import BigNumberInput from '../components/BigNumberInput.vue'
 import { useCalcStore } from '../store/calculator.js'
 import { calcDamage } from '../engine/damageCalc.js'
-import { getCoeffByLevel } from '../constants/levelTable.js'
 import { getScenarioPresets } from '../constants/presets.js'
+import { useDamageParams } from '../composables/useDamageParams.js'
 
 const { t } = useI18n()
 const store = useCalcStore()
@@ -343,15 +343,13 @@ function fmtPct(v, d=1) { return `${(v*100).toFixed(d)}%` }
 // Computed Results
 const results = computed(() => calcDamage(store.$state))
 
-const isAtkCustom = computed(() => {
-  const pA = getCoeffByLevel(store.atkLevel)
-  return store.cPen !== pA.cPen || store.cPmPen !== pA.cPmPen
-})
-
-const isDefCustom = computed(() => {
-  const pD = getCoeffByLevel(store.defLevel)
-  return store.cDef !== pD.cDef || store.cPmDef !== (store.damageType === 'mag' ? pD.cMdef : pD.cPdef)
-})
+const {
+  isAtkCustom,
+  isDefCustom,
+  onAtkLevelChange,
+  onDefLevelChange,
+  setDamageType,
+} = useDamageParams(store)
 
 const breakdownSteps = computed(() => {
   const base = results.value.rawDmg
@@ -375,33 +373,6 @@ function applyPreset(preset) {
   store.$patch(preset.params)
   if (!preset.params.atkLevel) store.atkLevel = 500
   if (!preset.params.defLevel) store.defLevel = 500
-}
-
-function setDamageType(type) {
-  const custom = isDefCustom.value
-  store.damageType = type
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    if (!custom) {
-      store.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
-    }
-  }
-}
-
-function onAtkLevelChange() {
-  const p = getCoeffByLevel(store.atkLevel)
-  if (p) {
-    store.cPen = p.cPen
-    store.cPmPen = p.cPmPen
-  }
-}
-
-function onDefLevelChange() {
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    store.cDef = p.cDef
-    store.cPmDef = store.damageType === 'mag' ? p.cMdef : p.cPdef
-  }
 }
 
 // Tables

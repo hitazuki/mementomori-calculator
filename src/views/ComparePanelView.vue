@@ -212,11 +212,12 @@ import { TooltipComponent, GridComponent, LegendComponent, TitleComponent } from
 import VChart from 'vue-echarts'
 
 import { calcDamage } from '../engine/damageCalc.js'
-import { getDefBenchmarks, getCoeffByLevel } from '../constants/levelTable.js'
+import { getDefBenchmarks } from '../constants/levelTable.js'
 import { getCompareBuildsDefault } from '../constants/presets.js'
 import { getMoriTheme, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
+import { useDamageParams } from '../composables/useDamageParams.js'
 
 use([CanvasRenderer, BarChart, RadarChart, TooltipComponent, GridComponent, LegendComponent, TitleComponent])
 
@@ -292,29 +293,11 @@ function addBench() {
   cs.benchmarks.push({ label: `${t('benchNamePrefix')} ${cs.benchmarks.length + 1}`, def: 5_000_000, pmDef: 5_000_000 })
 }
 
-function setDamageType(type) {
-  store.damageType = type
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    store.cPmDef = type === 'mag' ? p.cMdef : p.cPdef
-  }
-}
-
-function onAtkLevelChange() {
-  const p = getCoeffByLevel(store.atkLevel)
-  if (p) {
-    store.cPen = p.cPen
-    store.cPmPen = p.cPmPen
-  }
-}
-
-function onDefLevelChange() {
-  const p = getCoeffByLevel(store.defLevel)
-  if (p) {
-    store.cDef = p.cDef
-    store.cPmDef = store.damageType === 'mag' ? p.cMdef : p.cPdef
-  }
-}
+const {
+  onAtkLevelChange,
+  onDefLevelChange,
+  setDamageType,
+} = useDamageParams(store)
 
 const results = computed(() => {
   return cs.builds.map((build, bi) => ({

@@ -1,6 +1,5 @@
 // src/constants/levelTable.js
 import csvRaw from './level_coefficient.csv?raw'
-import { t } from '../i18n/index.js'
 
 const lines = csvRaw.trim().split('\n')
 const LEVEL_TABLE_MAP = new Map()
