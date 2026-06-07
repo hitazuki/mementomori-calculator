@@ -169,6 +169,17 @@
               <span v-if="tData.isDiff" style="color:var(--purple-light)">⚖ {{ tData.name }}</span>
               <span v-else style="color:var(--gold)">📊 {{ tData.build.name }}</span>
             </div>
+            <div class="mobile-export-highlights">
+              <div
+                v-for="cell in getTableHighlights(tData)"
+                :key="`${cell.yVal}-${cell.xVal}-${cell.text}`"
+                class="mobile-export-cell"
+                :style="getCellStyle(cell.value, tData.isDiff)"
+              >
+                <div class="mobile-export-cell-value">{{ cell.text }}</div>
+                <div class="mobile-export-cell-label">{{ yLabel }} {{ cell.yVal.toLocaleString() }} · {{ xLabel }} {{ cell.xVal.toLocaleString() }}</div>
+              </div>
+            </div>
             <div class="table-scroll-container">
               <table class="data-table">
                 <thead>
@@ -423,6 +434,27 @@ function getCellText(val, isDiff) {
   return metric.fmt(val)
 }
 
+function getTableHighlights(tData) {
+  const cells = []
+  for (const row of tData.rows) {
+    row.cols.forEach((col, index) => {
+      const value = col[ts.metric]
+      if (typeof value !== 'number' || !Number.isFinite(value)) return
+      if (tData.isDiff && value === 0) return
+      cells.push({
+        yVal: row.yVal,
+        xVal: tableData.value.xVals[index],
+        value,
+        text: getCellText(value, tData.isDiff),
+        score: tData.isDiff ? Math.abs(value) : value,
+      })
+    })
+  }
+  return cells
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+}
+
 function copyMarkdown() {
   const data = tableData.value
   if (!data) return
@@ -500,6 +532,9 @@ function downloadCsv() {
 }
 .export-table-heading {
   font-size: var(--fs-lg);
+}
+.mobile-export-highlights {
+  display: none;
 }
 .export-build-detail-head {
   display: none;
@@ -628,6 +663,32 @@ function downloadCsv() {
   .export-table-list {
     gap: 18px !important;
     overflow-x: visible !important;
+  }
+  .mobile-export-highlights {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .mobile-export-cell {
+    min-width: 0;
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    background: rgba(var(--color-invert-rgb), 0.035);
+    border: 1px solid rgba(var(--color-invert-rgb), 0.05);
+  }
+  .mobile-export-cell-value {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: var(--fs-md);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .mobile-export-cell-label {
+    margin-top: 3px;
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    line-height: 1.35;
   }
   .table-scroll-container {
     -webkit-overflow-scrolling: touch;
