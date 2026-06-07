@@ -1,6 +1,6 @@
-# MementoMori Calculator Project Rules (CLAUDE.md)
+# MementoMori Calculator Project Rules (AGENTS.md)
 
-This file contains the guidelines and references for Claude Code.
+This file contains the guidelines and references for Codex.
 
 ## 🛠 Commands
 * **Run Dev Server**: `npm run dev`
