@@ -19,9 +19,9 @@
         </div>
         <div class="form-group">
           <label class="form-label">{{ $t('atkType') }}</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-sm" :class="store.damageType==='phys'?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-            <button class="btn btn-sm" :class="store.damageType==='mag' ?'btn-primary':'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+          <div class="segmented-control">
+            <button class="btn btn-sm" :class="store.damageType==='phys'?'btn-primary':'btn-ghost'" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+            <button class="btn btn-sm" :class="store.damageType==='mag' ?'btn-primary':'btn-ghost'" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
           </div>
         </div>
         <div class="form-group">
@@ -44,16 +44,16 @@
             :style="{ padding:'8px 10px', borderRadius:'6px', border:'1px solid ' + LINE_COLORS[i%LINE_COLORS.length] + '30', background: LINE_COLORS[i%LINE_COLORS.length] + '08', display:'flex', justifyContent:'space-between', alignItems:'center' }"
           >
             <div style="display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-              <span :style="{ color: LINE_COLORS[i%LINE_COLORS.length], fontWeight:600, fontSize:'12px', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden' }">
+              <span :style="{ color: LINE_COLORS[i%LINE_COLORS.length], fontWeight:600, fontSize:'var(--fs-xs)', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden' }">
                 ▌ {{ b.name }}
               </span>
-              <span style="font-size: 13px; color:var(--text-secondary); whiteSpace:nowrap;">
+              <span style="font-size: var(--fs-xs); color:var(--text-secondary); whiteSpace:nowrap;">
                 PEN: {{ b.pen }} | P/M: {{ b.pmPen }}
               </span>
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
-              <button class="btn btn-secondary btn-sm" style="height:26px; padding:0 8px;" @click="editBuild(i)">✏️</button>
-              <button class="btn btn-danger btn-sm" style="height:26px; padding:0 8px;" @click="removeBuild(i)">✖</button>
+              <button class="btn btn-secondary btn-sm" style="min-height:30px; padding:0 8px;" @click="editBuild(i)">✏️</button>
+              <button class="btn btn-danger btn-sm" style="min-height:30px; padding:0 8px;" @click="removeBuild(i)">✖</button>
             </div>
           </div>
         </div>
@@ -71,20 +71,20 @@
           >
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <input type="text" v-model="b.label" style="background: transparent; border: none; border-bottom: 1px dashed var(--gold-dim); color: var(--gold); font-family: var(--font-mono); font-size: 14px; font-weight: 600; outline: none; width: 140px; padding: 2px 4px;" placeholder="Name">
-              <button class="btn btn-ghost btn-sm" @click="removeBench(i)" style="padding: 0 8px; height: 24px; color: var(--danger); font-size: 14px; line-height: 1;">✕</button>
+              <button class="btn btn-ghost btn-sm" @click="removeBench(i)" style="padding: 0 8px; min-height: 30px; color: var(--danger); font-size: var(--fs-sm); line-height: 1;">✕</button>
             </div>
             <div class="grid-2" style="gap: 8px;">
               <div class="flex-col">
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2px;">
-                  <span style="font-size: 11px; color: var(--text-muted);">DEF</span>
+                  <span style="font-size: var(--fs-xs); color: var(--text-muted);">DEF</span>
                 </div>
-                <BigNumberInput class="form-input" v-model="b.def" style="min-width:0; padding:5px 8px; font-size:13px;" placeholder="DEF" />
+                <BigNumberInput class="form-input" v-model="b.def" style="min-width:0; padding:5px 8px; font-size:var(--fs-sm);" placeholder="DEF" />
               </div>
               <div class="flex-col">
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 2px;">
-                  <span style="font-size: 11px; color: var(--text-muted);">P/M.DEF</span>
+                  <span style="font-size: var(--fs-xs); color: var(--text-muted);">P/M.DEF</span>
                 </div>
-                <BigNumberInput class="form-input" v-model="b.pmDef" style="min-width:0; padding:5px 8px; font-size:13px;" placeholder="P/M.DEF" />
+                <BigNumberInput class="form-input" v-model="b.pmDef" style="min-width:0; padding:5px 8px; font-size:var(--fs-sm);" placeholder="P/M.DEF" />
               </div>
             </div>
           </div>
@@ -94,7 +94,7 @@
     </div>
 
     <!-- Main Right Content -->
-    <div class="flex-col gap-12" style="position: sticky; top: 24px; z-index: 10; min-width: 0;">
+    <div class="flex-col gap-12 mobile-static-panel" style="position: sticky; top: 24px; z-index: 10; min-width: 0;">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
           <div style="display:flex;gap:6px">
@@ -108,12 +108,12 @@
         </div>
       </div>
 
-      <div class="card" style="min-height:420px">
-        <div v-show="cs.chartMode !== 'table'" style="width:100%;height:400px;position:relative">
+      <div class="card mobile-chart-panel" style="min-height:420px">
+        <div v-show="cs.chartMode !== 'table'" class="mobile-chart-frame" style="width:100%;height:400px;position:relative">
           <v-chart class="chart" :option="chartOption" :update-options="{ notMerge: true }" autoresize />
         </div>
         
-        <div v-if="cs.chartMode === 'table'" style="overflow-x:auto">
+        <div v-if="cs.chartMode === 'table'" class="mobile-table-scroll" style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
@@ -131,9 +131,32 @@
         </div>
       </div>
 
-      <div class="card" v-if="results.length >= 2">
+      <div class="mobile-compare-results">
+        <article
+          v-for="r in results"
+          :key="`mobile-${r.id}`"
+          class="mobile-compare-card"
+        >
+          <div class="mobile-compare-head">
+            <div class="mobile-compare-title" :style="{ color: r.color }">{{ r.name }}</div>
+            <div class="mobile-compare-metric">{{ getMetrics()[cs.metric].label }}</div>
+          </div>
+          <div class="mobile-compare-grid">
+            <div
+              v-for="(br, bi) in r.benchResults"
+              :key="bi"
+              class="mobile-compare-row"
+            >
+              <span>{{ cs.benchmarks[bi]?.label }}</span>
+              <b>{{ getMetrics()[cs.metric].fmt(br[cs.metric]) }}</b>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="card desktop-compare-tables" v-if="results.length >= 2">
         <div class="card-title">📊 {{ $t('ui_vsBuild1') }}</div>
-        <div style="overflow-x:auto">
+        <div class="mobile-table-scroll" style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>

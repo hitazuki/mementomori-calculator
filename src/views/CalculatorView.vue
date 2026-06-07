@@ -19,7 +19,7 @@
 
       <div style="width: 1px; height: 14px; background: var(--border-subtle); margin: 0 4px;"></div>
       
-      <span style="font-size: 13px; opacity: 0.8;">
+      <span style="font-size: var(--fs-xs); opacity: 0.8;">
         🔗 {{ $t('pveDataEntry') }}: <a href="https://mmmr.huijiwiki.com" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline;">https://mmmr.huijiwiki.com</a>
       </span>
     </div>
@@ -71,9 +71,9 @@
         
         <div class="form-group">
           <label class="form-label">{{ $t('atkType') }}</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-            <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" style="flex:1; font-size:11px; padding:6px 2px; letter-spacing:-0.5px;" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+          <div class="segmented-control">
+            <button class="btn btn-sm" :class="store.damageType === 'phys' ? 'btn-primary' : 'btn-ghost'" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+            <button class="btn btn-sm" :class="store.damageType === 'mag' ? 'btn-primary' : 'btn-ghost'" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
           </div>
         </div>
         
@@ -194,8 +194,31 @@
     </div>
 
     <!-- 右侧结果 -->
-    <div class="flex-col gap-12">
-      <div class="grid-2 gap-12">
+    <div class="flex-col gap-12 mobile-static-panel">
+      <div class="card mobile-summary-card">
+        <div class="mobile-summary-grid">
+          <div class="mobile-summary-primary">
+            <div class="mobile-summary-value">{{ fmt(results.finalDmg) }}</div>
+            <div class="mobile-summary-label">{{ $t('finalDmg') }}</div>
+          </div>
+          <div class="mobile-summary-secondary">
+            <div class="mobile-summary-chip">
+              <b>{{ results.dmgRatePct }}%</b>
+              <span>{{ $t('overallPenRate') }}</span>
+            </div>
+            <div class="mobile-summary-chip">
+              <b>{{ results.totalMitPct }}%</b>
+              <span>{{ $t('totalMitRate') }}</span>
+            </div>
+            <div class="mobile-summary-chip">
+              <b>{{ fmt(results.rawDmg) }}</b>
+              <span>{{ $t('rawDmg') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2 gap-12 desktop-summary-grid">
         <div class="stat-box"><div class="stat-value is-danger">{{ fmt(results.finalDmg) }}</div><div class="stat-label">{{ $t('finalDmg') }}</div></div>
         <div class="stat-box"><div class="stat-value">{{ results.dmgRatePct }}%</div><div class="stat-label">{{ $t('overallPenRate') }}</div></div>
         <div class="stat-box"><div class="stat-value is-purple">{{ results.defMitPct }}%</div><div class="stat-label">{{ $t('defMitRate') }}</div></div>
@@ -224,7 +247,7 @@
 
       <div class="card">
         <div class="card-title">{{ $t('quickTableTitle') }}</div>
-        <div style="overflow-x:auto">
+        <div class="mobile-table-scroll" style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
@@ -244,7 +267,7 @@
         </div>
         
         <div class="card-title mt-12" style="margin-top:16px">{{ $t('quickTablePmTitle') }}</div>
-        <div style="overflow-x:auto">
+        <div class="mobile-table-scroll" style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
