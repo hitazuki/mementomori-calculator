@@ -127,6 +127,7 @@ export default {
   // Compare Panel
   addBuild: "+ Add Build",
   addBench: "+ Add Target",
+  importCurrentParams: "Import Current Params",
   buildNamePrefix: "Build ",
   benchNamePrefix: "Target ",
   buildName: "Build Name",

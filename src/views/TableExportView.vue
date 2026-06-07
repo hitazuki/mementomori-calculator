@@ -127,6 +127,7 @@
           </div>
         </div>
         <button class="btn btn-secondary btn-sm w-full mt-8" @click="addBuild">+ {{ $t('addBuild') }}</button>
+        <button class="btn btn-ghost btn-sm w-full mt-4" @click="importCurrentBuild">{{ $t('importCurrentParams') }}</button>
         <button class="btn btn-ghost btn-sm w-full mt-4" @click="resetDefault">{{ $t('exportResetDefault') }}</button>
       </div>
     </div>
@@ -214,7 +215,27 @@ const getMetrics = () => ({
   pmMitRate:  { label: t('pmMitRate'), fmt: v => `${v.toFixed(2)}%` },
 })
 
-const getBaseParams = () => {
+const DEFAULT_TABLE_PARAMS = {
+  baseAtk: 1_000_000,
+  skillCoeff: 5.25,
+  def: 5_000_000,
+  pmDef: 5_000_000,
+  pen: 11950,
+  pmPen: 31200,
+  atkBonus: 0,
+  dmgBonus: 0.3,
+  defBonus: 0,
+  pmDefBonus: 0,
+  critMult: 1.5,
+  eleAdvantage: false,
+  damageType: 'phys',
+  atkLevel: 500,
+  defLevel: 500,
+}
+
+const clone = value => JSON.parse(JSON.stringify(value))
+
+const getCurrentParams = () => {
   const p = { ...store.$state }
   delete p.cPen
   delete p.cPmPen
@@ -223,25 +244,37 @@ const getBaseParams = () => {
   return p
 }
 
+function createDefaultBuilds() {
+  const baseId = Date.now()
+  const baseParams = clone(DEFAULT_TABLE_PARAMS)
+  const compareParams = {
+    ...baseParams,
+    pen: 4950,
+    pmPen: 47700,
+  }
+
+  return [
+    {
+      id: baseId,
+      name: t('buildNamePrefix') + ' 1',
+      params: baseParams,
+      _expanded: false
+    },
+    {
+      id: baseId + 1,
+      name: t('buildNamePrefix') + ' 2',
+      params: compareParams,
+      _expanded: false
+    }
+  ]
+}
+
 const ts = reactive({
   xKey: 'def',
   yKey: 'pen',
   xValsStr: '1000000, 3000000, 5000000, 10000000, 20000000, 50000000',
   yValsStr: '0, 4950, 11950, 18950',
-  builds: [
-    {
-      id: Date.now(),
-      name: t('buildNamePrefix') + ' 1',
-      params: getBaseParams(),
-      _expanded: false
-    },
-    {
-      id: Date.now() + 1,
-      name: t('buildNamePrefix') + ' 2',
-      params: { ...getBaseParams(), pmPen: 47700 },
-      _expanded: false
-    }
-  ],
+  builds: createDefaultBuilds(),
   metric: 'dmgRatePct',
   customTitle: '',
   isTitleTouched: false,
@@ -301,6 +334,15 @@ function addBuild() {
   })
 }
 
+function importCurrentBuild() {
+  ts.builds.push({
+    id: Date.now(),
+    name: `${t('buildNamePrefix')} ${ts.builds.length + 1}`,
+    params: getCurrentParams(),
+    _expanded: true
+  })
+}
+
 function removeBuild(idx) {
   ts.builds.splice(idx, 1)
 }
@@ -308,20 +350,7 @@ function removeBuild(idx) {
 function resetDefault() {
   ts.customTitle = ''
   ts.isTitleTouched = false
-  ts.builds = [
-    {
-      id: Date.now(),
-      name: t('buildNamePrefix') + ' 1',
-      params: getBaseParams(),
-      _expanded: false
-    },
-    {
-      id: Date.now() + 1,
-      name: t('buildNamePrefix') + ' 2',
-      params: { ...getBaseParams(), pmPen: 47700 },
-      _expanded: false
-    }
-  ]
+  ts.builds = createDefaultBuilds()
 }
 
 function parseVals(str) {

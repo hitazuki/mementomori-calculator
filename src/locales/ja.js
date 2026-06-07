@@ -126,6 +126,7 @@ export default {
   // Compare Panel
   addBuild: "+ 構成を追加",
   addBench: "+ 目標を追加",
+  importCurrentParams: "現在のパラメータを読み込む",
   buildNamePrefix: "構成 ",
   benchNamePrefix: "目標 ",
   buildName: "構成名",

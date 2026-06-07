@@ -126,6 +126,7 @@ export default {
   // Compare Panel
   addBuild: "+ 빌드 추가",
   addBench: "+ 대상 추가",
+  importCurrentParams: "현재 파라미터 가져오기",
   buildNamePrefix: "빌드 ",
   benchNamePrefix: "대상 ",
   buildName: "빌드 이름",

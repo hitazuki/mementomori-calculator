@@ -11,27 +11,28 @@
         <div class="card-title">⚙ {{ $t('manualAdjust') }} {{ $t('ui_common') }}</div>
         <div class="form-group">
           <label class="form-label">{{ $t('baseAtk') }}</label>
-          <BigNumberInput class="form-input" v-model="store.baseAtk" />
+          <BigNumberInput class="form-input" v-model="cs.common.baseAtk" />
         </div>
         <div class="form-group">
-          <label class="form-label">{{ $t('skillCoeff') }} <span class="value-display">{{ (store.skillCoeff*100).toFixed(0) }}%</span></label>
-          <input class="form-range" type="range" v-model.number="store.skillCoeff" min="1" max="20" step="0.25">
+          <label class="form-label">{{ $t('skillCoeff') }} <span class="value-display">{{ (cs.common.skillCoeff*100).toFixed(0) }}%</span></label>
+          <input class="form-range" type="range" v-model.number="cs.common.skillCoeff" min="1" max="20" step="0.25">
         </div>
         <div class="form-group">
           <label class="form-label">{{ $t('atkType') }}</label>
           <div class="segmented-control">
-            <button class="btn btn-sm" :class="store.damageType==='phys'?'btn-primary':'btn-ghost'" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
-            <button class="btn btn-sm" :class="store.damageType==='mag' ?'btn-primary':'btn-ghost'" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
+            <button class="btn btn-sm" :class="cs.common.damageType==='phys'?'btn-primary':'btn-ghost'" @click="setDamageType('phys')">{{ $t('typePhys') }}</button>
+            <button class="btn btn-sm" :class="cs.common.damageType==='mag' ?'btn-primary':'btn-ghost'" @click="setDamageType('mag')">{{ $t('typeMag') }}</button>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">{{ $t('atkLevel') }}</label>
-          <input class="form-input" type="number" v-model.number="store.atkLevel" @input="onAtkLevelChange" min="1" max="999">
+          <input class="form-input" type="number" v-model.number="cs.common.atkLevel" min="1" max="999">
         </div>
         <div class="form-group">
           <label class="form-label">{{ $t('defLevel') || $t('defPresetLabel') }}</label>
-          <input class="form-input" type="number" v-model.number="store.defLevel" @input="onDefLevelChange" min="1" max="999">
+          <input class="form-input" type="number" v-model.number="cs.common.defLevel" min="1" max="999">
         </div>
+        <button class="btn btn-ghost btn-sm w-full" @click="importCurrentParams">{{ $t('importCurrentParams') }}</button>
       </div>
 
       <!-- Builds -->
@@ -225,7 +226,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BigNumberInput from '../components/BigNumberInput.vue'
 import { use } from 'echarts/core'
@@ -240,7 +241,6 @@ import { getCompareBuildsDefault } from '../constants/presets.js'
 import { getMoriTheme, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 import { useCalcStore } from '../store/calculator.js'
-import { useDamageParams } from '../composables/useDamageParams.js'
 
 use([CanvasRenderer, BarChart, RadarChart, TooltipComponent, GridComponent, LegendComponent, TitleComponent])
 
@@ -248,6 +248,16 @@ const { t } = useI18n()
 const store = useCalcStore()
 
 const fmt = v => v >= 1e6 ? `${(v/1e6).toFixed(2)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
+
+const DEFAULT_COMMON_PARAMS = {
+  baseAtk: 1_000_000,
+  skillCoeff: 5.25,
+  damageType: 'phys',
+  atkLevel: 500,
+  defLevel: 500,
+}
+
+const clone = value => JSON.parse(JSON.stringify(value))
 
 const getMetrics = () => ({
   dmgRatePct: { label: t('overallPenRate'), fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
@@ -257,7 +267,8 @@ const getMetrics = () => ({
 })
 
 const cs = reactive({
-  builds: getCompareBuildsDefault().map(b => ({ critMult: store.critMult || 1.5, ...b })),
+  common: clone(DEFAULT_COMMON_PARAMS),
+  builds: getCompareBuildsDefault().map(b => ({ critMult: 1.5, eleAdvantage: false, ...b })),
   editingBuildIdx: null,
   benchmarks: getDefBenchmarks().slice(0, 4),
   chartMode: 'bar', 
@@ -304,7 +315,7 @@ function addBuild() {
     defBonus: 0, 
     pmDefBonus: 0, 
     eleAdvantage: false,
-    critMult: store.critMult || 1.5
+    critMult: 1.5
   })
 }
 
@@ -316,19 +327,25 @@ function addBench() {
   cs.benchmarks.push({ label: `${t('benchNamePrefix')} ${cs.benchmarks.length + 1}`, def: 5_000_000, pmDef: 5_000_000 })
 }
 
-const {
-  onAtkLevelChange,
-  onDefLevelChange,
-  setDamageType,
-} = useDamageParams(store)
+function setDamageType(type) {
+  cs.common.damageType = type
+}
+
+function importCurrentParams() {
+  cs.common.baseAtk = store.baseAtk
+  cs.common.skillCoeff = store.skillCoeff
+  cs.common.damageType = store.damageType
+  cs.common.atkLevel = store.atkLevel
+  cs.common.defLevel = store.defLevel
+}
 
 const results = computed(() => {
   return cs.builds.map((build, bi) => ({
     ...build, 
     color: LINE_COLORS[bi % LINE_COLORS.length],
     benchResults: cs.benchmarks.map(bench => calcDamage({
-      baseAtk: store.baseAtk, 
-      skillCoeff: store.skillCoeff, 
+      baseAtk: cs.common.baseAtk, 
+      skillCoeff: cs.common.skillCoeff, 
       critMult: build.critMult || 1.5, 
       eleAdvantage: build.eleAdvantage || false,
       def: bench.def, 
@@ -339,9 +356,9 @@ const results = computed(() => {
       dmgBonus: build.dmgBonus, 
       defBonus: build.defBonus || 0, 
       pmDefBonus: build.pmDefBonus || 0,
-      damageType: store.damageType,
-      atkLevel: store.atkLevel,
-      defLevel: store.defLevel,
+      damageType: cs.common.damageType,
+      atkLevel: cs.common.atkLevel,
+      defLevel: cs.common.defLevel,
     }))
   }))
 })

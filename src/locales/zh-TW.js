@@ -124,6 +124,7 @@ export default {
   // Compare Panel
   addBuild: "+ 添加方案",
   addBench: "+ 添加檔位",
+  importCurrentParams: "匯入目前參數",
   buildNamePrefix: "方案 ",
   benchNamePrefix: "防禦 ",
   buildName: "方案名稱",
