@@ -1165,7 +1165,7 @@ body::before {
     font-size: var(--fs-xs) !important;
   }
   .view-header {
-    padding-right: 150px;
+    padding-right: 0;
     margin-bottom: 14px;
   }
   .view-title {
@@ -1173,6 +1173,7 @@ body::before {
   }
   .view-desc {
     line-height: 1.45;
+    overflow-wrap: anywhere;
   }
   .view { padding: 58px 12px 18px; }
   .card { padding: 14px; }
