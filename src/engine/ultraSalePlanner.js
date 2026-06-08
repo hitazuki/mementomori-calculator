@@ -449,12 +449,21 @@ function findPermanentTopUpOptions(state, context) {
   if (!context.enablePermanentTopUp || !context.permanentPacks.length) return null
   if (state.purchases <= 0) return null
 
+  const cacheKey = state.spent
+  if (context.topUpOptionsCache?.has(cacheKey)) return context.topUpOptionsCache.get(cacheKey)
+
   const remainingBudget = context.budget - state.spent
-  if (remainingBudget <= 0) return null
+  if (remainingBudget <= 0) {
+    context.topUpOptionsCache?.set(cacheKey, null)
+    return null
+  }
   const dp = buildPermanentTopUpCombos(state, context, remainingBudget)
   const currentPaid = paidDiamondsForPrice(state.spent)
   const targetTier = nextRechargeTier(currentPaid)
-  if (!targetTier) return null
+  if (!targetTier) {
+    context.topUpOptionsCache?.set(cacheKey, null)
+    return null
+  }
 
   const ranked = []
   for (const candidate of dp) {
@@ -474,8 +483,9 @@ function findPermanentTopUpOptions(state, context) {
     })
   }
 
-  if (!ranked.length) return null
-  return ranked.sort(compareTopUpCandidate).slice(0, 1)
+  const result = ranked.length ? ranked.sort(compareTopUpCandidate).slice(0, 1) : null
+  context.topUpOptionsCache?.set(cacheKey, result)
+  return result
 }
 
 function applyTopUpToLastStep(state, topUp) {
@@ -509,6 +519,7 @@ function applyTopUpToLastStep(state, topUp) {
     topUpPurchaseCount: (state.topUpPurchaseCount || 0) + topUp.purchases.length,
     rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
     steps,
+    signature: stepsSignature(steps),
   }
 }
 
@@ -662,6 +673,7 @@ function createEmptyState(startTierIndex) {
     topUpPurchaseCount: 0,
     rechargeFreeDiamonds: 0,
     steps: [],
+    signature: '',
   }
 }
 
@@ -685,18 +697,36 @@ function buildPlanningContext(packs, settings) {
     lanes: combined.lanes,
     opportunities: combined.opportunities,
     batches: combined.batches,
+    topUpOptionsCache: new Map(),
     settings,
   }
 }
 
-function stateSignature(state) {
-  return state.steps
+function stepsSignature(steps) {
+  return steps
     .map(step => {
       const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
       const topUps = (step.topUpPacks || []).map(pack => pack.displayTrigger).join(',')
       return `${step.tierPrice}:${purchases}:topUp:${topUps}`
     })
     .join('|')
+}
+
+function stateSignature(state) {
+  if (typeof state.signature === 'string') return state.signature
+  return stepsSignature(state.steps)
+}
+
+function stepSignature(step) {
+  const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
+  const topUps = (step.topUpPacks || []).map(pack => pack.displayTrigger).join(',')
+  return `${step.tierPrice}:${purchases}:topUp:${topUps}`
+}
+
+function appendStepSignature(state, step) {
+  const current = stateSignature(state)
+  const next = stepSignature(step)
+  return current ? `${current}|${next}` : next
 }
 
 function insertRankedState(states, candidate, limit) {
@@ -773,6 +803,7 @@ function collectTopValuePlans(context, topK = 2) {
             topUpPurchaseCount: state.topUpPurchaseCount || 0,
             rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
             steps: [...state.steps, step],
+            signature: appendStepSignature(state, step),
           }
 
           const topUpOptions = action.bought
@@ -871,6 +902,7 @@ function simulatePolicyPlan(context, policy) {
       topUpPurchaseCount: state.topUpPurchaseCount || 0,
       rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
       steps: [...state.steps, step],
+      signature: appendStepSignature(state, step),
     }
     const topUpOptions = action.bought ? findPermanentTopUpOptions(baseState, context) : null
     state = topUpOptions?.length ? applyTopUpToLastStep(baseState, topUpOptions[0]) : baseState
