@@ -145,8 +145,24 @@
               <input type="checkbox" v-model="lane.enabled" />
               {{ planLaneName(lane) }}
             </span>
-            <input class="form-input" type="number" min="0" step="1" v-model.number="lane.startProgress" />
-            <input class="form-input" type="number" min="0" step="1" v-model.number="lane.endProgress" />
+            <input
+              v-if="lane.cat === 'quest'"
+              class="form-input"
+              type="text"
+              inputmode="numeric"
+              placeholder="13-28 / 336"
+              v-model.trim="lane.startProgress"
+            />
+            <input v-else class="form-input" type="number" min="0" step="1" v-model.number="lane.startProgress" />
+            <input
+              v-if="lane.cat === 'quest'"
+              class="form-input"
+              type="text"
+              inputmode="numeric"
+              placeholder="13-28 / 336"
+              v-model.trim="lane.endProgress"
+            />
+            <input v-else class="form-input" type="number" min="0" step="1" v-model.number="lane.endProgress" />
             <input
               v-if="isAttributeTowerLane(lane)"
               class="form-input"
@@ -503,7 +519,7 @@ function setActivePlan(id) {
 }
 
 const planLanes = reactive([
-  { id: 'quest', cat: 'quest', labelKey: 'origin_quest', enabled: true, startProgress: 0, endProgress: 55, batchSize: 6 },
+  { id: 'quest', cat: 'quest', labelKey: 'origin_quest', enabled: true, startProgress: '0-0', endProgress: '55-60', batchSize: 6 },
   { id: 'rank', cat: 'rank', labelKey: 'origin_rank', enabled: true, startProgress: 0, endProgress: 200, batchSize: 1 },
   { id: 'tower_infinite', cat: 'tower', tower: 'origin_tower_infinite', labelKey: 'origin_tower_infinite', enabled: true, startProgress: 0, endProgress: 1000, batchSize: 6 },
   { id: 'tower_blue', cat: 'tower', tower: 'origin_tower_blue', labelKey: 'origin_tower_blue', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },

@@ -1,3 +1,5 @@
+import { parseMainQuestProgress } from './mainQuestProgress.js'
+
 const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
 const DEFAULT_MAX_STATES_PER_TIER = 350
 const ATTRIBUTE_TOWERS = [
@@ -22,6 +24,11 @@ function parseTriggerProgress(trigger) {
   return Number.isFinite(numeric) ? numeric : 0
 }
 
+function parseLaneProgress(progress, lane) {
+  if ((lane.cat || lane.source) === 'quest') return parseMainQuestProgress(progress)
+  return parseTriggerProgress(progress)
+}
+
 function getPriceTiers(packs) {
   const prices = [...new Set(packs.map(pack => pack.price))]
     .filter(price => Number.isFinite(price))
@@ -37,8 +44,8 @@ function laneLabel(lane) {
 }
 
 function buildLaneOpportunities(packs, lane) {
-  const start = Number(lane.startProgress) || 0
-  const end = Number(lane.endProgress) || 0
+  const start = parseLaneProgress(lane.startProgress, lane)
+  const end = parseLaneProgress(lane.endProgress, lane)
   const source = lane.cat || lane.source || 'tower'
   const tower = lane.tower || null
   const label = laneLabel(lane)
@@ -49,7 +56,7 @@ function buildLaneOpportunities(packs, lane) {
     if (pack.cat !== source) continue
     if (source === 'tower' && tower && pack.tower !== tower) continue
 
-    const progress = parseTriggerProgress(pack.trigger)
+    const progress = parseLaneProgress(pack.trigger, lane)
     if (progress <= start || (end > 0 && progress > end)) continue
 
     const key = `${laneId}:${pack.trigger}`
@@ -92,8 +99,8 @@ function buildBatches(opportunities, batchSize) {
 }
 
 function getLaneReachBatchIndex(lane, triggerProgress) {
-  const start = Number(lane.startProgress) || 0
-  const end = Number(lane.endProgress) || 0
+  const start = parseLaneProgress(lane.startProgress, lane)
+  const end = parseLaneProgress(lane.endProgress, lane)
   if (triggerProgress <= start) return 0
   if (end > 0 && triggerProgress > end) return null
 
@@ -108,8 +115,8 @@ function buildDerivedAllTowerEntries(packs, lanes) {
   })
   if (attributeLanes.some(lane => !lane)) return []
 
-  const start = Math.min(...attributeLanes.map(lane => Number(lane.startProgress) || 0))
-  const end = Math.min(...attributeLanes.map(lane => Number(lane.endProgress) || 0))
+  const start = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.startProgress, lane)))
+  const end = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.endProgress, lane)))
   if (end <= start) return []
 
   const allTowerLane = {
@@ -171,8 +178,8 @@ function buildAttributeTowerTopologyBatches(packs, lanes) {
 
   const allTowerEvents = new Map()
   if (ATTRIBUTE_TOWERS.every(tower => attributeLanes.some(lane => lane.tower === tower))) {
-    const start = Math.min(...attributeLanes.map(lane => Number(lane.startProgress) || 0))
-    const end = Math.min(...attributeLanes.map(lane => Number(lane.endProgress) || 0))
+    const start = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.startProgress, lane)))
+    const end = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.endProgress, lane)))
 
     if (end > start) {
       const allTowerLane = {

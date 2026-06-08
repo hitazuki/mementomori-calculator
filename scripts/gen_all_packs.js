@@ -4,6 +4,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { parseMainQuestProgress } from '../src/engine/mainQuestProgress.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(__dirname, '..')
@@ -32,6 +33,11 @@ const towerIdMap = {
   '5': 'origin_tower_green',
   '6': 'origin_tower_yellow',
   '7': 'origin_group_all_towers'
+}
+
+function packSortKey(cat, id) {
+  if (cat === 'quest') return parseMainQuestProgress(id)
+  return parseInt(id)
 }
 
 for (const [key, packs] of Object.entries(ultraSaleRawDict)) {
@@ -64,7 +70,7 @@ for (const [key, packs] of Object.entries(ultraSaleRawDict)) {
       tower: tower,
       price: price,
       trigger: pack.Id,
-      sortKey: parseInt(pack.Id),
+      sortKey: packSortKey(cat, pack.Id),
       items: simplifiedItems
     })
   }

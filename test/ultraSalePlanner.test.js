@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
+import { mainQuestStageCount, parseMainQuestProgress } from '../src/engine/mainQuestProgress.js'
 import { buildUltraSalePlanOptions, compressUltraSalePlanSteps, planUltraSalePurchases } from '../src/engine/ultraSalePlanner.js'
 
 function pack(trigger, price, value) {
@@ -114,7 +115,7 @@ test('planner combines independent trigger lanes in the same batch round', () =>
     currentPrice: 160,
     lanes: [
       { id: 'tower', cat: 'tower', tower: 'origin_tower_infinite', label: '无穷塔', enabled: true, startProgress: 0, endProgress: 30, batchSize: 1 },
-      { id: 'quest', cat: 'quest', label: '主线', enabled: true, startProgress: 0, endProgress: 9, batchSize: 1 },
+      { id: 'quest', cat: 'quest', label: '主线', enabled: true, startProgress: '0-0', endProgress: '9-28', batchSize: 1 },
     ],
   })
 
@@ -124,6 +125,58 @@ test('planner combines independent trigger lanes in the same batch round', () =>
   assert.match(plan.steps[0].triggerRange, /无穷塔/)
   assert.equal(plan.steps[0].purchases[0].sourceLabel, '主线')
   assert.equal(plan.steps[1].tierPrice, 650)
+})
+
+test('main quest progress uses built-in game-like quest id conversion', () => {
+  assert.equal(parseMainQuestProgress('7-28'), 168)
+  assert.equal(parseMainQuestProgress('10-28'), 252)
+  assert.equal(parseMainQuestProgress('13-28'), 336)
+  assert.equal(parseMainQuestProgress('27-40'), 740)
+  assert.equal(parseMainQuestProgress('35-60'), 1080)
+  assert.equal(parseMainQuestProgress('55-60'), 2280)
+  assert.equal(parseMainQuestProgress('336'), 336)
+  assert.equal(mainQuestStageCount(13), 28)
+  assert.equal(mainQuestStageCount(35), 60)
+})
+
+test('quest planning accepts chapter-stage progress input', () => {
+  const packs = [
+    questPack('13-28', 160, 100),
+    questPack('14-28', 160, 300),
+    questPack('15-28', 160, 500),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    budget: 160,
+    currentPrice: 160,
+    lanes: [
+      { id: 'quest', cat: 'quest', label: 'quest', enabled: true, startProgress: '13-28', endProgress: '14-28', batchSize: 1 },
+    ],
+  })
+
+  assert.equal(plan.opportunityCount, 1)
+  assert.equal(plan.steps[0].triggerRange, 'quest: 14-28')
+  assert.equal(plan.steps[0].purchases[0].trigger, '14-28')
+})
+
+test('quest planning accepts numeric game quest id input', () => {
+  const packs = [
+    questPack('13-28', 160, 100),
+    questPack('14-28', 160, 300),
+    questPack('35-60', 160, 500),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    budget: 160,
+    currentPrice: 160,
+    lanes: [
+      { id: 'quest', cat: 'quest', label: 'quest', enabled: true, startProgress: 336, endProgress: 1080, batchSize: 3 },
+    ],
+  })
+
+  assert.equal(plan.opportunityCount, 2)
+  assert.match(plan.steps[0].triggerRange, /14-28/)
+  assert.match(plan.steps[0].triggerRange, /35-60/)
 })
 
 test('planner derives all-tower-reached packs from four attribute towers', () => {
