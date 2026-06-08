@@ -74,6 +74,18 @@
         <div style="margin-left:auto; font-size:var(--fs-sm); color:var(--text-muted); white-space:nowrap;">
           {{ $t('packResultCount', { n: filteredPacks.length }) }}
         </div>
+
+        <div class="mobile-pack-sort">
+          <select class="form-select" v-model="sortState.by">
+            <option value="trigger">{{ $t('packColTrigger') }}</option>
+            <option value="price">{{ $t('packColPrice') }}</option>
+            <option value="ce">CE</option>
+            <option value="value">{{ $t('packColValue') }}</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" @click="sortState.asc = !sortState.asc">
+            {{ sortState.asc ? '▲' : '▼' }}
+          </button>
+        </div>
       </div>
 
       <div class="card desktop-pack-table" style="overflow-x:auto;padding:8px;">

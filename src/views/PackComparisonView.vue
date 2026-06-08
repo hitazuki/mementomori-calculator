@@ -54,6 +54,18 @@
           {{ $t('packResultCount', { n: filteredPacks.length }) }}
         </div>
 
+        <div class="mobile-pack-sort">
+          <select class="form-select" v-model="sortState.by">
+            <option value="name">{{ $t('packCompareColName') }}</option>
+            <option value="price">{{ $t('packColPrice') }}</option>
+            <option value="ce">CE</option>
+            <option value="value">{{ $t('packColValue') }}</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" @click="sortState.asc = !sortState.asc">
+            {{ sortState.asc ? '▲' : '▼' }}
+          </button>
+        </div>
+
         <div style="width: 100%; height: 1px; background: var(--border-subtle); margin: 2px 0;"></div>
 
         <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">

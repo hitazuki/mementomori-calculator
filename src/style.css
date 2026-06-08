@@ -703,6 +703,9 @@ body::before {
 .mobile-pack-list {
   display: none;
 }
+.mobile-pack-sort {
+  display: none;
+}
 .mobile-pack-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -1345,6 +1348,21 @@ body::before {
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+  .mobile-pack-sort {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    width: 100%;
+  }
+  .mobile-pack-sort .form-select {
+    min-width: 0;
+    width: 100%;
+  }
+  .mobile-pack-sort .btn {
+    min-width: 44px;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
   }
   .mobile-pack-meta {
     grid-template-columns: 1fr;
