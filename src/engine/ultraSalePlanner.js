@@ -6,6 +6,7 @@ const ATTRIBUTE_TOWERS = [
   'origin_tower_green',
   'origin_tower_yellow',
 ]
+const ALL_ATTRIBUTE_TOWER = 'origin_group_all_towers'
 
 function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n))
@@ -115,7 +116,7 @@ function buildDerivedAllTowerEntries(packs, lanes) {
     id: 'tower_all_derived',
     cat: 'tower',
     tower: 'origin_group_all_towers',
-    label: '全属性塔抵达',
+    label: '\u5168\u5c5e\u6027\u5854\u62b5\u8fbe',
     startProgress: start,
     endProgress: end,
     batchSize: 1,
@@ -132,6 +133,83 @@ function buildDerivedAllTowerEntries(packs, lanes) {
     .filter(Boolean)
 }
 
+function isAttributeTowerLane(lane) {
+  return lane.cat === 'tower' && ATTRIBUTE_TOWERS.includes(lane.tower)
+}
+
+function sortBatchOpportunities(batch) {
+  return batch.sort((a, b) => {
+    const labelOrder = a.label.localeCompare(b.label)
+    if (labelOrder !== 0) return labelOrder
+    if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
+    return String(a.trigger).localeCompare(String(b.trigger), undefined, { numeric: true })
+  })
+}
+
+function buildAttributeTowerTopologyBatches(packs, lanes) {
+  const attributeLanes = lanes.filter(isAttributeTowerLane)
+  if (!attributeLanes.length) return { batches: [], opportunities: [] }
+
+  const singleEvents = new Map()
+  for (const lane of attributeLanes) {
+    const opportunities = buildLaneOpportunities(packs, {
+      ...lane,
+      batchSize: 1,
+    })
+    for (const opportunity of opportunities) {
+      const key = `single:${opportunity.sortValue}`
+      if (!singleEvents.has(key)) {
+        singleEvents.set(key, {
+          kind: 'single',
+          sortValue: opportunity.sortValue,
+          opportunities: [],
+        })
+      }
+      singleEvents.get(key).opportunities.push(opportunity)
+    }
+  }
+
+  const allTowerEvents = new Map()
+  if (ATTRIBUTE_TOWERS.every(tower => attributeLanes.some(lane => lane.tower === tower))) {
+    const start = Math.min(...attributeLanes.map(lane => Number(lane.startProgress) || 0))
+    const end = Math.min(...attributeLanes.map(lane => Number(lane.endProgress) || 0))
+
+    if (end > start) {
+      const allTowerLane = {
+        id: 'tower_all_derived',
+        cat: 'tower',
+        tower: ALL_ATTRIBUTE_TOWER,
+        label: '\u5168\u5c5e\u6027\u5854\u62b5\u8fbe',
+        startProgress: start,
+        endProgress: end,
+        batchSize: 1,
+      }
+
+      for (const opportunity of buildLaneOpportunities(packs, allTowerLane)) {
+        const key = `all:${opportunity.sortValue}`
+        allTowerEvents.set(key, {
+          kind: 'all',
+          sortValue: opportunity.sortValue,
+          opportunities: [opportunity],
+        })
+      }
+    }
+  }
+
+  const events = [...singleEvents.values(), ...allTowerEvents.values()]
+    .sort((a, b) => {
+      if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
+      if (a.kind === b.kind) return 0
+      return a.kind === 'all' ? -1 : 1
+    })
+
+  const batches = events.map(event => sortBatchOpportunities(event.opportunities))
+  return {
+    batches,
+    opportunities: batches.flat(),
+  }
+}
+
 function normalizePlanningLanes(settings) {
   if (Array.isArray(settings.lanes) && settings.lanes.length) {
     return settings.lanes
@@ -139,7 +217,12 @@ function normalizePlanningLanes(settings) {
       .map(lane => ({
         ...lane,
         cat: lane.cat || lane.source || 'tower',
-        batchSize: Math.max(1, Math.floor(Number(lane.batchSize) || Number(settings.batchSize) || 1)),
+        batchSize: isAttributeTowerLane({
+          ...lane,
+          cat: lane.cat || lane.source || 'tower',
+        })
+          ? 1
+          : Math.max(1, Math.floor(Number(lane.batchSize) || Number(settings.batchSize) || 1)),
       }))
   }
 
@@ -155,16 +238,16 @@ function normalizePlanningLanes(settings) {
 
 function buildCombinedBatches(packs, settings) {
   const lanes = normalizePlanningLanes(settings)
-  const laneBatches = lanes.map(lane => ({
+  const attributeTowerTopology = buildAttributeTowerTopologyBatches(packs, lanes)
+  const laneBatches = lanes.filter(lane => !isAttributeTowerLane(lane)).map(lane => ({
     lane,
     batches: buildBatches(buildLaneOpportunities(packs, lane), lane.batchSize),
   }))
-  const derivedAllTowerEntries = buildDerivedAllTowerEntries(packs, lanes)
 
   const maxBatchCount = Math.max(
     0,
     ...laneBatches.map(entry => entry.batches.length),
-    ...derivedAllTowerEntries.map(entry => entry.batchIndex + 1),
+    attributeTowerTopology.batches.length,
   )
   const batches = []
   for (let i = 0; i < maxBatchCount; i++) {
@@ -172,15 +255,8 @@ function buildCombinedBatches(packs, settings) {
     for (const entry of laneBatches) {
       batch.push(...(entry.batches[i] || []))
     }
-    batch.push(...derivedAllTowerEntries
-      .filter(entry => entry.batchIndex === i)
-      .map(entry => entry.opportunity))
-    batch.sort((a, b) => {
-      const labelOrder = a.label.localeCompare(b.label)
-      if (labelOrder !== 0) return labelOrder
-      if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
-      return String(a.trigger).localeCompare(String(b.trigger), undefined, { numeric: true })
-    })
+    batch.push(...(attributeTowerTopology.batches[i] || []))
+    sortBatchOpportunities(batch)
     batches.push(batch)
   }
 
@@ -188,7 +264,7 @@ function buildCombinedBatches(packs, settings) {
     lanes,
     opportunities: [
       ...laneBatches.flatMap(entry => entry.batches.flat()),
-      ...derivedAllTowerEntries.map(entry => entry.opportunity),
+      ...attributeTowerTopology.opportunities,
     ],
     batches,
   }
@@ -592,4 +668,5 @@ export const __testables = {
   buildOpportunities,
   buildBatches,
   buildDerivedAllTowerEntries,
+  buildAttributeTowerTopologyBatches,
 }

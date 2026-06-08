@@ -166,6 +166,62 @@ test('planner does not derive all-tower packs without all four attribute towers'
   assert.equal(plan.steps.length, 0)
 })
 
+test('attribute tower planning follows all-tower and single-tower topology order', () => {
+  const packs = [
+    towerPack('origin_group_all_towers', '225', 160, 1000),
+    towerPack('origin_tower_blue', '250', 160, 100),
+    towerPack('origin_tower_red', '250', 160, 100),
+    towerPack('origin_tower_green', '250', 160, 100),
+    towerPack('origin_tower_yellow', '250', 160, 100),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    budget: 800,
+    currentPrice: 160,
+    lanes: [
+      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
+      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
+      { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: 'green', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
+      { id: 'yellow', cat: 'tower', tower: 'origin_tower_yellow', label: 'yellow', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
+    ],
+  })
+
+  assert.equal(plan.batchCount, 2)
+  assert.match(plan.steps[0].triggerRange, /225/)
+  assert.doesNotMatch(plan.steps[0].triggerRange, /250/)
+  assert.match(plan.steps[1].triggerRange, /250/)
+})
+
+test('attribute tower topology keeps adjacent all-tower and single-tower events in separate batches', () => {
+  const packs = [
+    towerPack('origin_group_all_towers', '275', 160, 1000),
+    towerPack('origin_tower_blue', '250', 160, 100),
+    towerPack('origin_tower_blue', '300', 160, 100),
+    towerPack('origin_tower_red', '250', 160, 100),
+    towerPack('origin_tower_red', '300', 160, 100),
+    towerPack('origin_tower_green', '250', 160, 100),
+    towerPack('origin_tower_green', '300', 160, 100),
+    towerPack('origin_tower_yellow', '250', 160, 100),
+    towerPack('origin_tower_yellow', '300', 160, 100),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    budget: 2000,
+    currentPrice: 160,
+    lanes: [
+      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
+      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
+      { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: 'green', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
+      { id: 'yellow', cat: 'tower', tower: 'origin_tower_yellow', label: 'yellow', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
+    ],
+  })
+
+  assert.equal(plan.batchCount, 3)
+  assert.match(plan.steps[0].triggerRange, /250/)
+  assert.match(plan.steps[1].triggerRange, /275/)
+  assert.match(plan.steps[2].triggerRange, /300/)
+})
+
 test('compressUltraSalePlanSteps merges only consecutive skipped batches', () => {
   const rows = compressUltraSalePlanSteps([
     { index: 1, triggerRange: 'A', bought: true, cost: 160, value: 100, purchases: [{}] },

@@ -147,13 +147,34 @@
             </span>
             <input class="form-input" type="number" min="0" step="1" v-model.number="lane.startProgress" />
             <input class="form-input" type="number" min="0" step="1" v-model.number="lane.endProgress" />
-            <input class="form-input" type="number" min="1" max="50" step="1" v-model.number="lane.batchSize" />
+            <input
+              v-if="isAttributeTowerLane(lane)"
+              class="form-input"
+              type="number"
+              value="1"
+              disabled
+              title="属性塔触发间隔为 50 层，单批固定为 1"
+            />
+            <input v-else class="form-input" type="number" min="1" max="50" step="1" v-model.number="lane.batchSize" />
           </label>
         </div>
 
         <div class="planner-derived-note">
           当前层/等级表示已经达到的位置；计划推到表示本次规划最多推进到哪里；2小时内最多触发用于模拟卡包。预算单位为日元。全属性塔抵达由蓝塔、红塔、翠塔、黄塔四行自动推算。
         </div>
+
+        <div class="planner-derived-note">
+          乐观卡包假设：属性塔按全属性抵达与单属性触发的层级拓扑排序；属性塔触发间隔为 50 层，单批固定为 1。
+        </div>
+
+        <a
+          class="planner-doc-link"
+          href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/planning-rules.md"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          查看购买规划规则文档
+        </a>
 
         <div class="planner-actions">
           <button class="btn btn-primary btn-sm" type="button" :disabled="isPlanning" @click="calculatePlanner">
@@ -491,6 +512,17 @@ const planLanes = reactive([
   { id: 'tower_yellow', cat: 'tower', tower: 'origin_tower_yellow', labelKey: 'origin_tower_yellow', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
 ])
 
+const attributeTowerIds = new Set([
+  'origin_tower_blue',
+  'origin_tower_red',
+  'origin_tower_green',
+  'origin_tower_yellow',
+])
+
+function isAttributeTowerLane(lane) {
+  return lane.cat === 'tower' && attributeTowerIds.has(lane.tower)
+}
+
 function planLaneName(lane) {
   return lane.labelKey ? t(lane.labelKey) : lane.id
 }
@@ -509,7 +541,7 @@ const planningSettings = computed(() => ({
     enabled: lane.enabled,
     startProgress: lane.startProgress,
     endProgress: lane.endProgress,
-    batchSize: lane.batchSize,
+    batchSize: isAttributeTowerLane(lane) ? 1 : lane.batchSize,
   })),
 }))
 
@@ -699,6 +731,19 @@ function fmtNum(n) {
   font-size: var(--fs-xs);
   line-height: 1.45;
   margin-top: 8px;
+}
+
+.planner-doc-link {
+  display: inline-flex;
+  width: fit-content;
+  color: var(--gold);
+  font-size: var(--fs-xs);
+  margin-top: 8px;
+  text-decoration: none;
+}
+
+.planner-doc-link:hover {
+  text-decoration: underline;
 }
 
 .planner-actions {
