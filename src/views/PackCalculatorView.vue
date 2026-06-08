@@ -242,6 +242,18 @@
           <div><span>末档</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
         </div>
 
+        <div v-if="selectedPlan && selectedPlan.topUpBatches && selectedPlan.topUpBatches.length" class="planner-top-up-summary">
+          <div class="planner-detail-title">补累充包</div>
+          <div class="planner-top-up-list">
+            <div v-for="batch in selectedPlan.topUpBatches" :key="`${selectedPlan.id}-top-up-batch-${batch.index}`" class="planner-top-up-item">
+              <strong>第 {{ batch.index }} 批</strong>
+              <span>{{ batch.packs.map(pack => pack.displayTrigger).join(' / ') }}</span>
+              <span>{{ formatPrice(batch.cost) }}</span>
+              <span>赠钻 +{{ batch.rechargeFreeDiamonds.toLocaleString() }}</span>
+            </div>
+          </div>
+        </div>
+
         <div v-if="selectedPlan && selectedPlan.steps.length" class="planner-table-wrap">
           <table class="data-table planner-table">
             <thead>
@@ -257,28 +269,27 @@
             </thead>
             <tbody>
               <template v-for="step in displayedPlanSteps" :key="step.rowKey">
-                <tr :class="{ 'row-expanded': isPlannerStepExpanded(step.rowKey) }">
+                <tr
+                  :class="{ 'row-expanded': isPlannerStepExpanded(step.rowKey), 'planner-clickable-row': isPlannerStepExpandable(step) }"
+                  @click="togglePlannerStep(step)"
+                >
                   <td>{{ step.indexLabel }}</td>
                   <td>{{ step.triggerRange }}</td>
-                  <td>{{ step.isTopUp ? '补累充' : tierLabel(step.tierPrice) }}</td>
+                  <td>{{ tierLabel(step.tierPrice) }}</td>
                   <td>
                     <span v-if="!step.bought" class="text-muted">
                       {{ step.skipCount > 1 ? `连续不买 ×${step.skipCount}` : '不买' }}
+                      <span v-if="step.tierDropCount">，降档 {{ step.tierDropCount }} 次</span>
                     </span>
-                    <button
-                      v-else
-                      class="btn btn-ghost btn-sm planner-expand-btn"
-                      type="button"
-                      @click="togglePlannerStep(step.rowKey)"
-                    >
-                      {{ isPlannerStepExpanded(step.rowKey) ? '收起' : '展开' }} {{ step.purchases.length }} 个
-                    </button>
                     <span v-if="step.bought" class="planner-purchases">
                       <span v-for="p in step.purchases.slice(0, 3)" :key="`${step.rowKey}-${p.displayTrigger}`">
                         {{ p.displayTrigger }} / CE {{ p.ce.toFixed(1) }}
                       </span>
                       <span v-if="step.rechargeFreeDiamonds">
                         累充赠钻 +{{ step.rechargeFreeDiamonds.toLocaleString() }}
+                      </span>
+                      <span v-if="step.topUpPacks && step.topUpPacks.length">
+                        补 {{ step.topUpPacks.map(pack => pack.displayTrigger).join(' / ') }}
                       </span>
                     </span>
                   </td>
@@ -289,20 +300,38 @@
                       (内容 {{ step.originalValue.toLocaleString() }} + 累充 {{ step.rechargeValue.toLocaleString() }})
                     </span>
                   </td>
-                  <td>{{ step.isTopUp ? '不影响' : tierLabel(step.nextTierPrice) }}</td>
+                  <td>{{ tierLabel(step.nextTierPrice) }}</td>
                 </tr>
                 <tr v-if="step.bought && isPlannerStepExpanded(step.rowKey)" class="planner-detail-row">
                   <td :colspan="7">
                     <div class="planner-pack-details">
+                      <section v-if="step.opportunities && step.opportunities.length" class="planner-trigger-details">
+                        <div class="planner-detail-title">本批触发范围</div>
+                        <div class="planner-trigger-list">
+                          <div
+                            v-for="opportunity in step.opportunities"
+                            :key="`${step.rowKey}-trigger-${opportunity.displayTrigger}`"
+                            class="planner-trigger-item"
+                            :class="{ purchased: opportunity.purchased, unavailable: !opportunity.hasPackAtTier }"
+                          >
+                            <strong>{{ opportunity.displayTrigger }}</strong>
+                            <span v-if="opportunity.hasPackAtTier">
+                              {{ opportunity.purchased ? '已购买' : '触发未买' }}
+                              / CE {{ opportunity.ce.toFixed(1) }}
+                            </span>
+                            <span v-else>当前档位无包</span>
+                          </div>
+                        </div>
+                        <div v-if="step.skippedOpportunities && step.skippedOpportunities.length" class="planner-recharge-note">
+                          本批触发未买 {{ step.skippedOpportunities.length }} 个；因为批内至少买了 1 个，不会导致额外降档。
+                        </div>
+                      </section>
                       <article v-for="pack in step.purchases" :key="`${step.rowKey}-detail-${pack.displayTrigger}`" class="planner-pack-detail">
                         <div class="planner-pack-detail-head">
                           <strong>{{ pack.displayTrigger }}</strong>
                           <span>{{ formatPrice(pack.price) }}</span>
                           <span>CE {{ pack.ce.toFixed(1) }}</span>
                           <span>价值 {{ Math.round(pack.value).toLocaleString() }}</span>
-                        </div>
-                        <div v-if="step.isTopUp && step.unlockedRechargeTiers.length" class="planner-recharge-note">
-                          本次补包：累充 {{ step.rechargeBeforePaid.toLocaleString() }} -> {{ step.rechargeAfterPaid.toLocaleString() }} 付费钻，解锁 {{ step.unlockedRechargeTiers.join(' / ') }} 档，赠送免费钻 +{{ step.rechargeFreeDiamonds.toLocaleString() }}。
                         </div>
                         <div class="planner-pack-items">
                           <div
@@ -320,6 +349,44 @@
                           </div>
                         </div>
                       </article>
+                      <section v-if="step.topUpPacks && step.topUpPacks.length" class="planner-trigger-details">
+                        <div class="planner-detail-title">本批补累充</div>
+                        <div class="planner-recharge-note">
+                          补包花费 {{ formatPrice(step.topUpCost) }}；累充 {{ step.topUpRechargeBeforePaid.toLocaleString() }} -> {{ step.topUpRechargeAfterPaid.toLocaleString() }} 付费钻，解锁 {{ step.topUpUnlockedRechargeTiers.join(' / ') }} 档，赠送免费钻 +{{ step.topUpRechargeFreeDiamonds.toLocaleString() }}。
+                        </div>
+                        <div class="planner-top-up-list">
+                          <div v-for="pack in step.topUpPacks" :key="`${step.rowKey}-top-up-${pack.displayTrigger}`" class="planner-top-up-item">
+                            <strong>{{ pack.displayTrigger }}</strong>
+                            <span>{{ formatPrice(pack.price) }}</span>
+                            <span>价值 {{ Math.round(pack.value).toLocaleString() }}</span>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else-if="!step.bought && isPlannerStepExpanded(step.rowKey)" class="planner-detail-row">
+                  <td :colspan="7">
+                    <div class="planner-skip-details">
+                      <div class="planner-skip-summary">
+                        <span>连续跳过 {{ step.skipCount }} 批</span>
+                        <span>实际降档 {{ step.tierDropCount || 0 }} 次</span>
+                        <span>{{ tierLabel(step.tierPrice) }} -> {{ tierLabel(step.nextTierPrice) }}</span>
+                      </div>
+                      <div v-if="step.skipSourceRanges && step.skipSourceRanges.length" class="planner-skip-sources">
+                        <div v-for="source in step.skipSourceRanges" :key="`${step.rowKey}-${source.label}`" class="planner-skip-source">
+                          <strong>{{ source.label }}</strong>
+                          <span>{{ source.from === source.to ? source.from : `${source.from} -> ${source.to}` }}</span>
+                          <em>{{ source.count }} 批</em>
+                        </div>
+                      </div>
+                      <div class="planner-skip-batches">
+                        <div v-for="skipped in step.skippedSteps" :key="`${step.rowKey}-skip-${skipped.index}`" class="planner-skip-batch">
+                          <strong>第 {{ skipped.index }} 批</strong>
+                          <span>{{ skipped.triggerRange }}</span>
+                          <em>{{ tierLabel(skipped.tierPrice) }} -> {{ tierLabel(skipped.nextTierPrice) }}</em>
+                        </div>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -667,7 +734,13 @@ function toggleExpand(i) {
 }
 
 const plannerExpanded = reactive(new Set())
-function togglePlannerStep(rowKey) {
+function isPlannerStepExpandable(step) {
+  return !!step && (step.bought || step.skipCount > 0)
+}
+
+function togglePlannerStep(step) {
+  if (!isPlannerStepExpandable(step)) return
+  const rowKey = step.rowKey
   if (plannerExpanded.has(rowKey)) plannerExpanded.delete(rowKey)
   else plannerExpanded.add(rowKey)
 }
@@ -883,6 +956,37 @@ function fmtNum(n) {
   margin-top: 2px;
 }
 
+.planner-top-up-summary {
+  border: 1px solid rgba(212,175,55,0.32);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  margin-top: 10px;
+  background: rgba(212,175,55,0.055);
+}
+
+.planner-top-up-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.planner-top-up-item {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  background: rgba(0,0,0,0.1);
+}
+
+.planner-top-up-item strong {
+  color: var(--gold);
+}
+
 .planner-table-wrap {
   margin-top: 12px;
   overflow-x: auto;
@@ -892,9 +996,12 @@ function fmtNum(n) {
   min-width: 760px;
 }
 
-.planner-expand-btn {
-  padding: 3px 8px;
-  min-height: var(--control-h-sm);
+.planner-clickable-row {
+  cursor: pointer;
+}
+
+.planner-clickable-row:hover td {
+  background: rgba(255,255,255,0.035);
 }
 
 .planner-purchases {
@@ -929,6 +1036,62 @@ function fmtNum(n) {
   gap: 10px;
 }
 
+.planner-detail-title {
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.planner-trigger-details {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  background: rgba(255,255,255,0.025);
+}
+
+.planner-trigger-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 6px;
+}
+
+.planner-trigger-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 7px 9px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  background: rgba(0,0,0,0.08);
+}
+
+.planner-trigger-item.purchased {
+  border-color: rgba(212,175,55,0.45);
+  background: rgba(212,175,55,0.08);
+}
+
+.planner-trigger-item.unavailable {
+  opacity: 0.72;
+}
+
+.planner-trigger-item strong {
+  color: var(--text-secondary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-trigger-item span {
+  color: var(--gold);
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .planner-pack-detail {
   border: 1px solid var(--border-subtle);
   border-radius: var(--r-sm);
@@ -956,6 +1119,65 @@ function fmtNum(n) {
   font-size: var(--fs-xs);
   line-height: 1.45;
   margin: -2px 0 8px;
+}
+
+.planner-skip-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.planner-skip-summary,
+.planner-skip-source,
+.planner-skip-batch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+}
+
+.planner-skip-summary span {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.03);
+}
+
+.planner-skip-sources,
+.planner-skip-batches {
+  display: grid;
+  gap: 6px;
+}
+
+.planner-skip-source,
+.planner-skip-batch {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 7px 9px;
+  background: rgba(255,255,255,0.025);
+}
+
+.planner-skip-source strong,
+.planner-skip-batch strong {
+  color: var(--text-primary);
+  min-width: 88px;
+}
+
+.planner-skip-source span,
+.planner-skip-batch span {
+  color: var(--text-secondary);
+  flex: 1 1 220px;
+}
+
+.planner-skip-source em,
+.planner-skip-batch em {
+  color: var(--gold);
+  font-style: normal;
+  white-space: nowrap;
 }
 
 .planner-pack-items {

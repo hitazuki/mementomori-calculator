@@ -3,7 +3,7 @@ import { parseMainQuestProgress } from './mainQuestProgress.js'
 
 const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
 const DEFAULT_MAX_STATES_PER_TIER = 350
-const TOP_UP_TRIGGER_RANGE = '每日累充补包'
+const TOP_UP_SOURCE_LABEL = '每日累充补包'
 const MAX_DAILY_RECHARGE_PAID = DAILY_RECHARGE_BONUS_TIERS.at(-1)?.paid || 0
 const ATTRIBUTE_TOWERS = [
   'origin_tower_blue',
@@ -392,7 +392,7 @@ function groupTopUpPacks(packs) {
       : nameForTopUpPack(group.pack)
 
     return {
-      trigger: TOP_UP_TRIGGER_RANGE,
+      trigger: TOP_UP_SOURCE_LABEL,
       sourceLabel: '常驻补包',
       displayTrigger: label,
       price,
@@ -406,24 +406,21 @@ function groupTopUpPacks(packs) {
   })
 }
 
-function betterTopUpCandidate(candidate, current) {
-  if (!current) return true
-  if (candidate.value !== current.value) return candidate.value > current.value
-  if (candidate.unlockedCount !== current.unlockedCount) return candidate.unlockedCount > current.unlockedCount
-  if (candidate.cost !== current.cost) return candidate.cost < current.cost
-  return candidate.purchases.length < current.purchases.length
+function compareTopUpCandidate(a, b) {
+  if (a.cost !== b.cost) return a.cost - b.cost
+  if (a.value !== b.value) return b.value - a.value
+  return a.purchases.length - b.purchases.length
 }
 
-function findBestPermanentTopUp(state, context) {
-  if (!context.enablePermanentTopUp || !context.permanentPacks.length) return null
-  if (state.purchases <= 0) return null
+function nextRechargeTier(currentPaid) {
+  return DAILY_RECHARGE_BONUS_TIERS.find(tier => currentPaid < tier.paid) || null
+}
 
-  const remainingBudget = context.budget - state.spent
-  if (remainingBudget <= 0) return null
+function buildPermanentTopUpCombos(state, context, budgetLimit) {
   const maxPackPrice = Math.max(...context.permanentPacks.map(pack => pack.price))
   const currentPaid = paidDiamondsForPrice(state.spent)
   const budgetToLastTier = Math.max(0, (MAX_DAILY_RECHARGE_PAID - currentPaid) * 2)
-  const searchableBudget = Math.min(remainingBudget, budgetToLastTier + maxPackPrice)
+  const searchableBudget = Math.min(budgetLimit, budgetToLastTier + maxPackPrice)
 
   const dp = Array.from({ length: searchableBudget + 1 })
   dp[0] = { cost: 0, originalValue: 0, purchases: [] }
@@ -445,49 +442,64 @@ function findBestPermanentTopUp(state, context) {
     }
   }
 
-  let best = null
-
-  for (const candidate of dp) {
-    if (!candidate || candidate.cost <= 0) continue
-
-    const recharge = rechargeValueForPurchase(state.spent, candidate.cost, context)
-    if (!recharge.unlockedTiers.length) continue
-
-    const value = Math.round(candidate.originalValue + recharge.value)
-    const topUpCandidate = {
-      ...candidate,
-      value,
-      paidDiamonds: paidDiamondsForPrice(candidate.cost),
-      recharge,
-      unlockedCount: recharge.unlockedTiers.length,
-      afterPaid: currentPaid + paidDiamondsForPrice(candidate.cost),
-    }
-    if (betterTopUpCandidate(topUpCandidate, best)) best = topUpCandidate
-  }
-
-  return best
+  return dp
 }
 
-function applyPermanentTopUp(state, context) {
-  const topUp = findBestPermanentTopUp(state, context)
-  if (!topUp) return state
+function findPermanentTopUpOptions(state, context) {
+  if (!context.enablePermanentTopUp || !context.permanentPacks.length) return null
+  if (state.purchases <= 0) return null
 
-  const step = {
-    index: state.steps.length + 1,
-    triggerRange: TOP_UP_TRIGGER_RANGE,
-    tierPrice: null,
-    nextTierPrice: context.priceTiers[state.tierIndex],
-    bought: true,
-    isTopUp: true,
-    cost: topUp.cost,
-    value: topUp.value,
-    originalValue: Math.round(topUp.originalValue),
-    rechargeValue: topUp.recharge.value,
-    rechargeFreeDiamonds: topUp.recharge.freeDiamonds,
-    rechargeBeforePaid: topUp.recharge.beforePaid,
-    rechargeAfterPaid: topUp.recharge.afterPaid,
-    unlockedRechargeTiers: topUp.recharge.unlockedTiers,
-    purchases: groupTopUpPacks(topUp.purchases),
+  const remainingBudget = context.budget - state.spent
+  if (remainingBudget <= 0) return null
+  const dp = buildPermanentTopUpCombos(state, context, remainingBudget)
+  const currentPaid = paidDiamondsForPrice(state.spent)
+  const targetTier = nextRechargeTier(currentPaid)
+  if (!targetTier) return null
+
+  const ranked = []
+  for (const candidate of dp) {
+    if (!candidate || candidate.cost <= 0) continue
+    const paidDiamonds = paidDiamondsForPrice(candidate.cost)
+    if (currentPaid + paidDiamonds < targetTier.paid) continue
+
+    const recharge = rechargeValueForPurchase(state.spent, candidate.cost, context)
+
+    ranked.push({
+      ...candidate,
+      value: Math.round(candidate.originalValue + recharge.value),
+      paidDiamonds,
+      recharge,
+      unlockedCount: recharge.unlockedTiers.length,
+      afterPaid: currentPaid + paidDiamonds,
+    })
+  }
+
+  if (!ranked.length) return null
+  return ranked.sort(compareTopUpCandidate).slice(0, 1)
+}
+
+function applyTopUpToLastStep(state, topUp) {
+  if (!topUp || !state.steps.length) return state
+
+  const topUpPacks = groupTopUpPacks(topUp.purchases)
+  const steps = [...state.steps]
+  const lastStep = steps[steps.length - 1]
+  steps[steps.length - 1] = {
+    ...lastStep,
+    cost: lastStep.cost + topUp.cost,
+    value: lastStep.value + topUp.value,
+    originalValue: Math.round((lastStep.originalValue || 0) + topUp.originalValue),
+    rechargeValue: (lastStep.rechargeValue || 0) + topUp.recharge.value,
+    rechargeFreeDiamonds: (lastStep.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+    topUpCost: topUp.cost,
+    topUpValue: topUp.value,
+    topUpOriginalValue: Math.round(topUp.originalValue),
+    topUpRechargeValue: topUp.recharge.value,
+    topUpRechargeFreeDiamonds: topUp.recharge.freeDiamonds,
+    topUpRechargeBeforePaid: topUp.recharge.beforePaid,
+    topUpRechargeAfterPaid: topUp.recharge.afterPaid,
+    topUpUnlockedRechargeTiers: topUp.recharge.unlockedTiers,
+    topUpPacks,
   }
 
   return {
@@ -496,7 +508,7 @@ function applyPermanentTopUp(state, context) {
     value: state.value + topUp.value,
     topUpPurchaseCount: (state.topUpPurchaseCount || 0) + topUp.purchases.length,
     rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
-    steps: [...state.steps, step],
+    steps,
   }
 }
 
@@ -554,12 +566,32 @@ function actionOptionsForBatch(batch, tierPrice) {
   return actions
 }
 
+function summarizeOpportunity(opportunity, tierPrice, purchasedPacks) {
+  const pack = opportunity.packsByPrice.get(tierPrice)
+  const purchased = !!pack && purchasedPacks.includes(pack)
+  return {
+    label: opportunity.label || '',
+    trigger: opportunity.trigger,
+    displayTrigger: opportunity.displayTrigger || String(opportunity.trigger),
+    sortValue: opportunity.sortValue,
+    tierPrice,
+    hasPackAtTier: !!pack,
+    purchased,
+    price: pack?.price || 0,
+    value: pack ? getPackOriginalValue(pack) : 0,
+    ce: pack?.ce || 0,
+  }
+}
+
 function summarizeAction(action, batchIndex, batch, tierPrice, nextTierPrice, recharge = null) {
   const rechargeValue = recharge?.value || 0
   const originalValue = action.originalValue || 0
+  const opportunities = batch.map(opportunity => summarizeOpportunity(opportunity, tierPrice, action.purchases))
   return {
     index: batchIndex + 1,
     triggerRange: summarizeBatch(batch),
+    opportunities,
+    skippedOpportunities: opportunities.filter(opportunity => !opportunity.purchased),
     tierPrice,
     nextTierPrice,
     bought: action.bought,
@@ -586,6 +618,18 @@ function summarizeAction(action, batchIndex, batch, tierPrice, nextTierPrice, re
 }
 
 function createResult(state, context, meta = {}) {
+  const topUpPacks = state.steps.flatMap(step => step.topUpPacks || [])
+  const topUpBatches = state.steps
+    .filter(step => step.topUpPacks?.length)
+    .map(step => ({
+      index: step.index,
+      triggerRange: step.triggerRange,
+      cost: step.topUpCost || 0,
+      value: step.topUpValue || 0,
+      rechargeFreeDiamonds: step.topUpRechargeFreeDiamonds || 0,
+      unlockedRechargeTiers: step.topUpUnlockedRechargeTiers || [],
+      packs: step.topUpPacks,
+    }))
   return {
     ...meta,
     budget: context.budget,
@@ -594,6 +638,11 @@ function createResult(state, context, meta = {}) {
     value: Math.round(state.value),
     purchases: state.purchases,
     topUpPurchaseCount: state.topUpPurchaseCount || 0,
+    topUpPacks,
+    topUpBatches,
+    topUpPackSummary: topUpBatches
+      .map(batch => `第 ${batch.index} 批：${batch.packs.map(pack => pack.displayTrigger).join(' / ')}`)
+      .join('；'),
     rechargeFreeDiamonds: state.rechargeFreeDiamonds || 0,
     finalTierPrice: context.priceTiers[state.tierIndex],
     averageCe: state.spent > 0 ? state.value / (state.spent / 2) : 0,
@@ -642,7 +691,11 @@ function buildPlanningContext(packs, settings) {
 
 function stateSignature(state) {
   return state.steps
-    .map(step => `${step.tierPrice}:${step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')}`)
+    .map(step => {
+      const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
+      const topUps = (step.topUpPacks || []).map(pack => pack.displayTrigger).join(',')
+      return `${step.tierPrice}:${purchases}:topUp:${topUps}`
+    })
     .join('|')
 }
 
@@ -712,7 +765,7 @@ function collectTopValuePlans(context, topK = 2) {
           const recharge = rechargeValueForPurchase(state.spent, action.cost, context)
           const actionValue = (action.originalValue || 0) + recharge.value
           const step = summarizeAction(action, batchIndex, batch, tierPrice, context.priceTiers[nextTierIndex], recharge)
-          const candidate = {
+          const baseCandidate = {
             tierIndex: nextTierIndex,
             spent,
             value: state.value + actionValue,
@@ -721,9 +774,17 @@ function collectTopValuePlans(context, topK = 2) {
             rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
             steps: [...state.steps, step],
           }
-          const key = makeStateKey(nextTierIndex, spent)
-          const current = nextStates.get(key) || []
-          nextStates.set(key, insertRankedState(current, candidate, perStateLimit))
+
+          const topUpOptions = action.bought
+            ? [null, ...(findPermanentTopUpOptions(baseCandidate, context) || [])]
+            : [null]
+
+          for (const topUp of topUpOptions) {
+            const candidate = topUp ? applyTopUpToLastStep(baseCandidate, topUp) : baseCandidate
+            const key = makeStateKey(candidate.tierIndex, candidate.spent)
+            const current = nextStates.get(key) || []
+            nextStates.set(key, insertRankedState(current, candidate, perStateLimit))
+          }
         }
       }
     }
@@ -802,7 +863,7 @@ function simulatePolicyPlan(context, policy) {
     const recharge = rechargeValueForPurchase(state.spent, action.cost, context)
     const actionValue = (action.originalValue || 0) + recharge.value
     const step = summarizeAction(action, batchIndex, batch, tierPrice, context.priceTiers[nextTierIndex], recharge)
-    state = {
+    const baseState = {
       tierIndex: nextTierIndex,
       spent: state.spent + action.cost,
       value: state.value + actionValue,
@@ -811,6 +872,8 @@ function simulatePolicyPlan(context, policy) {
       rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
       steps: [...state.steps, step],
     }
+    const topUpOptions = action.bought ? findPermanentTopUpOptions(baseState, context) : null
+    state = topUpOptions?.length ? applyTopUpToLastStep(baseState, topUpOptions[0]) : baseState
   }
 
   return state
@@ -825,15 +888,62 @@ function formatSkipPlanRow(row) {
     ? row.triggerRange
     : `${row.triggerRanges[0]} ... ${row.triggerRanges[row.triggerRanges.length - 1]}`
 
+  const skippedSteps = row.skippedSteps || []
+  const tierDropCount = skippedSteps.filter(step => {
+    return Number.isFinite(step.tierPrice)
+      && Number.isFinite(step.nextTierPrice)
+      && step.nextTierPrice < step.tierPrice
+  }).length
+
   return {
     ...row,
     rowKey: `skip-${row.startIndex}-${row.endIndex}`,
     indexLabel: row.startIndex === row.endIndex ? String(row.startIndex) : `${row.startIndex}-${row.endIndex}`,
     triggerRange,
+    skippedSteps,
+    skipSourceRanges: summarizeSkippedSources(skippedSteps),
+    tierDropCount,
     cost: 0,
     value: 0,
     purchases: [],
   }
+}
+
+function parseTriggerSummary(triggerRange) {
+  return String(triggerRange || '')
+    .split(';')
+    .map(part => part.trim())
+    .filter(Boolean)
+    .map(part => {
+      const separator = part.indexOf(':')
+      if (separator === -1) return { label: '触发', range: part }
+      return {
+        label: part.slice(0, separator).trim(),
+        range: part.slice(separator + 1).trim(),
+      }
+    })
+}
+
+function summarizeSkippedSources(skippedSteps) {
+  const byLabel = new Map()
+
+  for (const step of skippedSteps) {
+    for (const segment of parseTriggerSummary(step.triggerRange)) {
+      if (!byLabel.has(segment.label)) {
+        byLabel.set(segment.label, {
+          label: segment.label,
+          from: segment.range,
+          to: segment.range,
+          count: 0,
+        })
+      }
+      const current = byLabel.get(segment.label)
+      current.to = segment.range
+      current.count += 1
+    }
+  }
+
+  return [...byLabel.values()]
 }
 
 export function compressUltraSalePlanSteps(steps = []) {
@@ -850,12 +960,14 @@ export function compressUltraSalePlanSteps(steps = []) {
           endIndex: step.index,
           skipCount: 1,
           triggerRanges: [step.triggerRange],
+          skippedSteps: [step],
         }
       } else {
         pendingSkip.endIndex = step.index
         pendingSkip.skipCount += 1
         pendingSkip.triggerRanges.push(step.triggerRange)
         pendingSkip.nextTierPrice = step.nextTierPrice
+        pendingSkip.skippedSteps.push(step)
       }
       continue
     }
@@ -866,8 +978,8 @@ export function compressUltraSalePlanSteps(steps = []) {
     }
     rows.push({
       ...step,
-      rowKey: step.isTopUp ? `top-up-${step.index}` : `buy-${step.index}`,
-      indexLabel: step.isTopUp ? '补包' : String(step.index),
+      rowKey: `buy-${step.index}`,
+      indexLabel: String(step.index),
       skipCount: 0,
     })
   }
@@ -879,7 +991,6 @@ export function compressUltraSalePlanSteps(steps = []) {
 export function planUltraSalePurchases(packs, settings = {}) {
   const context = buildPlanningContext(packs, settings)
   const states = collectTopValuePlans(context, context.enablePermanentTopUp ? 12 : 1)
-    .map(state => applyPermanentTopUp(state, context))
     .sort(comparePlan)
   return createResult(states[0], context)
 }
@@ -887,11 +998,10 @@ export function planUltraSalePurchases(packs, settings = {}) {
 export function buildUltraSalePlanOptions(packs, settings = {}) {
   const context = buildPlanningContext(packs, settings)
   const rankedStates = collectTopValuePlans(context, context.enablePermanentTopUp ? 12 : 2)
-    .map(state => applyPermanentTopUp(state, context))
     .sort(comparePlan)
   const [bestState, secondState] = rankedStates
-  const smallPackState = applyPermanentTopUp(simulatePolicyPlan(context, 'smallPack'), context)
-  const maxPackState = applyPermanentTopUp(simulatePolicyPlan(context, 'maxPack'), context)
+  const smallPackState = simulatePolicyPlan(context, 'smallPack')
+  const maxPackState = simulatePolicyPlan(context, 'maxPack')
 
   return [
     createResult(bestState, context, {

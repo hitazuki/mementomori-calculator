@@ -94,6 +94,15 @@ test('buying any pack in a multi-trigger batch raises only one tier', () => {
 
   assert.equal(plan.steps[0].purchases.length, 1)
   assert.equal(plan.steps[0].purchases[0].trigger, '10')
+  assert.equal(plan.steps[0].opportunities.length, 2)
+  assert.deepEqual(plan.steps[0].opportunities.map(opportunity => ({
+    trigger: opportunity.trigger,
+    purchased: opportunity.purchased,
+  })), [
+    { trigger: '10', purchased: true },
+    { trigger: '20', purchased: false },
+  ])
+  assert.equal(plan.steps[0].skippedOpportunities.length, 1)
   assert.equal(plan.steps[0].nextTierPrice, 650)
   assert.equal(plan.steps[1].tierPrice, 650)
 })
@@ -145,14 +154,48 @@ test('planner appends non-first permanent diamond packs to top up daily recharge
     freeDiamondScore: 1,
   })
 
-  const topUpStep = plan.steps.at(-1)
-  assert.equal(topUpStep.isTopUp, true)
-  assert.equal(topUpStep.cost, 320)
-  assert.equal(topUpStep.rechargeFreeDiamonds, 4800)
-  assert.deepEqual(topUpStep.unlockedRechargeTiers, [6000])
+  const topUpStep = plan.steps[0]
+  assert.equal(topUpStep.cost, 12120)
+  assert.equal(topUpStep.topUpCost, 320)
+  assert.equal(topUpStep.topUpRechargeFreeDiamonds, 4800)
+  assert.deepEqual(topUpStep.topUpUnlockedRechargeTiers, [6000])
   assert.equal(plan.topUpPurchaseCount, 2)
-  assert.equal(topUpStep.purchases[0].displayTrigger, '钻石组合包 80 ×2')
-  assert.equal(topUpStep.purchases.some(p => p.displayTrigger.includes('首次')), false)
+  assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 80 ×2')
+  assert.equal(plan.topUpBatches[0].index, 1)
+  assert.equal(plan.topUpBatches[0].cost, 320)
+  assert.equal(plan.topUpPacks[0].displayTrigger, '钻石组合包 80 ×2')
+  assert.equal(topUpStep.topUpPacks[0].displayTrigger, '钻石组合包 80 ×2')
+  assert.equal(topUpStep.topUpPacks.some(p => p.displayTrigger.includes('首次')), false)
+})
+
+test('planner stops permanent top-up once the next recharge tier is reached', () => {
+  const packs = [
+    pack('10', 11800, 5900),
+  ]
+  const permanentPacks = [
+    permanentDiamondPack('钻石组合包 80', 160, 148),
+    permanentDiamondPack('钻石组合包 325', 650, 518),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    source: 'tower',
+    tower: 'origin_tower_infinite',
+    startProgress: 0,
+    endProgress: 10,
+    currentPrice: 11800,
+    budget: 12280,
+    batchSize: 1,
+    enablePermanentTopUp: true,
+    permanentPacks,
+    freeDiamondScore: 1,
+  })
+
+  assert.equal(plan.spent, 12120)
+  assert.equal(plan.remaining, 160)
+  assert.equal(plan.topUpPurchaseCount, 2)
+  assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 80 ×2')
+  assert.equal(plan.steps[0].topUpCost, 320)
+  assert.deepEqual(plan.steps[0].topUpUnlockedRechargeTiers, [6000])
 })
 
 test('planner combines independent trigger lanes in the same batch round', () => {
@@ -331,19 +374,28 @@ test('attribute tower topology keeps adjacent all-tower and single-tower events 
 test('compressUltraSalePlanSteps merges only consecutive skipped batches', () => {
   const rows = compressUltraSalePlanSteps([
     { index: 1, triggerRange: 'A', bought: true, cost: 160, value: 100, purchases: [{}] },
-    { index: 2, triggerRange: 'B', bought: false, cost: 0, value: 0, purchases: [] },
-    { index: 3, triggerRange: 'C', bought: false, cost: 0, value: 0, purchases: [] },
+    { index: 2, triggerRange: '主线: 10-28; 无穷塔: 100 - 150', tierPrice: 650, nextTierPrice: 160, bought: false, cost: 0, value: 0, purchases: [] },
+    { index: 3, triggerRange: '主线: 11-28; 无穷塔: 200 - 250', tierPrice: 160, nextTierPrice: 160, bought: false, cost: 0, value: 0, purchases: [] },
     { index: 4, triggerRange: 'D', bought: true, cost: 160, value: 100, purchases: [{}] },
-    { index: 5, triggerRange: 'E', bought: false, cost: 0, value: 0, purchases: [] },
+    { index: 5, triggerRange: 'E', tierPrice: 160, nextTierPrice: 160, bought: false, cost: 0, value: 0, purchases: [] },
   ])
 
   assert.equal(rows.length, 4)
   assert.equal(rows[1].rowKey, 'skip-2-3')
   assert.equal(rows[1].indexLabel, '2-3')
   assert.equal(rows[1].skipCount, 2)
-  assert.equal(rows[1].triggerRange, 'B ... C')
+  assert.equal(rows[1].triggerRange, '主线: 10-28; 无穷塔: 100 - 150 ... 主线: 11-28; 无穷塔: 200 - 250')
+  assert.equal(rows[1].tierDropCount, 1)
+  assert.equal(rows[1].skippedSteps.length, 2)
+  assert.deepEqual(rows[1].skipSourceRanges, [
+    { label: '主线', from: '10-28', to: '11-28', count: 2 },
+    { label: '无穷塔', from: '100 - 150', to: '200 - 250', count: 2 },
+  ])
   assert.equal(rows[3].rowKey, 'skip-5-5')
   assert.equal(rows[3].indexLabel, '5')
   assert.equal(rows[3].skipCount, 1)
   assert.equal(rows[3].triggerRange, 'E')
+  assert.deepEqual(rows[3].skipSourceRanges, [
+    { label: '触发', from: 'E', to: 'E', count: 1 },
+  ])
 })
