@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
+import { cumulativeFreeDiamonds, marginalFreeDiamonds } from '../src/engine/dailyRechargeBonus.js'
 import { mainQuestStageCount, parseMainQuestProgress } from '../src/engine/mainQuestProgress.js'
 import { buildUltraSalePlanOptions, compressUltraSalePlanSteps, planUltraSalePurchases } from '../src/engine/ultraSalePlanner.js'
 
@@ -32,6 +33,25 @@ function towerPack(tower, trigger, price, value) {
     tower,
   }
 }
+
+function permanentDiamondPack(name, price, originalValue) {
+  return {
+    name,
+    price,
+    originalValue,
+    paidDiamonds: price / 2,
+    value: originalValue,
+    ce: originalValue / (price / 2),
+    items: [],
+  }
+}
+
+test('daily recharge bonus accumulates unlocked tier rewards', () => {
+  assert.equal(cumulativeFreeDiamonds(5900), 2400)
+  assert.equal(cumulativeFreeDiamonds(6000), 7200)
+  assert.equal(marginalFreeDiamonds(5900, 160), 4800)
+  assert.equal(marginalFreeDiamonds(12000, 6000), 4200)
+})
 
 test('buying one pack in a batch raises the tier for the next batch', () => {
   const packs = [
@@ -100,6 +120,39 @@ test('buildUltraSalePlanOptions exposes ranked and policy plans', () => {
   assert.ok(options[0].value >= options[1].value)
   assert.equal(options[2].label, '只买小包')
   assert.equal(options[3].label, '冲最大包')
+})
+
+test('planner appends non-first permanent diamond packs to top up daily recharge tiers', () => {
+  const packs = [
+    pack('10', 11800, 5900),
+  ]
+  const permanentPacks = [
+    permanentDiamondPack('钻石组合包 80', 160, 148),
+    permanentDiamondPack('钻石组合包 80 (首次双倍)', 160, 228),
+    permanentDiamondPack('钻石组合包 325', 650, 518),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    source: 'tower',
+    tower: 'origin_tower_infinite',
+    startProgress: 0,
+    endProgress: 10,
+    currentPrice: 11800,
+    budget: 12120,
+    batchSize: 1,
+    enablePermanentTopUp: true,
+    permanentPacks,
+    freeDiamondScore: 1,
+  })
+
+  const topUpStep = plan.steps.at(-1)
+  assert.equal(topUpStep.isTopUp, true)
+  assert.equal(topUpStep.cost, 320)
+  assert.equal(topUpStep.rechargeFreeDiamonds, 4800)
+  assert.deepEqual(topUpStep.unlockedRechargeTiers, [6000])
+  assert.equal(plan.topUpPurchaseCount, 2)
+  assert.equal(topUpStep.purchases[0].displayTrigger, '钻石组合包 80 ×2')
+  assert.equal(topUpStep.purchases.some(p => p.displayTrigger.includes('首次')), false)
 })
 
 test('planner combines independent trigger lanes in the same batch round', () => {

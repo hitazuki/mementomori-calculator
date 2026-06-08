@@ -269,12 +269,157 @@ O(B * S * A)
 
 其中 `1` 是“全不买”动作。
 
+## 每日累充与补包
+
+礼包查询页仍复用 `packCalc.js` 的 `RechargeValue`，按 `PaidDiamonds * 1.2` 展示单个礼包的期望充值价值。
+
+购买规划页使用实际每日累充规则。每日累充赠钻规则见 `../items-calc-formula.md`，在每日累计 12,000 付费钻之后，后续区间的边际赠钻倍率会下降。
+
+因此购买路径中的充值补正是路径相关值：
+
+```text
+同一个礼包的实际充值补正
+= 购买前后每日累计付费钻跨过的赠钻区间差值
+```
+
+规划器把礼包内容价值和充值补正拆开计算：
+
+```text
+actionValue = action.originalValue + actualRechargeValueDelta
+```
+
+其中 `actualRechargeValueDelta` 由 `src/engine/dailyRechargeBonus.js` 按当前路径已累计付费钻实时计算。
+
+### 每日累充函数
+
+`src/engine/dailyRechargeBonus.js` 提供：
+
+```js
+const DAILY_RECHARGE_BONUS_TIERS = [
+  { paid: 100, bonus: 120 },
+  { paid: 500, bonus: 480 },
+  { paid: 1000, bonus: 600 },
+  { paid: 2000, bonus: 1200 },
+  { paid: 6000, bonus: 4800 },
+  { paid: 12000, bonus: 7200 },
+  { paid: 18000, bonus: 4200 },
+  { paid: 24000, bonus: 5400 },
+  { paid: 36000, bonus: 10800 }
+]
+
+cumulativeFreeDiamonds(paidDiamonds)
+marginalFreeDiamonds(beforePaidDiamonds, addedPaidDiamonds)
+unlockedRechargeTiers(beforePaidDiamonds, addedPaidDiamonds)
+```
+
+`cumulativeFreeDiamonds()` 返回同一天累计付费钻已获得的免费钻总数。`marginalFreeDiamonds()` 返回本次购买动作带来的边际赠钻：
+
+```text
+Bonus(after) - Bonus(before)
+```
+
+`unlockedRechargeTiers()` 用于页面展示本次购买或补包解锁了哪些累充档位。
+
+### DP 状态
+
+单日规划中，当前已花费日元可以换算为已累计付费钻：
+
+```text
+dailyPaidDiamonds = spent / 2
+```
+
+当前页面不要求填写具体日期，购买规划按“同一个每日累充周期内完成”计算。如果未来支持跨 0 点规划，则状态需要显式增加：
+
+```js
+{
+  dayIndex,
+  dailyPaidDiamonds
+}
+```
+
+并在 0 点重置 `dailyPaidDiamonds`。
+
+### 动作估值
+
+批内动作预生成“买哪些包、花多少钱、基础内容价值、增加多少付费钻”，不在动作生成阶段写死最终价值。
+
+```js
+{
+  cost,
+  paidDiamonds,
+  intrinsicValue,
+  purchases
+}
+```
+
+状态转移时再计算：
+
+```text
+beforePaid = paidDiamondsForPrice(state.spent)
+afterPaid = beforePaid + paidDiamondsForPrice(action.cost)
+rechargeBonus = marginalFreeDiamonds(beforePaid, paidDiamondsForPrice(action.cost))
+rechargeValue = rechargeBonus * freeDiamondScore
+newValue = state.value + action.intrinsicValue + rechargeValue
+```
+
+这样同一批、同一礼包组合，在不同路径下会因为购买前累计付费钻不同而得到不同的实际充值价值。
+
+### 常驻钻石组合包补累充
+
+规划器可以把非首次常驻钻石组合包作为“补累充”动作。补包规则为：
+
+- 只使用 `src/constants/permanentPacks.json` 中名称为“钻石组合包 ...”且不包含“首次”的常驻包。
+- 补包不触发限时组合包，不影响限时包升降档。
+- 补包只附加在已经购买过至少 1 个限时组合包的路径之后，不会生成“只买常驻包”的方案。
+- 补包只在能解锁新的每日累充档位时加入路径。
+- 补包步骤会列出实际购买的常驻钻石组合包，例如 `钻石组合包 80 ×2`。
+
+补包选择使用无界背包。由于常驻钻石组合包满足：
+
+```text
+paidDiamonds = price / 2
+```
+
+同一补包总花费对应的每日累计付费钻相同，因此背包只需要在每个可达花费上保留内容价值最高的组合。之后再叠加该花费带来的边际累充赠钻：
+
+```text
+topUpValue =
+  permanentOriginalValue(combo)
+  + marginalFreeDiamonds(currentPaid, comboPaid) * freeDiamondScore
+```
+
+在剩余预算内，规划器选择 `topUpValue` 最高的可行补包组合；若价值相同，优先解锁档位更多、花费更少、购买包数更少的组合。
+
+典型场景：
+
+```text
+限时包累计 5,900 付费钻
+补 钻石组合包 80 ×2
+累计变为 6,060 付费钻
+解锁 6,000 档每日累充赠钻
+```
+
+### 排序与展示
+
+方案排序仍为：
+
+```text
+总价值高 -> 购买数多 -> 花费少
+```
+
+页面展示区分两个口径：
+
+- 礼包查询页展示单包 `RechargeValue`，属于 `1.2` 倍估算。
+- 购买规划页展示实际累计赠钻、每批实际充值补正、补包列表和补包解锁的累充档位。
+- “价值最优”“次优方案”“只买小包”“冲最大包”共用同一套边际赠钻和补包函数，保证不同方案价值可比较。
+
 ## 当前限制
 
 - 批内买多个礼包时，只枚举价值排序后的前缀组合，不枚举所有子集。
 - 剪枝会限制每个档位保留的候选数，因此极端输入下是受控近似搜索，不是无限状态的完整穷举。
 - 主线进度解析由 `mainQuestProgress.js` 统一处理。
 - 算法默认同一全局批次内的所有触发包共用一次升降档结算。
+- 当前购买规划按单个每日累充周期计算，不模拟跨 0 点后的累充重置。
 
 ## 属性塔拓扑模式
 

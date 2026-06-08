@@ -6,16 +6,17 @@
 
 ```mermaid
 flowchart TD
-  A["用户输入<br/>预算 / 当前档位 / 各触发源进度"] --> B["计算礼包 CE 与总价值"]
+  A["用户输入<br/>预算 / 当前档位 / 各触发源进度"] --> B["计算礼包内容价值"]
   B --> C["按触发源生成机会<br/>主线 / 等级 / 无穷塔 / 四属性塔"]
   C --> D["派生全属性塔抵达机会"]
   D --> E["每个触发源独立切批"]
   E --> F["合并同序号批次<br/>形成全局批次列表"]
   F --> G["动态规划搜索<br/>价值最优 / 次优"]
   F --> H["固定策略模拟<br/>只买小包 / 冲最大包"]
-  G --> I["压缩连续不买批次"]
+  G --> I["常驻钻石组合包补累充<br/>仅补可解锁的新累充档"]
   H --> I
-  I --> J["页面展示路径<br/>购买批次可展开看触发与内容物"]
+  I --> J["压缩连续不买批次"]
+  J --> K["页面展示路径<br/>购买批次可展开看触发与内容物"]
 ```
 
 ## 批次生成流程
@@ -65,9 +66,10 @@ function buildPlans(packs, settings):
   packsWithValue = calculatePackCE(packs)
   context = buildPlanningContext(packsWithValue, settings)
 
-  bestPlans = dynamicProgramming(context, topK = 2)
-  smallPackPlan = simulatePolicy(context, "smallPack")
-  maxPackPlan = simulatePolicy(context, "maxPack")
+  bestPlans = dynamicProgramming(context, topK = 12)
+  bestPlans = bestPlans.map(applyPermanentTopUp).sortByPlanValue()
+  smallPackPlan = applyPermanentTopUp(simulatePolicy(context, "smallPack"))
+  maxPackPlan = applyPermanentTopUp(simulatePolicy(context, "maxPack"))
 
   return [
     bestPlans[0],
@@ -124,10 +126,13 @@ function dynamicProgramming(context, topK):
 
         nextTierIndex = clampToValidTier(nextTierIndex)
 
+        rechargeBonus = marginalFreeDiamonds(state.spent / 2, action.cost / 2)
+        actionValue = action.originalValue + rechargeBonus * freeDiamondScore
+
         candidate = {
           tierIndex: nextTierIndex,
           spent: newSpent,
-          value: state.value + action.value,
+          value: state.value + actionValue,
           purchases: state.purchases + count(action.purchases),
           steps: state.steps + summarize(action, batch)
         }
@@ -137,6 +142,38 @@ function dynamicProgramming(context, topK):
     states = pruneByParetoAndLimit(nextStates)
 
   return takeTopK(sortPlans(all states), topK)
+```
+
+```text
+function applyPermanentTopUp(state, context):
+  if state.purchases == 0:
+    return state
+
+  remainingBudget = context.budget - state.spent
+  currentPaid = state.spent / 2
+  permanentPacks = nonFirstPermanentDiamondPacks()
+
+  bestByCost = unboundedKnapsack(
+    packs = permanentPacks,
+    budget = remainingBudget,
+    value = pack.originalValue
+  )
+
+  bestTopUp = null
+  for combo in bestByCost:
+    unlocked = unlockedRechargeTiers(currentPaid, combo.cost / 2)
+    if unlocked is empty:
+      continue
+
+    value = combo.originalValue
+      + marginalFreeDiamonds(currentPaid, combo.cost / 2) * freeDiamondScore
+
+    bestTopUp = better(value, unlocked, combo.cost, combo.packCount)
+
+  if bestTopUp exists:
+    append top-up step listing permanent packs
+
+  return state
 ```
 
 ## 单批动作示意
@@ -192,7 +229,7 @@ B 会被剪掉，因为它比 A 花费更多，但价值更低。
 第 5 批 买
 ```
 
-购买批次不会压缩，因为需要展开查看每个礼包的触发点、价格、CE、价值和内容物。
+购买批次和补包批次不会压缩，因为需要展开查看每个礼包的触发点、价格、CE、价值和内容物。补包批次会列出实际使用的非首次常驻钻石组合包。
 
 ## 属性塔拓扑流程
 

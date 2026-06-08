@@ -125,6 +125,11 @@
               </option>
             </select>
           </label>
+
+          <label class="planner-toggle-field">
+            <input type="checkbox" v-model="planSettings.enablePermanentTopUp" />
+            <span>允许常驻钻石组合包补累充（非首次）</span>
+          </label>
         </div>
 
         <div class="planner-lane-head">
@@ -183,6 +188,10 @@
           乐观卡包假设：属性塔按全属性抵达与单属性触发的层级拓扑排序；属性塔触发间隔为 50 层，单批固定为 1。
         </div>
 
+        <div class="planner-derived-note">
+          每日累充按 0 点重置计算；属性塔开放与每日 10 层限制按 4 点换日，但当前乐观卡包策略不使用跨 4 点额外推塔能力。
+        </div>
+
         <a
           class="planner-doc-link"
           href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/planning-rules.md"
@@ -224,9 +233,11 @@
           <div><span>可触发</span><b>{{ selectedPlan.opportunityCount }}</b></div>
           <div><span>批次</span><b>{{ selectedPlan.batchCount }}</b></div>
           <div><span>购买</span><b>{{ selectedPlan.purchases }}</b></div>
+          <div><span>补包</span><b>{{ selectedPlan.topUpPurchaseCount || 0 }}</b></div>
           <div><span>花费</span><b>{{ formatPrice(selectedPlan.spent) }}</b></div>
           <div><span>剩余</span><b>{{ formatPrice(selectedPlan.remaining) }}</b></div>
           <div><span>总价值</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
+          <div><span>累充赠钻</span><b>{{ (selectedPlan.rechargeFreeDiamonds || 0).toLocaleString() }}</b></div>
           <div><span>均 CE</span><b>{{ selectedPlan.averageCe.toFixed(1) }}</b></div>
           <div><span>末档</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
         </div>
@@ -249,7 +260,7 @@
                 <tr :class="{ 'row-expanded': isPlannerStepExpanded(step.rowKey) }">
                   <td>{{ step.indexLabel }}</td>
                   <td>{{ step.triggerRange }}</td>
-                  <td>{{ tierLabel(step.tierPrice) }}</td>
+                  <td>{{ step.isTopUp ? '补累充' : tierLabel(step.tierPrice) }}</td>
                   <td>
                     <span v-if="!step.bought" class="text-muted">
                       {{ step.skipCount > 1 ? `连续不买 ×${step.skipCount}` : '不买' }}
@@ -266,11 +277,19 @@
                       <span v-for="p in step.purchases.slice(0, 3)" :key="`${step.rowKey}-${p.displayTrigger}`">
                         {{ p.displayTrigger }} / CE {{ p.ce.toFixed(1) }}
                       </span>
+                      <span v-if="step.rechargeFreeDiamonds">
+                        累充赠钻 +{{ step.rechargeFreeDiamonds.toLocaleString() }}
+                      </span>
                     </span>
                   </td>
                   <td>{{ formatPrice(step.cost) }}</td>
-                  <td>{{ step.value.toLocaleString() }}</td>
-                  <td>{{ tierLabel(step.nextTierPrice) }}</td>
+                  <td>
+                    {{ step.value.toLocaleString() }}
+                    <span v-if="step.rechargeValue" class="planner-value-extra">
+                      (内容 {{ step.originalValue.toLocaleString() }} + 累充 {{ step.rechargeValue.toLocaleString() }})
+                    </span>
+                  </td>
+                  <td>{{ step.isTopUp ? '不影响' : tierLabel(step.nextTierPrice) }}</td>
                 </tr>
                 <tr v-if="step.bought && isPlannerStepExpanded(step.rowKey)" class="planner-detail-row">
                   <td :colspan="7">
@@ -281,6 +300,9 @@
                           <span>{{ formatPrice(pack.price) }}</span>
                           <span>CE {{ pack.ce.toFixed(1) }}</span>
                           <span>价值 {{ Math.round(pack.value).toLocaleString() }}</span>
+                        </div>
+                        <div v-if="step.isTopUp && step.unlockedRechargeTiers.length" class="planner-recharge-note">
+                          本次补包：累充 {{ step.rechargeBeforePaid.toLocaleString() }} -> {{ step.rechargeAfterPaid.toLocaleString() }} 付费钻，解锁 {{ step.unlockedRechargeTiers.join(' / ') }} 档，赠送免费钻 +{{ step.rechargeFreeDiamonds.toLocaleString() }}。
                         </div>
                         <div class="planner-pack-items">
                           <div
@@ -431,6 +453,7 @@ import { editableScores } from '../store/itemScores.js'
 const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
 const packsRaw = ref([])
+const permanentPacksRaw = ref([])
 const activePackTab = ref('query')
 
 function setActivePackTab(tab) {
@@ -439,6 +462,7 @@ function setActivePackTab(tab) {
 
 onMounted(async () => {
   packsRaw.value = (await import('../constants/ultraSalePacks.json')).default
+  permanentPacksRaw.value = (await import('../constants/permanentPacks.json')).default
 })
 
 // Map locale to itemScores name field
@@ -505,7 +529,8 @@ const filteredPacks = computed(() => {
 
 const planSettings = reactive({
   budget: 11800,
-  currentPrice: 160
+  currentPrice: 160,
+  enablePermanentTopUp: true
 })
 
 const activePlanId = ref('bestValue')
@@ -544,7 +569,13 @@ function planLaneName(lane) {
 }
 
 function tierLabel(price) {
+  if (!Number.isFinite(Number(price))) return '-'
   return `${formatPrice(price)} / ${paidDiamondsForPrice(price)}钻`
+}
+
+function scoreOf(itemKey, fallback = 1) {
+  const score = normalizedScores.value[itemKey]?.score
+  return Number.isFinite(Number(score)) ? Number(score) : fallback
 }
 
 const planningSettings = computed(() => ({
@@ -575,8 +606,12 @@ async function calculatePlanner() {
   try {
     const startedAt = performance.now()
     const calculatedPacks = calculatePackCE(packsRaw.value, normalizedScores.value)
+    const calculatedPermanentPacks = calculatePackCE(permanentPacksRaw.value, normalizedScores.value)
     const options = buildUltraSalePlanOptions(calculatedPacks, {
       ...planningSettings.value,
+      permanentPacks: calculatedPermanentPacks,
+      diamondScore: scoreOf('[2,1]', 1),
+      freeDiamondScore: scoreOf('[1,1]', scoreOf('[2,1]', 1)),
       maxStatesPerTier: 350,
     })
     planOptions.value = options
@@ -695,6 +730,21 @@ function fmtNum(n) {
   font-size: var(--fs-xs);
 }
 
+.planner-toggle-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--control-h);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.planner-toggle-field input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
 .planner-lane-head,
 .planner-lane {
   display: grid;
@@ -799,7 +849,7 @@ function fmtNum(n) {
 
 .planner-summary {
   display: grid;
-  grid-template-columns: repeat(8, minmax(78px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
   gap: 8px;
   margin-top: 12px;
 }
@@ -860,6 +910,14 @@ function fmtNum(n) {
   font-size: var(--fs-xs);
 }
 
+.planner-value-extra {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+
 .planner-detail-row td {
   background: rgba(255,255,255,0.025);
   padding: 10px !important;
@@ -891,6 +949,13 @@ function fmtNum(n) {
 .planner-pack-detail-head strong {
   color: var(--text-primary);
   font-size: var(--fs-sm);
+}
+
+.planner-recharge-note {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+  margin: -2px 0 8px;
 }
 
 .planner-pack-items {
