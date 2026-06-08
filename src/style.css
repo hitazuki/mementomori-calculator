@@ -1192,6 +1192,13 @@ body::before {
   .grid-sidebar-right {
     grid-template-columns: 1fr;
     gap: 12px !important;
+    min-width: 0;
+  }
+  .grid-sidebar > *,
+  .grid-sidebar-right > *,
+  .card,
+  .flex-col {
+    min-width: 0;
   }
   .mobile-static-panel {
     position: static !important;
@@ -1289,6 +1296,8 @@ body::before {
     padding: 12px !important;
   }
   .mobile-table-scroll {
+    max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }

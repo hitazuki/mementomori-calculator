@@ -247,7 +247,13 @@
 
       <div class="card">
         <div class="card-title">{{ $t('quickTableTitle') }}</div>
-        <div class="mobile-table-scroll" style="overflow-x:auto">
+        <div class="quick-mobile-grid">
+          <div v-for="item in quickDefHighlights" :key="`def-${item.pen}-${item.def}`" class="quick-mobile-cell" :class="getCellClass(item.value)">
+            <b>{{ item.value }}%</b>
+            <span>{{ $t('pen') }} {{ item.pen.toLocaleString() }} · {{ $t('targetDef') }} {{ fmt(item.def) }}</span>
+          </div>
+        </div>
+        <div class="mobile-table-scroll quick-desktop-table" style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
@@ -267,7 +273,13 @@
         </div>
         
         <div class="card-title mt-12" style="margin-top:16px">{{ $t('quickTablePmTitle') }}</div>
-        <div class="mobile-table-scroll" style="overflow-x:auto">
+        <div class="quick-mobile-grid">
+          <div v-for="item in quickPmHighlights" :key="`pm-${item.pmPen}-${item.pmDef}`" class="quick-mobile-cell" :class="getCellClass(item.value)">
+            <b>{{ item.value }}%</b>
+            <span>{{ $t('pmPen') }} {{ item.pmPen.toLocaleString() }} · {{ store.damageType === 'phys' ? $t('targetPhysDef') : $t('targetMagDef') }} {{ fmt(item.pmDef) }}</span>
+          </div>
+        </div>
+        <div class="mobile-table-scroll quick-desktop-table" style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
@@ -412,9 +424,68 @@ function getQuickPmDmg(pmPen, pmDef) {
   return calcDamage({ ...store.$state, pmPen, pmDef })
 }
 
+const quickDefHighlights = computed(() => {
+  const pairs = [
+    { pen: store.pen, def: store.def },
+    { pen: 0, def: store.def },
+    { pen: 11950, def: 5e6 },
+    { pen: 18950, def: 10e6 },
+  ]
+  return pairs.map(item => ({ ...item, value: getQuickDmg(item.pen, item.def).defMitPct }))
+})
+
+const quickPmHighlights = computed(() => {
+  const pairs = [
+    { pmPen: store.pmPen, pmDef: store.pmDef },
+    { pmPen: 0, pmDef: store.pmDef },
+    { pmPen: 31200, pmDef: 10e6 },
+    { pmPen: 47700, pmDef: 20e6 },
+  ]
+  return pairs.map(item => ({ ...item, value: getQuickPmDmg(item.pmPen, item.pmDef).pmMitPct }))
+})
+
 function getCellClass(val) {
   if (val < 40) return 'cell-high'
   if (val > 70) return 'cell-low'
   return ''
 }
 </script>
+
+<style scoped>
+.quick-mobile-grid {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .quick-desktop-table {
+    display: none;
+  }
+  .quick-mobile-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .quick-mobile-cell {
+    min-width: 0;
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    background: rgba(var(--color-invert-rgb), 0.035);
+    border: 1px solid rgba(var(--color-invert-rgb), 0.05);
+  }
+  .quick-mobile-cell b {
+    display: block;
+    color: var(--gold);
+    font-family: var(--font-mono);
+    font-size: var(--fs-md);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .quick-mobile-cell span {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    line-height: 1.35;
+  }
+}
+</style>
