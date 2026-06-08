@@ -45,8 +45,27 @@
 
     <!-- Right Panel: Results Table -->
     <div class="flex-col gap-12" style="min-width:0;">
+      <div class="card pack-view-tabs">
+        <button
+          class="btn btn-sm"
+          :class="activePackTab === 'query' ? 'btn-primary' : 'btn-ghost'"
+          type="button"
+          @click="setActivePackTab('query')"
+        >
+          礼包查询
+        </button>
+        <button
+          class="btn btn-sm"
+          :class="activePackTab === 'planner' ? 'btn-primary' : 'btn-ghost'"
+          type="button"
+          @click="setActivePackTab('planner')"
+        >
+          购买规划
+        </button>
+      </div>
+
       <!-- Filters -->
-      <div class="card pack-filters-card" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding: 10px 14px;">
+      <div v-if="activePackTab === 'query'" class="card pack-filters-card" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding: 10px 14px;">
         <div style="font-weight:bold; font-size:var(--fs-sm); color:var(--text-primary); display:flex; align-items:center; white-space:nowrap;">
           🔍 {{ $t('packFilterTitle') }}
         </div>
@@ -88,7 +107,176 @@
         </div>
       </div>
 
-      <div class="card desktop-pack-table" style="overflow-x:auto;padding:8px;">
+      <!-- Planner -->
+      <div v-if="activePackTab === 'planner'" class="card planner-card">
+        <div class="card-title">购买方案规划</div>
+
+        <div class="planner-controls">
+          <label class="planner-field">
+            <span>预算（日元）</span>
+            <input class="form-input" type="number" min="0" step="160" v-model.number="planSettings.budget" />
+          </label>
+
+          <label class="planner-field">
+            <span>当前礼包档位</span>
+            <select class="form-select" v-model.number="planSettings.currentPrice">
+              <option v-for="p in planPriceOptions" :key="p" :value="p">
+                {{ tierLabel(p) }}
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <div class="planner-lane-head">
+          <span>触发源</span>
+          <span>当前层/等级</span>
+          <span>计划推到</span>
+          <span>2小时内最多触发</span>
+        </div>
+
+        <div class="planner-lanes">
+          <label
+            v-for="lane in planLanes"
+            :key="lane.id"
+            class="planner-lane"
+            :class="{ disabled: !lane.enabled }"
+          >
+            <span class="planner-lane-name">
+              <input type="checkbox" v-model="lane.enabled" />
+              {{ planLaneName(lane) }}
+            </span>
+            <input class="form-input" type="number" min="0" step="1" v-model.number="lane.startProgress" />
+            <input class="form-input" type="number" min="0" step="1" v-model.number="lane.endProgress" />
+            <input class="form-input" type="number" min="1" max="50" step="1" v-model.number="lane.batchSize" />
+          </label>
+        </div>
+
+        <div class="planner-derived-note">
+          当前层/等级表示已经达到的位置；计划推到表示本次规划最多推进到哪里；2小时内最多触发用于模拟卡包。预算单位为日元。全属性塔抵达由蓝塔、红塔、翠塔、黄塔四行自动推算。
+        </div>
+
+        <div class="planner-actions">
+          <button class="btn btn-primary btn-sm" type="button" :disabled="isPlanning" @click="calculatePlanner">
+            {{ isPlanning ? '计算中...' : '计算购买方案' }}
+          </button>
+          <span class="planner-calc-status">
+            {{ plannerStatusText }}
+          </span>
+        </div>
+
+        <div v-if="planOptions.length" class="planner-mode-tabs" role="tablist" aria-label="购买方案">
+          <button
+            v-for="option in planOptions"
+            :key="option.id"
+            class="btn btn-sm"
+            :class="activePlanId === option.id ? 'btn-primary' : 'btn-ghost'"
+            type="button"
+            role="tab"
+            :aria-selected="activePlanId === option.id"
+            @click="setActivePlan(option.id)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+
+        <div v-if="planOptions.length" class="planner-mode-desc">
+          {{ selectedPlan.description }}
+        </div>
+
+        <div v-if="selectedPlan" class="planner-summary">
+          <div><span>可触发</span><b>{{ selectedPlan.opportunityCount }}</b></div>
+          <div><span>批次</span><b>{{ selectedPlan.batchCount }}</b></div>
+          <div><span>购买</span><b>{{ selectedPlan.purchases }}</b></div>
+          <div><span>花费</span><b>{{ formatPrice(selectedPlan.spent) }}</b></div>
+          <div><span>剩余</span><b>{{ formatPrice(selectedPlan.remaining) }}</b></div>
+          <div><span>总价值</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
+          <div><span>均 CE</span><b>{{ selectedPlan.averageCe.toFixed(1) }}</b></div>
+          <div><span>末档</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
+        </div>
+
+        <div v-if="selectedPlan && selectedPlan.steps.length" class="planner-table-wrap">
+          <table class="data-table planner-table">
+            <thead>
+              <tr>
+                <th>批次</th>
+                <th>触发</th>
+                <th>档位</th>
+                <th>操作</th>
+                <th>花费</th>
+                <th>价值</th>
+                <th>下批</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="step in displayedPlanSteps" :key="step.rowKey">
+                <tr :class="{ 'row-expanded': isPlannerStepExpanded(step.rowKey) }">
+                  <td>{{ step.indexLabel }}</td>
+                  <td>{{ step.triggerRange }}</td>
+                  <td>{{ tierLabel(step.tierPrice) }}</td>
+                  <td>
+                    <span v-if="!step.bought" class="text-muted">
+                      {{ step.skipCount > 1 ? `连续不买 ×${step.skipCount}` : '不买' }}
+                    </span>
+                    <button
+                      v-else
+                      class="btn btn-ghost btn-sm planner-expand-btn"
+                      type="button"
+                      @click="togglePlannerStep(step.rowKey)"
+                    >
+                      {{ isPlannerStepExpanded(step.rowKey) ? '收起' : '展开' }} {{ step.purchases.length }} 个
+                    </button>
+                    <span v-if="step.bought" class="planner-purchases">
+                      <span v-for="p in step.purchases.slice(0, 3)" :key="`${step.rowKey}-${p.displayTrigger}`">
+                        {{ p.displayTrigger }} / CE {{ p.ce.toFixed(1) }}
+                      </span>
+                    </span>
+                  </td>
+                  <td>{{ formatPrice(step.cost) }}</td>
+                  <td>{{ step.value.toLocaleString() }}</td>
+                  <td>{{ tierLabel(step.nextTierPrice) }}</td>
+                </tr>
+                <tr v-if="step.bought && isPlannerStepExpanded(step.rowKey)" class="planner-detail-row">
+                  <td :colspan="7">
+                    <div class="planner-pack-details">
+                      <article v-for="pack in step.purchases" :key="`${step.rowKey}-detail-${pack.displayTrigger}`" class="planner-pack-detail">
+                        <div class="planner-pack-detail-head">
+                          <strong>{{ pack.displayTrigger }}</strong>
+                          <span>{{ formatPrice(pack.price) }}</span>
+                          <span>CE {{ pack.ce.toFixed(1) }}</span>
+                          <span>价值 {{ Math.round(pack.value).toLocaleString() }}</span>
+                        </div>
+                        <div class="planner-pack-items">
+                          <div
+                            v-for="(item, itemIndex) in pack.items"
+                            :key="`${pack.displayTrigger}-${itemIndex}`"
+                            class="planner-pack-item"
+                            :title="itemDisplayName(item)"
+                          >
+                            <img
+                              :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
+                              @error="e => e.target.style.display='none'"
+                            />
+                            <span>{{ itemDisplayName(item) }}</span>
+                            <b><span class="pack-item-qty-mark">×</span>{{ item.qty }}</b>
+                          </div>
+                        </div>
+                      </article>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          <div v-if="compressedPlanSteps.length > displayedPlanSteps.length" class="planner-more">
+            还有 {{ compressedPlanSteps.length - displayedPlanSteps.length }} 行未显示
+          </div>
+        </div>
+
+        <div v-else-if="planOptions.length" class="planner-empty">当前范围内没有可规划的限时组合包。</div>
+        <div v-else class="planner-empty">调整预算与触发源后，点击“计算购买方案”。</div>
+      </div>
+
+      <div v-if="activePackTab === 'query'" class="card desktop-pack-table" style="overflow-x:auto;padding:8px;">
         <table class="data-table">
           <thead>
             <tr>
@@ -152,7 +340,7 @@
         </table>
       </div>
 
-      <div class="mobile-pack-list">
+      <div v-if="activePackTab === 'query'" class="mobile-pack-list">
         <article
           v-for="(p, i) in sortedPacks"
           :key="`mobile-${i}`"
@@ -200,11 +388,17 @@ import { useI18n } from 'vue-i18n'
 const showScores = ref(true)
 
 import { calculatePackCE, normalizeScores } from '../engine/packCalc.js'
+import { buildUltraSalePlanOptions, compressUltraSalePlanSteps, paidDiamondsForPrice } from '../engine/ultraSalePlanner.js'
 import { editableScores } from '../store/itemScores.js'
 
 const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
 const packsRaw = ref([])
+const activePackTab = ref('query')
+
+function setActivePackTab(tab) {
+  activePackTab.value = tab
+}
 
 onMounted(async () => {
   packsRaw.value = (await import('../constants/ultraSalePacks.json')).default
@@ -249,6 +443,8 @@ const priceOptions = computed(() => {
   return [...s].sort((a, b) => b - a)
 })
 
+const planPriceOptions = computed(() => [...priceOptions.value].sort((a, b) => a - b))
+
 // --- Sort ---
 const sortState = reactive({ by: 'trigger', asc: true })
 function toggleSort(field) {
@@ -269,6 +465,102 @@ const filteredPacks = computed(() => {
 
   return calculatePackCE(result, normalizedScores.value)
 })
+
+const planSettings = reactive({
+  budget: 11800,
+  currentPrice: 160
+})
+
+const activePlanId = ref('bestValue')
+const planOptions = ref([])
+const isPlanning = ref(false)
+const plannerDirty = ref(true)
+const plannerStatus = ref('尚未计算')
+
+function setActivePlan(id) {
+  activePlanId.value = id
+}
+
+const planLanes = reactive([
+  { id: 'quest', cat: 'quest', labelKey: 'origin_quest', enabled: true, startProgress: 0, endProgress: 55, batchSize: 6 },
+  { id: 'rank', cat: 'rank', labelKey: 'origin_rank', enabled: true, startProgress: 0, endProgress: 200, batchSize: 1 },
+  { id: 'tower_infinite', cat: 'tower', tower: 'origin_tower_infinite', labelKey: 'origin_tower_infinite', enabled: true, startProgress: 0, endProgress: 1000, batchSize: 6 },
+  { id: 'tower_blue', cat: 'tower', tower: 'origin_tower_blue', labelKey: 'origin_tower_blue', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
+  { id: 'tower_red', cat: 'tower', tower: 'origin_tower_red', labelKey: 'origin_tower_red', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
+  { id: 'tower_green', cat: 'tower', tower: 'origin_tower_green', labelKey: 'origin_tower_green', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
+  { id: 'tower_yellow', cat: 'tower', tower: 'origin_tower_yellow', labelKey: 'origin_tower_yellow', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
+])
+
+function planLaneName(lane) {
+  return lane.labelKey ? t(lane.labelKey) : lane.id
+}
+
+function tierLabel(price) {
+  return `${formatPrice(price)} / ${paidDiamondsForPrice(price)}钻`
+}
+
+const planningSettings = computed(() => ({
+  ...planSettings,
+  lanes: planLanes.map(lane => ({
+    id: lane.id,
+    cat: lane.cat,
+    tower: lane.tower,
+    label: planLaneName(lane),
+    enabled: lane.enabled,
+    startProgress: lane.startProgress,
+    endProgress: lane.endProgress,
+    batchSize: lane.batchSize,
+  })),
+}))
+
+const plannerStatusText = computed(() => {
+  if (isPlanning.value) return '正在生成方案，请稍候'
+  if (plannerDirty.value && planOptions.value.length) return '参数已变更，请重新计算'
+  return plannerStatus.value
+})
+
+async function calculatePlanner() {
+  if (isPlanning.value) return
+  isPlanning.value = true
+  await new Promise(resolve => setTimeout(resolve, 0))
+
+  try {
+    const startedAt = performance.now()
+    const calculatedPacks = calculatePackCE(packsRaw.value, normalizedScores.value)
+    const options = buildUltraSalePlanOptions(calculatedPacks, {
+      ...planningSettings.value,
+      maxStatesPerTier: 350,
+    })
+    planOptions.value = options
+    if (!options.some(option => option.id === activePlanId.value)) {
+      activePlanId.value = options[0]?.id || 'bestValue'
+    }
+    plannerDirty.value = false
+    plannerStatus.value = `已计算，耗时 ${Math.max(1, Math.round(performance.now() - startedAt))} ms`
+  } finally {
+    isPlanning.value = false
+  }
+}
+
+const selectedPlan = computed(() => {
+  if (!planOptions.value.length) return null
+  return planOptions.value.find(option => option.id === activePlanId.value) || planOptions.value[0]
+})
+
+const compressedPlanSteps = computed(() => {
+  if (!selectedPlan.value) return []
+  return compressUltraSalePlanSteps(selectedPlan.value.steps)
+})
+
+const displayedPlanSteps = computed(() => compressedPlanSteps.value.slice(0, 40))
+
+watch(planningSettings, () => {
+  plannerDirty.value = true
+}, { deep: true })
+
+watch(editableScores, () => {
+  plannerDirty.value = true
+}, { deep: true })
 
 const sortedPacks = computed(() => {
   const result = [...filteredPacks.value]
@@ -291,6 +583,19 @@ function toggleExpand(i) {
   else expanded.add(i)
 }
 
+const plannerExpanded = reactive(new Set())
+function togglePlannerStep(rowKey) {
+  if (plannerExpanded.has(rowKey)) plannerExpanded.delete(rowKey)
+  else plannerExpanded.add(rowKey)
+}
+function isPlannerStepExpanded(rowKey) {
+  return plannerExpanded.has(rowKey)
+}
+
+watch(activePlanId, () => {
+  plannerExpanded.clear()
+})
+
 const LOCKED_SCORES = { '[2,1]': true }
 function isLocked(key) { return !!LOCKED_SCORES[key] }
 
@@ -310,4 +615,313 @@ function fmtNum(n) {
   text-align: center;
 }
 
+.pack-view-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+.pack-view-tabs .btn {
+  min-width: 112px;
+}
+
+.planner-card {
+  padding: 14px;
+}
+
+.planner-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.planner-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.planner-field span {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.planner-lane-head,
+.planner-lane {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.4fr) repeat(3, minmax(72px, 0.7fr));
+  gap: 8px;
+  align-items: center;
+}
+
+.planner-lane-head {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  margin-top: 12px;
+  padding: 0 8px;
+}
+
+.planner-lanes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.planner-lane {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 8px;
+  background: rgba(255,255,255,0.03);
+}
+
+.planner-lane.disabled {
+  opacity: 0.58;
+}
+
+.planner-lane-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  min-width: 0;
+}
+
+.planner-lane-name input {
+  flex: 0 0 auto;
+}
+
+.planner-derived-note {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+  margin-top: 8px;
+}
+
+.planner-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.planner-actions .btn {
+  min-width: 132px;
+}
+
+.planner-calc-status {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.planner-mode-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.planner-mode-tabs .btn {
+  min-width: 88px;
+}
+
+.planner-mode-desc {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  margin-top: 8px;
+}
+
+.planner-summary {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(78px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.planner-summary div {
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 8px;
+  background: rgba(255,255,255,0.03);
+}
+
+.planner-summary span,
+.planner-summary b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-summary span {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.planner-summary b {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.planner-table-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.planner-table {
+  min-width: 760px;
+}
+
+.planner-expand-btn {
+  padding: 3px 8px;
+  min-height: var(--control-h-sm);
+}
+
+.planner-purchases {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-left: 4px;
+}
+
+.planner-purchases span {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.planner-detail-row td {
+  background: rgba(255,255,255,0.025);
+  padding: 10px !important;
+}
+
+.planner-pack-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.planner-pack-detail {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+}
+
+.planner-pack-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  margin-bottom: 8px;
+}
+
+.planner-pack-detail-head strong {
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+}
+
+.planner-pack-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.planner-pack-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 260px;
+  border-radius: var(--r-sm);
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.035);
+  color: var(--text-primary);
+  font-size: var(--fs-xs);
+}
+
+.planner-pack-item img {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+}
+
+.planner-pack-item span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-pack-item b {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+}
+
+.planner-more,
+.planner-empty {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  margin-top: 8px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .planner-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .planner-lane-head {
+    display: none;
+  }
+
+  .planner-lane {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .planner-lane-name {
+    grid-column: 1 / -1;
+  }
+
+  .planner-mode-tabs .btn {
+    flex: 1 1 calc(50% - 6px);
+  }
+
+  .planner-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .planner-controls,
+  .planner-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .pack-view-tabs {
+    flex-direction: column;
+  }
+
+  .pack-view-tabs .btn {
+    width: 100%;
+  }
+
+  .planner-lane {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-mode-tabs .btn {
+    flex-basis: 100%;
+  }
+}
 </style>

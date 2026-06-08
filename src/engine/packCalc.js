@@ -175,6 +175,7 @@ export function calculatePackCE(packs, scores) {
       rechargeValue,
       value: finalValue,
       diamondCount,
+      paidDiamonds,
       ce: paidDiamonds > 0 ? (finalValue / paidDiamonds) : 0,
       items: itemDetails
     }

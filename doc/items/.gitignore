@@ -4,5 +4,5 @@
 !Pack/
 !Pack/*
 !UltraSalePack/
-!UltraSalePack/ultra-sale-packs.json
+!UltraSalePack/*
 !.gitignore
