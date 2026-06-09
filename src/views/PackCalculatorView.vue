@@ -518,7 +518,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, shallowRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const showScores = ref(true)
@@ -621,7 +621,7 @@ const plannerTotalBudget = computed(() => {
 })
 
 const activePlanId = ref('bestValue')
-const planOptions = ref([])
+const planOptions = shallowRef([])
 const isPlanning = ref(false)
 const plannerDirty = ref(true)
 const plannerStatus = ref('尚未计算')
