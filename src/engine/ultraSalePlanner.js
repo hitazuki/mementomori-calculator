@@ -1013,9 +1013,15 @@ function expandState(state, context) {
         }
 
         next.push(continueSameRechargeDay(candidate))
-        if (candidate.purchases > 0 && candidate.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)) {
+        if (candidate.purchases > 0) {
           const toppedUp = tryApplyTopUp(candidate, context)
-          next.push(resetToNextRechargeDay(toppedUp))
+          if (candidate.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)) {
+            next.push(resetToNextRechargeDay(toppedUp))
+          } else if (toppedUp !== candidate) {
+            // 最后一天：不再生成跨日分支，但补包结果仍需保留。
+            // 将补包后的状态作为同日延续推入，确保最终排序可见补包收益。
+            next.push(continueSameRechargeDay(toppedUp))
+          }
         }
       }
     }
@@ -1043,12 +1049,8 @@ function collectTopValuePlans(context, topK = 1) {
     states = pruneStates(expanded, context)
   }
 
-  // 对所有存活状态统一补包：最后一天的跨日边界不会生成新分支，
-  // tryApplyTopUp 挂在跨日分支逻辑中，导致最后一天遗漏。
-  // tryApplyTopUp 对已补包的状态是幂等的（topUpCost>0 时直接返回）。
-  const toppedUp = states.map(state => tryApplyTopUp(state, context))
-  const complete = toppedUp.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
-  const rankedSource = complete.length ? complete : toppedUp
+  const complete = states.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
+  const rankedSource = complete.length ? complete : states
   const ranked = []
   for (const state of rankedSource.sort(comparePlan)) {
     if (!ranked.some(existing => stateSignature(existing) === stateSignature(state))) ranked.push(state)
