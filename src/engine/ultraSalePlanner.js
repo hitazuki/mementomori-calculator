@@ -880,7 +880,7 @@ function tryApplyTopUp(state, context) {
   if (!nextTier) return state
 
   const gap = nextTier.paid - state.dailyPaidDiamonds
-  const threshold = (Number(context.settings.topUpThreshold) || 10) / 100
+  const threshold = ((context.settings.topUpThreshold ?? 10) / 100)
   if (gap > state.dailyPaidDiamonds * threshold) return state
 
   const topUp = findPermanentTopUpOption(state, context)

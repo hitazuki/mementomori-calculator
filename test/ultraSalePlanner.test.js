@@ -173,7 +173,7 @@ test('planner appends non-first permanent diamond packs to top up daily recharge
     currentPrice: 11800,
     budget: 12120,
     batchSize: 1,
-    topUpBudgetRatio: 5,
+    topUpThreshold: 10,
     permanentPacks,
     freeDiamondScore: 1,
   })
@@ -183,7 +183,6 @@ test('planner appends non-first permanent diamond packs to top up daily recharge
   assert.equal(topUpStep.topUpCost, 320)
   assert.equal(topUpStep.topUpRechargeFreeDiamonds, 4800)
   assert.deepEqual(topUpStep.topUpUnlockedRechargeTiers, [6000])
-  assert.equal(plan.topUpPurchaseCount, 2)
   assert.equal(plan.topUpBatchCount, 1)
   assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 80 ×2')
   assert.equal(plan.topUpBatches[0].index, 1)
@@ -210,15 +209,15 @@ test('planner stops permanent top-up once the next recharge tier is reached', ()
     currentPrice: 11800,
     budget: 12280,
     batchSize: 1,
-    topUpBudgetRatio: 5,
+    topUpThreshold: 10,
     permanentPacks,
     freeDiamondScore: 1,
   })
 
-  assert.equal(plan.spent, 12120)
+  assert.equal(plan.spent, 11800)
   assert.equal(plan.remaining, 480)
-  assert.equal(plan.topUpRemaining, 294)
-  assert.equal(plan.topUpPurchaseCount, 2)
+  assert.equal(plan.totalSpent, 12120)
+  assert.equal(plan.topUpTotalCost, 320)
   assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 80 ×2')
   assert.equal(plan.steps[0].topUpCost, 320)
   assert.deepEqual(plan.steps[0].topUpUnlockedRechargeTiers, [6000])
@@ -241,13 +240,13 @@ test('planner uses the cheapest permanent diamond combo for the next recharge ti
     currentPrice: 11350,
     budget: 12000,
     batchSize: 1,
-    topUpBudgetRatio: 6,
+    topUpThreshold: 10,
     permanentPacks,
     freeDiamondScore: 1,
   })
 
-  assert.equal(plan.spent, 12000)
-  assert.equal(plan.topUpPurchaseCount, 1)
+  assert.equal(plan.totalSpent, 12000)
+  assert.equal(plan.topUpTotalCost, 650)
   assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 325')
   assert.equal(plan.steps[0].topUpCost, 650)
   assert.deepEqual(plan.steps[0].topUpUnlockedRechargeTiers, [6000])
@@ -270,23 +269,23 @@ test('planner skips permanent top-up when the recharge gap is too large', () => 
     currentPrice: 12000,
     budget: 24000,
     batchSize: 1,
-    topUpBudgetRatio: 5,
+    topUpThreshold: 10,
     permanentPacks,
     freeDiamondScore: 1,
   })
 
   assert.equal(plan.spent, 12000)
-  assert.equal(plan.topUpPurchaseCount, 0)
+  assert.equal(plan.topUpTotalCost, 0)
   assert.equal(plan.topUpPackSummary, '')
   assert.equal(plan.steps[0].topUpPacks, undefined)
 })
 
-test('planner keeps the no-top-up branch when current top-up is worse', () => {
+test('planner skips top-up when threshold is set to zero', () => {
   const packs = [
     pack('10', 11800, 5900),
   ]
   const permanentPacks = [
-    permanentDiamondPack('钻石组合包 80', 160, -10000),
+    permanentDiamondPack('钻石组合包 80', 160, 148),
   ]
 
   const plan = planUltraSalePurchases(packs, {
@@ -297,13 +296,12 @@ test('planner keeps the no-top-up branch when current top-up is worse', () => {
     currentPrice: 11800,
     budget: 11800,
     batchSize: 1,
-    topUpBudgetRatio: 5,
+    topUpThreshold: 0,
     permanentPacks,
-    freeDiamondScore: 0,
+    freeDiamondScore: 1,
   })
 
-  assert.equal(plan.topUpPurchaseCount, 0)
-  assert.equal(plan.topUpSpentYen, 0)
+  assert.equal(plan.topUpTotalCost, 0)
   assert.equal(plan.steps[0].topUpPacks, undefined)
 })
 
@@ -322,17 +320,16 @@ test('same-day continuation does not create permanent top-up candidates', () => 
     currentPrice: 11800,
     budget: 12120,
     batchSize: 1,
-    topUpBudgetRatio: 5,
+    topUpThreshold: 10,
     permanentPacks,
     freeDiamondScore: 1,
   })
 
   const states = __testables.expandState(__testables.createEmptyState(context), context)
   const sameDayBought = states.find(state => state.purchases === 1 && state.rechargeDayIndex === 0)
-  const nextDayTopUp = states.find(state => state.purchases === 1 && state.rechargeDayIndex === 1 && state.topUpSpentYen > 0)
+  const nextDayTopUp = states.find(state => state.purchases === 1 && state.rechargeDayIndex === 1 && state.steps[0].topUpCost > 0)
 
   assert.ok(sameDayBought)
-  assert.equal(sameDayBought.topUpSpentYen, 0)
   assert.equal(sameDayBought.steps[0].topUpPacks, undefined)
   assert.ok(nextDayTopUp)
   assert.equal(nextDayTopUp.steps[0].topUpPacks[0].displayTrigger, '钻石组合包 80 ×2')
