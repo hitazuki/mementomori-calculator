@@ -880,7 +880,7 @@ function tryApplyTopUp(state, context) {
   if (!nextTier) return state
 
   const gap = nextTier.paid - state.dailyPaidDiamonds
-  const threshold = Number(context.settings.topUpThreshold ?? context.topUpThreshold) || 0.10
+  const threshold = (Number(context.settings.topUpThreshold) || 10) / 100
   if (gap > state.dailyPaidDiamonds * threshold) return state
 
   const topUp = findPermanentTopUpOption(state, context)
@@ -1234,7 +1234,7 @@ function createResult(state, context, meta = {}) {
   const topUpTotalCost = topUpBatches.reduce((sum, b) => sum + b.cost, 0)
   const totalSpent = state.limitedSpentYen + topUpTotalCost
 
-  const topUpThreshold = Number(context.settings.topUpThreshold) || 0.10
+  const topUpThreshold = context.settings.topUpThreshold ?? 10
 
   return {
     ...meta,
