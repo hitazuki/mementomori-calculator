@@ -2,16 +2,16 @@ import { DAILY_RECHARGE_BONUS_TIERS, marginalFreeDiamonds, unlockedRechargeTiers
 import { parseMainQuestProgress } from './mainQuestProgress.js'
 
 const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
-const DEFAULT_MAX_STATES_PER_TIER = 350
+const DEFAULT_MAX_STATES = 350
+const DEFAULT_TOP_UP_RATIO = 0.05
 const TOP_UP_SOURCE_LABEL = '每日累充补包'
-const MAX_DAILY_RECHARGE_PAID = DAILY_RECHARGE_BONUS_TIERS.at(-1)?.paid || 0
+const ALL_ATTRIBUTE_TOWER = 'origin_group_all_towers'
 const ATTRIBUTE_TOWERS = [
   'origin_tower_blue',
   'origin_tower_red',
   'origin_tower_green',
   'origin_tower_yellow',
 ]
-const ALL_ATTRIBUTE_TOWER = 'origin_group_all_towers'
 
 function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n))
@@ -46,6 +46,58 @@ function laneLabel(lane) {
   return lane.tower || '塔'
 }
 
+function isAttributeTowerLane(lane) {
+  return lane.cat === 'tower' && ATTRIBUTE_TOWERS.includes(lane.tower)
+}
+
+function paidDiamondsForPriceValue(price) {
+  return Math.round(price / 2)
+}
+
+export function paidDiamondsForPrice(price) {
+  return paidDiamondsForPriceValue(price)
+}
+
+function getPackOriginalValue(pack) {
+  if (Number.isFinite(pack.originalValue)) return pack.originalValue
+  if (Number.isFinite(pack.value) && Number.isFinite(pack.rechargeValue)) return pack.value - pack.rechargeValue
+  return Number(pack.value) || 0
+}
+
+function getPackPaidDiamonds(pack) {
+  if (Number.isFinite(pack.paidDiamonds)) return pack.paidDiamonds
+  return paidDiamondsForPrice(pack.price)
+}
+
+function normalizePlanningLanes(settings) {
+  if (Array.isArray(settings.lanes) && settings.lanes.length) {
+    return settings.lanes
+      .filter(lane => lane.enabled !== false)
+      .map(lane => {
+        const normalized = {
+          ...lane,
+          cat: lane.cat || lane.source || 'tower',
+        }
+        return {
+          ...normalized,
+          batchSize: isAttributeTowerLane(normalized)
+            ? 1
+            : Math.max(1, Math.floor(Number(lane.batchSize) || Number(settings.batchSize) || 1)),
+        }
+      })
+  }
+
+  return [{
+    id: settings.source === 'tower' ? `tower:${settings.tower || 'origin_tower_infinite'}` : settings.source || 'tower',
+    cat: settings.source || 'tower',
+    tower: settings.tower || 'origin_tower_infinite',
+    label: settings.label,
+    startProgress: settings.startProgress,
+    endProgress: settings.endProgress,
+    batchSize: Math.max(1, Math.floor(Number(settings.batchSize) || 1)),
+  }]
+}
+
 function buildLaneOpportunities(packs, lane) {
   const start = parseLaneProgress(lane.startProgress, lane)
   const end = parseLaneProgress(lane.endProgress, lane)
@@ -65,6 +117,7 @@ function buildLaneOpportunities(packs, lane) {
     const key = `${laneId}:${pack.trigger}`
     if (!groups.has(key)) {
       groups.set(key, {
+        id: key,
         laneId,
         label,
         trigger: pack.trigger,
@@ -95,215 +148,331 @@ function buildOpportunities(packs, settings) {
 function buildBatches(opportunities, batchSize) {
   const size = Math.max(1, Number(batchSize) || 1)
   const batches = []
-  for (let i = 0; i < opportunities.length; i += size) {
-    batches.push(opportunities.slice(i, i + size))
-  }
+  for (let i = 0; i < opportunities.length; i += size) batches.push(opportunities.slice(i, i + size))
   return batches
 }
 
-function getLaneReachBatchIndex(lane, triggerProgress) {
-  const start = parseLaneProgress(lane.startProgress, lane)
-  const end = parseLaneProgress(lane.endProgress, lane)
-  if (triggerProgress <= start) return 0
-  if (end > 0 && triggerProgress > end) return null
-
-  const batchSize = Math.max(1, Number(lane.batchSize) || 1)
-  const triggerCount = Math.ceil(triggerProgress - start)
-  return Math.max(1, Math.ceil(triggerCount / batchSize))
-}
-
-function buildDerivedAllTowerEntries(packs, lanes) {
-  const attributeLanes = ATTRIBUTE_TOWERS.map(tower => {
-    return lanes.find(lane => lane.cat === 'tower' && lane.tower === tower)
-  })
-  if (attributeLanes.some(lane => !lane)) return []
-
-  const start = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.startProgress, lane)))
-  const end = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.endProgress, lane)))
-  if (end <= start) return []
-
-  const allTowerLane = {
-    id: 'tower_all_derived',
-    cat: 'tower',
-    tower: 'origin_group_all_towers',
-    label: '\u5168\u5c5e\u6027\u5854\u62b5\u8fbe',
-    startProgress: start,
-    endProgress: end,
-    batchSize: 1,
-  }
-
-  return buildLaneOpportunities(packs, allTowerLane)
-    .map(opportunity => {
-      const reachBatchIndexes = attributeLanes.map(lane => getLaneReachBatchIndex(lane, opportunity.sortValue))
-      if (reachBatchIndexes.some(index => index === null)) return null
-      const reachBatchIndex = Math.max(...reachBatchIndexes)
-      if (!Number.isFinite(reachBatchIndex)) return null
-      return { opportunity, batchIndex: reachBatchIndex - 1 }
-    })
-    .filter(Boolean)
-}
-
-function isAttributeTowerLane(lane) {
-  return lane.cat === 'tower' && ATTRIBUTE_TOWERS.includes(lane.tower)
-}
-
-function sortBatchOpportunities(batch) {
-  return batch.sort((a, b) => {
-    const labelOrder = a.label.localeCompare(b.label)
+function sortOpportunities(opportunities) {
+  return [...opportunities].sort((a, b) => {
+    const labelOrder = String(a.label || '').localeCompare(String(b.label || ''))
     if (labelOrder !== 0) return labelOrder
     if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
     return String(a.trigger).localeCompare(String(b.trigger), undefined, { numeric: true })
   })
 }
 
-function buildAttributeTowerTopologyBatches(packs, lanes) {
+function buildAttributeTowerEvents(packs, lanes) {
   const attributeLanes = lanes.filter(isAttributeTowerLane)
-  if (!attributeLanes.length) return { batches: [], opportunities: [] }
+  if (!attributeLanes.length) return []
 
-  const singleEvents = new Map()
+  const singleEvents = []
   for (const lane of attributeLanes) {
-    const opportunities = buildLaneOpportunities(packs, {
-      ...lane,
-      batchSize: 1,
-    })
-    for (const opportunity of opportunities) {
-      const key = `single:${opportunity.sortValue}`
-      if (!singleEvents.has(key)) {
-        singleEvents.set(key, {
-          kind: 'single',
-          sortValue: opportunity.sortValue,
-          opportunities: [],
-        })
-      }
-      singleEvents.get(key).opportunities.push(opportunity)
+    for (const opportunity of buildLaneOpportunities(packs, { ...lane, batchSize: 1 })) {
+      singleEvents.push({
+        kind: 'single',
+        sortValue: opportunity.sortValue,
+        topologyKey: `single:${opportunity.sortValue}`,
+        opportunities: [opportunity],
+      })
     }
   }
 
-  const allTowerEvents = new Map()
+  const allTowerEvents = []
   if (ATTRIBUTE_TOWERS.every(tower => attributeLanes.some(lane => lane.tower === tower))) {
     const start = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.startProgress, lane)))
     const end = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.endProgress, lane)))
-
     if (end > start) {
       const allTowerLane = {
         id: 'tower_all_derived',
         cat: 'tower',
         tower: ALL_ATTRIBUTE_TOWER,
-        label: '\u5168\u5c5e\u6027\u5854\u62b5\u8fbe',
+        label: '全属性塔抵达',
         startProgress: start,
         endProgress: end,
         batchSize: 1,
       }
-
       for (const opportunity of buildLaneOpportunities(packs, allTowerLane)) {
-        const key = `all:${opportunity.sortValue}`
-        allTowerEvents.set(key, {
+        allTowerEvents.push({
           kind: 'all',
           sortValue: opportunity.sortValue,
+          topologyKey: `all:${opportunity.sortValue}`,
           opportunities: [opportunity],
         })
       }
     }
   }
 
-  const events = [...singleEvents.values(), ...allTowerEvents.values()]
+  return [...singleEvents, ...allTowerEvents]
     .sort((a, b) => {
       if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
       if (a.kind === b.kind) return 0
       return a.kind === 'all' ? -1 : 1
     })
+    .map((event, index) => ({
+      id: `attribute:${index}:${event.kind}:${event.sortValue}`,
+      opportunities: sortOpportunities(event.opportunities),
+      sortValue: event.sortValue,
+      kind: event.kind,
+      topologyKey: event.topologyKey,
+    }))
+}
 
-  const batches = events.map(event => sortBatchOpportunities(event.opportunities))
+function buildAttributeTowerTopologyBatches(packs, lanes) {
+  const events = buildAttributeTowerEvents(packs, lanes)
+  const batches = events.map(event => event.opportunities)
   return {
     batches,
     opportunities: batches.flat(),
   }
 }
 
-function normalizePlanningLanes(settings) {
-  if (Array.isArray(settings.lanes) && settings.lanes.length) {
-    return settings.lanes
-      .filter(lane => lane.enabled !== false)
-      .map(lane => ({
-        ...lane,
-        cat: lane.cat || lane.source || 'tower',
-        batchSize: isAttributeTowerLane({
-          ...lane,
-          cat: lane.cat || lane.source || 'tower',
-        })
-          ? 1
-          : Math.max(1, Math.floor(Number(lane.batchSize) || Number(settings.batchSize) || 1)),
-      }))
-  }
-
-  return [{
-    id: settings.source === 'tower' ? `tower:${settings.tower || 'origin_tower_infinite'}` : settings.source || 'tower',
-    cat: settings.source || 'tower',
-    tower: settings.tower || 'origin_tower_infinite',
-    startProgress: settings.startProgress,
-    endProgress: settings.endProgress,
-    batchSize: Math.max(1, Math.floor(Number(settings.batchSize) || 1)),
-  }]
+function attributeTowerSourceId(lane) {
+  return lane.id || `tower:${lane.tower}`
 }
 
-function buildCombinedBatches(packs, settings) {
+function buildPlanningSources(packs, settings) {
   const lanes = normalizePlanningLanes(settings)
-  const attributeTowerTopology = buildAttributeTowerTopologyBatches(packs, lanes)
-  const laneBatches = lanes.filter(lane => !isAttributeTowerLane(lane)).map(lane => ({
-    lane,
-    batches: buildBatches(buildLaneOpportunities(packs, lane), lane.batchSize),
-  }))
+  const sources = []
 
-  const maxBatchCount = Math.max(
-    0,
-    ...laneBatches.map(entry => entry.batches.length),
-    attributeTowerTopology.batches.length,
-  )
-  const batches = []
-  for (let i = 0; i < maxBatchCount; i++) {
-    const batch = []
-    for (const entry of laneBatches) {
-      batch.push(...(entry.batches[i] || []))
+  for (const lane of lanes.filter(lane => !isAttributeTowerLane(lane))) {
+    const opportunities = buildLaneOpportunities(packs, lane)
+    if (!opportunities.length) continue
+    sources.push({
+      id: lane.id || `${lane.cat}:${lane.tower || 'all'}`,
+      label: laneLabel(lane),
+      batchSize: Math.max(1, Number(lane.batchSize) || 1),
+      groups: opportunities.map((opportunity, index) => ({
+        id: `${opportunity.id}:${index}`,
+        opportunities: [opportunity],
+        sortValue: opportunity.sortValue,
+      })),
+    })
+  }
+
+  const attributeSourceIndices = new Map()
+  for (const lane of lanes.filter(isAttributeTowerLane)) {
+    const opportunities = buildLaneOpportunities(packs, { ...lane, batchSize: 1 })
+    const sourceIndex = sources.length
+    attributeSourceIndices.set(lane.tower, sourceIndex)
+    sources.push({
+      id: attributeTowerSourceId(lane),
+      label: laneLabel(lane),
+      batchSize: 1,
+      attributeTower: lane.tower,
+      attributeStartProgress: parseLaneProgress(lane.startProgress, lane),
+      attributeEndProgress: parseLaneProgress(lane.endProgress, lane),
+      groups: opportunities.map((opportunity, index) => ({
+        id: `${opportunity.id}:${index}`,
+        opportunities: [opportunity],
+        sortValue: opportunity.sortValue,
+        attributeLayer: opportunity.sortValue,
+        attributeKind: 'single',
+      })),
+    })
+  }
+
+  const attributeLanes = lanes.filter(isAttributeTowerLane)
+  if (ATTRIBUTE_TOWERS.every(tower => attributeSourceIndices.has(tower))) {
+    const start = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.startProgress, lane)))
+    const end = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.endProgress, lane)))
+    if (end > start) {
+      const allTowerLane = {
+        id: 'tower_all_derived',
+        cat: 'tower',
+        tower: ALL_ATTRIBUTE_TOWER,
+        label: '全属性塔抵达',
+        startProgress: start,
+        endProgress: end,
+        batchSize: 1,
+      }
+      const opportunities = buildLaneOpportunities(packs, allTowerLane)
+      if (opportunities.length) {
+        sources.push({
+          id: 'attribute_all_towers',
+          label: '全属性塔抵达',
+          batchSize: 1,
+          attributeKind: 'all',
+          allAttributeTowerSourceIndices: ATTRIBUTE_TOWERS.map(tower => attributeSourceIndices.get(tower)),
+          groups: opportunities.map((opportunity, index) => ({
+            id: `${opportunity.id}:${index}`,
+            opportunities: [opportunity],
+            sortValue: opportunity.sortValue,
+            attributeLayer: opportunity.sortValue,
+            attributeKind: 'all',
+          })),
+        })
+      }
     }
-    batch.push(...(attributeTowerTopology.batches[i] || []))
-    sortBatchOpportunities(batch)
-    batches.push(batch)
   }
 
+  return { lanes, sources }
+}
+
+function sourceCursorsKey(cursors) {
+  return cursors.join(',')
+}
+
+function allSourcesExhausted(sources, cursors) {
+  return sources.every((source, index) => cursors[index] >= source.groups.length)
+}
+
+function batchIdForGroups(groups) {
+  return groups.map(group => group.id).join('+')
+}
+
+function processedAttributeLayer(state, sources) {
+  if (!state) return null
+  let layer = null
+  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    const source = sources[sourceIndex]
+    const cursor = state.sourceCursors[sourceIndex] || 0
+    for (let groupIndex = 0; groupIndex < cursor; groupIndex++) {
+      const groupLayer = source.groups[groupIndex]?.attributeLayer
+      if (!Number.isFinite(groupLayer)) continue
+      layer = layer === null ? groupLayer : Math.max(layer, groupLayer)
+    }
+  }
+  return layer
+}
+
+function batchAdvancesAttributeLayer(groupsBySource, sources, state) {
+  const layer = processedAttributeLayer(state, sources)
+  if (layer === null) return false
+  return Object.entries(groupsBySource).some(([sourceIndexText, groups]) => {
+    if (!sources[Number(sourceIndexText)]) return false
+    return groups.some(group => Number.isFinite(group.attributeLayer) && group.attributeLayer > layer)
+  })
+}
+
+function allAttributeTowerGroupAvailable(source, group, state, sources) {
+  if (!source.allAttributeTowerSourceIndices?.length) return true
+  const layer = group.sortValue
+  return source.allAttributeTowerSourceIndices.every(sourceIndex => {
+    const towerSource = sources[sourceIndex]
+    if (!towerSource) return false
+    const cursor = state.sourceCursors[sourceIndex] || 0
+    const previous = cursor > 0
+      ? towerSource.groups[cursor - 1]?.sortValue
+      : towerSource.attributeStartProgress
+    const next = cursor < towerSource.groups.length
+      ? towerSource.groups[cursor]?.sortValue
+      : towerSource.attributeEndProgress
+    return Number.isFinite(previous)
+      && Number.isFinite(next)
+      && layer > previous
+      && layer <= next
+  })
+}
+
+function makeBatchCandidate(groupsBySource, sources, state = null) {
+  const opportunities = []
+  const cursorDelta = Array.from({ length: sources.length }, () => 0)
+  let sourceCount = 0
+  let requiresRechargeReset = state ? batchAdvancesAttributeLayer(groupsBySource, sources, state) : false
+  for (const [sourceIndexText, groups] of Object.entries(groupsBySource)) {
+    const sourceIndex = Number(sourceIndexText)
+    if (!groups.length) continue
+    sourceCount += 1
+    cursorDelta[sourceIndex] = groups.length
+    const source = sources[sourceIndex]
+    if (state && source?.forceRechargeResetBetweenGroups && state.sourceCursors[sourceIndex] > 0) {
+      const previousGroup = source.groups[state.sourceCursors[sourceIndex] - 1]
+      const nextGroup = groups[0]
+      if (previousGroup?.topologyKey && nextGroup?.topologyKey && previousGroup.topologyKey !== nextGroup.topologyKey) {
+        requiresRechargeReset = true
+      }
+    }
+    for (const group of groups) opportunities.push(...group.opportunities)
+  }
+  const sorted = sortOpportunities(opportunities)
+  const pressure = sorted.length + Math.max(0, sourceCount - 1)
   return {
-    lanes,
-    opportunities: [
-      ...laneBatches.flatMap(entry => entry.batches.flat()),
-      ...attributeTowerTopology.opportunities,
-    ],
-    batches,
+    id: batchIdForGroups(Object.values(groupsBySource).flat()),
+    opportunities: sorted,
+    cursorDelta,
+    pressure,
+    sourceCount,
+    requiresRechargeReset,
   }
 }
 
-function makeStateKey(tierIndex, spent) {
-  return `${tierIndex}|${spent}`
+function sourcePrefixOptions(source, cursor, state, sources) {
+  const remaining = source.groups.length - cursor
+  if (remaining <= 0) return []
+  if (source.allAttributeTowerSourceIndices && !allAttributeTowerGroupAvailable(source, source.groups[cursor], state, sources)) {
+    return []
+  }
+  let maxTake = Math.min(source.batchSize, remaining)
+  if (source.limitPrefixToSameTopology) {
+    const topologyKey = source.groups[cursor]?.topologyKey
+    let sameTopologyCount = 0
+    while (
+      sameTopologyCount < maxTake
+      && source.groups[cursor + sameTopologyCount]?.topologyKey === topologyKey
+    ) {
+      sameTopologyCount += 1
+    }
+    maxTake = Math.max(1, sameTopologyCount)
+  }
+  const options = []
+  for (let count = 1; count <= maxTake; count++) {
+    options.push(source.groups.slice(cursor, cursor + count))
+  }
+  return options
 }
 
-function comparePlan(a, b) {
-  if (a.value !== b.value) return b.value - a.value
-  if (a.purchases !== b.purchases) return b.purchases - a.purchases
-  return a.spent - b.spent
+function generateBatchCandidates(state, context) {
+  const { sources } = context
+  const candidates = new Map()
+  const activeOptions = []
+
+  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    const source = sources[sourceIndex]
+    const options = sourcePrefixOptions(source, state.sourceCursors[sourceIndex], state, sources)
+    if (!options.length) continue
+    activeOptions.push({ sourceIndex, options })
+
+    for (const groups of options) {
+      const candidate = makeBatchCandidate({ [sourceIndex]: groups }, sources, state)
+      candidates.set(candidate.id, candidate)
+    }
+  }
+
+  const maxCrossSources = Math.min(activeOptions.length, Number(context.settings.maxCrossSources) || 5)
+  const cappedSources = activeOptions.slice(0, maxCrossSources)
+  const comboLimit = Math.max(20, Number(context.settings.maxBatchCandidates) || 120)
+
+  function addCross(index, selected) {
+    if (candidates.size >= comboLimit) return
+    if (index >= cappedSources.length) {
+      if (Object.keys(selected).length < 2) return
+      const candidate = makeBatchCandidate(selected, sources, state)
+      candidates.set(candidate.id, candidate)
+      return
+    }
+
+    addCross(index + 1, selected)
+
+    const { sourceIndex, options } = cappedSources[index]
+    const first = options[0]
+    addCross(index + 1, { ...selected, [sourceIndex]: first })
+
+    const maxPrefix = options[options.length - 1]
+    if (maxPrefix !== first) addCross(index + 1, { ...selected, [sourceIndex]: maxPrefix })
+  }
+
+  addCross(0, {})
+
+  return [...candidates.values()]
+    .filter(candidate => candidate.opportunities.length)
+    .sort((a, b) => {
+      if (a.pressure !== b.pressure) return a.pressure - b.pressure
+      return b.opportunities.length - a.opportunities.length
+    })
+    .slice(0, comboLimit)
 }
 
-function getPackOriginalValue(pack) {
-  if (Number.isFinite(pack.originalValue)) return pack.originalValue
-  if (Number.isFinite(pack.value) && Number.isFinite(pack.rechargeValue)) return pack.value - pack.rechargeValue
-  return Number(pack.value) || 0
-}
-
-function getPackPaidDiamonds(pack) {
-  if (Number.isFinite(pack.paidDiamonds)) return pack.paidDiamonds
-  return paidDiamondsForPrice(pack.price)
-}
-
-function rechargeValueForPurchase(beforeSpent, addedCost, context) {
-  const beforePaid = paidDiamondsForPrice(beforeSpent)
-  const addedPaid = paidDiamondsForPrice(addedCost)
+function rechargeValueForPaid(beforePaid, addedPaid, context) {
   const freeDiamonds = marginalFreeDiamonds(beforePaid, addedPaid)
   return {
     beforePaid,
@@ -313,6 +482,51 @@ function rechargeValueForPurchase(beforeSpent, addedCost, context) {
     value: Math.round(freeDiamonds * context.freeDiamondScore),
     unlockedTiers: unlockedRechargeTiers(beforePaid, addedPaid).map(tier => tier.paid),
   }
+}
+
+function rechargeValueForPurchase(beforeSpent, addedCost, context) {
+  return rechargeValueForPaid(paidDiamondsForPrice(beforeSpent), paidDiamondsForPrice(addedCost), context)
+}
+
+function actionOptionsForBatch(batch, tierPrice) {
+  const offers = batch
+    .map(opportunity => opportunity.packsByPrice.get(tierPrice))
+    .filter(Boolean)
+    .sort((a, b) => getPackOriginalValue(b) - getPackOriginalValue(a))
+
+  const actions = [{
+    bought: false,
+    limitedCostYen: 0,
+    cost: 0,
+    originalValue: 0,
+    paidDiamonds: 0,
+    purchases: [],
+  }]
+
+  let totalCost = 0
+  let totalOriginalValue = 0
+  let totalPaidDiamonds = 0
+  const selected = []
+  for (const pack of offers) {
+    totalCost += pack.price
+    totalOriginalValue += getPackOriginalValue(pack)
+    totalPaidDiamonds += getPackPaidDiamonds(pack)
+    selected.push(pack)
+    actions.push({
+      bought: true,
+      limitedCostYen: totalCost,
+      cost: totalCost,
+      originalValue: totalOriginalValue,
+      paidDiamonds: totalPaidDiamonds,
+      purchases: [...selected],
+    })
+  }
+
+  return actions
+}
+
+function nameForTopUpPack(pack) {
+  return String(pack.name || pack.displayTrigger || '钻石组合包')
 }
 
 function isPermanentDiamondTopUpPack(pack) {
@@ -343,22 +557,12 @@ function normalizePermanentTopUpPacks(packs) {
     .sort((a, b) => a.price - b.price)
 }
 
-function nameForTopUpPack(pack) {
-  return String(pack.name || pack.displayTrigger || '钻石组合包')
-}
-
 function mergeTopUpItems(packs) {
   const map = new Map()
   for (const pack of packs) {
     for (const item of pack.items || []) {
       const key = `${item.itype ?? item.ItemType}:${item.iid ?? item.ItemId}`
-      if (!map.has(key)) {
-        map.set(key, {
-          ...item,
-          qty: 0,
-          value: 0,
-        })
-      }
+      if (!map.has(key)) map.set(key, { ...item, qty: 0, value: 0 })
       const current = map.get(key)
       current.qty += Number(item.qty ?? item.ItemCount) || 0
       current.value += Number(item.value) || 0
@@ -371,25 +575,16 @@ function groupTopUpPacks(packs) {
   const groups = new Map()
   for (const pack of packs) {
     const key = pack.topUpId || `${pack.name}:${pack.price}`
-    if (!groups.has(key)) {
-      groups.set(key, {
-        pack,
-        count: 0,
-        copies: [],
-      })
-    }
-    const group = groups.get(key)
-    group.count += 1
-    group.copies.push(pack)
+    if (!groups.has(key)) groups.set(key, { pack, copies: [] })
+    groups.get(key).copies.push(pack)
   }
 
   return [...groups.values()].map(group => {
+    const count = group.copies.length
     const price = group.copies.reduce((sum, pack) => sum + pack.price, 0)
     const paidDiamonds = group.copies.reduce((sum, pack) => sum + getPackPaidDiamonds(pack), 0)
     const originalValue = group.copies.reduce((sum, pack) => sum + getPackOriginalValue(pack), 0)
-    const label = group.count > 1
-      ? `${nameForTopUpPack(group.pack)} ×${group.count}`
-      : nameForTopUpPack(group.pack)
+    const label = count > 1 ? `${nameForTopUpPack(group.pack)} ×${count}` : nameForTopUpPack(group.pack)
 
     return {
       trigger: TOP_UP_SOURCE_LABEL,
@@ -406,29 +601,27 @@ function groupTopUpPacks(packs) {
   })
 }
 
+function nextRechargeTier(currentPaid) {
+  return DAILY_RECHARGE_BONUS_TIERS.find(tier => currentPaid < tier.paid) || null
+}
+
 function compareTopUpCandidate(a, b) {
   if (a.cost !== b.cost) return a.cost - b.cost
   if (a.value !== b.value) return b.value - a.value
   return a.purchases.length - b.purchases.length
 }
 
-function nextRechargeTier(currentPaid) {
-  return DAILY_RECHARGE_BONUS_TIERS.find(tier => currentPaid < tier.paid) || null
-}
-
-function buildPermanentTopUpCombos(state, context, budgetLimit) {
-  const maxPackPrice = Math.max(...context.permanentPacks.map(pack => pack.price))
-  const currentPaid = paidDiamondsForPrice(state.spent)
-  const budgetToLastTier = Math.max(0, (MAX_DAILY_RECHARGE_PAID - currentPaid) * 2)
-  const searchableBudget = Math.min(budgetLimit, budgetToLastTier + maxPackPrice)
+function buildPermanentTopUpCombos(context, minCost, budgetLimit) {
+  if (!context.permanentPacks.length) return []
+  const minPackPrice = Math.min(...context.permanentPacks.map(pack => pack.price))
+  const searchableBudget = Math.min(budgetLimit, minCost + minPackPrice - 1)
+  if (searchableBudget < minCost) return []
 
   const dp = Array.from({ length: searchableBudget + 1 })
   dp[0] = { cost: 0, originalValue: 0, purchases: [] }
-
   for (let cost = 0; cost <= searchableBudget; cost++) {
     const base = dp[cost]
     if (!base) continue
-
     for (const pack of context.permanentPacks) {
       const nextCost = cost + pack.price
       if (nextCost > searchableBudget) continue
@@ -441,86 +634,42 @@ function buildPermanentTopUpCombos(state, context, budgetLimit) {
       if (!current || candidate.originalValue > current.originalValue) dp[nextCost] = candidate
     }
   }
-
-  return dp
+  return dp.slice(minCost).filter(Boolean)
 }
 
-function findPermanentTopUpOptions(state, context) {
-  if (!context.enablePermanentTopUp || !context.permanentPacks.length) return null
-  if (state.purchases <= 0) return null
+function findPermanentTopUpOption(state, context) {
+  if (!context.permanentPacks.length || state.purchases <= 0) return null
 
-  const cacheKey = state.spent
-  if (context.topUpOptionsCache?.has(cacheKey)) return context.topUpOptionsCache.get(cacheKey)
-
-  const remainingBudget = context.budget - state.spent
-  if (remainingBudget <= 0) {
-    context.topUpOptionsCache?.set(cacheKey, null)
-    return null
-  }
-  const dp = buildPermanentTopUpCombos(state, context, remainingBudget)
-  const currentPaid = paidDiamondsForPrice(state.spent)
+  const currentPaid = state.dailyPaidDiamonds
   const targetTier = nextRechargeTier(currentPaid)
-  if (!targetTier) {
-    context.topUpOptionsCache?.set(cacheKey, null)
-    return null
-  }
+  if (!targetTier) return null
+
+  const remainingTopUpBudget = context.topUpBudget - state.topUpSpentYen
+  if (remainingTopUpBudget <= 0) return null
+
+  const minCost = Math.max(1, Math.ceil((targetTier.paid - currentPaid) * 2))
+  if (minCost > remainingTopUpBudget) return null
+
+  const cacheKey = `${Math.round(currentPaid)}|${Math.floor(remainingTopUpBudget)}`
+  if (context.topUpOptionsCache.has(cacheKey)) return context.topUpOptionsCache.get(cacheKey)
 
   const ranked = []
-  for (const candidate of dp) {
-    if (!candidate || candidate.cost <= 0) continue
-    const paidDiamonds = paidDiamondsForPrice(candidate.cost)
+  for (const combo of buildPermanentTopUpCombos(context, minCost, remainingTopUpBudget)) {
+    const paidDiamonds = combo.purchases.reduce((sum, pack) => sum + getPackPaidDiamonds(pack), 0)
     if (currentPaid + paidDiamonds < targetTier.paid) continue
-
-    const recharge = rechargeValueForPurchase(state.spent, candidate.cost, context)
-
+    const recharge = rechargeValueForPaid(currentPaid, paidDiamonds, context)
     ranked.push({
-      ...candidate,
-      value: Math.round(candidate.originalValue + recharge.value),
+      ...combo,
       paidDiamonds,
       recharge,
+      value: Math.round(combo.originalValue + recharge.value),
       unlockedCount: recharge.unlockedTiers.length,
-      afterPaid: currentPaid + paidDiamonds,
     })
   }
 
-  const result = ranked.length ? ranked.sort(compareTopUpCandidate).slice(0, 1) : null
-  context.topUpOptionsCache?.set(cacheKey, result)
+  const result = ranked.length ? ranked.sort(compareTopUpCandidate)[0] : null
+  context.topUpOptionsCache.set(cacheKey, result)
   return result
-}
-
-function applyTopUpToLastStep(state, topUp) {
-  if (!topUp || !state.steps.length) return state
-
-  const topUpPacks = groupTopUpPacks(topUp.purchases)
-  const steps = [...state.steps]
-  const lastStep = steps[steps.length - 1]
-  steps[steps.length - 1] = {
-    ...lastStep,
-    cost: lastStep.cost + topUp.cost,
-    value: lastStep.value + topUp.value,
-    originalValue: Math.round((lastStep.originalValue || 0) + topUp.originalValue),
-    rechargeValue: (lastStep.rechargeValue || 0) + topUp.recharge.value,
-    rechargeFreeDiamonds: (lastStep.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
-    topUpCost: topUp.cost,
-    topUpValue: topUp.value,
-    topUpOriginalValue: Math.round(topUp.originalValue),
-    topUpRechargeValue: topUp.recharge.value,
-    topUpRechargeFreeDiamonds: topUp.recharge.freeDiamonds,
-    topUpRechargeBeforePaid: topUp.recharge.beforePaid,
-    topUpRechargeAfterPaid: topUp.recharge.afterPaid,
-    topUpUnlockedRechargeTiers: topUp.recharge.unlockedTiers,
-    topUpPacks,
-  }
-
-  return {
-    ...state,
-    spent: state.spent + topUp.cost,
-    value: state.value + topUp.value,
-    topUpPurchaseCount: (state.topUpPurchaseCount || 0) + topUp.purchases.length,
-    rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
-    steps,
-    signature: stepsSignature(steps),
-  }
 }
 
 function summarizeBatch(batch) {
@@ -542,41 +691,6 @@ function summarizeBatch(batch) {
   }).join('; ')
 }
 
-function actionOptionsForBatch(batch, tierPrice) {
-  const offers = batch
-    .map(opportunity => opportunity.packsByPrice.get(tierPrice))
-    .filter(Boolean)
-    .sort((a, b) => b.value - a.value)
-
-  const actions = [{
-    bought: false,
-    cost: 0,
-    originalValue: 0,
-    paidDiamonds: 0,
-    purchases: [],
-  }]
-
-  let totalCost = 0
-  let totalOriginalValue = 0
-  let totalPaidDiamonds = 0
-  const selected = []
-  for (const pack of offers) {
-    totalCost += pack.price
-    totalOriginalValue += getPackOriginalValue(pack)
-    totalPaidDiamonds += getPackPaidDiamonds(pack)
-    selected.push(pack)
-    actions.push({
-      bought: true,
-      cost: totalCost,
-      originalValue: totalOriginalValue,
-      paidDiamonds: totalPaidDiamonds,
-      purchases: [...selected],
-    })
-  }
-
-  return actions
-}
-
 function summarizeOpportunity(opportunity, tierPrice, purchasedPacks) {
   const pack = opportunity.packsByPrice.get(tierPrice)
   const purchased = !!pack && purchasedPacks.includes(pack)
@@ -594,19 +708,22 @@ function summarizeOpportunity(opportunity, tierPrice, purchasedPacks) {
   }
 }
 
-function summarizeAction(action, batchIndex, batch, tierPrice, nextTierPrice, recharge = null) {
-  const rechargeValue = recharge?.value || 0
+function summarizeAction(action, stepIndex, batch, tierPrice, nextTierPrice, recharge, meta = {}) {
   const originalValue = action.originalValue || 0
+  const rechargeValue = recharge?.value || 0
   const opportunities = batch.map(opportunity => summarizeOpportunity(opportunity, tierPrice, action.purchases))
   return {
-    index: batchIndex + 1,
+    index: stepIndex + 1,
+    rechargeDayIndex: meta.rechargeDayIndex || 0,
     triggerRange: summarizeBatch(batch),
     opportunities,
     skippedOpportunities: opportunities.filter(opportunity => !opportunity.purchased),
     tierPrice,
     nextTierPrice,
     bought: action.bought,
-    cost: action.cost,
+    cost: action.limitedCostYen || 0,
+    limitedCostYen: action.limitedCostYen || 0,
+    topUpCost: 0,
     value: Math.round(originalValue + rechargeValue),
     originalValue: Math.round(originalValue),
     rechargeValue,
@@ -614,6 +731,8 @@ function summarizeAction(action, batchIndex, batch, tierPrice, nextTierPrice, re
     rechargeBeforePaid: recharge?.beforePaid || 0,
     rechargeAfterPaid: recharge?.afterPaid || 0,
     unlockedRechargeTiers: recharge?.unlockedTiers || [],
+    pressure: meta.pressure || 0,
+    waitType: action.bought ? 'buy' : 'timeout',
     purchases: action.purchases.map(pack => ({
       trigger: pack.trigger,
       sourceLabel: pack.plannerSourceLabel || '',
@@ -628,9 +747,454 @@ function summarizeAction(action, batchIndex, batch, tierPrice, nextTierPrice, re
   }
 }
 
+function applyTopUpToLastStep(state, topUp) {
+  if (!topUp || !state.steps.length) return state
+
+  const topUpPacks = groupTopUpPacks(topUp.purchases)
+  const steps = [...state.steps]
+  const lastStep = steps[steps.length - 1]
+  steps[steps.length - 1] = {
+    ...lastStep,
+    cost: lastStep.cost + topUp.cost,
+    topUpCost: topUp.cost,
+    value: lastStep.value + topUp.value,
+    originalValue: Math.round((lastStep.originalValue || 0) + topUp.originalValue),
+    rechargeValue: (lastStep.rechargeValue || 0) + topUp.recharge.value,
+    rechargeFreeDiamonds: (lastStep.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+    topUpValue: topUp.value,
+    topUpOriginalValue: Math.round(topUp.originalValue),
+    topUpRechargeValue: topUp.recharge.value,
+    topUpRechargeFreeDiamonds: topUp.recharge.freeDiamonds,
+    topUpRechargeBeforePaid: topUp.recharge.beforePaid,
+    topUpRechargeAfterPaid: topUp.recharge.afterPaid,
+    topUpUnlockedRechargeTiers: topUp.recharge.unlockedTiers,
+    topUpPacks,
+  }
+
+  return {
+    ...state,
+    topUpSpentYen: state.topUpSpentYen + topUp.cost,
+    value: state.value + topUp.value,
+    topUpPurchaseCount: (state.topUpPurchaseCount || 0) + topUp.purchases.length,
+    rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+    dailyPaidDiamonds: state.dailyPaidDiamonds + topUp.paidDiamonds,
+    steps,
+    signature: `${state.signature}:topUp:${topUpPacks.map(pack => pack.displayTrigger).join(',')}`,
+  }
+}
+
+function expandTopUpBranches(state, context) {
+  const topUp = findPermanentTopUpOption(state, context)
+  if (!topUp) return [state]
+  return [state, applyTopUpToLastStep(state, topUp)]
+}
+
+function stepsSignature(steps) {
+  return steps
+    .map(step => {
+      const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
+      const topUps = (step.topUpPacks || []).map(pack => pack.displayTrigger).join(',')
+      return `${step.tierPrice}:${step.triggerRange}:${purchases}:topUp:${topUps}`
+    })
+    .join('|')
+}
+
+function stateSignature(state) {
+  return state.signature || stepsSignature(state.steps)
+}
+
+function appendStepSignature(state, step) {
+  const current = stateSignature(state)
+  const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
+  const next = `${step.tierPrice}:${step.triggerRange}:${purchases}:day:${step.rechargeDayIndex}`
+  return current ? `${current}|${next}` : next
+}
+
+function comparePlan(a, b) {
+  if (a.value !== b.value) return b.value - a.value
+  if ((a.pressure || 0) !== (b.pressure || 0)) return (a.pressure || 0) - (b.pressure || 0)
+  if ((a.triggerCount || 0) !== (b.triggerCount || 0)) return (a.triggerCount || 0) - (b.triggerCount || 0)
+  if (a.limitedSpentYen !== b.limitedSpentYen) return a.limitedSpentYen - b.limitedSpentYen
+  return a.topUpSpentYen - b.topUpSpentYen
+}
+
+function makeStateKey(state, context) {
+  const dailyBucket = DAILY_RECHARGE_BONUS_TIERS.findIndex(tier => state.dailyPaidDiamonds < tier.paid)
+  const spentBucket = Math.floor(state.limitedSpentYen / 160)
+  return [
+    state.tierIndex,
+    sourceCursorsKey(state.sourceCursors),
+    spentBucket,
+    Math.floor(state.topUpSpentYen / 160),
+    dailyBucket,
+  ].join('|')
+}
+
+function createEmptyState(context) {
+  return {
+    tierIndex: context.startTierIndex,
+    sourceCursors: context.sources.map(() => 0),
+    limitedSpentYen: 0,
+    topUpSpentYen: 0,
+    value: 0,
+    purchases: 0,
+    topUpPurchaseCount: 0,
+    triggerCount: 0,
+    pressure: 0,
+    rechargeDayIndex: 0,
+    dailyPaidDiamonds: 0,
+    sameDayBatchCount: 0,
+    timeoutWaits: 0,
+    rechargeFreeDiamonds: 0,
+    steps: [],
+    signature: '',
+  }
+}
+
+function applyCursorDelta(cursors, delta) {
+  return cursors.map((cursor, index) => cursor + (delta[index] || 0))
+}
+
+function continueSameRechargeDay(state) {
+  return {
+    ...state,
+    sameDayBatchCount: state.sameDayBatchCount + 1,
+  }
+}
+
+function resetToNextRechargeDay(state) {
+  return {
+    ...state,
+    rechargeDayIndex: state.rechargeDayIndex + 1,
+    dailyPaidDiamonds: 0,
+    sameDayBatchCount: 0,
+    signature: `${state.signature}|day:${state.rechargeDayIndex + 1}`,
+  }
+}
+
+function canTopUpBeforeRechargeReset(state) {
+  const lastStep = state.steps.at(-1)
+  return !!lastStep?.bought && !lastStep.topUpCost
+}
+
+function expandBeforeRechargeReset(state, context) {
+  const branches = canTopUpBeforeRechargeReset(state)
+    ? expandTopUpBranches(state, context)
+    : [state]
+  return branches.map(branch => resetToNextRechargeDay(branch))
+}
+
+function expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context) {
+  if (!batchCandidate.requiresRechargeReset) return [state]
+  if (state.dailyPaidDiamonds <= 0 && state.sameDayBatchCount <= 0) return [state]
+  return expandBeforeRechargeReset(state, context)
+}
+
+function shouldKeepNextDayBranch(state, context) {
+  if (!state.purchases) return false
+  return state.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)
+}
+
+function insertCandidate(map, candidate, context) {
+  const key = makeStateKey(candidate, context)
+  const list = map.get(key) || []
+  const signature = stateSignature(candidate)
+  if (list.some(state => stateSignature(state) === signature)) return
+  list.push(candidate)
+  list.sort(comparePlan)
+  map.set(key, list.slice(0, Math.max(2, Number(context.settings.perBucketStates) || 3)))
+}
+
+function dominates(a, b) {
+  return a.limitedSpentYen <= b.limitedSpentYen
+    && a.topUpSpentYen <= b.topUpSpentYen
+    && a.value >= b.value
+    && a.tierIndex >= b.tierIndex
+    && a.pressure <= b.pressure
+    && a.triggerCount <= b.triggerCount
+}
+
+function pruneStates(states, context) {
+  const byCursor = new Map()
+  for (const state of states) {
+    const key = `${sourceCursorsKey(state.sourceCursors)}|${state.tierIndex}`
+    if (!byCursor.has(key)) byCursor.set(key, [])
+    byCursor.get(key).push(state)
+  }
+
+  const map = new Map()
+  for (const group of byCursor.values()) {
+    const survivors = []
+    for (const state of group.sort(comparePlan)) {
+      if (survivors.some(existing => dominates(existing, state))) continue
+      survivors.push(state)
+      if (survivors.length >= Math.max(20, Number(context.settings.maxStatesPerCursor) || 80)) break
+    }
+    for (const state of survivors) insertCandidate(map, state, context)
+  }
+
+  const all = [...map.values()].flat().sort(comparePlan)
+  const limit = Math.max(50, Number(context.settings.maxStatesPerTier) || Number(context.settings.maxStates) || DEFAULT_MAX_STATES)
+  return all.slice(0, limit)
+}
+
+function expandState(state, context) {
+  const next = []
+  const batchCandidates = generateBatchCandidates(state, context)
+
+  for (const batchCandidate of batchCandidates) {
+    const baseStates = expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context)
+    for (const baseState of baseStates) {
+      const tierPrice = context.priceTiers[baseState.tierIndex]
+      const actions = actionOptionsForBatch(batchCandidate.opportunities, tierPrice)
+
+      for (const action of actions) {
+        if (baseState.limitedSpentYen + action.limitedCostYen > context.mainBudget) continue
+
+        const sourceCursors = applyCursorDelta(baseState.sourceCursors, batchCandidate.cursorDelta)
+        const nextTierIndex = action.bought
+          ? clamp(baseState.tierIndex + 1, 0, context.priceTiers.length - 1)
+          : clamp(baseState.tierIndex - 1, 0, context.priceTiers.length - 1)
+
+        const recharge = rechargeValueForPaid(baseState.dailyPaidDiamonds, action.paidDiamonds, context)
+        const step = summarizeAction(
+          action,
+          baseState.steps.length,
+          batchCandidate.opportunities,
+          tierPrice,
+          context.priceTiers[nextTierIndex],
+          recharge,
+          { rechargeDayIndex: baseState.rechargeDayIndex, pressure: batchCandidate.pressure },
+        )
+
+        const candidate = {
+          ...baseState,
+          tierIndex: nextTierIndex,
+          sourceCursors,
+          limitedSpentYen: baseState.limitedSpentYen + action.limitedCostYen,
+          value: baseState.value + action.originalValue + recharge.value,
+          purchases: baseState.purchases + action.purchases.length,
+          triggerCount: baseState.triggerCount + batchCandidate.opportunities.length,
+          pressure: baseState.pressure + batchCandidate.pressure,
+          dailyPaidDiamonds: baseState.dailyPaidDiamonds + action.paidDiamonds,
+          timeoutWaits: baseState.timeoutWaits + (action.bought ? 0 : 1),
+          rechargeFreeDiamonds: (baseState.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
+          steps: [...baseState.steps, step],
+          signature: appendStepSignature(baseState, step),
+        }
+
+        next.push(continueSameRechargeDay(candidate))
+        if (shouldKeepNextDayBranch(candidate, context)) {
+          next.push(...expandBeforeRechargeReset(candidate, context))
+        }
+      }
+    }
+  }
+
+  return next
+}
+
+function collectTopValuePlans(context, topK = 1) {
+  let states = [createEmptyState(context)]
+  const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
+  const maxIterations = Math.max(1, totalGroups)
+
+  for (let i = 0; i < maxIterations; i++) {
+    if (states.every(state => allSourcesExhausted(context.sources, state.sourceCursors))) break
+    const expanded = []
+    for (const state of states) {
+      if (allSourcesExhausted(context.sources, state.sourceCursors)) {
+        expanded.push(state)
+        continue
+      }
+      expanded.push(...expandState(state, context))
+    }
+    if (!expanded.length) break
+    states = pruneStates(expanded, context)
+  }
+
+  const complete = states.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
+  const rankedSource = complete.length ? complete : states
+  const ranked = []
+  for (const state of rankedSource.sort(comparePlan)) {
+    if (!ranked.some(existing => stateSignature(existing) === stateSignature(state))) ranked.push(state)
+    if (ranked.length >= topK) break
+  }
+  return ranked.length ? ranked : [createEmptyState(context)]
+}
+
+function makePolicyBatch(context, state, policy) {
+  const candidates = generateBatchCandidates(state, context)
+  if (!candidates.length) return null
+
+  if (policy === 'smallPack') {
+    return candidates.sort((a, b) => {
+      if (a.pressure !== b.pressure) return a.pressure - b.pressure
+      return a.opportunities.length - b.opportunities.length
+    })[0]
+  }
+
+  if (policy === 'maxPack') {
+    return candidates.sort((a, b) => {
+      const aOffers = a.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[state.tierIndex])).length
+      const bOffers = b.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[state.tierIndex])).length
+      if (aOffers !== bOffers) return bOffers - aOffers
+      if (a.pressure !== b.pressure) return a.pressure - b.pressure
+      return b.opportunities.length - a.opportunities.length
+    })[0]
+  }
+
+  return candidates[0]
+}
+
+function makePolicyAction(policy, batch, state, context) {
+  const tierPrice = context.priceTiers[state.tierIndex]
+  const offers = batch.opportunities
+    .map(opportunity => opportunity.packsByPrice.get(tierPrice))
+    .filter(Boolean)
+    .sort((a, b) => getPackOriginalValue(b) - getPackOriginalValue(a))
+
+  if (!offers.length) return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+
+  if (policy === 'smallPack') {
+    if (state.tierIndex !== 0) return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+    const best = offers[0]
+    if (state.limitedSpentYen + best.price > context.mainBudget) {
+      return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+    }
+    return {
+      bought: true,
+      limitedCostYen: best.price,
+      cost: best.price,
+      originalValue: getPackOriginalValue(best),
+      paidDiamonds: getPackPaidDiamonds(best),
+      purchases: [best],
+    }
+  }
+
+  if (policy === 'maxPack') {
+    const shouldBuyForTier = state.tierIndex < context.priceTiers.length - 1
+    if (shouldBuyForTier) {
+      const best = offers[0]
+      if (state.limitedSpentYen + best.price > context.mainBudget) {
+        return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+      }
+      return {
+        bought: true,
+        limitedCostYen: best.price,
+        cost: best.price,
+        originalValue: getPackOriginalValue(best),
+        paidDiamonds: getPackPaidDiamonds(best),
+        purchases: [best],
+      }
+    }
+
+    let cost = 0
+    let originalValue = 0
+    let paidDiamonds = 0
+    const purchases = []
+    for (const pack of offers) {
+      if (state.limitedSpentYen + cost + pack.price > context.mainBudget) break
+      cost += pack.price
+      originalValue += getPackOriginalValue(pack)
+      paidDiamonds += getPackPaidDiamonds(pack)
+      purchases.push(pack)
+    }
+    return purchases.length
+      ? { bought: true, limitedCostYen: cost, cost, originalValue, paidDiamonds, purchases }
+      : { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+  }
+
+  return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+}
+
+function simulatePolicyPlan(context, policy) {
+  let state = createEmptyState(context)
+  const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
+
+  for (let i = 0; i < totalGroups; i++) {
+    if (allSourcesExhausted(context.sources, state.sourceCursors)) break
+    const batch = makePolicyBatch(context, state, policy)
+    if (!batch) break
+    const [resetState] = expandRequiredRechargeResetBeforeBatch(state, batch, context).sort(comparePlan)
+    state = resetState
+    const action = makePolicyAction(policy, batch, state, context)
+    const tierPrice = context.priceTiers[state.tierIndex]
+    const nextTierIndex = action.bought
+      ? clamp(state.tierIndex + 1, 0, context.priceTiers.length - 1)
+      : clamp(state.tierIndex - 1, 0, context.priceTiers.length - 1)
+    const recharge = rechargeValueForPaid(state.dailyPaidDiamonds, action.paidDiamonds, context)
+    const step = summarizeAction(action, state.steps.length, batch.opportunities, tierPrice, context.priceTiers[nextTierIndex], recharge, {
+      rechargeDayIndex: state.rechargeDayIndex,
+      pressure: batch.pressure,
+    })
+    state = {
+      ...state,
+      tierIndex: nextTierIndex,
+      sourceCursors: applyCursorDelta(state.sourceCursors, batch.cursorDelta),
+      limitedSpentYen: state.limitedSpentYen + action.limitedCostYen,
+      value: state.value + action.originalValue + recharge.value,
+      purchases: state.purchases + action.purchases.length,
+      triggerCount: state.triggerCount + batch.opportunities.length,
+      pressure: state.pressure + batch.pressure,
+      dailyPaidDiamonds: state.dailyPaidDiamonds + action.paidDiamonds,
+      timeoutWaits: state.timeoutWaits + (action.bought ? 0 : 1),
+      rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
+      steps: [...state.steps, step],
+      signature: appendStepSignature(state, step),
+    }
+    state = continueSameRechargeDay(state)
+  }
+
+  return state
+}
+
+function normalizeTopUpRatio(value) {
+  if (value === undefined || value === null || value === '') return DEFAULT_TOP_UP_RATIO
+  const numeric = Number(value)
+  if (!Number.isFinite(numeric) || numeric < 0) return DEFAULT_TOP_UP_RATIO
+  return numeric > 1 ? numeric / 100 : numeric
+}
+
+function buildPlanningContext(packs, settings) {
+  const priceTiers = getPriceTiers(packs)
+  const mainBudget = Math.max(0, Math.floor(Number(settings.budget) || 0))
+  const topUpRatio = normalizeTopUpRatio(settings.topUpBudgetRatio ?? settings.topUpRatio)
+  const currentPrice = Number(settings.currentPrice) || priceTiers[0]
+  const tierIndex = priceTiers.indexOf(currentPrice)
+  const startTierIndex = clamp(tierIndex === -1 ? 0 : tierIndex, 0, priceTiers.length - 1)
+  const { lanes, sources } = buildPlanningSources(packs, settings)
+  const opportunities = sources.flatMap(source => source.groups.flatMap(group => group.opportunities))
+
+  return {
+    priceTiers,
+    budget: mainBudget,
+    mainBudget,
+    topUpBudget: Math.floor(mainBudget * topUpRatio),
+    topUpRatio,
+    startTierIndex,
+    freeDiamondScore: Number(settings.freeDiamondScore) || Number(settings.diamondScore) || 1,
+    permanentPacks: normalizePermanentTopUpPacks(settings.permanentPacks || []),
+    lanes,
+    sources,
+    opportunities,
+    topUpOptionsCache: new Map(),
+    settings,
+  }
+}
+
 function createResult(state, context, meta = {}) {
-  const topUpPacks = state.steps.flatMap(step => step.topUpPacks || [])
-  const topUpBatches = state.steps
+  const annotatedSteps = state.steps.map((step, index, steps) => {
+    const previous = steps[index - 1]
+    const rechargeReset = !!previous && step.rechargeDayIndex > previous.rechargeDayIndex
+    return {
+      ...step,
+      rechargeReset,
+      rechargeDayLabel: `第 ${step.rechargeDayIndex + 1} 日`,
+    }
+  })
+  const topUpPacks = annotatedSteps.flatMap(step => step.topUpPacks || [])
+  const topUpBatches = annotatedSteps
     .filter(step => step.topUpPacks?.length)
     .map(step => ({
       index: step.index,
@@ -641,13 +1205,24 @@ function createResult(state, context, meta = {}) {
       unlockedRechargeTiers: step.topUpUnlockedRechargeTiers || [],
       packs: step.topUpPacks,
     }))
+  const totalSpent = state.limitedSpentYen + state.topUpSpentYen
+
   return {
     ...meta,
-    budget: context.budget,
-    spent: state.spent,
-    remaining: context.budget - state.spent,
+    budget: context.mainBudget,
+    mainBudget: context.mainBudget,
+    topUpBudget: context.topUpBudget,
+    limitedSpentYen: state.limitedSpentYen,
+    topUpSpentYen: state.topUpSpentYen,
+    spent: totalSpent,
+    totalSpent,
+    remaining: context.mainBudget - state.limitedSpentYen,
+    topUpRemaining: context.topUpBudget - state.topUpSpentYen,
     value: Math.round(state.value),
     purchases: state.purchases,
+    triggerCount: state.triggerCount,
+    pressure: state.pressure,
+    rechargeDayCount: state.rechargeDayIndex + 1,
     topUpPurchaseCount: state.topUpPurchaseCount || 0,
     topUpPacks,
     topUpBatches,
@@ -656,276 +1231,57 @@ function createResult(state, context, meta = {}) {
       .join('；'),
     rechargeFreeDiamonds: state.rechargeFreeDiamonds || 0,
     finalTierPrice: context.priceTiers[state.tierIndex],
-    averageCe: state.spent > 0 ? state.value / (state.spent / 2) : 0,
+    averageCe: totalSpent > 0 ? state.value / (totalSpent / 2) : 0,
     priceTiers: context.priceTiers,
     opportunityCount: context.opportunities.length,
-    batchCount: context.batches.length,
-    steps: state.steps,
+    topUpBatchCount: topUpBatches.length,
+    batchCount: annotatedSteps.length,
+    steps: annotatedSteps,
   }
 }
 
-function createEmptyState(startTierIndex) {
-  return {
-    tierIndex: startTierIndex,
-    spent: 0,
-    value: 0,
-    purchases: 0,
-    topUpPurchaseCount: 0,
-    rechargeFreeDiamonds: 0,
-    steps: [],
-    signature: '',
-  }
+export function planUltraSalePurchases(packs, settings = {}) {
+  const context = buildPlanningContext(packs, settings)
+  const [state] = collectTopValuePlans(context, 1)
+  return createResult(state, context)
 }
 
-function buildPlanningContext(packs, settings) {
-  const priceTiers = getPriceTiers(packs)
-  const budget = Math.max(0, Math.floor(Number(settings.budget) || 0))
-  const batchSize = Math.max(1, Math.floor(Number(settings.batchSize) || 1))
-  const currentPrice = Number(settings.currentPrice) || priceTiers[0]
-  const tierIndex = priceTiers.indexOf(currentPrice)
-  const startTierIndex = clamp(tierIndex === -1 ? 0 : tierIndex, 0, priceTiers.length - 1)
-  const combined = buildCombinedBatches(packs, settings)
+export function buildUltraSalePlanOptions(packs, settings = {}) {
+  const context = buildPlanningContext(packs, settings)
+  const [bestState] = collectTopValuePlans(context, 1)
+  const smallPackState = simulatePolicyPlan(context, 'smallPack')
+  const maxPackState = simulatePolicyPlan(context, 'maxPack')
 
-  return {
-    priceTiers,
-    budget,
-    batchSize,
-    startTierIndex,
-    freeDiamondScore: Number(settings.freeDiamondScore) || Number(settings.diamondScore) || 1,
-    permanentPacks: normalizePermanentTopUpPacks(settings.permanentPacks || []),
-    enablePermanentTopUp: settings.enablePermanentTopUp === true,
-    lanes: combined.lanes,
-    opportunities: combined.opportunities,
-    batches: combined.batches,
-    topUpOptionsCache: new Map(),
-    settings,
-  }
-}
-
-function stepsSignature(steps) {
-  return steps
-    .map(step => {
-      const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
-      const topUps = (step.topUpPacks || []).map(pack => pack.displayTrigger).join(',')
-      return `${step.tierPrice}:${purchases}:topUp:${topUps}`
-    })
-    .join('|')
-}
-
-function stateSignature(state) {
-  if (typeof state.signature === 'string') return state.signature
-  return stepsSignature(state.steps)
-}
-
-function stepSignature(step) {
-  const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
-  const topUps = (step.topUpPacks || []).map(pack => pack.displayTrigger).join(',')
-  return `${step.tierPrice}:${purchases}:topUp:${topUps}`
-}
-
-function appendStepSignature(state, step) {
-  const current = stateSignature(state)
-  const next = stepSignature(step)
-  return current ? `${current}|${next}` : next
-}
-
-function insertRankedState(states, candidate, limit) {
-  const signature = stateSignature(candidate)
-  if (states.some(state => stateSignature(state) === signature)) return states
-
-  const ranked = [...states, candidate].sort(comparePlan)
-  return ranked.slice(0, limit)
-}
-
-function pruneStateMap(stateMap, maxStatesPerTier) {
-  const byTier = new Map()
-  for (const stateList of stateMap.values()) {
-    for (const state of stateList) {
-      if (!byTier.has(state.tierIndex)) byTier.set(state.tierIndex, [])
-      byTier.get(state.tierIndex).push(state)
-    }
-  }
-
-  const pruned = new Map()
-  for (const states of byTier.values()) {
-    const pareto = []
-    let bestValue = -Infinity
-    for (const state of states.sort((a, b) => {
-      if (a.spent !== b.spent) return a.spent - b.spent
-      return b.value - a.value
-    })) {
-      if (state.value <= bestValue) continue
-      pareto.push(state)
-      bestValue = state.value
-    }
-
-    const limited = pareto.sort(comparePlan).slice(0, maxStatesPerTier)
-    for (const state of limited) {
-      const key = makeStateKey(state.tierIndex, state.spent)
-      const current = pruned.get(key) || []
-      pruned.set(key, insertRankedState(current, state, 2))
-    }
-  }
-
-  return pruned
-}
-
-function collectTopValuePlans(context, topK = 2) {
-  const perStateLimit = Math.max(2, topK)
-  const maxStatesPerTier = Math.max(50, Number(context.settings?.maxStatesPerTier) || DEFAULT_MAX_STATES_PER_TIER)
-  let states = new Map()
-  states.set(makeStateKey(context.startTierIndex, 0), [createEmptyState(context.startTierIndex)])
-
-  for (const [batchIndex, batch] of context.batches.entries()) {
-    const nextStates = new Map()
-
-    for (const stateList of states.values()) {
-      for (const state of stateList) {
-        const tierPrice = context.priceTiers[state.tierIndex]
-        const actions = actionOptionsForBatch(batch, tierPrice)
-
-        for (const action of actions) {
-          const spent = state.spent + action.cost
-          if (spent > context.budget) continue
-
-          const nextTierIndex = action.bought
-            ? clamp(state.tierIndex + 1, 0, context.priceTiers.length - 1)
-            : clamp(state.tierIndex - 1, 0, context.priceTiers.length - 1)
-
-          const recharge = rechargeValueForPurchase(state.spent, action.cost, context)
-          const actionValue = (action.originalValue || 0) + recharge.value
-          const step = summarizeAction(action, batchIndex, batch, tierPrice, context.priceTiers[nextTierIndex], recharge)
-          const baseCandidate = {
-            tierIndex: nextTierIndex,
-            spent,
-            value: state.value + actionValue,
-            purchases: state.purchases + action.purchases.length,
-            topUpPurchaseCount: state.topUpPurchaseCount || 0,
-            rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
-            steps: [...state.steps, step],
-            signature: appendStepSignature(state, step),
-          }
-
-          const topUpOptions = action.bought
-            ? [null, ...(findPermanentTopUpOptions(baseCandidate, context) || [])]
-            : [null]
-
-          for (const topUp of topUpOptions) {
-            const candidate = topUp ? applyTopUpToLastStep(baseCandidate, topUp) : baseCandidate
-            const key = makeStateKey(candidate.tierIndex, candidate.spent)
-            const current = nextStates.get(key) || []
-            nextStates.set(key, insertRankedState(current, candidate, perStateLimit))
-          }
-        }
-      }
-    }
-
-    states = pruneStateMap(nextStates, maxStatesPerTier)
-    if (states.size === 0) break
-  }
-
-  const allStates = []
-  for (const stateList of states.values()) allStates.push(...stateList)
-
-  const ranked = []
-  for (const state of allStates.sort(comparePlan)) {
-    const signature = stateSignature(state)
-    if (!ranked.some(existing => stateSignature(existing) === signature)) ranked.push(state)
-    if (ranked.length >= topK) break
-  }
-
-  if (!ranked.length) ranked.push(createEmptyState(context.startTierIndex))
-  return ranked
-}
-
-function makePolicyAction(policy, offers, state, context) {
-  if (!offers.length) {
-    return { bought: false, cost: 0, value: 0, purchases: [] }
-  }
-
-  if (policy === 'smallPack') {
-    if (state.tierIndex !== 0) return { bought: false, cost: 0, value: 0, purchases: [] }
-    const best = offers[0]
-    if (state.spent + best.price > context.budget) return { bought: false, cost: 0, value: 0, purchases: [] }
-    return { bought: true, cost: best.price, originalValue: getPackOriginalValue(best), paidDiamonds: getPackPaidDiamonds(best), purchases: [best] }
-  }
-
-  if (policy === 'maxPack') {
-    if (state.tierIndex < context.priceTiers.length - 1) {
-      const best = offers[0]
-      if (state.spent + best.price > context.budget) return { bought: false, cost: 0, value: 0, purchases: [] }
-      return { bought: true, cost: best.price, originalValue: getPackOriginalValue(best), paidDiamonds: getPackPaidDiamonds(best), purchases: [best] }
-    }
-
-    let cost = 0
-    let originalValue = 0
-    let paidDiamonds = 0
-    const purchases = []
-    for (const pack of offers) {
-      if (state.spent + cost + pack.price > context.budget) break
-      cost += pack.price
-      originalValue += getPackOriginalValue(pack)
-      paidDiamonds += getPackPaidDiamonds(pack)
-      purchases.push(pack)
-    }
-    return purchases.length
-      ? { bought: true, cost, originalValue, paidDiamonds, purchases }
-      : { bought: false, cost: 0, value: 0, purchases: [] }
-  }
-
-  return { bought: false, cost: 0, value: 0, purchases: [] }
-}
-
-function simulatePolicyPlan(context, policy) {
-  let state = createEmptyState(context.startTierIndex)
-
-  for (const [batchIndex, batch] of context.batches.entries()) {
-    const tierPrice = context.priceTiers[state.tierIndex]
-    const offers = batch
-      .map(opportunity => opportunity.packsByPrice.get(tierPrice))
-      .filter(Boolean)
-      .sort((a, b) => b.value - a.value)
-
-    const action = makePolicyAction(policy, offers, state, context)
-    const nextTierIndex = action.bought
-      ? clamp(state.tierIndex + 1, 0, context.priceTiers.length - 1)
-      : clamp(state.tierIndex - 1, 0, context.priceTiers.length - 1)
-
-    const recharge = rechargeValueForPurchase(state.spent, action.cost, context)
-    const actionValue = (action.originalValue || 0) + recharge.value
-    const step = summarizeAction(action, batchIndex, batch, tierPrice, context.priceTiers[nextTierIndex], recharge)
-    const baseState = {
-      tierIndex: nextTierIndex,
-      spent: state.spent + action.cost,
-      value: state.value + actionValue,
-      purchases: state.purchases + action.purchases.length,
-      topUpPurchaseCount: state.topUpPurchaseCount || 0,
-      rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
-      steps: [...state.steps, step],
-      signature: appendStepSignature(state, step),
-    }
-    const topUpOptions = action.bought ? findPermanentTopUpOptions(baseState, context) : null
-    state = topUpOptions?.length ? applyTopUpToLastStep(baseState, topUpOptions[0]) : baseState
-  }
-
-  return state
-}
-
-export function paidDiamondsForPrice(price) {
-  return Math.round(price / 2)
+  return [
+    createResult(bestState, context, {
+      id: 'bestValue',
+      label: '价值最优',
+      description: '在主预算和补累充浮动预算内最大化总评分价值。',
+    }),
+    createResult(smallPackState, context, {
+      id: 'smallPack',
+      label: '只买小包',
+      description: '只在最低档购买，升档后等待掉回最低档。',
+    }),
+    createResult(maxPackState, context, {
+      id: 'maxPack',
+      label: '冲最大包',
+      description: '优先把有限触发机会用于更高档礼包，必要时等待降档。',
+    }),
+  ]
 }
 
 function formatSkipPlanRow(row) {
   const triggerRange = row.skipCount === 1
     ? row.triggerRange
     : `${row.triggerRanges[0]} ... ${row.triggerRanges[row.triggerRanges.length - 1]}`
-
   const skippedSteps = row.skippedSteps || []
   const tierDropCount = skippedSteps.filter(step => {
     return Number.isFinite(step.tierPrice)
       && Number.isFinite(step.nextTierPrice)
       && step.nextTierPrice < step.tierPrice
   }).length
+  const rechargeResetCount = skippedSteps.filter(step => step.rechargeReset).length
 
   return {
     ...row,
@@ -935,6 +1291,11 @@ function formatSkipPlanRow(row) {
     skippedSteps,
     skipSourceRanges: summarizeSkippedSources(skippedSteps),
     tierDropCount,
+    rechargeResetCount,
+    rechargeReset: rechargeResetCount > 0,
+    rechargeDayLabel: skippedSteps.length
+      ? `${skippedSteps[0].rechargeDayLabel}${skippedSteps.at(-1).rechargeDayLabel !== skippedSteps[0].rechargeDayLabel ? ` - ${skippedSteps.at(-1).rechargeDayLabel}` : ''}`
+      : row.rechargeDayLabel,
     cost: 0,
     value: 0,
     purchases: [],
@@ -958,7 +1319,6 @@ function parseTriggerSummary(triggerRange) {
 
 function summarizeSkippedSources(skippedSteps) {
   const byLabel = new Map()
-
   for (const step of skippedSteps) {
     for (const segment of parseTriggerSummary(step.triggerRange)) {
       if (!byLabel.has(segment.label)) {
@@ -974,7 +1334,6 @@ function summarizeSkippedSources(skippedSteps) {
       current.count += 1
     }
   }
-
   return [...byLabel.values()]
 }
 
@@ -1020,50 +1379,14 @@ export function compressUltraSalePlanSteps(steps = []) {
   return rows
 }
 
-export function planUltraSalePurchases(packs, settings = {}) {
-  const context = buildPlanningContext(packs, settings)
-  const states = collectTopValuePlans(context, context.enablePermanentTopUp ? 12 : 1)
-    .sort(comparePlan)
-  return createResult(states[0], context)
-}
-
-export function buildUltraSalePlanOptions(packs, settings = {}) {
-  const context = buildPlanningContext(packs, settings)
-  const rankedStates = collectTopValuePlans(context, context.enablePermanentTopUp ? 12 : 2)
-    .sort(comparePlan)
-  const [bestState, secondState] = rankedStates
-  const smallPackState = simulatePolicyPlan(context, 'smallPack')
-  const maxPackState = simulatePolicyPlan(context, 'maxPack')
-
-  return [
-    createResult(bestState, context, {
-      id: 'bestValue',
-      label: '价值最优',
-      description: '预算内最大化总评分价值。',
-    }),
-    createResult(secondState || bestState, context, {
-      id: 'secondValue',
-      label: '次优方案',
-      description: secondState ? '价值排名第二的可行路径。' : '当前条件下没有独立次优路径。',
-      unavailable: !secondState,
-    }),
-    createResult(smallPackState, context, {
-      id: 'smallPack',
-      label: '只买小包',
-      description: '只在最低档购买，升档后等待掉回最低档。',
-    }),
-    createResult(maxPackState, context, {
-      id: 'maxPack',
-      label: '冲最大包',
-      description: '先每批买 1 个升档，到最高档后尽量购买高档包。',
-    }),
-  ]
-}
-
 export const __testables = {
   parseTriggerProgress,
   buildOpportunities,
   buildBatches,
-  buildDerivedAllTowerEntries,
   buildAttributeTowerTopologyBatches,
+  buildPlanningSources,
+  generateBatchCandidates,
+  buildPlanningContext,
+  createEmptyState,
+  expandState,
 }

@@ -126,10 +126,14 @@
             </select>
           </label>
 
-          <label class="planner-toggle-field">
-            <input type="checkbox" v-model="planSettings.enablePermanentTopUp" />
-            <span>允许常驻钻石组合包补累充（非首次）</span>
+          <label class="planner-field">
+            <span>补累充预算比例</span>
+            <input class="form-input" type="number" min="0" max="100" step="1" v-model.number="planSettings.topUpBudgetRatio" />
           </label>
+        </div>
+
+        <div class="planner-derived-note">
+          补累充预算 {{ formatPrice(plannerTopUpBudget) }}；总预算 {{ formatPrice(plannerTotalBudget) }}。补累充预算独立于限时包预算，只用于非首次常驻钻石组合包。
         </div>
 
         <div class="planner-lane-head">
@@ -194,11 +198,11 @@
 
         <a
           class="planner-doc-link"
-          href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/planning-rules.md"
+          href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/game-rules.md"
           target="_blank"
           rel="noopener noreferrer"
         >
-          查看购买规划规则文档
+          查看游戏内规则文档
         </a>
 
         <div class="planner-actions">
@@ -233,8 +237,11 @@
           <div><span>可触发</span><b>{{ selectedPlan.opportunityCount }}</b></div>
           <div><span>批次</span><b>{{ selectedPlan.batchCount }}</b></div>
           <div><span>购买</span><b>{{ selectedPlan.purchases }}</b></div>
-          <div><span>补包</span><b>{{ selectedPlan.topUpPurchaseCount || 0 }}</b></div>
-          <div><span>花费</span><b>{{ formatPrice(selectedPlan.spent) }}</b></div>
+          <div><span>补包批次</span><b>{{ selectedPlan.topUpBatchCount || selectedPlan.topUpBatches?.length || 0 }}</b></div>
+          <div><span>限时花费</span><b>{{ formatPrice(selectedPlan.limitedSpentYen ?? selectedPlan.spent) }}</b></div>
+          <div><span>补包花费</span><b>{{ formatPrice(selectedPlan.topUpSpentYen || 0) }}</b></div>
+          <div><span>补包剩余</span><b>{{ formatPrice(selectedPlan.topUpRemaining || 0) }}</b></div>
+          <div><span>总花费</span><b>{{ formatPrice(selectedPlan.totalSpent ?? selectedPlan.spent) }}</b></div>
           <div><span>剩余</span><b>{{ formatPrice(selectedPlan.remaining) }}</b></div>
           <div><span>总价值</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
           <div><span>累充赠钻</span><b>{{ (selectedPlan.rechargeFreeDiamonds || 0).toLocaleString() }}</b></div>
@@ -259,9 +266,11 @@
             <thead>
               <tr>
                 <th>批次</th>
-                <th>触发</th>
+                <th>推进范围</th>
                 <th>档位</th>
-                <th>操作</th>
+                <th>触发/购买</th>
+                <th>累充</th>
+                <th>补包</th>
                 <th>花费</th>
                 <th>价值</th>
                 <th>下批</th>
@@ -274,23 +283,24 @@
                   @click="togglePlannerStep(step)"
                 >
                   <td>{{ step.indexLabel }}</td>
-                  <td>{{ step.triggerRange }}</td>
+                  <td class="planner-range-cell" :title="step.triggerRange">{{ step.triggerRange }}</td>
                   <td>{{ tierLabel(step.tierPrice) }}</td>
                   <td>
-                    <span v-if="!step.bought" class="text-muted">
-                      {{ step.skipCount > 1 ? `连续不买 ×${step.skipCount}` : '不买' }}
-                      <span v-if="step.tierDropCount">，降档 {{ step.tierDropCount }} 次</span>
+                    <span class="planner-simple-metric">
+                      {{ plannerTriggerCount(step) }} / {{ plannerPurchaseCount(step) }}
                     </span>
-                    <span v-if="step.bought" class="planner-purchases">
-                      <span v-for="p in step.purchases.slice(0, 3)" :key="`${step.rowKey}-${p.displayTrigger}`">
-                        {{ p.displayTrigger }} / CE {{ p.ce.toFixed(1) }}
-                      </span>
-                      <span v-if="step.rechargeFreeDiamonds">
-                        累充赠钻 +{{ step.rechargeFreeDiamonds.toLocaleString() }}
-                      </span>
-                      <span v-if="step.topUpPacks && step.topUpPacks.length">
-                        补 {{ step.topUpPacks.map(pack => pack.displayTrigger).join(' / ') }}
-                      </span>
+                    <span v-if="!step.bought" class="planner-cell-sub">
+                      {{ step.skipCount > 1 ? `连续不买 ×${step.skipCount}` : '不买' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span :class="step.rechargeReset ? 'planner-status-chip active' : 'planner-status-chip'">
+                      {{ plannerRechargeText(step) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span :class="step.topUpPacks && step.topUpPacks.length ? 'planner-status-chip active' : 'planner-status-chip'">
+                      {{ step.topUpPacks && step.topUpPacks.length ? '已补' : '无' }}
                     </span>
                   </td>
                   <td>{{ formatPrice(step.cost) }}</td>
@@ -303,7 +313,7 @@
                   <td>{{ tierLabel(step.nextTierPrice) }}</td>
                 </tr>
                 <tr v-if="step.bought && isPlannerStepExpanded(step.rowKey)" class="planner-detail-row">
-                  <td :colspan="7">
+                  <td :colspan="9">
                     <div class="planner-pack-details">
                       <section v-if="step.opportunities && step.opportunities.length" class="planner-trigger-details">
                         <div class="planner-detail-title">本批触发范围</div>
@@ -366,7 +376,7 @@
                   </td>
                 </tr>
                 <tr v-else-if="!step.bought && isPlannerStepExpanded(step.rowKey)" class="planner-detail-row">
-                  <td :colspan="7">
+                  <td :colspan="9">
                     <div class="planner-skip-details">
                       <div class="planner-skip-summary">
                         <span>连续跳过 {{ step.skipCount }} 批</span>
@@ -597,7 +607,17 @@ const filteredPacks = computed(() => {
 const planSettings = reactive({
   budget: 11800,
   currentPrice: 160,
-  enablePermanentTopUp: true
+  topUpBudgetRatio: 5,
+})
+
+const plannerTopUpBudget = computed(() => {
+  const budget = Math.max(0, Number(planSettings.budget) || 0)
+  const ratio = Math.max(0, Number(planSettings.topUpBudgetRatio) || 0) / 100
+  return Math.floor(budget * ratio)
+})
+
+const plannerTotalBudget = computed(() => {
+  return Math.max(0, Number(planSettings.budget) || 0) + plannerTopUpBudget.value
 })
 
 const activePlanId = ref('bestValue')
@@ -611,13 +631,13 @@ function setActivePlan(id) {
 }
 
 const planLanes = reactive([
-  { id: 'quest', cat: 'quest', labelKey: 'origin_quest', enabled: true, startProgress: '0-0', endProgress: '55-60', batchSize: 6 },
-  { id: 'rank', cat: 'rank', labelKey: 'origin_rank', enabled: true, startProgress: 0, endProgress: 200, batchSize: 1 },
-  { id: 'tower_infinite', cat: 'tower', tower: 'origin_tower_infinite', labelKey: 'origin_tower_infinite', enabled: true, startProgress: 0, endProgress: 1000, batchSize: 6 },
-  { id: 'tower_blue', cat: 'tower', tower: 'origin_tower_blue', labelKey: 'origin_tower_blue', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
-  { id: 'tower_red', cat: 'tower', tower: 'origin_tower_red', labelKey: 'origin_tower_red', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
-  { id: 'tower_green', cat: 'tower', tower: 'origin_tower_green', labelKey: 'origin_tower_green', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
-  { id: 'tower_yellow', cat: 'tower', tower: 'origin_tower_yellow', labelKey: 'origin_tower_yellow', enabled: false, startProgress: 0, endProgress: 500, batchSize: 1 },
+  { id: 'quest', cat: 'quest', labelKey: 'origin_quest', enabled: true, startProgress: '0-0', endProgress: '25-28', batchSize: 6 },
+  { id: 'rank', cat: 'rank', labelKey: 'origin_rank', enabled: true, startProgress: 0, endProgress: 100, batchSize: 1 },
+  { id: 'tower_infinite', cat: 'tower', tower: 'origin_tower_infinite', labelKey: 'origin_tower_infinite', enabled: true, startProgress: 0, endProgress: 500, batchSize: 6 },
+  { id: 'tower_blue', cat: 'tower', tower: 'origin_tower_blue', labelKey: 'origin_tower_blue', enabled: false, startProgress: 0, endProgress: 250, batchSize: 1 },
+  { id: 'tower_red', cat: 'tower', tower: 'origin_tower_red', labelKey: 'origin_tower_red', enabled: false, startProgress: 0, endProgress: 250, batchSize: 1 },
+  { id: 'tower_green', cat: 'tower', tower: 'origin_tower_green', labelKey: 'origin_tower_green', enabled: false, startProgress: 0, endProgress: 250, batchSize: 1 },
+  { id: 'tower_yellow', cat: 'tower', tower: 'origin_tower_yellow', labelKey: 'origin_tower_yellow', enabled: false, startProgress: 0, endProgress: 250, batchSize: 1 },
 ])
 
 const attributeTowerIds = new Set([
@@ -638,6 +658,27 @@ function planLaneName(lane) {
 function tierLabel(price) {
   if (!Number.isFinite(Number(price))) return '-'
   return `${formatPrice(price)} / ${paidDiamondsForPrice(price)}钻`
+}
+
+function plannerTriggerCount(step) {
+  if (step.skipCount > 1 && Array.isArray(step.skippedSteps)) {
+    return step.skippedSteps.reduce((sum, skipped) => sum + (skipped.opportunities?.length || 0), 0)
+  }
+  return step.opportunities?.length || 0
+}
+
+function plannerPurchaseCount(step) {
+  if (step.skipCount > 1 && Array.isArray(step.skippedSteps)) {
+    return step.skippedSteps.reduce((sum, skipped) => sum + (skipped.purchases?.length || 0), 0)
+  }
+  return step.purchases?.length || 0
+}
+
+function plannerRechargeText(step) {
+  const label = step.rechargeDayLabel || ''
+  if (step.rechargeResetCount) return `${label} / 重置×${step.rechargeResetCount}`
+  if (step.rechargeReset) return `${label} / 重置`
+  return label || '同日'
 }
 
 function scoreOf(itemKey, fallback = 1) {
@@ -702,7 +743,7 @@ const compressedPlanSteps = computed(() => {
   return compressUltraSalePlanSteps(selectedPlan.value.steps)
 })
 
-const displayedPlanSteps = computed(() => compressedPlanSteps.value.slice(0, 40))
+const displayedPlanSteps = computed(() => compressedPlanSteps.value)
 
 watch(planningSettings, () => {
   plannerDirty.value = true
@@ -993,7 +1034,14 @@ function fmtNum(n) {
 }
 
 .planner-table {
-  min-width: 760px;
+  min-width: 920px;
+}
+
+.planner-range-cell {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .planner-clickable-row {
@@ -1015,6 +1063,40 @@ function fmtNum(n) {
 .planner-purchases span {
   color: var(--text-muted);
   font-size: var(--fs-xs);
+}
+
+.planner-simple-metric {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.planner-cell-sub {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  margin-top: 2px;
+}
+
+.planner-status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 2px 6px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+  background: rgba(255,255,255,0.025);
+}
+
+.planner-status-chip.active {
+  border-color: rgba(212,175,55,0.45);
+  color: var(--gold);
+  background: rgba(212,175,55,0.08);
 }
 
 .planner-value-extra {

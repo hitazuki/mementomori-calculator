@@ -1,62 +1,74 @@
 # 限时组合包路径算法直观版
 
-本文用流程图和伪代码展示购买路径计算流程。完整算法说明见 `path-planning-algorithm.md`。
+本文用流程图和伪代码展示购买路径计算流程。完整实现设计见 `implementation-design.md`。
 
 ## 总览流程
 
 ```mermaid
 flowchart TD
-  A["用户输入<br/>预算 / 当前档位 / 各触发源进度"] --> B["计算礼包内容价值"]
-  B --> C["按触发源生成机会<br/>主线 / 等级 / 无穷塔 / 四属性塔"]
-  C --> D["派生全属性塔抵达机会"]
-  D --> E["每个触发源独立切批"]
-  E --> F["合并同序号批次<br/>形成全局批次列表"]
-  F --> G["动态规划搜索<br/>价值最优 / 次优"]
-  F --> H["固定策略模拟<br/>只买小包 / 冲最大包"]
-  G --> I["压缩连续不买批次"]
-  H --> I
-  I --> J["页面展示路径<br/>购买批次可展开看触发 / 内容物 / 本批补累充"]
+  A["用户输入<br/>主预算 / 补累充比例 / 当前档位 / 各触发源范围"] --> B["计算礼包内容价值"]
+  B --> C["按来源生成触发机会"]
+  C --> D["生成属性塔前沿<br/>单塔独立 cursor / 全属性塔派生门槛"]
+  D --> E["建立触发图和 source cursor"]
+  E --> F["从当前前沿生成候选批次<br/>拆批 / 合批 / 属性塔拓扑"]
+  F --> G["枚举本批动作<br/>不买 / 买价值最高前 N 个"]
+  G --> H["更新档位 / 主预算 / 累充进度"]
+  H --> I["时间分支<br/>下一批同日 / 下一批跨 0 点"]
+  I --> J["跨日前补累充分支<br/>补 / 不补"]
+  J --> K["剪枝保留代表状态"]
+  K --> L{"还有可达触发节点?"}
+  L -- "是" --> F
+  L -- "否" --> M["输出方案<br/>价值最优 / 只买小包 / 冲最大包"]
 ```
 
-## 批次生成流程
+## 批次编排流程
 
 ```mermaid
 flowchart TD
-  A["启用的触发源"] --> B["过滤触发点<br/>当前进度 < 触发点 <= 计划推到"]
-  B --> C["按进度排序"]
-  C --> D["按 2小时内最多触发 切成来源内批次"]
-  D --> E["第 N 批与其他来源第 N 批合并"]
-  E --> F["得到全局第 N 批"]
-  F --> G{"是否启用四属性塔?"}
-  G -- "是" --> H["计算全属性塔抵达批次"]
-  H --> I["加入对应全局批次"]
-  G -- "否" --> J["跳过全属性塔派生"]
-  I --> K["全局批次列表"]
-  J --> K
+  A["当前 source cursors"] --> B["找每个来源的当前可达节点"]
+  B --> C["生成单节点拆批候选"]
+  B --> D["生成同来源前缀候选<br/>不超过 2小时内最多触发"]
+  B --> E["生成跨来源合批候选"]
+  B --> F["生成属性塔候选<br/>同层单塔 / 下一层单塔 / 全属性塔"]
+  C --> G["候选批次集合"]
+  D --> G
+  E --> G
+  F --> G
+  G --> H["按压力 / 潜在价值剪枝"]
 ```
 
-## 动态规划流程
+未进入当前候选批次的触发节点不算已触发，不推进 cursor，可以留到后续档位变化后再触发。
+
+## 状态转移流程
 
 ```mermaid
 flowchart TD
-  A["初始状态<br/>档位 = 当前档位<br/>花费 = 0<br/>价值 = 0"] --> B["读取下一全局批次"]
-  B --> C["按当前档位取批内可买礼包"]
-  C --> D["生成动作<br/>全不买 / 买价值最高前 1 个 / 前 2 个 / ..."]
-  D --> E["枚举旧状态 × 动作"]
-  E --> F{"是否超预算?"}
-  F -- "是" --> G["丢弃候选状态"]
-  F -- "否" --> H["更新花费 / 价值 / 路径"]
-  H --> I{"本批是否购买?"}
-  I -- "是" --> J["下一批升 1 档<br/>枚举不补 / 补到下一累充档"]
-  I -- "否" --> K["下一批降 1 档"]
-  J --> L["加入下一轮状态"]
-  K --> L
-  L --> M["Pareto 剪枝<br/>去掉更贵且价值不高的状态"]
-  M --> N{"还有批次?"}
-  N -- "是" --> B
-  N -- "否" --> O["按价值 / 购买数 / 花费排序"]
-  O --> P["输出价值最优与次优方案"]
+  A["状态<br/>档位 / cursors / 主预算花费 / 补包花费 / 累充日进度"] --> B["选择候选批次"]
+  B --> C["生成购买动作"]
+  C --> D{"限时包花费是否超主预算?"}
+  D -- "是" --> E["丢弃动作"]
+  D -- "否" --> F["推进 cursor<br/>本批节点已触发"]
+  F --> G{"本批是否买限时包?"}
+  G -- "是" --> H["下一批升档<br/>计算实际累充赠钻"]
+  G -- "否" --> I["等待超时<br/>下一批降档"]
+  H --> K["生成候选状态"]
+  I --> K
+  K --> L["批次边界时间分支"]
+  L --> L1["继续同日<br/>不生成补包候选"]
+  L --> L2["准备跨 0 点重置"]
+  L2 --> J{"是否接近下一累充档<br/>且浮动预算可补足?"}
+  J -- "是" --> J1["跨日前补<br/>更新补包花费 / 累充进度 / 价值"]
+  J -- "否" --> J2["不补直接跨日"]
+  J1 --> M["重置到下一累充日"]
+  J2 --> M
+  L1 --> M2["保留当前累充日"]
+  M --> N["Pareto / Beam 剪枝"]
+  M2 --> N
 ```
+
+每日累充重置只发生在两个全局批次之间。同一批内的限时包和补包都按同一个累充日计算。
+
+属性塔使用单塔独立前沿。同一层级内的不同属性塔分批触发不强制重置；某个单塔进入下一层级，或进入全属性塔后续层级时，才会在批次边界强制重置累充日。若 `blue250` 已处理而 `red/green/yellow250` 未处理，下一批前沿同时包含 `red/green/yellow250` 和 `blue300`，只有实际触发 `blue300` 的候选需要强制重置。
 
 ## 核心伪代码
 
@@ -65,245 +77,64 @@ function buildPlans(packs, settings):
   packsWithValue = calculatePackCE(packs)
   context = buildPlanningContext(packsWithValue, settings)
 
-  bestPlans = dynamicProgramming(context, topK = 12)
-  bestPlans = sortByPlanValue(bestPlans)
+  bestPlan = searchBestValuePlan(context)
   smallPackPlan = simulatePolicy(context, "smallPack")
   maxPackPlan = simulatePolicy(context, "maxPack")
 
   return [
-    bestPlans[0],
-    bestPlans[1],
+    bestPlan,
     smallPackPlan,
     maxPackPlan
   ]
 ```
 
 ```text
-function buildPlanningContext(packs, settings):
-  priceTiers = sortedUniquePackPrices(packs)
-  lanes = enabledTriggerSources(settings)
+function searchBestValuePlan(context):
+  states = [emptyState(context)]
 
-  laneBatches = []
-  for lane in lanes:
-    opportunities = filterPacksByLaneAndProgress(packs, lane)
-    opportunities = sortByTriggerProgress(opportunities)
-    laneBatches.append(splitByBatchSize(opportunities, lane.batchSize))
+  while states has unfinished trigger cursors:
+    nextStates = []
 
-  allTowerEntries = deriveAllTowerOpportunities(packs, lanes)
+    for state in states:
+      batches = generateBatchCandidates(state.sourceCursors)
 
-  globalBatches = []
-  for batchIndex from 0 to maxBatchCount:
-    batch = mergeSameIndexBatches(laneBatches, batchIndex)
-    batch.add(allTowerEntries at batchIndex)
-    globalBatches.append(sortBatch(batch))
+      for batch in batches:
+        actions = generatePurchaseActions(batch, state.tierIndex)
 
-  return { priceTiers, globalBatches, budget, startTierIndex }
+        for action in actions:
+          if action.limitedCost exceeds main budget:
+            continue
+
+          candidate = applyBatchAndPurchase(state, batch, action)
+
+          nextStates.add(continueSameRechargeDay(candidate))
+
+          if shouldKeepNextDayBranch(candidate):
+            for branch in expandBeforeRechargeReset(candidate):
+              nextStates.add(branch)
+
+    states = prune(nextStates)
+
+  return best ranked state
 ```
 
-```text
-function dynamicProgramming(context, topK):
-  states = {
-    key(context.startTierIndex, 0): [emptyState]
-  }
-
-  for batch in context.globalBatches:
-    nextStates = {}
-
-    for state in all states:
-      tierPrice = context.priceTiers[state.tierIndex]
-      actions = buildActions(batch, tierPrice)
-
-      for action in actions:
-        newSpent = state.spent + action.cost
-        if newSpent > context.budget:
-          continue
-
-        if action.bought:
-          nextTierIndex = state.tierIndex + 1
-        else:
-          nextTierIndex = state.tierIndex - 1
-
-        nextTierIndex = clampToValidTier(nextTierIndex)
-
-        rechargeBonus = marginalFreeDiamonds(state.spent / 2, action.cost / 2)
-        actionValue = action.originalValue + rechargeBonus * freeDiamondScore
-
-        candidate = {
-          tierIndex: nextTierIndex,
-          spent: newSpent,
-          value: state.value + actionValue,
-          purchases: state.purchases + count(action.purchases),
-          steps: state.steps + summarize(action, batch)
-        }
-
-        topUpOptions = [none]
-        if action.bought:
-          topUpOptions += findTopUpToNextRechargeTier(candidate, context)
-
-        for topUp in topUpOptions:
-          candidateWithTopUp = attachTopUpToLastStep(candidate, topUp)
-          insertCandidate(nextStates, candidateWithTopUp, topK)
-
-    states = pruneByParetoAndLimit(nextStates)
-
-  return takeTopK(sortPlans(all states), topK)
-```
-
-```text
-function findTopUpToNextRechargeTier(state, context):
-  if permanent top-up is disabled:
-    return []
-
-  currentPaid = state.spent / 2
-  targetTier = first dailyRechargeTier where currentPaid < tier.paid
-  if targetTier does not exist:
-    return []
-
-  remainingBudget = context.budget - state.spent
-  permanentPacks = nonFirstPermanentDiamondPacks()
-
-  bestByCost = unboundedKnapsack(
-    packs = permanentPacks,
-    budget = remainingBudget,
-    value = pack.originalValue
-  )
-
-  candidates = []
-  for combo in bestByCost:
-    if currentPaid + combo.cost / 2 < targetTier.paid:
-      continue
-
-    value = combo.originalValue
-      + marginalFreeDiamonds(currentPaid, combo.cost / 2) * freeDiamondScore
-
-    candidates.append({ combo, value })
-
-  return lowestCostThenHighestValue(candidates).take(1)
-```
-
-## 单批动作示意
-
-假设某个全局批次中，当前档位可买 3 个礼包：
-
-| 触发 | 价值 | 价格 |
-| --- | ---: | ---: |
-| 主线 10-28 | 1500 | 160 |
-| 无穷塔 180 | 1200 | 160 |
-| 蓝塔 80 | 900 | 160 |
-
-先按价值排序后，动作只枚举前缀：
-
-| 动作 | 购买内容 | 是否升档 |
-| --- | --- | --- |
-| 全不买 | 无 | 否，下一批降档 |
-| 买 1 个 | 主线 10-28 | 是，下一批升档 |
-| 买 2 个 | 主线 10-28 + 无穷塔 180 | 是，下一批升档 |
-| 买 3 个 | 主线 10-28 + 无穷塔 180 + 蓝塔 80 | 是，下一批升档 |
-
-不会枚举“只买无穷塔 180”这类子集，因为同档礼包价格相同，买 1 个时选最高价值礼包一定不差。
-
-## 状态剪枝示意
-
-同一档位下，若有以下候选状态：
-
-| 状态 | 已花费 | 已价值 |
-| --- | ---: | ---: |
-| A | 160 | 1000 |
-| B | 650 | 900 |
-| C | 810 | 1800 |
-
-B 会被剪掉，因为它比 A 花费更多，但价值更低。
-
-保留 A 和 C，因为 C 虽然更贵，但价值也更高，后续仍可能成为最优路径的一部分。
-
-## 路径展示压缩
-
-算法内部仍保留每个批次的完整 step。页面展示时再压缩连续不买：
-
-```text
-原始路径:
-第 1 批 买
-第 2 批 不买
-第 3 批 不买
-第 4 批 不买
-第 5 批 买
-
-展示路径:
-第 1 批 买
-第 2-4 批 连续不买 ×3
-第 5 批 买
-```
-
-购买批次不会压缩，因为需要展开查看每个礼包的触发点、价格、CE、价值和内容物。若该批次采用了补累充，会在同一个展开区域列出实际使用的非首次常驻钻石组合包。
-
-## 属性塔拓扑流程
+## 补累充流程
 
 ```mermaid
 flowchart TD
-  A["读取蓝/红/翠/黄塔设置"] --> B["生成单属性塔触发事件"]
-  A --> C{"四塔都启用?"}
-  C -- "是" --> D["根据 min(四塔层数)<br/>生成全属性塔抵达事件"]
-  C -- "否" --> E["不生成全属性塔事件"]
-  B --> F["合并事件"]
-  D --> F
-  E --> F
-  F --> G["按触发层排序"]
-  G --> H{"事件类型"}
-  H -- "全属性塔抵达" --> I["单独形成 1 个属性塔批次"]
-  H -- "单属性塔触发" --> J["同层蓝/红/翠/黄合并为 1 个属性塔批次"]
-  I --> K["属性塔拓扑批次序列"]
-  J --> K
-  K --> L["作为一个来源参与全局第 N 批合并"]
+  A["状态准备跨 0 点重置"] --> B["找到当前累充日最后一个已买限时包批次"]
+  B --> B2["读取该批购买后的累充进度"]
+  B2 --> C{"是否存在下一累充档?"}
+  C -- "否" --> D["不补"]
+  C -- "是" --> E{"浮动预算内能否小额补足?"}
+  E -- "否" --> D
+  E -- "是" --> F["生成两个候选"]
+  F --> G["跨日前补<br/>选择达到下一档的最低花费组合"]
+  F --> H["不补直接跨日<br/>保留浮动预算给后续累充日"]
+  G --> I["更新状态<br/>补包花费 / 累充进度 / 累充价值"]
+  I --> J["重置到下一累充日"]
+  H --> J
+  D --> J
 ```
 
-示意：
-
-```text
-属性塔拓扑批次:
-第 1 批：全属性塔 225
-第 2 批：蓝250 + 红250 + 翠250 + 黄250
-第 3 批：全属性塔 275
-第 4 批：蓝300 + 红300 + 翠300 + 黄300
-```
-
-跨日最多 20 层，小于相邻属性塔事件的 25 层间隔，所以跨日能力不会改变该拓扑序列。
-
-## 日期抽象示意
-
-真实开放规则：
-
-```text
-周一 蓝
-周二 红
-周三 翠
-周四 黄
-周五 蓝 + 红
-周六 翠 + 黄
-周日 蓝 + 红 + 翠 + 黄
-```
-
-算法抽象：
-
-```text
-不关心具体星期几
-只保留属性塔礼包事件拓扑
-```
-
-原因：
-
-```text
-单塔每天 10 层
-跨日同批最多 20 层
-相邻属性塔礼包事件至少 25 层
-所以跨日不会把两个相邻事件压进同一批
-```
-
-因此最终仍按事件层级展示：
-
-```text
-全属性 225
-单属性 250
-全属性 275
-单属性 300
-...
-```
+补包只使用非首次常驻钻石组合包。补包不会触发限时包，也不会影响限时包升降档。继续同一累充日的分支不会生成补包候选。

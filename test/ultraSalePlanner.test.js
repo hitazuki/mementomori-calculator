@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 
 import { cumulativeFreeDiamonds, marginalFreeDiamonds } from '../src/engine/dailyRechargeBonus.js'
 import { mainQuestStageCount, parseMainQuestProgress } from '../src/engine/mainQuestProgress.js'
-import { buildUltraSalePlanOptions, compressUltraSalePlanSteps, planUltraSalePurchases } from '../src/engine/ultraSalePlanner.js'
+import { __testables, buildUltraSalePlanOptions, compressUltraSalePlanSteps, planUltraSalePurchases } from '../src/engine/ultraSalePlanner.js'
 
 function pack(trigger, price, value) {
   return {
@@ -75,7 +75,7 @@ test('buying one pack in a batch raises the tier for the next batch', () => {
   assert.equal(plan.steps[1].tierPrice, 650)
 })
 
-test('buying any pack in a multi-trigger batch raises only one tier', () => {
+test('buying part of a batch raises only one tier and skips low-value offers', () => {
   const packs = [
     pack('10', 160, 900),
     pack('20', 160, 100),
@@ -92,22 +92,46 @@ test('buying any pack in a multi-trigger batch raises only one tier', () => {
     batchSize: 2,
   })
 
-  assert.equal(plan.steps[0].purchases.length, 1)
-  assert.equal(plan.steps[0].purchases[0].trigger, '10')
-  assert.equal(plan.steps[0].opportunities.length, 2)
-  assert.deepEqual(plan.steps[0].opportunities.map(opportunity => ({
+  const partialBatch = plan.steps.find(step => step.opportunities.length === 2)
+  assert.equal(partialBatch.purchases.length, 1)
+  assert.equal(partialBatch.purchases[0].trigger, '30')
+  assert.deepEqual(partialBatch.opportunities.map(opportunity => ({
     trigger: opportunity.trigger,
     purchased: opportunity.purchased,
   })), [
-    { trigger: '10', purchased: true },
     { trigger: '20', purchased: false },
+    { trigger: '30', purchased: true },
   ])
-  assert.equal(plan.steps[0].skippedOpportunities.length, 1)
-  assert.equal(plan.steps[0].nextTierPrice, 650)
-  assert.equal(plan.steps[1].tierPrice, 650)
+  assert.equal(partialBatch.skippedOpportunities.length, 1)
+  assert.equal(partialBatch.tierPrice, 650)
+  assert.equal(partialBatch.nextTierPrice, 650)
 })
 
-test('buildUltraSalePlanOptions exposes ranked and policy plans', () => {
+test('planner can hold an untriggered node for a later higher tier batch', () => {
+  const packs = [
+    questPack('7-28', 160, 100),
+    pack('10', 160, 10),
+    pack('10', 650, 1000),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    currentPrice: 160,
+    budget: 810,
+    lanes: [
+      { id: 'quest', cat: 'quest', label: '主线', enabled: true, startProgress: '0-0', endProgress: '8-28', batchSize: 1 },
+      { id: 'tower', cat: 'tower', tower: 'origin_tower_infinite', label: '无穷塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 1 },
+    ],
+  })
+
+  assert.match(plan.steps[0].triggerRange, /主线/)
+  assert.equal(plan.steps[0].tierPrice, 160)
+  assert.equal(plan.steps[0].nextTierPrice, 650)
+  const towerStep = plan.steps.find(step => step.triggerRange.includes('无穷塔: 10'))
+  assert.equal(towerStep.tierPrice, 650)
+  assert.equal(towerStep.purchases[0].price, 650)
+})
+
+test('buildUltraSalePlanOptions exposes value and policy plans', () => {
   const packs = [
     pack('10', 160, 400),
     pack('20', 160, 100),
@@ -125,10 +149,10 @@ test('buildUltraSalePlanOptions exposes ranked and policy plans', () => {
     batchSize: 1,
   })
 
-  assert.deepEqual(options.map(option => option.id), ['bestValue', 'secondValue', 'smallPack', 'maxPack'])
-  assert.ok(options[0].value >= options[1].value)
-  assert.equal(options[2].label, '只买小包')
-  assert.equal(options[3].label, '冲最大包')
+  assert.deepEqual(options.map(option => option.id), ['bestValue', 'smallPack', 'maxPack'])
+  assert.ok(options[0].value >= 0)
+  assert.equal(options[1].label, '只买小包')
+  assert.equal(options[2].label, '冲最大包')
 })
 
 test('planner appends non-first permanent diamond packs to top up daily recharge tiers', () => {
@@ -149,7 +173,7 @@ test('planner appends non-first permanent diamond packs to top up daily recharge
     currentPrice: 11800,
     budget: 12120,
     batchSize: 1,
-    enablePermanentTopUp: true,
+    topUpBudgetRatio: 5,
     permanentPacks,
     freeDiamondScore: 1,
   })
@@ -160,6 +184,7 @@ test('planner appends non-first permanent diamond packs to top up daily recharge
   assert.equal(topUpStep.topUpRechargeFreeDiamonds, 4800)
   assert.deepEqual(topUpStep.topUpUnlockedRechargeTiers, [6000])
   assert.equal(plan.topUpPurchaseCount, 2)
+  assert.equal(plan.topUpBatchCount, 1)
   assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 80 ×2')
   assert.equal(plan.topUpBatches[0].index, 1)
   assert.equal(plan.topUpBatches[0].cost, 320)
@@ -185,20 +210,135 @@ test('planner stops permanent top-up once the next recharge tier is reached', ()
     currentPrice: 11800,
     budget: 12280,
     batchSize: 1,
-    enablePermanentTopUp: true,
+    topUpBudgetRatio: 5,
     permanentPacks,
     freeDiamondScore: 1,
   })
 
   assert.equal(plan.spent, 12120)
-  assert.equal(plan.remaining, 160)
+  assert.equal(plan.remaining, 480)
+  assert.equal(plan.topUpRemaining, 294)
   assert.equal(plan.topUpPurchaseCount, 2)
   assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 80 ×2')
   assert.equal(plan.steps[0].topUpCost, 320)
   assert.deepEqual(plan.steps[0].topUpUnlockedRechargeTiers, [6000])
 })
 
-test('planner combines independent trigger lanes in the same batch round', () => {
+test('planner uses the cheapest permanent diamond combo for the next recharge tier', () => {
+  const packs = [
+    pack('10', 11350, 5675),
+  ]
+  const permanentPacks = [
+    permanentDiamondPack('钻石组合包 80', 160, 148),
+    permanentDiamondPack('钻石组合包 325', 650, 518),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    source: 'tower',
+    tower: 'origin_tower_infinite',
+    startProgress: 0,
+    endProgress: 10,
+    currentPrice: 11350,
+    budget: 12000,
+    batchSize: 1,
+    topUpBudgetRatio: 6,
+    permanentPacks,
+    freeDiamondScore: 1,
+  })
+
+  assert.equal(plan.spent, 12000)
+  assert.equal(plan.topUpPurchaseCount, 1)
+  assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 325')
+  assert.equal(plan.steps[0].topUpCost, 650)
+  assert.deepEqual(plan.steps[0].topUpUnlockedRechargeTiers, [6000])
+})
+
+test('planner skips permanent top-up when the recharge gap is too large', () => {
+  const packs = [
+    pack('10', 12000, 6000),
+  ]
+  const permanentPacks = [
+    permanentDiamondPack('钻石组合包 80', 160, 148),
+    permanentDiamondPack('钻石组合包 3000', 6000, 5095),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    source: 'tower',
+    tower: 'origin_tower_infinite',
+    startProgress: 0,
+    endProgress: 10,
+    currentPrice: 12000,
+    budget: 24000,
+    batchSize: 1,
+    topUpBudgetRatio: 5,
+    permanentPacks,
+    freeDiamondScore: 1,
+  })
+
+  assert.equal(plan.spent, 12000)
+  assert.equal(plan.topUpPurchaseCount, 0)
+  assert.equal(plan.topUpPackSummary, '')
+  assert.equal(plan.steps[0].topUpPacks, undefined)
+})
+
+test('planner keeps the no-top-up branch when current top-up is worse', () => {
+  const packs = [
+    pack('10', 11800, 5900),
+  ]
+  const permanentPacks = [
+    permanentDiamondPack('钻石组合包 80', 160, -10000),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    source: 'tower',
+    tower: 'origin_tower_infinite',
+    startProgress: 0,
+    endProgress: 10,
+    currentPrice: 11800,
+    budget: 11800,
+    batchSize: 1,
+    topUpBudgetRatio: 5,
+    permanentPacks,
+    freeDiamondScore: 0,
+  })
+
+  assert.equal(plan.topUpPurchaseCount, 0)
+  assert.equal(plan.topUpSpentYen, 0)
+  assert.equal(plan.steps[0].topUpPacks, undefined)
+})
+
+test('same-day continuation does not create permanent top-up candidates', () => {
+  const packs = [
+    pack('10', 11800, 5900),
+  ]
+  const permanentPacks = [
+    permanentDiamondPack('钻石组合包 80', 160, 148),
+  ]
+  const context = __testables.buildPlanningContext(packs, {
+    source: 'tower',
+    tower: 'origin_tower_infinite',
+    startProgress: 0,
+    endProgress: 10,
+    currentPrice: 11800,
+    budget: 12120,
+    batchSize: 1,
+    topUpBudgetRatio: 5,
+    permanentPacks,
+    freeDiamondScore: 1,
+  })
+
+  const states = __testables.expandState(__testables.createEmptyState(context), context)
+  const sameDayBought = states.find(state => state.purchases === 1 && state.rechargeDayIndex === 0)
+  const nextDayTopUp = states.find(state => state.purchases === 1 && state.rechargeDayIndex === 1 && state.topUpSpentYen > 0)
+
+  assert.ok(sameDayBought)
+  assert.equal(sameDayBought.topUpSpentYen, 0)
+  assert.equal(sameDayBought.steps[0].topUpPacks, undefined)
+  assert.ok(nextDayTopUp)
+  assert.equal(nextDayTopUp.steps[0].topUpPacks[0].displayTrigger, '钻石组合包 80 ×2')
+})
+
+test('planner can split independent trigger lanes to buy later at higher tier', () => {
   const packs = [
     pack('10', 160, 100),
     questPack('7-28', 160, 300),
@@ -215,12 +355,12 @@ test('planner combines independent trigger lanes in the same batch round', () =>
     ],
   })
 
-  assert.equal(plan.steps.length, 2)
-  assert.equal(plan.steps[0].tierPrice, 160)
-  assert.match(plan.steps[0].triggerRange, /主线/)
-  assert.match(plan.steps[0].triggerRange, /无穷塔/)
-  assert.equal(plan.steps[0].purchases[0].sourceLabel, '主线')
-  assert.equal(plan.steps[1].tierPrice, 650)
+  assert.equal(plan.spent, 810)
+  assert.ok(plan.steps.length >= 3)
+  assert.equal(plan.steps.some(step => step.triggerRange.includes('主线') && step.bought), true)
+  const towerHighTierBuy = plan.steps.find(step => step.triggerRange.includes('无穷塔: 20') && step.bought)
+  assert.equal(towerHighTierBuy.tierPrice, 650)
+  assert.equal(towerHighTierBuy.purchases[0].sourceLabel, '无穷塔')
 })
 
 test('main quest progress uses built-in game-like quest id conversion', () => {
@@ -335,10 +475,73 @@ test('attribute tower planning follows all-tower and single-tower topology order
     ],
   })
 
-  assert.equal(plan.batchCount, 2)
+  assert.equal(plan.batchCount, 5)
   assert.match(plan.steps[0].triggerRange, /225/)
   assert.doesNotMatch(plan.steps[0].triggerRange, /250/)
-  assert.match(plan.steps[1].triggerRange, /250/)
+  assert.equal(plan.steps.slice(1).every(step => step.triggerRange.includes('250')), true)
+  assert.equal(plan.steps[1].rechargeReset, true)
+  assert.equal(plan.steps[1].rechargeDayIndex, 1)
+  assert.equal(plan.steps.slice(2).every(step => step.rechargeReset === false), true)
+})
+
+test('same-floor different attribute towers can split without recharge reset', () => {
+  const packs = [
+    towerPack('origin_tower_blue', '250', 160, 100),
+    towerPack('origin_tower_red', '250', 160, 1),
+    towerPack('origin_tower_red', '250', 650, 1000),
+  ]
+
+  const plan = planUltraSalePurchases(packs, {
+    budget: 810,
+    currentPrice: 160,
+    lanes: [
+      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 200, endProgress: 260, batchSize: 1 },
+      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 200, endProgress: 260, batchSize: 1 },
+    ],
+  })
+
+  assert.equal(plan.steps.length, 2)
+  assert.match(plan.steps[0].triggerRange, /blue: 250/)
+  assert.equal(plan.steps[0].nextTierPrice, 650)
+  assert.match(plan.steps[1].triggerRange, /red: 250/)
+  assert.equal(plan.steps[1].tierPrice, 650)
+  assert.equal(plan.steps[1].rechargeReset, false)
+  assert.equal(plan.steps[1].rechargeDayIndex, 0)
+})
+
+test('attribute tower frontier keeps untriggered same-floor towers and next blue layer available', () => {
+  const packs = [
+    towerPack('origin_tower_blue', '250', 160, 100),
+    towerPack('origin_tower_blue', '300', 650, 1000),
+    towerPack('origin_tower_red', '250', 160, 100),
+    towerPack('origin_tower_green', '250', 160, 100),
+    towerPack('origin_tower_yellow', '250', 160, 100),
+  ]
+  const settings = {
+    lanes: [
+      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 200, endProgress: 310, batchSize: 99 },
+      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
+      { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: 'green', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
+      { id: 'yellow', cat: 'tower', tower: 'origin_tower_yellow', label: 'yellow', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
+    ],
+  }
+  const { sources } = __testables.buildPlanningSources(packs, settings)
+  const state = { sourceCursors: sources.map((_, index) => index === 0 ? 1 : 0) }
+  const candidates = __testables.generateBatchCandidates(state, { sources, settings })
+
+  const singleBlue300 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'blue: 300')
+  const singleRed250 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'red: 250')
+  const singleGreen250 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'green: 250')
+  const singleYellow250 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'yellow: 250')
+
+  assert.ok(singleBlue300)
+  assert.equal(singleBlue300.requiresRechargeReset, true)
+  assert.ok(singleRed250)
+  assert.equal(singleRed250.requiresRechargeReset, false)
+  assert.ok(singleGreen250)
+  assert.equal(singleGreen250.requiresRechargeReset, false)
+  assert.ok(singleYellow250)
+  assert.equal(singleYellow250.requiresRechargeReset, false)
 })
 
 test('attribute tower topology keeps adjacent all-tower and single-tower events in separate batches', () => {
@@ -365,10 +568,13 @@ test('attribute tower topology keeps adjacent all-tower and single-tower events 
     ],
   })
 
-  assert.equal(plan.batchCount, 3)
-  assert.match(plan.steps[0].triggerRange, /250/)
-  assert.match(plan.steps[1].triggerRange, /275/)
-  assert.match(plan.steps[2].triggerRange, /300/)
+  assert.equal(plan.batchCount, 9)
+  assert.equal(plan.steps.slice(0, 4).every(step => step.triggerRange.includes('250')), true)
+  assert.match(plan.steps[4].triggerRange, /275/)
+  assert.equal(plan.steps.slice(5).every(step => step.triggerRange.includes('300')), true)
+  assert.equal(plan.steps[4].rechargeReset, true)
+  assert.equal(plan.steps[5].rechargeReset, true)
+  assert.equal(plan.steps.slice(6).every(step => step.rechargeReset === false), true)
 })
 
 test('compressUltraSalePlanSteps merges only consecutive skipped batches', () => {
