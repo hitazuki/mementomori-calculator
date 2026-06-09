@@ -861,6 +861,24 @@ function comparePlan(a, b) {
   return a.topUpSpentYen - b.topUpSpentYen
 }
 
+function estimateTopUpPotential(state, context) {
+  if (!context.topUpPotentialPerEvent) return 0
+  const remaining = context.topUpBudget - state.topUpSpentYen
+  if (remaining < context.minPermanentPackPrice) return 0
+  const events = Math.min(Math.floor(remaining / context.minPermanentPackPrice), 3)
+  return events * context.topUpPotentialPerEvent
+}
+
+function comparePlanWithPotential(a, b, context) {
+  const aEff = a.value + estimateTopUpPotential(a, context)
+  const bEff = b.value + estimateTopUpPotential(b, context)
+  if (aEff !== bEff) return bEff - aEff
+  if ((a.pressure || 0) !== (b.pressure || 0)) return (a.pressure || 0) - (b.pressure || 0)
+  if ((a.triggerCount || 0) !== (b.triggerCount || 0)) return (a.triggerCount || 0) - (b.triggerCount || 0)
+  if (a.limitedSpentYen !== b.limitedSpentYen) return a.limitedSpentYen - b.limitedSpentYen
+  return a.topUpSpentYen - b.topUpSpentYen
+}
+
 function makeStateKey(state, context) {
   const dailyBucket = DAILY_RECHARGE_BONUS_TIERS.findIndex(tier => state.dailyPaidDiamonds < tier.paid)
   const spentBucket = Math.floor(state.limitedSpentYen / 160)
@@ -940,13 +958,13 @@ function shouldKeepNextDayBranch(state, context) {
   return state.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)
 }
 
-function insertCandidate(map, candidate, context) {
+function insertCandidate(map, candidate, context, compare) {
   const key = makeStateKey(candidate, context)
   const list = map.get(key) || []
   const signature = stateSignature(candidate)
   if (list.some(state => stateSignature(state) === signature)) return
   list.push(candidate)
-  list.sort(comparePlan)
+  list.sort(compare || comparePlan)
   map.set(key, list.slice(0, Math.max(2, Number(context.settings.perBucketStates) || 3)))
 }
 
@@ -961,6 +979,10 @@ function dominates(a, b) {
 }
 
 function pruneStates(states, context) {
+  const compare = context.topUpPotentialPerEvent
+    ? (a, b) => comparePlanWithPotential(a, b, context)
+    : comparePlan
+
   const byCursor = new Map()
   for (const state of states) {
     const key = `${sourceCursorsKey(state.sourceCursors)}|${state.tierIndex}`
@@ -971,15 +993,15 @@ function pruneStates(states, context) {
   const map = new Map()
   for (const group of byCursor.values()) {
     const survivors = []
-    for (const state of group.sort(comparePlan)) {
+    for (const state of group.sort(compare)) {
       if (survivors.some(existing => dominates(existing, state))) continue
       survivors.push(state)
       if (survivors.length >= Math.max(20, Number(context.settings.maxStatesPerCursor) || 80)) break
     }
-    for (const state of survivors) insertCandidate(map, state, context)
+    for (const state of survivors) insertCandidate(map, state, context, compare)
   }
 
-  const all = [...map.values()].flat().sort(comparePlan)
+  const all = [...map.values()].flat().sort(compare)
   const limit = Math.max(50, Number(context.settings.maxStatesPerTier) || Number(context.settings.maxStates) || DEFAULT_MAX_STATES)
   return all.slice(0, limit)
 }
@@ -1213,6 +1235,16 @@ function buildPlanningContext(packs, settings) {
   const startTierIndex = clamp(tierIndex === -1 ? 0 : tierIndex, 0, priceTiers.length - 1)
   const { lanes, sources } = buildPlanningSources(packs, settings)
   const opportunities = sources.flatMap(source => source.groups.flatMap(group => group.opportunities))
+  const freeDiamondScore = Number(settings.freeDiamondScore) || Number(settings.diamondScore) || 1
+  const permanentPacks = normalizePermanentTopUpPacks(settings.permanentPacks || [])
+  const minPermanentPackPrice = permanentPacks.length
+    ? Math.min(...permanentPacks.map(p => p.price))
+    : 0
+  const avgTierBonus = DAILY_RECHARGE_BONUS_TIERS.reduce((sum, tier) => sum + tier.bonus, 0)
+    / DAILY_RECHARGE_BONUS_TIERS.length
+  const topUpPotentialPerEvent = minPermanentPackPrice > 0
+    ? avgTierBonus * freeDiamondScore * 0.5
+    : 0
 
   return {
     priceTiers,
@@ -1221,8 +1253,10 @@ function buildPlanningContext(packs, settings) {
     topUpBudget: Math.floor(mainBudget * topUpRatio),
     topUpRatio,
     startTierIndex,
-    freeDiamondScore: Number(settings.freeDiamondScore) || Number(settings.diamondScore) || 1,
-    permanentPacks: normalizePermanentTopUpPacks(settings.permanentPacks || []),
+    freeDiamondScore,
+    permanentPacks,
+    minPermanentPackPrice,
+    topUpPotentialPerEvent,
     lanes,
     sources,
     opportunities,

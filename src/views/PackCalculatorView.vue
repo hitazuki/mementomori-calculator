@@ -605,7 +605,7 @@ const filteredPacks = computed(() => {
 })
 
 const planSettings = reactive({
-  budget: 11800,
+  budget: 118000,
   currentPrice: 160,
   topUpBudgetRatio: 5,
 })
@@ -631,13 +631,13 @@ function setActivePlan(id) {
 }
 
 const planLanes = reactive([
-  { id: 'quest', cat: 'quest', labelKey: 'origin_quest', enabled: true, startProgress: '0-0', endProgress: '25-28', batchSize: 6 },
-  { id: 'rank', cat: 'rank', labelKey: 'origin_rank', enabled: true, startProgress: 0, endProgress: 100, batchSize: 1 },
-  { id: 'tower_infinite', cat: 'tower', tower: 'origin_tower_infinite', labelKey: 'origin_tower_infinite', enabled: true, startProgress: 0, endProgress: 500, batchSize: 6 },
-  { id: 'tower_blue', cat: 'tower', tower: 'origin_tower_blue', labelKey: 'origin_tower_blue', enabled: false, startProgress: 0, endProgress: 250, batchSize: 1 },
-  { id: 'tower_red', cat: 'tower', tower: 'origin_tower_red', labelKey: 'origin_tower_red', enabled: false, startProgress: 0, endProgress: 250, batchSize: 1 },
-  { id: 'tower_green', cat: 'tower', tower: 'origin_tower_green', labelKey: 'origin_tower_green', enabled: false, startProgress: 0, endProgress: 250, batchSize: 1 },
-  { id: 'tower_yellow', cat: 'tower', tower: 'origin_tower_yellow', labelKey: 'origin_tower_yellow', enabled: false, startProgress: 0, endProgress: 250, batchSize: 1 },
+  { id: 'quest', cat: 'quest', labelKey: 'origin_quest', enabled: true, startProgress: '45-09', endProgress: '48-01', batchSize: 6 },
+  { id: 'rank', cat: 'rank', labelKey: 'origin_rank', enabled: true, startProgress: 630, endProgress: 660, batchSize: 1 },
+  { id: 'tower_infinite', cat: 'tower', tower: 'origin_tower_infinite', labelKey: 'origin_tower_infinite', enabled: true, startProgress: 2444, endProgress: 2555, batchSize: 6 },
+  { id: 'tower_blue', cat: 'tower', tower: 'origin_tower_blue', labelKey: 'origin_tower_blue', enabled: true, startProgress: 1000, endProgress: 1100, batchSize: 1 },
+  { id: 'tower_red', cat: 'tower', tower: 'origin_tower_red', labelKey: 'origin_tower_red', enabled: true, startProgress: 1099, endProgress: 1100, batchSize: 1 },
+  { id: 'tower_green', cat: 'tower', tower: 'origin_tower_green', labelKey: 'origin_tower_green', enabled: true, startProgress: 1500, endProgress: 1800, batchSize: 1 },
+  { id: 'tower_yellow', cat: 'tower', tower: 'origin_tower_yellow', labelKey: 'origin_tower_yellow', enabled: true, startProgress: 1500, endProgress: 1800, batchSize: 1 },
 ])
 
 const attributeTowerIds = new Set([
