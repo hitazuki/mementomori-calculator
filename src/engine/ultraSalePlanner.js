@@ -1043,8 +1043,12 @@ function collectTopValuePlans(context, topK = 1) {
     states = pruneStates(expanded, context)
   }
 
-  const complete = states.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
-  const rankedSource = complete.length ? complete : states
+  // 对所有存活状态统一补包：最后一天的跨日边界不会生成新分支，
+  // tryApplyTopUp 挂在跨日分支逻辑中，导致最后一天遗漏。
+  // tryApplyTopUp 对已补包的状态是幂等的（topUpCost>0 时直接返回）。
+  const toppedUp = states.map(state => tryApplyTopUp(state, context))
+  const complete = toppedUp.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
+  const rankedSource = complete.length ? complete : toppedUp
   const ranked = []
   for (const state of rankedSource.sort(comparePlan)) {
     if (!ranked.some(existing => stateSignature(existing) === stateSignature(state))) ranked.push(state)
@@ -1177,7 +1181,7 @@ function simulatePolicyPlan(context, policy) {
     state = continueSameRechargeDay(state)
   }
 
-  return state
+  return tryApplyTopUp(state, context)
 }
 
 function buildPlanningContext(packs, settings) {
