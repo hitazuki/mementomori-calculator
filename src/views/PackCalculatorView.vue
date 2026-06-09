@@ -127,13 +127,13 @@
           </label>
 
           <label class="planner-field">
-            <span>补累充预算比例</span>
-            <input class="form-input" type="number" min="0" max="100" step="1" v-model.number="planSettings.topUpBudgetRatio" />
+            <span>补累充阈值 x%</span>
+            <input class="form-input" type="number" min="0" max="100" step="1" v-model.number="planSettings.topUpThreshold" />
           </label>
         </div>
 
         <div class="planner-derived-note">
-          补累充预算 {{ formatPrice(plannerTopUpBudget) }}；总预算 {{ formatPrice(plannerTotalBudget) }}。补累充预算独立于限时包预算，只用于非首次常驻钻石组合包。
+          跨日前 gap <= 累计付费钻 × {{ planSettings.topUpThreshold || 10 }}% 时自动补包。补包不计入主预算约束。
         </div>
 
         <div class="planner-lane-head">
@@ -239,8 +239,7 @@
           <div><span>购买</span><b>{{ selectedPlan.purchases }}</b></div>
           <div><span>补包批次</span><b>{{ selectedPlan.topUpBatchCount || selectedPlan.topUpBatches?.length || 0 }}</b></div>
           <div><span>限时花费</span><b>{{ formatPrice(selectedPlan.limitedSpentYen ?? selectedPlan.spent) }}</b></div>
-          <div><span>补包花费</span><b>{{ formatPrice(selectedPlan.topUpSpentYen || 0) }}</b></div>
-          <div><span>补包剩余</span><b>{{ formatPrice(selectedPlan.topUpRemaining || 0) }}</b></div>
+          <div><span>补包开销</span><b>{{ formatPrice(selectedPlan.topUpTotalCost || 0) }}</b></div>
           <div><span>总花费</span><b>{{ formatPrice(selectedPlan.totalSpent ?? selectedPlan.spent) }}</b></div>
           <div><span>剩余</span><b>{{ formatPrice(selectedPlan.remaining) }}</b></div>
           <div><span>总价值</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
@@ -607,17 +606,7 @@ const filteredPacks = computed(() => {
 const planSettings = reactive({
   budget: 118000,
   currentPrice: 160,
-  topUpBudgetRatio: 5,
-})
-
-const plannerTopUpBudget = computed(() => {
-  const budget = Math.max(0, Number(planSettings.budget) || 0)
-  const ratio = Math.max(0, Number(planSettings.topUpBudgetRatio) || 0) / 100
-  return Math.floor(budget * ratio)
-})
-
-const plannerTotalBudget = computed(() => {
-  return Math.max(0, Number(planSettings.budget) || 0) + plannerTopUpBudget.value
+  topUpThreshold: 10,
 })
 
 const activePlanId = ref('bestValue')

@@ -17,8 +17,8 @@
 主目标为：
 
 ```text
-在限时包花费 <= 主预算、补累充花费 <= 补累充浮动预算的约束下，
-最大化购买路径的总评分价值。
+在限时包花费 <= 主预算的约束下，最大化购买路径的总评分价值。
+补累充由阈值判定自动确定，不计入预算约束，仅在结果中展示。
 ```
 
 排序偏好为：
@@ -40,19 +40,7 @@
 mainBudgetYen
 ```
 
-补累充浮动预算独立于主预算，按主预算百分比计算：
-
-```text
-topUpBudgetYen = floor(mainBudgetYen * topUpBudgetRatio)
-```
-
-默认：
-
-```text
-topUpBudgetRatio = 0.05
-```
-
-补累充预算只能用于非首次常驻钻石组合包，不能转用于购买限时组合包。
+补累充不计入主预算约束，由阈值判定独立确定。阈值 `topUpThreshold` 默认为 `0.10`（10%），用户可调，设为 `0` 即关闭补包。
 
 ### 礼包档位
 
@@ -336,77 +324,42 @@ dailyPaidDiamonds += actionPaidDiamonds
 
 ## 自动补累充
 
-补累充是固定机制，不作为用户可关闭选项。实现上不要把它做成页面开关，但补累充只在跨日重置前结算：继续同日的状态分支不生成补包候选，跨日分支才保留“跨日前补”和“不补直接跨日”两个 DP 候选。
+补包在跨日重置前执行一次确定性判定，不产生路径分叉。用户可通过将 `topUpThreshold` 设为 `0` 关闭补包。
 
-补包只附着在某个累充日跨日重置前的最后一个已购买限时包批次上。它以该批限时包购买后的下一档每日累充为目标：
-
-```text
-targetTier = first tier where tier.paid > dailyPaidDiamondsAfterLimitedPacks
-```
-
-若不存在下一档，则不补。
-
-### 补包候选
-
-只使用非首次常驻钻石组合包：
+### 阈值判定
 
 ```text
-src/constants/permanentPacks.json 中名称为“钻石组合包 ...”且不包含“首次”的包
+gap = nextTier.paid - dailyPaidDiamonds
+if gap <= dailyPaidDiamonds × topUpThreshold:
+    购买常驻钻石组合包，使累计付费钻 >= 下一档
+else:
+    不补，直接跨日
 ```
 
-补包不触发限时包，不影响限时包升降档，只消耗补累充浮动预算并增加当前累充日付费钻。
+其中 `topUpThreshold` 为用户可调的补累充阈值（页面默认 `10%`）。判定是确定性的——同一状态在相同条件下总是得到相同结果，因此 beam search 不需要为补包分叉。
 
-补包目标：
+### 补包规则
 
-```text
-dailyPaidDiamondsAfterLimitedPacks + topUpPaidDiamonds >= targetTier.paid
-```
+- 只在跨日重置前结算；继续同日的批次不触发补包判定。
+- 只使用非首次常驻钻石组合包（`permanentPacks.json`）。
+- 补包附着在跨日前最后一个已购买限时包的批次上，不单独生成展示行。
+- 补包只瞄准下一档每日累充，达到即停。
+- 补包采用能达到目标的最低花费组合；同花费优先价值更高、包数更少。
+- 补包不触发限时包，不影响限时包升降档。
+- 补包花费不计入主预算约束，仅在结果中展示总开销。
 
-达到目标后立即停止，即使浮动预算还有剩余也不继续购买常驻包。
+### 补包搜索
 
-### 补包剪枝
+搜索窗口为 `[minCost, minCost + minPackPrice]`，其中 `minCost = (nextTier.paid - dailyPaidDiamonds) × 2`。窗口只覆盖”刚好达到下一档”的组合，不穷举远超下一档的组合。
 
-补包组合对复杂度影响大，对路径结果影响通常小，因此允许强剪枝。
+补包价值直接累入 `state.value`，参与 beam 排序。由于不再有独立预算池，`state` 不追踪 `topUpSpentYen`。
 
-剪枝策略：
+### 不补情况
 
-- 只搜索补累充浮动预算剩余额度内的组合。
-- 只保留能达到下一累充档的最低花费组合。
-- 同花费下保留内容价值更高、包数更少的组合。
-- 搜索窗口以“刚好达到下一档”为中心，不穷举远超下一档的组合。
-- 若缺口超过浮动预算或剪枝窗口，则视为额外充值决策，不自动补。
-
-补包价值：
-
-```text
-topUpValue =
-  permanentPackIntrinsicValue
-  + topUpRechargeBonus * freeDiamondScore
-```
-
-补包分支更新：
-
-```text
-topUpSpentYen += topUpCostYen
-dailyPaidDiamonds += topUpPaidDiamonds
-value += topUpValue
-```
-
-### 不补例外
-
-以下情况只保留不补分支：
-
-- 补累充浮动预算不足。
-- 缺口超过补包剪枝范围。
+- 本批限时包购买后无下一档每日累充。
+- 缺口不满足阈值条件（`gap > dailyPaidDiamonds × topUpThreshold`）。
 - 没有可用的非首次常驻钻石组合包组合。
-- 本批限时包购买后没有下一档每日累充。
-
-若跨日前可补，状态转移应同时保留两个候选：
-
-1. 跨日前补累充：消耗补累充浮动预算，更新该累充日进度和价值，然后重置到下一累充日。
-2. 不补直接跨日：不消耗浮动预算，把预算留给后续累充日。
-
-不补直接跨日不是用户关闭补包，而是为了避免全局共享浮动预算被早期低收益补包贪心消耗。剪枝时可以删除明显劣势的不补候选，但不能在转移阶段无条件丢弃。
+- 搜索窗口内无合法组合。
 
 ## 动态规划状态
 
@@ -424,9 +377,6 @@ value += topUpValue
 
   // 已用于购买限时组合包的日元花费，受主预算限制。
   limitedSpentYen,
-
-  // 已用于常驻钻石组合包补累充的日元花费，受补累充浮动预算限制。
-  topUpSpentYen,
 
   // 当前路径累计评分价值。
   // 包含限时包内容价值、实际每日累充赠钻价值、自动补包内容与累充价值。
@@ -469,7 +419,6 @@ value += topUpValue
 其中：
 
 - `tierIndex`、`sourceCursors`、`dailyPaidDiamonds` 是最关键的状态维度，分别控制后续档位、后续触发节点、后续累充价值。
-- `limitedSpentYen` 和 `topUpSpentYen` 必须分开保存，因为主预算和补累充浮动预算互不挪用。
 - `triggerCount` 和 `pressure` 不直接决定可行性，但决定价值接近时的方案偏好。
 - `steps` 体积较大，应只在剪枝后仍保留的候选状态中维护；内部可用轻量摘要或父指针优化。
 
@@ -479,7 +428,6 @@ value += topUpValue
 tierIndex
 sourceCursors
 limitedSpentYen
-topUpSpentYen
 dailyPaidDiamonds bucket
 ```
 
@@ -568,15 +516,12 @@ function expandState(state, context) {
 
       // 5. 时间分支只在批次结算后发生：
       // 下一批继续同一累充日，或下一批开始前跨 0 点重置。
-      // 该分支可剪枝，但不能全部删成固定同日或固定跨日。
       nextStates.push(continueSameRechargeDay(candidate))
 
-      // 6. 补累充只在跨日重置前评估。
-      // 可补时保留“跨日前补”和“不补直接跨日”两个候选；继续同日不生成补包候选。
-      if (shouldKeepNextDayBranch(candidate, context)) {
-        for (branch of expandBeforeRechargeReset(candidate, context)) {
-          nextStates.push(branch)
-        }
+      // 6. 跨日重置前执行确定性补包判定，无分叉。
+      if (candidate.purchases > 0 && candidate.rechargeDayIndex < maxRechargeDays) {
+        const toppedUp = tryApplyTopUp(candidate, context)
+        nextStates.push(resetToNextRechargeDay(toppedUp))
       }
     }
   }
@@ -592,8 +537,8 @@ function expandState(state, context) {
 - `applyCursorDelta()` 是批次编排的核心。分批后 cursor 推进不同，后续可达节点也会不同。
 - 不买动作不是“跳过计算”，而是“触发后等待超时”，因此会推进 cursor、增加等待，并导致下一批降档。
 - 没有进入当前批次的节点才是真正“保留到以后”；进入当前批次但不买的节点已经触发超时，不能等升档后再买。
-- `expandBeforeRechargeReset()` 是自动补累充的唯一入口；继续同日分支不调用补包逻辑。
-- `applyAutoTopUp()` 不应枚举所有常驻包组合；它只处理接近下一累充阈值的小额补包。
+- `tryApplyTopUp()` 是自动补累充的唯一入口；继续同日分支不调用补包逻辑。
+- `tryApplyTopUp()` 不应枚举所有常驻包组合；它只处理接近下一累充阈值的小额补包。
 - `continueSameRechargeDay()` 应增加 `sameDayBatchCount`，保留 `rechargeDayIndex` 和 `dailyPaidDiamonds`。
 - `resetToNextRechargeDay()` 只重置 `dailyPaidDiamonds` 和同日计数，不重置预算、档位或 source cursor。
 
@@ -606,7 +551,6 @@ function expandState(state, context) {
 在相同或相近的关键状态维度下，若某状态：
 
 - 限时包花费更高或相同。
-- 补累充花费更高或相同。
 - 价值不更高。
 - source cursor 不更靠后。
 - 档位不更有利。

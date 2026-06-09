@@ -3,7 +3,6 @@ import { parseMainQuestProgress } from './mainQuestProgress.js'
 
 const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
 const DEFAULT_MAX_STATES = 350
-const DEFAULT_TOP_UP_RATIO = 0.05
 const TOP_UP_SOURCE_LABEL = '每日累充补包'
 const ALL_ATTRIBUTE_TOWER = 'origin_group_all_towers'
 const ATTRIBUTE_TOWERS = [
@@ -648,12 +647,6 @@ function nextRechargeTier(currentPaid) {
   return DAILY_RECHARGE_BONUS_TIERS.find(tier => currentPaid < tier.paid) || null
 }
 
-function compareTopUpCandidate(a, b) {
-  if (a.cost !== b.cost) return a.cost - b.cost
-  if (a.value !== b.value) return b.value - a.value
-  return a.purchases.length - b.purchases.length
-}
-
 function buildPermanentTopUpCombos(context, minCost, budgetLimit) {
   if (!context.permanentPacks.length) return []
   const minPackPrice = Math.min(...context.permanentPacks.map(pack => pack.price))
@@ -687,17 +680,13 @@ function findPermanentTopUpOption(state, context) {
   const targetTier = nextRechargeTier(currentPaid)
   if (!targetTier) return null
 
-  const remainingTopUpBudget = context.topUpBudget - state.topUpSpentYen
-  if (remainingTopUpBudget <= 0) return null
-
+  // 搜索范围：达到下一档所需的最低花费 + 一个最小包（留少量组合空间）
   const minCost = Math.max(1, Math.ceil((targetTier.paid - currentPaid) * 2))
-  if (minCost > remainingTopUpBudget) return null
-
-  const cacheKey = `${Math.round(currentPaid)}|${Math.floor(remainingTopUpBudget)}`
-  if (context.topUpOptionsCache.has(cacheKey)) return context.topUpOptionsCache.get(cacheKey)
+  const minPackPrice = Math.min(...context.permanentPacks.map(p => p.price))
+  const searchLimit = minCost + minPackPrice
 
   const ranked = []
-  for (const combo of buildPermanentTopUpCombos(context, minCost, remainingTopUpBudget)) {
+  for (const combo of buildPermanentTopUpCombos(context, minCost, searchLimit)) {
     const paidDiamonds = combo.purchases.reduce((sum, pack) => sum + getPackPaidDiamonds(pack), 0)
     if (currentPaid + paidDiamonds < targetTier.paid) continue
     const recharge = rechargeValueForPaid(currentPaid, paidDiamonds, context)
@@ -710,9 +699,14 @@ function findPermanentTopUpOption(state, context) {
     })
   }
 
-  const result = ranked.length ? ranked.sort(compareTopUpCandidate)[0] : null
-  context.topUpOptionsCache.set(cacheKey, result)
-  return result
+  // 最低花费优先；同花费优先价值更高
+  return ranked.length
+    ? ranked.sort((a, b) => {
+        if (a.cost !== b.cost) return a.cost - b.cost
+        if (a.value !== b.value) return b.value - a.value
+        return a.purchases.length - b.purchases.length
+      })[0]
+    : null
 }
 
 function summarizeBatch(batch) {
@@ -790,48 +784,6 @@ function summarizeAction(action, stepIndex, batch, tierPrice, nextTierPrice, rec
   }
 }
 
-function applyTopUpToLastStep(state, topUp) {
-  if (!topUp || !state.steps.length) return state
-
-  const topUpPacks = groupTopUpPacks(topUp.purchases)
-  const steps = [...state.steps]
-  const lastStep = steps[steps.length - 1]
-  steps[steps.length - 1] = {
-    ...lastStep,
-    cost: lastStep.cost + topUp.cost,
-    topUpCost: topUp.cost,
-    value: lastStep.value + topUp.value,
-    originalValue: Math.round((lastStep.originalValue || 0) + topUp.originalValue),
-    rechargeValue: (lastStep.rechargeValue || 0) + topUp.recharge.value,
-    rechargeFreeDiamonds: (lastStep.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
-    topUpValue: topUp.value,
-    topUpOriginalValue: Math.round(topUp.originalValue),
-    topUpRechargeValue: topUp.recharge.value,
-    topUpRechargeFreeDiamonds: topUp.recharge.freeDiamonds,
-    topUpRechargeBeforePaid: topUp.recharge.beforePaid,
-    topUpRechargeAfterPaid: topUp.recharge.afterPaid,
-    topUpUnlockedRechargeTiers: topUp.recharge.unlockedTiers,
-    topUpPacks,
-  }
-
-  return {
-    ...state,
-    topUpSpentYen: state.topUpSpentYen + topUp.cost,
-    value: state.value + topUp.value,
-    topUpPurchaseCount: (state.topUpPurchaseCount || 0) + topUp.purchases.length,
-    rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
-    dailyPaidDiamonds: state.dailyPaidDiamonds + topUp.paidDiamonds,
-    steps,
-    signature: `${state.signature}:topUp:${topUpPacks.map(pack => pack.displayTrigger).join(',')}`,
-  }
-}
-
-function expandTopUpBranches(state, context) {
-  const topUp = findPermanentTopUpOption(state, context)
-  if (!topUp) return [state]
-  return [state, applyTopUpToLastStep(state, topUp)]
-}
-
 function stepsSignature(steps) {
   return steps
     .map(step => {
@@ -857,18 +809,7 @@ function comparePlan(a, b) {
   if (a.value !== b.value) return b.value - a.value
   if ((a.pressure || 0) !== (b.pressure || 0)) return (a.pressure || 0) - (b.pressure || 0)
   if ((a.triggerCount || 0) !== (b.triggerCount || 0)) return (a.triggerCount || 0) - (b.triggerCount || 0)
-  if (a.limitedSpentYen !== b.limitedSpentYen) return a.limitedSpentYen - b.limitedSpentYen
-  return a.topUpSpentYen - b.topUpSpentYen
-}
-
-function comparePlanWithPenalty(a, b, context) {
-  const aEff = a.value - a.topUpSpentYen * context.topUpPenaltyPerYen
-  const bEff = b.value - b.topUpSpentYen * context.topUpPenaltyPerYen
-  if (aEff !== bEff) return bEff - aEff
-  if ((a.pressure || 0) !== (b.pressure || 0)) return (a.pressure || 0) - (b.pressure || 0)
-  if ((a.triggerCount || 0) !== (b.triggerCount || 0)) return (a.triggerCount || 0) - (b.triggerCount || 0)
-  if (a.limitedSpentYen !== b.limitedSpentYen) return a.limitedSpentYen - b.limitedSpentYen
-  return a.topUpSpentYen - b.topUpSpentYen
+  return a.limitedSpentYen - b.limitedSpentYen
 }
 
 function makeStateKey(state, context) {
@@ -879,7 +820,6 @@ function makeStateKey(state, context) {
     sourceCursorsKey(state.sourceCursors),
     attributeTowerSetKey(state.currentDayAttributeTowers),
     spentBucket,
-    Math.floor(state.topUpSpentYen / 160),
     dailyBucket,
   ].join('|')
 }
@@ -889,10 +829,8 @@ function createEmptyState(context) {
     tierIndex: context.startTierIndex,
     sourceCursors: context.sources.map(() => 0),
     limitedSpentYen: 0,
-    topUpSpentYen: 0,
     value: 0,
     purchases: 0,
-    topUpPurchaseCount: 0,
     triggerCount: 0,
     pressure: 0,
     rechargeDayIndex: 0,
@@ -928,41 +866,75 @@ function resetToNextRechargeDay(state) {
   }
 }
 
-function canTopUpBeforeRechargeReset(state) {
+/**
+ * 跨日重置前按阈值判定并应用补包（确定性，无分叉）。
+ * gap = nextTier.paid - dailyPaidDiamonds
+ * if gap <= dailyPaidDiamonds × threshold: 补包；否则不补。
+ */
+function tryApplyTopUp(state, context) {
   const lastStep = state.steps.at(-1)
-  return !!lastStep?.bought && !lastStep.topUpCost
-}
+  if (!lastStep?.bought || (lastStep.topUpCost && lastStep.topUpCost > 0)) return state
+  if (!context.permanentPacks?.length) return state
 
-function expandBeforeRechargeReset(state, context) {
-  const branches = canTopUpBeforeRechargeReset(state)
-    ? expandTopUpBranches(state, context)
-    : [state]
-  return branches.map(branch => resetToNextRechargeDay(branch))
+  const nextTier = nextRechargeTier(state.dailyPaidDiamonds)
+  if (!nextTier) return state
+
+  const gap = nextTier.paid - state.dailyPaidDiamonds
+  const threshold = Number(context.settings.topUpThreshold ?? context.topUpThreshold) || 0.10
+  if (gap > state.dailyPaidDiamonds * threshold) return state
+
+  const topUp = findPermanentTopUpOption(state, context)
+  if (!topUp) return state
+
+  const topUpPacks = groupTopUpPacks(topUp.purchases)
+  const steps = [...state.steps]
+  const last = steps[steps.length - 1]
+  steps[steps.length - 1] = {
+    ...last,
+    cost: last.cost + topUp.cost,
+    topUpCost: topUp.cost,
+    value: last.value + topUp.value,
+    originalValue: Math.round((last.originalValue || 0) + topUp.originalValue),
+    rechargeValue: (last.rechargeValue || 0) + topUp.recharge.value,
+    rechargeFreeDiamonds: (last.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+    topUpValue: topUp.value,
+    topUpOriginalValue: Math.round(topUp.originalValue),
+    topUpRechargeValue: topUp.recharge.value,
+    topUpRechargeFreeDiamonds: topUp.recharge.freeDiamonds,
+    topUpRechargeBeforePaid: topUp.recharge.beforePaid,
+    topUpRechargeAfterPaid: topUp.recharge.afterPaid,
+    topUpUnlockedRechargeTiers: topUp.recharge.unlockedTiers,
+    topUpPacks,
+  }
+
+  return {
+    ...state,
+    value: state.value + topUp.value,
+    rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+    dailyPaidDiamonds: state.dailyPaidDiamonds + topUp.paidDiamonds,
+    steps,
+    signature: `${state.signature}:topUp:${topUpPacks.map(pack => pack.displayTrigger).join(',')}`,
+  }
 }
 
 function expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context) {
   if (!batchCandidate.requiresRechargeReset) return [state]
-  return expandBeforeRechargeReset(state, context)
+  const toppedUp = tryApplyTopUp(state, context)
+  return [resetToNextRechargeDay(toppedUp)]
 }
 
-function shouldKeepNextDayBranch(state, context) {
-  if (!state.purchases) return false
-  return state.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)
-}
-
-function insertCandidate(map, candidate, context, compare) {
+function insertCandidate(map, candidate, context) {
   const key = makeStateKey(candidate, context)
   const list = map.get(key) || []
   const signature = stateSignature(candidate)
   if (list.some(state => stateSignature(state) === signature)) return
   list.push(candidate)
-  list.sort(compare || comparePlan)
+  list.sort(comparePlan)
   map.set(key, list.slice(0, Math.max(2, Number(context.settings.perBucketStates) || 3)))
 }
 
 function dominates(a, b) {
   return a.limitedSpentYen <= b.limitedSpentYen
-    && a.topUpSpentYen <= b.topUpSpentYen
     && a.value >= b.value
     && a.tierIndex >= b.tierIndex
     && attributeTowerSetSubset(a.currentDayAttributeTowers, b.currentDayAttributeTowers)
@@ -971,10 +943,6 @@ function dominates(a, b) {
 }
 
 function pruneStates(states, context) {
-  const compare = context.topUpPenaltyPerYen
-    ? (a, b) => comparePlanWithPenalty(a, b, context)
-    : comparePlan
-
   const byCursor = new Map()
   for (const state of states) {
     const key = `${sourceCursorsKey(state.sourceCursors)}|${state.tierIndex}`
@@ -985,15 +953,15 @@ function pruneStates(states, context) {
   const map = new Map()
   for (const group of byCursor.values()) {
     const survivors = []
-    for (const state of group.sort(compare)) {
+    for (const state of group.sort(comparePlan)) {
       if (survivors.some(existing => dominates(existing, state))) continue
       survivors.push(state)
       if (survivors.length >= Math.max(20, Number(context.settings.maxStatesPerCursor) || 80)) break
     }
-    for (const state of survivors) insertCandidate(map, state, context, compare)
+    for (const state of survivors) insertCandidate(map, state, context)
   }
 
-  const all = [...map.values()].flat().sort(compare)
+  const all = [...map.values()].flat().sort(comparePlan)
   const limit = Math.max(50, Number(context.settings.maxStatesPerTier) || Number(context.settings.maxStates) || DEFAULT_MAX_STATES)
   return all.slice(0, limit)
 }
@@ -1045,8 +1013,9 @@ function expandState(state, context) {
         }
 
         next.push(continueSameRechargeDay(candidate))
-        if (shouldKeepNextDayBranch(candidate, context)) {
-          next.push(...expandBeforeRechargeReset(candidate, context))
+        if (candidate.purchases > 0 && candidate.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)) {
+          const toppedUp = tryApplyTopUp(candidate, context)
+          next.push(resetToNextRechargeDay(toppedUp))
         }
       }
     }
@@ -1177,7 +1146,7 @@ function simulatePolicyPlan(context, policy) {
     if (allSourcesExhausted(context.sources, state.sourceCursors)) break
     const batch = makePolicyBatch(context, state, policy)
     if (!batch) break
-    const [resetState] = expandRequiredRechargeResetBeforeBatch(state, batch, context).sort(comparePlan)
+    const [resetState] = expandRequiredRechargeResetBeforeBatch(state, batch, context)
     state = resetState
     const action = makePolicyAction(policy, batch, state, context)
     const tierPrice = context.priceTiers[state.tierIndex]
@@ -1211,17 +1180,9 @@ function simulatePolicyPlan(context, policy) {
   return state
 }
 
-function normalizeTopUpRatio(value) {
-  if (value === undefined || value === null || value === '') return DEFAULT_TOP_UP_RATIO
-  const numeric = Number(value)
-  if (!Number.isFinite(numeric) || numeric < 0) return DEFAULT_TOP_UP_RATIO
-  return numeric > 1 ? numeric / 100 : numeric
-}
-
 function buildPlanningContext(packs, settings) {
   const priceTiers = getPriceTiers(packs)
   const mainBudget = Math.max(0, Math.floor(Number(settings.budget) || 0))
-  const topUpRatio = normalizeTopUpRatio(settings.topUpBudgetRatio ?? settings.topUpRatio)
   const currentPrice = Number(settings.currentPrice) || priceTiers[0]
   const tierIndex = priceTiers.indexOf(currentPrice)
   const startTierIndex = clamp(tierIndex === -1 ? 0 : tierIndex, 0, priceTiers.length - 1)
@@ -1232,25 +1193,18 @@ function buildPlanningContext(packs, settings) {
   const minPermanentPackPrice = permanentPacks.length
     ? Math.min(...permanentPacks.map(p => p.price))
     : 0
-  const topUpPenaltyPerYen = minPermanentPackPrice > 0
-    ? freeDiamondScore * 0.8
-    : 0
 
   return {
     priceTiers,
     budget: mainBudget,
     mainBudget,
-    topUpBudget: Math.floor(mainBudget * topUpRatio),
-    topUpRatio,
     startTierIndex,
     freeDiamondScore,
     permanentPacks,
     minPermanentPackPrice,
-    topUpPenaltyPerYen,
     lanes,
     sources,
     opportunities,
-    topUpOptionsCache: new Map(),
     settings,
   }
 }
@@ -1277,25 +1231,26 @@ function createResult(state, context, meta = {}) {
       unlockedRechargeTiers: step.topUpUnlockedRechargeTiers || [],
       packs: step.topUpPacks,
     }))
-  const totalSpent = state.limitedSpentYen + state.topUpSpentYen
+  const topUpTotalCost = topUpBatches.reduce((sum, b) => sum + b.cost, 0)
+  const totalSpent = state.limitedSpentYen + topUpTotalCost
+
+  const topUpThreshold = Number(context.settings.topUpThreshold) || 0.10
 
   return {
     ...meta,
     budget: context.mainBudget,
     mainBudget: context.mainBudget,
-    topUpBudget: context.topUpBudget,
+    topUpThreshold,
     limitedSpentYen: state.limitedSpentYen,
-    topUpSpentYen: state.topUpSpentYen,
-    spent: totalSpent,
+    topUpTotalCost,
+    spent: state.limitedSpentYen,
     totalSpent,
     remaining: context.mainBudget - state.limitedSpentYen,
-    topUpRemaining: context.topUpBudget - state.topUpSpentYen,
     value: Math.round(state.value),
     purchases: state.purchases,
     triggerCount: state.triggerCount,
     pressure: state.pressure,
     rechargeDayCount: state.rechargeDayIndex + 1,
-    topUpPurchaseCount: state.topUpPurchaseCount || 0,
     topUpPacks,
     topUpBatches,
     topUpPackSummary: topUpBatches
