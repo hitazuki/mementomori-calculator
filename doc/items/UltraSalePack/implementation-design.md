@@ -132,7 +132,7 @@ allTower(floor) requires blue >= floor, red >= floor, green >= floor, yellow >= 
 - 同来源前置节点已经处理，或也在当前批次内按顺序处理。
 - 同来源本批数量不超过 `batchSize`。
 - 全属性塔抵达节点的四塔前沿已经能到达该层。
-- 属性塔拓扑层级不被倒置。
+- 全属性塔抵达节点满足四塔前沿派生门槛。
 
 同层单塔节点可以合批，也可以拆成多个批次。拆批时，已经处理的单塔可以进入自己的下一层级，而同层未处理的其他单塔仍保留在前沿。
 
@@ -145,13 +145,13 @@ yellow250
 blue300
 ```
 
-其中只要候选批次包含 `blue300`，就表示从 250 层级进入 300 层级，需要在批次结算前强制跨日重置；若候选批次只包含 `red250/green250/yellow250`，则仍属于同一拓扑层级，不强制重置。
+其中 `blue300` 是否需要在批次结算前强制跨日重置，不由拓扑层级本身决定，而由当前累充日内是否已经推进过蓝塔决定。若当前累充日已经推进过蓝塔，则 `blue300` 执行前必须重置；若当前累充日只推进过其他属性塔，则不强制重置。
 
 全属性塔抵达节点的可达性按四塔前沿判断：该层必须大于每个单塔已经处理到的层级，且不超过该单塔下一次会触发单塔限时包的层级；若该单塔后续没有单塔限时包，则不超过该塔规划终点。
 
-属性塔拓扑中相邻事件之间必须视为跨过累充日。单属性塔每天最多推进 10 层，无法在同一累充日内从一个属性塔触发事件推进到下一个相邻事件。因此属性塔拓扑来源从第二个事件开始，候选批次结算前需要强制执行一次抽象 0 点重置，除非当前状态已经处于新累充日开头。
+属性塔强制重置与拓扑层级没有直接关系。状态保存当前累充日内已经推进过的单属性塔集合 `currentDayAttributeTowers`；候选批次保存本批会推进的单属性塔集合 `batch.attributeTowers`。若两者有交集，则该批次执行前必须跨日重置；若没有交集，则不同属性塔可以继续共用同一累充日。
 
-强制重置按已处理的最高属性塔拓扑层级与候选批次中的属性塔层级判断，而不是按单个来源 cursor 简单判断。同一层级内的蓝/红/翠/黄单塔事件可以拆成多个批次且继续共用累充日；从 `single:250` 进入 `all:275`，或从 `all:275` 进入 `single:300` 时才需要强制重置。
+全属性塔抵达节点本身不推进蓝塔、红塔、翠塔或黄塔的单塔 cursor，因此不计入 `batch.attributeTowers`。若未来要求全属性塔抵达也参与强制重置，需要单独定义它的推进集合。
 
 ## 抽象时间模型
 
@@ -163,26 +163,28 @@ blue300
 {
   rechargeDayIndex,
   dailyPaidDiamonds,
+  currentDayAttributeTowers,
   sameDayBatchCount
 }
 ```
 
 - `rechargeDayIndex` 只是抽象日编号，不对应真实日期。
 - `dailyPaidDiamonds` 是当前累充日内已经累计的付费钻。
+- `currentDayAttributeTowers` 是当前累充日内已经推进过的单属性塔集合，用于判断同一单塔再次推进前是否必须跨日。
 - `sameDayBatchCount` 用于限制或剪枝同一累充日内连续批次数。
 
 每个批次结束后，下一批有两类时间转移：
 
-1. 继续同一累充日：保留 `dailyPaidDiamonds`。
-2. 跨 0 点重置：`rechargeDayIndex + 1`，`dailyPaidDiamonds = 0`。
+1. 继续同一累充日：保留 `dailyPaidDiamonds` 和 `currentDayAttributeTowers`。
+2. 跨 0 点重置：`rechargeDayIndex + 1`，`dailyPaidDiamonds = 0`，`currentDayAttributeTowers = []`。
 
 跨日转移是候选路径的一部分。剪枝可以限制跨日位置数量，但不能退化为固定同日连续购买或固定每批跨日。
 
 每日累充重置只发生在批次边界。同一个全局批次内的限时包购买和补累充购买都按同一个累充日计算，不枚举批内跨 0 点的购买顺序。
 
-属性塔拓扑是额外的强制换日来源：当下一批包含属性塔拓扑的后续事件时，若当前状态仍延续上一累充日，应先在上一批之后评估跨日前补累充，再重置 `dailyPaidDiamonds` 并结算该批。该重置仍发生在批次边界。
+属性塔是额外的强制换日来源：当下一批会再次推进当前累充日内已经推进过的同一个单属性塔时，应先在上一批之后评估跨日前补累充，再重置 `dailyPaidDiamonds` 和 `currentDayAttributeTowers`，然后结算该批。该重置仍发生在批次边界。
 
-如果下一批仍属于同一个属性塔拓扑层级，例如同为单属性塔 250 的不同属性塔事件，则不触发该强制重置。
+如果下一批推进的是当前累充日内尚未推进过的其他属性塔，则不触发该强制重置。全属性塔抵达节点本身不触发该强制重置。
 
 ### 批次等待
 
@@ -549,6 +551,10 @@ function expandState(state, context) {
         ...state,
         tierIndex,
         sourceCursors,
+        currentDayAttributeTowers: mergeAttributeTowerSets(
+          state.currentDayAttributeTowers,
+          batch.attributeTowers,
+        ),
         limitedSpentYen: state.limitedSpentYen + action.limitedCostYen,
         value: state.value + action.intrinsicValue + limitedRechargeValue,
         purchases: state.purchases + action.purchases.length,
@@ -581,6 +587,7 @@ function expandState(state, context) {
 
 ### 关键注意点
 
+- 属性塔强制换日由 `currentDayAttributeTowers` 与 `batch.attributeTowers` 的交集决定；`resetToNextRechargeDay()` 必须清空 `currentDayAttributeTowers`，`continueSameRechargeDay()` 必须保留它。
 - `generateBatchCandidates()` 不能只生成最大合批，也不能只生成单节点拆批；两类候选都要保留代表状态。
 - `applyCursorDelta()` 是批次编排的核心。分批后 cursor 推进不同，后续可达节点也会不同。
 - 不买动作不是“跳过计算”，而是“触发后等待超时”，因此会推进 cursor、增加等待，并导致下一批降档。
@@ -613,6 +620,7 @@ function expandState(state, context) {
 ```text
 tierIndex
 sourceCursorHash
+currentDayAttributeTowers
 rechargeTierBucket
 limitedSpentBucket
 ```

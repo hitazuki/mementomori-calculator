@@ -455,7 +455,7 @@ test('planner does not derive all-tower packs without all four attribute towers'
   assert.equal(plan.steps.length, 0)
 })
 
-test('attribute tower planning follows all-tower and single-tower topology order', () => {
+test('attribute tower planning keeps all-tower gate before single-tower fence', () => {
   const packs = [
     towerPack('origin_group_all_towers', '225', 160, 1000),
     towerPack('origin_tower_blue', '250', 160, 100),
@@ -475,13 +475,9 @@ test('attribute tower planning follows all-tower and single-tower topology order
     ],
   })
 
-  assert.equal(plan.batchCount, 5)
   assert.match(plan.steps[0].triggerRange, /225/)
   assert.doesNotMatch(plan.steps[0].triggerRange, /250/)
   assert.equal(plan.steps.slice(1).every(step => step.triggerRange.includes('250')), true)
-  assert.equal(plan.steps[1].rechargeReset, true)
-  assert.equal(plan.steps[1].rechargeDayIndex, 1)
-  assert.equal(plan.steps.slice(2).every(step => step.rechargeReset === false), true)
 })
 
 test('same-floor different attribute towers can split without recharge reset', () => {
@@ -526,7 +522,10 @@ test('attribute tower frontier keeps untriggered same-floor towers and next blue
     ],
   }
   const { sources } = __testables.buildPlanningSources(packs, settings)
-  const state = { sourceCursors: sources.map((_, index) => index === 0 ? 1 : 0) }
+  const state = {
+    sourceCursors: sources.map((_, index) => index === 0 ? 1 : 0),
+    currentDayAttributeTowers: ['origin_tower_blue'],
+  }
   const candidates = __testables.generateBatchCandidates(state, { sources, settings })
 
   const singleBlue300 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'blue: 300')
@@ -544,7 +543,43 @@ test('attribute tower frontier keeps untriggered same-floor towers and next blue
   assert.equal(singleYellow250.requiresRechargeReset, false)
 })
 
-test('attribute tower topology keeps adjacent all-tower and single-tower events in separate batches', () => {
+test('same attribute tower cannot advance twice in one recharge day', () => {
+  const packs = [
+    towerPack('origin_tower_blue', '250', 160, 100),
+    towerPack('origin_tower_blue', '300', 650, 1000),
+    towerPack('origin_tower_red', '250', 160, 100),
+  ]
+  const settings = {
+    lanes: [
+      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 200, endProgress: 310, batchSize: 99 },
+      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
+    ],
+  }
+  const { sources } = __testables.buildPlanningSources(packs, settings)
+  const afterBlueSameDay = {
+    sourceCursors: sources.map((_, index) => index === 0 ? 1 : 0),
+    currentDayAttributeTowers: ['origin_tower_blue'],
+  }
+  const afterBlueNextDay = {
+    sourceCursors: sources.map((_, index) => index === 0 ? 1 : 0),
+    currentDayAttributeTowers: [],
+  }
+
+  const sameDayCandidates = __testables.generateBatchCandidates(afterBlueSameDay, { sources, settings })
+  const nextDayCandidates = __testables.generateBatchCandidates(afterBlueNextDay, { sources, settings })
+  const sameDayBlue300 = sameDayCandidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'blue: 300')
+  const nextDayBlue300 = nextDayCandidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'blue: 300')
+  const sameDayRed250 = sameDayCandidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'red: 250')
+
+  assert.ok(sameDayBlue300)
+  assert.equal(sameDayBlue300.requiresRechargeReset, true)
+  assert.ok(nextDayBlue300)
+  assert.equal(nextDayBlue300.requiresRechargeReset, false)
+  assert.ok(sameDayRed250)
+  assert.equal(sameDayRed250.requiresRechargeReset, false)
+})
+
+test('all-tower reached cannot batch with the slowest tower next single node', () => {
   const packs = [
     towerPack('origin_group_all_towers', '275', 160, 1000),
     towerPack('origin_tower_blue', '250', 160, 100),
@@ -556,25 +591,29 @@ test('attribute tower topology keeps adjacent all-tower and single-tower events 
     towerPack('origin_tower_yellow', '250', 160, 100),
     towerPack('origin_tower_yellow', '300', 160, 100),
   ]
-
-  const plan = planUltraSalePurchases(packs, {
-    budget: 2000,
-    currentPrice: 160,
+  const settings = {
     lanes: [
       { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
       { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
       { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: 'green', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
       { id: 'yellow', cat: 'tower', tower: 'origin_tower_yellow', label: 'yellow', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
     ],
+  }
+  const { sources } = __testables.buildPlanningSources(packs, settings)
+  const state = {
+    sourceCursors: sources.map(source => source.attributeTower ? 1 : 0),
+    currentDayAttributeTowers: [],
+  }
+  const candidates = __testables.generateBatchCandidates(state, { sources, settings })
+  const allTowerOnly = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === '全属性塔抵达: 275')
+  const allTowerWithSingle = candidates.find(candidate => {
+    const triggers = candidate.opportunities.map(opportunity => opportunity.displayTrigger)
+    return triggers.some(trigger => trigger === '全属性塔抵达: 275')
+      && triggers.some(trigger => trigger.endsWith(': 300'))
   })
 
-  assert.equal(plan.batchCount, 9)
-  assert.equal(plan.steps.slice(0, 4).every(step => step.triggerRange.includes('250')), true)
-  assert.match(plan.steps[4].triggerRange, /275/)
-  assert.equal(plan.steps.slice(5).every(step => step.triggerRange.includes('300')), true)
-  assert.equal(plan.steps[4].rechargeReset, true)
-  assert.equal(plan.steps[5].rechargeReset, true)
-  assert.equal(plan.steps.slice(6).every(step => step.rechargeReset === false), true)
+  assert.ok(allTowerOnly)
+  assert.equal(allTowerWithSingle, undefined)
 })
 
 test('compressUltraSalePlanSteps merges only consecutive skipped batches', () => {

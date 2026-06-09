@@ -320,55 +320,97 @@ function batchIdForGroups(groups) {
   return groups.map(group => group.id).join('+')
 }
 
-function processedAttributeLayer(state, sources) {
-  if (!state) return null
-  let layer = null
-  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
-    const source = sources[sourceIndex]
-    const cursor = state.sourceCursors[sourceIndex] || 0
-    for (let groupIndex = 0; groupIndex < cursor; groupIndex++) {
-      const groupLayer = source.groups[groupIndex]?.attributeLayer
-      if (!Number.isFinite(groupLayer)) continue
-      layer = layer === null ? groupLayer : Math.max(layer, groupLayer)
-    }
-  }
-  return layer
+function attributeTowerSetKey(towers = []) {
+  return [...new Set(towers)].sort().join(',')
 }
 
-function batchAdvancesAttributeLayer(groupsBySource, sources, state) {
-  const layer = processedAttributeLayer(state, sources)
-  if (layer === null) return false
-  return Object.entries(groupsBySource).some(([sourceIndexText, groups]) => {
-    if (!sources[Number(sourceIndexText)]) return false
-    return groups.some(group => Number.isFinite(group.attributeLayer) && group.attributeLayer > layer)
-  })
+function mergeAttributeTowerSets(...sets) {
+  return [...new Set(sets.flat().filter(Boolean))].sort()
+}
+
+function attributeTowerSetIntersects(a = [], b = []) {
+  const lookup = new Set(a)
+  return b.some(tower => lookup.has(tower))
+}
+
+function attributeTowerSetSubset(a = [], b = []) {
+  const lookup = new Set(b)
+  return a.every(tower => lookup.has(tower))
+}
+
+function attributeTowersForGroups(groupsBySource, sources) {
+  const towers = []
+  for (const [sourceIndexText, groups] of Object.entries(groupsBySource)) {
+    if (!groups.length) continue
+    const tower = sources[Number(sourceIndexText)]?.attributeTower
+    if (tower) towers.push(tower)
+  }
+  return attributeTowerSetKey(towers).split(',').filter(Boolean)
+}
+
+function attributeTowerGateInterval(sourceIndex, state, sources) {
+  const towerSource = sources[sourceIndex]
+  if (!towerSource) return null
+  const cursor = state.sourceCursors[sourceIndex] || 0
+  const previous = cursor > 0
+    ? towerSource.groups[cursor - 1]?.sortValue
+    : towerSource.attributeStartProgress
+  const next = cursor < towerSource.groups.length
+    ? towerSource.groups[cursor]?.sortValue
+    : towerSource.attributeEndProgress
+  if (!Number.isFinite(previous) || !Number.isFinite(next)) return null
+  return { sourceIndex, previous, next }
 }
 
 function allAttributeTowerGroupAvailable(source, group, state, sources) {
   if (!source.allAttributeTowerSourceIndices?.length) return true
   const layer = group.sortValue
   return source.allAttributeTowerSourceIndices.every(sourceIndex => {
-    const towerSource = sources[sourceIndex]
-    if (!towerSource) return false
-    const cursor = state.sourceCursors[sourceIndex] || 0
-    const previous = cursor > 0
-      ? towerSource.groups[cursor - 1]?.sortValue
-      : towerSource.attributeStartProgress
-    const next = cursor < towerSource.groups.length
-      ? towerSource.groups[cursor]?.sortValue
-      : towerSource.attributeEndProgress
-    return Number.isFinite(previous)
-      && Number.isFinite(next)
-      && layer > previous
-      && layer <= next
+    const interval = attributeTowerGateInterval(sourceIndex, state, sources)
+    return interval
+      && layer > interval.previous
+      && layer <= interval.next
   })
 }
 
+function blockedTowerSourcesForAllAttributeGroup(source, group, state, sources) {
+  if (!source.allAttributeTowerSourceIndices?.length) return []
+  const layer = group.sortValue
+  const intervals = source.allAttributeTowerSourceIndices
+    .map(sourceIndex => attributeTowerGateInterval(sourceIndex, state, sources))
+    .filter(interval => interval
+      && layer > interval.previous
+      && layer <= interval.next)
+  if (intervals.length !== source.allAttributeTowerSourceIndices.length) return []
+  const slowestPrevious = Math.min(...intervals.map(interval => interval.previous))
+  return intervals
+    .filter(interval => interval.previous === slowestPrevious)
+    .map(interval => interval.sourceIndex)
+}
+
+function allAttributeBatchValid(groupsBySource, sources, state) {
+  if (!state) return true
+  for (const [sourceIndexText, groups] of Object.entries(groupsBySource)) {
+    const source = sources[Number(sourceIndexText)]
+    if (!source?.allAttributeTowerSourceIndices?.length) continue
+    for (const group of groups) {
+      for (const blockedSourceIndex of blockedTowerSourcesForAllAttributeGroup(source, group, state, sources)) {
+        if (groupsBySource[blockedSourceIndex]?.length) return false
+      }
+    }
+  }
+  return true
+}
+
 function makeBatchCandidate(groupsBySource, sources, state = null) {
+  if (!allAttributeBatchValid(groupsBySource, sources, state)) return null
   const opportunities = []
   const cursorDelta = Array.from({ length: sources.length }, () => 0)
   let sourceCount = 0
-  let requiresRechargeReset = state ? batchAdvancesAttributeLayer(groupsBySource, sources, state) : false
+  const attributeTowers = attributeTowersForGroups(groupsBySource, sources)
+  let requiresRechargeReset = state
+    ? attributeTowerSetIntersects(state.currentDayAttributeTowers, attributeTowers)
+    : false
   for (const [sourceIndexText, groups] of Object.entries(groupsBySource)) {
     const sourceIndex = Number(sourceIndexText)
     if (!groups.length) continue
@@ -392,6 +434,7 @@ function makeBatchCandidate(groupsBySource, sources, state = null) {
     cursorDelta,
     pressure,
     sourceCount,
+    attributeTowers,
     requiresRechargeReset,
   }
 }
@@ -434,7 +477,7 @@ function generateBatchCandidates(state, context) {
 
     for (const groups of options) {
       const candidate = makeBatchCandidate({ [sourceIndex]: groups }, sources, state)
-      candidates.set(candidate.id, candidate)
+      if (candidate) candidates.set(candidate.id, candidate)
     }
   }
 
@@ -447,7 +490,7 @@ function generateBatchCandidates(state, context) {
     if (index >= cappedSources.length) {
       if (Object.keys(selected).length < 2) return
       const candidate = makeBatchCandidate(selected, sources, state)
-      candidates.set(candidate.id, candidate)
+      if (candidate) candidates.set(candidate.id, candidate)
       return
     }
 
@@ -824,6 +867,7 @@ function makeStateKey(state, context) {
   return [
     state.tierIndex,
     sourceCursorsKey(state.sourceCursors),
+    attributeTowerSetKey(state.currentDayAttributeTowers),
     spentBucket,
     Math.floor(state.topUpSpentYen / 160),
     dailyBucket,
@@ -843,6 +887,7 @@ function createEmptyState(context) {
     pressure: 0,
     rechargeDayIndex: 0,
     dailyPaidDiamonds: 0,
+    currentDayAttributeTowers: [],
     sameDayBatchCount: 0,
     timeoutWaits: 0,
     rechargeFreeDiamonds: 0,
@@ -867,6 +912,7 @@ function resetToNextRechargeDay(state) {
     ...state,
     rechargeDayIndex: state.rechargeDayIndex + 1,
     dailyPaidDiamonds: 0,
+    currentDayAttributeTowers: [],
     sameDayBatchCount: 0,
     signature: `${state.signature}|day:${state.rechargeDayIndex + 1}`,
   }
@@ -886,7 +932,6 @@ function expandBeforeRechargeReset(state, context) {
 
 function expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context) {
   if (!batchCandidate.requiresRechargeReset) return [state]
-  if (state.dailyPaidDiamonds <= 0 && state.sameDayBatchCount <= 0) return [state]
   return expandBeforeRechargeReset(state, context)
 }
 
@@ -910,6 +955,7 @@ function dominates(a, b) {
     && a.topUpSpentYen <= b.topUpSpentYen
     && a.value >= b.value
     && a.tierIndex >= b.tierIndex
+    && attributeTowerSetSubset(a.currentDayAttributeTowers, b.currentDayAttributeTowers)
     && a.pressure <= b.pressure
     && a.triggerCount <= b.triggerCount
 }
@@ -971,6 +1017,7 @@ function expandState(state, context) {
           ...baseState,
           tierIndex: nextTierIndex,
           sourceCursors,
+          currentDayAttributeTowers: mergeAttributeTowerSets(baseState.currentDayAttributeTowers, batchCandidate.attributeTowers),
           limitedSpentYen: baseState.limitedSpentYen + action.limitedCostYen,
           value: baseState.value + action.originalValue + recharge.value,
           purchases: baseState.purchases + action.purchases.length,
@@ -1132,6 +1179,7 @@ function simulatePolicyPlan(context, policy) {
       ...state,
       tierIndex: nextTierIndex,
       sourceCursors: applyCursorDelta(state.sourceCursors, batch.cursorDelta),
+      currentDayAttributeTowers: mergeAttributeTowerSets(state.currentDayAttributeTowers, batch.attributeTowers),
       limitedSpentYen: state.limitedSpentYen + action.limitedCostYen,
       value: state.value + action.originalValue + recharge.value,
       purchases: state.purchases + action.purchases.length,
