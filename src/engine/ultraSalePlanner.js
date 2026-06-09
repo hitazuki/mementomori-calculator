@@ -861,17 +861,9 @@ function comparePlan(a, b) {
   return a.topUpSpentYen - b.topUpSpentYen
 }
 
-function estimateTopUpPotential(state, context) {
-  if (!context.topUpPotentialPerEvent) return 0
-  const remaining = context.topUpBudget - state.topUpSpentYen
-  if (remaining < context.minPermanentPackPrice) return 0
-  const events = Math.min(Math.floor(remaining / context.minPermanentPackPrice), 3)
-  return events * context.topUpPotentialPerEvent
-}
-
-function comparePlanWithPotential(a, b, context) {
-  const aEff = a.value + estimateTopUpPotential(a, context)
-  const bEff = b.value + estimateTopUpPotential(b, context)
+function comparePlanWithPenalty(a, b, context) {
+  const aEff = a.value - a.topUpSpentYen * context.topUpPenaltyPerYen
+  const bEff = b.value - b.topUpSpentYen * context.topUpPenaltyPerYen
   if (aEff !== bEff) return bEff - aEff
   if ((a.pressure || 0) !== (b.pressure || 0)) return (a.pressure || 0) - (b.pressure || 0)
   if ((a.triggerCount || 0) !== (b.triggerCount || 0)) return (a.triggerCount || 0) - (b.triggerCount || 0)
@@ -979,8 +971,8 @@ function dominates(a, b) {
 }
 
 function pruneStates(states, context) {
-  const compare = context.topUpPotentialPerEvent
-    ? (a, b) => comparePlanWithPotential(a, b, context)
+  const compare = context.topUpPenaltyPerYen
+    ? (a, b) => comparePlanWithPenalty(a, b, context)
     : comparePlan
 
   const byCursor = new Map()
@@ -1240,10 +1232,8 @@ function buildPlanningContext(packs, settings) {
   const minPermanentPackPrice = permanentPacks.length
     ? Math.min(...permanentPacks.map(p => p.price))
     : 0
-  const avgTierBonus = DAILY_RECHARGE_BONUS_TIERS.reduce((sum, tier) => sum + tier.bonus, 0)
-    / DAILY_RECHARGE_BONUS_TIERS.length
-  const topUpPotentialPerEvent = minPermanentPackPrice > 0
-    ? avgTierBonus * freeDiamondScore * 0.5
+  const topUpPenaltyPerYen = minPermanentPackPrice > 0
+    ? freeDiamondScore * 0.8
     : 0
 
   return {
@@ -1256,7 +1246,7 @@ function buildPlanningContext(packs, settings) {
     freeDiamondScore,
     permanentPacks,
     minPermanentPackPrice,
-    topUpPotentialPerEvent,
+    topUpPenaltyPerYen,
     lanes,
     sources,
     opportunities,
