@@ -1017,9 +1017,9 @@ function expandState(state, context) {
           const toppedUp = tryApplyTopUp(candidate, context)
           if (candidate.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)) {
             next.push(resetToNextRechargeDay(toppedUp))
-          } else if (toppedUp !== candidate) {
-            // 最后一天：不再生成跨日分支，但补包结果仍需保留。
-            // 将补包后的状态作为同日延续推入，确保最终排序可见补包收益。
+          } else if (toppedUp !== candidate && candidate.sameDayBatchCount === 0) {
+            // 最后一天且是日首批发（sameDayBatchCount===0 表示刚跨日）：
+            // 不再生成下一天分支，但补包结果作为同日延续保留。
             next.push(continueSameRechargeDay(toppedUp))
           }
         }
