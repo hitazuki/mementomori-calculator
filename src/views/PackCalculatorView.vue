@@ -52,7 +52,7 @@
           type="button"
           @click="setActivePackTab('query')"
         >
-          礼包查询
+          {{ $t('planTabQuery') }}
         </button>
         <button
           class="btn btn-sm"
@@ -60,7 +60,7 @@
           type="button"
           @click="setActivePackTab('planner')"
         >
-          购买规划
+          {{ $t('planTabPlanner') }}
         </button>
       </div>
 
@@ -109,16 +109,16 @@
 
       <!-- Planner -->
       <div v-if="activePackTab === 'planner'" class="card planner-card">
-        <div class="card-title">购买方案规划</div>
+        <div class="card-title">{{ $t('planTitle') }}</div>
 
         <div class="planner-controls">
           <label class="planner-field">
-            <span>预算（日元）</span>
+            <span>{{ $t('planBudget') }}</span>
             <input class="form-input" type="number" min="0" step="160" v-model.number="planSettings.budget" />
           </label>
 
           <label class="planner-field">
-            <span>当前礼包档位</span>
+            <span>{{ $t('planCurrentTier') }}</span>
             <select class="form-select" v-model.number="planSettings.currentPrice">
               <option v-for="p in planPriceOptions" :key="p" :value="p">
                 {{ tierLabel(p) }}
@@ -127,20 +127,19 @@
           </label>
 
           <label class="planner-field">
-            <span>补累充阈值 x%</span>
+            <span>{{ $t('planTopUpThreshold') }}</span>
             <input class="form-input" type="number" min="0" max="100" step="1" v-model.number="planSettings.topUpThreshold" />
           </label>
         </div>
 
-        <div class="planner-derived-note">
-          跨日前 gap <= 累计付费钻 × {{ planSettings.topUpThreshold || 10 }}% 时自动补包。补包不计入主预算约束。
+        <div class="planner-derived-note" v-html="$t('planTopUpNote', { threshold: planSettings.topUpThreshold || 10 })">
         </div>
 
         <div class="planner-lane-head">
-          <span>触发源</span>
-          <span>当前层/等级</span>
-          <span>计划推到</span>
-          <span>2小时内最多触发</span>
+          <span>{{ $t('planLaneSource') }}</span>
+          <span>{{ $t('planLaneCurrent') }}</span>
+          <span>{{ $t('planLaneTarget') }}</span>
+          <span>{{ $t('planLaneLimit') }}</span>
         </div>
 
         <div class="planner-lanes">
@@ -168,7 +167,7 @@
               class="form-input"
               type="text"
               inputmode="numeric"
-              placeholder="13-28 / 336"
+              :placeholder="$t('planPlaceholderQuest')"
               v-model.trim="lane.endProgress"
             />
             <input v-else class="form-input" type="number" min="0" step="1" v-model.number="lane.endProgress" />
@@ -178,22 +177,22 @@
               type="number"
               value="1"
               disabled
-              title="属性塔触发间隔为 50 层，单批固定为 1"
+              :title="$t('planAttrTowerTitle')"
             />
             <input v-else class="form-input" type="number" min="1" max="50" step="1" v-model.number="lane.batchSize" />
           </label>
         </div>
 
         <div class="planner-derived-note">
-          当前层/等级表示已经达到的位置；计划推到表示本次规划最多推进到哪里；2小时内最多触发用于模拟卡包。预算单位为日元。全属性塔抵达由蓝塔、红塔、翠塔、黄塔四行自动推算。
+          {{ $t('planNote1') }}
         </div>
 
         <div class="planner-derived-note">
-          乐观卡包假设：属性塔按全属性抵达与单属性触发的层级拓扑排序；属性塔触发间隔为 50 层，单批固定为 1。
+          {{ $t('planNote2') }}
         </div>
 
         <div class="planner-derived-note">
-          每日累充按 0 点重置计算；属性塔开放与每日 10 层限制按 4 点换日，但当前乐观卡包策略不使用跨 4 点额外推塔能力。
+          {{ $t('planNote3') }}
         </div>
 
         <div class="planner-doc-links">
@@ -202,7 +201,7 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            查看游戏内规则文档
+            {{ $t('planDocRules') }}
           </a>
           <span class="planner-doc-sep">|</span>
           <a
@@ -210,7 +209,7 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            查看设计文档
+            {{ $t('planDocDesign') }}
           </a>
           <span class="planner-doc-sep">|</span>
           <a
@@ -218,20 +217,20 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            查看算法流程图
+            {{ $t('planDocFlowchart') }}
           </a>
         </div>
 
         <div class="planner-actions">
           <button class="btn btn-primary btn-sm" type="button" :disabled="isPlanning" @click="calculatePlanner">
-            {{ isPlanning ? '计算中...' : '计算购买方案' }}
+            {{ isPlanning ? $t('planStatusCalculating') : $t('planBtnCalc') }}
           </button>
           <span class="planner-calc-status">
             {{ plannerStatusText }}
           </span>
         </div>
 
-        <div v-if="planOptions.length" class="planner-mode-tabs" role="tablist" aria-label="购买方案">
+        <div v-if="planOptions.length" class="planner-mode-tabs" role="tablist" :aria-label="$t('planTabPlanner')">
           <button
             v-for="option in planOptions"
             :key="option.id"
@@ -242,37 +241,37 @@
             :aria-selected="activePlanId === option.id"
             @click="setActivePlan(option.id)"
           >
-            {{ option.label }}
+            {{ option.labelKey ? $t(option.labelKey) : option.label }}
           </button>
         </div>
 
         <div v-if="planOptions.length" class="planner-mode-desc">
-          {{ selectedPlan.description }}
+          {{ selectedPlan.descKey ? $t(selectedPlan.descKey) : selectedPlan.description }}
         </div>
 
         <div v-if="selectedPlan" class="planner-summary">
-          <div><span>可触发</span><b>{{ selectedPlan.opportunityCount }}</b></div>
-          <div><span>批次</span><b>{{ selectedPlan.batchCount }}</b></div>
-          <div><span>购买</span><b>{{ selectedPlan.purchases }}</b></div>
-          <div><span>补包批次</span><b>{{ selectedPlan.topUpBatchCount || selectedPlan.topUpBatches?.length || 0 }}</b></div>
-          <div><span>限时花费</span><b>{{ formatPrice(selectedPlan.limitedSpentYen ?? selectedPlan.spent) }}</b></div>
-          <div><span>补包开销</span><b>{{ formatPrice(selectedPlan.topUpTotalCost || 0) }}</b></div>
-          <div><span>总花费</span><b>{{ formatPrice(selectedPlan.totalSpent ?? selectedPlan.spent) }}</b></div>
-          <div><span>剩余</span><b>{{ formatPrice(selectedPlan.remaining) }}</b></div>
-          <div><span>总价值</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
-          <div><span>累充赠钻</span><b>{{ (selectedPlan.rechargeFreeDiamonds || 0).toLocaleString() }}</b></div>
-          <div><span>均 CE</span><b>{{ selectedPlan.averageCe.toFixed(1) }}</b></div>
-          <div><span>末档</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
+          <div><span>{{ $t('planSumTrigger') }}</span><b>{{ selectedPlan.opportunityCount }}</b></div>
+          <div><span>{{ $t('planSumBatch') }}</span><b>{{ selectedPlan.batchCount }}</b></div>
+          <div><span>{{ $t('planSumPurchase') }}</span><b>{{ selectedPlan.purchases }}</b></div>
+          <div><span>{{ $t('planSumTopUpBatch') }}</span><b>{{ selectedPlan.topUpBatchCount || selectedPlan.topUpBatches?.length || 0 }}</b></div>
+          <div><span>{{ $t('planSumLimitedSpent') }}</span><b>{{ formatPrice(selectedPlan.limitedSpentYen ?? selectedPlan.spent) }}</b></div>
+          <div><span>{{ $t('planSumTopUpCost') }}</span><b>{{ formatPrice(selectedPlan.topUpTotalCost || 0) }}</b></div>
+          <div><span>{{ $t('planSumTotalSpent') }}</span><b>{{ formatPrice(selectedPlan.totalSpent ?? selectedPlan.spent) }}</b></div>
+          <div><span>{{ $t('planSumRemaining') }}</span><b>{{ formatPrice(selectedPlan.remaining) }}</b></div>
+          <div><span>{{ $t('planSumTotalValue') }}</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
+          <div><span>{{ $t('planSumFreeDiamond') }}</span><b>{{ (selectedPlan.rechargeFreeDiamonds || 0).toLocaleString() }}</b></div>
+          <div><span>{{ $t('planSumAvgCE') }}</span><b>{{ selectedPlan.averageCe.toFixed(1) }}</b></div>
+          <div><span>{{ $t('planSumFinalTier') }}</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
         </div>
 
         <div v-if="selectedPlan && selectedPlan.topUpBatches && selectedPlan.topUpBatches.length" class="planner-top-up-summary">
-          <div class="planner-detail-title">补累充包</div>
+          <div class="planner-detail-title">{{ $t('planTopUpTitle') }}</div>
           <div class="planner-top-up-list">
             <div v-for="batch in selectedPlan.topUpBatches" :key="`${selectedPlan.id}-top-up-batch-${batch.index}`" class="planner-top-up-item">
-              <strong>第 {{ batch.index }} 批</strong>
-              <span>{{ batch.packs.map(pack => pack.displayTrigger).join(' / ') }}</span>
+              <strong>{{ $t('planBatchNum', { n: batch.index }) }}</strong>
+              <span>{{ batch.packs.map(pack => translatePackName(pack.displayTrigger)).join(' / ') }}</span>
               <span>{{ formatPrice(batch.cost) }}</span>
-              <span>赠钻 +{{ batch.rechargeFreeDiamonds.toLocaleString() }}</span>
+              <span>{{ $t('planFreeDiamondAdd', { n: batch.rechargeFreeDiamonds.toLocaleString() }) }}</span>
             </div>
           </div>
         </div>
@@ -281,15 +280,15 @@
           <table class="data-table planner-table">
             <thead>
               <tr>
-                <th>批次</th>
-                <th>推进范围</th>
-                <th>档位</th>
-                <th>触发/购买</th>
-                <th>累充</th>
-                <th>补包</th>
-                <th>花费</th>
-                <th>价值</th>
-                <th>下批</th>
+                <th>{{ $t('planColBatch') }}</th>
+                <th>{{ $t('planColRange') }}</th>
+                <th>{{ $t('planColTier') }}</th>
+                <th>{{ $t('planColTriggerBuy') }}</th>
+                <th>{{ $t('planColRecharge') }}</th>
+                <th>{{ $t('planColTopUp') }}</th>
+                <th>{{ $t('planColCost') }}</th>
+                <th>{{ $t('planColValue') }}</th>
+                <th>{{ $t('planColNextTier') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -306,7 +305,7 @@
                       {{ plannerTriggerCount(step) }} / {{ plannerPurchaseCount(step) }}
                     </span>
                     <span v-if="!step.bought" class="planner-cell-sub">
-                      {{ step.skipCount > 1 ? `连续不买 ×${step.skipCount}` : '不买' }}
+                      {{ step.skipCount > 1 ? $t('planSkipCount', { n: step.skipCount }) : $t('planSkip') }}
                     </span>
                   </td>
                   <td>
@@ -323,14 +322,14 @@
                   </td>
                   <td>
                     <span :class="step.topUpPacks && step.topUpPacks.length ? 'planner-status-chip active' : 'planner-status-chip'">
-                      {{ step.topUpPacks && step.topUpPacks.length ? '已补' : '无' }}
+                      {{ step.topUpPacks && step.topUpPacks.length ? $t('planTopUpDone') : $t('planTopUpNone') }}
                     </span>
                   </td>
                   <td>{{ formatPrice(step.cost) }}</td>
                   <td>
                     {{ step.value.toLocaleString() }}
                     <span v-if="step.rechargeValue" class="planner-value-extra">
-                      (含累充 {{ step.rechargeValue.toLocaleString() }})
+                      {{ $t('planValueWithRecharge', { n: step.rechargeValue.toLocaleString() }) }}
                     </span>
                   </td>
                   <td>{{ tierLabel(step.nextTierPrice) }}</td>
@@ -339,7 +338,7 @@
                   <td :colspan="9">
                     <div class="planner-pack-details">
                       <section v-if="step.opportunities && step.opportunities.length" class="planner-trigger-details">
-                        <div class="planner-detail-title">本批触发范围</div>
+                        <div class="planner-detail-title">{{ $t('planDetailTriggerRange') }}</div>
                         <div class="planner-trigger-list">
                           <div
                             v-for="opportunity in step.opportunities"
@@ -349,14 +348,14 @@
                           >
                             <strong>{{ opportunity.displayTrigger }}</strong>
                             <span v-if="opportunity.hasPackAtTier">
-                              {{ opportunity.purchased ? '已购买' : '触发未买' }}
+                              {{ opportunity.purchased ? $t('planDetailBought') : $t('planDetailNotBought') }}
                               / CE {{ opportunity.ce.toFixed(1) }}
                             </span>
-                            <span v-else>当前档位无包</span>
+                            <span v-else>{{ $t('planDetailNoPack') }}</span>
                           </div>
                         </div>
                         <div v-if="step.skippedOpportunities && step.skippedOpportunities.length" class="planner-recharge-note">
-                          本批触发未买 {{ step.skippedOpportunities.length }} 个；因为批内至少买了 1 个，不会导致额外降档。
+                          {{ $t('planDetailSkipNote', { n: step.skippedOpportunities.length }) }}
                         </div>
                       </section>
                       <article v-for="pack in step.purchases" :key="`${step.rowKey}-detail-${pack.displayTrigger}`" class="planner-pack-detail">
@@ -364,7 +363,7 @@
                           <strong>{{ pack.displayTrigger }}</strong>
                           <span>{{ formatPrice(pack.price) }}</span>
                           <span>CE {{ pack.ce.toFixed(1) }}</span>
-                          <span>价值 {{ Math.round(pack.value).toLocaleString() }}</span>
+                          <span>{{ $t('planColValue') }} {{ Math.round(pack.value).toLocaleString() }}</span>
                         </div>
                         <div class="planner-pack-items">
                           <div
@@ -383,15 +382,15 @@
                         </div>
                       </article>
                       <section v-if="step.topUpPacks && step.topUpPacks.length" class="planner-trigger-details">
-                        <div class="planner-detail-title">本批补累充</div>
+                        <div class="planner-detail-title">{{ $t('planDetailTopUpTitle') }}</div>
                         <div class="planner-recharge-note">
-                          补包花费 {{ formatPrice(step.topUpCost) }}；累充 {{ step.topUpRechargeBeforePaid.toLocaleString() }} -> {{ step.topUpRechargeAfterPaid.toLocaleString() }} 付费钻，解锁 {{ step.topUpUnlockedRechargeTiers.join(' / ') }} 档，赠送免费钻 +{{ step.topUpRechargeFreeDiamonds.toLocaleString() }}。
+                          {{ $t('planDetailTopUpNote', { cost: formatPrice(step.topUpCost), before: step.topUpRechargeBeforePaid.toLocaleString(), after: step.topUpRechargeAfterPaid.toLocaleString(), tiers: step.topUpUnlockedRechargeTiers.join(' / '), free: step.topUpRechargeFreeDiamonds.toLocaleString() }) }}
                         </div>
                         <div class="planner-top-up-list">
                           <div v-for="pack in step.topUpPacks" :key="`${step.rowKey}-top-up-${pack.displayTrigger}`" class="planner-top-up-item">
-                            <strong>{{ pack.displayTrigger }}</strong>
+                            <strong>{{ translatePackName(pack.displayTrigger) }}</strong>
                             <span>{{ formatPrice(pack.price) }}</span>
-                            <span>价值 {{ Math.round(pack.value).toLocaleString() }}</span>
+                            <span>{{ $t('planColValue') }} {{ Math.round(pack.value || 0).toLocaleString() }}</span>
                           </div>
                         </div>
                       </section>
@@ -402,20 +401,20 @@
                   <td :colspan="9">
                     <div class="planner-skip-details">
                       <div class="planner-skip-summary">
-                        <span>连续跳过 {{ step.skipCount }} 批</span>
-                        <span>实际降档 {{ step.tierDropCount || 0 }} 次</span>
+                        <span>{{ $t('planSkipSeriesCount', { n: step.skipCount }) }}</span>
+                        <span>{{ $t('planTierDropCount', { n: step.tierDropCount || 0 }) }}</span>
                         <span>{{ tierLabel(step.tierPrice) }} -> {{ tierLabel(step.nextTierPrice) }}</span>
                       </div>
                       <div v-if="step.skipSourceRanges && step.skipSourceRanges.length" class="planner-skip-sources">
                         <div v-for="source in step.skipSourceRanges" :key="`${step.rowKey}-${source.label}`" class="planner-skip-source">
                           <strong>{{ source.label }}</strong>
                           <span>{{ source.from === source.to ? source.from : `${source.from} -> ${source.to}` }}</span>
-                          <em>{{ source.count }} 批</em>
+                          <em>{{ $t('planSkipBatchCount', { n: source.count }) }}</em>
                         </div>
                       </div>
                       <div class="planner-skip-batches">
                         <div v-for="skipped in step.skippedSteps" :key="`${step.rowKey}-skip-${skipped.index}`" class="planner-skip-batch">
-                          <strong>第 {{ skipped.index }} 批</strong>
+                          <strong>{{ $t('planBatchNum', { n: skipped.index }) }}</strong>
                           <span>{{ skipped.triggerRange }}</span>
                           <em>{{ tierLabel(skipped.tierPrice) }} -> {{ tierLabel(skipped.nextTierPrice) }}</em>
                         </div>
@@ -427,12 +426,12 @@
             </tbody>
           </table>
           <div v-if="compressedPlanSteps.length > displayedPlanSteps.length" class="planner-more">
-            还有 {{ compressedPlanSteps.length - displayedPlanSteps.length }} 行未显示
+            {{ $t('planMoreRows', { n: compressedPlanSteps.length - displayedPlanSteps.length }) }}
           </div>
         </div>
 
-        <div v-else-if="planOptions.length" class="planner-empty">当前范围内没有可规划的限时组合包。</div>
-        <div v-else class="planner-empty">调整预算与触发源后，点击“计算购买方案”。</div>
+        <div v-else-if="planOptions.length" class="planner-empty">{{ $t('planEmptyRange') }}</div>
+        <div v-else class="planner-empty">{{ $t('planEmptyInit') }}</div>
       </div>
 
       <div v-if="activePackTab === 'query'" class="card desktop-pack-table" style="overflow-x:auto;padding:8px;">
@@ -641,7 +640,7 @@ const activePlanId = ref('bestValue')
 const planOptions = shallowRef([])
 const isPlanning = ref(false)
 const plannerDirty = ref(true)
-const plannerStatus = ref('尚未计算')
+const plannerStatusCalcTime = ref(null)
 
 function setActivePlan(id) {
   activePlanId.value = id
@@ -674,7 +673,16 @@ function planLaneName(lane) {
 
 function tierLabel(price) {
   if (!Number.isFinite(Number(price))) return '-'
-  return `${paidDiamondsForPrice(price)}钻`
+  return t('planTierDiamond', { n: paidDiamondsForPrice(price) })
+}
+
+function translatePackName(name) {
+  if (!name) return ''
+  const m1 = name.match(/^钻石组合包 (\d+)( \(\w+\d+\))?( ×\d+)?$/)
+  if (m1) return t('planPackDiamond', { n: m1[1] }) + (m1[2] || '') + (m1[3] || '')
+  const m2 = name.match(/^钻石组合包 (\d+) \(首次双倍\)( ×\d+)?$/)
+  if (m2) return t('planPackDiamondFirst', { n: m2[1] }) + (m2[2] || '')
+  return name
 }
 
 function plannerTriggerCount(step) {
@@ -696,12 +704,12 @@ function getRechargeProgress(step) {
   if ((step.rechargeReset || step.rechargeResetCount) && !step.bought) {
     paid = 0
   }
-  return `${paid || 0}钻`
+  return t('planTierDiamond', { n: paid || 0 })
 }
 
 function getRechargeResetText(step) {
-  if (step.rechargeResetCount) return `重置×${step.rechargeResetCount}`
-  if (step.rechargeReset) return '重置'
+  if (step.rechargeResetCount) return t('planResetCount', { n: step.rechargeResetCount })
+  if (step.rechargeReset) return t('planReset')
   return ''
 }
 
@@ -725,9 +733,9 @@ const planningSettings = computed(() => ({
 }))
 
 const plannerStatusText = computed(() => {
-  if (isPlanning.value) return '正在生成方案，请稍候'
-  if (plannerDirty.value && planOptions.value.length) return '参数已变更，请重新计算'
-  return plannerStatus.value
+  if (isPlanning.value) return t('planStatusGenerating')
+  if (plannerDirty.value && planOptions.value.length) return t('planStatusDirty')
+  return plannerStatusCalcTime.value === null ? t('planStatusNotCalc') : t('planStatusDone', { n: plannerStatusCalcTime.value })
 })
 
 async function calculatePlanner() {
@@ -750,8 +758,8 @@ async function calculatePlanner() {
     if (!options.some(option => option.id === activePlanId.value)) {
       activePlanId.value = options[0]?.id || 'bestValue'
     }
+    plannerStatusCalcTime.value = Math.max(1, Math.round(performance.now() - startedAt))
     plannerDirty.value = false
-    plannerStatus.value = `已计算，耗时 ${Math.max(1, Math.round(performance.now() - startedAt))} ms`
   } finally {
     isPlanning.value = false
   }

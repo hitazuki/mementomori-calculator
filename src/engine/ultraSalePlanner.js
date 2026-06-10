@@ -1320,17 +1320,23 @@ export function buildUltraSalePlanOptions(packs, settings = {}) {
     createResult(bestState, context, {
       id: 'bestValue',
       label: '价值最优',
+      labelKey: 'planOptBest',
       description: '在主预算和补累充浮动预算内最大化总评分价值。',
+      descKey: 'planOptBestDesc',
     }),
     createResult(smallPackState, context, {
       id: 'smallPack',
       label: '只买小包',
+      labelKey: 'planOptSmall',
       description: '只在最低档购买，升档后等待掉回最低档。',
+      descKey: 'planOptSmallDesc',
     }),
     createResult(maxPackState, context, {
       id: 'maxPack',
       label: '冲最大包',
+      labelKey: 'planOptMax',
       description: '优先把有限触发机会用于更高档礼包，必要时等待降档。',
+      descKey: 'planOptMaxDesc',
     }),
   ]
 }
