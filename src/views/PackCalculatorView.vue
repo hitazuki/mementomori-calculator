@@ -817,8 +817,9 @@ function fmtNum(n) {
 
 .planner-controls {
   display: grid;
-  grid-template-columns: repeat(2, minmax(130px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 600px;
 }
 
 .planner-field {
