@@ -100,17 +100,7 @@
       <!-- Dynamic View Rendering -->
       <div class="view active">
         <KeepAlive>
-          <Suspense>
-            <template #default>
-              <component :is="activeComponent" />
-            </template>
-            <template #fallback>
-              <div class="view-loading">
-                <span class="loading-icon">⏳</span>
-                <span>{{ $t ? $t('loading') || 'Loading...' : 'Loading...' }}</span>
-              </div>
-            </template>
-          </Suspense>
+          <component :is="activeComponent" />
         </KeepAlive>
       </div>
     </main>
@@ -118,19 +108,34 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watchEffect, defineAsyncComponent } from 'vue'
+import { ref, computed, onMounted, watchEffect, defineAsyncComponent, h } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLang } from './i18n/index.js'
 
-const CalculatorView = defineAsyncComponent(() => import('./views/CalculatorView.vue'))
-const SweepChartView = defineAsyncComponent(() => import('./views/SweepChartView.vue'))
-const HeatmapChartView = defineAsyncComponent(() => import('./views/HeatmapChartView.vue'))
-const ComparePanelView = defineAsyncComponent(() => import('./views/ComparePanelView.vue'))
-const TornadoChartView = defineAsyncComponent(() => import('./views/TornadoChartView.vue'))
-const TableExportView = defineAsyncComponent(() => import('./views/TableExportView.vue'))
-const MysteriumPanelView = defineAsyncComponent(() => import('./views/MysteriumPanelView.vue'))
-const PackCalculatorView = defineAsyncComponent(() => import('./views/PackCalculatorView.vue'))
-const PackComparisonView = defineAsyncComponent(() => import('./views/PackComparisonView.vue'))
+const LoadingOverlay = {
+  setup() {
+    return () => h('div', { class: 'view-loading' }, [
+      h('span', { class: 'loading-icon' }, '⏳'),
+      h('span', 'Loading...')
+    ])
+  }
+}
+
+const createAsyncView = (loader) => defineAsyncComponent({
+  loader,
+  loadingComponent: LoadingOverlay,
+  delay: 0
+})
+
+const CalculatorView = createAsyncView(() => import('./views/CalculatorView.vue'))
+const SweepChartView = createAsyncView(() => import('./views/SweepChartView.vue'))
+const HeatmapChartView = createAsyncView(() => import('./views/HeatmapChartView.vue'))
+const ComparePanelView = createAsyncView(() => import('./views/ComparePanelView.vue'))
+const TornadoChartView = createAsyncView(() => import('./views/TornadoChartView.vue'))
+const TableExportView = createAsyncView(() => import('./views/TableExportView.vue'))
+const MysteriumPanelView = createAsyncView(() => import('./views/MysteriumPanelView.vue'))
+const PackCalculatorView = createAsyncView(() => import('./views/PackCalculatorView.vue'))
+const PackComparisonView = createAsyncView(() => import('./views/PackComparisonView.vue'))
 
 const { locale, t } = useI18n()
 const currentLanguage = ref(locale.value)
