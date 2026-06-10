@@ -264,11 +264,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { calculateMysteriumRankings } from '../engine/mysteriumCalc.js'
-import charactersRaw from '../constants/characters.json'
-import mysteriumRaw from '../constants/mysterium_data.json'
+
+const charactersRaw = ref({})
+const mysteriumRaw = ref({})
+
+onMounted(async () => {
+  charactersRaw.value = (await import('../constants/characters.json')).default
+  mysteriumRaw.value = (await import('../constants/mysterium_data.json')).default
+})
 
 const { t } = useI18n()
 
@@ -338,7 +344,10 @@ const groupedTemplate = computed(() => {
   return grouped
 })
 
-const result = computed(() => calculateMysteriumRankings(charactersRaw, mysteriumRaw, stateTemplate, algo.value))
+const result = computed(() => {
+  if (!Object.keys(charactersRaw.value).length) return { collections: [], rankings: [] }
+  return calculateMysteriumRankings(charactersRaw.value, mysteriumRaw.value, stateTemplate, algo.value)
+})
 
 const levelCapItem = computed(() => stateTemplate.find(t => t.key === 'appLevelCap') || { baseVal: 0, score: 0 })
 const levelCapScore = computed(() => levelCapItem.value.score)
@@ -347,7 +356,7 @@ const levelCapBaseVal = computed(() => levelCapItem.value.baseVal)
 const getCharFullName = (c) => t(c.nameKey) + (c.name2Key ? ` (${t(c.name2Key)})` : '')
 
 const getCharFullNameById = (id) => {
-  const c = charactersRaw[id]
+  const c = charactersRaw.value[id]
   if (!c) return ''
   return getCharFullName(c)
 }

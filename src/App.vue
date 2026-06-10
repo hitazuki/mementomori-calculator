@@ -100,7 +100,17 @@
       <!-- Dynamic View Rendering -->
       <div class="view active">
         <KeepAlive>
-          <component :is="activeComponent" />
+          <Suspense>
+            <template #default>
+              <component :is="activeComponent" />
+            </template>
+            <template #fallback>
+              <div class="view-loading">
+                <span class="loading-icon">⏳</span>
+                <span>{{ $t ? $t('loading') || 'Loading...' : 'Loading...' }}</span>
+              </div>
+            </template>
+          </Suspense>
         </KeepAlive>
       </div>
     </main>
@@ -186,3 +196,24 @@ const navMysteriumItems = [
   { id: 'mysterium', icon: '🔮', i18nLabel: 'navMysterium', i18nTitle: 'navMysterium' }
 ]
 </script>
+
+<style scoped>
+.view-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 50vh;
+  color: var(--text-muted);
+  font-size: 16px;
+  gap: 16px;
+}
+.loading-icon {
+  font-size: 40px;
+  animation: spin 1.5s linear infinite;
+}
+@keyframes spin { 
+  100% { transform: rotate(360deg); } 
+}
+</style>

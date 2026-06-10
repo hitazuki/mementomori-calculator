@@ -232,10 +232,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import packsRaw from '../constants/allPacks.json'
+const packsRaw = ref([])
+onMounted(async () => {
+  packsRaw.value = (await import('../constants/allPacks.json')).default
+})
 import { calculatePackCE, normalizeScores, getItemInfo, getBaseItemKey } from '../engine/packCalc.js'
 import { editableScores } from '../store/itemScores.js'
 
@@ -321,7 +324,7 @@ const filter = reactive({
 
 const availableSources = computed(() => {
   const set = new Set()
-  packsRaw.forEach(p => {
+  packsRaw.value.forEach(p => {
     if (p.source === 'witch_gift') {
       set.add('witch_gift')
     } else if (p.source === 'permanent_pack') {
@@ -344,14 +347,14 @@ const availableSources = computed(() => {
 })
 
 const availablePrices = computed(() => {
-  const prices = new Set(packsRaw.map(p => p.price))
+  const prices = new Set(packsRaw.value.map(p => p.price))
   return Array.from(prices).sort((a, b) => a - b)
 })
 
 const availableItems = computed(() => {
   const map = new Map()
   
-  packsRaw.forEach(pack => {
+  packsRaw.value.forEach(pack => {
     pack.items.forEach(item => {
       const baseKey = getBaseItemKey(item.ItemType, item.ItemId)
       if (!map.has(baseKey)) {
@@ -395,7 +398,7 @@ function sortIcon(field) {
 
 // --- Calculation ---
 const filteredPacks = computed(() => {
-  let result = packsRaw
+  let result = packsRaw.value
   if (filter.sources.length > 0) {
     result = result.filter(p => {
       if (p.source === 'witch_gift') return filter.sources.includes('witch_gift')
