@@ -519,7 +519,7 @@ function expandState(state, context) {
       nextStates.push(continueSameRechargeDay(candidate))
 
       // 6. 跨日重置前执行确定性补包判定，无分叉。
-      if (candidate.purchases > 0 && candidate.rechargeDayIndex < maxRechargeDays) {
+      if (candidate.purchases > 0) {
         const toppedUp = tryApplyTopUp(candidate, context)
         nextStates.push(resetToNextRechargeDay(toppedUp))
       }
@@ -569,14 +569,20 @@ rechargeTierBucket
 limitedSpentBucket
 ```
 
-排序使用：
+排序使用（引入效率逆差惩罚）：
 
 ```text
-value desc
+(value - historicalWastePenalty - currentDayInefficiencyPenalty) desc
 pressure asc
 triggerCount asc
 limitedSpentYen asc
 ```
+
+**效率逆差惩罚（Efficiency Deficit Penalty）核心逻辑：**
+- 真实游戏累充档位中，0~12,000钻的边际转化率为完美的 1.2。超过 12,000 后，转化率暴跌至 0.7 并在后续稳定于 0.9。
+- 算法彻底摒弃固定阈值的业务死判断，采用数学公式：`效率逆差 = (当日花费 × 1.2) - 当日真实可领取的累充钻石`。
+- **动态排查**：在 `comparePlan` 中，动态扣除此逆差分（并乘以系数1.5倍加大惩罚力度），强迫算法摒弃所有超越 12,000 钻的合批操作。
+- **历史烙印**：在 `resetToNextRechargeDay`（跨日）时，当天的逆差惩罚会被永久累加至状态的 `historicalWastePenalty` 字段，终生携带，彻底封杀劣质分支试图通过跨日重置来洗白当天空耗的漏洞（例如卡在 9000 钻重置）。
 
 ### 时间剪枝
 

@@ -1,4 +1,4 @@
-import { DAILY_RECHARGE_BONUS_TIERS, marginalFreeDiamonds, unlockedRechargeTiers } from './dailyRechargeBonus.js'
+import { DAILY_RECHARGE_BONUS_TIERS, marginalFreeDiamonds, unlockedRechargeTiers, cumulativeFreeDiamonds } from './dailyRechargeBonus.js'
 import { parseMainQuestProgress } from './mainQuestProgress.js'
 
 const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
@@ -805,8 +805,20 @@ function appendStepSignature(state, step) {
   return current ? `${current}|${next}` : next
 }
 
+function getDailyInefficiencyPenalty(paid) {
+  if (!paid) return 0
+  const idealBonus = paid * 1.2
+  const actualBonus = cumulativeFreeDiamonds(paid)
+  const deficit = Math.max(0, idealBonus - actualBonus)
+  return deficit * 1.5
+}
+
 function comparePlan(a, b) {
-  if (a.value !== b.value) return b.value - a.value
+  const penaltyA = (a.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(a.dailyPaidDiamonds)
+  const penaltyB = (b.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(b.dailyPaidDiamonds)
+  const scoreA = a.value - penaltyA
+  const scoreB = b.value - penaltyB
+  if (scoreA !== scoreB) return scoreB - scoreA
   if ((a.pressure || 0) !== (b.pressure || 0)) return (a.pressure || 0) - (b.pressure || 0)
   if ((a.triggerCount || 0) !== (b.triggerCount || 0)) return (a.triggerCount || 0) - (b.triggerCount || 0)
   return a.limitedSpentYen - b.limitedSpentYen
@@ -858,6 +870,7 @@ function continueSameRechargeDay(state) {
 function resetToNextRechargeDay(state) {
   return {
     ...state,
+    historicalWastePenalty: (state.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(state.dailyPaidDiamonds),
     rechargeDayIndex: state.rechargeDayIndex + 1,
     dailyPaidDiamonds: 0,
     currentDayAttributeTowers: [],
