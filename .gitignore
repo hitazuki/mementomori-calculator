@@ -34,4 +34,3 @@ asset_downloader/
 # Generated Data
 public/data/allPacks.json
 public/data/ultraSalePacks.json
-public/data/master_dict_*.json
