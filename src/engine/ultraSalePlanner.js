@@ -890,6 +890,7 @@ function tryApplyTopUp(state, context) {
   const targetStepIndex = state.steps.length - 1
   if (targetStepIndex === -1) return state
   const targetStep = state.steps[targetStepIndex]
+  if (targetStep.rechargeDayIndex !== currentDayIndex) return state
   if (targetStep.topUpCost && targetStep.topUpCost > 0) return state
 
   const nextTier = nextRechargeTier(state.dailyPaidDiamonds)
