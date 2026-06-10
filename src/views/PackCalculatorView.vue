@@ -293,9 +293,16 @@
                     </span>
                   </td>
                   <td>
-                    <span :class="step.rechargeReset ? 'planner-status-chip active' : 'planner-status-chip'">
-                      {{ plannerRechargeText(step) }}
-                    </span>
+                    <div class="planner-recharge-cell">
+                      <span class="planner-recharge-val">{{ getRechargeProgress(step) }}</span>
+                      <span
+                        v-if="step.rechargeReset || step.rechargeResetCount"
+                        :class="step.rechargeReset ? 'planner-status-chip active' : 'planner-status-chip'"
+                        style="margin-top: 3px;"
+                      >
+                        {{ getRechargeResetText(step) }}
+                      </span>
+                    </div>
                   </td>
                   <td>
                     <span :class="step.topUpPacks && step.topUpPacks.length ? 'planner-status-chip active' : 'planner-status-chip'">
@@ -663,18 +670,18 @@ function plannerPurchaseCount(step) {
   return step.purchases?.length || 0
 }
 
-function plannerRechargeText(step) {
+function getRechargeProgress(step) {
   let paid = step.topUpPacks && step.topUpPacks.length ? step.topUpRechargeAfterPaid : step.rechargeAfterPaid
-  if (step.rechargeReset || step.rechargeResetCount) {
-    if (!step.bought) {
-      paid = 0
-    }
+  if ((step.rechargeReset || step.rechargeResetCount) && !step.bought) {
+    paid = 0
   }
-  const formattedPaid = `${paid || 0}钻`
-  
-  if (step.rechargeResetCount) return `${formattedPaid} / 重置×${step.rechargeResetCount}`
-  if (step.rechargeReset) return `${formattedPaid} / 重置`
-  return formattedPaid
+  return `${paid || 0}钻`
+}
+
+function getRechargeResetText(step) {
+  if (step.rechargeResetCount) return `重置×${step.rechargeResetCount}`
+  if (step.rechargeReset) return '重置'
+  return ''
 }
 
 function scoreOf(itemKey, fallback = 1) {
@@ -1099,6 +1106,20 @@ function fmtNum(n) {
   border-color: rgba(212,175,55,0.45);
   color: var(--gold);
   background: rgba(212,175,55,0.08);
+}
+
+.planner-recharge-cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.planner-recharge-val {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .planner-value-extra {
