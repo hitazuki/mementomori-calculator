@@ -1077,9 +1077,7 @@ function expandState(state, context) {
         next.push(continueSameRechargeDay(candidate))
         if (candidate.purchases > 0) {
           const toppedUp = tryApplyTopUp(candidate, context)
-          if (candidate.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)) {
-            next.push(resetToNextRechargeDay(toppedUp))
-          }
+          next.push(resetToNextRechargeDay(toppedUp))
         }
       }
     }
