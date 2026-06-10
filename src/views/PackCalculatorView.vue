@@ -1047,10 +1047,13 @@ function fmtNum(n) {
 }
 
 .planner-range-cell {
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width: 280px;
+  min-width: 150px;
+  white-space: normal !important;
+  word-break: break-word;
+  text-align: left;
+  font-size: var(--fs-xs);
+  line-height: 1.4;
 }
 
 .planner-clickable-row {
