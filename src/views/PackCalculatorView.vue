@@ -306,7 +306,7 @@
                   <td>
                     {{ step.value.toLocaleString() }}
                     <span v-if="step.rechargeValue" class="planner-value-extra">
-                      (内容 {{ step.originalValue.toLocaleString() }} + 累充 {{ step.rechargeValue.toLocaleString() }})
+                      (含累充 {{ step.rechargeValue.toLocaleString() }})
                     </span>
                   </td>
                   <td>{{ tierLabel(step.nextTierPrice) }}</td>
@@ -646,7 +646,7 @@ function planLaneName(lane) {
 
 function tierLabel(price) {
   if (!Number.isFinite(Number(price))) return '-'
-  return `${formatPrice(price)} / ${paidDiamondsForPrice(price)}钻`
+  return `${paidDiamondsForPrice(price)}钻`
 }
 
 function plannerTriggerCount(step) {
@@ -952,7 +952,7 @@ function fmtNum(n) {
 
 .planner-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 8px;
   margin-top: 12px;
 }
@@ -1026,8 +1026,13 @@ function fmtNum(n) {
   min-width: 920px;
 }
 
+.planner-table th,
+.planner-table tbody tr:not(.planner-detail-row) td {
+  white-space: nowrap;
+}
+
 .planner-range-cell {
-  max-width: 260px;
+  max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
