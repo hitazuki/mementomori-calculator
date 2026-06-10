@@ -664,10 +664,17 @@ function plannerPurchaseCount(step) {
 }
 
 function plannerRechargeText(step) {
-  const label = step.rechargeDayLabel || ''
-  if (step.rechargeResetCount) return `${label} / 重置×${step.rechargeResetCount}`
-  if (step.rechargeReset) return `${label} / 重置`
-  return label || '同日'
+  let paid = step.topUpPacks && step.topUpPacks.length ? step.topUpRechargeAfterPaid : step.rechargeAfterPaid
+  if (step.rechargeReset || step.rechargeResetCount) {
+    if (!step.bought) {
+      paid = 0
+    }
+  }
+  const formattedPaid = `${paid || 0}钻`
+  
+  if (step.rechargeResetCount) return `${formattedPaid} / 重置×${step.rechargeResetCount}`
+  if (step.rechargeReset) return `${formattedPaid} / 重置`
+  return formattedPaid
 }
 
 function scoreOf(itemKey, fallback = 1) {
