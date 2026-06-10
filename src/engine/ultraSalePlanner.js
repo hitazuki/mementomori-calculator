@@ -647,32 +647,6 @@ function nextRechargeTier(currentPaid) {
   return DAILY_RECHARGE_BONUS_TIERS.find(tier => currentPaid < tier.paid) || null
 }
 
-function buildPermanentTopUpCombos(context, minCost, budgetLimit) {
-  if (!context.permanentPacks.length) return []
-  const minPackPrice = Math.min(...context.permanentPacks.map(pack => pack.price))
-  const searchableBudget = Math.min(budgetLimit, minCost + minPackPrice - 1)
-  if (searchableBudget < minCost) return []
-
-  const dp = Array.from({ length: searchableBudget + 1 })
-  dp[0] = { cost: 0, originalValue: 0, purchases: [] }
-  for (let cost = 0; cost <= searchableBudget; cost++) {
-    const base = dp[cost]
-    if (!base) continue
-    for (const pack of context.permanentPacks) {
-      const nextCost = cost + pack.price
-      if (nextCost > searchableBudget) continue
-      const candidate = {
-        cost: nextCost,
-        originalValue: base.originalValue + getPackOriginalValue(pack),
-        purchases: [...base.purchases, pack],
-      }
-      const current = dp[nextCost]
-      if (!current || candidate.originalValue > current.originalValue) dp[nextCost] = candidate
-    }
-  }
-  return dp.slice(minCost).filter(Boolean)
-}
-
 function findPermanentTopUpOption(state, context) {
   if (!context.permanentPacks.length || state.purchases <= 0) return null
 
@@ -680,33 +654,58 @@ function findPermanentTopUpOption(state, context) {
   const targetTier = nextRechargeTier(currentPaid)
   if (!targetTier) return null
 
-  // 搜索范围：达到下一档所需的最低花费 + 一个最小包（留少量组合空间）
-  const minCost = Math.max(1, Math.ceil((targetTier.paid - currentPaid) * 2))
-  const minPackPrice = Math.min(...context.permanentPacks.map(p => p.price))
-  const searchLimit = minCost + minPackPrice
-
-  const ranked = []
-  for (const combo of buildPermanentTopUpCombos(context, minCost, searchLimit)) {
-    const paidDiamonds = combo.purchases.reduce((sum, pack) => sum + getPackPaidDiamonds(pack), 0)
-    if (currentPaid + paidDiamonds < targetTier.paid) continue
-    const recharge = rechargeValueForPaid(currentPaid, paidDiamonds, context)
-    ranked.push({
-      ...combo,
-      paidDiamonds,
-      recharge,
-      value: Math.round(combo.originalValue + recharge.value),
-      unlockedCount: recharge.unlockedTiers.length,
-    })
+  // 包必须按能提供的钻石从大到小排序
+  const sortedPacks = [...context.permanentPacks].sort((a, b) => getPackPaidDiamonds(b) - getPackPaidDiamonds(a))
+  
+  let remainingGap = targetTier.paid - currentPaid
+  const usedPackIds = new Set()
+  const comboPurchases = []
+  
+  while (remainingGap > 0) {
+    let selectedPack = null
+    let largestUsedPack = null
+    
+    // 1. 尝试寻找不超额的包
+    for (const pack of sortedPacks) {
+      if (getPackPaidDiamonds(pack) <= remainingGap) {
+        if (!usedPackIds.has(pack.id)) {
+          selectedPack = pack // 找到最大的未使用的包
+          break
+        }
+        if (!largestUsedPack) largestUsedPack = pack // 记录最大的已使用的包
+      }
+    }
+    
+    // 2. 如果没找到未使用的，退而求其次用最大的已使用的包
+    if (!selectedPack && largestUsedPack) {
+      selectedPack = largestUsedPack
+    }
+    
+    // 3. 如果连已使用的都没有（所有包都大于缺口），必须超额，选最小的包
+    if (!selectedPack) {
+      selectedPack = sortedPacks[sortedPacks.length - 1] // 最小的包
+    }
+    
+    comboPurchases.push(selectedPack)
+    usedPackIds.add(selectedPack.id)
+    remainingGap -= getPackPaidDiamonds(selectedPack)
   }
-
-  // 最低花费优先；同花费优先价值更高
-  return ranked.length
-    ? ranked.sort((a, b) => {
-        if (a.cost !== b.cost) return a.cost - b.cost
-        if (a.value !== b.value) return b.value - a.value
-        return a.purchases.length - b.purchases.length
-      })[0]
-    : null
+  
+  // 组装最终方案返回
+  const totalPaid = comboPurchases.reduce((sum, p) => sum + getPackPaidDiamonds(p), 0)
+  const totalCost = comboPurchases.reduce((sum, p) => sum + p.price, 0)
+  const totalOriginalValue = comboPurchases.reduce((sum, p) => sum + getPackOriginalValue(p), 0)
+  const recharge = rechargeValueForPaid(currentPaid, totalPaid, context)
+  
+  return {
+    cost: totalCost,
+    originalValue: totalOriginalValue,
+    purchases: comboPurchases,
+    paidDiamonds: totalPaid,
+    recharge,
+    value: Math.round(totalOriginalValue + recharge.value),
+    unlockedCount: recharge.unlockedTiers.length,
+  }
 }
 
 function summarizeBatch(batch) {

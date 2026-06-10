@@ -538,7 +538,7 @@ function expandState(state, context) {
 - 不买动作不是“跳过计算”，而是“触发后等待超时”，因此会推进 cursor、增加等待，并导致下一批降档。
 - 没有进入当前批次的节点才是真正“保留到以后”；进入当前批次但不买的节点已经触发超时，不能等升档后再买。
 - `tryApplyTopUp()` 是自动补累充的唯一入口；继续同日分支不调用补包逻辑。
-- `tryApplyTopUp()` 不应枚举所有常驻包组合；它只处理接近下一累充阈值的小额补包。
+- `tryApplyTopUp()` 已废除动态规划（DP）搜索，全面采用**“双重偏好贪心策略（Greedy with Diversity）”**：只在接近下一阈值时，优先使用未购买过的大包（模拟玩家尽量触发各档位首充双倍的心理），再以最小代价兜底，从而将 `O(预算×包数量)` 的搜索降维至 `O(1)`。
 - `continueSameRechargeDay()` 应增加 `sameDayBatchCount`，保留 `rechargeDayIndex` 和 `dailyPaidDiamonds`。
 - `resetToNextRechargeDay()` 只重置 `dailyPaidDiamonds` 和同日计数，不重置预算、档位或 source cursor。
 
