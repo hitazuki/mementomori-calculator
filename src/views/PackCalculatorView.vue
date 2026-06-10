@@ -196,14 +196,31 @@
           每日累充按 0 点重置计算；属性塔开放与每日 10 层限制按 4 点换日，但当前乐观卡包策略不使用跨 4 点额外推塔能力。
         </div>
 
-        <a
-          class="planner-doc-link"
-          href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/game-rules.md"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          查看游戏内规则文档
-        </a>
+        <div class="planner-doc-links">
+          <a
+            href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/game-rules.md"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            查看游戏内规则文档
+          </a>
+          <span class="planner-doc-sep">|</span>
+          <a
+            href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/implementation-design.md"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            查看设计文档
+          </a>
+          <span class="planner-doc-sep">|</span>
+          <a
+            href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/path-planning-visual.md"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            查看算法流程图
+          </a>
+        </div>
 
         <div class="planner-actions">
           <button class="btn btn-primary btn-sm" type="button" :disabled="isPlanning" @click="calculatePlanner">
@@ -917,17 +934,27 @@ function fmtNum(n) {
   margin-top: 8px;
 }
 
-.planner-doc-link {
-  display: inline-flex;
-  width: fit-content;
-  color: var(--gold);
-  font-size: var(--fs-xs);
+.planner-doc-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   margin-top: 8px;
+  font-size: var(--fs-xs);
+}
+
+.planner-doc-links a {
+  color: var(--gold);
   text-decoration: none;
 }
 
-.planner-doc-link:hover {
+.planner-doc-links a:hover {
   text-decoration: underline;
+}
+
+.planner-doc-sep {
+  color: var(--border-subtle);
+  user-select: none;
 }
 
 .planner-actions {
