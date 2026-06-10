@@ -1079,10 +1079,6 @@ function expandState(state, context) {
           const toppedUp = tryApplyTopUp(candidate, context)
           if (candidate.rechargeDayIndex < (Number(context.settings.maxRechargeDays) || 3)) {
             next.push(resetToNextRechargeDay(toppedUp))
-          } else if (toppedUp !== candidate && candidate.sameDayBatchCount === 0) {
-            // 最后一天且是日首批发（sameDayBatchCount===0 表示刚跨日）：
-            // 不再生成下一天分支，但补包结果作为同日延续保留。
-            next.push(continueSameRechargeDay(toppedUp))
           }
         }
       }
@@ -1111,8 +1107,9 @@ function collectTopValuePlans(context, topK = 1) {
     states = pruneStates(expanded, context)
   }
 
-  const complete = states.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
-  const rankedSource = complete.length ? complete : states
+  const finalStates = states.map(state => tryApplyTopUp(state, context))
+  const complete = finalStates.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
+  const rankedSource = complete.length ? complete : finalStates
   const ranked = []
   for (const state of rankedSource.sort(comparePlan)) {
     if (!ranked.some(existing => stateSignature(existing) === stateSignature(state))) ranked.push(state)
