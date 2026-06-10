@@ -15,9 +15,9 @@ const MASTER_DIR = process.argv[2] || path.resolve(PROJECT_ROOT, 'data/Master');
 console.log(`Reading Master data from: ${MASTER_DIR}`);
 
 // Output paths
-const CHARACTERS_OUT = path.resolve(PROJECT_ROOT, 'src/constants/characters.json');
-const MYSTERIUM_OUT = path.resolve(PROJECT_ROOT, 'src/constants/mysterium_data.json');
-const LOCALES_OUT = path.resolve(PROJECT_ROOT, 'src/locales/master_dict.json');
+const CHARACTERS_OUT = path.resolve(PROJECT_ROOT, 'public/data/characters.json');
+const MYSTERIUM_OUT = path.resolve(PROJECT_ROOT, 'public/data/mysterium_data.json');
+const LOCALES_OUT_DIR = path.resolve(PROJECT_ROOT, 'public/data/');
 
 const loadJson = (filename) => {
   const filepath = path.join(MASTER_DIR, filename);
@@ -278,7 +278,7 @@ const ensureDir = (filepath) => {
 
 ensureDir(CHARACTERS_OUT);
 ensureDir(MYSTERIUM_OUT);
-ensureDir(LOCALES_OUT);
+ensureDir(path.resolve(LOCALES_OUT_DIR, 'dummy.txt'));
 
 fs.writeFileSync(CHARACTERS_OUT, JSON.stringify(outCharacters, null, 2), 'utf8');
 console.log(`Wrote characters -> ${CHARACTERS_OUT}`);
@@ -286,5 +286,11 @@ console.log(`Wrote characters -> ${CHARACTERS_OUT}`);
 fs.writeFileSync(MYSTERIUM_OUT, JSON.stringify(outCollections, null, 2), 'utf8');
 console.log(`Wrote mysteriums -> ${MYSTERIUM_OUT}`);
 
-fs.writeFileSync(LOCALES_OUT, JSON.stringify(masterDict, null, 2), 'utf8');
-console.log(`Wrote dictionary -> ${LOCALES_OUT}`);
+// Write separate master_dict for each language
+for (const lang of Object.keys(langFiles)) {
+  if (masterDict[lang]) {
+    const langOutPath = path.resolve(LOCALES_OUT_DIR, `master_dict_${lang}.json`);
+    fs.writeFileSync(langOutPath, JSON.stringify(masterDict[lang], null, 2), 'utf8');
+    console.log(`Wrote dictionary -> ${langOutPath}`);
+  }
+}

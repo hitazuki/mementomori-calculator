@@ -32,5 +32,6 @@ data/
 asset_downloader/
 
 # Generated Data
-src/constants/allPacks.json
-src/constants/ultraSalePacks.json
+public/data/allPacks.json
+public/data/ultraSalePacks.json
+public/data/master_dict_*.json

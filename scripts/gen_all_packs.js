@@ -77,7 +77,7 @@ for (const [key, packs] of Object.entries(ultraSaleRawDict)) {
 }
 
 // Output the flattened ultraSalePacks.json for backward compatibility with old views
-const ultraSaleOutPath = path.join(root, 'src', 'constants', 'ultraSalePacks.json')
+const ultraSaleOutPath = path.join(root, 'public', 'data', 'ultraSalePacks.json')
 fs.writeFileSync(ultraSaleOutPath, JSON.stringify(ultraSaleRaw, null, 0))
 console.log(`Generated ultraSalePacks.json (flattened) with ${ultraSaleRaw.length} elements.`)
 
@@ -221,7 +221,7 @@ for (const group of dedupMap.values()) {
   })
 }
 
-const outPath = path.join(root, 'src', 'constants', 'allPacks.json')
+const outPath = path.join(root, 'public', 'data', 'allPacks.json')
 fs.writeFileSync(outPath, JSON.stringify(finalPacks, null, 2))
 console.log(`Generated allPacks.json with ${finalPacks.length} totally unique packs (i18n supported).`)
 

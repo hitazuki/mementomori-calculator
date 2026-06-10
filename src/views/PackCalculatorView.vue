@@ -561,7 +561,11 @@ function setActivePackTab(tab) {
 }
 
 onMounted(async () => {
-  packsRaw.value = (await import('../constants/ultraSalePacks.json')).default
+  try {
+    packsRaw.value = await fetch(`${import.meta.env.BASE_URL}data/ultraSalePacks.json`).then(r => r.json())
+  } catch (e) {
+    console.error('Failed to fetch ultraSalePacks.json', e)
+  }
   permanentPacksRaw.value = (await import('../constants/permanentPacks.json')).default
 })
 

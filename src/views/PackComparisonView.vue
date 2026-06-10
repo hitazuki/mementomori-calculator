@@ -237,7 +237,11 @@ import { useI18n } from 'vue-i18n'
 
 const packsRaw = ref([])
 onMounted(async () => {
-  packsRaw.value = (await import('../constants/allPacks.json')).default
+  try {
+    packsRaw.value = await fetch(`${import.meta.env.BASE_URL}data/allPacks.json`).then(r => r.json())
+  } catch (e) {
+    console.error('Failed to fetch allPacks.json', e)
+  }
 })
 import { calculatePackCE, normalizeScores, getItemInfo, getBaseItemKey } from '../engine/packCalc.js'
 import { editableScores } from '../store/itemScores.js'

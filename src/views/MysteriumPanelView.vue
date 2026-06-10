@@ -272,8 +272,16 @@ const charactersRaw = ref({})
 const mysteriumRaw = ref({})
 
 onMounted(async () => {
-  charactersRaw.value = (await import('../constants/characters.json')).default
-  mysteriumRaw.value = (await import('../constants/mysterium_data.json')).default
+  try {
+    const [chars, myst] = await Promise.all([
+      fetch(`${import.meta.env.BASE_URL}data/characters.json`).then(r => r.json()),
+      fetch(`${import.meta.env.BASE_URL}data/mysterium_data.json`).then(r => r.json())
+    ])
+    charactersRaw.value = chars
+    mysteriumRaw.value = myst
+  } catch (e) {
+    console.error('Failed to fetch mysterium data', e)
+  }
 })
 
 const { t } = useI18n()
