@@ -981,8 +981,8 @@ function pruneStates(states, context) {
   const all = [...map.values()].flat().sort(comparePlan)
   const limit = Math.max(50, Number(context.settings.maxStatesPerTier) || Number(context.settings.maxStates) || DEFAULT_MAX_STATES)
 
-  // 1. 恒定 10,000 日元分桶
-  const bucketSize = 10000
+  // 1. 最小价格单位分桶 (160日元)
+  const bucketSize = 160
   const bySpent = new Map()
   for (const state of all) {
     const bucket = Math.floor(state.limitedSpentYen / bucketSize)
@@ -1089,7 +1089,7 @@ function expandState(state, context) {
 function collectTopValuePlans(context, topK = 1) {
   let states = [createEmptyState(context)]
   const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
-  const maxIterations = Math.max(1, totalGroups)
+  const maxIterations = Math.max(1, totalGroups * (context.priceTiers.length + 2))
 
   for (let i = 0; i < maxIterations; i++) {
     if (states.every(state => allSourcesExhausted(context.sources, state.sourceCursors))) break
@@ -1222,8 +1222,9 @@ function makePolicyAction(policy, batch, state, context) {
 function simulatePolicyPlan(context, policy) {
   let state = createEmptyState(context)
   const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
+  const maxIterations = Math.max(1, totalGroups * (context.priceTiers.length + 2))
 
-  for (let i = 0; i < totalGroups; i++) {
+  for (let i = 0; i < maxIterations; i++) {
     if (allSourcesExhausted(context.sources, state.sourceCursors)) break
     const batch = makePolicyBatch(context, state, policy)
     if (!batch) break
