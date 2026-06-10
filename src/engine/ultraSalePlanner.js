@@ -887,16 +887,7 @@ function tryApplyTopUp(state, context) {
   if (!context.permanentPacks?.length) return state
 
   const currentDayIndex = state.rechargeDayIndex
-  let targetStepIndex = -1
-  for (let i = state.steps.length - 1; i >= 0; i--) {
-    const step = state.steps[i]
-    if (step.rechargeDayIndex !== currentDayIndex) break
-    if (step.bought) {
-      targetStepIndex = i
-      break
-    }
-  }
-
+  const targetStepIndex = state.steps.length - 1
   if (targetStepIndex === -1) return state
   const targetStep = state.steps[targetStepIndex]
   if (targetStep.topUpCost && targetStep.topUpCost > 0) return state
@@ -988,7 +979,52 @@ function pruneStates(states, context) {
 
   const all = [...map.values()].flat().sort(comparePlan)
   const limit = Math.max(50, Number(context.settings.maxStatesPerTier) || Number(context.settings.maxStates) || DEFAULT_MAX_STATES)
-  return all.slice(0, limit)
+
+  // 1. 恒定 10,000 日元分桶
+  const bucketSize = 10000
+  const bySpent = new Map()
+  for (const state of all) {
+    const bucket = Math.floor(state.limitedSpentYen / bucketSize)
+    if (!bySpent.has(bucket)) bySpent.set(bucket, [])
+    bySpent.get(bucket).push(state)
+  }
+
+  const sortedBuckets = Array.from(bySpent.values()) // bucket内部已经是按 comparePlan 排序的，因为 all 是排序好的
+
+  const survivors = []
+  const survivorSignatures = new Set()
+
+  // 2. 保底轮询阶段 (Quota Phase)
+  // 确保每个消费阶层至少获得部分存活名额，保护隐忍分支。分配约 40% 的上限名额用于保底。
+  const QUOTA = Math.max(2, Math.floor((limit * 0.4) / sortedBuckets.length))
+  
+  let pass = 0
+  while (pass < QUOTA && survivors.length < limit) {
+    for (const bucket of sortedBuckets) {
+      if (pass < bucket.length && survivors.length < limit) {
+        const state = bucket[pass]
+        const sig = stateSignature(state)
+        if (!survivorSignatures.has(sig)) {
+          survivors.push(state)
+          survivorSignatures.add(sig)
+        }
+      }
+    }
+    pass++
+  }
+
+  // 3. 全局竞争阶段 (Global Phase)
+  // 剩余名额按全局最优排序填补，确保高分主流梯队能展开足够多的 cursor 变种组合
+  for (const state of all) {
+    if (survivors.length >= limit) break
+    const sig = stateSignature(state)
+    if (!survivorSignatures.has(sig)) {
+      survivors.push(state)
+      survivorSignatures.add(sig)
+    }
+  }
+
+  return survivors.sort(comparePlan)
 }
 
 function expandState(state, context) {
