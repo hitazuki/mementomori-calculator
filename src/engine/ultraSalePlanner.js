@@ -872,9 +872,22 @@ function resetToNextRechargeDay(state) {
  * if gap <= dailyPaidDiamonds × threshold: 补包；否则不补。
  */
 function tryApplyTopUp(state, context) {
-  const lastStep = state.steps.at(-1)
-  if (!lastStep?.bought || (lastStep.topUpCost && lastStep.topUpCost > 0)) return state
   if (!context.permanentPacks?.length) return state
+
+  const currentDayIndex = state.rechargeDayIndex
+  let targetStepIndex = -1
+  for (let i = state.steps.length - 1; i >= 0; i--) {
+    const step = state.steps[i]
+    if (step.rechargeDayIndex !== currentDayIndex) break
+    if (step.bought) {
+      targetStepIndex = i
+      break
+    }
+  }
+
+  if (targetStepIndex === -1) return state
+  const targetStep = state.steps[targetStepIndex]
+  if (targetStep.topUpCost && targetStep.topUpCost > 0) return state
 
   const nextTier = nextRechargeTier(state.dailyPaidDiamonds)
   if (!nextTier) return state
@@ -888,8 +901,8 @@ function tryApplyTopUp(state, context) {
 
   const topUpPacks = groupTopUpPacks(topUp.purchases)
   const steps = [...state.steps]
-  const last = steps[steps.length - 1]
-  steps[steps.length - 1] = {
+  const last = steps[targetStepIndex]
+  steps[targetStepIndex] = {
     ...last,
     cost: last.cost + topUp.cost,
     topUpCost: topUp.cost,
@@ -1065,8 +1078,21 @@ function makePolicyBatch(context, state, policy) {
 
   if (policy === 'smallPack') {
     return candidates.sort((a, b) => {
-      if (a.pressure !== b.pressure) return a.pressure - b.pressure
-      return a.opportunities.length - b.opportunities.length
+      const willBuyA = state.tierIndex === 0 && a.opportunities.some(op => op.packsByPrice.has(context.priceTiers[0]))
+      const willBuyB = state.tierIndex === 0 && b.opportunities.some(op => op.packsByPrice.has(context.priceTiers[0]))
+      
+      if (willBuyA !== willBuyB) return willBuyA ? -1 : 1
+      
+      if (willBuyA) {
+        const aOffers = a.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[0])).length
+        const bOffers = b.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[0])).length
+        if (aOffers !== bOffers) return bOffers - aOffers
+        if (a.pressure !== b.pressure) return a.pressure - b.pressure
+        return b.opportunities.length - a.opportunities.length
+      } else {
+        if (a.pressure !== b.pressure) return a.pressure - b.pressure
+        return a.opportunities.length - b.opportunities.length
+      }
     })[0]
   }
 
@@ -1094,18 +1120,23 @@ function makePolicyAction(policy, batch, state, context) {
 
   if (policy === 'smallPack') {
     if (state.tierIndex !== 0) return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
-    const best = offers[0]
-    if (state.limitedSpentYen + best.price > context.mainBudget) {
-      return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+    
+    let cost = 0
+    let originalValue = 0
+    let paidDiamonds = 0
+    const purchases = []
+    
+    for (const pack of offers) {
+      if (state.limitedSpentYen + cost + pack.price > context.mainBudget) break
+      cost += pack.price
+      originalValue += getPackOriginalValue(pack)
+      paidDiamonds += getPackPaidDiamonds(pack)
+      purchases.push(pack)
     }
-    return {
-      bought: true,
-      limitedCostYen: best.price,
-      cost: best.price,
-      originalValue: getPackOriginalValue(best),
-      paidDiamonds: getPackPaidDiamonds(best),
-      purchases: [best],
-    }
+
+    return purchases.length
+      ? { bought: true, limitedCostYen: cost, cost, originalValue, paidDiamonds, purchases }
+      : { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
   }
 
   if (policy === 'maxPack') {
