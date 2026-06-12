@@ -1270,7 +1270,9 @@ async function simulatePolicyPlan(context, policy) {
 
 function buildPlanningContext(packs, settings) {
   const priceTiers = getPriceTiers(packs)
-  const mainBudget = Math.max(0, Math.floor(Number(settings.budget) || 0))
+  const mainBudget = settings.budget !== undefined && settings.budget !== null && settings.budget !== '' 
+    ? Math.max(0, Math.floor(Number(settings.budget))) 
+    : Infinity
   const currentPrice = Number(settings.currentPrice) || priceTiers[0]
   const tierIndex = priceTiers.indexOf(currentPrice)
   const startTierIndex = clamp(tierIndex === -1 ? 0 : tierIndex, 0, priceTiers.length - 1)
