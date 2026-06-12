@@ -1,4 +1,16 @@
 export default {
+  planTopUpMode: "补累充模式",
+  planTopUpAuto: "自动价值判断",
+  planTopUpOff: "关闭",
+  planPlaceholderQuest: "如：31-4",
+  planSumRecommendation: "推荐结论",
+  planSumExpectedRatio: "预期性价比",
+  planSumActualCE: "路径实际性价比",
+  planSumSurplus: "金钱净收益",
+  planSumDecision: "决策价值",
+  planSumTriggerCount: "已触发机会数",
+  planSumRetained: "保留机会数",
+  planSumResets: "跨日重置次数",
   // Common
   appTitle: "MementoMori 各种计算器",
   appDesc:

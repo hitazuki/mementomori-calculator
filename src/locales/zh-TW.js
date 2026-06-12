@@ -1,4 +1,16 @@
 export default {
+  planTopUpMode: "補儲值模式",
+  planTopUpAuto: "自動價值判斷",
+  planTopUpOff: "關閉",
+  planPlaceholderQuest: "如：31-4",
+  planSumRecommendation: "推薦結論",
+  planSumExpectedRatio: "預期性價比",
+  planSumActualCE: "路徑實際性價比",
+  planSumSurplus: "金錢淨收益",
+  planSumDecision: "決策價值",
+  planSumTriggerCount: "已觸發機會數",
+  planSumRetained: "保留機會數",
+  planSumResets: "跨日重置次數",
   // Common
   appTitle: "MementoMori 各種計算機",
   appDesc:

@@ -19,7 +19,8 @@ const i18n = createI18n({
   legacy: false, // use Composition API
   locale: currentLang,
   fallbackLocale: 'zh-CN',
-  messages: baseMessages
+  messages: baseMessages,
+  warnHtmlMessage: false
 });
 
 export async function initI18n() {

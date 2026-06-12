@@ -1,4 +1,16 @@
 export default {
+  planTopUpMode: "追加課金モード",
+  planTopUpAuto: "自動価値判定",
+  planTopUpOff: "オフ",
+  planPlaceholderQuest: "例: 31-4",
+  planSumRecommendation: "推奨結論",
+  planSumExpectedRatio: "期待コスパ",
+  planSumActualCE: "実質コスパ",
+  planSumSurplus: "純利益(円)",
+  planSumDecision: "判断価値",
+  planSumTriggerCount: "発生機会数",
+  planSumRetained: "保留機会数",
+  planSumResets: "日替わりリセット",
   // Common
   appTitle: "メメントモリ 各種計算機",
   appDesc:

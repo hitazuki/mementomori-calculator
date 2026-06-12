@@ -1,4 +1,16 @@
 export default {
+  planTopUpMode: "추가 과금 모드",
+  planTopUpAuto: "자동 가치 판단",
+  planTopUpOff: "끄기",
+  planPlaceholderQuest: "예: 31-4",
+  planSumRecommendation: "추천 결론",
+  planSumExpectedRatio: "예상 가성비",
+  planSumActualCE: "실제 가성비",
+  planSumSurplus: "순수익(엔)",
+  planSumDecision: "결정 가치",
+  planSumTriggerCount: "발생 기회 수",
+  planSumRetained: "보류 기회 수",
+  planSumResets: "일일 초기화 횟수",
   // Common
   appTitle: "메멘토모리 각종 계산기",
   appDesc:

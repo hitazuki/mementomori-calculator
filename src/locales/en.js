@@ -1,4 +1,16 @@
 export default {
+  planTopUpMode: "Top Up Mode",
+  planTopUpAuto: "Auto Evaluate",
+  planTopUpOff: "Off",
+  planPlaceholderQuest: "e.g. 31-4",
+  planSumRecommendation: "Recommendation",
+  planSumExpectedRatio: "Expected CE",
+  planSumActualCE: "Actual Path CE",
+  planSumSurplus: "Net Cash Value",
+  planSumDecision: "Decision Value",
+  planSumTriggerCount: "Triggered Count",
+  planSumRetained: "Retained Count",
+  planSumResets: "Daily Resets",
   // Common
   appTitle: "MementoMori Calculators",
   appDesc:
