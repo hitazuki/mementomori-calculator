@@ -760,7 +760,7 @@ async function calculatePlanner() {
     const startedAt = performance.now()
     const calculatedPacks = calculatePackCE(packsRaw.value, normalizedScores.value)
     const calculatedPermanentPacks = calculatePackCE(permanentPacksRaw.value, normalizedScores.value)
-    const options = buildUltraSalePlanOptions(calculatedPacks, {
+    const options = await buildUltraSalePlanOptions(calculatedPacks, {
       ...planningSettings.value,
       permanentPacks: calculatedPermanentPacks,
       diamondScore: scoreOf('[2,1]', 1),

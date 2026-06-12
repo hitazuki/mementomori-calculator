@@ -1090,13 +1090,12 @@ function expandState(state, context) {
   return next.sort(comparePlan).slice(0, 50)
 }
 
-async function collectTopValuePlans(context, topK = 1) {
+function collectTopValuePlans(context, topK = 1) {
   let states = [createEmptyState(context)]
   const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
   const maxIterations = Math.max(1, totalGroups * (context.priceTiers.length + 2))
 
-  for (let i = 0; i < maxIterations; i++) {
-    if (i % 5 === 0) await new Promise(resolve => setTimeout(resolve, 0))
+  for (let i = 0; i < maxIterations; i++) { console.log(`Iteration ${i}, states: ${states.length}`);
     if (states.every(state => allSourcesExhausted(context.sources, state.sourceCursors))) break
     const expanded = []
     for (const state of states) {
@@ -1224,13 +1223,12 @@ function makePolicyAction(policy, batch, state, context) {
   return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
 }
 
-async function simulatePolicyPlan(context, policy) {
+function simulatePolicyPlan(context, policy) {
   let state = createEmptyState(context)
   const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
   const maxIterations = Math.max(1, totalGroups * (context.priceTiers.length + 2))
 
   for (let i = 0; i < maxIterations; i++) {
-    if (i % 5 === 0) await new Promise(resolve => setTimeout(resolve, 0))
     if (allSourcesExhausted(context.sources, state.sourceCursors)) break
     const batch = makePolicyBatch(context, state, policy)
     if (!batch) break
@@ -1361,11 +1359,11 @@ export function planUltraSalePurchases(packs, settings = {}) {
   return createResult(state, context)
 }
 
-export async function buildUltraSalePlanOptions(packs, settings = {}) {
+export function buildUltraSalePlanOptions(packs, settings = {}) {
   const context = buildPlanningContext(packs, settings)
-  const [bestState] = await collectTopValuePlans(context, 1)
-  const smallPackState = await simulatePolicyPlan(context, 'smallPack')
-  const maxPackState = await simulatePolicyPlan(context, 'maxPack')
+  const [bestState] = collectTopValuePlans(context, 1)
+  const smallPackState = simulatePolicyPlan(context, 'smallPack')
+  const maxPackState = simulatePolicyPlan(context, 'maxPack')
 
   return [
     createResult(bestState, context, {
@@ -1511,3 +1509,28 @@ export const __testables = {
   createEmptyState,
   expandState,
 }
+
+import fs from 'fs';
+import { calculatePackCE } from './packCalc.js';
+const packsRaw = JSON.parse(fs.readFileSync('public/data/ultraSalePacks.json', 'utf8'));
+const permanentPacksRaw = JSON.parse(fs.readFileSync('src/constants/permanentPacks.json', 'utf8'));
+const itemScores = JSON.parse(fs.readFileSync('src/constants/itemScores.json', 'utf8'));
+const calculatedPacks = calculatePackCE(packsRaw, itemScores);
+const calculatedPermanentPacks = calculatePackCE(permanentPacksRaw, itemScores);
+console.log('Starting...');
+buildUltraSalePlanOptions(calculatedPacks, {
+  lanes: [
+    { id: 'quest', cat: 'quest', enabled: true, startProgress: '45-09', endProgress: '48-01', batchSize: 6 },
+    { id: 'rank', cat: 'rank', enabled: true, startProgress: 630, endProgress: 660, batchSize: 1 },
+    { id: 'tower_infinite', cat: 'tower', tower: 'origin_tower_infinite', enabled: true, startProgress: 2444, endProgress: 2555, batchSize: 6 },
+    { id: 'tower_blue', cat: 'tower', tower: 'origin_tower_blue', enabled: true, startProgress: 1000, endProgress: 1100, batchSize: 1 },
+    { id: 'tower_red', cat: 'tower', tower: 'origin_tower_red', enabled: true, startProgress: 1099, endProgress: 1100, batchSize: 1 },
+    { id: 'tower_green', cat: 'tower', tower: 'origin_tower_green', enabled: true, startProgress: 1500, endProgress: 1800, batchSize: 1 },
+    { id: 'tower_yellow', cat: 'tower', tower: 'origin_tower_yellow', enabled: true, startProgress: 1500, endProgress: 1800, batchSize: 1 }
+  ],
+  budget: 1000000000,
+  permanentPacks: calculatedPermanentPacks,
+  diamondScore: 1,
+  freeDiamondScore: 1,
+  maxStatesPerTier: 350,
+});
