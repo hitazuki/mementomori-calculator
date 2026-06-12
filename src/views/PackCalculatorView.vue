@@ -443,6 +443,9 @@
         </div>
 
         <div v-else-if="planOptions.length" class="planner-empty">{{ $t('planEmptyRange') }}</div>
+        <div v-if="plannerError" class="planner-error" style="color: #ff5555; padding: 20px; white-space: pre-wrap; font-family: monospace; background: rgba(255,0,0,0.1); border-radius: 8px; margin-top: 20px; font-size: 12px">
+          {{ plannerError }}
+        </div>
         <div v-else class="planner-empty">{{ $t('planEmptyInit') }}</div>
       </div>
 
@@ -652,6 +655,7 @@ const planSettings = reactive({
 const activePlanId = ref('bestValue')
 const planOptions = shallowRef([])
 const isPlanning = ref(false)
+const plannerError = ref(null)
 const plannerDirty = ref(true)
 const plannerStatusCalcTime = ref(null)
 
@@ -756,6 +760,7 @@ async function calculatePlanner() {
   isPlanning.value = true
   await new Promise(resolve => setTimeout(resolve, 0))
 
+  plannerError.value = null
   try {
     const startedAt = performance.now()
     const calculatedPacks = calculatePackCE(packsRaw.value, normalizedScores.value)
@@ -773,6 +778,9 @@ async function calculatePlanner() {
     }
     plannerStatusCalcTime.value = Math.max(1, Math.round(performance.now() - startedAt))
     plannerDirty.value = false
+  } catch (e) {
+    plannerError.value = String(e.stack || e)
+    console.error('Planner Error:', e)
   } finally {
     isPlanning.value = false
   }
