@@ -16,6 +16,7 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
+.codex/
 .claude/
 .DS_Store
 *.suo
@@ -23,6 +24,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local scratch / profiling artifacts
+*.cpuprofile
+recover.txt
+git_log.txt
+test_perf.mjs
+src/engine/temp_runner.mjs
 
 
 doc/mysterium/
