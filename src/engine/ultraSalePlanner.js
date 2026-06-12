@@ -377,11 +377,19 @@ function blockedTowerSourcesForAllAttributeGroup(source, group, state, sources) 
   const layer = group.sortValue
   const intervals = source.allAttributeTowerSourceIndices
     .map(sourceIndex => attributeTowerGateInterval(sourceIndex, state, sources))
-    .filter(interval => interval
-      && layer > interval.previous
-      && layer <= interval.next)
+    .filter(Boolean)
+    
   if (intervals.length !== source.allAttributeTowerSourceIndices.length) return []
+  
   const slowestPrevious = Math.min(...intervals.map(interval => interval.previous))
+  
+  // Only block if the allTower pack is actually being unlocked by this slowest tower NOW
+  // meaning the slowest tower's current interval "contains" the layer.
+  const slowestInterval = intervals.find(i => i.previous === slowestPrevious)
+  if (!(layer > slowestInterval.previous && layer <= slowestInterval.next)) {
+    return []
+  }
+  
   return intervals
     .filter(interval => interval.previous === slowestPrevious)
     .map(interval => interval.sourceIndex)
@@ -768,6 +776,7 @@ function summarizeAction(action, stepIndex, batch, tierPrice, nextTierPrice, rec
     rechargeAfterPaid: recharge?.afterPaid || 0,
     unlockedRechargeTiers: recharge?.unlockedTiers || [],
     pressure: meta.pressure || 0,
+    moneySurplus: meta.moneySurplus || 0,
     waitType: action.bought ? 'buy' : 'timeout',
     purchases: action.purchases.map(pack => ({
       trigger: pack.trigger,
@@ -804,46 +813,97 @@ function appendStepSignature(state, step) {
   return current ? `${current}|${next}` : next
 }
 
-function getDailyInefficiencyPenalty(paid) {
-  if (!paid) return 0
-  const idealBonus = paid * 1.2
-  const actualBonus = cumulativeFreeDiamonds(paid)
-  const deficit = Math.max(0, idealBonus - actualBonus)
-  return deficit * 1.5
+function getHeuristicRechargePotential(paid, context) {
+  if (paid >= context.envelope.length) return 0
+  const sx = cumulativeFreeDiamonds(paid) * context.freeDiamondScore
+  return Math.max(0, context.envelope[paid] - sx)
 }
 
-function comparePlan(a, b) {
-  const penaltyA = (a.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(a.dailyPaidDiamonds)
-  const penaltyB = (b.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(b.dailyPaidDiamonds)
-  const scoreA = a.value - penaltyA
-  const scoreB = b.value - penaltyB
-  if (scoreA !== scoreB) return scoreB - scoreA
-  if ((a.pressure || 0) !== (b.pressure || 0)) return (a.pressure || 0) - (b.pressure || 0)
-  if ((a.triggerCount || 0) !== (b.triggerCount || 0)) return (a.triggerCount || 0) - (b.triggerCount || 0)
-  return a.limitedSpentYen - b.limitedSpentYen
+function getGapBand(gap) {
+  if (gap <= 0) return 0
+  if (gap <= 80) return 1
+  if (gap <= 325) return 2
+  if (gap <= 500) return 3
+  if (gap <= 750) return 4
+  if (gap <= 1500) return 5
+  if (gap <= 3000) return 6
+  if (gap <= 5900) return 7
+  return 8
+}
+
+function getRewardTierIndex(paid) {
+  let index = -1
+  for (let i = 0; i < DAILY_RECHARGE_BONUS_TIERS.length; i++) {
+    if (paid >= DAILY_RECHARGE_BONUS_TIERS[i].paid) index = i
+    else break
+  }
+  return index
+}
+
+function getRechargeBucket(paid, context) {
+  const nextTier = nextRechargeTier(paid)
+  const rewardTierIndex = getRewardTierIndex(paid)
+  const gap = nextTier ? nextTier.paid - paid : 0
+  const nextGapBand = getGapBand(gap)
+  const potentialBand = Math.floor(getHeuristicRechargePotential(paid, context) / 500)
+  return `${rewardTierIndex}|${nextGapBand}|${potentialBand}`
 }
 
 function makeStateKey(state, context) {
-  const dailyBucket = DAILY_RECHARGE_BONUS_TIERS.findIndex(tier => state.dailyPaidDiamonds < tier.paid)
-  const spentBucket = Math.floor(state.limitedSpentYen / 160)
   return [
     state.tierIndex,
     sourceCursorsKey(state.sourceCursors),
     attributeTowerSetKey(state.currentDayAttributeTowers),
-    spentBucket,
-    dailyBucket,
+    getRechargeBucket(state.dailyPaidDiamonds, context),
   ].join('|')
 }
 
+function comparePlan(a, b) {
+  if (a.realScore !== b.realScore) return b.realScore - a.realScore
+  if (a.realScore !== b.realScore) return b.realScore - a.realScore
+  if (a.pressure !== b.pressure) return a.pressure - b.pressure
+  return a.limitedSpentYen - b.limitedSpentYen
+}
+
+function estimateRemainingStateValue(state, context) {
+  let remainingValue = 0
+  for (let sourceIndex = 0; sourceIndex < context.sources.length; sourceIndex++) {
+    const source = context.sources[sourceIndex]
+    const cursor = state.sourceCursors[sourceIndex] || 0
+    // Give slightly higher weight to rarer opportunities
+    const weight = (source.cat === 'rank' || source.cat === 'tower') && source.tower !== 'origin_tower_infinite' ? 1.2 : 1.0
+    for (let i = cursor; i < source.groups.length; i++) {
+      for (const opportunity of source.groups[i].opportunities) {
+        let bestSurplus = 0
+        const baseExecCost = (source.batchSize || 1) * 0.1 * context.executionWeight
+        for (const pack of opportunity.packsByPrice.values()) {
+          const surplus = getPackOriginalValue(pack) - (pack.price / 2) * context.expectedRatio - baseExecCost
+          if (surplus > bestSurplus) bestSurplus = surplus
+        }
+        remainingValue += bestSurplus * weight
+      }
+    }
+  }
+  return remainingValue
+}
+
 function createEmptyState(context) {
+  const heuristicRechargePotential = getHeuristicRechargePotential(0, context)
   return {
     tierIndex: context.startTierIndex,
     sourceCursors: context.sources.map(() => 0),
     limitedSpentYen: 0,
-    value: 0,
+    totalSpentYen: 0,
+    topUpCostYen: 0,
+    value: 0, 
+    moneySurplus: 0,
+    realScore: 0,
+    searchPriority: 0,
     purchases: 0,
     triggerCount: 0,
     pressure: 0,
+    executionCost: 0,
+    executionCostComponents: {},
     rechargeDayIndex: 0,
     dailyPaidDiamonds: 0,
     currentDayAttributeTowers: [],
@@ -866,170 +926,179 @@ function continueSameRechargeDay(state) {
   }
 }
 
-function resetToNextRechargeDay(state) {
-  return {
+function resetToNextRechargeDay(state, context) {
+  const nextState = {
     ...state,
-    historicalWastePenalty: (state.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(state.dailyPaidDiamonds),
     rechargeDayIndex: state.rechargeDayIndex + 1,
     dailyPaidDiamonds: 0,
     currentDayAttributeTowers: [],
     sameDayBatchCount: 0,
-    tierIndex: 0,
-    pressure: (state.pressure || 0) + 1,
     signature: `${state.signature}|day:${state.rechargeDayIndex + 1}`,
   }
+  const remainingStateHeuristic = estimateRemainingStateValue(nextState, context)
+  nextState.searchPriority = nextState.realScore + remainingStateHeuristic * context.preferenceDiscount
+  return nextState
 }
 
-/**
- * 跨日重置前按阈值判定并应用补包（确定性，无分叉）。
- * gap = nextTier.paid - dailyPaidDiamonds
- * if gap <= dailyPaidDiamonds × threshold: 补包；否则不补。
- */
-function tryApplyTopUp(state, context) {
-  if (!context.permanentPacks?.length) return state
+function dayCloseTransitions(state, context) {
+  const options = []
+  
+  // Option A: 不补，直接跨日
+  options.push(resetToNextRechargeDay(state, context))
+  
+  // Option B: 补包后跨日
+  if (context.permanentPacks?.length && state.steps.length > 0) {
+    const targetStepIndex = state.steps.length - 1
+    const targetStep = state.steps[targetStepIndex]
+    
+    if (targetStep.rechargeDayIndex === state.rechargeDayIndex && (!targetStep.topUpCost || targetStep.topUpCost <= 0)) {
+      const nextTier = nextRechargeTier(state.dailyPaidDiamonds)
+      if (nextTier && context.settings.topUpMode !== 'off') {
+        const topUp = findPermanentTopUpOption(state, context)
+      if (topUp) {
+        // 评估是否划算: topUpSurplus >= 0
+        const topUpCost = topUp.cost
+        const expectedCostCE = (topUpCost / 2) * context.expectedRatio
+        const topUpSurplus = topUp.value - expectedCostCE
+        
+        // 确保不会触发上限
+        if (topUpSurplus >= 0) {
+          const topUpPacks = groupTopUpPacks(topUp.purchases)
+          const steps = [...state.steps]
+          const last = steps[targetStepIndex]
+          steps[targetStepIndex] = {
+            ...last,
+            cost: last.cost + topUpCost,
+            topUpCost: topUpCost,
+            value: last.value + topUp.value,
+            originalValue: Math.round((last.originalValue || 0) + topUp.originalValue),
+            rechargeValue: (last.rechargeValue || 0) + topUp.recharge.value,
+            rechargeFreeDiamonds: (last.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+            topUpValue: topUp.value,
+            topUpOriginalValue: Math.round(topUp.originalValue),
+            topUpRechargeValue: topUp.recharge.value,
+            topUpRechargeFreeDiamonds: topUp.recharge.freeDiamonds,
+            topUpRechargeBeforePaid: topUp.recharge.beforePaid,
+            topUpRechargeAfterPaid: topUp.recharge.afterPaid,
+            topUpUnlockedRechargeTiers: topUp.recharge.unlockedTiers,
+            topUpPacks,
+          }
+          
+          const executionCostComponent = 1 * context.executionWeight // manualTopUpCost
+          const newExecutionCostComponents = { ...state.executionCostComponents, topUpCost: state.executionCostComponents.topUpCost + executionCostComponent }
 
-  const currentDayIndex = state.rechargeDayIndex
-  const targetStepIndex = state.steps.length - 1
-  if (targetStepIndex === -1) return state
-  const targetStep = state.steps[targetStepIndex]
-  if (targetStep.rechargeDayIndex !== currentDayIndex) return state
-  if (targetStep.topUpCost && targetStep.topUpCost > 0) return state
-
-  const nextTier = nextRechargeTier(state.dailyPaidDiamonds)
-  if (!nextTier) return state
-
-  const gap = nextTier.paid - state.dailyPaidDiamonds
-  const threshold = ((context.settings.topUpThreshold ?? 10) / 100)
-  if (gap > state.dailyPaidDiamonds * threshold) return state
-
-  const topUp = findPermanentTopUpOption(state, context)
-  if (!topUp) return state
-
-  const topUpPacks = groupTopUpPacks(topUp.purchases)
-  const steps = [...state.steps]
-  const last = steps[targetStepIndex]
-  steps[targetStepIndex] = {
-    ...last,
-    cost: last.cost + topUp.cost,
-    topUpCost: topUp.cost,
-    value: last.value + topUp.value,
-    originalValue: Math.round((last.originalValue || 0) + topUp.originalValue),
-    rechargeValue: (last.rechargeValue || 0) + topUp.recharge.value,
-    rechargeFreeDiamonds: (last.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
-    topUpValue: topUp.value,
-    topUpOriginalValue: Math.round(topUp.originalValue),
-    topUpRechargeValue: topUp.recharge.value,
-    topUpRechargeFreeDiamonds: topUp.recharge.freeDiamonds,
-    topUpRechargeBeforePaid: topUp.recharge.beforePaid,
-    topUpRechargeAfterPaid: topUp.recharge.afterPaid,
-    topUpUnlockedRechargeTiers: topUp.recharge.unlockedTiers,
-    topUpPacks,
+          const toppedUpState = {
+            ...state,
+            topUpCostYen: state.topUpCostYen + topUpCost,
+            totalSpentYen: state.totalSpentYen + topUpCost,
+            value: state.value + topUp.value,
+            moneySurplus: state.moneySurplus + topUpSurplus,
+            realScore: state.moneySurplus + topUpSurplus - (state.executionCost + executionCostComponent),
+            executionCost: state.executionCost + executionCostComponent,
+            executionCostComponents: newExecutionCostComponents,
+            rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+            dailyPaidDiamonds: state.dailyPaidDiamonds + topUp.paidDiamonds,
+            steps,
+            signature: `${state.signature}:topUp:${topUpPacks.map(pack => pack.displayTrigger).join(',')}`,
+          }
+          
+          options.push(resetToNextRechargeDay(toppedUpState, context))
+        }
+      }
+      }
+    }
   }
-
-  return {
-    ...state,
-    value: state.value + topUp.value,
-    rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
-    dailyPaidDiamonds: state.dailyPaidDiamonds + topUp.paidDiamonds,
-    steps,
-    signature: `${state.signature}:topUp:${topUpPacks.map(pack => pack.displayTrigger).join(',')}`,
-  }
+  return options
 }
 
 function expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context) {
   if (batchCandidate.requiresRechargeReset || state.dailyPaidDiamonds >= 12000) {
-    const toppedUp = tryApplyTopUp(state, context)
-    return [resetToNextRechargeDay(toppedUp)]
+    const transitions = dayCloseTransitions(state, context)
+    let best = transitions[0]
+    for (let i = 1; i < transitions.length; i++) {
+      if (transitions[i].realScore > best.realScore) {
+        best = transitions[i]
+      }
+    }
+    return [best]
   }
   return [state]
 }
 
-function insertCandidate(map, candidate, context) {
-  const key = makeStateKey(candidate, context)
-  const list = map.get(key) || []
-  const signature = stateSignature(candidate)
-  if (list.some(state => stateSignature(state) === signature)) return
-  list.push(candidate)
-  list.sort(comparePlan)
-  map.set(key, list.slice(0, Math.max(2, Number(context.settings.perBucketStates) || 3)))
-}
-
-function dominates(a, b) {
-  return a.limitedSpentYen <= b.limitedSpentYen
-    && a.value >= b.value
-    && a.tierIndex >= b.tierIndex
+function strictlyDominates(a, b) {
+  return a.totalSpentYen <= b.totalSpentYen
+    && a.realScore >= b.realScore
     && attributeTowerSetSubset(a.currentDayAttributeTowers, b.currentDayAttributeTowers)
     && a.pressure <= b.pressure
     && a.triggerCount <= b.triggerCount
 }
 
+function approximatelyDominates(a, b, tolerance = 0.98) {
+  // 容忍极小程度的非帕累托优劣，只为控制规模，牺牲一定全局最优概率
+  return a.totalSpentYen <= b.totalSpentYen * (2 - tolerance)
+    && a.realScore >= b.realScore * tolerance
+    && a.pressure <= b.pressure + 2
+}
+
 function pruneStates(states, context) {
-  const byCursor = new Map()
+  const byBucketKey = new Map()
   for (const state of states) {
-    const key = `${sourceCursorsKey(state.sourceCursors)}|${state.tierIndex}`
-    if (!byCursor.has(key)) byCursor.set(key, [])
-    byCursor.get(key).push(state)
+    const key = makeStateKey(state, context)
+    if (!byBucketKey.has(key)) byBucketKey.set(key, [])
+    byBucketKey.get(key).push(state)
   }
 
-  const map = new Map()
-  for (const group of byCursor.values()) {
+  const allSurvivors = []
+  const userMax = Math.max(50, Number(context.settings.maxStatesPerTier) || Number(context.settings.maxStates) || DEFAULT_MAX_STATES)
+  const bucketMax = Math.max(2, Number(context.settings.perBucketStates) || 5)
+  const tolerance = Number(context.settings.pruneTolerance) || 0.99
+  const minBucketSurvivors = Number(context.settings.minBucketSurvivors) || 2
+
+  for (const group of byBucketKey.values()) {
     const survivors = []
+    // 同一 bucketKey 内部拥有极其相似的后续转移环境 (包括 rechargeBucket)
     for (const state of group.sort(comparePlan)) {
-      if (survivors.some(existing => dominates(existing, state))) continue
+      if (survivors.some(existing => strictlyDominates(existing, state))) continue
+      // Approximate preference pruning (Layer 2)
+      if (survivors.some(existing => approximatelyDominates(existing, state, tolerance))) continue
+      
       survivors.push(state)
-      if (survivors.length >= Math.max(20, Number(context.settings.maxStatesPerCursor) || 80)) break
+      if (survivors.length >= bucketMax) break
     }
-    for (const state of survivors) insertCandidate(map, state, context)
+    allSurvivors.push(...survivors)
   }
 
-  const all = [...map.values()].flat().sort(comparePlan)
-  const limit = Math.max(50, Number(context.settings.maxStatesPerTier) || Number(context.settings.maxStates) || DEFAULT_MAX_STATES)
+  // Layer 3: Global Beam with Bucket Quota
+  const globalSorted = allSurvivors.sort(comparePlan)
+  const finalSurvivors = []
+  const bucketSurvivorCount = new Map()
+  const takenSignatures = new Set()
 
-  // 1. 最小价格单位分桶 (160日元)
-  const bucketSize = 160
-  const bySpent = new Map()
-  for (const state of all) {
-    const bucket = Math.floor(state.limitedSpentYen / bucketSize)
-    if (!bySpent.has(bucket)) bySpent.set(bucket, [])
-    bySpent.get(bucket).push(state)
-  }
-
-  const sortedBuckets = Array.from(bySpent.values()) // bucket内部已经是按 comparePlan 排序的，因为 all 是排序好的
-
-  const survivors = []
-  const survivorSignatures = new Set()
-
-  // 2. 保底轮询阶段 (Quota Phase)
-  // 确保每个消费阶层至少获得部分存活名额，保护隐忍分支。分配约 40% 的上限名额用于保底。
-  const QUOTA = Math.max(2, Math.floor((limit * 0.4) / sortedBuckets.length))
-  
-  let pass = 0
-  while (pass < QUOTA && survivors.length < limit) {
-    for (const bucket of sortedBuckets) {
-      if (pass < bucket.length && survivors.length < limit) {
-        const state = bucket[pass]
-        const sig = stateSignature(state)
-        if (!survivorSignatures.has(sig)) {
-          survivors.push(state)
-          survivorSignatures.add(sig)
-        }
+  // Phase 1: 保底每个 rechargeBucket
+  for (const state of globalSorted) {
+    const rechargeBucket = getRechargeBucket(state.dailyPaidDiamonds, context)
+    const count = bucketSurvivorCount.get(rechargeBucket) || 0
+    if (count < minBucketSurvivors) {
+      const sig = stateSignature(state)
+      if (!takenSignatures.has(sig)) {
+        finalSurvivors.push(state)
+        takenSignatures.add(sig)
+        bucketSurvivorCount.set(rechargeBucket, count + 1)
       }
     }
-    pass++
   }
 
-  // 3. 全局竞争阶段 (Global Phase)
-  // 剩余名额按全局最优排序填补，确保高分主流梯队能展开足够多的 cursor 变种组合
-  for (const state of all) {
-    if (survivors.length >= limit) break
+  // Phase 2: 全局填充剩余名额
+  for (const state of globalSorted) {
+    if (finalSurvivors.length >= userMax) break
     const sig = stateSignature(state)
-    if (!survivorSignatures.has(sig)) {
-      survivors.push(state)
-      survivorSignatures.add(sig)
+    if (!takenSignatures.has(sig)) {
+      finalSurvivors.push(state)
+      takenSignatures.add(sig)
     }
   }
 
-  return survivors.sort(comparePlan)
+  return finalSurvivors.sort(comparePlan)
 }
 
 function expandState(state, context) {
@@ -1043,14 +1112,20 @@ function expandState(state, context) {
       const actions = actionOptionsForBatch(batchCandidate.opportunities, tierPrice)
 
       for (const action of actions) {
-        if (baseState.limitedSpentYen + action.limitedCostYen > context.mainBudget) continue
+
 
         const sourceCursors = applyCursorDelta(baseState.sourceCursors, batchCandidate.cursorDelta)
         const nextTierIndex = action.bought
           ? clamp(baseState.tierIndex + 1, 0, context.priceTiers.length - 1)
           : clamp(baseState.tierIndex - 1, 0, context.priceTiers.length - 1)
 
+        const actionValue = action.originalValue * context.preferenceDiscount
         const recharge = rechargeValueForPaid(baseState.dailyPaidDiamonds, action.paidDiamonds, context)
+
+        const addedRealValue = action.originalValue + recharge.value
+        const expectedCostCE = (action.limitedCostYen / 2) * context.expectedRatio
+        const addedMoneySurplus = addedRealValue - expectedCostCE
+
         const step = summarizeAction(
           action,
           baseState.steps.length,
@@ -1058,8 +1133,30 @@ function expandState(state, context) {
           tierPrice,
           context.priceTiers[nextTierIndex],
           recharge,
-          { rechargeDayIndex: baseState.rechargeDayIndex, pressure: batchCandidate.pressure },
+          { rechargeDayIndex: baseState.rechargeDayIndex, pressure: batchCandidate.pressure, moneySurplus: addedMoneySurplus },
         )
+
+        // executionCost computation
+        const isTimeout = !action.bought
+        let newExecutionCost = baseState.executionCost
+        const execComponents = { ...baseState.executionCostComponents }
+        
+        const bpCost = batchCandidate.pressure * 0.1 * context.executionWeight
+        newExecutionCost += bpCost
+        execComponents.batchPressureCost = (execComponents.batchPressureCost || 0) + bpCost
+        
+        if (batchCandidate.sourceCount > 1) {
+          const csCost = (batchCandidate.sourceCount - 1) * 2.0 * context.executionWeight
+          newExecutionCost += csCost
+          execComponents.crossSourceCost = (execComponents.crossSourceCost || 0) + csCost
+        }
+        
+        const nextDailyPaid = baseState.dailyPaidDiamonds + action.paidDiamonds
+        const candidateMoneySurplus = baseState.moneySurplus + addedMoneySurplus
+        const candidateRealScore = candidateMoneySurplus - newExecutionCost
+        
+        const remainingStateHeuristic = estimateRemainingStateValue({ ...baseState, dailyPaidDiamonds: nextDailyPaid }, context)
+        const candidateSearchPriority = candidateRealScore + remainingStateHeuristic * context.preferenceDiscount
 
         const candidate = {
           ...baseState,
@@ -1067,12 +1164,18 @@ function expandState(state, context) {
           sourceCursors,
           currentDayAttributeTowers: mergeAttributeTowerSets(baseState.currentDayAttributeTowers, batchCandidate.attributeTowers),
           limitedSpentYen: baseState.limitedSpentYen + action.limitedCostYen,
-          value: baseState.value + action.originalValue + recharge.value,
+          totalSpentYen: baseState.totalSpentYen + action.limitedCostYen,
+          value: baseState.value + addedRealValue,
+          moneySurplus: candidateMoneySurplus,
+          realScore: candidateRealScore,
+          searchPriority: candidateSearchPriority,
+          executionCost: newExecutionCost,
+          executionCostComponents: execComponents,
           purchases: baseState.purchases + action.purchases.length,
           triggerCount: baseState.triggerCount + batchCandidate.opportunities.length,
           pressure: baseState.pressure + batchCandidate.pressure,
-          dailyPaidDiamonds: baseState.dailyPaidDiamonds + action.paidDiamonds,
-          timeoutWaits: baseState.timeoutWaits + (action.bought ? 0 : 1),
+          dailyPaidDiamonds: nextDailyPaid,
+          timeoutWaits: baseState.timeoutWaits + (isTimeout ? 1 : 0),
           rechargeFreeDiamonds: (baseState.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
           steps: [...baseState.steps, step],
           signature: appendStepSignature(baseState, step),
@@ -1080,28 +1183,37 @@ function expandState(state, context) {
 
         next.push(continueSameRechargeDay(candidate))
         if (candidate.purchases > 0) {
-          const toppedUp = tryApplyTopUp(candidate, context)
-          next.push(resetToNextRechargeDay(toppedUp))
+          next.push(...dayCloseTransitions(candidate, context))
         }
       }
     }
   }
 
-  return next.sort(comparePlan).slice(0, 50)
+  return next
+}
+
+function compareFinalPlan(a, b) {
+  if (a.realScore !== b.realScore) return b.realScore - a.realScore
+  if (a.pressure !== b.pressure) return a.pressure - b.pressure
+  return a.totalSpentYen - b.totalSpentYen
 }
 
 async function collectTopValuePlans(context, topK = 1) {
-  let states = [createEmptyState(context)]
+  const emptyState = createEmptyState(context)
+  let states = [emptyState]
+  const candidatePool = []
+  
   const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
   const maxIterations = Math.max(1, totalGroups * (context.priceTiers.length + 2))
 
   for (let i = 0; i < maxIterations; i++) {
-    if (i % 5 === 0) await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise(r => setTimeout(r, 0)) // yield to UI
+    candidatePool.push(...states)
+
     if (states.every(state => allSourcesExhausted(context.sources, state.sourceCursors))) break
     const expanded = []
     for (const state of states) {
       if (allSourcesExhausted(context.sources, state.sourceCursors)) {
-        expanded.push(state)
         continue
       }
       expanded.push(...expandState(state, context))
@@ -1110,169 +1222,32 @@ async function collectTopValuePlans(context, topK = 1) {
     states = pruneStates(expanded, context)
   }
 
-  const finalStates = states.map(state => tryApplyTopUp(state, context))
-  const complete = finalStates.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
-  const rankedSource = complete.length ? complete : finalStates
   const ranked = []
-  for (const state of rankedSource.sort(comparePlan)) {
-    if (!ranked.some(existing => stateSignature(existing) === stateSignature(state))) ranked.push(state)
+  for (const state of candidatePool.sort(compareFinalPlan)) {
+    if (!ranked.some(existing => stateSignature(existing) === stateSignature(state))) {
+      ranked.push(state)
+    }
     if (ranked.length >= topK) break
   }
-  return ranked.length ? ranked : [createEmptyState(context)]
+  
+  return ranked.length ? ranked : [emptyState]
 }
 
-function makePolicyBatch(context, state, policy) {
-  const candidates = generateBatchCandidates(state, context)
-  if (!candidates.length) return null
-
-  if (policy === 'smallPack') {
-    return candidates.sort((a, b) => {
-      const willBuyA = state.tierIndex === 0 && a.opportunities.some(op => op.packsByPrice.has(context.priceTiers[0]))
-      const willBuyB = state.tierIndex === 0 && b.opportunities.some(op => op.packsByPrice.has(context.priceTiers[0]))
-      
-      if (willBuyA !== willBuyB) return willBuyA ? -1 : 1
-      
-      if (willBuyA) {
-        const aOffers = a.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[0])).length
-        const bOffers = b.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[0])).length
-        if (aOffers !== bOffers) return bOffers - aOffers
-        if (a.pressure !== b.pressure) return a.pressure - b.pressure
-        return b.opportunities.length - a.opportunities.length
-      } else {
-        if (a.pressure !== b.pressure) return a.pressure - b.pressure
-        return a.opportunities.length - b.opportunities.length
-      }
-    })[0]
+function buildEnvelope(expectedRatio, freeDiamondScore) {
+  const maxPaid = DAILY_RECHARGE_BONUS_TIERS[DAILY_RECHARGE_BONUS_TIERS.length - 1].paid
+  const envelope = new Float64Array(maxPaid + 1)
+  const slope = Math.max(0, expectedRatio - 1.2)
+  
+  envelope[maxPaid] = cumulativeFreeDiamonds(maxPaid) * freeDiamondScore
+  for (let x = maxPaid - 1; x >= 0; x--) {
+    const sx = cumulativeFreeDiamonds(x) * freeDiamondScore
+    envelope[x] = Math.max(sx, envelope[x + 1] - slope)
   }
-
-  if (policy === 'maxPack') {
-    return candidates.sort((a, b) => {
-      const aOffers = a.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[state.tierIndex])).length
-      const bOffers = b.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[state.tierIndex])).length
-      if (aOffers !== bOffers) return bOffers - aOffers
-      if (a.pressure !== b.pressure) return a.pressure - b.pressure
-      return b.opportunities.length - a.opportunities.length
-    })[0]
-  }
-
-  return candidates[0]
-}
-
-function makePolicyAction(policy, batch, state, context) {
-  const tierPrice = context.priceTiers[state.tierIndex]
-  const offers = batch.opportunities
-    .map(opportunity => opportunity.packsByPrice.get(tierPrice))
-    .filter(Boolean)
-    .sort((a, b) => getPackOriginalValue(b) - getPackOriginalValue(a))
-
-  if (!offers.length) return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
-
-  if (policy === 'smallPack') {
-    if (state.tierIndex !== 0) return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
-    
-    let cost = 0
-    let originalValue = 0
-    let paidDiamonds = 0
-    const purchases = []
-    
-    for (const pack of offers) {
-      if (state.limitedSpentYen + cost + pack.price > context.mainBudget) break
-      cost += pack.price
-      originalValue += getPackOriginalValue(pack)
-      paidDiamonds += getPackPaidDiamonds(pack)
-      purchases.push(pack)
-    }
-
-    return purchases.length
-      ? { bought: true, limitedCostYen: cost, cost, originalValue, paidDiamonds, purchases }
-      : { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
-  }
-
-  if (policy === 'maxPack') {
-    const shouldBuyForTier = state.tierIndex < context.priceTiers.length - 1
-    if (shouldBuyForTier) {
-      const best = offers[0]
-      if (state.limitedSpentYen + best.price > context.mainBudget) {
-        return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
-      }
-      return {
-        bought: true,
-        limitedCostYen: best.price,
-        cost: best.price,
-        originalValue: getPackOriginalValue(best),
-        paidDiamonds: getPackPaidDiamonds(best),
-        purchases: [best],
-      }
-    }
-
-    let cost = 0
-    let originalValue = 0
-    let paidDiamonds = 0
-    const purchases = []
-    for (const pack of offers) {
-      if (state.limitedSpentYen + cost + pack.price > context.mainBudget) break
-      cost += pack.price
-      originalValue += getPackOriginalValue(pack)
-      paidDiamonds += getPackPaidDiamonds(pack)
-      purchases.push(pack)
-    }
-    return purchases.length
-      ? { bought: true, limitedCostYen: cost, cost, originalValue, paidDiamonds, purchases }
-      : { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
-  }
-
-  return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
-}
-
-async function simulatePolicyPlan(context, policy) {
-  let state = createEmptyState(context)
-  const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
-  const maxIterations = Math.max(1, totalGroups * (context.priceTiers.length + 2))
-
-  for (let i = 0; i < maxIterations; i++) {
-    if (i % 5 === 0) await new Promise(resolve => setTimeout(resolve, 0))
-    if (allSourcesExhausted(context.sources, state.sourceCursors)) break
-    const batch = makePolicyBatch(context, state, policy)
-    if (!batch) break
-    const [resetState] = expandRequiredRechargeResetBeforeBatch(state, batch, context)
-    state = resetState
-    const action = makePolicyAction(policy, batch, state, context)
-    const tierPrice = context.priceTiers[state.tierIndex]
-    const nextTierIndex = action.bought
-      ? clamp(state.tierIndex + 1, 0, context.priceTiers.length - 1)
-      : clamp(state.tierIndex - 1, 0, context.priceTiers.length - 1)
-    const recharge = rechargeValueForPaid(state.dailyPaidDiamonds, action.paidDiamonds, context)
-    const step = summarizeAction(action, state.steps.length, batch.opportunities, tierPrice, context.priceTiers[nextTierIndex], recharge, {
-      rechargeDayIndex: state.rechargeDayIndex,
-      pressure: batch.pressure,
-    })
-    state = {
-      ...state,
-      tierIndex: nextTierIndex,
-      sourceCursors: applyCursorDelta(state.sourceCursors, batch.cursorDelta),
-      currentDayAttributeTowers: mergeAttributeTowerSets(state.currentDayAttributeTowers, batch.attributeTowers),
-      limitedSpentYen: state.limitedSpentYen + action.limitedCostYen,
-      value: state.value + action.originalValue + recharge.value,
-      purchases: state.purchases + action.purchases.length,
-      triggerCount: state.triggerCount + batch.opportunities.length,
-      pressure: state.pressure + batch.pressure,
-      dailyPaidDiamonds: state.dailyPaidDiamonds + action.paidDiamonds,
-      timeoutWaits: state.timeoutWaits + (action.bought ? 0 : 1),
-      rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
-      steps: [...state.steps, step],
-      signature: appendStepSignature(state, step),
-    }
-    state = continueSameRechargeDay(state)
-  }
-
-  return tryApplyTopUp(state, context)
+  return envelope
 }
 
 function buildPlanningContext(packs, settings) {
   const priceTiers = getPriceTiers(packs)
-  const mainBudget = settings.budget !== undefined && settings.budget !== null && settings.budget !== '' 
-    ? Math.max(0, Math.floor(Number(settings.budget))) 
-    : Infinity
   const currentPrice = Number(settings.currentPrice) || priceTiers[0]
   const tierIndex = priceTiers.indexOf(currentPrice)
   const startTierIndex = clamp(tierIndex === -1 ? 0 : tierIndex, 0, priceTiers.length - 1)
@@ -1284,10 +1259,27 @@ function buildPlanningContext(packs, settings) {
     ? Math.min(...permanentPacks.map(p => p.price))
     : 0
 
+  const preferenceLevel = settings.preferenceLevel || 'balanced'
+  let expectedRatio = 3.0
+  let preferenceDiscount = 0.9
+  if (preferenceLevel === 'conservative') {
+    expectedRatio = 4.0
+    preferenceDiscount = 1.0
+  } else if (preferenceLevel === 'aggressive') {
+    expectedRatio = 2.0
+    preferenceDiscount = 0.8
+  }
+
+  const envelope = buildEnvelope(expectedRatio, freeDiamondScore)
+  const executionWeight = settings.executionWeight !== undefined ? Number(settings.executionWeight) : 50
+
   return {
+    envelope,
+    expectedRatio,
+    preferenceDiscount,
+    executionWeight,
+    preferenceLevel,
     priceTiers,
-    budget: mainBudget,
-    mainBudget,
     startTierIndex,
     freeDiamondScore,
     permanentPacks,
@@ -1323,24 +1315,27 @@ function createResult(state, context, meta = {}) {
     }))
   const topUpTotalCost = topUpBatches.reduce((sum, b) => sum + b.cost, 0)
   const totalSpent = state.limitedSpentYen + topUpTotalCost
-
-  const topUpThreshold = context.settings.topUpThreshold ?? 10
-
   return {
     ...meta,
-    budget: context.mainBudget,
-    mainBudget: context.mainBudget,
-    topUpThreshold,
+    expectedRatio: context.expectedRatio,
+    preferenceDiscount: context.preferenceDiscount,
+    executionWeight: context.executionWeight,
+    preferenceLevel: context.preferenceLevel,
+    remainingBudget: context.mainBudget !== undefined ? context.mainBudget - totalSpent : Infinity,
     limitedSpentYen: state.limitedSpentYen,
     topUpTotalCost,
     spent: state.limitedSpentYen,
     totalSpent,
-    remaining: context.mainBudget - state.limitedSpentYen,
     value: Math.round(state.value),
+    moneySurplus: Math.round(state.moneySurplus),
+    decisionValue: Math.round(state.searchPriority || state.realScore),
+    executionCost: state.executionCost || 0,
     purchases: state.purchases,
     triggerCount: state.triggerCount,
+    retainedOpportunities: context.opportunities.length - state.triggerCount,
     pressure: state.pressure,
     rechargeDayCount: state.rechargeDayIndex + 1,
+    rechargeResets: state.rechargeDayIndex,
     topUpPacks,
     topUpBatches,
     topUpPackSummary: topUpBatches
@@ -1349,9 +1344,6 @@ function createResult(state, context, meta = {}) {
     rechargeFreeDiamonds: state.rechargeFreeDiamonds || 0,
     finalTierPrice: context.priceTiers[state.tierIndex],
     averageCe: totalSpent > 0 ? state.value / (totalSpent / 2) : 0,
-    expectedRatio: totalSpent > 0 ? state.value / (totalSpent / 2) : 0,
-    moneySurplus: state.value - (totalSpent * 20),
-    decisionValue: state.value,
     priceTiers: context.priceTiers,
     opportunityCount: context.opportunities.length,
     topUpBatchCount: topUpBatches.length,
@@ -1368,33 +1360,125 @@ export function planUltraSalePurchases(packs, settings = {}) {
 
 export async function buildUltraSalePlanOptions(packs, settings = {}) {
   const context = buildPlanningContext(packs, settings)
-  const [bestState] = await collectTopValuePlans(context, 1)
-  const smallPackState = await simulatePolicyPlan(context, 'smallPack')
-  const maxPackState = await simulatePolicyPlan(context, 'maxPack')
+  const candidates = await collectTopValuePlans(context, 200)
+  const emptyState = createEmptyState(context)
+  const bestState = candidates[0] || emptyState
 
-  return [
-    createResult(bestState, context, {
-      id: 'bestValue',
-      label: '价值最优',
-      labelKey: 'planOptBest',
-      description: '在主预算和补累充浮动预算内最大化总评分价值。',
-      descKey: 'planOptBestDesc',
-    }),
-    createResult(smallPackState, context, {
-      id: 'smallPack',
-      label: '只买小包',
-      labelKey: 'planOptSmall',
-      description: '只在最低档购买，升档后等待掉回最低档。',
-      descKey: 'planOptSmallDesc',
-    }),
-    createResult(maxPackState, context, {
-      id: 'maxPack',
-      label: '冲最大包',
-      labelKey: 'planOptMax',
-      description: '优先把有限触发机会用于更高档礼包，必要时等待降档。',
-      descKey: 'planOptMaxDesc',
-    }),
-  ]
+  const retentionDecision = emptyState.searchPriority
+  const executableDecision = bestState.searchPriority
+
+  const hasProfitablePlan = executableDecision > retentionDecision && bestState.purchases > 0
+
+  if (!hasProfitablePlan) {
+    return [
+      createResult(emptyState, context, {
+        id: 'retention',
+        label: '保留机会',
+        description: '当前决策价值（执行收益+未来保留价值）未超过直接保留机会的基线。建议暂不购买，保留机会。',
+      })
+    ]
+  }
+
+  const options = []
+
+  // Feature detection for best state
+  const bestIsConservative = bestState.steps.every(step => 
+    !(!step.bought && step.tierPrice > context.priceTiers[0]) && !(step.bought && step.moneySurplus < 0)
+  )
+  const bestIsPaving = bestState.steps.some(step => step.bought && step.moneySurplus < 0)
+  const bestIsWaiting = bestState.steps.some(step => !step.bought && step.tierPrice > context.priceTiers[0])
+
+  // Add Recommended
+  options.push(createResult(bestState, context, {
+    id: 'bestValue',
+    label: '价值最优',
+    description: '综合决策价值最高，兼顾了当前盈余和未来潜力。' + (bestIsConservative ? ' (当前最优解天然符合保守策略)' : ''),
+  }))
+
+  let conservativeState = null
+  let pavingState = null
+
+  // Option 2: Conservative
+  if (!bestIsConservative) {
+    conservativeState = candidates.find(state => {
+      let isValid = true
+      for (const step of state.steps) {
+        if (!step.bought && step.tierPrice > context.priceTiers[0]) {
+          isValid = false
+          break
+        }
+        if (step.bought && step.moneySurplus < 0) {
+          isValid = false
+          break
+        }
+      }
+      return isValid && state.signature !== bestState.signature && state.purchases > 0
+    })
+
+    if (conservativeState) {
+      const conservativeRemainingValue = estimateRemainingStateValue(conservativeState, context)
+      const conservativeDecision = conservativeState.moneySurplus + conservativeRemainingValue
+      if (conservativeDecision > retentionDecision) {
+        options.push(createResult(conservativeState, context, {
+          id: 'conservative',
+          label: '保守方案',
+          description: '稳健不激进，不采用亏损铺路，也不主动闲置机会换取降档。',
+        }))
+      }
+    }
+  }
+
+  // Option 3: Paving
+  if (!bestIsPaving) {
+    pavingState = candidates.find(state => {
+      let hasPaving = false
+      for (const step of state.steps) {
+        if (step.bought && step.moneySurplus < 0) {
+          hasPaving = true
+        }
+      }
+      return hasPaving && state.signature !== bestState.signature && (!conservativeState || state.signature !== conservativeState.signature) && state.purchases > 0
+    })
+
+    if (pavingState) {
+      const pavingRemainingValue = estimateRemainingStateValue(pavingState, context)
+      const pavingDecision = pavingState.moneySurplus + pavingRemainingValue
+      if (pavingDecision > retentionDecision) {
+        options.push(createResult(pavingState, context, {
+          id: 'paving',
+          label: '升档铺路',
+          description: '故意购买当前略亏的礼包强行推高档位，为后续更划算的大包做铺垫。',
+        }))
+      }
+    }
+  }
+
+  // Option 4: Waiting
+  if (!bestIsWaiting) {
+    const waitingState = candidates.find(state => {
+      let hasWaiting = false
+      for (const step of state.steps) {
+        if (!step.bought && step.tierPrice > context.priceTiers[0]) {
+          hasWaiting = true
+        }
+      }
+      return hasWaiting && state.signature !== bestState.signature && (!conservativeState || state.signature !== conservativeState.signature) && (!pavingState || state.signature !== pavingState.signature) && state.purchases > 0
+    })
+
+    if (waitingState) {
+      const waitingRemainingValue = estimateRemainingStateValue(waitingState, context)
+      const waitingDecision = waitingState.moneySurplus + waitingRemainingValue
+      if (waitingDecision > retentionDecision) {
+        options.push(createResult(waitingState, context, {
+          id: 'waiting',
+          label: '空置降档',
+          description: '为了规避低性价比的限时包，主动让本批次降档并跨日等待，适合机会充足时使用。',
+        }))
+      }
+    }
+  }
+
+  return options
 }
 
 function formatSkipPlanRow(row) {
@@ -1515,4 +1599,7 @@ export const __testables = {
   buildPlanningContext,
   createEmptyState,
   expandState,
+  getRechargeBucket,
 }
+
+export function testPool(context) { const emptyState = createEmptyState(context); let states = [emptyState]; const candidatePool = []; const totalGroups = context.sources.reduce((sum, s) => sum + s.groups.length, 0); const maxIterations = Math.max(1, totalGroups * 4); for (let i = 0; i < maxIterations; i++) { candidatePool.push(...states); if (states.every(state => allSourcesExhausted(context.sources, state.sourceCursors))) break; const expanded = []; for (const state of states) { if (allSourcesExhausted(context.sources, state.sourceCursors)) { continue; } expanded.push(...expandState(state, context)); } if (!expanded.length) break; states = pruneStates(expanded, context); } return candidatePool.sort(compareFinalPlan); }
