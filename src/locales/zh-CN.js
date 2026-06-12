@@ -254,7 +254,7 @@ export default {
   navGroupItemSystem: "道具系统",
   navPackCalc: "超值限时组合包查询",
   packCalcDesc: "根据道具评分计算超值限时组合包的性价比。",
-  packCalcSource: "数据来源 <a href='https://tamamo.dev/UltraSalePack' target='_blank' style='color:var(--gold);text-decoration:underline;'>tamamo.dev</a>，内容物可能有误，注意辨别",
+  packCalcSource: "数据来源 {link}，内容物可能有误，注意辨别",
   packFilterTitle: "筛选",
   packFilterCategory: "类别",
   packFilterTower: "塔类型",

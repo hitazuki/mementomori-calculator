@@ -2,7 +2,12 @@
   <div class="view-header animate-fadeup">
     <h1 class="view-title">💰 {{ $t('navPackCalc') }}</h1>
     <p class="view-desc">
-      {{ $t('packCalcDesc') }} — <span v-html="$t('packCalcSource')"></span>
+      {{ $t('packCalcDesc') }} — 
+      <i18n-t keypath="packCalcSource" tag="span">
+        <template #link>
+          <a href="https://tamamo.dev/UltraSalePack" target="_blank" style="color:var(--gold);text-decoration:underline;">tamamo.dev</a>
+        </template>
+      </i18n-t>
     </p>
   </div>
 

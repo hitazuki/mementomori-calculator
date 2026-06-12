@@ -256,7 +256,7 @@ export default {
   navGroupItemSystem: "아이템 시스템",
   navPackCalc: "울트라 세일 팩 검색",
   packCalcDesc: "아이템 점수에 기반하여 울트라 세일 팩의 가성비를 계산합니다.",
-  packCalcSource: "데이터 출처: <a href='https://tamamo.dev/UltraSalePack' target='_blank' style='color:var(--gold);text-decoration:underline;'>tamamo.dev</a>, 내용물 오류 가능성 있음",
+  packCalcSource: "데이터 출처: {link}, 내용물 오류 가능성 있음",
   packFilterTitle: "필터",
   packFilterCategory: "카테고리",
   packFilterTower: "탑 종류",
