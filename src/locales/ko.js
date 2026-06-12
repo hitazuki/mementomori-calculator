@@ -362,6 +362,7 @@ export default {
   planResetCount: "초기화×{n}",
   planReset: "초기화",
   planTopUpDone: "완료",
+  planTopUpPending: "정산 대기",
   planTopUpNone: "없음",
   planValueWithRecharge: "(충전 포함 {n})",
   planDetailTriggerRange: "배치 발생 범위",

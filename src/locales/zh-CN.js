@@ -373,6 +373,7 @@ export default {
   planResetCount: "重置×{n}",
   planReset: "重置",
   planTopUpDone: "已补",
+  planTopUpPending: "待结算",
   planTopUpNone: "无",
   planValueWithRecharge: "(含累充 {n})",
   planDetailTriggerRange: "本批触发范围",

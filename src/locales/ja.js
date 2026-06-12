@@ -378,6 +378,7 @@ export default {
   planResetCount: "リセット×{n}",
   planReset: "リセット",
   planTopUpDone: "済",
+  planTopUpPending: "未精算",
   planTopUpNone: "なし",
   planValueWithRecharge: "(チャージ分込 {n})",
   planDetailTriggerRange: "当バッチ発生範囲",

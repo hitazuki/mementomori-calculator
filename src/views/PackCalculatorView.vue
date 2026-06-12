@@ -338,8 +338,8 @@
                     </div>
                   </td>
                   <td>
-                    <span :class="step.topUpPacks && step.topUpPacks.length ? 'planner-status-chip active' : 'planner-status-chip'">
-                      {{ step.topUpPacks && step.topUpPacks.length ? $t('planTopUpDone') : $t('planTopUpNone') }}
+                    <span :class="getTopUpStatusClass(step)">
+                      {{ getTopUpStatusText(step) }}
                     </span>
                   </td>
                   <td>{{ formatPrice(step.cost) }}</td>
@@ -733,6 +733,31 @@ function getRechargeResetText(step) {
   if (step.rechargeResetCount) return t('planResetCount', { n: step.rechargeResetCount })
   if (step.rechargeReset) return t('planReset')
   return ''
+}
+
+function getPlannerRowLastStep(row) {
+  if (Array.isArray(row.skippedSteps) && row.skippedSteps.length) return row.skippedSteps.at(-1)
+  const steps = selectedPlan.value?.steps || []
+  return steps.find(step => step.index === row.index) || row
+}
+
+function isTopUpSettlementPending(row) {
+  if (row.topUpPacks && row.topUpPacks.length) return false
+  const lastStep = getPlannerRowLastStep(row)
+  if (!lastStep || !Number.isFinite(lastStep.index)) return true
+  const nextStep = (selectedPlan.value?.steps || []).find(step => step.index > lastStep.index)
+  return !nextStep || nextStep.rechargeDayIndex === lastStep.rechargeDayIndex
+}
+
+function getTopUpStatusText(row) {
+  if (row.topUpPacks && row.topUpPacks.length) return t('planTopUpDone')
+  if (isTopUpSettlementPending(row)) return t('planTopUpPending')
+  return t('planTopUpNone')
+}
+
+function getTopUpStatusClass(row) {
+  if (row.topUpPacks && row.topUpPacks.length) return 'planner-status-chip active'
+  return isTopUpSettlementPending(row) ? 'planner-status-chip pending' : 'planner-status-chip'
 }
 
 function scoreOf(itemKey, fallback = 1) {
@@ -1174,6 +1199,12 @@ function fmtNum(n) {
   border-color: rgba(212,175,55,0.45);
   color: var(--gold);
   background: rgba(212,175,55,0.08);
+}
+
+.planner-status-chip.pending {
+  border-color: rgba(212,175,55,0.28);
+  color: var(--text-secondary);
+  background: rgba(212,175,55,0.04);
 }
 
 .planner-recharge-cell {

@@ -375,6 +375,7 @@ export default {
   planResetCount: "Reset ×{n}",
   planReset: "Reset",
   planTopUpDone: "Bought",
+  planTopUpPending: "Pending",
   planTopUpNone: "None",
   planValueWithRecharge: "(incl. Recharge {n})",
   planDetailTriggerRange: "Batch Trigger Range",
