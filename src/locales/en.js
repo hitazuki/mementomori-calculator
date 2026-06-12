@@ -9,7 +9,7 @@ export default {
   planSumSurplus: "Net Cash Value",
   planSumDecision: "Decision Value",
   planSumTriggerCount: "Triggered Count",
-  planSumRetained: "Retained Count",
+  planSumRetained: "Unused Opportunities",
   planSumResets: "Daily Resets",
   // Common
   appTitle: "MementoMori Calculators",
@@ -410,4 +410,8 @@ export default {
   planPackDiamondFirst: "Diamond Pack {n} (First 2x)",
   planAttrTowerTitle: "Attribute Tower interval is 50 floors, fixed at 1 per batch",
   planSkipBatchCount: "{n} Batches",
+  planRemainingTitle: "{n} Opportunities Left After This Path",
+  planRemainingDesc: "These opportunities are inside the current lookahead range but are not consumed by this recommended path.",
+  planRemainingCount: "{n} Opportunities",
+  planRemainingRangeHint: "If you still plan to keep progressing, expand the lookahead range so later opportunities can participate in the next decision segment.",
 };

@@ -275,7 +275,7 @@
           <div><span>{{ $t('planSumTopUpCost') || '补累充花费' }}</span><b>{{ formatPrice(selectedPlan.topUpTotalCost || 0) }}</b></div>
           <div><span>{{ $t('planSumPurchase') || '购买限时包数' }}</span><b>{{ selectedPlan.purchases }}</b></div>
           <div><span>{{ $t('planSumTriggerCount') || '已触发机会数' }}</span><b>{{ selectedPlan.triggerCount }}</b></div>
-          <div><span>{{ $t('planSumRetained') || '保留机会数' }}</span><b>{{ selectedPlan.retainedOpportunities }}</b></div>
+          <div><span>{{ $t('planSumRetained') || '未使用机会数' }}</span><b>{{ selectedPlan.remainingOpportunities ?? selectedPlan.retainedOpportunities }}</b></div>
           <div><span>{{ $t('planSumResets') || '跨日重置次数' }}</span><b>{{ selectedPlan.rechargeResets }}</b></div>
           <div><span>{{ $t('planSumTopUpBatch') || '补累充批次数' }}</span><b>{{ selectedPlan.topUpBatches?.length || 0 }}</b></div>
           <div><span>{{ $t('planSumFinalTier') || '下一批结束后档位' }}</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
@@ -444,6 +444,29 @@
           </table>
           <div v-if="compressedPlanSteps.length > displayedPlanSteps.length" class="planner-more">
             {{ $t('planMoreRows', { n: compressedPlanSteps.length - displayedPlanSteps.length }) }}
+          </div>
+          <div
+            v-if="selectedPlan.remainingOpportunities > 0 && selectedPlan.remainingOpportunityGroups?.length"
+            class="planner-remaining"
+          >
+            <div class="planner-remaining-head">
+              <strong>{{ $t('planRemainingTitle', { n: selectedPlan.remainingOpportunities }) }}</strong>
+              <span>{{ $t('planRemainingDesc') }}</span>
+            </div>
+            <div class="planner-remaining-list">
+              <div
+                v-for="group in selectedPlan.remainingOpportunityGroups"
+                :key="`${selectedPlan.id}-remaining-${group.sourceId}-${group.from}-${group.to}`"
+                class="planner-remaining-item"
+              >
+                <strong>{{ group.label }}</strong>
+                <span>{{ remainingOpportunityRange(group) }}</span>
+                <em>{{ $t('planRemainingCount', { n: group.count }) }}</em>
+              </div>
+            </div>
+            <div class="planner-remaining-note">
+              {{ $t('planRemainingRangeHint') }}
+            </div>
           </div>
         </div>
 
@@ -758,6 +781,11 @@ function getTopUpStatusText(row) {
 function getTopUpStatusClass(row) {
   if (row.topUpPacks && row.topUpPacks.length) return 'planner-status-chip active'
   return isTopUpSettlementPending(row) ? 'planner-status-chip pending' : 'planner-status-chip'
+}
+
+function remainingOpportunityRange(group) {
+  if (!group) return ''
+  return group.from === group.to ? group.from : `${group.from} - ${group.to}`
 }
 
 function scoreOf(itemKey, fallback = 1) {
@@ -1379,6 +1407,70 @@ function fmtNum(n) {
 
 .planner-skip-source em,
 .planner-skip-batch em {
+  color: var(--gold);
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.planner-remaining {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.025);
+  display: grid;
+  gap: 10px;
+}
+
+.planner-remaining-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+}
+
+.planner-remaining-head strong {
+  color: var(--gold);
+  font-size: var(--fs-md);
+}
+
+.planner-remaining-head span,
+.planner-remaining-note {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+}
+
+.planner-remaining-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.planner-remaining-item {
+  display: grid;
+  grid-template-columns: minmax(72px, max-content) minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 7px 9px;
+  background: rgba(255,255,255,0.025);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.planner-remaining-item strong {
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.planner-remaining-item span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.planner-remaining-item em {
   color: var(--gold);
   font-style: normal;
   white-space: nowrap;

@@ -9,7 +9,7 @@ export default {
   planSumSurplus: "순수익(엔)",
   planSumDecision: "결정 가치",
   planSumTriggerCount: "발생 기회 수",
-  planSumRetained: "보류 기회 수",
+  planSumRetained: "미사용 기회 수",
   planSumResets: "일일 초기화 횟수",
   // Common
   appTitle: "메멘토모리 각종 계산기",
@@ -397,4 +397,8 @@ export default {
   planPackDiamondFirst: "다이아 팩 {n} (첫 구매 2배)",
   planAttrTowerTitle: "속성탑 발생 간격은 50층이며, 배치당 1개로 고정됩니다.",
   planSkipBatchCount: "{n} 배치",
+  planRemainingTitle: "이 경로 이후 남은 기회 {n}개",
+  planRemainingDesc: "이 기회들은 현재 전망 범위 안에 있지만, 이번 추천 경로에서는 소모하지 않습니다.",
+  planRemainingCount: "{n}개 기회",
+  planRemainingRangeHint: "계속 진행할 계획이라면 전망 범위를 넓혀 더 뒤의 기회도 다음 판단에 포함할 수 있습니다.",
 };

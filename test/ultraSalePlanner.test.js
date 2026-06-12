@@ -261,6 +261,40 @@ test('keep-tier large-pack strategy can skip low-CE packs in a bought batch with
   assert.equal(option.steps[0].nextTierPrice, 11800)
 })
 
+test('planner result summarizes unused opportunities left inside the lookahead range', async () => {
+  const packs = [
+    makePack(1, 160, 1000),
+    makePack(2, 160, 10),
+    makePack(3, 160, 10),
+  ]
+
+  const options = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 160,
+    lanes: [{
+      id: 'tower:infinite',
+      cat: 'tower',
+      tower: 'origin_tower_infinite',
+      label: 'Tower',
+      startProgress: 0,
+      endProgress: 3,
+      batchSize: 1,
+    }],
+  }))
+  const option = options.find(o => o.id === 'bestValue')
+
+  assert.ok(option, 'expected a value option that stops before exhausting the lookahead range')
+  assert.equal(option.triggerCount, 1)
+  assert.equal(option.retainedOpportunities, 2)
+  assert.equal(option.remainingOpportunities, 2)
+  assert.deepEqual(option.remainingOpportunityGroups, [{
+    sourceId: 'tower:infinite',
+    label: 'Tower',
+    from: '2',
+    to: '3',
+    count: 2,
+  }])
+})
+
 test('preference CE target is derived from 5900-paid-diamond hard-currency packs', async () => {
   const packs = [
     makePack(1, 11800, 47200, {

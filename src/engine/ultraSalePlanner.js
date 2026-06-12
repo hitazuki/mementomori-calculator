@@ -1572,6 +1572,8 @@ function createResult(state, context, meta = {}) {
     }))
   const topUpTotalCost = topUpBatches.reduce((sum, b) => sum + b.cost, 0)
   const totalSpent = state.limitedSpentYen + topUpTotalCost
+  const remainingOpportunityGroups = summarizeRemainingOpportunities(state, context)
+  const remainingOpportunityCount = remainingOpportunityGroups.reduce((sum, group) => sum + group.count, 0)
   return {
     ...meta,
     expectedRatio: context.expectedRatio,
@@ -1591,7 +1593,9 @@ function createResult(state, context, meta = {}) {
     executionCost: state.executionCost || 0,
     purchases: state.purchases,
     triggerCount: state.triggerCount,
-    retainedOpportunities: context.opportunities.length - state.triggerCount,
+    retainedOpportunities: remainingOpportunityCount,
+    remainingOpportunities: remainingOpportunityCount,
+    remainingOpportunityGroups,
     pressure: state.pressure,
     rechargeDayCount: state.rechargeDayIndex + 1,
     rechargeResets: state.rechargeDayIndex,
@@ -1773,6 +1777,35 @@ function summarizeSkippedSources(skippedSteps) {
     }
   }
   return [...byLabel.values()]
+}
+
+function groupTriggerLabel(group) {
+  const opportunity = group?.opportunities?.[0]
+  return String(group?.trigger ?? opportunity?.trigger ?? opportunity?.displayTrigger ?? '')
+}
+
+function summarizeRemainingOpportunities(state, context) {
+  const summaries = []
+  for (let sourceIndex = 0; sourceIndex < context.sources.length; sourceIndex++) {
+    const source = context.sources[sourceIndex]
+    const cursor = state.sourceCursors[sourceIndex] || 0
+    const groups = source.groups.slice(cursor)
+    if (!groups.length) continue
+
+    const count = groups.reduce((sum, group) => sum + group.opportunities.length, 0)
+    if (count <= 0) continue
+
+    const first = groups[0]
+    const last = groups[groups.length - 1]
+    summaries.push({
+      sourceId: source.id || source.laneId || String(sourceIndex),
+      label: first.label || source.label || source.id || '触发',
+      from: groupTriggerLabel(first),
+      to: groupTriggerLabel(last),
+      count,
+    })
+  }
+  return summaries
 }
 
 export function compressUltraSalePlanSteps(steps = []) {

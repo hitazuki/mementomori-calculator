@@ -9,7 +9,7 @@ export default {
   planSumSurplus: "金錢淨收益",
   planSumDecision: "決策價值",
   planSumTriggerCount: "已觸發機會數",
-  planSumRetained: "保留機會數",
+  planSumRetained: "未使用機會數",
   planSumResets: "跨日重置次數",
   // Common
   appTitle: "MementoMori 各種計算機",
@@ -408,4 +408,8 @@ export default {
   planPackDiamondFirst: "鑽石組合包 {n} (首次雙倍)",
   planAttrTowerTitle: "屬性塔觸發間隔為 50 層，單批固定為 1",
   planSkipBatchCount: "{n} 批",
+  planRemainingTitle: "路徑結束後剩餘 {n} 個機會",
+  planRemainingDesc: "這些機會已在目前前瞻範圍內，但沒有被本推薦路徑消耗。",
+  planRemainingCount: "{n} 個機會",
+  planRemainingRangeHint: "如果你還計畫繼續推進，可以擴大前瞻範圍，讓更後面的機會參與下一段決策。",
 };

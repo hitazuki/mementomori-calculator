@@ -9,7 +9,7 @@ export default {
   planSumSurplus: "純利益(円)",
   planSumDecision: "判断価値",
   planSumTriggerCount: "発生機会数",
-  planSumRetained: "保留機会数",
+  planSumRetained: "未使用機会数",
   planSumResets: "日替わりリセット",
   // Common
   appTitle: "メメントモリ 各種計算機",
@@ -413,4 +413,8 @@ export default {
   planPackDiamondFirst: "ダイヤパック {n} (初回2倍)",
   planAttrTowerTitle: "属性塔のトリガー間隔は50階で、1回のバッチにつき1つに固定されています",
   planSkipBatchCount: "{n} バッチ",
+  planRemainingTitle: "この経路の後に残る機会 {n} 件",
+  planRemainingDesc: "これらは現在の前方参照範囲内にありますが、この推奨経路では消費されません。",
+  planRemainingCount: "{n} 件",
+  planRemainingRangeHint: "さらに進める予定がある場合は、前方参照範囲を広げると、より後ろの機会も次の判断に含められます。",
 };
