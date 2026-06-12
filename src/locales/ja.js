@@ -312,7 +312,11 @@ export default {
   // Pack Planner
   planTabQuery: "パック検索",
   planTabPlanner: "購入プランナー",
-  planTitle: "購入プランナー",
+  planTitle: "超得パックプランナー",
+  planPreferenceLevel: 'Purchase Preference',
+  planPrefConservative: 'Conservative',
+  planPrefBalanced: 'Balanced (Default)',
+  planPrefAggressive: 'Aggressive',
   planBudget: "予算（円）",
   planCurrentTier: "現在のティア",
   planTopUpThreshold: "チャージ閾値 x%",

@@ -65,10 +65,8 @@ decisionValue = moneySurplus
 
 | 参数名称 | 建议默认值 | 物理含义 | 改动产生的影响 |
 | :--- | :--- | :--- | :--- |
-| `expectedRatio` (预期性价比倍率) | 玩家输入(如3.0) | 玩家对金钱投资回报的门槛 | **调高**：算法变得极其挑剔，绝大多数路径的 `moneySurplus` 变为负数，输出大量“机会保留/空方案”。<br>**调低**：算法倾向于买更多包，愿意接受低档包铺路。 |
-| `preferenceDiscount` (机会偏好折现率) | 积极: 0.8<br>均衡: 0.9<br>珍惜: 1.0 | 对未来未发生收益的信任程度与时间贴现 | **调高(趋近1.0)**：未来收益权重高，算法更倾向于把机会留给未来（珍惜机会）。<br>**调低(趋近0)**：未来收益权重低，算法只看眼前的 `moneySurplus`，有达标包就触发（积极使用）。 |
+| `preferenceLevel` (购买偏好档位) | 玩家输入(保守/均衡/激进) | 玩家对金钱投资回报的门槛与对未发生收益的信任程度 | **激进**：内部映射低 `expectedRatio` 盈亏线和低 `preferenceDiscount`。算法倾向于通过升档买更多包，愿意接受低档包铺路。<br>**保守**：内部映射高 `expectedRatio` 和高 `preferenceDiscount`。算法变得极其挑剔，绝大多数路径的 `moneySurplus` 变为负数，输出大量“机会保留/空方案”。 |
 | `executionWeight` (执行惩罚权重) | 50 CE / 次 | 每增加一点操作复杂度的价值惩罚（等效约 50 免费钻价值） | **调高**：极力避免同一批次触发大量礼包，算法会更倾向于把触发点拆到不同天（跨日），以降低单批次压力。<br>**调低**：肆无忌惮地跨来源大合批，可能导致玩家实际操作时容易手忙脚乱超时。 |
-| `optionalSafeLimit` (可选安全上限) | 玩家输入(日元) | 愿意接受的最高单次规划总花费 | **调高/关闭**：放出最优数学解。<br>**调低**：在状态树生成时直接剪枝超额路径，可能导致无法达到最高收益。 |
 
 > **关于默认值量级的严格计算与合理性评估（基于真实数据推演）：**
 > 根据现有限时包真实数据，通常大包的真实 CE 值在 **3.0 ~ 6.5** 之间。
@@ -81,12 +79,12 @@ decisionValue = moneySurplus
 
 ## 4. 输入归一化
 
-### 4.1 安全上限与性价比
-页面输入的不再是必须花完的主预算，而是期望性价比倍率：
+### 4.1 输入归一化
+页面输入的不再是散乱的性价比和预算上限，而是统一的购买偏好档位（如：保守、均衡、激进）：
 ```text
-expectedRatio
+preferenceLevel
 ```
-同时可附带一个安全上限 `optionalSafeLimit`，作为剪枝时的风险过滤条件。
+内部算法将根据该宏观档位映射出精确的盈亏线 `expectedRatio` 和摩擦力成本，用于后续规划与状态剪枝。
 
 ### 4.2 礼包档位
 从限时包数据中提取可用价格档位并升序排列：
@@ -160,7 +158,7 @@ allTower(floor) requires blue >= floor, red >= floor, green >= floor, yellow >= 
 2. 跨 0 点重置：`rechargeDayIndex + 1`，`dailyPaidDiamonds = 0`，`currentDayAttributeTowers = []`。
 
 跨日转移是候选路径的一部分。剪枝可以限制跨日位置数量，但不能退化为固定同日连续购买或固定每批跨日。每日累充重置只发生在批次边界。
-
+**大额累充强制跨日（算法剪枝优化）**：由于单日硬冲超过 12000 的边际性价比显著下降，当当前累计付费钻 `dailyPaidDiamonds >= 12000` 时，算法强制在执行下一批次前跨日重置。这属于一种剪枝优化，用于引导规划器自然偏向多日重复凑 12000 并防止状态空间在低性价比分支上无意义展开。
 **属性塔强制换日**：当下一批会再次推进当前累充日内已经推进过的同一个单属性塔时，应先在上一批之后评估跨日前补累充，再重置 `dailyPaidDiamonds` 和 `currentDayAttributeTowers`，然后结算该批。
 
 ## 7. 批次编排搜索
@@ -208,17 +206,18 @@ actionValue = intrinsicValue + rechargeBonus * freeDiamondScore
 
 当 DP 选出最优路线后，**UI 层恢复使用真实的阶梯函数 $S(x)$** 结算账本，计算出真实的 `moneySurplus`。此时真实的 $S(11800)$ 并未拿到大奖，UI 后处理模块探测到极高的额外利润，自动触发补包建议。
 
-## 9. 自动补累充的彻底解耦 (UI Post-Processing Top-up)
+## 9. 自动补累充的判定分支 (Top-up DP Branching)
 
-补累充逻辑被**彻底移出 DP 状态流转**，降级为 UI 展示层的独立后处理模块。由于 DP 底层有包络线 $E(x)$ 的数学底座保驾护航，这种“代码绝对纯净 + UI后处理兜底”的解耦架构，彻底消灭了以往方案因“短视剪枝”而丢失优质路线的顽疾。
+补累充逻辑**回滚并保留在 DP 状态流转中**，作为跨日前的一层独立分支节点。如果不放入搜索树而解耦到 UI 后处理，会破坏补包带来的滚雪球效应和基于更优累充起点的后续路径。
 
 工作流如下：
-1. **纯净搜索**：DP 引擎仅使用限时包流转，依靠 $E(x)$ 寻优。
-2. **UI 事后评估**：当 DP 生成候选方案后，展示层独立扫描每一天寻找距离下一档的差额。
-3. **真实组合枚举**：UI 层针对该差额，在 `permanentPacks.json` 中枚举最低成本的常驻包组合，计算真实盈余：
-   `topUpSurplus = 补包新增累充赠钻CE + 补包内容CE - (补包花费 / 2) * expectedRatio`
-4. **追加建议**：
-   *   如果 `topUpSurplus >= 0`：在 UI 中追加 Tip（例如：“💡距下一档差 200 钻，建议购买 X包+Y包，性价比达标”）。
+1. **纯净搜索**：DP 引擎主要使用限时包流转，依靠包络线 $E(x)$ 评估每日累充收益。
+2. **跨日补包判定**：当一个批次需要跨日（或同日无后续动作）时，检查当前 `dailyPaidDiamonds` 距离下一档 `nextTier` 的差额 `gap`。
+3. **阈值与盈余双重检查**：
+   * 检查 `gap <= dailyPaidDiamonds` 或类似的安全边界（视配置而定），避免为了几百钻强补几千钻大包。
+   * 枚举最低成本的常驻包组合，计算真实盈余：`topUpSurplus = 补包新增累充赠钻CE + 补包内容CE - (补包花费 / 2) * expectedRatio`。
+   * 如果 `topUpSurplus >= 0`：在 DP 树中生成一个“买补包后跨日”的状态分支，继承更高的实际收益。
+   * 并发生成一个“不买补包直接跨日”的常规状态分支，由搜索树后续自主择优。
 
 ## 10. 动态规划状态 (DP State)
 
@@ -234,7 +233,7 @@ DP 状态移除对 `limitedSpentYen` 的绝对容量依赖，变更为以 `Decis
   currentDayAttributeTowers,  // 今日推塔集合，决定强制跨日。
   
   // --- 价值与花费追踪 ---
-  totalSpentYen,              // 包含限时包与补累充的总花费（用于检查 optionalSafeLimit）。
+  totalSpentYen,              // 包含限时包与补累充的总花费。
   totalValue,                 // 路径已获得的总综合 CE。
   moneySurplus,               // 当前路径的金钱净收益 (核心指标 1)。
   decisionValue,              // 当前路径的决策价值 (核心指标 2，包含 heuristics)。
@@ -267,30 +266,29 @@ state
   -> pruneStates
 ```
 
-### 11.1 剪枝策略与公式 (Beam Search & Pareto Pruning)
+### 11.1 剪枝策略与公式 (3-Layer Pruning)
 
-为防止状态空间爆炸，采用按维度的 Beam Search 与带容忍度的 Pareto 剪枝。
+为防止状态空间爆炸，采用按维度的分桶（Bucketing）和三层过滤剪枝体系：
 
 **1. 分桶策略 (Bucketing)**
-使用以下离散维度计算哈希键分桶：
+使用以下离散维度计算哈希键分桶，保证桶内状态的后续转移环境高度一致：
 ```text
-BucketKey = hash(tierIndex, sourceCursors, currentDayAttributeTowers)
+BucketKey = hash(tierIndex, sourceCursors, currentDayAttributeTowers, rechargeBucket)
 ```
+其中 `rechargeBucket` 包含三个子维度：
+*   `rewardTierIndex`：当前日累充奖励的最高达成档位。
+*   `nextGapBand`：距离下一档的差额分段（精确划分为：0, 1~80, 81~325, 326~500, 501~750, 751~1500, 1501~3000, 3001~5900, 5900+）。
+*   `potentialBand`：剩余包络线潜力 $E(x)$ 的分段（每 500 CE 一档），用于保证不会错误淘汰具有高潜力的低充值状态。
 
-**2. 桶内 Pareto 优势判定公式**
-摒弃旧版的“花费越低越好”逻辑。在相同 Bucket 内，如果状态 A 对状态 B 构成“绝对优势”，则淘汰 B。判定公式为：
-```text
-A 淘汰 B 的条件 = 
-  (A.decisionValue >= B.decisionValue - decisionTolerance)
-  AND (A.totalSpentYen <= B.totalSpentYen)
-  AND (A.triggerCount <= B.triggerCount)
-```
-*   `decisionTolerance` (价值容忍度参数，建议值：`500`)：基于真实数据中单包盈余（约数千 CE）与操作/风险惩罚（50~500 CE）的比例，容忍度设为 500 CE（等效 500 钻物资价值）最为合适。这意味着，即使 A 的决策价值比 B 略低一点（在 500 CE 以内），但只要 A 花的钱和消耗的机会都不比 B 多，A 依然视为更优并淘汰 B。这不仅过滤了计算底噪，还保留了那些“虽然收益少了一点点，但便宜很多”的高性价比平替方案。如果将容忍度设为 0，则退化为严苛的绝对优越判定。
-
-**3. 截断限制 (Beam Width)**
-经过 Pareto 淘汰后，对剩余状态按 `decisionValue` 降序排序，并实施硬截断：
-*   `bucketSizeLimit` (单桶容量参数，建议值：`15`)：每个 Bucket 最多保留 15 个代表状态，保证策略多样性（如不同时间跨日的分支）的同时剔除劣解。
-*   `globalStateLimit` (全局状态上限，建议值：`2000`)：每层转移结束后，全局最多保留 2000 个状态，防止搜索晚期前沿面过大导致 OOM。
+**2. 三层过滤体系**
+*   **Layer 1: 严格支配淘汰 (Strictly Dominates)**
+    在同一个 Bucket 中，如果状态 A 花费不大于 B、`realScore` 不低于 B、压力不超过 B、且属性塔限制包含于 B，则 A 绝对优于 B，直接将 B 淘汰。
+*   **Layer 2: 近似劣解淘汰 (Approximately Dominates)**
+    在上述严格支配之外，若 A 相比 B 花费稍多，但 `realScore` 的增加足以弥补这种差异，且其他条件近似，则淘汰 B，避免细碎的次优路径膨胀。
+*   **Layer 3: 带配额保护的全局 Beam 截断**
+    经过桶内自剪枝后，按照全局候选的 `comparePlan`（首要 `searchPriority` 其次 `realScore`）排序，并实施硬截断：
+    *   `minBucketSurvivors` (配额底线)：截断前，为每个 Bucket 保留最优秀的若干个代表，免受全局暴力的截断。
+    *   `globalStateLimit` (全局状态上限)：全局最多保留数千状态，避免内存溢出。
 
 ### 11.2 启发函数估值 (Heuristic Evaluator)
 为了计算 `remainingStateValue`，可以在每步状态转移时，对当前 `sourceCursors` 到 `计算前瞻范围` 之间的未触发节点进行一维线性扫描估值（假设在最优状态下触发能产生的理论最大 Surplus），作为启发式数值加给 `decisionValue`。
@@ -299,8 +297,8 @@ A 淘汰 B 的条件 =
 
 替换掉旧版的定死策略（最大包/只买小包），在 DP 搜索结束后，对留存的合法路径集合打标签分类输出：
 
-1.  **推荐方案 (Recommended)**：按 `decisionValue` 排序的 Top 1 方案。
-2.  **保守方案 (Conservative)**：过滤掉所有包含主动降档不买、或购买低于 expectedRatio 单包作为升档铺路的路径，在剩余中选 `decisionValue` 最高的。
+1.  **推荐方案 (Recommended)**：按 `realScore` 排序的 Top 1 方案。
+2.  **保守方案 (Conservative)**：过滤掉所有包含主动降档不买、或购买低于 expectedRatio 单包作为升档铺路的路径，在剩余中选 `realScore` 最高的。
 3.  **升档铺路方案 (Paving)**：提取路径中明确包含“用亏损包换取下一批升档”动作，且整条路径 `moneySurplus >= 0` 的方案。
 4.  **降档等待方案 (Waiting)**：提取路径中包含“同批触发全不买以换取强制降档”动作，且最终 `moneySurplus >= 0` 的方案。
 5.  **机会保留方案 (Retention)**：如果所有搜索结果的 `moneySurplus < 0`，算法停止，输出空方案，并在 UI 侧重点渲染“已保留的触发点”与保留建议。

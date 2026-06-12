@@ -874,6 +874,8 @@ function resetToNextRechargeDay(state) {
     dailyPaidDiamonds: 0,
     currentDayAttributeTowers: [],
     sameDayBatchCount: 0,
+    tierIndex: 0,
+    pressure: (state.pressure || 0) + 1,
     signature: `${state.signature}|day:${state.rechargeDayIndex + 1}`,
   }
 }
@@ -935,9 +937,11 @@ function tryApplyTopUp(state, context) {
 }
 
 function expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context) {
-  if (!batchCandidate.requiresRechargeReset) return [state]
-  const toppedUp = tryApplyTopUp(state, context)
-  return [resetToNextRechargeDay(toppedUp)]
+  if (batchCandidate.requiresRechargeReset || state.dailyPaidDiamonds >= 12000) {
+    const toppedUp = tryApplyTopUp(state, context)
+    return [resetToNextRechargeDay(toppedUp)]
+  }
+  return [state]
 }
 
 function insertCandidate(map, candidate, context) {
@@ -1083,7 +1087,7 @@ function expandState(state, context) {
     }
   }
 
-  return next
+  return next.sort(comparePlan).slice(0, 50)
 }
 
 function collectTopValuePlans(context, topK = 1) {

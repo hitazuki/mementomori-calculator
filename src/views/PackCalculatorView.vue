@@ -113,8 +113,12 @@
 
         <div class="planner-controls">
           <label class="planner-field">
-            <span>{{ $t('planBudget') }}</span>
-            <input class="form-input" type="number" min="0" step="160" v-model.number="planSettings.budget" />
+            <span>{{ $t('planPreferenceLevel') || '购买意愿与偏好' }}</span>
+            <select class="form-select" v-model="planSettings.preferenceLevel">
+              <option value="conservative">{{ $t('planPrefConservative') || '保守 (极其挑剔/宁缺毋滥)' }}</option>
+              <option value="balanced">{{ $t('planPrefBalanced') || '均衡 (默认推荐/兼顾进度)' }}</option>
+              <option value="aggressive">{{ $t('planPrefAggressive') || '激进 (预算充足/积极把握机会)' }}</option>
+            </select>
           </label>
 
           <label class="planner-field">
@@ -127,12 +131,17 @@
           </label>
 
           <label class="planner-field">
-            <span>{{ $t('planTopUpThreshold') }}</span>
-            <input class="form-input" type="number" min="0" max="100" step="1" v-model.number="planSettings.topUpThreshold" />
+            <span>{{ $t('planTopUpMode') || '补累充模式' }}</span>
+            <select class="form-select" v-model="planSettings.topUpMode">
+              <option value="auto">{{ $t('planTopUpAuto') || '自动价值判断' }}</option>
+              <option value="off">{{ $t('planTopUpOff') || '关闭' }}</option>
+            </select>
           </label>
+
+
         </div>
 
-        <div class="planner-derived-note" v-html="$t('planTopUpNote', { threshold: planSettings.topUpThreshold || 10 })">
+        <div class="planner-derived-note" v-html="$t('planTopUpNote')">
         </div>
 
         <div class="planner-lane-head">
@@ -250,18 +259,21 @@
         </div>
 
         <div v-if="selectedPlan" class="planner-summary">
-          <div><span>{{ $t('planSumTrigger') }}</span><b>{{ selectedPlan.opportunityCount }}</b></div>
-          <div><span>{{ $t('planSumBatch') }}</span><b>{{ selectedPlan.batchCount }}</b></div>
-          <div><span>{{ $t('planSumPurchase') }}</span><b>{{ selectedPlan.purchases }}</b></div>
-          <div><span>{{ $t('planSumTopUpBatch') }}</span><b>{{ selectedPlan.topUpBatchCount || selectedPlan.topUpBatches?.length || 0 }}</b></div>
-          <div><span>{{ $t('planSumLimitedSpent') }}</span><b>{{ formatPrice(selectedPlan.limitedSpentYen ?? selectedPlan.spent) }}</b></div>
-          <div><span>{{ $t('planSumTopUpCost') }}</span><b>{{ formatPrice(selectedPlan.topUpTotalCost || 0) }}</b></div>
-          <div><span>{{ $t('planSumTotalSpent') }}</span><b>{{ formatPrice(selectedPlan.totalSpent ?? selectedPlan.spent) }}</b></div>
-          <div><span>{{ $t('planSumRemaining') }}</span><b>{{ formatPrice(selectedPlan.remaining) }}</b></div>
-          <div><span>{{ $t('planSumTotalValue') }}</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
-          <div><span>{{ $t('planSumFreeDiamond') }}</span><b>{{ (selectedPlan.rechargeFreeDiamonds || 0).toLocaleString() }}</b></div>
-          <div><span>{{ $t('planSumAvgCE') }}</span><b>{{ selectedPlan.averageCe.toFixed(1) }}</b></div>
-          <div><span>{{ $t('planSumFinalTier') }}</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
+          <div><span>{{ $t('planSumRecommendation') || '推荐结论' }}</span><b>{{ selectedPlan.labelKey ? $t(selectedPlan.labelKey) : selectedPlan.label }}</b></div>
+          <div><span>{{ $t('planSumExpectedRatio') || '预期性价比' }}</span><b>{{ selectedPlan.expectedRatio.toFixed(1) }}</b></div>
+          <div><span>{{ $t('planSumActualCE') || '路径实际性价比' }}</span><b>{{ selectedPlan.averageCe.toFixed(1) }}</b></div>
+          <div><span>{{ $t('planSumSurplus') || '金钱净收益' }}</span><b :style="{ color: selectedPlan.moneySurplus < 0 ? '#e74c3c' : 'var(--gold)' }">{{ selectedPlan.moneySurplus.toLocaleString() }}</b></div>
+          <div><span>{{ $t('planSumDecision') || '决策价值' }}</span><b class="planner-simple-metric">{{ selectedPlan.decisionValue.toLocaleString() }}</b></div>
+          <div><span>{{ $t('planSumTotalValue') || '总价值' }}</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
+          <div><span>{{ $t('planSumTotalSpent') || '总花费' }}</span><b>{{ formatPrice(selectedPlan.totalSpent ?? selectedPlan.spent) }}</b></div>
+          <div><span>{{ $t('planSumLimitedSpent') || '限时包花费' }}</span><b>{{ formatPrice(selectedPlan.limitedSpentYen ?? selectedPlan.spent) }}</b></div>
+          <div><span>{{ $t('planSumTopUpCost') || '补累充花费' }}</span><b>{{ formatPrice(selectedPlan.topUpTotalCost || 0) }}</b></div>
+          <div><span>{{ $t('planSumPurchase') || '购买限时包数' }}</span><b>{{ selectedPlan.purchases }}</b></div>
+          <div><span>{{ $t('planSumTriggerCount') || '已触发机会数' }}</span><b>{{ selectedPlan.triggerCount }}</b></div>
+          <div><span>{{ $t('planSumRetained') || '保留机会数' }}</span><b>{{ selectedPlan.retainedOpportunities }}</b></div>
+          <div><span>{{ $t('planSumResets') || '跨日重置次数' }}</span><b>{{ selectedPlan.rechargeResets }}</b></div>
+          <div><span>{{ $t('planSumTopUpBatch') || '补累充批次数' }}</span><b>{{ selectedPlan.topUpBatches?.length || 0 }}</b></div>
+          <div><span>{{ $t('planSumFinalTier') || '下一批结束后档位' }}</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
         </div>
 
         <div v-if="selectedPlan && selectedPlan.topUpBatches && selectedPlan.topUpBatches.length" class="planner-top-up-summary">
@@ -631,9 +643,10 @@ const filteredPacks = computed(() => {
 })
 
 const planSettings = reactive({
-  budget: 118000,
+  preferenceLevel: 'balanced',
+  executionWeight: 50,
   currentPrice: 160,
-  topUpThreshold: 10,
+  topUpMode: 'auto',
 })
 
 const activePlanId = ref('bestValue')

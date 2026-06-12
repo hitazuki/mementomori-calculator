@@ -1,643 +1,1498 @@
-import test from 'node:test'
-import assert from 'node:assert/strict'
+import { DAILY_RECHARGE_BONUS_TIERS, marginalFreeDiamonds, unlockedRechargeTiers, cumulativeFreeDiamonds } from '../src/engine/dailyRechargeBonus.js'
+import { parseMainQuestProgress } from '../src/engine/mainQuestProgress.js'
 
-import { cumulativeFreeDiamonds, marginalFreeDiamonds } from '../src/engine/dailyRechargeBonus.js'
-import { mainQuestStageCount, parseMainQuestProgress } from '../src/engine/mainQuestProgress.js'
-import { __testables, buildUltraSalePlanOptions, compressUltraSalePlanSteps, planUltraSalePurchases } from '../src/engine/ultraSalePlanner.js'
+const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
+const DEFAULT_MAX_STATES = 350
+const TOP_UP_SOURCE_LABEL = '每日累充补包'
+const ALL_ATTRIBUTE_TOWER = 'origin_group_all_towers'
+const ATTRIBUTE_TOWERS = [
+  'origin_tower_blue',
+  'origin_tower_red',
+  'origin_tower_green',
+  'origin_tower_yellow',
+]
 
-function pack(trigger, price, value) {
-  return {
-    cat: 'tower',
-    tower: 'origin_tower_infinite',
-    trigger,
-    sortKey: Number(trigger),
-    price,
-    value,
-    ce: value / Math.max(1, price / 2),
-    items: [],
-  }
+function clamp(n, min, max) {
+  return Math.min(max, Math.max(min, n))
 }
 
-function questPack(trigger, price, value) {
-  return {
-    ...pack(trigger, price, value),
-    cat: 'quest',
-    tower: null,
-    sortKey: Number(String(trigger).split('-')[0]),
-  }
+function parseTriggerProgress(trigger) {
+  if (typeof trigger === 'number') return trigger
+  const text = String(trigger || '').trim()
+  if (!text) return 0
+  const quest = text.match(/^(\d+)-(\d+)$/)
+  if (quest) return Number(quest[1]) + Number(quest[2]) / 100
+  const numeric = Number(text)
+  return Number.isFinite(numeric) ? numeric : 0
 }
 
-function towerPack(tower, trigger, price, value) {
-  return {
-    ...pack(trigger, price, value),
-    tower,
-  }
+function parseLaneProgress(progress, lane) {
+  if ((lane.cat || lane.source) === 'quest') return parseMainQuestProgress(progress)
+  return parseTriggerProgress(progress)
 }
 
-function permanentDiamondPack(name, price, originalValue) {
-  return {
-    name,
-    price,
-    originalValue,
-    paidDiamonds: price / 2,
-    value: originalValue,
-    ce: originalValue / (price / 2),
-    items: [],
-  }
+function getPriceTiers(packs) {
+  const prices = [...new Set(packs.map(pack => pack.price))]
+    .filter(price => Number.isFinite(price))
+    .sort((a, b) => a - b)
+  return prices.length ? prices : DEFAULT_PRICE_TIERS
 }
 
-test('daily recharge bonus accumulates unlocked tier rewards', () => {
-  assert.equal(cumulativeFreeDiamonds(5900), 2400)
-  assert.equal(cumulativeFreeDiamonds(6000), 7200)
-  assert.equal(marginalFreeDiamonds(5900, 160), 4800)
-  assert.equal(marginalFreeDiamonds(12000, 6000), 4200)
-})
+function laneLabel(lane) {
+  if (lane.label) return lane.label
+  if (lane.cat === 'quest') return '主线'
+  if (lane.cat === 'rank') return '等级'
+  return lane.tower || '塔'
+}
 
-test('buying one pack in a batch raises the tier for the next batch', () => {
-  const packs = [
-    pack('10', 160, 100),
-    pack('20', 650, 1000),
-  ]
+function isAttributeTowerLane(lane) {
+  return lane.cat === 'tower' && ATTRIBUTE_TOWERS.includes(lane.tower)
+}
 
-  const plan = planUltraSalePurchases(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 30,
-    currentPrice: 160,
-    budget: 970,
-    batchSize: 1,
+function paidDiamondsForPriceValue(price) {
+  return Math.round(price / 2)
+}
+
+export function paidDiamondsForPrice(price) {
+  return paidDiamondsForPriceValue(price)
+}
+
+function getPackOriginalValue(pack) {
+  if (Number.isFinite(pack.originalValue)) return pack.originalValue
+  if (Number.isFinite(pack.value) && Number.isFinite(pack.rechargeValue)) return pack.value - pack.rechargeValue
+  return Number(pack.value) || 0
+}
+
+function getPackPaidDiamonds(pack) {
+  if (Number.isFinite(pack.paidDiamonds)) return pack.paidDiamonds
+  return paidDiamondsForPrice(pack.price)
+}
+
+function normalizePlanningLanes(settings) {
+  if (Array.isArray(settings.lanes) && settings.lanes.length) {
+    return settings.lanes
+      .filter(lane => lane.enabled !== false)
+      .map(lane => {
+        const normalized = {
+          ...lane,
+          cat: lane.cat || lane.source || 'tower',
+        }
+        return {
+          ...normalized,
+          batchSize: isAttributeTowerLane(normalized)
+            ? 1
+            : Math.max(1, Math.floor(Number(lane.batchSize) || Number(settings.batchSize) || 1)),
+        }
+      })
+  }
+
+  return [{
+    id: settings.source === 'tower' ? `tower:${settings.tower || 'origin_tower_infinite'}` : settings.source || 'tower',
+    cat: settings.source || 'tower',
+    tower: settings.tower || 'origin_tower_infinite',
+    label: settings.label,
+    startProgress: settings.startProgress,
+    endProgress: settings.endProgress,
+    batchSize: Math.max(1, Math.floor(Number(settings.batchSize) || 1)),
+  }]
+}
+
+function buildLaneOpportunities(packs, lane) {
+  const start = parseLaneProgress(lane.startProgress, lane)
+  const end = parseLaneProgress(lane.endProgress, lane)
+  const source = lane.cat || lane.source || 'tower'
+  const tower = lane.tower || null
+  const label = laneLabel(lane)
+  const laneId = lane.id || `${source}:${tower || 'all'}`
+
+  const groups = new Map()
+  for (const pack of packs) {
+    if (pack.cat !== source) continue
+    if (source === 'tower' && tower && pack.tower !== tower) continue
+
+    const progress = parseLaneProgress(pack.trigger, lane)
+    if (progress <= start || (end > 0 && progress > end)) continue
+
+    const key = `${laneId}:${pack.trigger}`
+    if (!groups.has(key)) {
+      groups.set(key, {
+        id: key,
+        laneId,
+        label,
+        trigger: pack.trigger,
+        displayTrigger: `${label}: ${pack.trigger}`,
+        sortValue: progress,
+        packsByPrice: new Map(),
+      })
+    }
+    groups.get(key).packsByPrice.set(pack.price, {
+      ...pack,
+      plannerLaneId: laneId,
+      plannerSourceLabel: label,
+      plannerDisplayTrigger: `${label}: ${pack.trigger}`,
+    })
+  }
+
+  return [...groups.values()].sort((a, b) => {
+    if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
+    return String(a.trigger).localeCompare(String(b.trigger), undefined, { numeric: true })
   })
+}
 
-  assert.equal(plan.spent, 810)
-  assert.equal(plan.purchases, 2)
-  assert.equal(plan.steps[0].nextTierPrice, 650)
-  assert.equal(plan.steps[1].tierPrice, 650)
-})
+function buildOpportunities(packs, settings) {
+  const [lane] = normalizePlanningLanes(settings)
+  return buildLaneOpportunities(packs, lane)
+}
 
-test('buying part of a batch raises only one tier and skips low-value offers', () => {
-  const packs = [
-    pack('10', 160, 900),
-    pack('20', 160, 100),
-    pack('30', 650, 1000),
-  ]
+function buildBatches(opportunities, batchSize) {
+  const size = Math.max(1, Number(batchSize) || 1)
+  const batches = []
+  for (let i = 0; i < opportunities.length; i += size) batches.push(opportunities.slice(i, i + size))
+  return batches
+}
 
-  const plan = planUltraSalePurchases(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 40,
-    currentPrice: 160,
-    budget: 810,
-    batchSize: 2,
+function sortOpportunities(opportunities) {
+  return [...opportunities].sort((a, b) => {
+    const labelOrder = String(a.label || '').localeCompare(String(b.label || ''))
+    if (labelOrder !== 0) return labelOrder
+    if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
+    return String(a.trigger).localeCompare(String(b.trigger), undefined, { numeric: true })
   })
+}
 
-  const partialBatch = plan.steps.find(step => step.opportunities.length === 2)
-  assert.equal(partialBatch.purchases.length, 1)
-  assert.equal(partialBatch.purchases[0].trigger, '30')
-  assert.deepEqual(partialBatch.opportunities.map(opportunity => ({
+function buildAttributeTowerEvents(packs, lanes) {
+  const attributeLanes = lanes.filter(isAttributeTowerLane)
+  if (!attributeLanes.length) return []
+
+  const singleEvents = []
+  for (const lane of attributeLanes) {
+    for (const opportunity of buildLaneOpportunities(packs, { ...lane, batchSize: 1 })) {
+      singleEvents.push({
+        kind: 'single',
+        sortValue: opportunity.sortValue,
+        topologyKey: `single:${opportunity.sortValue}`,
+        opportunities: [opportunity],
+      })
+    }
+  }
+
+  const allTowerEvents = []
+  if (ATTRIBUTE_TOWERS.every(tower => attributeLanes.some(lane => lane.tower === tower))) {
+    const start = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.startProgress, lane)))
+    const end = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.endProgress, lane)))
+    if (end > start) {
+      const allTowerLane = {
+        id: 'tower_all_derived',
+        cat: 'tower',
+        tower: ALL_ATTRIBUTE_TOWER,
+        label: '全属性塔抵达',
+        startProgress: start,
+        endProgress: end,
+        batchSize: 1,
+      }
+      for (const opportunity of buildLaneOpportunities(packs, allTowerLane)) {
+        allTowerEvents.push({
+          kind: 'all',
+          sortValue: opportunity.sortValue,
+          topologyKey: `all:${opportunity.sortValue}`,
+          opportunities: [opportunity],
+        })
+      }
+    }
+  }
+
+  return [...singleEvents, ...allTowerEvents]
+    .sort((a, b) => {
+      if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
+      if (a.kind === b.kind) return 0
+      return a.kind === 'all' ? -1 : 1
+    })
+    .map((event, index) => ({
+      id: `attribute:${index}:${event.kind}:${event.sortValue}`,
+      opportunities: sortOpportunities(event.opportunities),
+      sortValue: event.sortValue,
+      kind: event.kind,
+      topologyKey: event.topologyKey,
+    }))
+}
+
+function buildAttributeTowerTopologyBatches(packs, lanes) {
+  const events = buildAttributeTowerEvents(packs, lanes)
+  const batches = events.map(event => event.opportunities)
+  return {
+    batches,
+    opportunities: batches.flat(),
+  }
+}
+
+function attributeTowerSourceId(lane) {
+  return lane.id || `tower:${lane.tower}`
+}
+
+function buildPlanningSources(packs, settings) {
+  const lanes = normalizePlanningLanes(settings)
+  const sources = []
+
+  for (const lane of lanes.filter(lane => !isAttributeTowerLane(lane))) {
+    const opportunities = buildLaneOpportunities(packs, lane)
+    if (!opportunities.length) continue
+    sources.push({
+      id: lane.id || `${lane.cat}:${lane.tower || 'all'}`,
+      label: laneLabel(lane),
+      batchSize: Math.max(1, Number(lane.batchSize) || 1),
+      groups: opportunities.map((opportunity, index) => ({
+        id: `${opportunity.id}:${index}`,
+        opportunities: [opportunity],
+        sortValue: opportunity.sortValue,
+      })),
+    })
+  }
+
+  const attributeSourceIndices = new Map()
+  for (const lane of lanes.filter(isAttributeTowerLane)) {
+    const opportunities = buildLaneOpportunities(packs, { ...lane, batchSize: 1 })
+    const sourceIndex = sources.length
+    attributeSourceIndices.set(lane.tower, sourceIndex)
+    sources.push({
+      id: attributeTowerSourceId(lane),
+      label: laneLabel(lane),
+      batchSize: 1,
+      attributeTower: lane.tower,
+      attributeStartProgress: parseLaneProgress(lane.startProgress, lane),
+      attributeEndProgress: parseLaneProgress(lane.endProgress, lane),
+      groups: opportunities.map((opportunity, index) => ({
+        id: `${opportunity.id}:${index}`,
+        opportunities: [opportunity],
+        sortValue: opportunity.sortValue,
+        attributeLayer: opportunity.sortValue,
+        attributeKind: 'single',
+      })),
+    })
+  }
+
+  const attributeLanes = lanes.filter(isAttributeTowerLane)
+  if (ATTRIBUTE_TOWERS.every(tower => attributeSourceIndices.has(tower))) {
+    const start = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.startProgress, lane)))
+    const end = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.endProgress, lane)))
+    if (end > start) {
+      const allTowerLane = {
+        id: 'tower_all_derived',
+        cat: 'tower',
+        tower: ALL_ATTRIBUTE_TOWER,
+        label: '全属性塔抵达',
+        startProgress: start,
+        endProgress: end,
+        batchSize: 1,
+      }
+      const opportunities = buildLaneOpportunities(packs, allTowerLane)
+      if (opportunities.length) {
+        sources.push({
+          id: 'attribute_all_towers',
+          label: '全属性塔抵达',
+          batchSize: 1,
+          attributeKind: 'all',
+          allAttributeTowerSourceIndices: ATTRIBUTE_TOWERS.map(tower => attributeSourceIndices.get(tower)),
+          groups: opportunities.map((opportunity, index) => ({
+            id: `${opportunity.id}:${index}`,
+            opportunities: [opportunity],
+            sortValue: opportunity.sortValue,
+            attributeLayer: opportunity.sortValue,
+            attributeKind: 'all',
+          })),
+        })
+      }
+    }
+  }
+
+  return { lanes, sources }
+}
+
+function sourceCursorsKey(cursors) {
+  return cursors.join(',')
+}
+
+function allSourcesExhausted(sources, cursors) {
+  return sources.every((source, index) => cursors[index] >= source.groups.length)
+}
+
+function batchIdForGroups(groups) {
+  return groups.map(group => group.id).join('+')
+}
+
+function attributeTowerSetKey(towers = []) {
+  return [...new Set(towers)].sort().join(',')
+}
+
+function mergeAttributeTowerSets(...sets) {
+  return [...new Set(sets.flat().filter(Boolean))].sort()
+}
+
+function attributeTowerSetIntersects(a = [], b = []) {
+  const lookup = new Set(a)
+  return b.some(tower => lookup.has(tower))
+}
+
+function attributeTowerSetSubset(a = [], b = []) {
+  const lookup = new Set(b)
+  return a.every(tower => lookup.has(tower))
+}
+
+function attributeTowersForGroups(groupsBySource, sources) {
+  const towers = []
+  for (const [sourceIndexText, groups] of Object.entries(groupsBySource)) {
+    if (!groups.length) continue
+    const tower = sources[Number(sourceIndexText)]?.attributeTower
+    if (tower) towers.push(tower)
+  }
+  return attributeTowerSetKey(towers).split(',').filter(Boolean)
+}
+
+function attributeTowerGateInterval(sourceIndex, state, sources) {
+  const towerSource = sources[sourceIndex]
+  if (!towerSource) return null
+  const cursor = state.sourceCursors[sourceIndex] || 0
+  const previous = cursor > 0
+    ? towerSource.groups[cursor - 1]?.sortValue
+    : towerSource.attributeStartProgress
+  const next = cursor < towerSource.groups.length
+    ? towerSource.groups[cursor]?.sortValue
+    : towerSource.attributeEndProgress
+  if (!Number.isFinite(previous) || !Number.isFinite(next)) return null
+  return { sourceIndex, previous, next }
+}
+
+function allAttributeTowerGroupAvailable(source, group, state, sources) {
+  if (!source.allAttributeTowerSourceIndices?.length) return true
+  const layer = group.sortValue
+  return source.allAttributeTowerSourceIndices.every(sourceIndex => {
+    const interval = attributeTowerGateInterval(sourceIndex, state, sources)
+    return interval
+      && layer > interval.previous
+      && layer <= interval.next
+  })
+}
+
+function blockedTowerSourcesForAllAttributeGroup(source, group, state, sources) {
+  if (!source.allAttributeTowerSourceIndices?.length) return []
+  const layer = group.sortValue
+  const intervals = source.allAttributeTowerSourceIndices
+    .map(sourceIndex => attributeTowerGateInterval(sourceIndex, state, sources))
+    .filter(interval => interval
+      && layer > interval.previous
+      && layer <= interval.next)
+  if (intervals.length !== source.allAttributeTowerSourceIndices.length) return []
+  const slowestPrevious = Math.min(...intervals.map(interval => interval.previous))
+  return intervals
+    .filter(interval => interval.previous === slowestPrevious)
+    .map(interval => interval.sourceIndex)
+}
+
+function allAttributeBatchValid(groupsBySource, sources, state) {
+  if (!state) return true
+  for (const [sourceIndexText, groups] of Object.entries(groupsBySource)) {
+    const source = sources[Number(sourceIndexText)]
+    if (!source?.allAttributeTowerSourceIndices?.length) continue
+    for (const group of groups) {
+      for (const blockedSourceIndex of blockedTowerSourcesForAllAttributeGroup(source, group, state, sources)) {
+        if (groupsBySource[blockedSourceIndex]?.length) return false
+      }
+    }
+  }
+  return true
+}
+
+function makeBatchCandidate(groupsBySource, sources, state = null) {
+  if (!allAttributeBatchValid(groupsBySource, sources, state)) return null
+  const opportunities = []
+  const cursorDelta = Array.from({ length: sources.length }, () => 0)
+  let sourceCount = 0
+  const attributeTowers = attributeTowersForGroups(groupsBySource, sources)
+  let requiresRechargeReset = state
+    ? attributeTowerSetIntersects(state.currentDayAttributeTowers, attributeTowers)
+    : false
+  for (const [sourceIndexText, groups] of Object.entries(groupsBySource)) {
+    const sourceIndex = Number(sourceIndexText)
+    if (!groups.length) continue
+    sourceCount += 1
+    cursorDelta[sourceIndex] = groups.length
+    const source = sources[sourceIndex]
+    if (state && source?.forceRechargeResetBetweenGroups && state.sourceCursors[sourceIndex] > 0) {
+      const previousGroup = source.groups[state.sourceCursors[sourceIndex] - 1]
+      const nextGroup = groups[0]
+      if (previousGroup?.topologyKey && nextGroup?.topologyKey && previousGroup.topologyKey !== nextGroup.topologyKey) {
+        requiresRechargeReset = true
+      }
+    }
+    for (const group of groups) opportunities.push(...group.opportunities)
+  }
+  const sorted = sortOpportunities(opportunities)
+  const pressure = sorted.length + Math.max(0, sourceCount - 1)
+  return {
+    id: batchIdForGroups(Object.values(groupsBySource).flat()),
+    opportunities: sorted,
+    cursorDelta,
+    pressure,
+    sourceCount,
+    attributeTowers,
+    requiresRechargeReset,
+  }
+}
+
+function sourcePrefixOptions(source, cursor, state, sources) {
+  const remaining = source.groups.length - cursor
+  if (remaining <= 0) return []
+  if (source.allAttributeTowerSourceIndices && !allAttributeTowerGroupAvailable(source, source.groups[cursor], state, sources)) {
+    return []
+  }
+  let maxTake = Math.min(source.batchSize, remaining)
+  if (source.limitPrefixToSameTopology) {
+    const topologyKey = source.groups[cursor]?.topologyKey
+    let sameTopologyCount = 0
+    while (
+      sameTopologyCount < maxTake
+      && source.groups[cursor + sameTopologyCount]?.topologyKey === topologyKey
+    ) {
+      sameTopologyCount += 1
+    }
+    maxTake = Math.max(1, sameTopologyCount)
+  }
+  const options = []
+  for (let count = 1; count <= maxTake; count++) {
+    options.push(source.groups.slice(cursor, cursor + count))
+  }
+  return options
+}
+
+function generateBatchCandidates(state, context) {
+  const { sources } = context
+  const candidates = new Map()
+  const activeOptions = []
+
+  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    const source = sources[sourceIndex]
+    const options = sourcePrefixOptions(source, state.sourceCursors[sourceIndex], state, sources)
+    if (!options.length) continue
+    activeOptions.push({ sourceIndex, options })
+
+    for (const groups of options) {
+      const candidate = makeBatchCandidate({ [sourceIndex]: groups }, sources, state)
+      if (candidate) candidates.set(candidate.id, candidate)
+    }
+  }
+
+  const maxCrossSources = Math.min(activeOptions.length, Number(context.settings.maxCrossSources) || 5)
+  const cappedSources = activeOptions.slice(0, maxCrossSources)
+  const comboLimit = Math.max(20, Number(context.settings.maxBatchCandidates) || 120)
+
+  function addCross(index, selected) {
+    if (candidates.size >= comboLimit) return
+    if (index >= cappedSources.length) {
+      if (Object.keys(selected).length < 2) return
+      const candidate = makeBatchCandidate(selected, sources, state)
+      if (candidate) candidates.set(candidate.id, candidate)
+      return
+    }
+
+    addCross(index + 1, selected)
+
+    const { sourceIndex, options } = cappedSources[index]
+    const first = options[0]
+    addCross(index + 1, { ...selected, [sourceIndex]: first })
+
+    const maxPrefix = options[options.length - 1]
+    if (maxPrefix !== first) addCross(index + 1, { ...selected, [sourceIndex]: maxPrefix })
+  }
+
+  addCross(0, {})
+
+  return [...candidates.values()]
+    .filter(candidate => candidate.opportunities.length)
+    .sort((a, b) => {
+      if (a.pressure !== b.pressure) return a.pressure - b.pressure
+      return b.opportunities.length - a.opportunities.length
+    })
+    .slice(0, comboLimit)
+}
+
+function rechargeValueForPaid(beforePaid, addedPaid, context) {
+  const freeDiamonds = marginalFreeDiamonds(beforePaid, addedPaid)
+  return {
+    beforePaid,
+    afterPaid: beforePaid + addedPaid,
+    addedPaid,
+    freeDiamonds,
+    value: Math.round(freeDiamonds * context.freeDiamondScore),
+    unlockedTiers: unlockedRechargeTiers(beforePaid, addedPaid).map(tier => tier.paid),
+  }
+}
+
+function rechargeValueForPurchase(beforeSpent, addedCost, context) {
+  return rechargeValueForPaid(paidDiamondsForPrice(beforeSpent), paidDiamondsForPrice(addedCost), context)
+}
+
+function actionOptionsForBatch(batch, tierPrice) {
+  const offers = batch
+    .map(opportunity => opportunity.packsByPrice.get(tierPrice))
+    .filter(Boolean)
+    .sort((a, b) => getPackOriginalValue(b) - getPackOriginalValue(a))
+
+  const actions = [{
+    bought: false,
+    limitedCostYen: 0,
+    cost: 0,
+    originalValue: 0,
+    paidDiamonds: 0,
+    purchases: [],
+  }]
+
+  let totalCost = 0
+  let totalOriginalValue = 0
+  let totalPaidDiamonds = 0
+  const selected = []
+  for (const pack of offers) {
+    totalCost += pack.price
+    totalOriginalValue += getPackOriginalValue(pack)
+    totalPaidDiamonds += getPackPaidDiamonds(pack)
+    selected.push(pack)
+    actions.push({
+      bought: true,
+      limitedCostYen: totalCost,
+      cost: totalCost,
+      originalValue: totalOriginalValue,
+      paidDiamonds: totalPaidDiamonds,
+      purchases: [...selected],
+    })
+  }
+
+  return actions
+}
+
+function nameForTopUpPack(pack) {
+  return String(pack.name || pack.displayTrigger || '钻石组合包')
+}
+
+function isPermanentDiamondTopUpPack(pack) {
+  const name = String(pack.name || '')
+  return name.startsWith('钻石组合包') && !name.includes('首次')
+}
+
+function normalizePermanentTopUpPacks(packs) {
+  return packs
+    .filter(isPermanentDiamondTopUpPack)
+    .map((pack, index) => {
+      const price = Math.max(0, Math.floor(Number(pack.price) || 0))
+      const paidDiamonds = getPackPaidDiamonds({ ...pack, price })
+      const originalValue = getPackOriginalValue(pack)
+      return {
+        ...pack,
+        topUpId: `${nameForTopUpPack(pack)}:${price}:${index}`,
+        displayTrigger: nameForTopUpPack(pack),
+        price,
+        paidDiamonds,
+        originalValue,
+        value: originalValue,
+        ce: paidDiamonds > 0 ? originalValue / paidDiamonds : 0,
+        items: pack.items || [],
+      }
+    })
+    .filter(pack => pack.price > 0 && pack.paidDiamonds > 0)
+    .sort((a, b) => a.price - b.price)
+}
+
+function mergeTopUpItems(packs) {
+  const map = new Map()
+  for (const pack of packs) {
+    for (const item of pack.items || []) {
+      const key = `${item.itype ?? item.ItemType}:${item.iid ?? item.ItemId}`
+      if (!map.has(key)) map.set(key, { ...item, qty: 0, value: 0 })
+      const current = map.get(key)
+      current.qty += Number(item.qty ?? item.ItemCount) || 0
+      current.value += Number(item.value) || 0
+    }
+  }
+  return [...map.values()]
+}
+
+function groupTopUpPacks(packs) {
+  const groups = new Map()
+  for (const pack of packs) {
+    const key = pack.topUpId || `${pack.name}:${pack.price}`
+    if (!groups.has(key)) groups.set(key, { pack, copies: [] })
+    groups.get(key).copies.push(pack)
+  }
+
+  return [...groups.values()].map(group => {
+    const count = group.copies.length
+    const price = group.copies.reduce((sum, pack) => sum + pack.price, 0)
+    const paidDiamonds = group.copies.reduce((sum, pack) => sum + getPackPaidDiamonds(pack), 0)
+    const originalValue = group.copies.reduce((sum, pack) => sum + getPackOriginalValue(pack), 0)
+    const label = count > 1 ? `${nameForTopUpPack(group.pack)} ×${count}` : nameForTopUpPack(group.pack)
+
+    return {
+      trigger: TOP_UP_SOURCE_LABEL,
+      sourceLabel: '常驻补包',
+      displayTrigger: label,
+      price,
+      value: Math.round(originalValue),
+      originalValue: Math.round(originalValue),
+      rechargeValue: 0,
+      ce: paidDiamonds > 0 ? originalValue / paidDiamonds : 0,
+      paidDiamonds,
+      items: mergeTopUpItems(group.copies),
+    }
+  })
+}
+
+function nextRechargeTier(currentPaid) {
+  return DAILY_RECHARGE_BONUS_TIERS.find(tier => currentPaid < tier.paid) || null
+}
+
+function findPermanentTopUpOption(state, context) {
+  if (!context.permanentPacks.length || state.purchases <= 0) return null
+
+  const currentPaid = state.dailyPaidDiamonds
+  const targetTier = nextRechargeTier(currentPaid)
+  if (!targetTier) return null
+
+  // 包必须按能提供的钻石从大到小排序
+  const sortedPacks = [...context.permanentPacks].sort((a, b) => getPackPaidDiamonds(b) - getPackPaidDiamonds(a))
+  
+  let remainingGap = targetTier.paid - currentPaid
+  const usedPackIds = new Set()
+  const comboPurchases = []
+  
+  while (remainingGap > 0) {
+    let selectedPack = null
+    let largestUsedPack = null
+    
+    // 1. 尝试寻找不超额的包
+    for (const pack of sortedPacks) {
+      if (getPackPaidDiamonds(pack) <= remainingGap) {
+        if (!usedPackIds.has(pack.id)) {
+          selectedPack = pack // 找到最大的未使用的包
+          break
+        }
+        if (!largestUsedPack) largestUsedPack = pack // 记录最大的已使用的包
+      }
+    }
+    
+    // 2. 如果没找到未使用的，退而求其次用最大的已使用的包
+    if (!selectedPack && largestUsedPack) {
+      selectedPack = largestUsedPack
+    }
+    
+    // 3. 如果连已使用的都没有（所有包都大于缺口），必须超额，选最小的包
+    if (!selectedPack) {
+      selectedPack = sortedPacks[sortedPacks.length - 1] // 最小的包
+    }
+    
+    comboPurchases.push(selectedPack)
+    usedPackIds.add(selectedPack.id)
+    remainingGap -= getPackPaidDiamonds(selectedPack)
+  }
+  
+  // 组装最终方案返回
+  const totalPaid = comboPurchases.reduce((sum, p) => sum + getPackPaidDiamonds(p), 0)
+  const totalCost = comboPurchases.reduce((sum, p) => sum + p.price, 0)
+  const totalOriginalValue = comboPurchases.reduce((sum, p) => sum + getPackOriginalValue(p), 0)
+  const recharge = rechargeValueForPaid(currentPaid, totalPaid, context)
+  
+  return {
+    cost: totalCost,
+    originalValue: totalOriginalValue,
+    purchases: comboPurchases,
+    paidDiamonds: totalPaid,
+    recharge,
+    value: Math.round(totalOriginalValue + recharge.value),
+    unlockedCount: recharge.unlockedTiers.length,
+  }
+}
+
+function summarizeBatch(batch) {
+  if (!batch.length) return ''
+  if (batch.length === 1) return batch[0].displayTrigger || String(batch[0].trigger)
+
+  const byLabel = new Map()
+  for (const opportunity of batch) {
+    const label = opportunity.label || ''
+    if (!byLabel.has(label)) byLabel.set(label, [])
+    byLabel.get(label).push(opportunity)
+  }
+
+  return [...byLabel.entries()].map(([label, opportunities]) => {
+    const first = opportunities[0]
+    const last = opportunities[opportunities.length - 1]
+    const range = first.trigger === last.trigger ? first.trigger : `${first.trigger} - ${last.trigger}`
+    return label ? `${label}: ${range}` : String(range)
+  }).join('; ')
+}
+
+function summarizeOpportunity(opportunity, tierPrice, purchasedPacks) {
+  const pack = opportunity.packsByPrice.get(tierPrice)
+  const purchased = !!pack && purchasedPacks.includes(pack)
+  return {
+    label: opportunity.label || '',
     trigger: opportunity.trigger,
-    purchased: opportunity.purchased,
-  })), [
-    { trigger: '20', purchased: false },
-    { trigger: '30', purchased: true },
-  ])
-  assert.equal(partialBatch.skippedOpportunities.length, 1)
-  assert.equal(partialBatch.tierPrice, 650)
-  assert.equal(partialBatch.nextTierPrice, 650)
-})
-
-test('planner can hold an untriggered node for a later higher tier batch', () => {
-  const packs = [
-    questPack('7-28', 160, 100),
-    pack('10', 160, 10),
-    pack('10', 650, 1000),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    currentPrice: 160,
-    budget: 810,
-    lanes: [
-      { id: 'quest', cat: 'quest', label: '主线', enabled: true, startProgress: '0-0', endProgress: '8-28', batchSize: 1 },
-      { id: 'tower', cat: 'tower', tower: 'origin_tower_infinite', label: '无穷塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 1 },
-    ],
-  })
-
-  assert.match(plan.steps[0].triggerRange, /主线/)
-  assert.equal(plan.steps[0].tierPrice, 160)
-  assert.equal(plan.steps[0].nextTierPrice, 650)
-  const towerStep = plan.steps.find(step => step.triggerRange.includes('无穷塔: 10'))
-  assert.equal(towerStep.tierPrice, 650)
-  assert.equal(towerStep.purchases[0].price, 650)
-})
-
-test('buildUltraSalePlanOptions exposes value and policy plans', () => {
-  const packs = [
-    pack('10', 160, 400),
-    pack('20', 160, 100),
-    pack('30', 650, 900),
-    pack('40', 1000, 1600),
-  ]
-
-  const options = buildUltraSalePlanOptions(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 50,
-    currentPrice: 160,
-    budget: 1810,
-    batchSize: 1,
-  })
-
-  assert.deepEqual(options.map(option => option.id), ['bestValue', 'smallPack', 'maxPack'])
-  assert.ok(options[0].value >= 0)
-  assert.equal(options[1].label, '只买小包')
-  assert.equal(options[2].label, '冲最大包')
-})
-
-test('planner appends non-first permanent diamond packs to top up daily recharge tiers', () => {
-  const packs = [
-    pack('10', 11800, 5900),
-  ]
-  const permanentPacks = [
-    permanentDiamondPack('钻石组合包 80', 160, 148),
-    permanentDiamondPack('钻石组合包 80 (首次双倍)', 160, 228),
-    permanentDiamondPack('钻石组合包 325', 650, 518),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 10,
-    currentPrice: 11800,
-    budget: 12120,
-    batchSize: 1,
-    topUpThreshold: 10,
-    permanentPacks,
-    freeDiamondScore: 1,
-  })
-
-  const topUpStep = plan.steps[0]
-  assert.equal(topUpStep.cost, 12120)
-  assert.equal(topUpStep.topUpCost, 320)
-  assert.equal(topUpStep.topUpRechargeFreeDiamonds, 4800)
-  assert.deepEqual(topUpStep.topUpUnlockedRechargeTiers, [6000])
-  assert.equal(plan.topUpBatchCount, 1)
-  assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 80 ×2')
-  assert.equal(plan.topUpBatches[0].index, 1)
-  assert.equal(plan.topUpBatches[0].cost, 320)
-  assert.equal(plan.topUpPacks[0].displayTrigger, '钻石组合包 80 ×2')
-  assert.equal(topUpStep.topUpPacks[0].displayTrigger, '钻石组合包 80 ×2')
-  assert.equal(topUpStep.topUpPacks.some(p => p.displayTrigger.includes('首次')), false)
-})
-
-test('planner stops permanent top-up once the next recharge tier is reached', () => {
-  const packs = [
-    pack('10', 11800, 5900),
-  ]
-  const permanentPacks = [
-    permanentDiamondPack('钻石组合包 80', 160, 148),
-    permanentDiamondPack('钻石组合包 325', 650, 518),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 10,
-    currentPrice: 11800,
-    budget: 12280,
-    batchSize: 1,
-    topUpThreshold: 10,
-    permanentPacks,
-    freeDiamondScore: 1,
-  })
-
-  assert.equal(plan.spent, 11800)
-  assert.equal(plan.remaining, 480)
-  assert.equal(plan.totalSpent, 12120)
-  assert.equal(plan.topUpTotalCost, 320)
-  assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 80 ×2')
-  assert.equal(plan.steps[0].topUpCost, 320)
-  assert.deepEqual(plan.steps[0].topUpUnlockedRechargeTiers, [6000])
-})
-
-test('planner uses the cheapest permanent diamond combo for the next recharge tier', () => {
-  const packs = [
-    pack('10', 11350, 5675),
-  ]
-  const permanentPacks = [
-    permanentDiamondPack('钻石组合包 80', 160, 148),
-    permanentDiamondPack('钻石组合包 325', 650, 518),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 10,
-    currentPrice: 11350,
-    budget: 12000,
-    batchSize: 1,
-    topUpThreshold: 10,
-    permanentPacks,
-    freeDiamondScore: 1,
-  })
-
-  assert.equal(plan.totalSpent, 12000)
-  assert.equal(plan.topUpTotalCost, 650)
-  assert.equal(plan.topUpPackSummary, '第 1 批：钻石组合包 325')
-  assert.equal(plan.steps[0].topUpCost, 650)
-  assert.deepEqual(plan.steps[0].topUpUnlockedRechargeTiers, [6000])
-})
-
-test('planner skips permanent top-up when the recharge gap is too large', () => {
-  const packs = [
-    pack('10', 12000, 6000),
-  ]
-  const permanentPacks = [
-    permanentDiamondPack('钻石组合包 80', 160, 148),
-    permanentDiamondPack('钻石组合包 3000', 6000, 5095),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 10,
-    currentPrice: 12000,
-    budget: 24000,
-    batchSize: 1,
-    topUpThreshold: 10,
-    permanentPacks,
-    freeDiamondScore: 1,
-  })
-
-  assert.equal(plan.spent, 12000)
-  assert.equal(plan.topUpTotalCost, 0)
-  assert.equal(plan.topUpPackSummary, '')
-  assert.equal(plan.steps[0].topUpPacks, undefined)
-})
-
-test('planner skips top-up when threshold is set to zero', () => {
-  const packs = [
-    pack('10', 11800, 5900),
-  ]
-  const permanentPacks = [
-    permanentDiamondPack('钻石组合包 80', 160, 148),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 10,
-    currentPrice: 11800,
-    budget: 11800,
-    batchSize: 1,
-    topUpThreshold: 0,
-    permanentPacks,
-    freeDiamondScore: 1,
-  })
-
-  assert.equal(plan.topUpTotalCost, 0)
-  assert.equal(plan.steps[0].topUpPacks, undefined)
-})
-
-test('same-day continuation does not create permanent top-up candidates', () => {
-  const packs = [
-    pack('10', 11800, 5900),
-  ]
-  const permanentPacks = [
-    permanentDiamondPack('钻石组合包 80', 160, 148),
-  ]
-  const context = __testables.buildPlanningContext(packs, {
-    source: 'tower',
-    tower: 'origin_tower_infinite',
-    startProgress: 0,
-    endProgress: 10,
-    currentPrice: 11800,
-    budget: 12120,
-    batchSize: 1,
-    topUpThreshold: 10,
-    permanentPacks,
-    freeDiamondScore: 1,
-  })
-
-  const states = __testables.expandState(__testables.createEmptyState(context), context)
-  const sameDayBought = states.find(state => state.purchases === 1 && state.rechargeDayIndex === 0)
-  const nextDayTopUp = states.find(state => state.purchases === 1 && state.rechargeDayIndex === 1 && state.steps[0].topUpCost > 0)
-
-  assert.ok(sameDayBought)
-  assert.equal(sameDayBought.steps[0].topUpPacks, undefined)
-  assert.ok(nextDayTopUp)
-  assert.equal(nextDayTopUp.steps[0].topUpPacks[0].displayTrigger, '钻石组合包 80 ×2')
-})
-
-test('planner can split independent trigger lanes to buy later at higher tier', () => {
-  const packs = [
-    pack('10', 160, 100),
-    questPack('7-28', 160, 300),
-    pack('20', 650, 1000),
-    questPack('8-28', 650, 500),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    budget: 810,
-    currentPrice: 160,
-    lanes: [
-      { id: 'tower', cat: 'tower', tower: 'origin_tower_infinite', label: '无穷塔', enabled: true, startProgress: 0, endProgress: 30, batchSize: 1 },
-      { id: 'quest', cat: 'quest', label: '主线', enabled: true, startProgress: '0-0', endProgress: '9-28', batchSize: 1 },
-    ],
-  })
-
-  assert.equal(plan.spent, 810)
-  assert.ok(plan.steps.length >= 3)
-  assert.equal(plan.steps.some(step => step.triggerRange.includes('主线') && step.bought), true)
-  const towerHighTierBuy = plan.steps.find(step => step.triggerRange.includes('无穷塔: 20') && step.bought)
-  assert.equal(towerHighTierBuy.tierPrice, 650)
-  assert.equal(towerHighTierBuy.purchases[0].sourceLabel, '无穷塔')
-})
-
-test('main quest progress uses built-in game-like quest id conversion', () => {
-  assert.equal(parseMainQuestProgress('7-28'), 168)
-  assert.equal(parseMainQuestProgress('10-28'), 252)
-  assert.equal(parseMainQuestProgress('13-28'), 336)
-  assert.equal(parseMainQuestProgress('27-40'), 740)
-  assert.equal(parseMainQuestProgress('35-60'), 1080)
-  assert.equal(parseMainQuestProgress('55-60'), 2280)
-  assert.equal(parseMainQuestProgress('336'), 336)
-  assert.equal(mainQuestStageCount(13), 28)
-  assert.equal(mainQuestStageCount(35), 60)
-})
-
-test('quest planning accepts chapter-stage progress input', () => {
-  const packs = [
-    questPack('13-28', 160, 100),
-    questPack('14-28', 160, 300),
-    questPack('15-28', 160, 500),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    budget: 160,
-    currentPrice: 160,
-    lanes: [
-      { id: 'quest', cat: 'quest', label: 'quest', enabled: true, startProgress: '13-28', endProgress: '14-28', batchSize: 1 },
-    ],
-  })
-
-  assert.equal(plan.opportunityCount, 1)
-  assert.equal(plan.steps[0].triggerRange, 'quest: 14-28')
-  assert.equal(plan.steps[0].purchases[0].trigger, '14-28')
-})
-
-test('quest planning accepts numeric game quest id input', () => {
-  const packs = [
-    questPack('13-28', 160, 100),
-    questPack('14-28', 160, 300),
-    questPack('35-60', 160, 500),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    budget: 160,
-    currentPrice: 160,
-    lanes: [
-      { id: 'quest', cat: 'quest', label: 'quest', enabled: true, startProgress: 336, endProgress: 1080, batchSize: 3 },
-    ],
-  })
-
-  assert.equal(plan.opportunityCount, 2)
-  assert.match(plan.steps[0].triggerRange, /14-28/)
-  assert.match(plan.steps[0].triggerRange, /35-60/)
-})
-
-test('planner derives all-tower-reached packs from four attribute towers', () => {
-  const packs = [
-    towerPack('origin_group_all_towers', '10', 160, 500),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    budget: 160,
-    currentPrice: 160,
-    lanes: [
-      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: '蓝塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 10 },
-      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: '红塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 10 },
-      { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: '翠塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 10 },
-      { id: 'yellow', cat: 'tower', tower: 'origin_tower_yellow', label: '黄塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 10 },
-    ],
-  })
-
-  assert.equal(plan.opportunityCount, 1)
-  assert.equal(plan.steps[0].triggerRange, '全属性塔抵达: 10')
-  assert.equal(plan.steps[0].purchases[0].sourceLabel, '全属性塔抵达')
-})
-
-test('planner does not derive all-tower packs without all four attribute towers', () => {
-  const packs = [
-    towerPack('origin_group_all_towers', '10', 160, 500),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    budget: 160,
-    currentPrice: 160,
-    lanes: [
-      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: '蓝塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 10 },
-      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: '红塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 10 },
-      { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: '翠塔', enabled: true, startProgress: 0, endProgress: 10, batchSize: 10 },
-    ],
-  })
-
-  assert.equal(plan.opportunityCount, 0)
-  assert.equal(plan.steps.length, 0)
-})
-
-test('attribute tower planning keeps all-tower gate before single-tower fence', () => {
-  const packs = [
-    towerPack('origin_group_all_towers', '225', 160, 1000),
-    towerPack('origin_tower_blue', '250', 160, 100),
-    towerPack('origin_tower_red', '250', 160, 100),
-    towerPack('origin_tower_green', '250', 160, 100),
-    towerPack('origin_tower_yellow', '250', 160, 100),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    budget: 800,
-    currentPrice: 160,
-    lanes: [
-      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
-      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
-      { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: 'green', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
-      { id: 'yellow', cat: 'tower', tower: 'origin_tower_yellow', label: 'yellow', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
-    ],
-  })
-
-  assert.match(plan.steps[0].triggerRange, /225/)
-  assert.doesNotMatch(plan.steps[0].triggerRange, /250/)
-  assert.equal(plan.steps.slice(1).every(step => step.triggerRange.includes('250')), true)
-})
-
-test('same-floor different attribute towers can split without recharge reset', () => {
-  const packs = [
-    towerPack('origin_tower_blue', '250', 160, 100),
-    towerPack('origin_tower_red', '250', 160, 1),
-    towerPack('origin_tower_red', '250', 650, 1000),
-  ]
-
-  const plan = planUltraSalePurchases(packs, {
-    budget: 810,
-    currentPrice: 160,
-    lanes: [
-      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 200, endProgress: 260, batchSize: 1 },
-      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 200, endProgress: 260, batchSize: 1 },
-    ],
-  })
-
-  assert.equal(plan.steps.length, 2)
-  assert.match(plan.steps[0].triggerRange, /blue: 250/)
-  assert.equal(plan.steps[0].nextTierPrice, 650)
-  assert.match(plan.steps[1].triggerRange, /red: 250/)
-  assert.equal(plan.steps[1].tierPrice, 650)
-  assert.equal(plan.steps[1].rechargeReset, false)
-  assert.equal(plan.steps[1].rechargeDayIndex, 0)
-})
-
-test('attribute tower frontier keeps untriggered same-floor towers and next blue layer available', () => {
-  const packs = [
-    towerPack('origin_tower_blue', '250', 160, 100),
-    towerPack('origin_tower_blue', '300', 650, 1000),
-    towerPack('origin_tower_red', '250', 160, 100),
-    towerPack('origin_tower_green', '250', 160, 100),
-    towerPack('origin_tower_yellow', '250', 160, 100),
-  ]
-  const settings = {
-    lanes: [
-      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 200, endProgress: 310, batchSize: 99 },
-      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
-      { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: 'green', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
-      { id: 'yellow', cat: 'tower', tower: 'origin_tower_yellow', label: 'yellow', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
-    ],
+    displayTrigger: opportunity.displayTrigger || String(opportunity.trigger),
+    sortValue: opportunity.sortValue,
+    tierPrice,
+    hasPackAtTier: !!pack,
+    purchased,
+    price: pack?.price || 0,
+    value: pack ? getPackOriginalValue(pack) : 0,
+    ce: pack?.ce || 0,
   }
-  const { sources } = __testables.buildPlanningSources(packs, settings)
-  const state = {
-    sourceCursors: sources.map((_, index) => index === 0 ? 1 : 0),
-    currentDayAttributeTowers: ['origin_tower_blue'],
-  }
-  const candidates = __testables.generateBatchCandidates(state, { sources, settings })
+}
 
-  const singleBlue300 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'blue: 300')
-  const singleRed250 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'red: 250')
-  const singleGreen250 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'green: 250')
-  const singleYellow250 = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'yellow: 250')
-
-  assert.ok(singleBlue300)
-  assert.equal(singleBlue300.requiresRechargeReset, true)
-  assert.ok(singleRed250)
-  assert.equal(singleRed250.requiresRechargeReset, false)
-  assert.ok(singleGreen250)
-  assert.equal(singleGreen250.requiresRechargeReset, false)
-  assert.ok(singleYellow250)
-  assert.equal(singleYellow250.requiresRechargeReset, false)
-})
-
-test('same attribute tower cannot advance twice in one recharge day', () => {
-  const packs = [
-    towerPack('origin_tower_blue', '250', 160, 100),
-    towerPack('origin_tower_blue', '300', 650, 1000),
-    towerPack('origin_tower_red', '250', 160, 100),
-  ]
-  const settings = {
-    lanes: [
-      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 200, endProgress: 310, batchSize: 99 },
-      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 200, endProgress: 260, batchSize: 99 },
-    ],
+function summarizeAction(action, stepIndex, batch, tierPrice, nextTierPrice, recharge, meta = {}) {
+  const originalValue = action.originalValue || 0
+  const rechargeValue = recharge?.value || 0
+  const opportunities = batch.map(opportunity => summarizeOpportunity(opportunity, tierPrice, action.purchases))
+  return {
+    index: stepIndex + 1,
+    rechargeDayIndex: meta.rechargeDayIndex || 0,
+    triggerRange: summarizeBatch(batch),
+    opportunities,
+    skippedOpportunities: opportunities.filter(opportunity => !opportunity.purchased),
+    tierPrice,
+    nextTierPrice,
+    bought: action.bought,
+    cost: action.limitedCostYen || 0,
+    limitedCostYen: action.limitedCostYen || 0,
+    topUpCost: 0,
+    value: Math.round(originalValue + rechargeValue),
+    originalValue: Math.round(originalValue),
+    rechargeValue,
+    rechargeFreeDiamonds: recharge?.freeDiamonds || 0,
+    rechargeBeforePaid: recharge?.beforePaid || 0,
+    rechargeAfterPaid: recharge?.afterPaid || 0,
+    unlockedRechargeTiers: recharge?.unlockedTiers || [],
+    pressure: meta.pressure || 0,
+    waitType: action.bought ? 'buy' : 'timeout',
+    purchases: action.purchases.map(pack => ({
+      trigger: pack.trigger,
+      sourceLabel: pack.plannerSourceLabel || '',
+      displayTrigger: pack.plannerDisplayTrigger || String(pack.trigger),
+      price: pack.price,
+      value: getPackOriginalValue(pack),
+      originalValue: getPackOriginalValue(pack),
+      rechargeValue: 0,
+      ce: pack.ce,
+      items: pack.items || [],
+    })),
   }
-  const { sources } = __testables.buildPlanningSources(packs, settings)
-  const afterBlueSameDay = {
-    sourceCursors: sources.map((_, index) => index === 0 ? 1 : 0),
-    currentDayAttributeTowers: ['origin_tower_blue'],
-  }
-  const afterBlueNextDay = {
-    sourceCursors: sources.map((_, index) => index === 0 ? 1 : 0),
+}
+
+function stepsSignature(steps) {
+  return steps
+    .map(step => {
+      const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
+      const topUps = (step.topUpPacks || []).map(pack => pack.displayTrigger).join(',')
+      return `${step.tierPrice}:${step.triggerRange}:${purchases}:topUp:${topUps}`
+    })
+    .join('|')
+}
+
+function stateSignature(state) {
+  return state.signature || stepsSignature(state.steps)
+}
+
+function appendStepSignature(state, step) {
+  const current = stateSignature(state)
+  const purchases = step.purchases.map(pack => pack.displayTrigger || pack.trigger).join(',')
+  const next = `${step.tierPrice}:${step.triggerRange}:${purchases}:day:${step.rechargeDayIndex}`
+  return current ? `${current}|${next}` : next
+}
+
+function getDailyInefficiencyPenalty(paid) {
+  if (!paid) return 0
+  const idealBonus = paid * 1.2
+  const actualBonus = cumulativeFreeDiamonds(paid)
+  const deficit = Math.max(0, idealBonus - actualBonus)
+  return deficit * 1.5
+}
+
+function comparePlan(a, b) {
+  const penaltyA = (a.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(a.dailyPaidDiamonds)
+  const penaltyB = (b.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(b.dailyPaidDiamonds)
+  const scoreA = a.value - penaltyA
+  const scoreB = b.value - penaltyB
+  if (scoreA !== scoreB) return scoreB - scoreA
+  if ((a.pressure || 0) !== (b.pressure || 0)) return (a.pressure || 0) - (b.pressure || 0)
+  if ((a.triggerCount || 0) !== (b.triggerCount || 0)) return (a.triggerCount || 0) - (b.triggerCount || 0)
+  return a.limitedSpentYen - b.limitedSpentYen
+}
+
+function makeStateKey(state, context) {
+  const dailyBucket = DAILY_RECHARGE_BONUS_TIERS.findIndex(tier => state.dailyPaidDiamonds < tier.paid)
+  const spentBucket = Math.floor(state.limitedSpentYen / 160)
+  return [
+    state.tierIndex,
+    sourceCursorsKey(state.sourceCursors),
+    attributeTowerSetKey(state.currentDayAttributeTowers),
+    spentBucket,
+    dailyBucket,
+  ].join('|')
+}
+
+function createEmptyState(context) {
+  return {
+    tierIndex: context.startTierIndex,
+    sourceCursors: context.sources.map(() => 0),
+    limitedSpentYen: 0,
+    value: 0,
+    purchases: 0,
+    triggerCount: 0,
+    pressure: 0,
+    rechargeDayIndex: 0,
+    dailyPaidDiamonds: 0,
     currentDayAttributeTowers: [],
+    sameDayBatchCount: 0,
+    timeoutWaits: 0,
+    rechargeFreeDiamonds: 0,
+    steps: [],
+    signature: '',
   }
+}
 
-  const sameDayCandidates = __testables.generateBatchCandidates(afterBlueSameDay, { sources, settings })
-  const nextDayCandidates = __testables.generateBatchCandidates(afterBlueNextDay, { sources, settings })
-  const sameDayBlue300 = sameDayCandidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'blue: 300')
-  const nextDayBlue300 = nextDayCandidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'blue: 300')
-  const sameDayRed250 = sameDayCandidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === 'red: 250')
+function applyCursorDelta(cursors, delta) {
+  return cursors.map((cursor, index) => cursor + (delta[index] || 0))
+}
 
-  assert.ok(sameDayBlue300)
-  assert.equal(sameDayBlue300.requiresRechargeReset, true)
-  assert.ok(nextDayBlue300)
-  assert.equal(nextDayBlue300.requiresRechargeReset, false)
-  assert.ok(sameDayRed250)
-  assert.equal(sameDayRed250.requiresRechargeReset, false)
-})
-
-test('all-tower reached cannot batch with the slowest tower next single node', () => {
-  const packs = [
-    towerPack('origin_group_all_towers', '275', 160, 1000),
-    towerPack('origin_tower_blue', '250', 160, 100),
-    towerPack('origin_tower_blue', '300', 160, 100),
-    towerPack('origin_tower_red', '250', 160, 100),
-    towerPack('origin_tower_red', '300', 160, 100),
-    towerPack('origin_tower_green', '250', 160, 100),
-    towerPack('origin_tower_green', '300', 160, 100),
-    towerPack('origin_tower_yellow', '250', 160, 100),
-    towerPack('origin_tower_yellow', '300', 160, 100),
-  ]
-  const settings = {
-    lanes: [
-      { id: 'blue', cat: 'tower', tower: 'origin_tower_blue', label: 'blue', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
-      { id: 'red', cat: 'tower', tower: 'origin_tower_red', label: 'red', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
-      { id: 'green', cat: 'tower', tower: 'origin_tower_green', label: 'green', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
-      { id: 'yellow', cat: 'tower', tower: 'origin_tower_yellow', label: 'yellow', enabled: true, startProgress: 240, endProgress: 310, batchSize: 50 },
-    ],
+function continueSameRechargeDay(state) {
+  return {
+    ...state,
+    sameDayBatchCount: state.sameDayBatchCount + 1,
   }
-  const { sources } = __testables.buildPlanningSources(packs, settings)
-  const state = {
-    sourceCursors: sources.map(source => source.attributeTower ? 1 : 0),
+}
+
+function resetToNextRechargeDay(state) {
+  return {
+    ...state,
+    historicalWastePenalty: (state.historicalWastePenalty || 0) + getDailyInefficiencyPenalty(state.dailyPaidDiamonds),
+    rechargeDayIndex: state.rechargeDayIndex + 1,
+    dailyPaidDiamonds: 0,
     currentDayAttributeTowers: [],
+    sameDayBatchCount: 0,
+    signature: `${state.signature}|day:${state.rechargeDayIndex + 1}`,
   }
-  const candidates = __testables.generateBatchCandidates(state, { sources, settings })
-  const allTowerOnly = candidates.find(candidate => candidate.opportunities.map(opportunity => opportunity.displayTrigger).join(',') === '全属性塔抵达: 275')
-  const allTowerWithSingle = candidates.find(candidate => {
-    const triggers = candidate.opportunities.map(opportunity => opportunity.displayTrigger)
-    return triggers.some(trigger => trigger === '全属性塔抵达: 275')
-      && triggers.some(trigger => trigger.endsWith(': 300'))
+}
+
+/**
+ * 跨日重置前按阈值判定并应用补包（确定性，无分叉）。
+ * gap = nextTier.paid - dailyPaidDiamonds
+ * if gap <= dailyPaidDiamonds × threshold: 补包；否则不补。
+ */
+function tryApplyTopUp(state, context) {
+  if (!context.permanentPacks?.length) return state
+
+  const currentDayIndex = state.rechargeDayIndex
+  const targetStepIndex = state.steps.length - 1
+  if (targetStepIndex === -1) return state
+  const targetStep = state.steps[targetStepIndex]
+  if (targetStep.rechargeDayIndex !== currentDayIndex) return state
+  if (targetStep.topUpCost && targetStep.topUpCost > 0) return state
+
+  const nextTier = nextRechargeTier(state.dailyPaidDiamonds)
+  if (!nextTier) return state
+
+  const gap = nextTier.paid - state.dailyPaidDiamonds
+  const threshold = ((context.settings.topUpThreshold ?? 10) / 100)
+  if (gap > state.dailyPaidDiamonds * threshold) return state
+
+  const topUp = findPermanentTopUpOption(state, context)
+  if (!topUp) return state
+
+  const topUpPacks = groupTopUpPacks(topUp.purchases)
+  const steps = [...state.steps]
+  const last = steps[targetStepIndex]
+  steps[targetStepIndex] = {
+    ...last,
+    cost: last.cost + topUp.cost,
+    topUpCost: topUp.cost,
+    value: last.value + topUp.value,
+    originalValue: Math.round((last.originalValue || 0) + topUp.originalValue),
+    rechargeValue: (last.rechargeValue || 0) + topUp.recharge.value,
+    rechargeFreeDiamonds: (last.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+    topUpValue: topUp.value,
+    topUpOriginalValue: Math.round(topUp.originalValue),
+    topUpRechargeValue: topUp.recharge.value,
+    topUpRechargeFreeDiamonds: topUp.recharge.freeDiamonds,
+    topUpRechargeBeforePaid: topUp.recharge.beforePaid,
+    topUpRechargeAfterPaid: topUp.recharge.afterPaid,
+    topUpUnlockedRechargeTiers: topUp.recharge.unlockedTiers,
+    topUpPacks,
+  }
+
+  return {
+    ...state,
+    value: state.value + topUp.value,
+    rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + topUp.recharge.freeDiamonds,
+    dailyPaidDiamonds: state.dailyPaidDiamonds + topUp.paidDiamonds,
+    steps,
+    signature: `${state.signature}:topUp:${topUpPacks.map(pack => pack.displayTrigger).join(',')}`,
+  }
+}
+
+function expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context) {
+  if (!batchCandidate.requiresRechargeReset) return [state]
+  const toppedUp = tryApplyTopUp(state, context)
+  return [resetToNextRechargeDay(toppedUp)]
+}
+
+function insertCandidate(map, candidate, context) {
+  const key = makeStateKey(candidate, context)
+  const list = map.get(key) || []
+  const signature = stateSignature(candidate)
+  if (list.some(state => stateSignature(state) === signature)) return
+  list.push(candidate)
+  list.sort(comparePlan)
+  map.set(key, list.slice(0, Math.max(2, Number(context.settings.perBucketStates) || 3)))
+}
+
+function dominates(a, b) {
+  return a.limitedSpentYen <= b.limitedSpentYen
+    && a.value >= b.value
+    && a.tierIndex >= b.tierIndex
+    && attributeTowerSetSubset(a.currentDayAttributeTowers, b.currentDayAttributeTowers)
+    && a.pressure <= b.pressure
+    && a.triggerCount <= b.triggerCount
+}
+
+function pruneStates(states, context) {
+  const byCursor = new Map()
+  for (const state of states) {
+    const key = `${sourceCursorsKey(state.sourceCursors)}|${state.tierIndex}`
+    if (!byCursor.has(key)) byCursor.set(key, [])
+    byCursor.get(key).push(state)
+  }
+
+  const map = new Map()
+  for (const group of byCursor.values()) {
+    const survivors = []
+    for (const state of group.sort(comparePlan)) {
+      if (survivors.some(existing => dominates(existing, state))) continue
+      survivors.push(state)
+      if (survivors.length >= Math.max(20, Number(context.settings.maxStatesPerCursor) || 80)) break
+    }
+    for (const state of survivors) insertCandidate(map, state, context)
+  }
+
+  const all = [...map.values()].flat().sort(comparePlan)
+  const userMax = Math.max(50, Number(context.settings.maxStatesPerTier) || Number(context.settings.maxStates) || DEFAULT_MAX_STATES)
+
+  // 1. 预设硬性网格分桶 (1500日元)
+  const bucketSize = 1500
+  const bySpent = new Map()
+  for (const state of all) {
+    const bucket = Math.floor(state.limitedSpentYen / bucketSize)
+    if (!bySpent.has(bucket)) bySpent.set(bucket, [])
+    bySpent.get(bucket).push(state)
+  }
+
+  const sortedBuckets = Array.from(bySpent.values()) // bucket内部已经是按 comparePlan 排序的，因为 all 是排序好的
+
+  const survivors = []
+  const survivorSignatures = new Set()
+
+  // 2. 动态容量按桶选拔阶段 (Stratified Survival)
+  // 彻底废除全局填补阶段，完全去中心化按桶限额
+  const BASE_CAPACITY = Math.max(5, Math.floor(userMax * 0.05))
+  const CAPACITY_PER_UNIQUE_PRICE = Math.max(1, Math.floor(userMax * 0.015))
+
+  for (const bucket of sortedBuckets) {
+    const uniquePricesCount = new Set(bucket.map(s => s.limitedSpentYen)).size
+    const bucketLimit = BASE_CAPACITY + uniquePricesCount * CAPACITY_PER_UNIQUE_PRICE
+
+    let taken = 0
+    for (const state of bucket) {
+      if (taken >= bucketLimit) break
+      const sig = stateSignature(state)
+      if (!survivorSignatures.has(sig)) {
+        survivors.push(state)
+        survivorSignatures.add(sig)
+        taken++
+      }
+    }
+  }
+
+  return survivors.sort(comparePlan)
+}
+
+function expandState(state, context) {
+  const next = []
+  const batchCandidates = generateBatchCandidates(state, context)
+
+  for (const batchCandidate of batchCandidates) {
+    const baseStates = expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context)
+    for (const baseState of baseStates) {
+      const tierPrice = context.priceTiers[baseState.tierIndex]
+      const actions = actionOptionsForBatch(batchCandidate.opportunities, tierPrice)
+
+      for (const action of actions) {
+        if (baseState.limitedSpentYen + action.limitedCostYen > context.mainBudget) continue
+
+        const sourceCursors = applyCursorDelta(baseState.sourceCursors, batchCandidate.cursorDelta)
+        const nextTierIndex = action.bought
+          ? clamp(baseState.tierIndex + 1, 0, context.priceTiers.length - 1)
+          : clamp(baseState.tierIndex - 1, 0, context.priceTiers.length - 1)
+
+        const recharge = rechargeValueForPaid(baseState.dailyPaidDiamonds, action.paidDiamonds, context)
+        const step = summarizeAction(
+          action,
+          baseState.steps.length,
+          batchCandidate.opportunities,
+          tierPrice,
+          context.priceTiers[nextTierIndex],
+          recharge,
+          { rechargeDayIndex: baseState.rechargeDayIndex, pressure: batchCandidate.pressure },
+        )
+
+        const candidate = {
+          ...baseState,
+          tierIndex: nextTierIndex,
+          sourceCursors,
+          currentDayAttributeTowers: mergeAttributeTowerSets(baseState.currentDayAttributeTowers, batchCandidate.attributeTowers),
+          limitedSpentYen: baseState.limitedSpentYen + action.limitedCostYen,
+          value: baseState.value + action.originalValue + recharge.value,
+          purchases: baseState.purchases + action.purchases.length,
+          triggerCount: baseState.triggerCount + batchCandidate.opportunities.length,
+          pressure: baseState.pressure + batchCandidate.pressure,
+          dailyPaidDiamonds: baseState.dailyPaidDiamonds + action.paidDiamonds,
+          timeoutWaits: baseState.timeoutWaits + (action.bought ? 0 : 1),
+          rechargeFreeDiamonds: (baseState.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
+          steps: [...baseState.steps, step],
+          signature: appendStepSignature(baseState, step),
+        }
+
+        next.push(continueSameRechargeDay(candidate))
+        if (candidate.purchases > 0) {
+          const toppedUp = tryApplyTopUp(candidate, context)
+          next.push(resetToNextRechargeDay(toppedUp))
+        }
+      }
+    }
+  }
+
+  return next
+}
+
+function collectTopValuePlans(context, topK = 1) {
+  let states = [createEmptyState(context)]
+  const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
+  const maxIterations = Math.max(1, totalGroups * (context.priceTiers.length + 2))
+
+  for (let i = 0; i < maxIterations; i++) {
+    if (states.every(state => allSourcesExhausted(context.sources, state.sourceCursors))) break
+    const expanded = []
+    for (const state of states) {
+      if (allSourcesExhausted(context.sources, state.sourceCursors)) {
+        expanded.push(state)
+        continue
+      }
+      expanded.push(...expandState(state, context))
+    }
+    if (!expanded.length) break
+    states = pruneStates(expanded, context)
+  }
+
+  const finalStates = states.map(state => tryApplyTopUp(state, context))
+  const complete = finalStates.filter(state => allSourcesExhausted(context.sources, state.sourceCursors))
+  const rankedSource = complete.length ? complete : finalStates
+  const ranked = []
+  for (const state of rankedSource.sort(comparePlan)) {
+    if (!ranked.some(existing => stateSignature(existing) === stateSignature(state))) ranked.push(state)
+    if (ranked.length >= topK) break
+  }
+  return ranked.length ? ranked : [createEmptyState(context)]
+}
+
+function makePolicyBatch(context, state, policy) {
+  const candidates = generateBatchCandidates(state, context)
+  if (!candidates.length) return null
+
+  if (policy === 'smallPack') {
+    return candidates.sort((a, b) => {
+      const willBuyA = state.tierIndex === 0 && a.opportunities.some(op => op.packsByPrice.has(context.priceTiers[0]))
+      const willBuyB = state.tierIndex === 0 && b.opportunities.some(op => op.packsByPrice.has(context.priceTiers[0]))
+      
+      if (willBuyA !== willBuyB) return willBuyA ? -1 : 1
+      
+      if (willBuyA) {
+        const aOffers = a.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[0])).length
+        const bOffers = b.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[0])).length
+        if (aOffers !== bOffers) return bOffers - aOffers
+        if (a.pressure !== b.pressure) return a.pressure - b.pressure
+        return b.opportunities.length - a.opportunities.length
+      } else {
+        if (a.pressure !== b.pressure) return a.pressure - b.pressure
+        return a.opportunities.length - b.opportunities.length
+      }
+    })[0]
+  }
+
+  if (policy === 'maxPack') {
+    return candidates.sort((a, b) => {
+      const aOffers = a.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[state.tierIndex])).length
+      const bOffers = b.opportunities.filter(op => op.packsByPrice.has(context.priceTiers[state.tierIndex])).length
+      if (aOffers !== bOffers) return bOffers - aOffers
+      if (a.pressure !== b.pressure) return a.pressure - b.pressure
+      return b.opportunities.length - a.opportunities.length
+    })[0]
+  }
+
+  return candidates[0]
+}
+
+function makePolicyAction(policy, batch, state, context) {
+  const tierPrice = context.priceTiers[state.tierIndex]
+  const offers = batch.opportunities
+    .map(opportunity => opportunity.packsByPrice.get(tierPrice))
+    .filter(Boolean)
+    .sort((a, b) => getPackOriginalValue(b) - getPackOriginalValue(a))
+
+  if (!offers.length) return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+
+  if (policy === 'smallPack') {
+    if (state.tierIndex !== 0) return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+    
+    let cost = 0
+    let originalValue = 0
+    let paidDiamonds = 0
+    const purchases = []
+    
+    for (const pack of offers) {
+      if (state.limitedSpentYen + cost + pack.price > context.mainBudget) break
+      cost += pack.price
+      originalValue += getPackOriginalValue(pack)
+      paidDiamonds += getPackPaidDiamonds(pack)
+      purchases.push(pack)
+    }
+
+    return purchases.length
+      ? { bought: true, limitedCostYen: cost, cost, originalValue, paidDiamonds, purchases }
+      : { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+  }
+
+  if (policy === 'maxPack') {
+    const shouldBuyForTier = state.tierIndex < context.priceTiers.length - 1
+    if (shouldBuyForTier) {
+      const best = offers[0]
+      if (state.limitedSpentYen + best.price > context.mainBudget) {
+        return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+      }
+      return {
+        bought: true,
+        limitedCostYen: best.price,
+        cost: best.price,
+        originalValue: getPackOriginalValue(best),
+        paidDiamonds: getPackPaidDiamonds(best),
+        purchases: [best],
+      }
+    }
+
+    let cost = 0
+    let originalValue = 0
+    let paidDiamonds = 0
+    const purchases = []
+    for (const pack of offers) {
+      if (state.limitedSpentYen + cost + pack.price > context.mainBudget) break
+      cost += pack.price
+      originalValue += getPackOriginalValue(pack)
+      paidDiamonds += getPackPaidDiamonds(pack)
+      purchases.push(pack)
+    }
+    return purchases.length
+      ? { bought: true, limitedCostYen: cost, cost, originalValue, paidDiamonds, purchases }
+      : { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+  }
+
+  return { bought: false, limitedCostYen: 0, cost: 0, originalValue: 0, paidDiamonds: 0, purchases: [] }
+}
+
+function simulatePolicyPlan(context, policy) {
+  let state = createEmptyState(context)
+  const totalGroups = context.sources.reduce((sum, source) => sum + source.groups.length, 0)
+  const maxIterations = Math.max(1, totalGroups * (context.priceTiers.length + 2))
+
+  for (let i = 0; i < maxIterations; i++) {
+    if (allSourcesExhausted(context.sources, state.sourceCursors)) break
+    const batch = makePolicyBatch(context, state, policy)
+    if (!batch) break
+    const [resetState] = expandRequiredRechargeResetBeforeBatch(state, batch, context)
+    state = resetState
+    const action = makePolicyAction(policy, batch, state, context)
+    const tierPrice = context.priceTiers[state.tierIndex]
+    const nextTierIndex = action.bought
+      ? clamp(state.tierIndex + 1, 0, context.priceTiers.length - 1)
+      : clamp(state.tierIndex - 1, 0, context.priceTiers.length - 1)
+    const recharge = rechargeValueForPaid(state.dailyPaidDiamonds, action.paidDiamonds, context)
+    const step = summarizeAction(action, state.steps.length, batch.opportunities, tierPrice, context.priceTiers[nextTierIndex], recharge, {
+      rechargeDayIndex: state.rechargeDayIndex,
+      pressure: batch.pressure,
+    })
+    state = {
+      ...state,
+      tierIndex: nextTierIndex,
+      sourceCursors: applyCursorDelta(state.sourceCursors, batch.cursorDelta),
+      currentDayAttributeTowers: mergeAttributeTowerSets(state.currentDayAttributeTowers, batch.attributeTowers),
+      limitedSpentYen: state.limitedSpentYen + action.limitedCostYen,
+      value: state.value + action.originalValue + recharge.value,
+      purchases: state.purchases + action.purchases.length,
+      triggerCount: state.triggerCount + batch.opportunities.length,
+      pressure: state.pressure + batch.pressure,
+      dailyPaidDiamonds: state.dailyPaidDiamonds + action.paidDiamonds,
+      timeoutWaits: state.timeoutWaits + (action.bought ? 0 : 1),
+      rechargeFreeDiamonds: (state.rechargeFreeDiamonds || 0) + recharge.freeDiamonds,
+      steps: [...state.steps, step],
+      signature: appendStepSignature(state, step),
+    }
+    state = continueSameRechargeDay(state)
+  }
+
+  return tryApplyTopUp(state, context)
+}
+
+function buildPlanningContext(packs, settings) {
+  const priceTiers = getPriceTiers(packs)
+  const mainBudget = Math.max(0, Math.floor(Number(settings.budget) || 0))
+  const currentPrice = Number(settings.currentPrice) || priceTiers[0]
+  const tierIndex = priceTiers.indexOf(currentPrice)
+  const startTierIndex = clamp(tierIndex === -1 ? 0 : tierIndex, 0, priceTiers.length - 1)
+  const { lanes, sources } = buildPlanningSources(packs, settings)
+  const opportunities = sources.flatMap(source => source.groups.flatMap(group => group.opportunities))
+  const freeDiamondScore = Number(settings.freeDiamondScore) || Number(settings.diamondScore) || 1
+  const permanentPacks = normalizePermanentTopUpPacks(settings.permanentPacks || [])
+  const minPermanentPackPrice = permanentPacks.length
+    ? Math.min(...permanentPacks.map(p => p.price))
+    : 0
+
+  return {
+    priceTiers,
+    budget: mainBudget,
+    mainBudget,
+    startTierIndex,
+    freeDiamondScore,
+    permanentPacks,
+    minPermanentPackPrice,
+    lanes,
+    sources,
+    opportunities,
+    settings,
+  }
+}
+
+function createResult(state, context, meta = {}) {
+  const annotatedSteps = state.steps.map((step, index, steps) => {
+    const previous = steps[index - 1]
+    const rechargeReset = !!previous && step.rechargeDayIndex > previous.rechargeDayIndex
+    return {
+      ...step,
+      rechargeReset,
+      rechargeDayLabel: `第 ${step.rechargeDayIndex + 1} 日`,
+    }
   })
+  const topUpPacks = annotatedSteps.flatMap(step => step.topUpPacks || [])
+  const topUpBatches = annotatedSteps
+    .filter(step => step.topUpPacks?.length)
+    .map(step => ({
+      index: step.index,
+      triggerRange: step.triggerRange,
+      cost: step.topUpCost || 0,
+      value: step.topUpValue || 0,
+      rechargeFreeDiamonds: step.topUpRechargeFreeDiamonds || 0,
+      unlockedRechargeTiers: step.topUpUnlockedRechargeTiers || [],
+      packs: step.topUpPacks,
+    }))
+  const topUpTotalCost = topUpBatches.reduce((sum, b) => sum + b.cost, 0)
+  const totalSpent = state.limitedSpentYen + topUpTotalCost
 
-  assert.ok(allTowerOnly)
-  assert.equal(allTowerWithSingle, undefined)
-})
+  const topUpThreshold = context.settings.topUpThreshold ?? 10
 
-test('compressUltraSalePlanSteps merges only consecutive skipped batches', () => {
-  const rows = compressUltraSalePlanSteps([
-    { index: 1, triggerRange: 'A', bought: true, cost: 160, value: 100, purchases: [{}] },
-    { index: 2, triggerRange: '主线: 10-28; 无穷塔: 100 - 150', tierPrice: 650, nextTierPrice: 160, bought: false, cost: 0, value: 0, purchases: [] },
-    { index: 3, triggerRange: '主线: 11-28; 无穷塔: 200 - 250', tierPrice: 160, nextTierPrice: 160, bought: false, cost: 0, value: 0, purchases: [] },
-    { index: 4, triggerRange: 'D', bought: true, cost: 160, value: 100, purchases: [{}] },
-    { index: 5, triggerRange: 'E', tierPrice: 160, nextTierPrice: 160, bought: false, cost: 0, value: 0, purchases: [] },
-  ])
+  return {
+    ...meta,
+    budget: context.mainBudget,
+    mainBudget: context.mainBudget,
+    topUpThreshold,
+    limitedSpentYen: state.limitedSpentYen,
+    topUpTotalCost,
+    spent: state.limitedSpentYen,
+    totalSpent,
+    remaining: context.mainBudget - state.limitedSpentYen,
+    value: Math.round(state.value),
+    purchases: state.purchases,
+    triggerCount: state.triggerCount,
+    pressure: state.pressure,
+    rechargeDayCount: state.rechargeDayIndex + 1,
+    topUpPacks,
+    topUpBatches,
+    topUpPackSummary: topUpBatches
+      .map(batch => `第 ${batch.index} 批：${batch.packs.map(pack => pack.displayTrigger).join(' / ')}`)
+      .join('；'),
+    rechargeFreeDiamonds: state.rechargeFreeDiamonds || 0,
+    finalTierPrice: context.priceTiers[state.tierIndex],
+    averageCe: totalSpent > 0 ? state.value / (totalSpent / 2) : 0,
+    priceTiers: context.priceTiers,
+    opportunityCount: context.opportunities.length,
+    topUpBatchCount: topUpBatches.length,
+    batchCount: annotatedSteps.length,
+    steps: annotatedSteps,
+  }
+}
 
-  assert.equal(rows.length, 4)
-  assert.equal(rows[1].rowKey, 'skip-2-3')
-  assert.equal(rows[1].indexLabel, '2-3')
-  assert.equal(rows[1].skipCount, 2)
-  assert.equal(rows[1].triggerRange, '主线: 10-28; 无穷塔: 100 - 150 ... 主线: 11-28; 无穷塔: 200 - 250')
-  assert.equal(rows[1].tierDropCount, 1)
-  assert.equal(rows[1].skippedSteps.length, 2)
-  assert.deepEqual(rows[1].skipSourceRanges, [
-    { label: '主线', from: '10-28', to: '11-28', count: 2 },
-    { label: '无穷塔', from: '100 - 150', to: '200 - 250', count: 2 },
-  ])
-  assert.equal(rows[3].rowKey, 'skip-5-5')
-  assert.equal(rows[3].indexLabel, '5')
-  assert.equal(rows[3].skipCount, 1)
-  assert.equal(rows[3].triggerRange, 'E')
-  assert.deepEqual(rows[3].skipSourceRanges, [
-    { label: '触发', from: 'E', to: 'E', count: 1 },
-  ])
-})
+export function planUltraSalePurchases(packs, settings = {}) {
+  const context = buildPlanningContext(packs, settings)
+  const [state] = collectTopValuePlans(context, 1)
+  return createResult(state, context)
+}
+
+export function buildUltraSalePlanOptions(packs, settings = {}) {
+  const context = buildPlanningContext(packs, settings)
+  const [bestState] = collectTopValuePlans(context, 1)
+  const smallPackState = simulatePolicyPlan(context, 'smallPack')
+  const maxPackState = simulatePolicyPlan(context, 'maxPack')
+
+  return [
+    createResult(bestState, context, {
+      id: 'bestValue',
+      label: '价值最优',
+      labelKey: 'planOptBest',
+      description: '在主预算和补累充浮动预算内最大化总评分价值。',
+      descKey: 'planOptBestDesc',
+    }),
+    createResult(smallPackState, context, {
+      id: 'smallPack',
+      label: '只买小包',
+      labelKey: 'planOptSmall',
+      description: '只在最低档购买，升档后等待掉回最低档。',
+      descKey: 'planOptSmallDesc',
+    }),
+    createResult(maxPackState, context, {
+      id: 'maxPack',
+      label: '冲最大包',
+      labelKey: 'planOptMax',
+      description: '优先把有限触发机会用于更高档礼包，必要时等待降档。',
+      descKey: 'planOptMaxDesc',
+    }),
+  ]
+}
+
+function formatSkipPlanRow(row) {
+  const triggerRange = row.skipCount === 1
+    ? row.triggerRange
+    : `${row.triggerRanges[0]} ... ${row.triggerRanges[row.triggerRanges.length - 1]}`
+  const skippedSteps = row.skippedSteps || []
+  const tierDropCount = skippedSteps.filter(step => {
+    return Number.isFinite(step.tierPrice)
+      && Number.isFinite(step.nextTierPrice)
+      && step.nextTierPrice < step.tierPrice
+  }).length
+  const rechargeResetCount = skippedSteps.filter(step => step.rechargeReset).length
+
+  return {
+    ...row,
+    rowKey: `skip-${row.startIndex}-${row.endIndex}`,
+    indexLabel: row.startIndex === row.endIndex ? String(row.startIndex) : `${row.startIndex}-${row.endIndex}`,
+    triggerRange,
+    skippedSteps,
+    skipSourceRanges: summarizeSkippedSources(skippedSteps),
+    tierDropCount,
+    rechargeResetCount,
+    rechargeReset: rechargeResetCount > 0,
+    rechargeDayLabel: skippedSteps.length
+      ? `${skippedSteps[0].rechargeDayLabel}${skippedSteps.at(-1).rechargeDayLabel !== skippedSteps[0].rechargeDayLabel ? ` - ${skippedSteps.at(-1).rechargeDayLabel}` : ''}`
+      : row.rechargeDayLabel,
+    cost: 0,
+    value: 0,
+    purchases: [],
+  }
+}
+
+function parseTriggerSummary(triggerRange) {
+  return String(triggerRange || '')
+    .split(';')
+    .map(part => part.trim())
+    .filter(Boolean)
+    .map(part => {
+      const separator = part.indexOf(':')
+      if (separator === -1) return { label: '触发', range: part }
+      return {
+        label: part.slice(0, separator).trim(),
+        range: part.slice(separator + 1).trim(),
+      }
+    })
+}
+
+function summarizeSkippedSources(skippedSteps) {
+  const byLabel = new Map()
+  for (const step of skippedSteps) {
+    for (const segment of parseTriggerSummary(step.triggerRange)) {
+      if (!byLabel.has(segment.label)) {
+        byLabel.set(segment.label, {
+          label: segment.label,
+          from: segment.range,
+          to: segment.range,
+          count: 0,
+        })
+      }
+      const current = byLabel.get(segment.label)
+      current.to = segment.range
+      current.count += 1
+    }
+  }
+  return [...byLabel.values()]
+}
+
+export function compressUltraSalePlanSteps(steps = []) {
+  const rows = []
+  let pendingSkip = null
+
+  for (const step of steps) {
+    if (!step.bought) {
+      if (!pendingSkip) {
+        pendingSkip = {
+          ...step,
+          rowKey: `skip-${step.index}`,
+          startIndex: step.index,
+          endIndex: step.index,
+          skipCount: 1,
+          triggerRanges: [step.triggerRange],
+          skippedSteps: [step],
+        }
+      } else {
+        pendingSkip.endIndex = step.index
+        pendingSkip.skipCount += 1
+        pendingSkip.triggerRanges.push(step.triggerRange)
+        pendingSkip.nextTierPrice = step.nextTierPrice
+        pendingSkip.skippedSteps.push(step)
+      }
+      continue
+    }
+
+    if (pendingSkip) {
+      rows.push(formatSkipPlanRow(pendingSkip))
+      pendingSkip = null
+    }
+    rows.push({
+      ...step,
+      rowKey: `buy-${step.index}`,
+      indexLabel: String(step.index),
+      skipCount: 0,
+    })
+  }
+
+  if (pendingSkip) rows.push(formatSkipPlanRow(pendingSkip))
+  return rows
+}
+
+export const __testables = {
+  parseTriggerProgress,
+  buildOpportunities,
+  buildBatches,
+  buildAttributeTowerTopologyBatches,
+  buildPlanningSources,
+  generateBatchCandidates,
+  buildPlanningContext,
+  createEmptyState,
+  expandState,
+}

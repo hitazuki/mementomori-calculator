@@ -296,7 +296,11 @@ export default {
   // Pack Planner
   planTabQuery: "패키지 검색",
   planTabPlanner: "구매 플래너",
-  planTitle: "구매 플래너",
+  planTitle: "초특가 팩 플래너",
+  planPreferenceLevel: 'Purchase Preference',
+  planPrefConservative: 'Conservative',
+  planPrefBalanced: 'Balanced (Default)',
+  planPrefAggressive: 'Aggressive',
   planBudget: "예산 (엔)",
   planCurrentTier: "현재 티어",
   planTopUpThreshold: "충전 임계값 x%",

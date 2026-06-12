@@ -309,7 +309,11 @@ export default {
   // Pack Planner
   planTabQuery: "Query",
   planTabPlanner: "Planner",
-  planTitle: "Purchase Planner",
+  planTitle: "Ultra Sale Packs Planner",
+  planPreferenceLevel: 'Purchase Preference',
+  planPrefConservative: 'Conservative',
+  planPrefBalanced: 'Balanced (Default)',
+  planPrefAggressive: 'Aggressive',
   planBudget: "Budget (Yen)",
   planCurrentTier: "Current Tier",
   planTopUpThreshold: "Top-Up Threshold x%",

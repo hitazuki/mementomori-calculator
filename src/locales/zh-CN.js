@@ -307,7 +307,11 @@ export default {
   // Pack Planner
   planTabQuery: "礼包查询",
   planTabPlanner: "购买规划",
-  planTitle: "购买方案规划",
+  planTitle: "超值限时组合包规划",
+  planPreferenceLevel: '购买意愿与偏好',
+  planPrefConservative: '保守 (极其挑剔/宁缺毋滥)',
+  planPrefBalanced: '均衡 (默认推荐/兼顾进度)',
+  planPrefAggressive: '激进 (预算充足/积极把握机会)',
   planBudget: "预算（日元）",
   planCurrentTier: "当前礼包档位",
   planTopUpThreshold: "补累充阈值 x%",

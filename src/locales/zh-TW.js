@@ -307,7 +307,11 @@ export default {
   // Pack Planner
   planTabQuery: "禮包查詢",
   planTabPlanner: "購買規劃",
-  planTitle: "購買方案規劃",
+  planTitle: "超值限時組合包規劃",
+  planPreferenceLevel: '購買意願與偏好',
+  planPrefConservative: '保守 (極其挑剔/寧缺毋濫)',
+  planPrefBalanced: '均衡 (默認推薦/兼顧進度)',
+  planPrefAggressive: '激進 (預算充足/積極把握機會)',
   planBudget: "預算（日元）",
   planCurrentTier: "當前禮包檔位",
   planTopUpThreshold: "補累充閾值 x%",
