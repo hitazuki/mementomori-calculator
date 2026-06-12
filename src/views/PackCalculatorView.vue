@@ -122,7 +122,7 @@
             <select class="form-select" v-model="planSettings.preferenceLevel">
               <option value="conservative">{{ $t('planPrefConservative') || '保守 (极其挑剔/宁缺毋滥)' }}</option>
               <option value="balanced">{{ $t('planPrefBalanced') || '均衡 (默认推荐/兼顾进度)' }}</option>
-              <option value="aggressive">{{ $t('planPrefAggressive') || '激进 (预算充足/积极把握机会)' }}</option>
+              <option value="aggressive">{{ $t('planPrefAggressive') || '激进 (积极把握机会/接受较低性价比)' }}</option>
             </select>
           </label>
 
