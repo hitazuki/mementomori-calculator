@@ -18,7 +18,7 @@ flowchart TD
   J --> K["剪枝保留代表状态"]
   K --> L{"还有可达触发节点?"}
   L -- "是" --> F
-  L -- "否" --> M["输出方案<br/>价值最优 / 保守 / 铺路 / 等待 / 保留机会"]
+  L -- "否" --> M["输出方案<br/>保档大包 / 3000付费钻 / 小包批量 / 价值最优 / 保留机会"]
 ```
 
 ## 批次编排流程
@@ -81,8 +81,10 @@ function buildPlans(packs, settings):
   candidates = collectTopValuePlans(context)
   retention = createRetentionBaseline(context)
 
-  return classifyPlanOptions(candidates, retention)
+  return classifyStrategyOptions(candidates, retention)
 ```
+
+`classifyStrategyOptions` 输出保档大包、3000 付费钻微操、小包批量、价值最优兜底或机会保留方案。3000 付费钻方案是保档大包的衍生策略，只有当候选路径形成可比较收益时展示。价值最优若只是已展示策略的近似等价变体，则不单独输出，避免同一买法重复占据结果卡片。
 
 ```text
 function searchBestValuePlan(context):

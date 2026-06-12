@@ -233,6 +233,142 @@ test('planner avoids same-day 36000-tier bursts from a multi-trigger 5900 tier b
   assert.ok(option.topUpPacks.every(pack => !pack.displayTrigger.includes('5900')))
 })
 
+test('keep-tier large-pack strategy can skip low-CE packs in a bought batch without dropping tier', async () => {
+  const packs = [
+    makePack(1, 11800, 36000),
+    makePack(2, 11800, 100),
+  ]
+
+  const options = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 11800,
+    lanes: [{
+      id: 'tower:infinite',
+      cat: 'tower',
+      tower: 'origin_tower_infinite',
+      label: 'Tower',
+      startProgress: 0,
+      endProgress: 2,
+      batchSize: 2,
+    }],
+  }))
+  const option = options.find(o => o.id === 'keepTierMaxPack')
+
+  assert.ok(option, 'expected a keep-tier large-pack strategy option')
+  assert.equal(options.some(o => o.id === 'bestValue'), false)
+  assert.equal(option.steps[0].bought, true)
+  assert.equal(option.steps[0].purchases.length, 1)
+  assert.equal(option.steps[0].skippedOpportunities.length, 1)
+  assert.equal(option.steps[0].nextTierPrice, 11800)
+})
+
+test('preference CE target is derived from 5900-paid-diamond hard-currency packs', async () => {
+  const packs = [
+    makePack(1, 11800, 47200, {
+      items: [{ itype: 16, iid: 4 }],
+    }),
+    makePack(2, 11800, 59000, {
+      items: [{ ItemType: 17, ItemId: 107 }],
+    }),
+    makePack(3, 11800, 177000, {
+      items: [{ itype: 16, iid: 12 }],
+    }),
+  ]
+
+  const balanced = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 11800,
+  }))
+  const conservative = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 11800,
+    preferenceLevel: 'conservative',
+  }))
+  const aggressive = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 11800,
+    preferenceLevel: 'aggressive',
+  }))
+
+  assert.equal(balanced[0].preferenceBaselineCe, 9)
+  assert.equal(balanced[0].expectedRatio, 9)
+  assert.equal(conservative[0].expectedRatio, 11.25)
+  assert.equal(aggressive[0].expectedRatio, 6.75)
+  assert.equal(balanced[0].strategyCeThreshold, balanced[0].expectedRatio)
+})
+
+test('preference CE target falls back to secondary hard currency when no standard baseline exists', async () => {
+  const packs = [
+    makePack(1, 11800, 41300, {
+      items: [{ itype: 16, iid: 12 }],
+    }),
+    makePack(2, 11800, 47200, {
+      items: [{ ItemType: 24, ItemId: 1 }],
+    }),
+  ]
+
+  const [option] = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 11800,
+  }))
+
+  assert.equal(option.preferenceBaselineCe, 7.5)
+  assert.equal(option.expectedRatio, 7.5)
+})
+
+test('3000-paid-diamond strategy is shown only when the mid tier is a meaningful large-pack variant', async () => {
+  const packs = [
+    makePack(1, 3000, 5000),
+    makePack(2, 6000, 36000),
+    makePack(3, 6000, 36000),
+    makePack(4, 6000, 36000),
+    makePack(2, 11800, 20000),
+    makePack(3, 11800, 20000),
+    makePack(4, 11800, 20000),
+  ]
+
+  const options = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 3000,
+    freeDiamondScore: 0,
+    maxStatesPerTier: 120,
+    lanes: [{
+      id: 'tower:infinite',
+      cat: 'tower',
+      tower: 'origin_tower_infinite',
+      label: 'Tower',
+      startProgress: 0,
+      endProgress: 4,
+      batchSize: 1,
+    }],
+  }))
+  const option = options.find(o => o.id === 'midTier3000')
+
+  assert.ok(option, 'expected a 3000-paid-diamond strategy option')
+  assert.ok(option.steps.flatMap(step => step.purchases).filter(pack => pack.price === 6000).length >= 2)
+  assert.ok(option.averageCe > 10)
+})
+
+test('small-pack batch strategy buys only 80-paid-diamond packs and can buy multiple in one batch', async () => {
+  const packs = [
+    makePack(1, 160, 2400),
+    makePack(2, 160, 2200),
+    makePack(3, 650, 500),
+  ]
+
+  const options = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 160,
+    lanes: [{
+      id: 'tower:infinite',
+      cat: 'tower',
+      tower: 'origin_tower_infinite',
+      label: 'Tower',
+      startProgress: 0,
+      endProgress: 3,
+      batchSize: 2,
+    }],
+  }))
+  const option = options.find(o => o.id === 'smallBatch')
+
+  assert.ok(option, 'expected a small-pack batch strategy option')
+  assert.ok(option.steps.some(step => step.purchases.length >= 2))
+  assert.ok(option.steps.flatMap(step => step.purchases).every(pack => pack.price === 160))
+})
+
 test('Chinese planner copy no longer describes removed budget and threshold controls', () => {
   const text = [
     zhCN.planPrefAggressive,

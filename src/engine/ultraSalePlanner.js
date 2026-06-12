@@ -4,6 +4,25 @@ import { parseMainQuestProgress } from './mainQuestProgress.js'
 const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
 const DEFAULT_MAX_STATES = 350
 const DEFAULT_DAILY_RECHARGE_RESET_PAID = 12000
+const SMALL_PACK_PAID_DIAMONDS = 80
+const MID_TIER_PAID_DIAMONDS = 3000
+const BASELINE_PAID_DIAMONDS = 5900
+const STANDARD_HARD_CURRENCY_ITEM_KEYS = new Set([
+  '16:1',
+  '16:4',
+  '17:107',
+  '17:118',
+])
+const SECONDARY_HARD_CURRENCY_ITEM_KEYS = new Set([
+  '16:7',
+  '16:12',
+  '24:1',
+])
+const PREFERENCE_CE_MULTIPLIERS = {
+  conservative: 1.25,
+  balanced: 1,
+  aggressive: 0.75,
+}
 const TOP_UP_SOURCE_LABEL = '每日累充补包'
 const ALL_ATTRIBUTE_TOWER = 'origin_group_all_towers'
 const ATTRIBUTE_TOWERS = [
@@ -67,6 +86,57 @@ function getPackOriginalValue(pack) {
 function getPackPaidDiamonds(pack) {
   if (Number.isFinite(pack.paidDiamonds)) return pack.paidDiamonds
   return paidDiamondsForPrice(pack.price)
+}
+
+function itemKey(item) {
+  const itemType = item?.itype ?? item?.ItemType ?? item?.itemType
+  const itemId = item?.iid ?? item?.ItemId ?? item?.itemId
+  if (!Number.isFinite(Number(itemType)) || !Number.isFinite(Number(itemId))) return ''
+  return `${Number(itemType)}:${Number(itemId)}`
+}
+
+function packContainsItemKey(pack, itemKeys) {
+  return (pack.items || []).some(item => itemKeys.has(itemKey(item)))
+}
+
+function median(values) {
+  const sorted = values
+    .map(Number)
+    .filter(value => Number.isFinite(value) && value > 0)
+    .sort((a, b) => a - b)
+  if (!sorted.length) return 0
+  const middle = Math.floor(sorted.length / 2)
+  return sorted.length % 2
+    ? sorted[middle]
+    : (sorted[middle - 1] + sorted[middle]) / 2
+}
+
+function packBaselineCe(pack) {
+  const ce = Number(pack.ce)
+  if (Number.isFinite(ce) && ce > 0) return ce
+  const paidDiamonds = getPackPaidDiamonds(pack)
+  return paidDiamonds > 0 ? getPackOriginalValue(pack) / paidDiamonds : 0
+}
+
+function deriveHardCurrencyBaselineCe(packs) {
+  const baselineTierPacks = packs.filter(pack => getPackPaidDiamonds(pack) === BASELINE_PAID_DIAMONDS)
+  const standard = baselineTierPacks
+    .filter(pack => packContainsItemKey(pack, STANDARD_HARD_CURRENCY_ITEM_KEYS))
+    .map(packBaselineCe)
+  const standardBaseline = median(standard)
+  if (standardBaseline > 0) return standardBaseline
+
+  const secondary = baselineTierPacks
+    .filter(pack => packContainsItemKey(pack, SECONDARY_HARD_CURRENCY_ITEM_KEYS))
+    .map(packBaselineCe)
+  return median(secondary)
+}
+
+function resolvePreferenceBaselineCe(packs, settings) {
+  const explicitBaseline = Number(settings.preferenceBaselineCe)
+  if (Number.isFinite(explicitBaseline) && explicitBaseline > 0) return explicitBaseline
+  const derivedBaseline = deriveHardCurrencyBaselineCe(packs)
+  return derivedBaseline > 0 ? derivedBaseline : 3.0
 }
 
 function normalizePlanningLanes(settings) {
@@ -907,6 +977,117 @@ function compareRealizedPlan(a, b) {
   return a.totalSpentYen - b.totalSpentYen
 }
 
+function statePurchasedPacks(state) {
+  return state.steps.flatMap(step => step.purchases || [])
+}
+
+function stateAverageCe(state) {
+  return state.totalSpentYen > 0 ? state.value / (state.totalSpentYen / 2) : 0
+}
+
+function purchasePaidDiamonds(purchase) {
+  return getPackPaidDiamonds(purchase)
+}
+
+function purchasedPacksMeetCeThreshold(state, context) {
+  const threshold = context.strategyCeThreshold
+  return statePurchasedPacks(state).every(pack => (Number(pack.ce) || 0) >= threshold)
+}
+
+function hasFullTierDropWait(state) {
+  return (state.steps || []).some(step => !step.bought && step.nextTierPrice < step.tierPrice)
+}
+
+function hasPartialPackSkip(state) {
+  return (state.steps || []).some(step => step.bought && (step.skippedOpportunities?.length || 0) > 0)
+}
+
+function countPurchasesByPaidDiamonds(state, paidDiamonds) {
+  return statePurchasedPacks(state)
+    .filter(pack => purchasePaidDiamonds(pack) === paidDiamonds)
+    .length
+}
+
+function allPurchasesAtOrBelowPaidDiamonds(state, paidDiamonds) {
+  const purchases = statePurchasedPacks(state)
+  return purchases.length > 0 && purchases.every(pack => purchasePaidDiamonds(pack) <= paidDiamonds)
+}
+
+function allPurchasesAtOrAbovePaidDiamonds(state, paidDiamonds) {
+  const purchases = statePurchasedPacks(state)
+  return purchases.length > 0 && purchases.every(pack => purchasePaidDiamonds(pack) >= paidDiamonds)
+}
+
+function compareHighCePlan(a, b) {
+  const aCe = stateAverageCe(a)
+  const bCe = stateAverageCe(b)
+  if (aCe !== bCe) return bCe - aCe
+  return compareRealizedPlan(a, b)
+}
+
+function compareKeepTierPlan(a, b) {
+  const aPartialSkip = hasPartialPackSkip(a) ? 1 : 0
+  const bPartialSkip = hasPartialPackSkip(b) ? 1 : 0
+  if (aPartialSkip !== bPartialSkip) return bPartialSkip - aPartialSkip
+  if (a.triggerCount !== b.triggerCount) return b.triggerCount - a.triggerCount
+  return compareRealizedPlan(a, b)
+}
+
+function compareSmallBatchPlan(a, b) {
+  const aCe = stateAverageCe(a)
+  const bCe = stateAverageCe(b)
+  if (aCe !== bCe) return bCe - aCe
+  if (a.purchases !== b.purchases) return b.purchases - a.purchases
+  return compareRealizedPlan(a, b)
+}
+
+function pickStrategyState(candidates, predicate, compare = compareRealizedPlan) {
+  return [...candidates].filter(predicate).sort(compare)[0] || null
+}
+
+function isKeepTierMaxPackState(state, context) {
+  return state.purchases > 0
+    && !hasFullTierDropWait(state)
+    && purchasedPacksMeetCeThreshold(state, context)
+}
+
+function isMidTier3000State(state, context) {
+  return state.purchases > 0
+    && countPurchasesByPaidDiamonds(state, MID_TIER_PAID_DIAMONDS) >= 2
+    && allPurchasesAtOrAbovePaidDiamonds(state, MID_TIER_PAID_DIAMONDS / 2)
+    && purchasedPacksMeetCeThreshold(state, context)
+    && stateAverageCe(state) >= context.strategyCeThreshold + 1
+}
+
+function isSmallBatchState(state, context) {
+  return state.purchases > 0
+    && allPurchasesAtOrBelowPaidDiamonds(state, SMALL_PACK_PAID_DIAMONDS)
+    && state.steps.some(step => (step.purchases?.length || 0) >= 2)
+    && purchasedPacksMeetCeThreshold(state, context)
+}
+
+function isStrategicallyEquivalentPlan(a, b, context) {
+  if (!a || !b || a.purchases <= 0 || b.purchases <= 0) return false
+
+  const aMidTier = isMidTier3000State(a, context)
+  const bMidTier = isMidTier3000State(b, context)
+  const aSmallBatch = isSmallBatchState(a, context)
+  const bSmallBatch = isSmallBatchState(b, context)
+  if (aMidTier !== bMidTier || aSmallBatch !== bSmallBatch) return false
+
+  const aKeepTier = isKeepTierMaxPackState(a, context)
+  const bKeepTier = isKeepTierMaxPackState(b, context)
+  if (!aKeepTier || !bKeepTier) return false
+
+  const realScoreTolerance = Math.max(500, Math.abs(b.realScore) * 0.03)
+  const spentTolerance = Math.max(650, b.totalSpentYen * 0.03)
+  return Math.abs(a.realScore - b.realScore) <= realScoreTolerance
+    && Math.abs(a.totalSpentYen - b.totalSpentYen) <= spentTolerance
+    && Math.abs(stateAverageCe(a) - stateAverageCe(b)) <= 0.25
+    && Math.abs(a.purchases - b.purchases) <= 1
+    && Math.abs(a.triggerCount - b.triggerCount) <= 1
+}
+
 function estimateRemainingStateValue(state, context) {
   let remainingValue = 0
   for (let sourceIndex = 0; sourceIndex < context.sources.length; sourceIndex++) {
@@ -1330,24 +1511,30 @@ function buildPlanningContext(packs, settings) {
     : 0
 
   const preferenceLevel = settings.preferenceLevel || 'balanced'
-  let expectedRatio = 3.0
+  const preferenceBaselineCe = resolvePreferenceBaselineCe(packs, settings)
+  const preferenceMultiplier = PREFERENCE_CE_MULTIPLIERS[preferenceLevel] || PREFERENCE_CE_MULTIPLIERS.balanced
+  let expectedRatio = preferenceBaselineCe * preferenceMultiplier
   let preferenceDiscount = 0.9
   if (preferenceLevel === 'conservative') {
-    expectedRatio = 4.0
     preferenceDiscount = 1.0
   } else if (preferenceLevel === 'aggressive') {
-    expectedRatio = 2.0
     preferenceDiscount = 0.8
   }
 
   const envelope = buildEnvelope(expectedRatio, freeDiamondScore)
   const executionWeight = settings.executionWeight !== undefined ? Number(settings.executionWeight) : 50
+  const explicitStrategyCeThreshold = Number(settings.strategyCeThreshold)
+  const strategyCeThreshold = Number.isFinite(explicitStrategyCeThreshold) && explicitStrategyCeThreshold > 0
+    ? explicitStrategyCeThreshold
+    : expectedRatio
 
   return {
     envelope,
     expectedRatio,
+    preferenceBaselineCe,
     preferenceDiscount,
     executionWeight,
+    strategyCeThreshold,
     preferenceLevel,
     priceTiers,
     startTierIndex,
@@ -1388,8 +1575,10 @@ function createResult(state, context, meta = {}) {
   return {
     ...meta,
     expectedRatio: context.expectedRatio,
+    preferenceBaselineCe: context.preferenceBaselineCe,
     preferenceDiscount: context.preferenceDiscount,
     executionWeight: context.executionWeight,
+    strategyCeThreshold: context.strategyCeThreshold,
     preferenceLevel: context.preferenceLevel,
     remainingBudget: context.mainBudget !== undefined ? context.mainBudget - totalSpent : Infinity,
     limitedSpentYen: state.limitedSpentYen,
@@ -1436,11 +1625,13 @@ export async function buildUltraSalePlanOptions(packs, settings = {}) {
   const retentionDecision = emptyState.searchPriority
   const viableCandidates = candidates
     .filter(state => state.purchases > 0 && state.searchPriority > retentionDecision)
+  const strategyCandidates = candidates
+    .filter(state => state.purchases > 0 && state.realScore > 0)
   const bestState = viableCandidates.length
     ? [...viableCandidates].sort(compareRealizedPlan)[0]
     : emptyState
 
-  const hasProfitablePlan = bestState.purchases > 0
+  const hasProfitablePlan = bestState.purchases > 0 || strategyCandidates.length > 0
 
   if (!hasProfitablePlan) {
     return [
@@ -1453,93 +1644,69 @@ export async function buildUltraSalePlanOptions(packs, settings = {}) {
   }
 
   const options = []
+  const optionStates = []
 
-  // Feature detection for best state
-  const bestIsConservative = bestState.steps.every(step => 
-    !(!step.bought && step.tierPrice > context.priceTiers[0]) && !(step.bought && step.moneySurplus < 0)
+  function addOption(state, meta) {
+    if (!state) return
+    optionStates.push(state)
+    options.push(createResult(state, context, meta))
+  }
+
+  const keepTierState = pickStrategyState(
+    strategyCandidates,
+    state => isKeepTierMaxPackState(state, context),
+    compareKeepTierPlan,
   )
-  const bestIsPaving = bestState.steps.some(step => step.bought && step.moneySurplus < 0)
-  const bestIsWaiting = bestState.steps.some(step => !step.bought && step.tierPrice > context.priceTiers[0])
+  addOption(keepTierState, {
+    id: 'keepTierMaxPack',
+    labelKey: 'planOptKeepTierMax',
+    descKey: hasPartialPackSkip(keepTierState || {})
+      ? 'planOptKeepTierMaxDescPartial'
+      : 'planOptKeepTierMaxDesc',
+  })
 
-  // Add Recommended
-  options.push(createResult(bestState, context, {
-    id: 'bestValue',
-    label: '价值最优',
-    description: '超过保留机会基线后真实收益最高，兼顾当前盈余和未来潜力。' + (bestIsConservative ? ' (当前最优解天然符合保守策略)' : ''),
-  }))
+  const midTierState = pickStrategyState(
+    strategyCandidates,
+    state => isMidTier3000State(state, context),
+    compareHighCePlan,
+  )
+  addOption(midTierState, {
+    id: 'midTier3000',
+    labelKey: 'planOptMidTier3000',
+    descKey: 'planOptMidTier3000Desc',
+  })
 
-  let conservativeState = null
-  let pavingState = null
+  const smallBatchState = pickStrategyState(
+    strategyCandidates,
+    state => isSmallBatchState(state, context),
+    compareSmallBatchPlan,
+  )
+  addOption(smallBatchState, {
+    id: 'smallBatch',
+    labelKey: 'planOptSmallBatch',
+    descKey: 'planOptSmallBatchDesc',
+  })
 
-  // Option 2: Conservative
-  if (!bestIsConservative) {
-    conservativeState = [...viableCandidates].sort(compareRealizedPlan).find(state => {
-      let isValid = true
-      for (const step of state.steps) {
-        if (!step.bought && step.tierPrice > context.priceTiers[0]) {
-          isValid = false
-          break
-        }
-        if (step.bought && step.moneySurplus < 0) {
-          isValid = false
-          break
-        }
-      }
-      return isValid && state.signature !== bestState.signature
+  const bestStateAlreadyRepresented = optionStates.some(state => (
+    stateSignature(state) === stateSignature(bestState)
+    || isStrategicallyEquivalentPlan(bestState, state, context)
+  ))
+  if (bestState.purchases > 0 && !bestStateAlreadyRepresented) {
+    addOption(bestState, {
+      id: 'bestValue',
+      labelKey: 'planOptBest',
+      descKey: 'planOptBestDesc',
     })
-
-    if (conservativeState) {
-      options.push(createResult(conservativeState, context, {
-        id: 'conservative',
-        label: '保守方案',
-        description: '稳健不激进，不采用亏损铺路，也不主动闲置机会换取降档。',
-      }))
-    }
   }
 
-  // Option 3: Paving
-  if (!bestIsPaving) {
-    pavingState = [...viableCandidates].sort(compareRealizedPlan).find(state => {
-      let hasPaving = false
-      for (const step of state.steps) {
-        if (step.bought && step.moneySurplus < 0) {
-          hasPaving = true
-        }
-      }
-      return hasPaving && state.signature !== bestState.signature && (!conservativeState || state.signature !== conservativeState.signature)
+  return options.length ? options : [
+    createResult(emptyState, context, {
+      id: 'retention',
+      label: '保留机会',
+      description: '当前没有符合策略输出规则的正收益路径。建议暂不购买，保留机会。',
     })
+  ]
 
-    if (pavingState) {
-      options.push(createResult(pavingState, context, {
-        id: 'paving',
-        label: '升档铺路',
-        description: '故意购买当前略亏的礼包强行推高档位，为后续更划算的大包做铺垫。',
-      }))
-    }
-  }
-
-  // Option 4: Waiting
-  if (!bestIsWaiting) {
-    const waitingState = [...viableCandidates].sort(compareRealizedPlan).find(state => {
-      let hasWaiting = false
-      for (const step of state.steps) {
-        if (!step.bought && step.tierPrice > context.priceTiers[0]) {
-          hasWaiting = true
-        }
-      }
-      return hasWaiting && state.signature !== bestState.signature && (!conservativeState || state.signature !== conservativeState.signature) && (!pavingState || state.signature !== pavingState.signature)
-    })
-
-    if (waitingState) {
-      options.push(createResult(waitingState, context, {
-        id: 'waiting',
-        label: '空置降档',
-        description: '为了规避低性价比的限时包，主动让本批次降档并跨日等待，适合机会充足时使用。',
-      }))
-    }
-  }
-
-  return options
 }
 
 function formatSkipPlanRow(row) {
