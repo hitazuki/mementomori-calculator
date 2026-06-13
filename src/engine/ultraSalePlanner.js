@@ -4,6 +4,7 @@ import { parseMainQuestProgress } from './mainQuestProgress.js'
 const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
 const DEFAULT_MAX_STATES = 350
 const DEFAULT_DAILY_RECHARGE_RESET_PAID = 12000
+const RUSH_RECHARGE_RESET_COST_MULTIPLIER = 4
 const SMALL_PACK_PAID_DIAMONDS = 80
 const MID_TIER_PAID_DIAMONDS = 3000
 const KEEP_TIER_MIN_PAID_DIAMONDS = 1500
@@ -759,22 +760,27 @@ function groupTopUpPacks(packs) {
   })
 }
 
-function nextRechargeTier(currentPaid) {
-  return DAILY_RECHARGE_BONUS_TIERS.find(tier => currentPaid < tier.paid) || null
-}
-
 function getDailyRechargeResetPaid(context) {
+  if (context.settings.rechargePlanningMode === 'rush') return 0
   const configured = Number(context.settings.dailyRechargeResetPaid)
   return Number.isFinite(configured)
     ? Math.max(0, Math.floor(configured))
     : DEFAULT_DAILY_RECHARGE_RESET_PAID
 }
 
-function nextPlannerRechargeTier(currentPaid, context) {
+function getDailyRechargeTargetPaid(context) {
+  if (context.settings.rechargePlanningMode === 'rush') {
+    return DAILY_RECHARGE_BONUS_TIERS[DAILY_RECHARGE_BONUS_TIERS.length - 1].paid
+  }
   const resetPaid = getDailyRechargeResetPaid(context)
-  if (resetPaid <= 0 || currentPaid >= resetPaid) return null
+  return resetPaid > 0 ? resetPaid : DAILY_RECHARGE_BONUS_TIERS[DAILY_RECHARGE_BONUS_TIERS.length - 1].paid
+}
+
+function nextPlannerRechargeTier(currentPaid, context) {
+  const targetPaid = getDailyRechargeTargetPaid(context)
+  if (targetPaid <= 0 || currentPaid >= targetPaid) return null
   return DAILY_RECHARGE_BONUS_TIERS
-    .find(tier => currentPaid < tier.paid && tier.paid <= resetPaid) || null
+    .find(tier => currentPaid < tier.paid && tier.paid <= targetPaid) || null
 }
 
 function isBetterTopUpPackForTier(candidate, best) {
@@ -836,14 +842,14 @@ function findHeuristicTopUpCombination(gap, packs, prepared = null) {
 }
 
 function buildPermanentTopUpOptionCache(context) {
-  const resetPaid = getDailyRechargeResetPaid(context)
-  if (!context.permanentPacks.length || resetPaid <= 0) return []
+  const targetPaid = getDailyRechargeTargetPaid(context)
+  if (!context.permanentPacks.length || targetPaid <= 0) return []
 
   const prepared = prepareTopUpPackOptions(context.permanentPacks)
   if (!prepared.uniquePacks.length || !prepared.filler) return []
 
-  const options = Array.from({ length: resetPaid + 1 }, () => null)
-  for (let currentPaid = 0; currentPaid < resetPaid; currentPaid++) {
+  const options = Array.from({ length: targetPaid + 1 }, () => null)
+  for (let currentPaid = 0; currentPaid < targetPaid; currentPaid++) {
     const targetTier = nextPlannerRechargeTier(currentPaid, context)
     if (!targetTier) continue
 
@@ -991,12 +997,6 @@ function appendStepSignature(state, step) {
   return current ? `${current}|${next}` : next
 }
 
-function getHeuristicRechargePotential(paid, context) {
-  if (paid >= context.envelope.length) return 0
-  const sx = cumulativeFreeDiamonds(paid) * context.freeDiamondScore
-  return Math.max(0, context.envelope[paid] - sx)
-}
-
 function getGapBand(gap) {
   if (gap <= 0) return 0
   if (gap <= 80) return 1
@@ -1019,12 +1019,21 @@ function getRewardTierIndex(paid) {
 }
 
 function getRechargeBucket(paid, context) {
-  const nextTier = nextRechargeTier(paid)
+  const nextTier = nextPlannerRechargeTier(paid, context)
   const rewardTierIndex = getRewardTierIndex(paid)
   const gap = nextTier ? nextTier.paid - paid : 0
   const nextGapBand = getGapBand(gap)
-  const potentialBand = Math.floor(getHeuristicRechargePotential(paid, context) / 500)
-  return `${rewardTierIndex}|${nextGapBand}|${potentialBand}`
+  if (context.envelope) {
+    const potentialBand = Math.floor(getHeuristicRechargePotential(paid, context) / 500)
+    return `${rewardTierIndex}|${nextGapBand}|${potentialBand}`
+  }
+  return `${rewardTierIndex}|${nextGapBand}`
+}
+
+function getHeuristicRechargePotential(paid, context) {
+  if (!context.envelope || paid >= context.envelope.length) return 0
+  const sx = cumulativeFreeDiamonds(paid) * context.freeDiamondScore
+  return Math.max(0, context.envelope[paid] - sx)
 }
 
 function makeStateKey(state, context) {
@@ -1274,13 +1283,31 @@ function continueSameRechargeDay(state) {
   }
 }
 
+function rechargeResetCost(context) {
+  const explicitCost = Number(context.settings.rechargeResetCost)
+  if (Number.isFinite(explicitCost) && explicitCost >= 0) return explicitCost
+  return context.settings.rechargePlanningMode === 'rush'
+    ? context.executionWeight * RUSH_RECHARGE_RESET_COST_MULTIPLIER
+    : 0
+}
+
 function resetToNextRechargeDay(state, context) {
+  const resetCost = rechargeResetCost(context)
+  const executionCostComponents = resetCost > 0
+    ? {
+        ...state.executionCostComponents,
+        rechargeResetCost: (state.executionCostComponents.rechargeResetCost || 0) + resetCost,
+      }
+    : state.executionCostComponents
   const nextState = {
     ...state,
     rechargeDayIndex: state.rechargeDayIndex + 1,
     dailyPaidDiamonds: 0,
     currentDayAttributeTowers: [],
     sameDayBatchCount: 0,
+    executionCost: state.executionCost + resetCost,
+    executionCostComponents,
+    realScore: state.moneySurplus - (state.executionCost + resetCost),
     signature: `${state.signature}|day:${state.rechargeDayIndex + 1}`,
   }
   return refreshSearchPriority(nextState, context)
@@ -1599,11 +1626,10 @@ async function collectTopValuePlans(context, topK = 1) {
   return ranked.length ? ranked : [emptyState]
 }
 
-function buildEnvelope(expectedRatio, freeDiamondScore) {
-  const maxPaid = DAILY_RECHARGE_BONUS_TIERS[DAILY_RECHARGE_BONUS_TIERS.length - 1].paid
+function buildEnvelope(expectedRatio, freeDiamondScore, maxPaid) {
   const envelope = new Float64Array(maxPaid + 1)
   const slope = Math.max(0, expectedRatio - 1.2)
-  
+
   envelope[maxPaid] = cumulativeFreeDiamonds(maxPaid) * freeDiamondScore
   for (let x = maxPaid - 1; x >= 0; x--) {
     const sx = cumulativeFreeDiamonds(x) * freeDiamondScore
@@ -1634,7 +1660,6 @@ function buildPlanningContext(packs, settings) {
     preferenceDiscount = 0.8
   }
 
-  const envelope = buildEnvelope(expectedRatio, freeDiamondScore)
   const executionWeight = settings.executionWeight !== undefined ? Number(settings.executionWeight) : 50
   const explicitStrategyCeThreshold = Number(settings.strategyCeThreshold)
   const strategyCeThreshold = Number.isFinite(explicitStrategyCeThreshold) && explicitStrategyCeThreshold > 0
@@ -1642,7 +1667,9 @@ function buildPlanningContext(packs, settings) {
     : expectedRatio
 
   const context = {
-    envelope,
+    envelope: settings.rechargePlanningMode === 'rush'
+      ? buildEnvelope(expectedRatio, freeDiamondScore, getDailyRechargeTargetPaid({ settings }))
+      : null,
     expectedRatio,
     preferenceBaselineCe,
     preferenceDiscount,
@@ -1986,6 +2013,7 @@ export const __testables = {
   findPermanentTopUpOption,
   pruneStates,
   getRechargeBucket,
+  rechargeResetCost,
 }
 
 export function testPool(context) { const emptyState = createEmptyState(context); let states = [emptyState]; const candidatePool = []; const totalGroups = context.sources.reduce((sum, s) => sum + s.groups.length, 0); const maxIterations = Math.max(1, totalGroups * 4); for (let i = 0; i < maxIterations; i++) { candidatePool.push(...states); if (states.every(state => allSourcesExhausted(context.sources, state.sourceCursors))) break; const expanded = []; for (const state of states) { if (allSourcesExhausted(context.sources, state.sourceCursors)) { continue; } expanded.push(...expandState(state, context)); } if (!expanded.length) break; states = pruneStates(expanded, context); } return candidatePool.sort(compareFinalPlan); }

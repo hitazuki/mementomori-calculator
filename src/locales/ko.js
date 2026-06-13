@@ -1,4 +1,7 @@
 export default {
+  planRechargeMode: "계획 모드",
+  planRechargeModeLongTerm: "장기 계획",
+  planRechargeModeRush: "빠른 진행",
   planTopUpMode: "추가 과금 모드",
   planTopUpAuto: "자동 가치 판단",
   planTopUpOff: "끄기",

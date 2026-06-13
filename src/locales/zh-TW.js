@@ -1,4 +1,7 @@
 export default {
+  planRechargeMode: "規劃模式",
+  planRechargeModeLongTerm: "長期規劃",
+  planRechargeModeRush: "趕進度",
   planTopUpMode: "補儲值模式",
   planTopUpAuto: "自動價值判斷",
   planTopUpOff: "關閉",

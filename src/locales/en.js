@@ -1,4 +1,7 @@
 export default {
+  planRechargeMode: "Planning Mode",
+  planRechargeModeLongTerm: "Long Term",
+  planRechargeModeRush: "Rush",
   planTopUpMode: "Top Up Mode",
   planTopUpAuto: "Auto Evaluate",
   planTopUpOff: "Off",

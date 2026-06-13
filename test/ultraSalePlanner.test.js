@@ -16,6 +16,8 @@ const {
   pruneStates,
   findHeuristicTopUpCombination,
   findPermanentTopUpOption,
+  getRechargeBucket,
+  rechargeResetCost,
 } = __testables
 
 function makePack(trigger, price, originalValue, overrides = {}) {
@@ -199,6 +201,56 @@ test('top-up heuristic tries each denomination once before repeating small fille
   assert.equal(combo.purchases.filter(pack => pack.paidDiamonds === 500).length, 1)
   assert.equal(combo.purchases.filter(pack => pack.paidDiamonds === 325).length, 0)
   assert.equal(combo.purchases.filter(pack => pack.paidDiamonds === 80).length, 2)
+})
+
+test('recharge bucket stops at the daily 12000 target without envelope potential', () => {
+  const context = buildPlanningContext([makePack(1, 11800, 50000)], baseSettings({
+    currentPrice: 11800,
+    dailyRechargeResetPaid: 12000,
+  }))
+
+  assert.equal(context.envelope, null)
+  assert.equal(getRechargeBucket(11800, context), '4|2')
+  assert.equal(getRechargeBucket(12000, context), '5|0')
+})
+
+test('rush planning mode restores recharge envelope and allows top-up beyond 12000', () => {
+  const context = buildPlanningContext([makePack(1, 11800, 50000)], baseSettings({
+    currentPrice: 11800,
+    rechargePlanningMode: 'rush',
+    freeDiamondScore: 1,
+    permanentPacks: [
+      makePermanentPack('钻石组合包 80', 160, 80),
+      makePermanentPack('钻石组合包 5900', 11800, 5900),
+    ],
+  }))
+  const bucket = getRechargeBucket(11800, context).split('|')
+  const state = {
+    ...createEmptyState(context),
+    purchases: 1,
+    dailyPaidDiamonds: 12000,
+    steps: [{ rechargeDayIndex: 0, topUpCost: 0 }],
+  }
+  const topUp = findPermanentTopUpOption(state, context)
+
+  assert.ok(context.envelope, 'expected rush mode to build a recharge envelope')
+  assert.equal(bucket.length, 3)
+  assert.ok(Number(bucket[2]) > 0)
+  assert.ok(topUp, 'expected rush mode to consider the 18000 tier after 12000 paid diamonds')
+  assert.ok(topUp.paidDiamonds >= 6000)
+})
+
+test('rush planning mode adds a small abstract cost to day resets', () => {
+  const longTerm = buildPlanningContext([makePack(1, 160, 400)], baseSettings({
+    executionWeight: 50,
+  }))
+  const rush = buildPlanningContext([makePack(1, 160, 400)], baseSettings({
+    rechargePlanningMode: 'rush',
+    executionWeight: 50,
+  }))
+
+  assert.equal(rechargeResetCost(longTerm), 0)
+  assert.equal(rechargeResetCost(rush), 200)
 })
 
 test('planner avoids same-day 36000-tier bursts from a multi-trigger 5900 tier batch', async () => {

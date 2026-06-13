@@ -118,6 +118,14 @@
 
         <div class="planner-controls">
           <label class="planner-field">
+            <span>{{ $t('planRechargeMode') || '规划模式' }}</span>
+            <select class="form-select" v-model="planSettings.rechargePlanningMode">
+              <option value="longTerm">{{ $t('planRechargeModeLongTerm') || '长期规划' }}</option>
+              <option value="rush">{{ $t('planRechargeModeRush') || '赶进度' }}</option>
+            </select>
+          </label>
+
+          <label class="planner-field">
             <span>{{ $t('planPreferenceLevel') || '购买意愿与偏好' }}</span>
             <select class="form-select" v-model="planSettings.preferenceLevel">
               <option value="conservative">{{ preferenceOptionLabel('conservative') }}</option>
@@ -698,6 +706,7 @@ const filteredPacks = computed(() => {
 })
 
 const planSettings = reactive({
+  rechargePlanningMode: 'longTerm',
   preferenceLevel: 'balanced',
   customExpectedRatio: null,
   executionWeight: 50,
@@ -988,7 +997,7 @@ function fmtNum(n) {
 
 .planner-controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
 }
 
@@ -1005,7 +1014,7 @@ function fmtNum(n) {
 }
 
 .planner-field-compact {
-  max-width: 180px;
+  max-width: 160px;
 }
 
 .planner-toggle-field {

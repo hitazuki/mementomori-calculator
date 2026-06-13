@@ -1,4 +1,7 @@
 export default {
+  planRechargeMode: "計画モード",
+  planRechargeModeLongTerm: "長期計画",
+  planRechargeModeRush: "急ぎ",
   planTopUpMode: "追加課金モード",
   planTopUpAuto: "自動価値判定",
   planTopUpOff: "オフ",
