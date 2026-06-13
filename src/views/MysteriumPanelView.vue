@@ -106,7 +106,8 @@
                   <template v-else>
                     <div class="char-list-inline">
                       <div v-for="c in (r.chars || [r])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
-                        <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                                                <img v-if="hasIcon(c.id)" :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                        <span v-else class="char-avatar-fallback">?</span>
                       </div>
                     </div>
                   </template>
@@ -114,7 +115,8 @@
                 <td v-if="mainTab === 'colls'" style="max-width: 250px;">
                   <div class="char-avatar-group">
                     <div v-for="c in (r.chars || [])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
-                      <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                                              <img v-if="hasIcon(c.id)" :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                        <span v-else class="char-avatar-fallback">?</span>
                     </div>
                   </div>
                 </td>
@@ -129,7 +131,8 @@
                   <td>
                     <div v-if="r.bottleneck && r.bottleneck.length > 0" class="char-avatar-group">
                       <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-sm char-avatar-bw" :title="getCharFullName(c)">
-                        <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                                                <img v-if="hasIcon(c.id)" :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                        <span v-else class="char-avatar-fallback">?</span>
                       </div>
                     </div>
                     <span v-else style="font-size: var(--fs-xs); color:var(--text-muted)">-</span>
@@ -144,7 +147,8 @@
                       <div style="background: rgba(var(--color-invert-rgb),0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(var(--color-invert-rgb),0.05); display: flex; flex-direction: column; min-width: min-content;">
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1; align-content: flex-start; justify-content: center;">
                           <div v-for="c in (r.chars || [r])" :key="c.id" class="char-card">
-                            <img :src="getCharIconUrl(c.id)" class="char-card-img" @error="handleImgError" />
+                                            <img v-if="hasIcon(c.id)" :src="getCharIconUrl(c.id)" class="char-card-img" @error="handleImgError" />
+                <span v-else class="char-card-img char-avatar-fallback" style="display:flex;align-items:center;justify-content:center;font-size:24px;">?</span>
                             <div class="char-card-name" :title="getCharFullName(c)">
                               <div class="char-base-name">{{ $t(c.nameKey) }}</div>
                               <div v-if="c.name2Key" class="char-sub-name">{{ $t(c.name2Key) }}</div>
@@ -178,7 +182,8 @@
                           </div>
                           <div v-if="getCol(act).reqCids" class="char-avatar-group" style="gap: 2px; flex-wrap: nowrap; flex-shrink: 0;">
                             <div v-for="cid in getCol(act).reqCids" :key="cid" class="char-avatar char-avatar-xs" :title="getCharFullNameById(cid)">
-                              <img :src="getCharIconUrl(cid)" @error="handleImgError" />
+                                                            <img v-if="hasIcon(cid)" :src="getCharIconUrl(cid)" @error="handleImgError" />
+                              <span v-else class="char-avatar-fallback">?</span>
                             </div>
                           </div>
                         </div>
@@ -227,7 +232,8 @@
 
           <div class="mobile-mysterium-avatars">
             <div v-for="c in (r.chars || [r])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
-              <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                                      <img v-if="hasIcon(c.id)" :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                        <span v-else class="char-avatar-fallback">?</span>
             </div>
           </div>
 
@@ -235,7 +241,8 @@
             <span>{{ $t('ui_bottleneck') }}</span>
             <div class="char-avatar-group">
               <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-xs char-avatar-bw" :title="getCharFullName(c)">
-                <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                                        <img v-if="hasIcon(c.id)" :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                        <span v-else class="char-avatar-fallback">?</span>
               </div>
             </div>
           </div>
@@ -243,7 +250,8 @@
           <div v-show="r._expanded" class="mobile-mysterium-detail">
             <div class="char-avatar-group">
               <div v-for="c in (r.chars || [r])" :key="c.id" class="char-card">
-                <img :src="getCharIconUrl(c.id)" class="char-card-img" @error="handleImgError" />
+                                <img v-if="hasIcon(c.id)" :src="getCharIconUrl(c.id)" class="char-card-img" @error="handleImgError" />
+                <span v-else class="char-card-img char-avatar-fallback" style="display:flex;align-items:center;justify-content:center;font-size:24px;">?</span>
                 <div class="char-card-name" :title="getCharFullName(c)">
                   <div class="char-base-name">{{ $t(c.nameKey) }}</div>
                   <div v-if="c.name2Key" class="char-sub-name">{{ $t(c.name2Key) }}</div>
@@ -270,15 +278,18 @@ import { calculateMysteriumRankings } from '../engine/mysteriumCalc.js'
 
 const charactersRaw = ref({})
 const mysteriumRaw = ref({})
+const availableIcons = ref(null)
 
 onMounted(async () => {
   try {
-    const [chars, myst] = await Promise.all([
+    const [chars, myst, icons] = await Promise.all([
       fetch(`${import.meta.env.BASE_URL}data/characters.json`).then(r => r.json()),
-      fetch(`${import.meta.env.BASE_URL}data/mysterium_data.json`).then(r => r.json())
+      fetch(`${import.meta.env.BASE_URL}data/mysterium_data.json`).then(r => r.json()),
+      fetch(`${import.meta.env.BASE_URL}data/available_icons.json`).then(r => r.json()).catch(() => null)
     ])
     charactersRaw.value = chars
     mysteriumRaw.value = myst
+    availableIcons.value = icons
   } catch (e) {
     console.error('Failed to fetch mysterium data', e)
   }
@@ -370,6 +381,11 @@ const getCharFullNameById = (id) => {
 }
 
 const getCharIconUrl = (id) => `${import.meta.env.BASE_URL}images/characters/${id}.png`
+
+const hasIcon = (id) => {
+  if (!availableIcons.value) return true // fallback to true before load
+  return availableIcons.value.includes(Number(id))
+}
 
 const getCharNames = (r) => {
   if (r.chars) return r.chars.map(c => getCharFullName(c)).join(' + ')
