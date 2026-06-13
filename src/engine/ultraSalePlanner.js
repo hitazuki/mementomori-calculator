@@ -379,6 +379,7 @@ function buildPlanningSources(packs, settings) {
           id: 'attribute_all_towers',
           label: '全属性塔抵达',
           batchSize: 1,
+          attributeTower: ALL_ATTRIBUTE_TOWER,
           attributeKind: 'all',
           allAttributeTowerSourceIndices: ATTRIBUTE_TOWERS.map(tower => attributeSourceIndices.get(tower)),
           groups: opportunities.map((opportunity, index) => ({
@@ -422,7 +423,12 @@ function mergeAttributeTowerSets(...sets) {
 
 function attributeTowerSetIntersects(a = [], b = []) {
   const lookup = new Set(a)
-  return b.some(tower => lookup.has(tower))
+  if (b.some(tower => lookup.has(tower))) return true
+  const aHasAllTower = lookup.has(ALL_ATTRIBUTE_TOWER)
+  const bHasAllTower = b.includes(ALL_ATTRIBUTE_TOWER)
+  const aHasSingleTower = a.some(tower => ATTRIBUTE_TOWERS.includes(tower))
+  const bHasSingleTower = b.some(tower => ATTRIBUTE_TOWERS.includes(tower))
+  return (aHasAllTower && bHasSingleTower) || (bHasAllTower && aHasSingleTower)
 }
 
 function attributeTowerSetSubset(a = [], b = []) {
@@ -459,9 +465,7 @@ function allAttributeTowerGroupAvailable(source, group, state, sources) {
   const layer = group.sortValue
   return source.allAttributeTowerSourceIndices.every(sourceIndex => {
     const interval = attributeTowerGateInterval(sourceIndex, state, sources)
-    return interval
-      && layer > interval.previous
-      && layer <= interval.next
+    return interval && layer <= interval.next
   })
 }
 
@@ -488,15 +492,65 @@ function blockedTowerSourcesForAllAttributeGroup(source, group, state, sources) 
     .map(interval => interval.sourceIndex)
 }
 
+function groupSelected(groupsBySource, sourceIndex, group) {
+  return (groupsBySource[sourceIndex] || []).some(selected => selected.id === group.id)
+}
+
+function selectedSingleTowerSourcesAtOrAbove(groupsBySource, sources, layer) {
+  return Object.entries(groupsBySource)
+    .filter(([, groups]) => groups.some(group => group.sortValue >= layer))
+    .map(([sourceIndexText]) => Number(sourceIndexText))
+    .filter(sourceIndex => {
+      const tower = sources[sourceIndex]?.attributeTower
+      return tower && ATTRIBUTE_TOWERS.includes(tower)
+    })
+}
+
+function attributeTowerProgressAfterBatch(sourceIndex, groupsBySource, state, sources) {
+  const towerSource = sources[sourceIndex]
+  if (!towerSource) return null
+  const cursor = state.sourceCursors[sourceIndex] || 0
+  const delta = groupsBySource[sourceIndex]?.length || 0
+  const nextCursor = cursor + delta
+  const progress = nextCursor > 0
+    ? towerSource.groups[nextCursor - 1]?.sortValue
+    : towerSource.attributeStartProgress
+  return Number.isFinite(progress) ? progress : null
+}
+
+function allAttributeLayerFullyCrossedAfterBatch(source, group, groupsBySource, state, sources) {
+  if (!source.allAttributeTowerSourceIndices?.length) return false
+  const layer = group.sortValue
+  return source.allAttributeTowerSourceIndices.every(sourceIndex => {
+    const progress = attributeTowerProgressAfterBatch(sourceIndex, groupsBySource, state, sources)
+    return Number.isFinite(progress) && progress > layer
+  })
+}
+
 function allAttributeBatchValid(groupsBySource, sources, state) {
   if (!state) return true
-  for (const [sourceIndexText, groups] of Object.entries(groupsBySource)) {
-    const source = sources[Number(sourceIndexText)]
+
+  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    const source = sources[sourceIndex]
     if (!source?.allAttributeTowerSourceIndices?.length) continue
-    for (const group of groups) {
-      for (const blockedSourceIndex of blockedTowerSourcesForAllAttributeGroup(source, group, state, sources)) {
-        if (groupsBySource[blockedSourceIndex]?.length) return false
-      }
+    const cursor = state.sourceCursors[sourceIndex] || 0
+    const group = source.groups[cursor]
+    if (!group || !allAttributeTowerGroupAvailable(source, group, state, sources)) continue
+
+    const selectedSingleSources = selectedSingleTowerSourcesAtOrAbove(groupsBySource, sources, group.sortValue)
+    if (!selectedSingleSources.length) continue
+
+    if (!groupSelected(groupsBySource, sourceIndex, group)) {
+      if (allAttributeLayerFullyCrossedAfterBatch(source, group, groupsBySource, state, sources)) return false
+      continue
+    }
+
+    const blockedSourceIndices = blockedTowerSourcesForAllAttributeGroup(source, group, state, sources)
+    if (
+      blockedSourceIndices.length
+      && blockedSourceIndices.every(blockedSourceIndex => selectedSingleSources.includes(blockedSourceIndex))
+    ) {
+      return false
     }
   }
   return true

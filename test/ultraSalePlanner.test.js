@@ -12,6 +12,7 @@ const {
   buildPlanningContext,
   createEmptyState,
   expandState,
+  generateBatchCandidates,
   comparePlan,
   pruneStates,
   findHeuristicTopUpCombination,
@@ -464,6 +465,199 @@ test('3000-paid-diamond strategy is shown when a path drops tier then buys the 3
   assert.ok(option, 'expected a 3000-paid-diamond micro-adjustment option')
   assert.ok(option.steps.some(step => !step.bought && step.nextTierPrice < step.tierPrice))
   assert.ok(option.steps.flatMap(step => step.purchases).some(pack => pack.price === 6000))
+})
+
+test('all-attribute tower arrival may be retained while some next single-tower triggers remain unconsumed', () => {
+  const attributeTowers = [
+    'origin_tower_blue',
+    'origin_tower_red',
+    'origin_tower_green',
+    'origin_tower_yellow',
+  ]
+  const packs = [
+    makePack(1025, 160, 4000, { tower: 'origin_group_all_towers' }),
+    ...attributeTowers.map(tower => makePack(1050, 160, 4000, { tower })),
+  ]
+  const lanes = attributeTowers.map(tower => ({
+    id: `tower:${tower}`,
+    cat: 'tower',
+    tower,
+    label: tower,
+    startProgress: 1000,
+    endProgress: 1050,
+    batchSize: 1,
+  }))
+  const context = buildPlanningContext(packs, baseSettings({
+    currentPrice: 160,
+    lanes,
+  }))
+  const empty = createEmptyState(context)
+  const initialCandidates = generateBatchCandidates(empty, context)
+
+  assert.ok(initialCandidates.length, 'expected the all-attribute arrival to be a candidate')
+  assert.ok(initialCandidates.some(candidate => (
+    candidate.attributeTowers.includes('origin_tower_red')
+    && !candidate.attributeTowers.includes('origin_group_all_towers')
+  )), 'a subset of 1050 single-tower triggers may leave all-attribute 1025 retained')
+  assert.equal(initialCandidates.some(candidate => (
+    attributeTowers.every(tower => candidate.attributeTowers.includes(tower))
+    && !candidate.attributeTowers.includes('origin_group_all_towers')
+  )), false, 'all four 1050 single-tower triggers cannot leave all-attribute 1025 retained')
+  assert.equal(initialCandidates.some(candidate => (
+    attributeTowers.every(tower => candidate.attributeTowers.includes(tower))
+    && candidate.attributeTowers.includes('origin_group_all_towers')
+  )), false, 'all-attribute 1025 cannot batch with every tower that unlocks the next 1050 layer')
+
+  const afterAllTower = expandState(empty, context)
+    .find(state => state.triggerCount === 1
+      && state.rechargeDayIndex === 0
+      && state.currentDayAttributeTowers.includes('origin_group_all_towers'))
+  assert.ok(afterAllTower, 'expected an in-day state after consuming all-attribute 1025')
+
+  const nextCandidates = generateBatchCandidates(afterAllTower, context)
+    .filter(candidate => candidate.attributeTowers.some(tower => attributeTowers.includes(tower)))
+  assert.ok(nextCandidates.length, 'expected single-tower 1050 candidates after all-attribute 1025')
+  assert.ok(nextCandidates.every(candidate => candidate.requiresRechargeReset), 'single-tower triggers after all-attribute arrival must force a day reset')
+})
+
+test('all-attribute tower arrival blocks the final next single-tower trigger from being left behind', () => {
+  const attributeTowers = [
+    'origin_tower_blue',
+    'origin_tower_red',
+    'origin_tower_green',
+    'origin_tower_yellow',
+  ]
+  const packs = [
+    makePack(1025, 160, 4000, { tower: 'origin_group_all_towers' }),
+    makePack(1050, 160, 4000, { tower: 'origin_tower_blue' }),
+    makePack(1150, 160, 4000, { tower: 'origin_tower_red' }),
+    makePack(1750, 160, 4000, { tower: 'origin_tower_green' }),
+    makePack(1750, 160, 4000, { tower: 'origin_tower_yellow' }),
+  ]
+  const lanes = [
+    {
+      id: 'tower:origin_tower_blue',
+      cat: 'tower',
+      tower: 'origin_tower_blue',
+      label: 'Blue',
+      startProgress: 1000,
+      endProgress: 1050,
+      batchSize: 1,
+    },
+    {
+      id: 'tower:origin_tower_red',
+      cat: 'tower',
+      tower: 'origin_tower_red',
+      label: 'Red',
+      startProgress: 1100,
+      endProgress: 1150,
+      batchSize: 1,
+    },
+    {
+      id: 'tower:origin_tower_green',
+      cat: 'tower',
+      tower: 'origin_tower_green',
+      label: 'Green',
+      startProgress: 1700,
+      endProgress: 1750,
+      batchSize: 1,
+    },
+    {
+      id: 'tower:origin_tower_yellow',
+      cat: 'tower',
+      tower: 'origin_tower_yellow',
+      label: 'Yellow',
+      startProgress: 1700,
+      endProgress: 1750,
+      batchSize: 1,
+    },
+  ]
+  const context = buildPlanningContext(packs, baseSettings({
+    currentPrice: 160,
+    lanes,
+  }))
+  const candidates = generateBatchCandidates(createEmptyState(context), context)
+
+  assert.ok(candidates.length, 'expected reachable all-attribute 1025 candidates')
+  assert.equal(candidates.some(candidate => (
+    candidate.attributeTowers.includes('origin_tower_blue')
+  )), false, 'blue 1050 is the final missing next single-tower trigger, so all-attribute 1025 cannot be left behind')
+  assert.ok(candidates.some(candidate => (
+    candidate.attributeTowers.includes('origin_group_all_towers')
+    && candidate.attributeTowers.includes('origin_tower_red')
+  )), 'non-lowest single towers may be batched with the all-attribute arrival')
+  assert.equal(candidates.some(candidate => (
+    candidate.attributeTowers.includes('origin_group_all_towers')
+    && candidate.attributeTowers.includes('origin_tower_blue')
+  )), false, 'the only lowest tower that unlocks the all-attribute layer cannot be batched with it')
+})
+
+test('all-attribute tower arrival may batch with a subset of tied lowest towers', () => {
+  const packs = [
+    makePack(1025, 160, 4000, { tower: 'origin_group_all_towers' }),
+    makePack(1050, 160, 4000, { tower: 'origin_tower_blue' }),
+    makePack(1050, 160, 4000, { tower: 'origin_tower_red' }),
+    makePack(1050, 160, 4000, { tower: 'origin_tower_green' }),
+    makePack(1100, 160, 4000, { tower: 'origin_tower_yellow' }),
+  ]
+  const lanes = [
+    {
+      id: 'tower:origin_tower_blue',
+      cat: 'tower',
+      tower: 'origin_tower_blue',
+      label: 'Blue',
+      startProgress: 1000,
+      endProgress: 1050,
+      batchSize: 1,
+    },
+    {
+      id: 'tower:origin_tower_red',
+      cat: 'tower',
+      tower: 'origin_tower_red',
+      label: 'Red',
+      startProgress: 1000,
+      endProgress: 1050,
+      batchSize: 1,
+    },
+    {
+      id: 'tower:origin_tower_green',
+      cat: 'tower',
+      tower: 'origin_tower_green',
+      label: 'Green',
+      startProgress: 1000,
+      endProgress: 1050,
+      batchSize: 1,
+    },
+    {
+      id: 'tower:origin_tower_yellow',
+      cat: 'tower',
+      tower: 'origin_tower_yellow',
+      label: 'Yellow',
+      startProgress: 1050,
+      endProgress: 1100,
+      batchSize: 1,
+    },
+  ]
+  const context = buildPlanningContext(packs, baseSettings({
+    currentPrice: 160,
+    lanes,
+  }))
+  const candidates = generateBatchCandidates(createEmptyState(context), context)
+  const hasTowers = (...towers) => candidates.some(candidate => (
+    towers.every(tower => candidate.attributeTowers.includes(tower))
+  ))
+
+  assert.ok(hasTowers(
+    'origin_group_all_towers',
+    'origin_tower_red',
+    'origin_tower_green',
+  ), 'a subset of tied lowest towers may batch with the all-attribute arrival')
+  assert.equal(candidates.some(candidate => (
+    candidate.attributeTowers.includes('origin_group_all_towers')
+    && candidate.attributeTowers.includes('origin_tower_blue')
+    && candidate.attributeTowers.includes('origin_tower_red')
+    && candidate.attributeTowers.includes('origin_tower_green')
+  )), false, 'all tied lowest towers cannot be advanced in the same batch as the all-attribute arrival')
 })
 
 test('small-pack batch strategy buys only 80-paid-diamond packs and can buy multiple in one batch', async () => {
