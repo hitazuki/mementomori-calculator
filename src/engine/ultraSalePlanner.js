@@ -1106,6 +1106,18 @@ function allPurchasesAtOrAbovePaidDiamonds(state, paidDiamonds) {
   return purchases.length > 0 && purchases.every(pack => purchasePaidDiamonds(pack) >= paidDiamonds)
 }
 
+function countPurchasesBelowPaidDiamonds(state, paidDiamonds) {
+  return statePurchasedPacks(state)
+    .filter(pack => purchasePaidDiamonds(pack) < paidDiamonds)
+    .length
+}
+
+function averagePaidDiamondsPerPurchase(state) {
+  const purchases = statePurchasedPacks(state)
+  if (!purchases.length) return 0
+  return purchases.reduce((sum, pack) => sum + purchasePaidDiamonds(pack), 0) / purchases.length
+}
+
 function compareHighCePlan(a, b) {
   const aCe = stateAverageCe(a)
   const bCe = stateAverageCe(b)
@@ -1117,7 +1129,16 @@ function compareKeepTierPlan(a, b) {
   const aPartialSkip = hasPartialPackSkip(a) ? 1 : 0
   const bPartialSkip = hasPartialPackSkip(b) ? 1 : 0
   if (aPartialSkip !== bPartialSkip) return bPartialSkip - aPartialSkip
-  if (a.triggerCount !== b.triggerCount) return b.triggerCount - a.triggerCount
+  const aCe = stateAverageCe(a)
+  const bCe = stateAverageCe(b)
+  if (aCe !== bCe) return bCe - aCe
+  const aLowTierPurchases = countPurchasesBelowPaidDiamonds(a, KEEP_TIER_MIN_PAID_DIAMONDS)
+  const bLowTierPurchases = countPurchasesBelowPaidDiamonds(b, KEEP_TIER_MIN_PAID_DIAMONDS)
+  if (aLowTierPurchases !== bLowTierPurchases) return aLowTierPurchases - bLowTierPurchases
+  const aAveragePaid = averagePaidDiamondsPerPurchase(a)
+  const bAveragePaid = averagePaidDiamondsPerPurchase(b)
+  if (aAveragePaid !== bAveragePaid) return bAveragePaid - aAveragePaid
+  if (a.purchases !== b.purchases) return a.purchases - b.purchases
   return compareRealizedPlan(a, b)
 }
 
@@ -1142,7 +1163,8 @@ function isKeepTierMaxPackState(state, context) {
 
 function isMidTier3000State(state, context) {
   return state.purchases > 0
-    && countPurchasesByPaidDiamonds(state, MID_TIER_PAID_DIAMONDS) >= 2
+    && hasFullTierDropWait(state)
+    && countPurchasesByPaidDiamonds(state, MID_TIER_PAID_DIAMONDS) >= 1
     && allPurchasesAtOrAbovePaidDiamonds(state, MID_TIER_PAID_DIAMONDS / 2)
     && purchasedPacksMeetCeThreshold(state, context)
     && stateAverageCe(state) >= context.strategyCeThreshold + 1

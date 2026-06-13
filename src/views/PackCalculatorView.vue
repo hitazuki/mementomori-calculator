@@ -118,14 +118,6 @@
 
         <div class="planner-controls">
           <label class="planner-field">
-            <span>{{ $t('planRechargeMode') || '规划模式' }}</span>
-            <select class="form-select" v-model="planSettings.rechargePlanningMode">
-              <option value="longTerm">{{ $t('planRechargeModeLongTerm') || '长期规划' }}</option>
-              <option value="rush">{{ $t('planRechargeModeRush') || '赶进度' }}</option>
-            </select>
-          </label>
-
-          <label class="planner-field">
             <span>{{ $t('planPreferenceLevel') || '购买意愿与偏好' }}</span>
             <select class="form-select" v-model="planSettings.preferenceLevel">
               <option value="conservative">{{ preferenceOptionLabel('conservative') }}</option>
@@ -161,6 +153,14 @@
             <select class="form-select" v-model="planSettings.topUpMode">
               <option value="auto">{{ $t('planTopUpAuto') || '自动价值判断' }}</option>
               <option value="off">{{ $t('planTopUpOff') || '关闭' }}</option>
+            </select>
+          </label>
+
+          <label class="planner-field">
+            <span>{{ $t('planRechargeMode') || '规划模式' }}</span>
+            <select class="form-select" v-model="planSettings.rechargePlanningMode">
+              <option value="longTerm">{{ $t('planRechargeModeLongTerm') || '长期规划' }}</option>
+              <option value="rush">{{ $t('planRechargeModeRush') || '赶进度' }}</option>
             </select>
           </label>
 

@@ -415,19 +415,13 @@ test('custom preference CE target overrides the derived threshold but keeps the 
   assert.equal(option.strategyCeThreshold, 6.5)
 })
 
-test('3000-paid-diamond strategy is shown only when the mid tier is a meaningful large-pack variant', async () => {
+test('3000-paid-diamond strategy is not shown for a no-drop value path', async () => {
   const packs = [
-    makePack(1, 3000, 5000),
-    makePack(2, 6000, 36000),
-    makePack(3, 6000, 36000),
-    makePack(4, 6000, 36000),
-    makePack(2, 11800, 20000),
-    makePack(3, 11800, 20000),
-    makePack(4, 11800, 20000),
+    makePack(1, 6000, 42000),
   ]
 
   const options = await buildUltraSalePlanOptions(packs, baseSettings({
-    currentPrice: 3000,
+    currentPrice: 6000,
     freeDiamondScore: 0,
     maxStatesPerTier: 120,
     lanes: [{
@@ -436,15 +430,40 @@ test('3000-paid-diamond strategy is shown only when the mid tier is a meaningful
       tower: 'origin_tower_infinite',
       label: 'Tower',
       startProgress: 0,
-      endProgress: 4,
+      endProgress: 1,
+      batchSize: 1,
+    }],
+  }))
+
+  assert.equal(options.some(o => o.id === 'midTier3000'), false)
+  assert.ok(options.some(o => o.id === 'bestValue' || o.id === 'keepTierMaxPack'))
+})
+
+test('3000-paid-diamond strategy is shown when a path drops tier then buys the 3000 paid-diamond tier', async () => {
+  const packs = [
+    makePack(1, 11800, 100),
+    makePack(2, 6000, 42000),
+  ]
+
+  const options = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 11800,
+    freeDiamondScore: 0,
+    maxStatesPerTier: 120,
+    lanes: [{
+      id: 'tower:infinite',
+      cat: 'tower',
+      tower: 'origin_tower_infinite',
+      label: 'Tower',
+      startProgress: 0,
+      endProgress: 2,
       batchSize: 1,
     }],
   }))
   const option = options.find(o => o.id === 'midTier3000')
 
-  assert.ok(option, 'expected a 3000-paid-diamond strategy option')
-  assert.ok(option.steps.flatMap(step => step.purchases).filter(pack => pack.price === 6000).length >= 2)
-  assert.ok(option.averageCe > 10)
+  assert.ok(option, 'expected a 3000-paid-diamond micro-adjustment option')
+  assert.ok(option.steps.some(step => !step.bought && step.nextTierPrice < step.tierPrice))
+  assert.ok(option.steps.flatMap(step => step.purchases).some(pack => pack.price === 6000))
 })
 
 test('small-pack batch strategy buys only 80-paid-diamond packs and can buy multiple in one batch', async () => {
