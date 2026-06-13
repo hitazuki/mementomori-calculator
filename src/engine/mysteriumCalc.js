@@ -313,6 +313,8 @@ export function calculateMysteriumRankings(characters, collections, scoringTempl
         const char = charMap.get(cid)
         cost += char.cost
         chars.push(char)
+      } else {
+        chars.push({ id: cid, nameKey: '???', cost: 0 })
       }
     }
     return {
