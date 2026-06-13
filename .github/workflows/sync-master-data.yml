@@ -1,0 +1,67 @@
+name: Sync Master Data
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # 每天 UTC 8:00 (北京时间 16:00) 运行
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  sync-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          path: 'mmt-calculator'
+
+      - name: Checkout masterbook repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'moonheart/mementomori-masterbook'
+          path: 'masterbook'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Locate Master Data directory
+        id: locate
+        run: |
+          # 自动查找包含 CharacterMB.json 的目录
+          MASTER_DIR=$(find masterbook -name "CharacterMB.json" -exec dirname {} \;)
+          if [ -z "$MASTER_DIR" ]; then
+            echo "Error: Could not find Master data JSON files."
+            exit 1
+          fi
+          echo "dir=$MASTER_DIR" >> $GITHUB_OUTPUT
+
+      - name: Extract Master Data
+        working-directory: mmt-calculator
+        run: |
+          # 复用项目中的抽取逻辑
+          # 由于脚本支持通过参数传入 Master 目录，直接将刚才定位到的路径传给脚本
+          node scripts/extract_master_data.js ../${{ steps.locate.outputs.dir }}
+
+      - name: Check for changes
+        id: git-check
+        working-directory: mmt-calculator
+        run: |
+          # 检查 public/data/ 目录下是否有更新的数据
+          git add public/data/
+          if git diff --staged --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No data changes detected."
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Data changes detected."
+          fi
+
+      - name: Commit and Push changes
+        if: steps.git-check.outputs.changes == 'true'
+        working-directory: mmt-calculator
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m "chore(data): auto sync master data"
+          git push origin main
