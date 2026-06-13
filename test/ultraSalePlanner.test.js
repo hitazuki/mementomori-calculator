@@ -345,6 +345,24 @@ test('preference CE target falls back to secondary hard currency when no standar
   assert.equal(option.expectedRatio, 7.5)
 })
 
+test('custom preference CE target overrides the derived threshold but keeps the baseline visible', async () => {
+  const packs = [
+    makePack(1, 11800, 47200, {
+      items: [{ itype: 16, iid: 4 }],
+    }),
+  ]
+
+  const [option] = await buildUltraSalePlanOptions(packs, baseSettings({
+    currentPrice: 11800,
+    preferenceLevel: 'custom',
+    customExpectedRatio: 6.5,
+  }))
+
+  assert.equal(option.preferenceBaselineCe, 8)
+  assert.equal(option.expectedRatio, 6.5)
+  assert.equal(option.strategyCeThreshold, 6.5)
+})
+
 test('3000-paid-diamond strategy is shown only when the mid tier is a meaningful large-pack variant', async () => {
   const packs = [
     makePack(1, 3000, 5000),

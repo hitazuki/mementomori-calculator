@@ -140,6 +140,22 @@ function resolvePreferenceBaselineCe(packs, settings) {
   return derivedBaseline > 0 ? derivedBaseline : 3.0
 }
 
+export function preferenceCeForLevel(packs, preferenceLevel = 'balanced', settings = {}) {
+  const preferenceBaselineCe = resolvePreferenceBaselineCe(packs, settings)
+  const customExpectedRatio = Number(settings.customExpectedRatio)
+  if (preferenceLevel === 'custom' && Number.isFinite(customExpectedRatio) && customExpectedRatio > 0) {
+    return {
+      preferenceBaselineCe,
+      expectedRatio: customExpectedRatio,
+    }
+  }
+  const preferenceMultiplier = PREFERENCE_CE_MULTIPLIERS[preferenceLevel] || PREFERENCE_CE_MULTIPLIERS.balanced
+  return {
+    preferenceBaselineCe,
+    expectedRatio: preferenceBaselineCe * preferenceMultiplier,
+  }
+}
+
 function normalizePlanningLanes(settings) {
   if (Array.isArray(settings.lanes) && settings.lanes.length) {
     return settings.lanes
@@ -1517,9 +1533,7 @@ function buildPlanningContext(packs, settings) {
     : 0
 
   const preferenceLevel = settings.preferenceLevel || 'balanced'
-  const preferenceBaselineCe = resolvePreferenceBaselineCe(packs, settings)
-  const preferenceMultiplier = PREFERENCE_CE_MULTIPLIERS[preferenceLevel] || PREFERENCE_CE_MULTIPLIERS.balanced
-  let expectedRatio = preferenceBaselineCe * preferenceMultiplier
+  const { preferenceBaselineCe, expectedRatio } = preferenceCeForLevel(packs, preferenceLevel, settings)
   let preferenceDiscount = 0.9
   if (preferenceLevel === 'conservative') {
     preferenceDiscount = 1.0
@@ -1643,13 +1657,18 @@ export async function buildUltraSalePlanOptions(packs, settings = {}) {
 
   const hasProfitablePlan = bestState.purchases > 0 || strategyCandidates.length > 0
 
+  function createNoPlanResult(description, meta = {}) {
+    return createResult(emptyState, context, {
+      id: 'retention',
+      label: '保留机会',
+      description,
+      ...meta,
+    })
+  }
+
   if (!hasProfitablePlan) {
     return [
-      createResult(emptyState, context, {
-        id: 'retention',
-        label: '保留机会',
-        description: '当前决策价值（执行收益+未来保留价值）未超过直接保留机会的基线。建议暂不购买，保留机会。',
-      })
+      createNoPlanResult('当前决策价值（执行收益+未来保留价值）未超过直接保留机会的基线。建议暂不购买，保留机会。')
     ]
   }
 
@@ -1710,11 +1729,7 @@ export async function buildUltraSalePlanOptions(packs, settings = {}) {
   }
 
   return options.length ? options : [
-    createResult(emptyState, context, {
-      id: 'retention',
-      label: '保留机会',
-      description: '当前没有符合策略输出规则的正收益路径。建议暂不购买，保留机会。',
-    })
+    createNoPlanResult('当前没有符合策略输出规则的正收益路径。建议暂不购买，保留机会。')
   ]
 
 }

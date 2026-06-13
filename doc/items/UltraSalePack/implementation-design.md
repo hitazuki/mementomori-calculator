@@ -65,7 +65,7 @@ decisionValue = moneySurplus
 
 | 参数名称 | 建议默认值 | 物理含义 | 改动产生的影响 |
 | :--- | :--- | :--- | :--- |
-| `preferenceLevel` (购买偏好档位) | 玩家输入(保守/均衡/激进) | 玩家对金钱投资回报的门槛与对未发生收益的信任程度 | 先从当前评分表下的 5900 付费钻硬通货包推导 `preferenceBaselineCe`，再映射为 `expectedRatio`。**激进**：`基准 × 0.75` 且 `preferenceDiscount` 低，愿意接受更多大包和铺路。**均衡**：`基准 × 1.0`。**保守**：`基准 × 1.25` 且 `preferenceDiscount` 高，更容易只保留极高 CE 小包或输出机会保留。 |
+| `preferenceLevel` (CE 门槛档位) | 玩家输入(保守/均衡/激进/自定义) | 玩家对金钱投资回报的门槛与对未发生收益的信任程度 | 先从当前评分表下的 5900 付费钻硬通货包推导 `preferenceBaselineCe`，再映射为 `expectedRatio`。**激进**：`基准 × 0.75` 且 `preferenceDiscount` 低，愿意接受更多大包和铺路。**均衡**：`基准 × 1.0`。**保守**：`基准 × 1.25` 且 `preferenceDiscount` 高，更容易只保留极高 CE 小包或输出机会保留。**自定义**：直接使用玩家填写 CE。 |
 | `executionWeight` (执行惩罚权重) | 50 CE / 次 | 每增加一点操作复杂度的价值惩罚（等效约 50 免费钻价值） | **调高**：极力避免同一批次触发大量礼包，算法会更倾向于把触发点拆到不同天（跨日），以降低单批次压力。<br>**调低**：肆无忌惮地跨来源大合批，可能导致玩家实际操作时容易手忙脚乱超时。 |
 
 > **关于默认值量级的严格计算与合理性评估（基于真实数据推演）：**
@@ -80,11 +80,11 @@ decisionValue = moneySurplus
 ## 4. 输入归一化
 
 ### 4.1 输入归一化
-页面输入的不再是散乱的性价比和预算上限，而是统一的购买偏好档位（如：保守、均衡、激进）：
+页面输入的不再是散乱的性价比和预算上限，而是统一的 CE 门槛档位（如：保守、均衡、激进、自定义）：
 ```text
 preferenceLevel
 ```
-内部算法先从当前礼包 CE 数据推导 `preferenceBaselineCe`，再根据该宏观档位映射出精确的盈亏线 `expectedRatio` 和摩擦力成本，用于后续规划与状态剪枝。基准 CE 取 5900 付费钻硬通货包 CE 中位数；标准硬通货优先，次级硬通货仅作兜底；缺少样本时回退到 `3.0`。
+内部算法先从当前礼包 CE 数据推导 `preferenceBaselineCe`，再根据该宏观档位映射出精确的盈亏线 `expectedRatio` 和摩擦力成本，用于后续规划与状态剪枝。基准 CE 取 5900 付费钻硬通货包 CE 中位数；标准硬通货优先，次级硬通货仅作兜底；缺少样本时回退到 `3.0`。`preferenceBaselineCe` 是评分表驱动的市场锚点，`expectedRatio` 才是当前偏好实际使用的门槛 CE。
 
 ### 4.2 礼包档位
 从限时包数据中提取可用价格档位并升序排列：
@@ -323,7 +323,7 @@ BucketKey = hash(tierIndex, sourceCursors, currentDayAttributeTowers, rechargeBu
 
 ## 12. 方案输出架构
 
-DP 搜索仍生成通用候选路径；输出层再按玩家可执行的买包策略挑选代表方案。`preferenceLevel` 先映射出动态 `preferenceBaselineCe`、`expectedRatio` 与 `preferenceDiscount`，而策略输出使用 `strategyCeThreshold` 判断已购买礼包是否达标。若未显式传入 `strategyCeThreshold`，默认沿用 `expectedRatio`。
+DP 搜索仍生成通用候选路径；输出层再按玩家可执行的买包策略挑选代表方案。`preferenceLevel` 映射动态 `preferenceBaselineCe`、`expectedRatio` 与 `preferenceDiscount`。策略输出使用 `strategyCeThreshold` 判断已购买礼包是否达标；若未显式传入 `strategyCeThreshold`，默认沿用 `expectedRatio`。
 
 1.  **保档大包方案 (Keep-Tier Large Packs)**：过滤掉整批触发后全不买导致降档的路径，允许同批只购买 CE 达标的高价值礼包并卡掉低 CE 包。候选路径至少需要包含 1 个 1500 付费钻及以上购买点，纯 80 付费钻路径由小包批量或价值最优承接。挑选时优先展示存在同批卡包特征的路径，再按触发覆盖量与 `realScore` 排序。
 2.  **3000 付费钻微操方案 (3000-Diamond Variant)**：从真实收益为正的候选中挑选至少包含两个 3000 付费钻档购买点的路径，且路径平均 CE 必须明显高于策略 CE 门槛。该方案是大包策略的可选衍生；若没有可比较收益则不输出，避免 UI 噪音。

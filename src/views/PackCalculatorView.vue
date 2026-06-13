@@ -120,10 +120,23 @@
           <label class="planner-field">
             <span>{{ $t('planPreferenceLevel') || '购买意愿与偏好' }}</span>
             <select class="form-select" v-model="planSettings.preferenceLevel">
-              <option value="conservative">{{ $t('planPrefConservative') || '保守 (极其挑剔/宁缺毋滥)' }}</option>
-              <option value="balanced">{{ $t('planPrefBalanced') || '均衡 (默认推荐/兼顾进度)' }}</option>
-              <option value="aggressive">{{ $t('planPrefAggressive') || '激进 (积极把握机会/接受较低性价比)' }}</option>
+              <option value="conservative">{{ preferenceOptionLabel('conservative') }}</option>
+              <option value="balanced">{{ preferenceOptionLabel('balanced') }}</option>
+              <option value="aggressive">{{ preferenceOptionLabel('aggressive') }}</option>
+              <option value="custom">{{ preferenceOptionLabel('custom') }}</option>
             </select>
+          </label>
+
+          <label v-if="planSettings.preferenceLevel === 'custom'" class="planner-field planner-field-compact">
+            <span>{{ $t('planCustomCe') || '自定义 CE' }}</span>
+            <input
+              class="form-input"
+              type="number"
+              min="0.1"
+              step="0.1"
+              :placeholder="formatCe(plannerPreferenceCePreview.balanced)"
+              v-model.number="planSettings.customExpectedRatio"
+            />
           </label>
 
           <label class="planner-field">
@@ -147,6 +160,17 @@
         </div>
 
         <div class="planner-derived-note" v-html="$t('planTopUpNote')">
+        </div>
+        <div class="planner-derived-note planner-ce-note">
+          <span class="planner-ce-chip">
+            {{ $t('planCeBaselineLabel') }}
+            <b>{{ formatCe(plannerPreferenceCePreview.baseline) }}</b>
+          </span>
+          <span class="planner-ce-chip active">
+            {{ $t('planCeTargetLabel') }}
+            <b>{{ formatCe(plannerPreferenceCePreview.current) }}</b>
+          </span>
+          <span>{{ $t('planCeBaselineMeaning') }}</span>
         </div>
 
         <div class="planner-lane-head">
@@ -589,7 +613,7 @@ import { useI18n } from 'vue-i18n'
 const showScores = ref(true)
 
 import { calculatePackCE, normalizeScores } from '../engine/packCalc.js'
-import { buildUltraSalePlanOptions, compressUltraSalePlanSteps, paidDiamondsForPrice } from '../engine/ultraSalePlanner.js'
+import { buildUltraSalePlanOptions, compressUltraSalePlanSteps, paidDiamondsForPrice, preferenceCeForLevel } from '../engine/ultraSalePlanner.js'
 import { editableScores } from '../store/itemScores.js'
 
 const { t, locale } = useI18n()
@@ -675,9 +699,25 @@ const filteredPacks = computed(() => {
 
 const planSettings = reactive({
   preferenceLevel: 'balanced',
+  customExpectedRatio: null,
   executionWeight: 50,
   currentPrice: 160,
   topUpMode: 'auto',
+})
+
+const plannerCalculatedPacks = computed(() => calculatePackCE(packsRaw.value, normalizedScores.value))
+
+const plannerPreferenceCePreview = computed(() => {
+  const packs = plannerCalculatedPacks.value
+  const balanced = preferenceCeForLevel(packs, 'balanced')
+  return {
+    baseline: balanced.preferenceBaselineCe,
+    current: preferenceCeForLevel(packs, planSettings.preferenceLevel, planSettings).expectedRatio,
+    conservative: preferenceCeForLevel(packs, 'conservative').expectedRatio,
+    balanced: balanced.expectedRatio,
+    aggressive: preferenceCeForLevel(packs, 'aggressive').expectedRatio,
+    custom: preferenceCeForLevel(packs, 'custom', planSettings).expectedRatio,
+  }
 })
 
 const activePlanId = ref('bestValue')
@@ -788,6 +828,15 @@ function remainingOpportunityRange(group) {
   return group.from === group.to ? group.from : `${group.from} - ${group.to}`
 }
 
+function formatCe(value) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number.toFixed(1) : '-'
+}
+
+function preferenceOptionLabel(level) {
+  return `${t(`planPref${level[0].toUpperCase()}${level.slice(1)}`)} (CE ${formatCe(plannerPreferenceCePreview.value[level])})`
+}
+
 function scoreOf(itemKey, fallback = 1) {
   const score = normalizedScores.value[itemKey]?.score
   return Number.isFinite(Number(score)) ? Number(score) : fallback
@@ -821,7 +870,7 @@ async function calculatePlanner() {
   plannerError.value = null
   try {
     const startedAt = performance.now()
-    const calculatedPacks = calculatePackCE(packsRaw.value, normalizedScores.value)
+    const calculatedPacks = plannerCalculatedPacks.value
     const calculatedPermanentPacks = calculatePackCE(permanentPacksRaw.value, normalizedScores.value)
     const options = await buildUltraSalePlanOptions(calculatedPacks, {
       ...planningSettings.value,
@@ -939,9 +988,8 @@ function fmtNum(n) {
 
 .planner-controls {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
-  max-width: 600px;
 }
 
 .planner-field {
@@ -954,6 +1002,10 @@ function fmtNum(n) {
 .planner-field span {
   color: var(--text-muted);
   font-size: var(--fs-xs);
+}
+
+.planner-field-compact {
+  max-width: 180px;
 }
 
 .planner-toggle-field {
@@ -1023,6 +1075,34 @@ function fmtNum(n) {
   font-size: var(--fs-xs);
   line-height: 1.45;
   margin-top: 8px;
+}
+
+.planner-ce-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  border: 1px solid rgba(199, 157, 74, 0.42);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  background: rgba(199, 157, 74, 0.08);
+}
+
+.planner-ce-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.planner-ce-chip b {
+  color: var(--gold);
+  font-size: var(--fs-sm);
+}
+
+.planner-ce-chip.active b {
+  color: var(--text-primary);
 }
 
 .planner-doc-links {
@@ -1550,6 +1630,10 @@ function fmtNum(n) {
   .planner-controls,
   .planner-summary {
     grid-template-columns: 1fr;
+  }
+
+  .planner-field-compact {
+    max-width: none;
   }
 
   .pack-view-tabs {
