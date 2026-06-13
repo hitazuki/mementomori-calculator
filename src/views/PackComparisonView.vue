@@ -8,7 +8,7 @@
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
     <!-- Left Panel: Scores -->
-    <div class="flex-col gap-12 pack-score-panel" style="position:sticky;top:24px;height:calc(100vh - 48px);">
+    <div class="flex-col gap-12 pack-score-panel">
       <!-- Scores Panel -->
       <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
         <div class="card-title" @click="showScores = !showScores" style="cursor:pointer;user-select:none;margin-bottom:0;display:flex;align-items:center;">

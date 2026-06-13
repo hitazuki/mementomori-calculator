@@ -925,6 +925,7 @@ function summarizeOpportunity(opportunity, tierPrice, purchasedPacks) {
   return {
     label: opportunity.label || '',
     trigger: opportunity.trigger,
+    sourceLabel: pack?.plannerSourceLabel || opportunity.label || '',
     displayTrigger: opportunity.displayTrigger || String(opportunity.trigger),
     sortValue: opportunity.sortValue,
     tierPrice,
@@ -932,7 +933,9 @@ function summarizeOpportunity(opportunity, tierPrice, purchasedPacks) {
     purchased,
     price: pack?.price || 0,
     value: pack ? getPackOriginalValue(pack) : 0,
+    originalValue: pack ? getPackOriginalValue(pack) : 0,
     ce: pack?.ce || 0,
+    items: pack?.items || [],
   }
 }
 

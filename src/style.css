@@ -561,6 +561,16 @@ body::before {
   z-index: 4;
   margin-bottom: 12px;
 }
+
+.pack-score-panel {
+  position: static;
+  height: auto;
+}
+
+.pack-score-panel > .card {
+  max-height: min(820px, calc(100vh - 32px));
+}
+
 .mobile-summary-grid {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
@@ -1321,7 +1331,7 @@ body::before {
     height: auto !important;
   }
   .pack-score-panel > .card {
-    max-height: 42vh;
+    max-height: 68vh;
   }
   .pack-filters-card {
     align-items: stretch !important;

@@ -13,7 +13,7 @@
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
     <!-- Left Panel: Scores -->
-    <div class="flex-col gap-12 pack-score-panel" style="position:sticky;top:24px;height:calc(100vh - 48px);">
+    <div class="flex-col gap-12 pack-score-panel">
 
       <!-- Scores Panel -->
       <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
@@ -393,13 +393,11 @@
                             v-for="opportunity in step.opportunities"
                             :key="`${step.rowKey}-trigger-${opportunity.displayTrigger}`"
                             class="planner-trigger-item"
-                            :class="{ purchased: opportunity.purchased, unavailable: !opportunity.hasPackAtTier }"
+                            :class="{ purchased: opportunity.purchased, skipped: opportunity.hasPackAtTier && !opportunity.purchased, unavailable: !opportunity.hasPackAtTier }"
+                            :title="opportunity.hasPackAtTier ? `${opportunity.displayTrigger} / CE ${opportunity.ce.toFixed(1)}` : opportunity.displayTrigger"
                           >
                             <strong>{{ opportunity.displayTrigger }}</strong>
-                            <span v-if="opportunity.hasPackAtTier">
-                              {{ opportunity.purchased ? $t('planDetailBought') : $t('planDetailNotBought') }}
-                              / CE {{ opportunity.ce.toFixed(1) }}
-                            </span>
+                            <span v-if="opportunity.hasPackAtTier">CE {{ opportunity.ce.toFixed(1) }}</span>
                             <span v-else>{{ $t('planDetailNoPack') }}</span>
                           </div>
                         </div>
@@ -407,9 +405,15 @@
                           {{ $t('planDetailSkipNote', { n: step.skippedOpportunities.length }) }}
                         </div>
                       </section>
-                      <article v-for="pack in step.purchases" :key="`${step.rowKey}-detail-${pack.displayTrigger}`" class="planner-pack-detail">
+                      <article
+                        v-for="(pack, packIndex) in plannerTriggeredPacks(step)"
+                        :key="`${step.rowKey}-detail-${pack.displayTrigger}-${packIndex}`"
+                        class="planner-pack-detail"
+                        :class="{ purchased: pack.purchased, skipped: !pack.purchased }"
+                      >
                         <div class="planner-pack-detail-head">
                           <strong>{{ pack.displayTrigger }}</strong>
+                          <span class="planner-pack-state">{{ pack.purchased ? $t('planDetailBought') : $t('planDetailNotBought') }}</span>
                           <span>{{ formatPrice(pack.price) }}</span>
                           <span>CE {{ pack.ce.toFixed(1) }}</span>
                           <span>{{ $t('planColValue') }} {{ Math.round(pack.value).toLocaleString() }}</span>
@@ -791,6 +795,24 @@ function plannerPurchaseCount(step) {
     return step.skippedSteps.reduce((sum, skipped) => sum + (skipped.purchases?.length || 0), 0)
   }
   return step.purchases?.length || 0
+}
+
+function plannerTriggeredPacks(step) {
+  if (Array.isArray(step.opportunities) && step.opportunities.length) {
+    return step.opportunities
+      .filter(opportunity => opportunity.hasPackAtTier)
+      .map(opportunity => ({
+        displayTrigger: opportunity.displayTrigger,
+        sourceLabel: opportunity.sourceLabel || opportunity.label || '',
+        price: opportunity.price || 0,
+        value: opportunity.value || opportunity.originalValue || 0,
+        originalValue: opportunity.originalValue || opportunity.value || 0,
+        ce: opportunity.ce || 0,
+        items: opportunity.items || [],
+        purchased: !!opportunity.purchased,
+      }))
+  }
+  return (step.purchases || []).map(pack => ({ ...pack, purchased: true }))
 }
 
 function getRechargeProgress(step) {
@@ -1373,7 +1395,7 @@ function fmtNum(n) {
 
 .planner-trigger-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 6px;
 }
 
@@ -1393,6 +1415,11 @@ function fmtNum(n) {
 .planner-trigger-item.purchased {
   border-color: rgba(212,175,55,0.45);
   background: rgba(212,175,55,0.08);
+}
+
+.planner-trigger-item.skipped {
+  border-color: rgba(255,255,255,0.11);
+  background: rgba(255,255,255,0.025);
 }
 
 .planner-trigger-item.unavailable {
@@ -1420,6 +1447,16 @@ function fmtNum(n) {
   background: rgba(255,255,255,0.03);
 }
 
+.planner-pack-detail.purchased {
+  border-color: rgba(212,175,55,0.45);
+  background: rgba(212,175,55,0.055);
+}
+
+.planner-pack-detail.skipped {
+  border-color: rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.08);
+}
+
 .planner-pack-detail-head {
   display: flex;
   flex-wrap: wrap;
@@ -1433,6 +1470,20 @@ function fmtNum(n) {
 .planner-pack-detail-head strong {
   color: var(--text-primary);
   font-size: var(--fs-sm);
+}
+
+.planner-pack-state {
+  border: 1px solid rgba(212,175,55,0.36);
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: var(--gold);
+  font-size: var(--fs-xs);
+  line-height: 1.2;
+}
+
+.planner-pack-detail.skipped .planner-pack-state {
+  border-color: rgba(255,255,255,0.14);
+  color: var(--text-muted);
 }
 
 .planner-recharge-note {
