@@ -2116,5 +2116,51 @@
         "val": 40
       }
     ]
+  },
+  {
+    "id": 94,
+    "nameKey": "[CharacterCollectionName94]",
+    "reqCids": [
+      141,
+      134
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 14,
+        "nameKey": "[BattleParameterTypeDamageEnhance]",
+        "ctype": 1,
+        "val": 250
+      }
+    ],
+    "baseParams": []
+  },
+  {
+    "id": 95,
+    "nameKey": "[CharacterCollectionName95]",
+    "reqCids": [
+      92,
+      90
+    ],
+    "params": [
+      {
+        "ptype": 1,
+        "nameKey": "[BattleParameterTypeHp]",
+        "ctype": 2,
+        "val": 500
+      },
+      {
+        "ptype": 16,
+        "nameKey": "[BattleParameterTypeDebuffResist]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
   }
 ]
