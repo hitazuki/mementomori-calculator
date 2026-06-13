@@ -6,6 +6,7 @@ const DEFAULT_MAX_STATES = 350
 const DEFAULT_DAILY_RECHARGE_RESET_PAID = 12000
 const SMALL_PACK_PAID_DIAMONDS = 80
 const MID_TIER_PAID_DIAMONDS = 3000
+const KEEP_TIER_MIN_PAID_DIAMONDS = 1500
 const BASELINE_PAID_DIAMONDS = 5900
 const STANDARD_HARD_CURRENCY_ITEM_KEYS = new Set([
   '16:1',
@@ -1013,6 +1014,10 @@ function allPurchasesAtOrBelowPaidDiamonds(state, paidDiamonds) {
   return purchases.length > 0 && purchases.every(pack => purchasePaidDiamonds(pack) <= paidDiamonds)
 }
 
+function hasPurchaseAtOrAbovePaidDiamonds(state, paidDiamonds) {
+  return statePurchasedPacks(state).some(pack => purchasePaidDiamonds(pack) >= paidDiamonds)
+}
+
 function allPurchasesAtOrAbovePaidDiamonds(state, paidDiamonds) {
   const purchases = statePurchasedPacks(state)
   return purchases.length > 0 && purchases.every(pack => purchasePaidDiamonds(pack) >= paidDiamonds)
@@ -1048,6 +1053,7 @@ function pickStrategyState(candidates, predicate, compare = compareRealizedPlan)
 function isKeepTierMaxPackState(state, context) {
   return state.purchases > 0
     && !hasFullTierDropWait(state)
+    && hasPurchaseAtOrAbovePaidDiamonds(state, KEEP_TIER_MIN_PAID_DIAMONDS)
     && purchasedPacksMeetCeThreshold(state, context)
 }
 

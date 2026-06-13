@@ -325,7 +325,7 @@ BucketKey = hash(tierIndex, sourceCursors, currentDayAttributeTowers, rechargeBu
 
 DP 搜索仍生成通用候选路径；输出层再按玩家可执行的买包策略挑选代表方案。`preferenceLevel` 先映射出动态 `preferenceBaselineCe`、`expectedRatio` 与 `preferenceDiscount`，而策略输出使用 `strategyCeThreshold` 判断已购买礼包是否达标。若未显式传入 `strategyCeThreshold`，默认沿用 `expectedRatio`。
 
-1.  **保档大包方案 (Keep-Tier Large Packs)**：过滤掉整批触发后全不买导致降档的路径，允许同批只购买 CE 达标的高价值礼包并卡掉低 CE 包。挑选时优先展示存在同批卡包特征的路径，再按触发覆盖量与 `realScore` 排序。
+1.  **保档大包方案 (Keep-Tier Large Packs)**：过滤掉整批触发后全不买导致降档的路径，允许同批只购买 CE 达标的高价值礼包并卡掉低 CE 包。候选路径至少需要包含 1 个 1500 付费钻及以上购买点，纯 80 付费钻路径由小包批量或价值最优承接。挑选时优先展示存在同批卡包特征的路径，再按触发覆盖量与 `realScore` 排序。
 2.  **3000 付费钻微操方案 (3000-Diamond Variant)**：从真实收益为正的候选中挑选至少包含两个 3000 付费钻档购买点的路径，且路径平均 CE 必须明显高于策略 CE 门槛。该方案是大包策略的可选衍生；若没有可比较收益则不输出，避免 UI 噪音。
 3.  **小包批量方案 (Small-Pack Batch)**：只允许购买 80 付费钻档，且至少有一个批次购买多个小包。排序优先路径平均 CE，其次购买数量与 `realScore`。
 4.  **价值最优方案 (Best Value)**：若上述策略未覆盖全局最高 `realScore` 路径，且该路径与已展示策略不是同一类买法的近似等价变体，则额外输出 `bestValue` 作为兜底推荐。

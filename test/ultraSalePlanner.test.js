@@ -399,6 +399,7 @@ test('small-pack batch strategy buys only 80-paid-diamond packs and can buy mult
   const option = options.find(o => o.id === 'smallBatch')
 
   assert.ok(option, 'expected a small-pack batch strategy option')
+  assert.equal(options.some(o => o.id === 'keepTierMaxPack'), false)
   assert.ok(option.steps.some(step => step.purchases.length >= 2))
   assert.ok(option.steps.flatMap(step => step.purchases).every(pack => pack.price === 160))
 })
