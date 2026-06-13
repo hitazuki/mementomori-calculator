@@ -399,6 +399,10 @@ function sourceCursorsKey(cursors) {
   return cursors.join(',')
 }
 
+function stateTransitionKey(state) {
+  return `${sourceCursorsKey(state.sourceCursors)}|${attributeTowerSetKey(state.currentDayAttributeTowers)}`
+}
+
 function allSourcesExhausted(sources, cursors) {
   return sources.every((source, index) => cursors[index] >= source.groups.length)
 }
@@ -560,6 +564,10 @@ function sourcePrefixOptions(source, cursor, state, sources) {
 }
 
 function generateBatchCandidates(state, context) {
+  const cacheKey = stateTransitionKey(state)
+  const cached = context.batchCandidateCache?.get(cacheKey)
+  if (cached) return cached
+
   const { sources } = context
   const candidates = new Map()
   const activeOptions = []
@@ -601,13 +609,16 @@ function generateBatchCandidates(state, context) {
 
   addCross(0, {})
 
-  return [...candidates.values()]
+  const result = [...candidates.values()]
     .filter(candidate => candidate.opportunities.length)
     .sort((a, b) => {
       if (a.pressure !== b.pressure) return a.pressure - b.pressure
       return b.opportunities.length - a.opportunities.length
     })
     .slice(0, comboLimit)
+
+  context.batchCandidateCache?.set(cacheKey, result)
+  return result
 }
 
 function rechargeValueForPaid(beforePaid, addedPaid, context) {
@@ -626,7 +637,15 @@ function rechargeValueForPurchase(beforeSpent, addedCost, context) {
   return rechargeValueForPaid(paidDiamondsForPrice(beforeSpent), paidDiamondsForPrice(addedCost), context)
 }
 
-function actionOptionsForBatch(batch, tierPrice) {
+function actionOptionsCacheKey(batch, tierPrice) {
+  return `${tierPrice}|${batch.map(opportunity => opportunity.id).join('+')}`
+}
+
+function actionOptionsForBatch(batch, tierPrice, context = null) {
+  const cacheKey = actionOptionsCacheKey(batch, tierPrice)
+  const cached = context?.actionOptionsCache?.get(cacheKey)
+  if (cached) return cached
+
   const offers = batch
     .map(opportunity => opportunity.packsByPrice.get(tierPrice))
     .filter(Boolean)
@@ -660,6 +679,7 @@ function actionOptionsForBatch(batch, tierPrice) {
     })
   }
 
+  context?.actionOptionsCache?.set(cacheKey, actions)
   return actions
 }
 
@@ -770,9 +790,7 @@ function addTopUpPackToCombo(combo, pack) {
   combo.originalValue += getPackOriginalValue(pack)
 }
 
-function findHeuristicTopUpCombination(gap, packs) {
-  if (gap <= 0) return null
-
+function prepareTopUpPackOptions(packs) {
   const packByPaid = new Map()
   for (const pack of packs) {
     const paidDiamonds = getPackPaidDiamonds(pack)
@@ -783,7 +801,20 @@ function findHeuristicTopUpCombination(gap, packs) {
 
   const uniquePacks = [...packByPaid.values()]
     .sort((a, b) => getPackPaidDiamonds(b) - getPackPaidDiamonds(a))
-  if (!uniquePacks.length) return null
+  const filler = [...uniquePacks]
+    .sort((a, b) => {
+      if (getPackPaidDiamonds(a) !== getPackPaidDiamonds(b)) return getPackPaidDiamonds(a) - getPackPaidDiamonds(b)
+      return a.price - b.price
+    })[0]
+
+  return { uniquePacks, filler }
+}
+
+function findHeuristicTopUpCombination(gap, packs, prepared = null) {
+  if (gap <= 0) return null
+
+  const { uniquePacks, filler } = prepared || prepareTopUpPackOptions(packs)
+  if (!uniquePacks.length || !filler) return null
 
   const combo = { cost: 0, paidDiamonds: 0, originalValue: 0, purchases: [] }
   let remainingGap = gap
@@ -796,11 +827,6 @@ function findHeuristicTopUpCombination(gap, packs) {
     }
   }
 
-  const filler = [...uniquePacks]
-    .sort((a, b) => {
-      if (getPackPaidDiamonds(a) !== getPackPaidDiamonds(b)) return getPackPaidDiamonds(a) - getPackPaidDiamonds(b)
-      return a.price - b.price
-    })[0]
   while (remainingGap > 0) {
     addTopUpPackToCombo(combo, filler)
     remainingGap -= getPackPaidDiamonds(filler)
@@ -809,10 +835,42 @@ function findHeuristicTopUpCombination(gap, packs) {
   return combo.purchases.length ? combo : null
 }
 
+function buildPermanentTopUpOptionCache(context) {
+  const resetPaid = getDailyRechargeResetPaid(context)
+  if (!context.permanentPacks.length || resetPaid <= 0) return []
+
+  const prepared = prepareTopUpPackOptions(context.permanentPacks)
+  if (!prepared.uniquePacks.length || !prepared.filler) return []
+
+  const options = Array.from({ length: resetPaid + 1 }, () => null)
+  for (let currentPaid = 0; currentPaid < resetPaid; currentPaid++) {
+    const targetTier = nextPlannerRechargeTier(currentPaid, context)
+    if (!targetTier) continue
+
+    const combo = findHeuristicTopUpCombination(targetTier.paid - currentPaid, context.permanentPacks, prepared)
+    if (!combo) continue
+
+    const recharge = rechargeValueForPaid(currentPaid, combo.paidDiamonds, context)
+    options[currentPaid] = {
+      cost: combo.cost,
+      originalValue: combo.originalValue,
+      purchases: combo.purchases,
+      paidDiamonds: combo.paidDiamonds,
+      recharge,
+      value: Math.round(combo.originalValue + recharge.value),
+      unlockedCount: recharge.unlockedTiers.length,
+    }
+  }
+  return options
+}
+
 function findPermanentTopUpOption(state, context) {
   if (!context.permanentPacks.length || state.purchases <= 0) return null
 
   const currentPaid = state.dailyPaidDiamonds
+  const cached = context.topUpOptionByCurrentPaid?.[currentPaid]
+  if (cached) return cached
+
   const targetTier = nextPlannerRechargeTier(currentPaid, context)
   if (!targetTier) return null
 
@@ -1110,7 +1168,42 @@ function isStrategicallyEquivalentPlan(a, b, context) {
     && Math.abs(a.triggerCount - b.triggerCount) <= 1
 }
 
+function estimateGroupRemainingValue(source, group, expectedRatio, executionWeight) {
+  const weight = (source.cat === 'rank' || source.cat === 'tower') && source.tower !== 'origin_tower_infinite' ? 1.2 : 1.0
+  const baseExecCost = (source.batchSize || 1) * 0.1 * executionWeight
+  let groupValue = 0
+  for (const opportunity of group.opportunities) {
+    let bestSurplus = 0
+    for (const pack of opportunity.packsByPrice.values()) {
+      const surplus = getPackOriginalValue(pack) - (pack.price / 2) * expectedRatio - baseExecCost
+      if (surplus > bestSurplus) bestSurplus = surplus
+    }
+    groupValue += bestSurplus * weight
+  }
+  return groupValue
+}
+
+function buildRemainingValueSuffixes(sources, expectedRatio, executionWeight) {
+  return sources.map(source => {
+    const suffix = new Float64Array(source.groups.length + 1)
+    for (let i = source.groups.length - 1; i >= 0; i--) {
+      suffix[i] = suffix[i + 1] + estimateGroupRemainingValue(source, source.groups[i], expectedRatio, executionWeight)
+    }
+    return suffix
+  })
+}
+
 function estimateRemainingStateValue(state, context) {
+  if (context.remainingValueSuffixes) {
+    let remainingValue = 0
+    for (let sourceIndex = 0; sourceIndex < context.remainingValueSuffixes.length; sourceIndex++) {
+      const suffix = context.remainingValueSuffixes[sourceIndex]
+      const cursor = clamp(state.sourceCursors[sourceIndex] || 0, 0, suffix.length - 1)
+      remainingValue += suffix[cursor]
+    }
+    return remainingValue
+  }
+
   let remainingValue = 0
   for (let sourceIndex = 0; sourceIndex < context.sources.length; sourceIndex++) {
     const source = context.sources[sourceIndex]
@@ -1380,7 +1473,7 @@ function expandState(state, context) {
     const baseStates = expandRequiredRechargeResetBeforeBatch(state, batchCandidate, context)
     for (const baseState of baseStates) {
       const tierPrice = context.priceTiers[baseState.tierIndex]
-      const actions = actionOptionsForBatch(batchCandidate.opportunities, tierPrice)
+      const actions = actionOptionsForBatch(batchCandidate.opportunities, tierPrice, context)
         .filter(action => actionWithinDailyRechargeTarget(action, context))
 
       for (const action of actions) {
@@ -1548,7 +1641,7 @@ function buildPlanningContext(packs, settings) {
     ? explicitStrategyCeThreshold
     : expectedRatio
 
-  return {
+  const context = {
     envelope,
     expectedRatio,
     preferenceBaselineCe,
@@ -1565,7 +1658,12 @@ function buildPlanningContext(packs, settings) {
     sources,
     opportunities,
     settings,
+    remainingValueSuffixes: buildRemainingValueSuffixes(sources, expectedRatio, executionWeight),
+    batchCandidateCache: new Map(),
+    actionOptionsCache: new Map(),
   }
+  context.topUpOptionByCurrentPaid = buildPermanentTopUpOptionCache(context)
+  return context
 }
 
 function createResult(state, context, meta = {}) {
