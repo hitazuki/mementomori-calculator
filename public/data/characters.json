@@ -622,6 +622,20 @@
     "elementType": 2,
     "isLimited": true
   },
+  "90": {
+    "id": 90,
+    "nameKey": "[CharacterName90]",
+    "name2Key": null,
+    "elementType": 4,
+    "isLimited": true
+  },
+  "92": {
+    "id": 92,
+    "nameKey": "[CharacterName92]",
+    "name2Key": null,
+    "elementType": 3,
+    "isLimited": true
+  },
   "93": {
     "id": 93,
     "nameKey": "[CharacterName93]",
@@ -872,6 +886,6 @@
     "nameKey": "[CharacterName141]",
     "name2Key": null,
     "elementType": 5,
-    "isLimited": false
+    "isLimited": true
   }
 }
