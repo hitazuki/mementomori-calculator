@@ -1,9 +1,20 @@
-import { DAILY_RECHARGE_BONUS_TIERS, marginalFreeDiamonds, unlockedRechargeTiers, cumulativeFreeDiamonds } from './dailyRechargeBonus.js'
+import { DAILY_RECHARGE_BONUS_TIERS, cumulativeFreeDiamonds } from './dailyRechargeBonus.js'
 import { parseMainQuestProgress } from './mainQuestProgress.js'
+import { getPackOriginalValue, getPackPaidDiamonds, paidDiamondsForPriceValue } from './ultraSalePlannerPackUtils.js'
+import {
+  buildPermanentTopUpOptionCache,
+  findHeuristicTopUpCombination,
+  findPermanentTopUpOption,
+  getDailyRechargeResetPaid,
+  getDailyRechargeTargetPaid,
+  groupTopUpPacks,
+  nextPlannerRechargeTier,
+  normalizePermanentTopUpPacks,
+  rechargeValueForPaid,
+} from './ultraSalePlannerTopUp.js'
 
 const DEFAULT_PRICE_TIERS = [160, 650, 1000, 1500, 3000, 6000, 11800]
 const DEFAULT_MAX_STATES = 350
-const DEFAULT_DAILY_RECHARGE_RESET_PAID = 12000
 const RUSH_RECHARGE_RESET_COST_MULTIPLIER = 4
 const SMALL_PACK_PAID_DIAMONDS = 80
 const MID_TIER_PAID_DIAMONDS = 3000
@@ -25,7 +36,6 @@ const PREFERENCE_CE_MULTIPLIERS = {
   balanced: 1,
   aggressive: 0.75,
 }
-const TOP_UP_SOURCE_LABEL = '每日累充补包'
 const ALL_ATTRIBUTE_TOWER = 'origin_group_all_towers'
 const ATTRIBUTE_TOWERS = [
   'origin_tower_blue',
@@ -71,23 +81,8 @@ function isAttributeTowerLane(lane) {
   return lane.cat === 'tower' && ATTRIBUTE_TOWERS.includes(lane.tower)
 }
 
-function paidDiamondsForPriceValue(price) {
-  return Math.round(price / 2)
-}
-
 export function paidDiamondsForPrice(price) {
   return paidDiamondsForPriceValue(price)
-}
-
-function getPackOriginalValue(pack) {
-  if (Number.isFinite(pack.originalValue)) return pack.originalValue
-  if (Number.isFinite(pack.value) && Number.isFinite(pack.rechargeValue)) return pack.value - pack.rechargeValue
-  return Number(pack.value) || 0
-}
-
-function getPackPaidDiamonds(pack) {
-  if (Number.isFinite(pack.paidDiamonds)) return pack.paidDiamonds
-  return paidDiamondsForPrice(pack.price)
 }
 
 function itemKey(item) {
@@ -228,18 +223,6 @@ function buildLaneOpportunities(packs, lane) {
   })
 }
 
-function buildOpportunities(packs, settings) {
-  const [lane] = normalizePlanningLanes(settings)
-  return buildLaneOpportunities(packs, lane)
-}
-
-function buildBatches(opportunities, batchSize) {
-  const size = Math.max(1, Number(batchSize) || 1)
-  const batches = []
-  for (let i = 0; i < opportunities.length; i += size) batches.push(opportunities.slice(i, i + size))
-  return batches
-}
-
 function sortOpportunities(opportunities) {
   return [...opportunities].sort((a, b) => {
     const labelOrder = String(a.label || '').localeCompare(String(b.label || ''))
@@ -247,71 +230,6 @@ function sortOpportunities(opportunities) {
     if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
     return String(a.trigger).localeCompare(String(b.trigger), undefined, { numeric: true })
   })
-}
-
-function buildAttributeTowerEvents(packs, lanes) {
-  const attributeLanes = lanes.filter(isAttributeTowerLane)
-  if (!attributeLanes.length) return []
-
-  const singleEvents = []
-  for (const lane of attributeLanes) {
-    for (const opportunity of buildLaneOpportunities(packs, { ...lane, batchSize: 1 })) {
-      singleEvents.push({
-        kind: 'single',
-        sortValue: opportunity.sortValue,
-        topologyKey: `single:${opportunity.sortValue}`,
-        opportunities: [opportunity],
-      })
-    }
-  }
-
-  const allTowerEvents = []
-  if (ATTRIBUTE_TOWERS.every(tower => attributeLanes.some(lane => lane.tower === tower))) {
-    const start = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.startProgress, lane)))
-    const end = Math.min(...attributeLanes.map(lane => parseLaneProgress(lane.endProgress, lane)))
-    if (end > start) {
-      const allTowerLane = {
-        id: 'tower_all_derived',
-        cat: 'tower',
-        tower: ALL_ATTRIBUTE_TOWER,
-        label: '全属性塔抵达',
-        startProgress: start,
-        endProgress: end,
-        batchSize: 1,
-      }
-      for (const opportunity of buildLaneOpportunities(packs, allTowerLane)) {
-        allTowerEvents.push({
-          kind: 'all',
-          sortValue: opportunity.sortValue,
-          topologyKey: `all:${opportunity.sortValue}`,
-          opportunities: [opportunity],
-        })
-      }
-    }
-  }
-
-  return [...singleEvents, ...allTowerEvents]
-    .sort((a, b) => {
-      if (a.sortValue !== b.sortValue) return a.sortValue - b.sortValue
-      if (a.kind === b.kind) return 0
-      return a.kind === 'all' ? -1 : 1
-    })
-    .map((event, index) => ({
-      id: `attribute:${index}:${event.kind}:${event.sortValue}`,
-      opportunities: sortOpportunities(event.opportunities),
-      sortValue: event.sortValue,
-      kind: event.kind,
-      topologyKey: event.topologyKey,
-    }))
-}
-
-function buildAttributeTowerTopologyBatches(packs, lanes) {
-  const events = buildAttributeTowerEvents(packs, lanes)
-  const batches = events.map(event => event.opportunities)
-  return {
-    batches,
-    opportunities: batches.flat(),
-  }
 }
 
 function attributeTowerSourceId(lane) {
@@ -676,22 +594,6 @@ function generateBatchCandidates(state, context) {
   return result
 }
 
-function rechargeValueForPaid(beforePaid, addedPaid, context) {
-  const freeDiamonds = marginalFreeDiamonds(beforePaid, addedPaid)
-  return {
-    beforePaid,
-    afterPaid: beforePaid + addedPaid,
-    addedPaid,
-    freeDiamonds,
-    value: Math.round(freeDiamonds * context.freeDiamondScore),
-    unlockedTiers: unlockedRechargeTiers(beforePaid, addedPaid).map(tier => tier.paid),
-  }
-}
-
-function rechargeValueForPurchase(beforeSpent, addedCost, context) {
-  return rechargeValueForPaid(paidDiamondsForPrice(beforeSpent), paidDiamondsForPrice(addedCost), context)
-}
-
 function actionOptionsCacheKey(batch, tierPrice) {
   return `${tierPrice}|${batch.map(opportunity => opportunity.id).join('+')}`
 }
@@ -736,222 +638,6 @@ function actionOptionsForBatch(batch, tierPrice, context = null) {
 
   context?.actionOptionsCache?.set(cacheKey, actions)
   return actions
-}
-
-function nameForTopUpPack(pack) {
-  return String(pack.name || pack.displayTrigger || '钻石组合包')
-}
-
-function isPermanentDiamondTopUpPack(pack) {
-  const name = String(pack.name || '')
-  return name.startsWith('钻石组合包') && !name.includes('首次')
-}
-
-function normalizePermanentTopUpPacks(packs) {
-  return packs
-    .filter(isPermanentDiamondTopUpPack)
-    .map((pack, index) => {
-      const price = Math.max(0, Math.floor(Number(pack.price) || 0))
-      const paidDiamonds = getPackPaidDiamonds({ ...pack, price })
-      const originalValue = getPackOriginalValue(pack)
-      return {
-        ...pack,
-        topUpId: `${nameForTopUpPack(pack)}:${price}:${index}`,
-        displayTrigger: nameForTopUpPack(pack),
-        price,
-        paidDiamonds,
-        originalValue,
-        value: originalValue,
-        ce: paidDiamonds > 0 ? originalValue / paidDiamonds : 0,
-        items: pack.items || [],
-      }
-    })
-    .filter(pack => pack.price > 0 && pack.paidDiamonds > 0)
-    .sort((a, b) => a.price - b.price)
-}
-
-function mergeTopUpItems(packs) {
-  const map = new Map()
-  for (const pack of packs) {
-    for (const item of pack.items || []) {
-      const key = `${item.itype ?? item.ItemType}:${item.iid ?? item.ItemId}`
-      if (!map.has(key)) map.set(key, { ...item, qty: 0, value: 0 })
-      const current = map.get(key)
-      current.qty += Number(item.qty ?? item.ItemCount) || 0
-      current.value += Number(item.value) || 0
-    }
-  }
-  return [...map.values()]
-}
-
-function groupTopUpPacks(packs) {
-  const groups = new Map()
-  for (const pack of packs) {
-    const key = pack.topUpId || `${pack.name}:${pack.price}`
-    if (!groups.has(key)) groups.set(key, { pack, copies: [] })
-    groups.get(key).copies.push(pack)
-  }
-
-  return [...groups.values()].map(group => {
-    const count = group.copies.length
-    const price = group.copies.reduce((sum, pack) => sum + pack.price, 0)
-    const paidDiamonds = group.copies.reduce((sum, pack) => sum + getPackPaidDiamonds(pack), 0)
-    const originalValue = group.copies.reduce((sum, pack) => sum + getPackOriginalValue(pack), 0)
-    const label = count > 1 ? `${nameForTopUpPack(group.pack)} ×${count}` : nameForTopUpPack(group.pack)
-
-    return {
-      trigger: TOP_UP_SOURCE_LABEL,
-      sourceLabel: '常驻补包',
-      displayTrigger: label,
-      price,
-      value: Math.round(originalValue),
-      originalValue: Math.round(originalValue),
-      rechargeValue: 0,
-      ce: paidDiamonds > 0 ? originalValue / paidDiamonds : 0,
-      paidDiamonds,
-      items: mergeTopUpItems(group.copies),
-    }
-  })
-}
-
-function getDailyRechargeResetPaid(context) {
-  if (context.settings.rechargePlanningMode === 'rush') return 0
-  const configured = Number(context.settings.dailyRechargeResetPaid)
-  return Number.isFinite(configured)
-    ? Math.max(0, Math.floor(configured))
-    : DEFAULT_DAILY_RECHARGE_RESET_PAID
-}
-
-function getDailyRechargeTargetPaid(context) {
-  if (context.settings.rechargePlanningMode === 'rush') {
-    return DAILY_RECHARGE_BONUS_TIERS[DAILY_RECHARGE_BONUS_TIERS.length - 1].paid
-  }
-  const resetPaid = getDailyRechargeResetPaid(context)
-  return resetPaid > 0 ? resetPaid : DAILY_RECHARGE_BONUS_TIERS[DAILY_RECHARGE_BONUS_TIERS.length - 1].paid
-}
-
-function nextPlannerRechargeTier(currentPaid, context) {
-  const targetPaid = getDailyRechargeTargetPaid(context)
-  if (targetPaid <= 0 || currentPaid >= targetPaid) return null
-  return DAILY_RECHARGE_BONUS_TIERS
-    .find(tier => currentPaid < tier.paid && tier.paid <= targetPaid) || null
-}
-
-function isBetterTopUpPackForTier(candidate, best) {
-  if (!best) return true
-  if (candidate.price !== best.price) return candidate.price < best.price
-  return getPackOriginalValue(candidate) > getPackOriginalValue(best)
-}
-
-function addTopUpPackToCombo(combo, pack) {
-  combo.purchases.push(pack)
-  combo.cost += pack.price
-  combo.paidDiamonds += getPackPaidDiamonds(pack)
-  combo.originalValue += getPackOriginalValue(pack)
-}
-
-function prepareTopUpPackOptions(packs) {
-  const packByPaid = new Map()
-  for (const pack of packs) {
-    const paidDiamonds = getPackPaidDiamonds(pack)
-    if (paidDiamonds <= 0 || pack.price <= 0) continue
-    const best = packByPaid.get(paidDiamonds)
-    if (isBetterTopUpPackForTier(pack, best)) packByPaid.set(paidDiamonds, pack)
-  }
-
-  const uniquePacks = [...packByPaid.values()]
-    .sort((a, b) => getPackPaidDiamonds(b) - getPackPaidDiamonds(a))
-  const filler = [...uniquePacks]
-    .sort((a, b) => {
-      if (getPackPaidDiamonds(a) !== getPackPaidDiamonds(b)) return getPackPaidDiamonds(a) - getPackPaidDiamonds(b)
-      return a.price - b.price
-    })[0]
-
-  return { uniquePacks, filler }
-}
-
-function findHeuristicTopUpCombination(gap, packs, prepared = null) {
-  if (gap <= 0) return null
-
-  const { uniquePacks, filler } = prepared || prepareTopUpPackOptions(packs)
-  if (!uniquePacks.length || !filler) return null
-
-  const combo = { cost: 0, paidDiamonds: 0, originalValue: 0, purchases: [] }
-  let remainingGap = gap
-
-  for (const pack of uniquePacks) {
-    const paidDiamonds = getPackPaidDiamonds(pack)
-    if (paidDiamonds <= remainingGap) {
-      addTopUpPackToCombo(combo, pack)
-      remainingGap -= paidDiamonds
-    }
-  }
-
-  while (remainingGap > 0) {
-    addTopUpPackToCombo(combo, filler)
-    remainingGap -= getPackPaidDiamonds(filler)
-  }
-
-  return combo.purchases.length ? combo : null
-}
-
-function buildPermanentTopUpOptionCache(context) {
-  const targetPaid = getDailyRechargeTargetPaid(context)
-  if (!context.permanentPacks.length || targetPaid <= 0) return []
-
-  const prepared = prepareTopUpPackOptions(context.permanentPacks)
-  if (!prepared.uniquePacks.length || !prepared.filler) return []
-
-  const options = Array.from({ length: targetPaid + 1 }, () => null)
-  for (let currentPaid = 0; currentPaid < targetPaid; currentPaid++) {
-    const targetTier = nextPlannerRechargeTier(currentPaid, context)
-    if (!targetTier) continue
-
-    const combo = findHeuristicTopUpCombination(targetTier.paid - currentPaid, context.permanentPacks, prepared)
-    if (!combo) continue
-
-    const recharge = rechargeValueForPaid(currentPaid, combo.paidDiamonds, context)
-    options[currentPaid] = {
-      cost: combo.cost,
-      originalValue: combo.originalValue,
-      purchases: combo.purchases,
-      paidDiamonds: combo.paidDiamonds,
-      recharge,
-      value: Math.round(combo.originalValue + recharge.value),
-      unlockedCount: recharge.unlockedTiers.length,
-    }
-  }
-  return options
-}
-
-function findPermanentTopUpOption(state, context) {
-  if (!context.permanentPacks.length || state.purchases <= 0) return null
-
-  const currentPaid = state.dailyPaidDiamonds
-  const cached = context.topUpOptionByCurrentPaid?.[currentPaid]
-  if (cached) return cached
-
-  const targetTier = nextPlannerRechargeTier(currentPaid, context)
-  if (!targetTier) return null
-
-  const combo = findHeuristicTopUpCombination(targetTier.paid - currentPaid, context.permanentPacks)
-  if (!combo) return null
-  
-  // 组装最终方案返回
-  const totalPaid = combo.paidDiamonds
-  const totalCost = combo.cost
-  const totalOriginalValue = combo.originalValue
-  const recharge = rechargeValueForPaid(currentPaid, totalPaid, context)
-  
-  return {
-    cost: totalCost,
-    originalValue: totalOriginalValue,
-    purchases: combo.purchases,
-    paidDiamonds: totalPaid,
-    recharge,
-    value: Math.round(totalOriginalValue + recharge.value),
-    unlockedCount: recharge.unlockedTiers.length,
-  }
 }
 
 function summarizeBatch(batch) {
@@ -2077,9 +1763,6 @@ export function compressUltraSalePlanSteps(steps = []) {
 
 export const __testables = {
   parseTriggerProgress,
-  buildOpportunities,
-  buildBatches,
-  buildAttributeTowerTopologyBatches,
   buildPlanningSources,
   generateBatchCandidates,
   buildPlanningContext,
@@ -2094,5 +1777,3 @@ export const __testables = {
   getRechargeBucket,
   rechargeResetCost,
 }
-
-export function testPool(context) { const emptyState = createEmptyState(context); let states = [emptyState]; const candidatePool = []; const totalGroups = context.sources.reduce((sum, s) => sum + s.groups.length, 0); const maxIterations = Math.max(1, totalGroups * 4); for (let i = 0; i < maxIterations; i++) { candidatePool.push(...states); if (states.every(state => allSourcesExhausted(context.sources, state.sourceCursors))) break; const expanded = []; for (const state of states) { if (allSourcesExhausted(context.sources, state.sourceCursors)) { continue; } expanded.push(...expandState(state, context)); } if (!expanded.length) break; states = pruneStates(expanded, context); } return candidatePool.sort(compareFinalPlan); }

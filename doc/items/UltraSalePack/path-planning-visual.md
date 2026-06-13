@@ -45,7 +45,7 @@ flowchart TD
 flowchart TD
   A["状态<br/>档位 / cursors / 限时包花费 / 补包花费 / 累充日进度"] --> B["选择候选批次"]
   B --> C["生成购买动作"]
-  C --> D{"本动作是否会越过 12000 日目标?"}
+  C --> D{"本动作是否会越过当前累充日目标?<br/>长期规划默认 12000"}
   D -- "是" --> D1["先跨日结算<br/>补包 / 不补"]
   D -- "否" --> F["推进 cursor<br/>本批节点已触发"]
   D1 --> F
@@ -74,23 +74,30 @@ flowchart TD
 ## 核心伪代码
 
 ```text
-function buildPlans(packs, settings):
-  packsWithValue = calculatePackCE(packs)
-  context = buildPlanningContext(packsWithValue, settings)
+async function buildUltraSalePlanOptions(packs, settings):
+  context = buildPlanningContext(packs, settings)
+  candidates = await collectTopValuePlans(context, 200)
+  retention = createEmptyState(context)
 
-  candidates = collectTopValuePlans(context)
-  retention = createRetentionBaseline(context)
+  viableCandidates = candidates where purchases > 0
+                     and searchPriority > retention.searchPriority
+  strategyCandidates = candidates where purchases > 0
+                       and realScore > 0
 
-  return classifyStrategyOptions(candidates, retention)
+  bestState = highest realScore in viableCandidates
+  return classifyStrategyOptions(strategyCandidates, bestState, retention)
 ```
 
-`classifyStrategyOptions` 输出保档大包、3000 付费钻微操、小包批量、价值最优兜底或机会保留方案。3000 付费钻方案是保档大包的衍生策略，只有当候选路径形成可比较收益时展示。价值最优若只是已展示策略的近似等价变体，则不单独输出，避免同一买法重复占据结果卡片。
+`collectTopValuePlans` 保留中间状态到候选池，因此没有走完整个前瞻范围、但保留了高价值机会的状态也可以进入输出层。`classifyStrategyOptions` 输出保档大包、3000 付费钻微操、小包批量、价值最优兜底或机会保留方案。3000 付费钻方案是保档大包的衍生策略，只有当候选路径形成可比较收益时展示。价值最优若只是已展示策略的近似等价变体，则不单独输出，避免同一买法重复占据结果卡片。
 
 ```text
 function searchBestValuePlan(context):
   states = [emptyState(context)]
+  candidatePool = []
 
   while states has unfinished trigger cursors:
+    yield to UI
+    candidatePool.add(states)
     nextStates = []
 
     for state in states:
@@ -110,8 +117,10 @@ function searchBestValuePlan(context):
 
     states = pruneBySearchPriority(nextStates)
 
-  return candidate pool ranked by decision value
+  return unique states from candidatePool ranked by searchPriority, then realScore
 ```
+
+输出层不会直接把 `searchPriority` 最高的路径当作最终推荐。`searchPriority` 用于搜索和剪枝；最终可执行的 `bestValue` 在超过保留基线的候选中按 `realScore` 选择。
 
 ## 补累充流程
 
@@ -119,7 +128,7 @@ function searchBestValuePlan(context):
 flowchart TD
   A["状态准备跨 0 点重置"] --> B["找到当前累充日最后一个已买限时包批次"]
   B --> B2["读取该批购买后的累充进度"]
-  B2 --> C{"是否存在下一累充档?"}
+  B2 --> C{"补累充模式是否开启<br/>且存在下一累充档?"}
   C -- "否" --> D["不补"]
   C -- "是" --> E{"补包新增价值是否达到当前 CE 标准?"}
   E -- "否" --> D

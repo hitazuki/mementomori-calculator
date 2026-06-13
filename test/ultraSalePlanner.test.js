@@ -180,6 +180,29 @@ test('top-up uses a fast bounded-overfill pack combination before reset', () => 
   assert.ok(topUp.purchases.every(pack => pack.paidDiamonds < 5900))
 })
 
+test('top-up option still resolves when the precomputed cache is unavailable', () => {
+  const context = buildPlanningContext([makePack(1, 11800, 50000)], baseSettings({
+    currentPrice: 11800,
+    permanentPacks: [
+      makePermanentPack('钻石组合包 80', 160, 80),
+      makePermanentPack('钻石组合包 500', 1000, 500),
+    ],
+  }))
+  context.topUpOptionByCurrentPaid = null
+  const state = {
+    ...createEmptyState(context),
+    purchases: 1,
+    dailyPaidDiamonds: 11800,
+    steps: [{ rechargeDayIndex: 0, topUpCost: 0 }],
+  }
+
+  const topUp = findPermanentTopUpOption(state, context)
+
+  assert.ok(topUp, 'expected fallback top-up resolution without the cache')
+  assert.equal(topUp.paidDiamonds, 240)
+  assert.equal(topUp.recharge.afterPaid, 12040)
+})
+
 test('top-up heuristic tries each denomination once before repeating small fillers', () => {
   const packs = [
     makePermanentPack('钻石组合包 80', 160, 80),
