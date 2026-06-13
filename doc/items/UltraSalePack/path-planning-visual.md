@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart TD
-  A["用户输入<br/>购买偏好 / 补累充模式 / 当前档位 / 各触发源前瞻范围"] --> B["计算礼包内容价值"]
+  A["用户输入<br/>购买偏好 / 累充规划模式 / 补累充模式 / 当前档位 / 各触发源前瞻范围"] --> B["计算礼包内容价值"]
   B --> C["按来源生成触发机会"]
   C --> D["生成属性塔前沿<br/>单塔独立 cursor / 全属性塔派生门槛"]
   D --> E["建立触发图和 source cursor"]
@@ -45,7 +45,9 @@ flowchart TD
 flowchart TD
   A["状态<br/>档位 / cursors / 限时包花费 / 补包花费 / 累充日进度"] --> B["选择候选批次"]
   B --> C["生成购买动作"]
-  C --> D{"本动作是否会越过当前累充日目标?<br/>长期规划默认 12000"}
+  C --> R{"累充规划模式?"}
+  R -- "长期规划" --> D{"本动作是否会越过单日目标?<br/>默认 12000"}
+  R -- "赶进度" --> F["推进 cursor<br/>本批节点已触发"]
   D -- "是" --> D1["先跨日结算<br/>补包 / 不补"]
   D -- "否" --> F["推进 cursor<br/>本批节点已触发"]
   D1 --> F
@@ -56,7 +58,7 @@ flowchart TD
   I --> K
   K --> L["批次边界时间分支"]
   L --> L1["继续同日<br/>不生成补包候选"]
-  L --> L2["准备跨 0 点重置"]
+  L --> L2["准备跨 0 点重置<br/>赶进度模式计入抽象时间成本"]
   L2 --> J{"补包新增价值是否达到当前 CE 标准?"}
   J -- "是" --> J1["跨日前补<br/>更新补包花费 / 累充进度 / 价值"]
   J -- "否" --> J2["不补直接跨日"]
@@ -67,7 +69,7 @@ flowchart TD
   M2 --> N
 ```
 
-每日累充重置只发生在两个全局批次之间。同一批内的限时包和补包都按同一个累充日计算。
+每日累充重置只发生在两个全局批次之间。同一批内的限时包和补包都按同一个累充日计算。长期规划模式默认以 12000 付费钻为单日目标，达到或即将越过该目标时先结算跨日；赶进度模式取消 12000 硬重置，允许同日继续冲 18000 / 24000 / 36000 累充档，并通过累充包络线和跨日抽象时间成本表达“更快推进”和“跨日等待”的取舍。
 
 属性塔使用单塔独立前沿。批次编排与拓扑层级没有直接强制换日关系；强制重置只由当前累充日内是否再次推进同一单塔决定。若当前累充日已处理 `blue250`，下一批前沿仍可同时包含 `red/green/yellow250` 和 `blue300`；只有实际触发 `blue300` 这类再次推进蓝塔的候选需要强制重置，触发其他属性塔不强制重置。
 
@@ -76,6 +78,12 @@ flowchart TD
 ```text
 async function buildUltraSalePlanOptions(packs, settings):
   context = buildPlanningContext(packs, settings)
+  if settings.rechargePlanningMode == rush:
+    context.envelope = buildRechargeEnvelope(up to highest daily tier)
+    daily hard reset target is disabled
+  else:
+    daily hard reset target = dailyRechargeResetPaid or 12000
+
   candidates = await collectTopValuePlans(context, 200)
   retention = createEmptyState(context)
 
@@ -128,7 +136,7 @@ function searchBestValuePlan(context):
 flowchart TD
   A["状态准备跨 0 点重置"] --> B["找到当前累充日最后一个已买限时包批次"]
   B --> B2["读取该批购买后的累充进度"]
-  B2 --> C{"补累充模式是否开启<br/>且存在下一累充档?"}
+  B2 --> C{"补累充模式是否开启<br/>且存在当前规划模式可见的下一累充档?"}
   C -- "否" --> D["不补"]
   C -- "是" --> E{"补包新增价值是否达到当前 CE 标准?"}
   E -- "否" --> D
@@ -141,4 +149,4 @@ flowchart TD
   D --> J
 ```
 
-补包只使用非首次常驻钻石组合包。补包不会触发限时包，也不会影响限时包升降档。继续同一累充日的分支不会生成补包候选。
+长期规划模式只补到单日目标范围内的下一累充档；赶进度模式可以继续看到 18000 / 24000 / 36000 档。补包只使用非首次常驻钻石组合包。补包不会触发限时包，也不会影响限时包升降档。继续同一累充日的分支不会生成补包候选。
