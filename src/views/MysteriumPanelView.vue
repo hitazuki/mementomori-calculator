@@ -167,13 +167,13 @@
                     <div style="flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-content: flex-start;">
                       
                       <!-- Level Cap Card -->
-                      <div style="background: rgba(var(--color-invert-rgb),0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(var(--color-invert-rgb),0.05);">
+                      <div v-if="getLimitedCharCount(r) > 0" style="background: rgba(var(--color-invert-rgb),0.03); padding: 10px; border-radius: 6px; border: 1px solid rgba(var(--color-invert-rgb),0.05);">
                         <div style="font-weight: bold; margin-bottom: 6px; font-size: 15px; color: var(--text-primary);">
-                          🏰 <span style="font-size: var(--fs-xs); color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
+                          🏰 <span style="font-size: var(--fs-xs); color: var(--gold); font-weight: normal; margin-left: 4px;">⭐ {{ (getLimitedCharCount(r) * levelCapScore).toFixed(1) }}</span>
                         </div>
                         <div style="font-size: var(--fs-sm); color: var(--text-secondary); display: flex; justify-content: space-between;">
-                          <span>{{ $t('appLevelCap') }} +{{ (r.chars ? r.chars.length : 1) * levelCapBaseVal }}</span>
-                          <span style="opacity: 0.6;">{{ ((r.chars ? r.chars.length : 1) * levelCapScore).toFixed(1) }}</span>
+                          <span>{{ $t('appLevelCap') }} +{{ getLimitedCharCount(r) * levelCapBaseVal }}</span>
+                          <span style="opacity: 0.6;">{{ (getLimitedCharCount(r) * levelCapScore).toFixed(1) }}</span>
                         </div>
                       </div>
 
@@ -398,6 +398,11 @@ const hasIcon = (id) => {
 const getCharNames = (r) => {
   if (r.chars) return r.chars.map(c => getCharFullName(c)).join(' + ')
   return getCharFullName(r)
+}
+
+const getLimitedCharCount = (r) => {
+  if (r.chars) return r.chars.filter(c => c.isLimited).length
+  return r.isLimited ? 1 : 0
 }
 
 const handleImgError = (e) => {
