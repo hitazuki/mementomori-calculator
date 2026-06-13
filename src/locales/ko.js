@@ -187,6 +187,7 @@ export default {
   ui_score: "점수",
   ui_ce: "가성비(CE)",
   ui_marginal_ce: "한계 CE",
+  ui_hide_standard: "상시 미스테리움 숨기기",
   ui_bottleneck: "선행 플랜",
   ui_algo1: "독립 분배법",
   ui_algo2: "세트 결합법",

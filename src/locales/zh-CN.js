@@ -194,6 +194,7 @@ export default {
   ui_algo3_desc:
     "💡 <b>寻找全局最优解</b>。穷举所有可能的角色抽取组合，智能计算多套秘仪之间的角色重叠红利，为您推导出性价比最高的整体抽取路线。",
   ui_marginal_ce: "边际性价比",
+  ui_hide_standard: "隐藏常驻秘仪",
   ui_fixed: "(固定)",
   ui_percent: "(百分比)",
   ui_growth: "(成长)",

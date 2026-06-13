@@ -195,6 +195,7 @@ export default {
   ui_algo3_desc:
     "💡 <b>尋找全局最優解</b>。窮舉所有可能的角色抽取組合，智能計算多套秘儀之間的角色重疊紅利，為您推導出性價比最高的整體抽取路線。",
   ui_marginal_ce: "邊際性價比",
+  ui_hide_standard: "隱藏常駐秘儀",
   ui_fixed: "(固定)",
   ui_percent: "(百分比)",
   ui_growth: "(成長)",

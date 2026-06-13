@@ -48,6 +48,13 @@
             <button class="btn btn-sm" :class="algo === 2 ? 'btn-primary' : 'btn-ghost'" @click="algo = 2">{{ $t('ui_algo2') }}</button>
             <button class="btn btn-sm" :class="algo === 3 ? 'btn-primary' : 'btn-ghost'" @click="algo = 3">{{ $t('ui_algo3') }}</button>
           </div>
+          <!-- Hide Standard Colls Toggle -->
+          <div v-show="mainTab === 'colls'" style="margin-left: auto;">
+            <label style="display:flex; align-items:center; gap: 6px; font-size: var(--fs-sm); cursor: pointer; color: var(--text-secondary); user-select: none;">
+              <input type="checkbox" v-model="hideStandard" />
+              {{ $t('ui_hide_standard') }}
+            </label>
+          </div>
         </div>
         <!-- Description -->
         <div v-show="mainTab === 'chars'" class="mysterium-desc" style="font-size: var(--fs-xs); color: var(--text-muted); background: rgba(var(--color-invert-rgb),0.02); border: 1px solid rgba(var(--color-invert-rgb),0.05); padding: 6px 10px; border-radius: 4px; line-height: 1.4;" v-html="$t('ui_algo' + algo + '_desc')">
@@ -123,7 +130,7 @@
                 <td>{{ r.cost }}</td>
                 <td>{{ (r.totalScore ?? r.score ?? 0).toFixed(1) }}</td>
                 <td v-if="algo !== 3 || mainTab === 'colls'" style="color:var(--gold); font-weight:bold;">
-                  {{ r.ce === Infinity ? '∞' : r.ce.toFixed(2) }}
+                  {{ mainTab === 'colls' && r.cost === 0 ? '-' : (r.ce === Infinity ? '∞' : r.ce.toFixed(2)) }}
                 </td>
                 <template v-if="mainTab === 'chars' && algo === 3">
                   <td>{{ r.ce.toFixed(2) }}</td>
@@ -220,7 +227,7 @@
               </template>
             </div>
             <div class="mobile-mysterium-ce">
-              {{ r.ce === Infinity ? '∞' : r.ce.toFixed(2) }}
+              {{ mainTab === 'colls' && r.cost === 0 ? '-' : (r.ce === Infinity ? '∞' : r.ce.toFixed(2)) }}
             </div>
           </div>
 
@@ -346,6 +353,7 @@ const algo = ref(3)
 const mainTab = ref('colls')
 const collSortBy = ref('ce')
 const collSortDesc = ref(true)
+const hideStandard = ref(false)
 
 const getCtypeStr = (ctype) => {
   if (ctype === 1) return t('ui_fixed')
@@ -416,10 +424,13 @@ const getCol = (act) => act.col || act
 
 const displayedResults = ref([])
 
-watch([result, mainTab, collSortBy, collSortDesc], () => {
+watch([result, mainTab, collSortBy, collSortDesc, hideStandard], () => {
   let list = []
   if (mainTab.value === 'colls') {
     list = [...result.value.collections]
+    if (hideStandard.value) {
+      list = list.filter(item => item.cost > 0)
+    }
     list.sort((a, b) => {
       let valA = collSortBy.value === 'ce' ? a.ce : (collSortBy.value === 'cost' ? a.cost : a.totalScore)
       let valB = collSortBy.value === 'ce' ? b.ce : (collSortBy.value === 'cost' ? b.cost : b.totalScore)

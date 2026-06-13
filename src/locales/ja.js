@@ -187,6 +187,7 @@ export default {
   ui_score: "スコア",
   ui_ce: "コスパ",
   ui_marginal_ce: "限界コスパ",
+  ui_hide_standard: "恒常ミステリウムを隠す",
   ui_bottleneck: "前提プラン",
   ui_algo1: "個別配分法",
   ui_algo2: "セットバインド",

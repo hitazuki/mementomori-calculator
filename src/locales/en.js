@@ -187,6 +187,7 @@ export default {
   ui_score: "Score",
   ui_ce: "CE",
   ui_marginal_ce: "Marginal CE",
+  ui_hide_standard: "Hide Standard Mysteria",
   ui_bottleneck: "Prerequisite Plan",
   ui_algo1: "Independent Sharing",
   ui_algo2: "Set Binding",
