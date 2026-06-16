@@ -16,6 +16,7 @@ const APK_URL_TEMPLATE = 'https://mememori-game.com/apps/mementomori_{version}.a
 const ASSETSTUDIO_RELEASE_URL = 'https://api.github.com/repos/aelurum/AssetStudio/releases/latest';
 
 const VERSION_FILE = path.join(PROJECT_ROOT, 'public/data/asset_version.txt');
+const CHARACTERS_DATA_FILE = path.join(PROJECT_ROOT, 'public/data/characters.json');
 const CHARACTER_DEST_DIR = path.join(PROJECT_ROOT, 'public/images/characters');
 const ITEM_DEST_DIR = path.join(PROJECT_ROOT, 'public/images/items');
 const WORK_DIR = process.env.SYNC_ASSETS_WORK_DIR
@@ -23,6 +24,7 @@ const WORK_DIR = process.env.SYNC_ASSETS_WORK_DIR
   : path.join(process.env.RUNNER_TEMP || os.tmpdir(), 'mmt-calculator-asset-sync');
 
 const HTTP_TIMEOUT_MS = Number(process.env.SYNC_ASSETS_HTTP_TIMEOUT_MS || 10 * 60 * 1000);
+const TEXTURE_EXPORT_RETRIES = Number(process.env.SYNC_ASSETS_TEXTURE_EXPORT_RETRIES || 2);
 
 function log(message) {
   console.log(`[sync-assets] ${message}`);
@@ -34,6 +36,34 @@ function warn(message) {
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
+}
+
+function countFiles(dir, pattern) {
+  if (!fs.existsSync(dir)) return 0;
+  return fs.readdirSync(dir).filter((file) => pattern.test(file)).length;
+}
+
+export function readExpectedCharacterIds(filePath = CHARACTERS_DATA_FILE) {
+  if (!fs.existsSync(filePath)) return new Set();
+
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  const entries = Array.isArray(data) ? data : Object.values(data);
+  const ids = entries
+    .map((entry) => Number(entry?.id ?? entry?.Id ?? entry))
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  return new Set(ids);
+}
+
+export function missingIds(expectedIds, actualIds) {
+  return [...expectedIds]
+    .filter((id) => !actualIds.has(id))
+    .sort((a, b) => a - b);
+}
+
+function formatIdList(ids, limit = 20) {
+  const shown = ids.slice(0, limit).join(', ');
+  return ids.length > limit ? `${shown}, ... (+${ids.length - limit} more)` : shown;
 }
 
 function formatBytes(bytes) {
@@ -327,6 +357,48 @@ export async function extractTextures(bundleDir, assetStudioCli) {
   return outputDir;
 }
 
+async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
+  const expectedCharacterIds = readExpectedCharacterIds();
+  const minCharacters = Number(
+    process.env.SYNC_ASSETS_MIN_CHARACTER_ICONS
+    || Math.max(countFiles(CHARACTER_DEST_DIR, /^\d+\.png$/), expectedCharacterIds.size),
+  );
+  const minItems = Number(
+    process.env.SYNC_ASSETS_MIN_ITEM_ICONS
+    || countFiles(ITEM_DEST_DIR, /^Item_\d{4}\.png$/),
+  );
+
+  return withRetries('Extract and validate image assets', async () => {
+    const textureDir = await extractTextures(bundleDir, assetStudioCli);
+    const characterResult = copyCharacterIcons(textureDir, CHARACTER_DEST_DIR, { log });
+    const itemResult = copyItemIcons(textureDir, ITEM_DEST_DIR, { log });
+
+    const missingCharacterBaseline = characterResult.ids.size < minCharacters;
+    const missingItemBaseline = itemResult.ids.size < minItems;
+    const missingExpectedCharacters = missingIds(expectedCharacterIds, characterResult.ids);
+
+    if (missingExpectedCharacters.length > 0) {
+      throw new Error(
+        `Exported character icons are missing expected character IDs from characters.json: `
+        + formatIdList(missingExpectedCharacters),
+      );
+    }
+
+    if (missingCharacterBaseline || missingItemBaseline) {
+      throw new Error(
+        `Exported icon count below baseline: characters ${characterResult.ids.size}/${minCharacters}, `
+        + `items ${itemResult.ids.size}/${minItems}`,
+      );
+    }
+
+    if (characterResult.ids.size === 0 && itemResult.ids.size === 0) {
+      throw new Error('Asset extraction produced no matching character or item icons.');
+    }
+
+    return { characterResult, itemResult };
+  }, TEXTURE_EXPORT_RETRIES);
+}
+
 export async function syncAssets() {
   ensureDir(WORK_DIR);
 
@@ -345,14 +417,7 @@ export async function syncAssets() {
   const apkPath = await downloadApk(currentVersion);
   const bundleDir = await extractBundles(apkPath);
   const assetStudioCli = await prepareAssetStudioCli();
-  const textureDir = await extractTextures(bundleDir, assetStudioCli);
-
-  const characterResult = copyCharacterIcons(textureDir, CHARACTER_DEST_DIR, { log });
-  const itemResult = copyItemIcons(textureDir, ITEM_DEST_DIR, { log });
-
-  if (characterResult.ids.size === 0 && itemResult.ids.size === 0) {
-    throw new Error('Asset extraction produced no matching character or item icons.');
-  }
+  const { characterResult, itemResult } = await extractAndCopyIconsWithValidation(bundleDir, assetStudioCli);
 
   updateVersionCache(currentVersion);
   log(`Updated ${VERSION_FILE} to ${currentVersion}`);

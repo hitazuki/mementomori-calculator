@@ -50,20 +50,29 @@ export function copyCharacterIcons(srcDir, destDir, { log = console.log } = {}) 
   let copied = 0;
   let skipped = 0;
   const ids = new Set();
+  const candidates = new Map();
 
   for (const srcPath of collectFiles(srcDir)) {
     const file = path.basename(srcPath);
     if (file.includes('#')) continue;
 
-    const match = file.match(/^CHR_(\d{6})_00_m(?:_offwhite)?\.png$/i);
+    const match = file.match(/^CHR_(\d{6})_00_m(_offwhite)?\.png$/i);
     if (!match) continue;
 
     const id = Number.parseInt(match[1], 10);
-    if (!Number.isFinite(id) || ids.has(id)) continue;
+    if (!Number.isFinite(id)) continue;
 
+    const isOffwhite = Boolean(match[2]);
+    const current = candidates.get(id);
+    if (!current || (isOffwhite && !current.isOffwhite)) {
+      candidates.set(id, { srcPath, isOffwhite });
+    }
+  }
+
+  for (const [id, candidate] of [...candidates.entries()].sort((a, b) => a[0] - b[0])) {
     ids.add(id);
     const destPath = path.join(destDir, `${id}.png`);
-    if (copyIfChanged(srcPath, destPath)) {
+    if (copyIfChanged(candidate.srcPath, destPath)) {
       copied++;
     } else {
       skipped++;
@@ -103,4 +112,3 @@ export function copyItemIcons(srcDir, destDir, { log = console.log } = {}) {
   log(`Item icons: ${copied} copied, ${skipped} unchanged, ${ids.size} matched.`);
   return { copied, skipped, ids };
 }
-

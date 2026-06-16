@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
     steps:
       - name: Checkout target repository
         uses: actions/checkout@v4
@@ -60,16 +59,11 @@ jobs:
             echo "Data changes detected."
           fi
 
-      - name: Create Pull Request
+      - name: Commit and push changes
         if: steps.git-check.outputs.changes == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          path: 'mmt-calculator'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(data): auto sync master data"
-          title: "chore(data): auto sync master data"
-          body: |
-            🔄 Master 数据自动更新已就绪。
-            请点击 **Files changed** 选项卡检查变动。确认无误后即可 Merge。
-          branch: "auto-sync-master-data"
-          base: "main"
+        working-directory: mmt-calculator
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(data): auto sync master data"
+          git push

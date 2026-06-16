@@ -30,6 +30,7 @@ test('copyCharacterIcons normalizes music player icon names and skips duplicates
     assert.equal(second.skipped, 2);
     assert.equal(fs.existsSync(path.join(dest, '1.png')), true);
     assert.equal(fs.existsSync(path.join(dest, '2.png')), true);
+    assert.equal(fs.readFileSync(path.join(dest, '2.png'), 'utf8'), 'two-duplicate');
     assert.equal(fs.existsSync(path.join(dest, '3.png')), false);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
@@ -58,4 +59,3 @@ test('copyItemIcons preserves Item file names and ignores generated variants', (
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
-

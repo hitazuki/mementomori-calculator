@@ -13,13 +13,13 @@ jobs:
     timeout-minutes: 120
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
       - name: Checkout target repository
         uses: actions/checkout@v4
         with:
           path: 'mmt-calculator'
+          ref: ${{ github.event.workflow_run.head_branch || github.ref_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,18 +55,11 @@ jobs:
             echo "Image asset changes detected."
           fi
 
-      - name: Create Pull Request
+      - name: Commit and push changes
         if: steps.git-check.outputs.changes == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          path: 'mmt-calculator'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(assets): auto sync image assets"
-          title: "chore(assets): auto sync image assets"
-          body: |
-            Image assets were updated from the latest public MementoMori APK.
-
-            Please review the changed files before merging.
-          branch: "auto-sync-image-assets"
-          base: "main"
-
+        working-directory: mmt-calculator
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(assets): auto sync image assets"
+          git push
