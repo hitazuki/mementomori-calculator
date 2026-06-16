@@ -1,0 +1,72 @@
+name: Sync Image Assets
+
+on:
+  workflow_run:
+    workflows: ["Sync Master Data"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  sync-assets:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          path: 'mmt-calculator'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install archive tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Sync image assets
+        working-directory: mmt-calculator
+        env:
+          SYNC_ASSETS_GRACEFUL_FAILURE: '1'
+        run: npm run sync:assets
+
+      - name: Check for changes
+        id: git-check
+        working-directory: mmt-calculator
+        run: |
+          git add public/images/ public/data/asset_version.txt
+          if git diff --staged --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No image asset changes detected."
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Image asset changes detected."
+          fi
+
+      - name: Create Pull Request
+        if: steps.git-check.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          path: 'mmt-calculator'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(assets): auto sync image assets"
+          title: "chore(assets): auto sync image assets"
+          body: |
+            Image assets were updated from the latest public MementoMori APK.
+
+            Please review the changed files before merging.
+          branch: "auto-sync-image-assets"
+          base: "main"
+
