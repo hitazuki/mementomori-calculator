@@ -62,8 +62,21 @@ export function missingIds(expectedIds, actualIds) {
 }
 
 function formatIdList(ids, limit = 20) {
+  if (ids.length === 0) return 'none';
   const shown = ids.slice(0, limit).join(', ');
   return ids.length > limit ? `${shown}, ... (+${ids.length - limit} more)` : shown;
+}
+
+export function formatCharacterIconDiff(expectedIds, actualIds) {
+  const missingExpected = missingIds(expectedIds, actualIds);
+  const extraExported = missingIds(actualIds, expectedIds);
+
+  return [
+    `expected=${expectedIds.size}`,
+    `exported=${actualIds.size}`,
+    `missingExpected(${missingExpected.length})=${formatIdList(missingExpected)}`,
+    `extraExported(${extraExported.length})=${formatIdList(extraExported)}`,
+  ].join('; ');
 }
 
 function formatBytes(bytes) {
@@ -220,16 +233,20 @@ export async function downloadApk(version) {
 function spawnCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     log(`Running: ${command} ${args.join(' ')}`);
+    const { allowNonZero = false, ...spawnOptions } = options;
     const child = spawn(command, args, {
       stdio: 'inherit',
       shell: process.platform === 'win32',
-      ...options,
+      ...spawnOptions,
     });
 
     child.on('error', reject);
     child.on('exit', (code) => {
-      if (code === 0) {
-        resolve();
+      if (code === 0 || allowNonZero) {
+        if (code !== 0) {
+          warn(`${command} exited with code ${code}; exported files will be validated before accepting the result.`);
+        }
+        resolve(code);
       } else {
         reject(new Error(`${command} exited with code ${code}`));
       }
@@ -349,9 +366,9 @@ export async function extractTextures(bundleDir, assetStudioCli) {
   ];
 
   if (/\.dll$/i.test(assetStudioCli)) {
-    await spawnCommand('dotnet', [assetStudioCli, ...args]);
+    await spawnCommand('dotnet', [assetStudioCli, ...args], { allowNonZero: true });
   } else {
-    await spawnCommand(assetStudioCli, args);
+    await spawnCommand(assetStudioCli, args, { allowNonZero: true });
   }
 
   return outputDir;
@@ -376,18 +393,20 @@ async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
     const missingCharacterBaseline = characterResult.ids.size < minCharacters;
     const missingItemBaseline = itemResult.ids.size < minItems;
     const missingExpectedCharacters = missingIds(expectedCharacterIds, characterResult.ids);
+    const characterDiff = formatCharacterIconDiff(expectedCharacterIds, characterResult.ids);
+
+    log(`Character icon validation: ${characterDiff}`);
 
     if (missingExpectedCharacters.length > 0) {
       throw new Error(
-        `Exported character icons are missing expected character IDs from characters.json: `
-        + formatIdList(missingExpectedCharacters),
+        `Exported character icons do not match characters.json: ${characterDiff}`,
       );
     }
 
     if (missingCharacterBaseline || missingItemBaseline) {
       throw new Error(
         `Exported icon count below baseline: characters ${characterResult.ids.size}/${minCharacters}, `
-        + `items ${itemResult.ids.size}/${minItems}`,
+        + `items ${itemResult.ids.size}/${minItems}; ${characterDiff}`,
       );
     }
 
