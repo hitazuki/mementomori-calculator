@@ -881,11 +881,25 @@
     "elementType": 4,
     "isLimited": true
   },
+  "140": {
+    "id": 140,
+    "nameKey": "[CharacterName140]",
+    "name2Key": "[CharacterSubName140]",
+    "elementType": 6,
+    "isLimited": false
+  },
   "141": {
     "id": 141,
     "nameKey": "[CharacterName141]",
     "name2Key": null,
     "elementType": 5,
+    "isLimited": true
+  },
+  "148": {
+    "id": 148,
+    "nameKey": "[CharacterName148]",
+    "name2Key": null,
+    "elementType": 2,
     "isLimited": true
   }
 }

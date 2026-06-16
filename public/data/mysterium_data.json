@@ -2162,5 +2162,28 @@
       }
     ],
     "baseParams": []
+  },
+  {
+    "id": 96,
+    "nameKey": "[CharacterCollectionName96]",
+    "reqCids": [
+      148,
+      0
+    ],
+    "params": [
+      {
+        "ptype": 12,
+        "nameKey": "[BattleParameterTypeDefensePenetration]",
+        "ctype": 1,
+        "val": 250
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": []
   }
 ]
