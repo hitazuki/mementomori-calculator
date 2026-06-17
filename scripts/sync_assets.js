@@ -307,7 +307,7 @@ function attachFilteredOutput(stream, write, { filterOutput = false } = {}) {
 
   stream.on('data', (chunk) => {
     buffer += chunk.toString();
-    const lines = buffer.split(/\r?\n/);
+    const lines = buffer.split(/\r\n|\n|\r/);
     buffer = lines.pop() || '';
 
     for (const line of lines) {
@@ -377,6 +377,7 @@ export async function extractBundles(apkPath) {
     'x',
     apkPath,
     'assets/aa/Android/*',
+    'assets/aa/catalog.json',
     `-o${outputDir}`,
     '-y',
   ]);
@@ -512,10 +513,10 @@ async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
     const missingFinalCharacters = missingIds(expectedCharacterIds, finalCharacterIds);
     const missingFinalCharactersInCatalog = catalogCharacterIds.size > 0
       ? missingFinalCharacters.filter((id) => catalogCharacterIds.has(id))
-      : missingFinalCharacters;
+      : [];
     const missingFinalCharactersNotInCatalog = catalogCharacterIds.size > 0
       ? missingFinalCharacters.filter((id) => !catalogCharacterIds.has(id))
-      : [];
+      : missingFinalCharacters;
     const characterDiff = formatCharacterIconDiff(
       expectedCharacterIds,
       characterResult.ids,
