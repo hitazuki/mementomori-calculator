@@ -55,6 +55,18 @@ function readCharacterIconIds(dir) {
   );
 }
 
+function readItemIconIds(dir) {
+  if (!fs.existsSync(dir)) return new Set();
+
+  return new Set(
+    fs.readdirSync(dir)
+      .map((file) => file.match(/^Item_(\d{4})\.png$/)?.[1])
+      .filter(Boolean)
+      .map((id) => Number.parseInt(id, 10))
+      .filter((id) => Number.isInteger(id) && id >= 0),
+  );
+}
+
 export function readExpectedCharacterIds(filePath = CHARACTERS_DATA_FILE) {
   if (!fs.existsSync(filePath)) return new Set();
 
@@ -74,10 +86,22 @@ export function missingIds(expectedIds, actualIds) {
 }
 
 function parseAddressableKeys(catalogPath) {
-  if (!fs.existsSync(catalogPath)) return [];
+  return parseAddressableCatalog(catalogPath).keys;
+}
+
+function parseAddressableCatalog(catalogPath) {
+  if (!fs.existsSync(catalogPath)) return { keys: [], buckets: new Map(), entries: [] };
 
   const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
-  const buffer = Buffer.from(catalog.m_KeyDataString || '', 'base64');
+  const keys = parseCatalogKeys(catalog.m_KeyDataString || '');
+  const buckets = parseCatalogBuckets(catalog.m_BucketDataString || '');
+  const entries = parseCatalogEntries(catalog, keys);
+
+  return { keys, buckets, entries };
+}
+
+function parseCatalogKeys(dataString) {
+  const buffer = Buffer.from(dataString, 'base64');
   if (buffer.length < 4) return [];
 
   let offset = 0;
@@ -102,6 +126,60 @@ function parseAddressableKeys(catalogPath) {
   return keys;
 }
 
+function parseCatalogBuckets(dataString) {
+  const buffer = Buffer.from(dataString, 'base64');
+  const buckets = new Map();
+  if (buffer.length < 4) return buckets;
+
+  let offset = 0;
+  const count = buffer.readInt32LE(offset);
+  offset += 4;
+
+  for (let index = 0; index < count && offset + 8 <= buffer.length; index++) {
+    const keyIndex = buffer.readInt32LE(offset);
+    offset += 4;
+    const entryCount = buffer.readInt32LE(offset);
+    offset += 4;
+    const entryIndexes = [];
+
+    for (let entry = 0; entry < entryCount && offset + 4 <= buffer.length; entry++) {
+      entryIndexes.push(buffer.readInt32LE(offset));
+      offset += 4;
+    }
+
+    buckets.set(keyIndex, entryIndexes);
+  }
+
+  return buckets;
+}
+
+function parseCatalogEntries(catalog, keys) {
+  const buffer = Buffer.from(catalog.m_EntryDataString || '', 'base64');
+  if (buffer.length < 4) return [];
+
+  const count = buffer.readInt32LE(0);
+  const entries = [];
+
+  for (let index = 0; index < count; index++) {
+    const offset = 4 + index * 28;
+    if (offset + 28 > buffer.length) break;
+
+    const internalIdIndex = buffer.readInt32LE(offset);
+    const primaryKeyIndex = buffer.readInt32LE(offset + 20);
+    const internalId = catalog.m_InternalIds?.[internalIdIndex] || '';
+    const primaryKey = keys[primaryKeyIndex] || '';
+    const bundleName = path.basename(internalId.replace(/\\/g, '/'));
+
+    entries.push({
+      internalId,
+      primaryKey,
+      bundleName: bundleName.endsWith('.bundle') ? bundleName : '',
+    });
+  }
+
+  return entries;
+}
+
 function readCatalogCharacterIds(bundleDir) {
   const catalogPath = path.resolve(bundleDir, '..', 'catalog.json');
   const ids = new Set();
@@ -115,6 +193,81 @@ function readCatalogCharacterIds(bundleDir) {
   }
 
   return ids;
+}
+
+function readCatalogItemIds(bundleDir) {
+  const catalogPath = path.resolve(bundleDir, '..', 'catalog.json');
+  const ids = new Set();
+
+  for (const key of parseAddressableKeys(catalogPath)) {
+    const match = key.match(/^Icon\/Item\/Item_(\d{4})$/);
+    if (!match) continue;
+
+    const id = Number.parseInt(match[1], 10);
+    if (Number.isInteger(id) && id >= 0) ids.add(id);
+  }
+
+  return ids;
+}
+
+function isTargetIconCatalogKey(key) {
+  return /^CharacterIcon\/CHR_\d{6}\/CHR_\d{6}_00_m$/.test(key)
+    || /^Icon\/Item\/Item_\d{4}$/.test(key);
+}
+
+function resolveTargetBundleNames(bundleDir) {
+  const catalogPath = path.resolve(bundleDir, '..', 'catalog.json');
+  const { keys, buckets, entries } = parseAddressableCatalog(catalogPath);
+  const bundleNames = new Set();
+
+  keys.forEach((key, keyIndex) => {
+    if (!isTargetIconCatalogKey(key)) return;
+
+    const entryIndexes = buckets.get(keyIndex) || [];
+    for (const entryIndex of entryIndexes) {
+      const bundleName = entries[entryIndex]?.bundleName;
+      if (bundleName) bundleNames.add(bundleName);
+    }
+  });
+
+  return bundleNames;
+}
+
+function prepareAssetStudioInputDir(bundleDir) {
+  if (process.env.SYNC_ASSETS_FULL_BUNDLE_SCAN === '1') {
+    log('Using full bundle directory because SYNC_ASSETS_FULL_BUNDLE_SCAN=1.');
+    return bundleDir;
+  }
+
+  const bundleNames = resolveTargetBundleNames(bundleDir);
+  if (bundleNames.size === 0) {
+    warn('Could not resolve target icon bundles from catalog; falling back to full bundle directory.');
+    return bundleDir;
+  }
+
+  const targetDir = path.join(WORK_DIR, 'target-bundles');
+  fs.rmSync(targetDir, { recursive: true, force: true });
+  ensureDir(targetDir);
+
+  let copied = 0;
+  let bytes = 0;
+  for (const bundleName of bundleNames) {
+    const srcPath = path.join(bundleDir, bundleName);
+    if (!fs.existsSync(srcPath)) continue;
+
+    const destPath = path.join(targetDir, bundleName);
+    fs.copyFileSync(srcPath, destPath);
+    copied++;
+    bytes += fs.statSync(srcPath).size;
+  }
+
+  if (copied === 0) {
+    warn('Resolved target icon bundles, but none were present on disk; falling back to full bundle directory.');
+    return bundleDir;
+  }
+
+  log(`Selected ${copied}/${bundleNames.size} catalog icon bundles for AssetStudio (${formatBytes(bytes)}).`);
+  return targetDir;
 }
 
 function formatIdList(ids, limit = 20) {
@@ -142,6 +295,19 @@ export function formatCharacterIconDiff(expectedIds, exportedIds, finalIds = exp
     `missingFinalInCatalog(${missingFinalInCatalog.length})=${formatIdList(missingFinalInCatalog)}`,
     `missingFinalNotInCatalog(${missingFinalNotInCatalog.length})=${formatIdList(missingFinalNotInCatalog)}`,
     `extraFinal(${extraFinal.length})=${formatIdList(extraFinal)}`,
+  ].join('; ');
+}
+
+function formatCatalogIconDiff(label, exportedIds, finalIds, catalogIds) {
+  const missingCatalog = catalogIds.size > 0 ? missingIds(catalogIds, finalIds) : [];
+  const finalNotInCatalog = catalogIds.size > 0 ? missingIds(finalIds, catalogIds) : [];
+
+  return [
+    `${label}Exported=${exportedIds.size}`,
+    `${label}Final=${finalIds.size}`,
+    `${label}Catalog=${catalogIds.size || 'unknown'}`,
+    `${label}MissingCatalog(${missingCatalog.length})=${formatIdList(missingCatalog)}`,
+    `${label}FinalNotInCatalog(${finalNotInCatalog.length})=${formatIdList(finalNotInCatalog)}`,
   ].join('; ');
 }
 
@@ -489,9 +655,10 @@ export async function extractTextures(bundleDir, assetStudioCli) {
   return outputDir;
 }
 
-async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
+async function extractAndCopyIconsWithValidation(bundleDir, assetStudioInputDir, assetStudioCli) {
   const expectedCharacterIds = readExpectedCharacterIds();
   const catalogCharacterIds = readCatalogCharacterIds(bundleDir);
+  const catalogItemIds = readCatalogItemIds(bundleDir);
   const minCharacters = Number(
     process.env.SYNC_ASSETS_MIN_CHARACTER_ICONS
     || catalogCharacterIds.size
@@ -499,17 +666,21 @@ async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
   );
   const minItems = Number(
     process.env.SYNC_ASSETS_MIN_ITEM_ICONS
+    || catalogItemIds.size
     || countFiles(ITEM_DEST_DIR, /^Item_\d{4}\.png$/),
   );
 
   return withRetries('Extract and validate image assets', async () => {
-    const textureDir = await extractTextures(bundleDir, assetStudioCli);
+    const textureDir = await extractTextures(assetStudioInputDir, assetStudioCli);
     const characterResult = copyCharacterIcons(textureDir, CHARACTER_DEST_DIR, { log });
     const itemResult = copyItemIcons(textureDir, ITEM_DEST_DIR, { log });
     const finalCharacterIds = readCharacterIconIds(CHARACTER_DEST_DIR);
+    const finalItemIds = readItemIconIds(ITEM_DEST_DIR);
 
     const missingCharacterBaseline = characterResult.ids.size < minCharacters;
-    const missingItemBaseline = itemResult.ids.size < minItems;
+    const missingItemBaseline = catalogItemIds.size > 0
+      ? missingIds(catalogItemIds, finalItemIds).length > 0
+      : itemResult.ids.size < minItems;
     const missingFinalCharacters = missingIds(expectedCharacterIds, finalCharacterIds);
     const missingFinalCharactersInCatalog = catalogCharacterIds.size > 0
       ? missingFinalCharacters.filter((id) => catalogCharacterIds.has(id))
@@ -523,8 +694,10 @@ async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
       finalCharacterIds,
       catalogCharacterIds,
     );
+    const itemDiff = formatCatalogIconDiff('item', itemResult.ids, finalItemIds, catalogItemIds);
 
     log(`Character icon validation: ${characterDiff}`);
+    log(`Item icon validation: ${itemDiff}`);
 
     if (missingFinalCharactersInCatalog.length > 0) {
       throw new Error(
@@ -539,7 +712,7 @@ async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
     if (missingCharacterBaseline || missingItemBaseline) {
       throw new Error(
         `Exported icon count below baseline: characters ${characterResult.ids.size}/${minCharacters}, `
-        + `items ${itemResult.ids.size}/${minItems}; ${characterDiff}`,
+        + `items ${itemResult.ids.size}/${minItems}; ${characterDiff}; ${itemDiff}`,
       );
     }
 
@@ -568,8 +741,9 @@ export async function syncAssets() {
 
   const apkPath = await downloadApk(currentVersion);
   const bundleDir = await extractBundles(apkPath);
+  const assetStudioInputDir = prepareAssetStudioInputDir(bundleDir);
   const assetStudioCli = await prepareAssetStudioCli();
-  const { characterResult, itemResult } = await extractAndCopyIconsWithValidation(bundleDir, assetStudioCli);
+  const { characterResult, itemResult } = await extractAndCopyIconsWithValidation(bundleDir, assetStudioInputDir, assetStudioCli);
 
   updateVersionCache(currentVersion);
   log(`Updated ${VERSION_FILE} to ${currentVersion}`);

@@ -72,6 +72,11 @@ export function copyCharacterIcons(srcDir, destDir, { log = console.log } = {}) 
   for (const [id, candidate] of [...candidates.entries()].sort((a, b) => a[0] - b[0])) {
     ids.add(id);
     const destPath = path.join(destDir, `${id}.png`);
+    if (!candidate.isOffwhite && fs.existsSync(destPath)) {
+      skipped++;
+      continue;
+    }
+
     if (copyIfChanged(candidate.srcPath, destPath)) {
       copied++;
     } else {

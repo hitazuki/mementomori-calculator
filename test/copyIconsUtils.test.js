@@ -59,3 +59,24 @@ test('copyItemIcons preserves Item file names and ignores generated variants', (
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('copyCharacterIcons does not replace existing icons with transparent-only variants', () => {
+  const root = makeTempDir();
+  try {
+    const src = path.join(root, 'src');
+    const dest = path.join(root, 'dest');
+    fs.mkdirSync(src, { recursive: true });
+    fs.mkdirSync(dest, { recursive: true });
+    fs.writeFileSync(path.join(src, 'CHR_000001_00_m.png'), 'transparent');
+    fs.writeFileSync(path.join(dest, '1.png'), 'offwhite');
+
+    const result = copyCharacterIcons(src, dest, { log: () => {} });
+
+    assert.equal(result.ids.size, 1);
+    assert.equal(result.copied, 0);
+    assert.equal(result.skipped, 1);
+    assert.equal(fs.readFileSync(path.join(dest, '1.png'), 'utf8'), 'offwhite');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
