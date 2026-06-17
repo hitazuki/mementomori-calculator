@@ -295,22 +295,3 @@ for (const lang of Object.keys(langFiles)) {
   }
 }
 
-// 5. Generate Available Icons Whitelist
-const ICONS_DIR = path.resolve(PROJECT_ROOT, 'public/images/characters');
-const AVAILABLE_ICONS_OUT = path.resolve(LOCALES_OUT_DIR, 'available_icons.json');
-const availableIcons = [];
-
-if (fs.existsSync(ICONS_DIR)) {
-  const files = fs.readdirSync(ICONS_DIR);
-  for (const file of files) {
-    if (file.endsWith('.png')) {
-      const id = parseInt(file.replace('.png', ''), 10);
-      if (!isNaN(id)) {
-        availableIcons.push(id);
-      }
-    }
-  }
-}
-
-fs.writeFileSync(AVAILABLE_ICONS_OUT, JSON.stringify(availableIcons), 'utf8');
-console.log(`Wrote available icons -> ${AVAILABLE_ICONS_OUT}`);
