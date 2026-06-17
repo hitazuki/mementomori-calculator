@@ -43,6 +43,18 @@ function countFiles(dir, pattern) {
   return fs.readdirSync(dir).filter((file) => pattern.test(file)).length;
 }
 
+function readCharacterIconIds(dir) {
+  if (!fs.existsSync(dir)) return new Set();
+
+  return new Set(
+    fs.readdirSync(dir)
+      .map((file) => file.match(/^(\d+)\.png$/)?.[1])
+      .filter(Boolean)
+      .map((id) => Number.parseInt(id, 10))
+      .filter((id) => Number.isInteger(id) && id > 0),
+  );
+}
+
 export function readExpectedCharacterIds(filePath = CHARACTERS_DATA_FILE) {
   if (!fs.existsSync(filePath)) return new Set();
 
@@ -61,21 +73,75 @@ export function missingIds(expectedIds, actualIds) {
     .sort((a, b) => a - b);
 }
 
+function parseAddressableKeys(catalogPath) {
+  if (!fs.existsSync(catalogPath)) return [];
+
+  const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+  const buffer = Buffer.from(catalog.m_KeyDataString || '', 'base64');
+  if (buffer.length < 4) return [];
+
+  let offset = 0;
+  const count = buffer.readInt32LE(offset);
+  offset += 4;
+  const keys = [];
+
+  for (let index = 0; index < count && offset < buffer.length; index++) {
+    const type = buffer[offset];
+    offset += 1;
+
+    if (type !== 0 || offset + 4 > buffer.length) break;
+
+    const length = buffer.readInt32LE(offset);
+    offset += 4;
+    if (offset + length > buffer.length) break;
+
+    keys.push(buffer.subarray(offset, offset + length).toString('utf8'));
+    offset += length;
+  }
+
+  return keys;
+}
+
+function readCatalogCharacterIds(bundleDir) {
+  const catalogPath = path.resolve(bundleDir, '..', 'catalog.json');
+  const ids = new Set();
+
+  for (const key of parseAddressableKeys(catalogPath)) {
+    const match = key.match(/^CharacterIcon\/CHR_(\d{6})\/CHR_\d{6}_00_m(?:_offwhite)?$/);
+    if (!match) continue;
+
+    const id = Number.parseInt(match[1], 10);
+    if (Number.isInteger(id) && id > 0) ids.add(id);
+  }
+
+  return ids;
+}
+
 function formatIdList(ids, limit = 20) {
   if (ids.length === 0) return 'none';
   const shown = ids.slice(0, limit).join(', ');
   return ids.length > limit ? `${shown}, ... (+${ids.length - limit} more)` : shown;
 }
 
-export function formatCharacterIconDiff(expectedIds, actualIds) {
-  const missingExpected = missingIds(expectedIds, actualIds);
-  const extraExported = missingIds(actualIds, expectedIds);
+export function formatCharacterIconDiff(expectedIds, exportedIds, finalIds = exportedIds, catalogIds = new Set()) {
+  const missingFinal = missingIds(expectedIds, finalIds);
+  const missingFinalInCatalog = catalogIds.size > 0
+    ? missingFinal.filter((id) => catalogIds.has(id))
+    : missingFinal;
+  const missingFinalNotInCatalog = catalogIds.size > 0
+    ? missingFinal.filter((id) => !catalogIds.has(id))
+    : [];
+  const extraFinal = missingIds(finalIds, expectedIds);
 
   return [
     `expected=${expectedIds.size}`,
-    `exported=${actualIds.size}`,
-    `missingExpected(${missingExpected.length})=${formatIdList(missingExpected)}`,
-    `extraExported(${extraExported.length})=${formatIdList(extraExported)}`,
+    `exported=${exportedIds.size}`,
+    `final=${finalIds.size}`,
+    `catalog=${catalogIds.size || 'unknown'}`,
+    `missingFinal(${missingFinal.length})=${formatIdList(missingFinal)}`,
+    `missingFinalInCatalog(${missingFinalInCatalog.length})=${formatIdList(missingFinalInCatalog)}`,
+    `missingFinalNotInCatalog(${missingFinalNotInCatalog.length})=${formatIdList(missingFinalNotInCatalog)}`,
+    `extraFinal(${extraFinal.length})=${formatIdList(extraFinal)}`,
   ].join('; ');
 }
 
@@ -230,18 +296,66 @@ export async function downloadApk(version) {
   return downloadFile(apkUrl, apkPath, { label: `APK ${version}`, retries: 2 });
 }
 
+function shouldPrintToolLine(line) {
+  return /\b(error|failed|warning|warn|exception)\b/i.test(line)
+    || /^\[(Error|Warning)\]/i.test(line);
+}
+
+function attachFilteredOutput(stream, write, { filterOutput = false } = {}) {
+  let buffer = '';
+  let suppressed = 0;
+
+  stream.on('data', (chunk) => {
+    buffer += chunk.toString();
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!filterOutput || shouldPrintToolLine(line)) {
+        write(`${line}\n`);
+      } else if (line.trim()) {
+        suppressed++;
+      }
+    }
+  });
+
+  return () => {
+    if (buffer.trim()) {
+      if (!filterOutput || shouldPrintToolLine(buffer)) {
+        write(`${buffer}\n`);
+      } else {
+        suppressed++;
+      }
+    }
+
+    return suppressed;
+  };
+}
+
 function spawnCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     log(`Running: ${command} ${args.join(' ')}`);
-    const { allowNonZero = false, ...spawnOptions } = options;
+    const { allowNonZero = false, filterOutput = false, ...spawnOptions } = options;
     const child = spawn(command, args, {
-      stdio: 'inherit',
+      stdio: filterOutput ? ['ignore', 'pipe', 'pipe'] : 'inherit',
       shell: process.platform === 'win32',
       ...spawnOptions,
     });
 
+    const flushStdout = filterOutput
+      ? attachFilteredOutput(child.stdout, (line) => process.stdout.write(line), { filterOutput })
+      : () => 0;
+    const flushStderr = filterOutput
+      ? attachFilteredOutput(child.stderr, (line) => process.stderr.write(line), { filterOutput })
+      : () => 0;
+
     child.on('error', reject);
     child.on('exit', (code) => {
+      const suppressed = flushStdout() + flushStderr();
+      if (suppressed > 0) {
+        log(`Suppressed ${suppressed} verbose tool log lines.`);
+      }
+
       if (code === 0 || allowNonZero) {
         if (code !== 0) {
           warn(`${command} exited with code ${code}; exported files will be validated before accepting the result.`);
@@ -366,9 +480,9 @@ export async function extractTextures(bundleDir, assetStudioCli) {
   ];
 
   if (/\.dll$/i.test(assetStudioCli)) {
-    await spawnCommand('dotnet', [assetStudioCli, ...args], { allowNonZero: true });
+    await spawnCommand('dotnet', [assetStudioCli, ...args], { allowNonZero: true, filterOutput: true });
   } else {
-    await spawnCommand(assetStudioCli, args, { allowNonZero: true });
+    await spawnCommand(assetStudioCli, args, { allowNonZero: true, filterOutput: true });
   }
 
   return outputDir;
@@ -376,9 +490,11 @@ export async function extractTextures(bundleDir, assetStudioCli) {
 
 async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
   const expectedCharacterIds = readExpectedCharacterIds();
+  const catalogCharacterIds = readCatalogCharacterIds(bundleDir);
   const minCharacters = Number(
     process.env.SYNC_ASSETS_MIN_CHARACTER_ICONS
-    || Math.max(countFiles(CHARACTER_DEST_DIR, /^\d+\.png$/), expectedCharacterIds.size),
+    || catalogCharacterIds.size
+    || countFiles(CHARACTER_DEST_DIR, /^\d+\.png$/),
   );
   const minItems = Number(
     process.env.SYNC_ASSETS_MIN_ITEM_ICONS
@@ -389,18 +505,34 @@ async function extractAndCopyIconsWithValidation(bundleDir, assetStudioCli) {
     const textureDir = await extractTextures(bundleDir, assetStudioCli);
     const characterResult = copyCharacterIcons(textureDir, CHARACTER_DEST_DIR, { log });
     const itemResult = copyItemIcons(textureDir, ITEM_DEST_DIR, { log });
+    const finalCharacterIds = readCharacterIconIds(CHARACTER_DEST_DIR);
 
     const missingCharacterBaseline = characterResult.ids.size < minCharacters;
     const missingItemBaseline = itemResult.ids.size < minItems;
-    const missingExpectedCharacters = missingIds(expectedCharacterIds, characterResult.ids);
-    const characterDiff = formatCharacterIconDiff(expectedCharacterIds, characterResult.ids);
+    const missingFinalCharacters = missingIds(expectedCharacterIds, finalCharacterIds);
+    const missingFinalCharactersInCatalog = catalogCharacterIds.size > 0
+      ? missingFinalCharacters.filter((id) => catalogCharacterIds.has(id))
+      : missingFinalCharacters;
+    const missingFinalCharactersNotInCatalog = catalogCharacterIds.size > 0
+      ? missingFinalCharacters.filter((id) => !catalogCharacterIds.has(id))
+      : [];
+    const characterDiff = formatCharacterIconDiff(
+      expectedCharacterIds,
+      characterResult.ids,
+      finalCharacterIds,
+      catalogCharacterIds,
+    );
 
     log(`Character icon validation: ${characterDiff}`);
 
-    if (missingExpectedCharacters.length > 0) {
+    if (missingFinalCharactersInCatalog.length > 0) {
       throw new Error(
-        `Exported character icons do not match characters.json: ${characterDiff}`,
+        `Character icons are missing even though current APK catalog lists them: ${characterDiff}`,
       );
+    }
+
+    if (missingFinalCharactersNotInCatalog.length > 0) {
+      warn(`Character IDs are present in characters.json but absent from current APK catalog: ${formatIdList(missingFinalCharactersNotInCatalog)}.`);
     }
 
     if (missingCharacterBaseline || missingItemBaseline) {
