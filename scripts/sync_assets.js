@@ -93,23 +93,25 @@ function parseAddressableCatalog(catalogPath) {
   if (!fs.existsSync(catalogPath)) return { keys: [], buckets: new Map(), entries: [] };
 
   const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
-  const keys = parseCatalogKeys(catalog.m_KeyDataString || '');
-  const buckets = parseCatalogBuckets(catalog.m_BucketDataString || '');
+  const { keys, keyByOffset } = parseCatalogKeys(catalog.m_KeyDataString || '');
+  const { buckets, bucketByKey } = parseCatalogBuckets(catalog.m_BucketDataString || '', keyByOffset);
   const entries = parseCatalogEntries(catalog, keys);
 
-  return { keys, buckets, entries };
+  return { keys, buckets, bucketByKey, entries };
 }
 
 function parseCatalogKeys(dataString) {
   const buffer = Buffer.from(dataString, 'base64');
-  if (buffer.length < 4) return [];
+  if (buffer.length < 4) return { keys: [], keyByOffset: new Map() };
 
   let offset = 0;
   const count = buffer.readInt32LE(offset);
   offset += 4;
   const keys = [];
+  const keyByOffset = new Map();
 
   for (let index = 0; index < count && offset < buffer.length; index++) {
+    const keyOffset = offset;
     const type = buffer[offset];
     offset += 1;
 
@@ -119,17 +121,20 @@ function parseCatalogKeys(dataString) {
     offset += 4;
     if (offset + length > buffer.length) break;
 
-    keys.push(buffer.subarray(offset, offset + length).toString('utf8'));
+    const key = buffer.subarray(offset, offset + length).toString('utf8');
+    keys.push(key);
+    keyByOffset.set(keyOffset, key);
     offset += length;
   }
 
-  return keys;
+  return { keys, keyByOffset };
 }
 
-function parseCatalogBuckets(dataString) {
+function parseCatalogBuckets(dataString, keyByOffset) {
   const buffer = Buffer.from(dataString, 'base64');
-  const buckets = new Map();
-  if (buffer.length < 4) return buckets;
+  const buckets = [];
+  const bucketByKey = new Map();
+  if (buffer.length < 4) return { buckets, bucketByKey };
 
   let offset = 0;
   const count = buffer.readInt32LE(offset);
@@ -147,10 +152,13 @@ function parseCatalogBuckets(dataString) {
       offset += 4;
     }
 
-    buckets.set(keyIndex, entryIndexes);
+    const key = keyByOffset.get(keyIndex) || '';
+    const bucket = { key, entryIndexes };
+    buckets.push(bucket);
+    if (key) bucketByKey.set(key, bucket);
   }
 
-  return buckets;
+  return { buckets, bucketByKey };
 }
 
 function parseCatalogEntries(catalog, keys) {
@@ -165,7 +173,10 @@ function parseCatalogEntries(catalog, keys) {
     if (offset + 28 > buffer.length) break;
 
     const internalIdIndex = buffer.readInt32LE(offset);
+    const providerIndex = buffer.readInt32LE(offset + 4);
+    const dependenciesBucketIndex = buffer.readInt32LE(offset + 8);
     const primaryKeyIndex = buffer.readInt32LE(offset + 20);
+    const resourceTypeIndex = buffer.readInt32LE(offset + 24);
     const internalId = catalog.m_InternalIds?.[internalIdIndex] || '';
     const primaryKey = keys[primaryKeyIndex] || '';
     const bundleName = path.basename(internalId.replace(/\\/g, '/'));
@@ -173,6 +184,9 @@ function parseCatalogEntries(catalog, keys) {
     entries.push({
       internalId,
       primaryKey,
+      providerId: catalog.m_ProviderIds?.[providerIndex] || '',
+      dependenciesBucketIndex,
+      resourceType: catalog.m_resourceTypes?.[resourceTypeIndex]?.m_ClassName || '',
       bundleName: bundleName.endsWith('.bundle') ? bundleName : '',
     });
   }
@@ -215,18 +229,28 @@ function isTargetIconCatalogKey(key) {
     || /^Icon\/Item\/Item_\d{4}$/.test(key);
 }
 
-function resolveTargetBundleNames(bundleDir) {
+export function resolveTargetBundleNames(bundleDir) {
   const catalogPath = path.resolve(bundleDir, '..', 'catalog.json');
-  const { keys, buckets, entries } = parseAddressableCatalog(catalogPath);
+  const { keys, buckets, bucketByKey, entries } = parseAddressableCatalog(catalogPath);
   const bundleNames = new Set();
 
-  keys.forEach((key, keyIndex) => {
+  keys.forEach((key) => {
     if (!isTargetIconCatalogKey(key)) return;
 
-    const entryIndexes = buckets.get(keyIndex) || [];
-    for (const entryIndex of entryIndexes) {
-      const bundleName = entries[entryIndex]?.bundleName;
-      if (bundleName) bundleNames.add(bundleName);
+    const assetEntryIndexes = bucketByKey.get(key)?.entryIndexes || [];
+    for (const assetEntryIndex of assetEntryIndexes) {
+      const assetEntry = entries[assetEntryIndex];
+      if (!assetEntry) continue;
+
+      const dependencyBucket = buckets[assetEntry.dependenciesBucketIndex];
+      const dependencyEntryIndexes = dependencyBucket?.entryIndexes || [];
+
+      for (const dependencyEntryIndex of dependencyEntryIndexes) {
+        const bundleName = entries[dependencyEntryIndex]?.bundleName;
+        if (bundleName) bundleNames.add(bundleName);
+      }
+
+      if (assetEntry.bundleName) bundleNames.add(assetEntry.bundleName);
     }
   });
 
