@@ -14,6 +14,10 @@ const PROJECT_ROOT = path.resolve(__dirname, '..');
 const VARS_URL = 'https://mememori-game.com/apps/vars.js';
 const APK_URL_TEMPLATE = 'https://mememori-game.com/apps/mementomori_{version}.apk';
 const ASSETSTUDIO_RELEASE_URL = 'https://api.github.com/repos/aelurum/AssetStudio/releases/latest';
+const FALLBACK_ASSETSTUDIO_ASSET = {
+  name: 'AssetStudioModCLI_net9_linux64.zip',
+  browser_download_url: 'https://github.com/aelurum/AssetStudio/releases/download/v0.19.0/AssetStudioModCLI_net9_linux64.zip',
+};
 
 const VERSION_FILE = path.join(PROJECT_ROOT, 'public/data/asset_version.txt');
 const CHARACTERS_DATA_FILE = path.join(PROJECT_ROOT, 'public/data/characters.json');
@@ -640,8 +644,22 @@ export async function prepareAssetStudioCli() {
     return path.resolve(process.env.ASSET_STUDIO_CLI);
   }
 
-  const release = await withRetries('Fetch AssetStudio release metadata', fetchLatestAssetStudioRelease, 2);
-  const asset = chooseAssetStudioAsset(release);
+  let asset;
+  if (process.env.ASSET_STUDIO_CLI_ZIP_URL) {
+    asset = {
+      name: path.basename(new URL(process.env.ASSET_STUDIO_CLI_ZIP_URL).pathname),
+      browser_download_url: process.env.ASSET_STUDIO_CLI_ZIP_URL,
+    };
+  } else {
+    try {
+      const release = await withRetries('Fetch AssetStudio release metadata', fetchLatestAssetStudioRelease, 2);
+      asset = chooseAssetStudioAsset(release);
+    } catch (error) {
+      warn(`Falling back to pinned AssetStudio release after metadata fetch failed: ${error.message}`);
+      asset = FALLBACK_ASSETSTUDIO_ASSET;
+    }
+  }
+
   const toolDir = path.join(WORK_DIR, 'assetstudio');
   const zipPath = path.join(WORK_DIR, asset.name);
 
@@ -649,7 +667,11 @@ export async function prepareAssetStudioCli() {
   ensureDir(toolDir);
 
   log(`Using AssetStudio release asset: ${asset.name}`);
-  await downloadFile(asset.browser_download_url, zipPath, { label: asset.name, retries: 2 });
+  if (fs.existsSync(zipPath)) {
+    log(`Using cached AssetStudio archive: ${zipPath}`);
+  } else {
+    await downloadFile(asset.browser_download_url, zipPath, { label: asset.name, retries: 2 });
+  }
   await spawnCommand('7z', ['x', zipPath, `-o${toolDir}`, '-y']);
 
   return findAssetStudioExecutable(toolDir);
