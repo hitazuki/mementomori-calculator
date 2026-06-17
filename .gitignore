@@ -43,3 +43,4 @@ asset_downloader/
 public/data/allPacks.json
 public/data/ultraSalePacks.json
 !/public/data/asset_version.txt
+!/public/data/asset_catalog_version.txt

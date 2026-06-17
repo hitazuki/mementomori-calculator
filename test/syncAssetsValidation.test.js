@@ -3,7 +3,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { formatCharacterIconDiff, missingIds, readExpectedCharacterIds } from '../scripts/sync_assets.js';
+import {
+  formatCharacterIconDiff,
+  missingIds,
+  readExpectedCharacterIds,
+  readExpectedItemIconIds,
+} from '../scripts/sync_assets.js';
 
 function makeTempFile(content) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mmt-sync-assets-'));
@@ -21,6 +26,23 @@ test('readExpectedCharacterIds reads object-shaped character data', () => {
 
   try {
     assert.deepEqual([...readExpectedCharacterIds(file)].sort((a, b) => a - b), [1, 140]);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('readExpectedItemIconIds reads unique item icon IDs from master data', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mmt-sync-assets-'));
+  const file = path.join(dir, 'ItemMB.json');
+  fs.writeFileSync(file, JSON.stringify([
+    { IconId: 9 },
+    { IconId: 9 },
+    { IconId: 12 },
+    { IconId: null },
+  ]), 'utf8');
+
+  try {
+    assert.deepEqual([...readExpectedItemIconIds(file)].sort((a, b) => a - b), [9, 12]);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

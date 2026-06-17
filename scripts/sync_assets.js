@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
 const VARS_URL = 'https://mememori-game.com/apps/vars.js';
+const BOI_AUTH_URL = 'https://prd1-auth.mememori-boi.com/api/auth/getDataUri';
 const APK_URL_TEMPLATE = 'https://mememori-game.com/apps/mementomori_{version}.apk';
 const ASSETSTUDIO_RELEASE_URL = 'https://api.github.com/repos/aelurum/AssetStudio/releases/latest';
 const FALLBACK_ASSETSTUDIO_ASSET = {
@@ -20,7 +21,9 @@ const FALLBACK_ASSETSTUDIO_ASSET = {
 };
 
 const VERSION_FILE = path.join(PROJECT_ROOT, 'public/data/asset_version.txt');
+const ASSET_CATALOG_VERSION_FILE = path.join(PROJECT_ROOT, 'public/data/asset_catalog_version.txt');
 const CHARACTERS_DATA_FILE = path.join(PROJECT_ROOT, 'public/data/characters.json');
+const ITEM_MASTER_FILE = path.join(PROJECT_ROOT, 'data/Master/ItemMB.json');
 const CHARACTER_DEST_DIR = path.join(PROJECT_ROOT, 'public/images/characters');
 const ITEM_DEST_DIR = path.join(PROJECT_ROOT, 'public/images/items');
 const WORK_DIR = process.env.SYNC_ASSETS_WORK_DIR
@@ -36,6 +39,217 @@ function log(message) {
 
 function warn(message) {
   console.warn(`[sync-assets] ${message}`);
+}
+
+function encodeMsgpackString(value) {
+  const bytes = Buffer.from(value, 'utf8');
+  if (bytes.length < 32) return Buffer.concat([Buffer.from([0xa0 | bytes.length]), bytes]);
+  if (bytes.length < 256) return Buffer.concat([Buffer.from([0xd9, bytes.length]), bytes]);
+  if (bytes.length < 65536) {
+    const header = Buffer.alloc(3);
+    header[0] = 0xda;
+    header.writeUInt16BE(bytes.length, 1);
+    return Buffer.concat([header, bytes]);
+  }
+
+  const header = Buffer.alloc(5);
+  header[0] = 0xdb;
+  header.writeUInt32BE(bytes.length, 1);
+  return Buffer.concat([header, bytes]);
+}
+
+function encodeMsgpackInteger(value) {
+  if (value >= 0 && value < 128) return Buffer.from([value]);
+  if (value >= 0 && value < 256) return Buffer.from([0xcc, value]);
+  if (value >= 0 && value < 65536) {
+    const buffer = Buffer.alloc(3);
+    buffer[0] = 0xcd;
+    buffer.writeUInt16BE(value, 1);
+    return buffer;
+  }
+
+  const buffer = Buffer.alloc(9);
+  buffer[0] = 0xd3;
+  buffer.writeBigInt64BE(BigInt(value), 1);
+  return buffer;
+}
+
+function encodeMsgpackMap(value) {
+  const entries = Object.entries(value);
+  if (entries.length >= 16) {
+    throw new Error('Small MessagePack encoder only supports fixmap values.');
+  }
+
+  const parts = [Buffer.from([0x80 | entries.length])];
+  for (const [key, entryValue] of entries) {
+    parts.push(encodeMsgpackString(key));
+    if (typeof entryValue === 'string') {
+      parts.push(encodeMsgpackString(entryValue));
+    } else if (Number.isInteger(entryValue)) {
+      parts.push(encodeMsgpackInteger(entryValue));
+    } else {
+      throw new Error(`Unsupported MessagePack value for ${key}: ${typeof entryValue}`);
+    }
+  }
+
+  return Buffer.concat(parts);
+}
+
+class MsgpackDecoder {
+  constructor(buffer) {
+    this.buffer = buffer;
+    this.offset = 0;
+  }
+
+  readByte() {
+    return this.buffer[this.offset++];
+  }
+
+  readString(length) {
+    const value = this.buffer.subarray(this.offset, this.offset + length).toString('utf8');
+    this.offset += length;
+    return value;
+  }
+
+  skip(length) {
+    this.offset += length;
+    return null;
+  }
+
+  readValue() {
+    const type = this.readByte();
+    if (type <= 0x7f) return type;
+    if (type >= 0xe0) return type - 256;
+    if (type >= 0xa0 && type <= 0xbf) return this.readString(type & 0x1f);
+    if (type >= 0x90 && type <= 0x9f) return this.readArray(type & 0x0f);
+    if (type >= 0x80 && type <= 0x8f) return this.readMap(type & 0x0f);
+
+    if (type === 0xc0) return null;
+    if (type === 0xc2) return false;
+    if (type === 0xc3) return true;
+    if (type === 0xca) {
+      const value = this.buffer.readFloatBE(this.offset);
+      this.offset += 4;
+      return value;
+    }
+    if (type === 0xcb) {
+      const value = this.buffer.readDoubleBE(this.offset);
+      this.offset += 8;
+      return value;
+    }
+    if (type === 0xcc) return this.readByte();
+    if (type === 0xcd) {
+      const value = this.buffer.readUInt16BE(this.offset);
+      this.offset += 2;
+      return value;
+    }
+    if (type === 0xce) {
+      const value = this.buffer.readUInt32BE(this.offset);
+      this.offset += 4;
+      return value;
+    }
+    if (type === 0xcf) {
+      const value = this.buffer.readBigUInt64BE(this.offset);
+      this.offset += 8;
+      return Number(value);
+    }
+    if (type === 0xd0) {
+      const value = this.buffer.readInt8(this.offset);
+      this.offset += 1;
+      return value;
+    }
+    if (type === 0xd1) {
+      const value = this.buffer.readInt16BE(this.offset);
+      this.offset += 2;
+      return value;
+    }
+    if (type === 0xd2) {
+      const value = this.buffer.readInt32BE(this.offset);
+      this.offset += 4;
+      return value;
+    }
+    if (type === 0xd3) {
+      const value = this.buffer.readBigInt64BE(this.offset);
+      this.offset += 8;
+      return Number(value);
+    }
+    if (type === 0xd9) return this.readString(this.readByte());
+    if (type === 0xda) {
+      const length = this.buffer.readUInt16BE(this.offset);
+      this.offset += 2;
+      return this.readString(length);
+    }
+    if (type === 0xdb) {
+      const length = this.buffer.readUInt32BE(this.offset);
+      this.offset += 4;
+      return this.readString(length);
+    }
+    if (type === 0xdc) {
+      const length = this.buffer.readUInt16BE(this.offset);
+      this.offset += 2;
+      return this.readArray(length);
+    }
+    if (type === 0xdd) {
+      const length = this.buffer.readUInt32BE(this.offset);
+      this.offset += 4;
+      return this.readArray(length);
+    }
+    if (type === 0xde) {
+      const length = this.buffer.readUInt16BE(this.offset);
+      this.offset += 2;
+      return this.readMap(length);
+    }
+    if (type === 0xdf) {
+      const length = this.buffer.readUInt32BE(this.offset);
+      this.offset += 4;
+      return this.readMap(length);
+    }
+    if (type === 0xc4) return this.skip(this.readByte());
+    if (type === 0xc5) {
+      const length = this.buffer.readUInt16BE(this.offset);
+      this.offset += 2;
+      return this.skip(length);
+    }
+    if (type === 0xc6) {
+      const length = this.buffer.readUInt32BE(this.offset);
+      this.offset += 4;
+      return this.skip(length);
+    }
+    if (type === 0xd4) return this.skip(2);
+    if (type === 0xd5) return this.skip(3);
+    if (type === 0xd6) return this.skip(5);
+    if (type === 0xd7) return this.skip(9);
+    if (type === 0xd8) return this.skip(17);
+    if (type === 0xc7) return this.skip(this.readByte() + 1);
+    if (type === 0xc8) {
+      const length = this.buffer.readUInt16BE(this.offset);
+      this.offset += 2;
+      return this.skip(length + 1);
+    }
+    if (type === 0xc9) {
+      const length = this.buffer.readUInt32BE(this.offset);
+      this.offset += 4;
+      return this.skip(length + 1);
+    }
+
+    throw new Error(`Unsupported MessagePack type 0x${type.toString(16)} at offset ${this.offset - 1}.`);
+  }
+
+  readArray(length) {
+    return Array.from({ length }, () => this.readValue());
+  }
+
+  readMap(length) {
+    const value = {};
+    for (let index = 0; index < length; index++) {
+      value[this.readValue()] = this.readValue();
+    }
+    return value;
+  }
+}
+
+function decodeMsgpack(buffer) {
+  return new MsgpackDecoder(buffer).readValue();
 }
 
 function ensureDir(dir) {
@@ -83,6 +297,18 @@ export function readExpectedCharacterIds(filePath = CHARACTERS_DATA_FILE) {
   return new Set(ids);
 }
 
+export function readExpectedItemIconIds(filePath = ITEM_MASTER_FILE) {
+  if (!fs.existsSync(filePath)) return new Set();
+
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  const entries = Array.isArray(data) ? data : Object.values(data);
+  const ids = entries
+    .map((entry) => Number(entry?.IconId ?? entry?.iconId))
+    .filter((id) => Number.isInteger(id) && id >= 0);
+
+  return new Set(ids);
+}
+
 export function missingIds(expectedIds, actualIds) {
   return [...expectedIds]
     .filter((id) => !actualIds.has(id))
@@ -94,7 +320,7 @@ function parseAddressableKeys(catalogPath) {
 }
 
 function parseAddressableCatalog(catalogPath) {
-  if (!fs.existsSync(catalogPath)) return { keys: [], buckets: new Map(), entries: [] };
+  if (!fs.existsSync(catalogPath)) return { keys: [], buckets: [], bucketByKey: new Map(), entries: [] };
 
   const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
   const { keys, keyByOffset } = parseCatalogKeys(catalog.m_KeyDataString || '');
@@ -102,6 +328,10 @@ function parseAddressableCatalog(catalogPath) {
   const entries = parseCatalogEntries(catalog, keys);
 
   return { keys, buckets, bucketByKey, entries };
+}
+
+function getCatalogPathForBundleDir(bundleDir) {
+  return path.resolve(bundleDir, '..', 'catalog.json');
 }
 
 function parseCatalogKeys(dataString) {
@@ -199,7 +429,7 @@ function parseCatalogEntries(catalog, keys) {
 }
 
 function readCatalogCharacterIds(bundleDir) {
-  const catalogPath = path.resolve(bundleDir, '..', 'catalog.json');
+  const catalogPath = getCatalogPathForBundleDir(bundleDir);
   const ids = new Set();
 
   for (const key of parseAddressableKeys(catalogPath)) {
@@ -214,7 +444,7 @@ function readCatalogCharacterIds(bundleDir) {
 }
 
 function readCatalogItemIds(bundleDir) {
-  const catalogPath = path.resolve(bundleDir, '..', 'catalog.json');
+  const catalogPath = getCatalogPathForBundleDir(bundleDir);
   const ids = new Set();
 
   for (const key of parseAddressableKeys(catalogPath)) {
@@ -228,18 +458,42 @@ function readCatalogItemIds(bundleDir) {
   return ids;
 }
 
-function isTargetIconCatalogKey(key) {
-  return /^CharacterIcon\/CHR_\d{6}\/CHR_\d{6}_00_m$/.test(key)
-    || /^Icon\/Item\/Item_\d{4}$/.test(key);
+function catalogIconTarget(key) {
+  const characterMatch = key.match(/^CharacterIcon\/CHR_(\d{6})\/CHR_\d{6}_00_m(?:_offwhite)?$/);
+  if (characterMatch) {
+    return { type: 'character', id: Number.parseInt(characterMatch[1], 10) };
+  }
+
+  const itemMatch = key.match(/^Icon\/Item\/Item_(\d{4})$/);
+  if (itemMatch) {
+    return { type: 'item', id: Number.parseInt(itemMatch[1], 10) };
+  }
+
+  return null;
 }
 
-export function resolveTargetBundleNames(bundleDir) {
-  const catalogPath = path.resolve(bundleDir, '..', 'catalog.json');
+function isWantedCatalogIconKey(key, targets = {}) {
+  const target = catalogIconTarget(key);
+  if (!target) return false;
+
+  if (target.type === 'character' && targets.characterIds?.size) {
+    return targets.characterIds.has(target.id);
+  }
+
+  if (target.type === 'item' && targets.itemIds?.size) {
+    return targets.itemIds.has(target.id);
+  }
+
+  return !targets.characterIds?.size && !targets.itemIds?.size;
+}
+
+export function resolveTargetBundleNames(bundleDir, targets = {}) {
+  const catalogPath = getCatalogPathForBundleDir(bundleDir);
   const { keys, buckets, bucketByKey, entries } = parseAddressableCatalog(catalogPath);
   const bundleNames = new Set();
 
   keys.forEach((key) => {
-    if (!isTargetIconCatalogKey(key)) return;
+    if (!isWantedCatalogIconKey(key, targets)) return;
 
     const assetEntryIndexes = bucketByKey.get(key)?.entryIndexes || [];
     for (const assetEntryIndex of assetEntryIndexes) {
@@ -261,19 +515,23 @@ export function resolveTargetBundleNames(bundleDir) {
   return bundleNames;
 }
 
-function prepareAssetStudioInputDir(bundleDir) {
+function prepareAssetStudioInputDir(bundleDir, { targets = {}, outputName = 'target-bundles', fallbackToFull = true } = {}) {
   if (process.env.SYNC_ASSETS_FULL_BUNDLE_SCAN === '1') {
     log('Using full bundle directory because SYNC_ASSETS_FULL_BUNDLE_SCAN=1.');
     return bundleDir;
   }
 
-  const bundleNames = resolveTargetBundleNames(bundleDir);
+  const bundleNames = resolveTargetBundleNames(bundleDir, targets);
   if (bundleNames.size === 0) {
-    warn('Could not resolve target icon bundles from catalog; falling back to full bundle directory.');
-    return bundleDir;
+    if (fallbackToFull) {
+      warn('Could not resolve target icon bundles from catalog; falling back to full bundle directory.');
+      return bundleDir;
+    }
+    warn('Could not resolve target icon bundles from catalog.');
+    return null;
   }
 
-  const targetDir = path.join(WORK_DIR, 'target-bundles');
+  const targetDir = path.join(WORK_DIR, outputName);
   fs.rmSync(targetDir, { recursive: true, force: true });
   ensureDir(targetDir);
 
@@ -290,8 +548,12 @@ function prepareAssetStudioInputDir(bundleDir) {
   }
 
   if (copied === 0) {
-    warn('Resolved target icon bundles, but none were present on disk; falling back to full bundle directory.');
-    return bundleDir;
+    if (fallbackToFull) {
+      warn('Resolved target icon bundles, but none were present on disk; falling back to full bundle directory.');
+      return bundleDir;
+    }
+    warn('Resolved target icon bundles, but none were present on disk.');
+    return null;
   }
 
   log(`Selected ${copied}/${bundleNames.size} catalog icon bundles for AssetStudio (${formatBytes(bytes)}).`);
@@ -387,6 +649,105 @@ async function fetchWithTimeout(url, options = {}) {
   }
 }
 
+function replaceUriFormat(format, value) {
+  return format.includes('{0}') ? format.replace('{0}', value) : format.replace('{}', value);
+}
+
+function unityFetchHeaders() {
+  return {
+    'user-agent': 'UnityPlayer/2021.3.10f1 (UnityWebRequest/1.0, libcurl/7.80.0-DEV)',
+    'x-unity-version': '2021.3.10f1',
+  };
+}
+
+async function fetchBoiDataUri(appVersion) {
+  const body = encodeMsgpackMap({ CountryCode: 'CN', UserId: 0 });
+  const response = await fetchWithTimeout(BOI_AUTH_URL, {
+    method: 'POST',
+    timeoutMs: 30_000,
+    headers: {
+      'content-type': 'application/json; charset=UTF-8',
+      ortegaaccesstoken: '',
+      ortegaappversion: appVersion,
+      ortegadevicetype: '2',
+      ortegauuid: '0123456789abcdef0123456789abcdef',
+      'accept-encoding': 'gzip',
+      'user-agent': 'BestHTTP/2 v2.3.0',
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch BOI data URI: HTTP ${response.status}`);
+  }
+
+  const statusCode = response.headers.get('ortegastatuscode');
+  if (statusCode && statusCode !== '0') {
+    throw new Error(`BOI data URI request returned ortegastatuscode=${statusCode}`);
+  }
+
+  const data = decodeMsgpack(Buffer.from(await response.arrayBuffer()));
+  const assetVersion = response.headers.get('ortegaassetversion');
+  const masterVersion = response.headers.get('ortegamasterversion');
+  const assetCatalogFixedUriFormat = data?.AssetCatalogFixedUriFormat;
+
+  if (!assetVersion || !assetCatalogFixedUriFormat) {
+    throw new Error('BOI data URI response did not include asset version or catalog URI format.');
+  }
+
+  return {
+    assetVersion,
+    masterVersion,
+    appVersion: data?.AppAssetVersionInfo?.Version || appVersion,
+    assetCatalogFixedUriFormat,
+    rawDataUriFormat: data?.RawDataUriFormat,
+  };
+}
+
+async function downloadBoiCatalog(boiInfo) {
+  const outputDir = path.join(WORK_DIR, 'boi');
+  const catalogPath = path.join(outputDir, 'catalog.json');
+  const catalogUrl = replaceUriFormat(boiInfo.assetCatalogFixedUriFormat, `Android/${boiInfo.assetVersion}.json`);
+
+  fs.rmSync(outputDir, { recursive: true, force: true });
+  ensureDir(outputDir);
+  await downloadFile(catalogUrl, catalogPath, {
+    label: `BOI catalog ${boiInfo.assetVersion}`,
+    retries: 2,
+    headers: unityFetchHeaders(),
+  });
+
+  return catalogPath;
+}
+
+async function downloadBoiTargetBundles(boiInfo, catalogPath, targets) {
+  const bundleDir = path.join(path.dirname(catalogPath), 'Android');
+  ensureDir(bundleDir);
+
+  const bundleNames = resolveTargetBundleNames(bundleDir, targets);
+  if (bundleNames.size === 0) {
+    warn('BOI catalog does not list bundles for currently missing master icons.');
+    return { bundleDir, bundleNames, downloaded: 0, bytes: 0 };
+  }
+
+  let downloaded = 0;
+  let bytes = 0;
+  for (const bundleName of bundleNames) {
+    const destPath = path.join(bundleDir, bundleName);
+    const bundleUrl = replaceUriFormat(boiInfo.assetCatalogFixedUriFormat, `Android/${bundleName}`);
+    await downloadFile(bundleUrl, destPath, {
+      label: `BOI bundle ${downloaded + 1}/${bundleNames.size}`,
+      retries: 2,
+      headers: unityFetchHeaders(),
+    });
+    downloaded++;
+    bytes += fs.statSync(destPath).size;
+  }
+
+  log(`Downloaded ${downloaded}/${bundleNames.size} BOI target bundles (${formatBytes(bytes)}).`);
+  return { bundleDir, bundleNames, downloaded, bytes };
+}
+
 async function readResponseText(response) {
   const buffer = Buffer.from(await response.arrayBuffer());
 
@@ -435,7 +796,17 @@ export function updateVersionCache(version) {
   fs.writeFileSync(VERSION_FILE, `${version}\n`, 'utf8');
 }
 
-async function downloadFile(url, destPath, { label, retries = 2 } = {}) {
+export function readAssetCatalogVersionCache() {
+  if (!fs.existsSync(ASSET_CATALOG_VERSION_FILE)) return '';
+  return fs.readFileSync(ASSET_CATALOG_VERSION_FILE, 'utf8').trim();
+}
+
+export function updateAssetCatalogVersionCache(version) {
+  ensureDir(path.dirname(ASSET_CATALOG_VERSION_FILE));
+  fs.writeFileSync(ASSET_CATALOG_VERSION_FILE, `${version}\n`, 'utf8');
+}
+
+async function downloadFile(url, destPath, { label, retries = 2, headers = {} } = {}) {
   ensureDir(path.dirname(destPath));
 
   return withRetries(label || url, async () => {
@@ -449,7 +820,7 @@ async function downloadFile(url, destPath, { label, retries = 2 } = {}) {
     try {
       const response = await fetch(url, {
         signal: controller.signal,
-        headers: { 'user-agent': 'mmt-calculator-asset-sync' },
+        headers: { 'user-agent': 'mmt-calculator-asset-sync', ...headers },
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} for ${url}`);
@@ -770,33 +1141,208 @@ async function extractAndCopyIconsWithValidation(bundleDir, assetStudioInputDir,
   }, TEXTURE_EXPORT_RETRIES);
 }
 
+function currentMissingMasterIconTargets() {
+  const expectedCharacterIds = readExpectedCharacterIds();
+  const expectedItemIds = process.env.SYNC_ASSETS_INCLUDE_MASTER_ITEM_TARGETS === '1'
+    ? readExpectedItemIconIds()
+    : new Set();
+  const finalCharacterIds = readCharacterIconIds(CHARACTER_DEST_DIR);
+  const finalItemIds = readItemIconIds(ITEM_DEST_DIR);
+
+  return {
+    expectedCharacterIds,
+    expectedItemIds,
+    finalCharacterIds,
+    finalItemIds,
+    missingCharacterIds: new Set(missingIds(expectedCharacterIds, finalCharacterIds)),
+    missingItemIds: new Set(missingIds(expectedItemIds, finalItemIds)),
+  };
+}
+
+function hasMissingTargets(targets) {
+  return targets.missingCharacterIds.size > 0 || targets.missingItemIds.size > 0;
+}
+
+function targetSetsFromMissing(targets) {
+  return {
+    characterIds: targets.missingCharacterIds,
+    itemIds: targets.missingItemIds,
+  };
+}
+
+function formatTargetSummary(targets) {
+  return [
+    `characters=${targets.missingCharacterIds.size ? formatIdList([...targets.missingCharacterIds]) : 'none'}`,
+    `items=${targets.missingItemIds.size ? formatIdList([...targets.missingItemIds]) : 'none'}`,
+  ].join('; ');
+}
+
+async function extractAndCopyMissingMasterIcons(assetStudioInputDir, assetStudioCli, targets, sourceLabel) {
+  return withRetries(`Extract ${sourceLabel} missing master icons`, async () => {
+    const textureDir = await extractTextures(assetStudioInputDir, assetStudioCli);
+    const characterResult = copyCharacterIcons(textureDir, CHARACTER_DEST_DIR, { log });
+    const itemResult = copyItemIcons(textureDir, ITEM_DEST_DIR, { log });
+    const nextTargets = currentMissingMasterIconTargets();
+
+    log(`${sourceLabel} character icons: ${characterResult.copied} copied, ${characterResult.skipped} unchanged, ${characterResult.ids.size} matched.`);
+    log(`${sourceLabel} item icons: ${itemResult.copied} copied, ${itemResult.skipped} unchanged, ${itemResult.ids.size} matched.`);
+    log(`${sourceLabel} remaining missing master icons: ${formatTargetSummary(nextTargets)}.`);
+
+    const stillMissingRequestedCharacters = missingIds(targets.missingCharacterIds, readCharacterIconIds(CHARACTER_DEST_DIR));
+    const stillMissingRequestedItems = missingIds(targets.missingItemIds, readItemIconIds(ITEM_DEST_DIR));
+    if (stillMissingRequestedCharacters.length > 0 || stillMissingRequestedItems.length > 0) {
+      throw new Error(
+        `${sourceLabel} did not export all requested master icons: `
+        + `characters=${formatIdList(stillMissingRequestedCharacters)}, `
+        + `items=${formatIdList(stillMissingRequestedItems)}`,
+      );
+    }
+
+    return { characterResult, itemResult, nextTargets };
+  }, TEXTURE_EXPORT_RETRIES);
+}
+
+async function trySyncMissingIconsFromBoi(currentVersion, assetStudioCli) {
+  const targets = currentMissingMasterIconTargets();
+  if (!hasMissingTargets(targets)) {
+    log('No missing master icon targets before BOI sync.');
+    return { syncedAllMissingTargets: true, boiInfo: null, targets };
+  }
+
+  log(`Missing master icon targets before BOI sync: ${formatTargetSummary(targets)}.`);
+  const boiInfo = await fetchBoiDataUri(currentVersion);
+  log(`Current BOI asset catalog version: ${boiInfo.assetVersion}`);
+  const catalogPath = await downloadBoiCatalog(boiInfo);
+  const catalogBundleDir = path.join(path.dirname(catalogPath), 'Android');
+  const catalogCharacterIds = readCatalogCharacterIds(catalogBundleDir);
+  const catalogItemIds = readCatalogItemIds(catalogBundleDir);
+  const missingCharactersInBoiCatalog = missingIds(targets.missingCharacterIds, catalogCharacterIds);
+  const missingItemsInBoiCatalog = missingIds(targets.missingItemIds, catalogItemIds);
+
+  if (missingCharactersInBoiCatalog.length > 0 || missingItemsInBoiCatalog.length > 0) {
+    warn(
+      `BOI catalog does not list every missing master icon: `
+      + `characters=${formatIdList(missingCharactersInBoiCatalog)}, `
+      + `items=${formatIdList(missingItemsInBoiCatalog)}.`,
+    );
+  }
+
+  const boiTargets = {
+    ...targets,
+    missingCharacterIds: new Set([...targets.missingCharacterIds].filter((id) => catalogCharacterIds.has(id))),
+    missingItemIds: new Set([...targets.missingItemIds].filter((id) => catalogItemIds.has(id))),
+  };
+
+  if (!hasMissingTargets(boiTargets)) {
+    warn('No missing master icons are present in the current BOI catalog.');
+    return { syncedAllMissingTargets: false, boiInfo, targets };
+  }
+
+  await downloadBoiTargetBundles(boiInfo, catalogPath, targetSetsFromMissing(boiTargets));
+  const assetStudioInputDir = prepareAssetStudioInputDir(catalogBundleDir, {
+    targets: targetSetsFromMissing(boiTargets),
+    outputName: 'boi-target-bundles',
+    fallbackToFull: false,
+  });
+
+  if (!assetStudioInputDir) {
+    return { syncedAllMissingTargets: false, boiInfo, targets };
+  }
+
+  const result = await extractAndCopyMissingMasterIcons(assetStudioInputDir, assetStudioCli, boiTargets, 'BOI');
+  return {
+    syncedAllMissingTargets: !hasMissingTargets(result.nextTargets),
+    boiInfo,
+    targets: result.nextTargets,
+    characters: result.characterResult,
+    items: result.itemResult,
+  };
+}
+
 export async function syncAssets() {
   ensureDir(WORK_DIR);
 
   const currentVersion = await checkVersion();
   const cachedVersion = readVersionCache();
+  const cachedAssetCatalogVersion = readAssetCatalogVersionCache();
   const forced = process.argv.includes('--force') || process.env.SYNC_ASSETS_FORCE === '1';
+  let assetStudioCli;
+  let boiInfo;
 
   log(`Current APK version: ${currentVersion}`);
   log(`Cached APK version: ${cachedVersion}`);
+  log(`Cached BOI asset catalog version: ${cachedAssetCatalogVersion || 'none'}`);
 
-  if (!forced && currentVersion === cachedVersion) {
-    log('Asset version is unchanged. Nothing to do.');
-    return { changed: false, version: currentVersion };
+  const initialTargets = currentMissingMasterIconTargets();
+  log(`Missing master icon targets: ${formatTargetSummary(initialTargets)}.`);
+
+  if (!forced && process.env.SYNC_ASSETS_DISABLE_BOI !== '1' && hasMissingTargets(initialTargets)) {
+    try {
+      assetStudioCli = await prepareAssetStudioCli();
+      const boiResult = await trySyncMissingIconsFromBoi(currentVersion, assetStudioCli);
+      boiInfo = boiResult.boiInfo;
+
+      if (boiResult.syncedAllMissingTargets) {
+        if (boiInfo) {
+          updateAssetCatalogVersionCache(boiInfo.assetVersion);
+          log(`Updated ${ASSET_CATALOG_VERSION_FILE} to ${boiInfo.assetVersion}`);
+        }
+        updateVersionCache(currentVersion);
+        log('BOI hot-update assets satisfied all missing master icons; skipping APK extraction.');
+        log(`Updated ${VERSION_FILE} to ${currentVersion}`);
+        return {
+          changed: true,
+          version: currentVersion,
+          assetCatalogVersion: boiInfo?.assetVersion || cachedAssetCatalogVersion,
+          characters: boiResult.characters,
+          items: boiResult.items,
+        };
+      }
+    } catch (error) {
+      warn(`BOI hot-update asset sync failed; falling back to APK if needed: ${error.message}`);
+    }
+  }
+
+  const targetsAfterBoi = currentMissingMasterIconTargets();
+  if (!forced && !hasMissingTargets(targetsAfterBoi)) {
+    if (currentVersion !== cachedVersion) {
+      updateVersionCache(currentVersion);
+      log('No missing master icons remain; skipping APK extraction.');
+      log(`Updated ${VERSION_FILE} to ${currentVersion}`);
+      return { changed: true, version: currentVersion, assetCatalogVersion: boiInfo?.assetVersion || cachedAssetCatalogVersion };
+    }
+
+    log('APK version is unchanged and no missing master icons remain. Nothing to do.');
+    return { changed: false, version: currentVersion, assetCatalogVersion: boiInfo?.assetVersion || cachedAssetCatalogVersion };
+  }
+
+  if (!forced && hasMissingTargets(targetsAfterBoi)) {
+    log(`Falling back to APK for remaining missing master icons: ${formatTargetSummary(targetsAfterBoi)}.`);
   }
 
   const apkPath = await downloadApk(currentVersion);
   const bundleDir = await extractBundles(apkPath);
-  const assetStudioInputDir = prepareAssetStudioInputDir(bundleDir);
-  const assetStudioCli = await prepareAssetStudioCli();
-  const { characterResult, itemResult } = await extractAndCopyIconsWithValidation(bundleDir, assetStudioInputDir, assetStudioCli);
+  assetStudioCli ||= await prepareAssetStudioCli();
+  const targetMode = !forced && hasMissingTargets(targetsAfterBoi);
+  const assetStudioInputDir = prepareAssetStudioInputDir(bundleDir, {
+    targets: targetMode ? targetSetsFromMissing(targetsAfterBoi) : {},
+    outputName: targetMode ? 'apk-target-bundles' : 'target-bundles',
+  });
+  const { characterResult, itemResult } = targetMode
+    ? await extractAndCopyMissingMasterIcons(assetStudioInputDir, assetStudioCli, targetsAfterBoi, 'APK')
+    : await extractAndCopyIconsWithValidation(bundleDir, assetStudioInputDir, assetStudioCli);
 
   updateVersionCache(currentVersion);
   log(`Updated ${VERSION_FILE} to ${currentVersion}`);
+  if (boiInfo) {
+    updateAssetCatalogVersionCache(boiInfo.assetVersion);
+    log(`Updated ${ASSET_CATALOG_VERSION_FILE} to ${boiInfo.assetVersion}`);
+  }
 
   return {
     changed: true,
     version: currentVersion,
+    assetCatalogVersion: boiInfo?.assetVersion || cachedAssetCatalogVersion,
     characters: characterResult,
     items: itemResult,
   };

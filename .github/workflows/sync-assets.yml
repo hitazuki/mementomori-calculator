@@ -55,7 +55,7 @@ jobs:
         id: git-check
         working-directory: mmt-calculator
         run: |
-          git add public/images/ public/data/asset_version.txt
+          git add public/images/ public/data/asset_version.txt public/data/asset_catalog_version.txt
           if git diff --staged --quiet; then
             echo "changes=false" >> $GITHUB_OUTPUT
             echo "No image asset changes detected."
