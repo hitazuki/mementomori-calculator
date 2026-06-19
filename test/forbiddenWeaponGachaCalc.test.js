@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import { buildForbiddenWeaponGachaAnalysis } from '../src/engine/forbiddenWeaponGachaCalc.js'
 
 const scores = {
+  '[16,6]': { score: 60, batch: 1 },
   '[16,7]': { score: 300, batch: 1 },
   '[19,1]': { score: 50, batch: 1 },
   '[12,1]': { score: 1, batch: 1000 },
@@ -51,4 +52,27 @@ test('implicit core unit improves at milestone nodes', () => {
 
   assert.ok(at10.implicitCoreUnit < at9.implicitCoreUnit)
   assert.ok(at20.implicitCoreUnit < at9.implicitCoreUnit)
+})
+
+test('light weapon gacha uses Sandalphon drops and scaled side products', () => {
+  const analysis = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'light',
+    selectedPulls: 20,
+  })
+
+  const expectedSideValue =
+    (0.06 * 1 * 50) +
+    (0.20 * 40 * 0.001) +
+    (0.25 * 4 * 20) +
+    (0.25 * 3 * 50)
+
+  assert.equal(analysis.config.costItem.label, '天光武具召唤券')
+  assert.equal(analysis.ticketValue, 60)
+  assert.equal(analysis.sideValuePerPull, expectedSideValue)
+  assert.equal(analysis.config.coreDrops.find(drop => drop.key === 'scroll').label, '圣德芬的卷轴')
+  assert.equal(analysis.config.coreDrops.find(drop => drop.key === 'grimoire').label, '圣德芬的魔书')
+  assert.equal(analysis.sideDrops.find(drop => drop.key === 'water').qty, 40)
+  assert.equal(analysis.sideDrops.find(drop => drop.key === 'rune').qty, 4)
+  assert.equal(analysis.selected.coreCounts.scroll, 20 * 0.12 + 1)
+  assert.equal(analysis.selected.coreCounts.grimoire, 20 * 0.12 + 1)
 })

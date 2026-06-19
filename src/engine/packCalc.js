@@ -51,7 +51,7 @@ function scoreKey(itype, iid) {
   return `[${itype},${iid}]`
 }
 
-function getScore(scores, itype, iid) {
+export function getScore(scores, itype, iid) {
   // Resolve derived items first
   if (itype === 10) {
     // 培育材料组

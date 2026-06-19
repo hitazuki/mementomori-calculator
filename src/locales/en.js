@@ -287,9 +287,9 @@ export default {
   navGacha: "Character Summon Analysis",
   gachaTitle: "Character Summon Value Analysis",
   gachaDesc: "Visualize target-character rates, pity cost, and budget success rates for Destiny and pick-up summons.",
-  navForbiddenWeaponGacha: "Forbidden Gear Gacha",
-  forbiddenWeaponGachaTitle: "Forbidden Gear Gacha Value",
-  forbiddenWeaponGachaDesc: "Use item scores to evaluate side-product recovery, scroll/grimoire implied unit cost, and expected item quantities by pull count.",
+  navForbiddenWeaponGacha: "Gear Gacha Analysis",
+  forbiddenWeaponGachaTitle: "Gear Gacha Value",
+  forbiddenWeaponGachaDesc: "Use item scores to evaluate Holy/Forbidden gear gacha side-product recovery, scroll/tome implied unit cost, and expected item quantities by pull count.",
 
   packBadgePermanent: "Perm",
   packBadgeWitch: "Witch",

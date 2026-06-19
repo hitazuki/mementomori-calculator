@@ -51,18 +51,26 @@
       <div class="stat-label">平均出货</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value">{{ fmtDiamonds(analysis.expectedNetCost) }}</div>
-      <div class="stat-label">{{ selectedBanner === 'destiny' ? '期望净成本' : '期望成本' }}</div>
+      <div class="stat-value">{{ hasSideReturn ? fmtPercent(analysis.sideRecoveryRate) : fmtDiamonds(analysis.expectedNetCost) }}</div>
+      <div class="stat-label">{{ hasSideReturn ? '副产物回收率' : selectedBanner === 'destiny' ? '期望净成本' : '期望成本' }}</div>
+    </div>
+    <div v-if="selectedBanner === 'destiny'" class="stat-box">
+      <div class="stat-value">{{ fmtDiamonds(analysis.expectedGrossCost) }}</div>
+      <div class="stat-label">期望总成本</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value">{{ fmtDiamonds(quantileCost('p50')) }}</div>
-      <div class="stat-label">50%预算</div>
+      <div class="stat-value">{{ hasSideReturn ? fmtDiamonds(analysis.expectedNetCost) : fmtDiamonds(quantileGrossCost('p50')) }}</div>
+      <div class="stat-label">{{ hasSideReturn ? '期望净成本' : '50%预算' }}</div>
+    </div>
+    <div v-if="selectedBanner === 'destiny'" class="stat-box">
+      <div class="stat-value">{{ fmtDiamonds(quantileGrossCost('p90')) }}</div>
+      <div class="stat-label">90%总预算</div>
     </div>
     <div class="stat-box">
-      <div class="stat-value">{{ fmtDiamonds(quantileCost('p90')) }}</div>
-      <div class="stat-label">90%预算</div>
+      <div class="stat-value">{{ fmtDiamonds(hasSideReturn ? quantileNetCost('p90') : quantileGrossCost('p90')) }}</div>
+      <div class="stat-label">{{ hasSideReturn ? '90%净预算' : '90%预算' }}</div>
     </div>
-    <div class="stat-box">
+    <div v-if="selectedBanner !== 'destiny'" class="stat-box">
       <div class="stat-value">{{ fmtDiamonds(analysis.config.maxPulls * analysis.config.costPerPull) }}</div>
       <div class="stat-label">保底成本</div>
     </div>
@@ -87,11 +95,22 @@
         <div v-for="row in budgetRows" :key="row.pull" class="gacha-budget-row">
           <span>{{ row.pull }} 抽</span>
           <b>{{ fmtPercent(row.limitedRate) }}</b>
-          <small>{{ fmtDiamonds(row.diamonds) }}</small>
+          <small>
+            <template v-if="hasSideReturn">
+              净 {{ fmtDiamonds(row.netCost) }} / 原 {{ fmtDiamonds(row.diamonds) }}
+            </template>
+            <template v-else>
+              {{ fmtDiamonds(row.diamonds) }}
+            </template>
+          </small>
         </div>
       </div>
       <div class="gacha-side-note">
-        <template v-if="selectedBanner === 'destiny'">
+        <template v-if="hasSideReturn">
+          副产物按当前道具评分表估值：每抽期望回收 {{ fmtDiamondValue(analysis.sideValuePerPull) }}，目标出货前预计回收 {{ fmtDiamonds(analysis.expectedSideValue) }}。亚斯塔禄卷轴/魔书参考禁忌召唤隐含单价，圣德芬卷轴/魔书仅显示数量。
+          <span v-if="probabilityCheckNotice">{{ probabilityCheckNotice }}</span>
+        </template>
+        <template v-else-if="selectedBanner === 'destiny'">
           30000 钻大奖：抽到出货为止的期望返钻约 {{ fmtDiamonds(analysis.expectedDiamondPrize) }}；满 {{ analysis.config.maxPulls }} 抽至少中一次概率 {{ fmtPercent(analysis.diamondPrizeChanceAtCeiling) }}。
         </template>
         <template v-else>
@@ -120,6 +139,41 @@
       </div>
     </div>
   </section>
+
+  <section v-if="hasSideReturn" class="gacha-side-analysis animate-fadeup">
+    <div class="card gacha-chart-card">
+      <div class="chart-toolbar">
+        <div class="chart-toolbar-main">
+          <div class="card-title">副产物价值贡献</div>
+          <span class="tag tag-purple">每抽期望</span>
+        </div>
+      </div>
+      <div class="chart-frame gacha-chart-frame-sm">
+        <v-chart class="chart" :option="sideContributionOption" autoresize />
+      </div>
+    </div>
+
+    <div class="card gacha-side-detail-card">
+      <div class="chart-toolbar">
+        <div class="chart-toolbar-main">
+          <div class="card-title">副产物评分明细</div>
+          <span class="tag tag-gold">来自评分表</span>
+        </div>
+      </div>
+      <div class="gacha-side-detail-list">
+        <div v-for="drop in sideDetailRows" :key="drop.key" class="gacha-side-detail-row">
+          <div>
+            <span>{{ drop.label }}</span>
+            <small>{{ fmtPercent(drop.rate, 4) }}，{{ analysis.config.maxPulls }} 抽期望 {{ fmtQty(drop.expectedQtyAtCeiling) }} 个</small>
+          </div>
+          <b v-if="drop.isPriced">{{ fmtDiamondValue(drop.expectedValuePerPull) }}/抽</b>
+          <b v-else>未计价</b>
+          <small v-if="drop.isPriced">{{ scoreSourceText(drop) }}</small>
+          <small v-else>专属产物</small>
+        </div>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script setup>
@@ -133,6 +187,8 @@ import * as echarts from 'echarts/core'
 import VChart from 'vue-echarts'
 
 import { buildGachaAnalysis, calcAtLeastOne, GACHA_BANNERS, GACHA_TYPES } from '../engine/gachaCalc.js'
+import { normalizeScores } from '../engine/packCalc.js'
+import { editableScores } from '../store/itemScores.js'
 import { baseChartOption, getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 
@@ -141,18 +197,34 @@ use([CanvasRenderer, BarChart, LineChart, GridComponent, LegendComponent, TitleC
 useI18n()
 
 const selectedBanner = ref('destiny')
-const selectedType = ref('lightDark')
+const selectedType = ref('fourElements')
 
 const bannerOptions = Object.values(GACHA_BANNERS).map(({ key, label }) => ({ key, label }))
 const typeOptions = Object.values(GACHA_TYPES)
 
-const analysis = computed(() => buildGachaAnalysis(selectedBanner.value, selectedType.value))
+const normalizedScores = computed(() => normalizeScores(editableScores))
+const analysis = computed(() => buildGachaAnalysis(selectedBanner.value, selectedType.value, normalizedScores.value))
+const hasSideReturn = computed(() => analysis.value.sideDrops.length > 0)
 
 const fmtPercent = (value, digits = 2) => `${(value * 100).toFixed(digits)}%`
 const fmtPulls = (value) => `${value.toFixed(1)} 抽`
 const fmtDiamonds = (value) => `${Math.round(value).toLocaleString()} 钻`
+const fmtDiamondValue = value => `${(value >= 100 ? Math.round(value) : Number(value).toFixed(value >= 10 ? 1 : 2)).toLocaleString()} 钻`
+const fmtScore = value => value >= 10 ? value.toFixed(1) : value.toFixed(2)
+const fmtQty = value => value >= 10 ? value.toFixed(1) : value.toFixed(2)
+const scoreSourceText = drop => drop.referenceLabel
+  ? `${drop.referenceLabel}，单个 ${fmtScore(drop.unitScore)} 钻`
+  : `单个 ${fmtScore(drop.unitScore)} 钻`
 
-const quantileCost = (key) => analysis.value.quantiles[key] * analysis.value.config.costPerPull
+const probabilityCheckNotice = computed(() => {
+  if (!hasSideReturn.value || selectedType.value !== 'lightDark') return ''
+  const check = analysis.value.sideProbabilityCheck
+  if (check.isClosed) return ''
+  return ` 光暗末位抹0试算：副产物合计 ${fmtPercent(check.sideRate, 4)}，加限定为 ${fmtPercent(check.totalRate, 4)}，差 ${fmtPercent(check.gapRate, 4)}。`
+})
+
+const quantileGrossCost = (key) => analysis.value.quantiles[key] * analysis.value.config.costPerPull
+const quantileNetCost = (key) => analysis.value.quantiles[key] * analysis.value.netCostPerPull
 const invitationCost = computed(() => {
   const config = analysis.value.config
   return (config.invitationPulls || 0) * config.costPerPull
@@ -173,6 +245,7 @@ const budgetRows = computed(() => {
   return pulls.map(pull => ({
     pull,
     diamonds: pull * config.costPerPull,
+    netCost: pull * analysis.value.netCostPerPull,
     limitedRate: getLimitedRateAtPull(pull),
   }))
 })
@@ -186,6 +259,7 @@ const cumulativeRows = computed(() => {
     return {
       pull,
       diamonds: pull * config.costPerPull,
+      netCost: pull * analysis.value.netCostPerPull,
       limitedRate: getLimitedRateAtPull(pull),
       sideRate: selectedBanner.value === 'pickup'
         ? calcAtLeastOne(config.permanentRate, pull)
@@ -194,10 +268,22 @@ const cumulativeRows = computed(() => {
   })
 })
 
+const sideContributionRows = computed(() => analysis.value.pricedSideDrops.slice(0, 10))
+const sideDetailRows = computed(() => [
+  ...analysis.value.pricedSideDrops,
+  ...analysis.value.exclusiveSideDrops,
+].map(drop => ({
+  ...drop,
+  expectedQtyAtCeiling: drop.expectedQtyPerPull * analysis.value.config.maxPulls,
+})))
+
 const makeTooltip = (label, rows, valueLabel = '概率') => (params) => {
   const list = Array.isArray(params) ? params : [params]
   const row = rows[list[0].dataIndex]
-  let html = `<b style="color:var(--gold)">${label}：第 ${row.pull} 抽 / ${fmtDiamonds(row.diamonds)}</b><br>`
+  const costText = hasSideReturn.value
+    ? `${fmtDiamonds(row.netCost)} 净 / ${fmtDiamonds(row.diamonds)} 原`
+    : fmtDiamonds(row.diamonds)
+  let html = `<b style="color:var(--gold)">${label}：第 ${row.pull} 抽 / ${costText}</b><br>`
   list.forEach(item => {
     html += `<span style="color:${item.color}">● ${item.seriesName}</span> ${valueLabel}：<b>${item.value.toFixed(2)}%</b><br>`
   })
@@ -337,6 +423,55 @@ const rateChartOption = computed(() => {
     ],
   }
 })
+
+const sideContributionOption = computed(() => {
+  const isDark = currentTheme.value === 'dark'
+  const theme = getMoriTheme(isDark)
+  const rows = [...sideContributionRows.value].reverse()
+
+  return {
+    ...baseChartOption('', '', isDark),
+    tooltip: {
+      ...theme.tooltip,
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: (params) => {
+        const item = params[0]
+        const row = rows[item.dataIndex]
+        return `<b style="color:var(--gold)">${row.label}</b><br>概率：${fmtPercent(row.rate, 4)}<br>单个价值：${fmtScore(row.unitScore)} 钻<br>每抽期望：${fmtDiamondValue(row.expectedValuePerPull)}`
+      },
+    },
+    grid: {
+      ...theme.grid,
+      left: 132,
+      right: 28,
+    },
+    xAxis: {
+      type: 'value',
+      axisLabel: { ...theme.axisLabel, formatter: '{value}' },
+      splitLine: theme.splitLine,
+    },
+    yAxis: {
+      type: 'category',
+      data: rows.map(row => row.label.replace(' x', '×')),
+      axisLabel: {
+        ...theme.axisLabel,
+        width: 120,
+        overflow: 'truncate',
+      },
+      axisLine: theme.axisLine,
+    },
+    series: [
+      {
+        name: '每抽期望价值',
+        type: 'bar',
+        barMaxWidth: 16,
+        itemStyle: { color: LINE_COLORS[0] },
+        data: rows.map(row => +row.expectedValuePerPull.toFixed(3)),
+      },
+    ],
+  }
+})
 </script>
 
 <style scoped>
@@ -362,25 +497,31 @@ const rateChartOption = computed(() => {
 
 .gacha-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 14px;
 }
 
 .gacha-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 330px;
   gap: 14px;
   margin-bottom: 14px;
 }
 
-.gacha-secondary {
+.gacha-secondary,
+.gacha-side-analysis {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
-.gacha-chart-card {
+.gacha-secondary {
+  margin-bottom: 14px;
+}
+
+.gacha-chart-card,
+.gacha-side-detail-card {
   min-width: 0;
 }
 
@@ -430,6 +571,7 @@ const rateChartOption = computed(() => {
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .gacha-side-note {
@@ -441,10 +583,58 @@ const rateChartOption = computed(() => {
   line-height: 1.55;
 }
 
+.gacha-side-detail-list {
+  display: grid;
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.gacha-side-detail-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 90px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+  font-size: var(--fs-sm);
+}
+
+.gacha-side-detail-row span {
+  display: block;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gacha-side-detail-row b {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.gacha-side-detail-row small {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.35;
+  text-align: right;
+}
+
+.gacha-side-detail-row > div small {
+  display: block;
+  text-align: left;
+}
+
 @media (max-width: 1100px) {
   .gacha-controls,
   .gacha-main,
-  .gacha-secondary {
+  .gacha-secondary,
+  .gacha-side-analysis {
     grid-template-columns: 1fr;
   }
 
@@ -457,7 +647,8 @@ const rateChartOption = computed(() => {
   .gacha-controls,
   .gacha-summary,
   .gacha-main,
-  .gacha-secondary {
+  .gacha-secondary,
+  .gacha-side-analysis {
     gap: 12px;
   }
 
@@ -476,6 +667,15 @@ const rateChartOption = computed(() => {
 
   .gacha-budget-row small {
     grid-column: 1 / -1;
+  }
+
+  .gacha-side-detail-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .gacha-side-detail-row > small {
+    grid-column: 1 / -1;
+    text-align: left;
   }
 }
 </style>

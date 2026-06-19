@@ -4,12 +4,29 @@
     <p class="view-desc">{{ $t('forbiddenWeaponGachaDesc') }}</p>
   </div>
 
+  <section class="weapon-banner-control animate-fadeup">
+    <div class="card weapon-banner-card">
+      <div class="card-title">武具召唤类型</div>
+      <div class="segmented-control">
+        <button
+          v-for="banner in bannerOptions"
+          :key="banner.key"
+          class="btn btn-sm"
+          :class="selectedBanner === banner.key ? 'btn-primary' : 'btn-ghost'"
+          @click="selectedBanner = banner.key"
+        >
+          {{ banner.shortLabel }}
+        </button>
+      </div>
+    </div>
+  </section>
+
   <section class="weapon-layout animate-fadeup">
     <div class="weapon-main">
       <section class="weapon-summary">
         <div class="stat-box">
           <div class="stat-value">{{ fmtDiamonds(analysis.ticketValue) }}</div>
-          <div class="stat-label">禁忌券价值</div>
+          <div class="stat-label">{{ analysis.config.costItem.label }}价值</div>
         </div>
         <div class="stat-box">
           <div class="stat-value">{{ fmtPercent(selected.sideRecoveryRate) }}</div>
@@ -93,7 +110,7 @@
         <div class="card-title">当前抽数结果</div>
         <div class="weapon-result-list">
           <div>
-            <span>总成本</span>
+          <span>总成本</span>
             <b>{{ fmtDiamonds(selected.totalCost) }}</b>
           </div>
           <div>
@@ -101,11 +118,11 @@
             <b>{{ fmtDiamonds(selected.sideValue) }}</b>
           </div>
           <div>
-            <span>卷轴预计数量</span>
+            <span>{{ coreScrollLabel }}预计数量</span>
             <b>{{ fmtQty(selected.coreCounts.scroll) }}</b>
           </div>
           <div>
-            <span>魔书预计数量</span>
+            <span>{{ coreGrimoireLabel }}预计数量</span>
             <b>{{ fmtQty(selected.coreCounts.grimoire) }}</b>
           </div>
           <div>
@@ -121,7 +138,7 @@
         </button>
         <div v-show="showFormula" class="weapon-formula">
           <p>副产物价值来自道具评分表，卷轴/魔书不单独手填。</p>
-          <p>副产物回收率 = 副产物期望价值 / 禁忌券总价值。</p>
+          <p>副产物回收率 = 副产物期望价值 / {{ analysis.config.costItem.label }}总价值。</p>
           <p>卷轴/魔书隐含单价 = max(0, 总成本 - 副产物价值) / 预计核心产物数量。</p>
           <p>每 10 抽获得一次累计奖励，卷轴/魔书交替出现，不限次数；这些奖励已并入预计数量。</p>
         </div>
@@ -152,7 +169,7 @@ import { BarChart, LineChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 
-import { buildForbiddenWeaponGachaAnalysis } from '../engine/forbiddenWeaponGachaCalc.js'
+import { buildForbiddenWeaponGachaAnalysis, WEAPON_GACHA_CONFIGS } from '../engine/forbiddenWeaponGachaCalc.js'
 import { normalizeScores } from '../engine/packCalc.js'
 import { editableScores } from '../store/itemScores.js'
 import { baseChartOption, getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
@@ -162,15 +179,20 @@ use([CanvasRenderer, BarChart, LineChart, GridComponent, LegendComponent, TitleC
 
 useI18n()
 
+const selectedBanner = ref('forbidden')
 const selectedPulls = ref(20)
 const showFormula = ref(false)
+const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
 
 const normalizedScores = computed(() => normalizeScores(editableScores))
 const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScores.value, {
+  bannerKey: selectedBanner.value,
   selectedPulls: selectedPulls.value,
   maxPulls: 100,
 }))
 const selected = computed(() => analysis.value.selected)
+const coreScrollLabel = computed(() => analysis.value.config.coreDrops.find(drop => drop.key === 'scroll')?.label || '卷轴')
+const coreGrimoireLabel = computed(() => analysis.value.config.coreDrops.find(drop => drop.key === 'grimoire')?.label || '魔书')
 
 const fmtDiamonds = value => `${Math.round(value).toLocaleString()} 钻`
 const fmtScoreValue = value => {
@@ -283,7 +305,7 @@ const quantityOption = computed(() => {
     },
     series: [
       {
-        name: '卷轴',
+        name: coreScrollLabel.value,
         type: 'line',
         smooth: true,
         lineStyle: { width: 3, color: LINE_COLORS[0] },
@@ -291,7 +313,7 @@ const quantityOption = computed(() => {
         data: rows.map(row => +row.coreCounts.scroll.toFixed(2)),
       },
       {
-        name: '魔书',
+        name: coreGrimoireLabel.value,
         type: 'line',
         smooth: true,
         lineStyle: { width: 3, color: LINE_COLORS[1] },
@@ -412,6 +434,14 @@ const sideContributionOption = computed(() => {
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 14px;
   align-items: start;
+}
+
+.weapon-banner-control {
+  margin-bottom: 14px;
+}
+
+.weapon-banner-card {
+  max-width: 420px;
 }
 
 .weapon-main,

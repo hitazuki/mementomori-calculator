@@ -191,6 +191,18 @@
     "nameKo": "운명 뽑기 티켓",
     "isBase": true
   },
+  "[16,6]": {
+    "name": "天光武具召唤券",
+    "score": 60,
+    "batch": 1,
+    "iconId": 84,
+    "nameZh": "天光武具召唤券",
+    "nameTw": "天光武具召喚券",
+    "nameEn": "Ticket of The Holy",
+    "nameJa": "天光武具ガチャチケット",
+    "nameKo": "천광무구 뽑기 티켓",
+    "isBase": true
+  },
   "[16,7]": {
     "name": "禁忌武具召唤券",
     "score": 300,

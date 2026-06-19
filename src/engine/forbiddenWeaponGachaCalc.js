@@ -1,25 +1,57 @@
-export const FORBIDDEN_WEAPON_GACHA = {
-  costItem: { itype: 16, iid: 7, fallbackValue: 300, label: '禁忌武具召唤券' },
-  originalDiamondCost: 300,
-  maxPulls: 100,
-  coreDrops: [
-    { key: 'scroll', label: '亚斯塔禄的卷轴', rate: 0.12, qty: 1 },
-    { key: 'grimoire', label: '亚斯塔禄的魔书', rate: 0.12, qty: 1 },
-  ],
-  sideDrops: [
-    { key: 'boss1', label: '首领挑战券 x1', rate: 0.06, qty: 1, itype: 19, iid: 1 },
-    { key: 'water', label: '强化水 x200', rate: 0.20, qty: 200, itype: 12, iid: 1 },
-    { key: 'rune', label: '符石兑换券 x20', rate: 0.25, qty: 20, itype: 13, iid: 4 },
-    { key: 'boss3', label: '首领挑战券 x3', rate: 0.25, qty: 3, itype: 19, iid: 1 },
-  ],
-  milestone: {
-    interval: 10,
-    rotation: [
-      { key: 'scroll', label: '亚斯塔禄的卷轴', qty: 1 },
-      { key: 'grimoire', label: '亚斯塔禄的魔书', qty: 1 },
+export const WEAPON_GACHA_CONFIGS = {
+  forbidden: {
+    key: 'forbidden',
+    label: '禁忌武具召唤',
+    shortLabel: '禁忌武具',
+    costItem: { itype: 16, iid: 7, fallbackValue: 300, label: '禁忌武具召唤券' },
+    originalDiamondCost: 300,
+    maxPulls: 100,
+    coreDrops: [
+      { key: 'scroll', label: '亚斯塔禄的卷轴', rate: 0.12, qty: 1 },
+      { key: 'grimoire', label: '亚斯塔禄的魔书', rate: 0.12, qty: 1 },
     ],
+    sideDrops: [
+      { key: 'boss1', label: '首领挑战券 x1', rate: 0.06, qty: 1, itype: 19, iid: 1 },
+      { key: 'water', label: '强化水 x200', rate: 0.20, qty: 200, itype: 12, iid: 1 },
+      { key: 'rune', label: '符石兑换券 x20', rate: 0.25, qty: 20, itype: 13, iid: 4 },
+      { key: 'boss3', label: '首领挑战券 x3', rate: 0.25, qty: 3, itype: 19, iid: 1 },
+    ],
+    milestone: {
+      interval: 10,
+      rotation: [
+        { key: 'scroll', label: '亚斯塔禄的卷轴', qty: 1 },
+        { key: 'grimoire', label: '亚斯塔禄的魔书', qty: 1 },
+      ],
+    },
+  },
+  light: {
+    key: 'light',
+    label: '天光武具召唤',
+    shortLabel: '天光武具',
+    costItem: { itype: 16, iid: 6, fallbackValue: 60, label: '天光武具召唤券' },
+    originalDiamondCost: 60,
+    maxPulls: 100,
+    coreDrops: [
+      { key: 'scroll', label: '圣德芬的卷轴', rate: 0.12, qty: 1 },
+      { key: 'grimoire', label: '圣德芬的魔书', rate: 0.12, qty: 1 },
+    ],
+    sideDrops: [
+      { key: 'boss1', label: '首领挑战券 x1', rate: 0.06, qty: 1, itype: 19, iid: 1 },
+      { key: 'water', label: '强化水 x40', rate: 0.20, qty: 40, itype: 12, iid: 1 },
+      { key: 'rune', label: '符石兑换券 x4', rate: 0.25, qty: 4, itype: 13, iid: 4 },
+      { key: 'boss3', label: '首领挑战券 x3', rate: 0.25, qty: 3, itype: 19, iid: 1 },
+    ],
+    milestone: {
+      interval: 10,
+      rotation: [
+        { key: 'scroll', label: '圣德芬的卷轴', qty: 1 },
+        { key: 'grimoire', label: '圣德芬的魔书', qty: 1 },
+      ],
+    },
   },
 }
+
+export const FORBIDDEN_WEAPON_GACHA = WEAPON_GACHA_CONFIGS.forbidden
 
 function scoreKey(itype, iid) {
   return `[${itype},${iid}]`
@@ -54,7 +86,7 @@ export function getForbiddenMilestoneRewards(pulls, config = FORBIDDEN_WEAPON_GA
 }
 
 export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
-  const config = FORBIDDEN_WEAPON_GACHA
+  const config = WEAPON_GACHA_CONFIGS[options.bannerKey] || FORBIDDEN_WEAPON_GACHA
   const maxPulls = options.maxPulls || config.maxPulls
   const selectedPulls = Math.max(1, Math.min(maxPulls, Number(options.selectedPulls) || 20))
   const ticketValue = getUnitScore(

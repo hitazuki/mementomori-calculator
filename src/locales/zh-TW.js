@@ -284,9 +284,9 @@ export default {
   navGacha: "角色召喚分析",
   gachaTitle: "角色召喚價值分析",
   gachaDesc: "對命運召喚與 pick-up 召喚的指定角色機率、保底成本和預算達成率進行視覺化分析。",
-  navForbiddenWeaponGacha: "禁忌武具召喚",
-  forbiddenWeaponGachaTitle: "禁忌武具召喚價值分析",
-  forbiddenWeaponGachaDesc: "連動道具評分表，分析禁忌武具召喚券的副產物回收、卷軸/魔書隱含單價與抽數產物數量。",
+  navForbiddenWeaponGacha: "武具召喚分析",
+  forbiddenWeaponGachaTitle: "武具召喚價值分析",
+  forbiddenWeaponGachaDesc: "連動道具評分表，分析天光/禁忌武具召喚券的副產物回收、卷軸/魔書隱含單價與抽數產物數量。",
 
   packBadgePermanent: "常駐",
   packBadgeWitch: "魔女",
