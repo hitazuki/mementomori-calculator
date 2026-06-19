@@ -286,7 +286,7 @@ export default {
   navGroupGacha: "Gacha System",
   navGacha: "Character Summon Analysis",
   gachaTitle: "Character Summon Value Analysis",
-  gachaDesc: "Visualize target-character rates, pity cost, and budget success rates for Destiny and pick-up summons.",
+  gachaDesc: "Visualize target-character rates, pity cost, and budget success rates for Destiny and Prayer of The Fleeting.",
   navForbiddenWeaponGacha: "Gear Gacha Analysis",
   forbiddenWeaponGachaTitle: "Gear Gacha Value",
   forbiddenWeaponGachaDesc: "Use item scores to evaluate Holy/Forbidden gear gacha side-product recovery, scroll/tome implied unit cost, and expected item quantities by pull count.",

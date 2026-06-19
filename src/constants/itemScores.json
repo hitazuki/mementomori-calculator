@@ -479,6 +479,18 @@
     "nameKo": "마녀의 편지 (SR・속성 선택)",
     "isBase": true
   },
+  "[17,26]": {
+    "name": "魔女的邀请函",
+    "score": 720,
+    "batch": 1,
+    "iconId": 69,
+    "nameZh": "魔女的邀请函",
+    "nameTw": "魔女的邀請函",
+    "nameEn": "Witch’s Invitation",
+    "nameJa": "魔女の招待状",
+    "nameKo": "마녀의 초대장",
+    "isBase": true
+  },
   "[17,27]": {
     "name": "魔女的心片(R)",
     "score": 80,

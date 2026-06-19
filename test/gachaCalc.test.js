@@ -6,6 +6,7 @@ import {
   calcAtLeastOne,
   DESTINY_FOUR_ELEMENTS_SIDE_DROPS,
   DESTINY_LIGHT_DARK_SIDE_DROPS,
+  PICKUP_CHARACTER_SIDE_DROPS,
   getConditionalLimitedRate,
   getGachaConfig,
 } from '../src/engine/gachaCalc.js'
@@ -33,6 +34,34 @@ test('pickup gacha keeps the normal rate until the 100-pull guarantee', () => {
   const analysis = buildGachaAnalysis('pickup', 'fourElements')
   assert.equal(analysis.pulls.at(-1).cumulativeRate, 1)
   assert.equal(analysis.quantiles.p100, 100)
+})
+
+test('pickup side returns include rarity conversion and cyclic pull rewards', () => {
+  const scores = {
+    '[17,5]': { score: 16, batch: 1 },
+    '[17,17]': { score: 80, batch: 1 },
+    '[17,21]': { score: 720, batch: 1 },
+    '[17,26]': { score: 720, batch: 1 },
+    '[17,28]': { score: 800, batch: 60 },
+  }
+
+  const analysis = buildGachaAnalysis('pickup', 'fourElements', scores)
+  const otherSr = analysis.sideDrops.find(drop => drop.key === 'pickupOtherSr')
+  const nRole = analysis.sideDrops.find(drop => drop.key === 'pickupN')
+  const at50 = analysis.getSideSummaryAtPulls(50)
+  const at100 = analysis.getSideSummaryAtPulls(100)
+  const at300 = analysis.getSideSummaryAtPulls(300)
+
+  assert.equal(analysis.config.label, '精选召唤')
+  assert.equal(PICKUP_CHARACTER_SIDE_DROPS.length, 4)
+  assert.equal(otherSr.rate.toFixed(4), '0.0295')
+  assert.equal(nRole.qty, 0.5)
+  assert.equal(at50.sideQuantities.pickupRuneLv3, 2)
+  assert.equal(at50.sideQuantities.pickupRuneLv5, 1)
+  assert.equal(at100.sideQuantities.pickupHeartSr80, 80)
+  assert.equal(at300.sideQuantities.pickupHeartSr80, 160)
+  assert.equal(at300.sideQuantities.pickupInvitation, 1)
+  assert.ok(analysis.expectedNetCost < analysis.expectedGrossCost)
 })
 
 test('at least one helper calculates independent side-prize probability', () => {

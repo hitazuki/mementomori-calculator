@@ -283,7 +283,7 @@ export default {
   navGroupGacha: "召唤系统",
   navGacha: "角色召唤分析",
   gachaTitle: "角色召唤价值分析",
-  gachaDesc: "对命运召唤与 pick-up 召唤的指定角色概率、保底成本和预算达成率进行可视化分析。",
+  gachaDesc: "对命运召唤与精选召唤的指定角色概率、保底成本和预算达成率进行可视化分析。",
   navForbiddenWeaponGacha: "武具召唤分析",
   forbiddenWeaponGachaTitle: "武具召唤价值分析",
   forbiddenWeaponGachaDesc: "联动道具评分表，分析天光/禁忌武具召唤券的副产物回收、卷轴/魔书隐含单价与抽数产物数量。",

@@ -312,7 +312,7 @@ export default {
   navGroupGacha: "소환 시스템",
   navGacha: "캐릭터 소환 분석",
   gachaTitle: "캐릭터 소환 가치 분석",
-  gachaDesc: "운명 소환과 pick-up 소환의 지정 캐릭터 확률, 천장 비용, 예산 성공률을 시각화합니다.",
+  gachaDesc: "운명 소환과 픽업 뽑기의 지정 캐릭터 확률, 천장 비용, 예산 성공률을 시각화합니다.",
   navForbiddenWeaponGacha: "무구 소환 분석",
   forbiddenWeaponGachaTitle: "무구 소환 가치 분석",
   forbiddenWeaponGachaDesc: "아이템 점수표와 연동해 천광/금기무구 소환의 부산물 회수, 두루마리/마도서의 암묵 단가, 소환 수별 기대 수량을 분석합니다.",

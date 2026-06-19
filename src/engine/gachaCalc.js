@@ -48,6 +48,20 @@ export const DESTINY_LIGHT_DARK_SIDE_DROPS = DESTINY_FOUR_ELEMENTS_SIDE_DROPS.ma
   rate: drop.key === 'water100' ? 0.0374 : Math.floor(drop.rate * 100000) / 100000,
 }))
 
+export const PICKUP_CHARACTER_SIDE_DROPS = [
+  { key: 'pickupOtherSr', label: 'SR角色（折算魔女的来信(SR)） x1', rate: 0, qty: 1, itype: 17, iid: 21 },
+  { key: 'pickupPermanentLightDark', label: '光暗常驻角色 x1', rate: 0.0014, qty: 1, exclusive: true },
+  { key: 'pickupR', label: 'R角色（折算魔女的来信(R)） x1', rate: 0.4377, qty: 1, itype: 17, iid: 17 },
+  { key: 'pickupN', label: 'N角色（折算魔女的心片(SR)） x0.5', rate: 0.5177, qty: 0.5, itype: 17, iid: 28 },
+]
+
+export const PICKUP_MILESTONE_SIDE_DROPS = [
+  { key: 'pickupRuneLv3', label: '未鉴定符石Lv3 x1（20/50抽）', rate: 0, qty: 1, itype: 17, iid: 6, milestoneOffsets: [20, 50], milestoneCycle: 100 },
+  { key: 'pickupRuneLv5', label: '未鉴定符石Lv5 x1（50抽）', rate: 0, qty: 1, itype: 17, iid: 8, milestoneOffsets: [50], milestoneCycle: 100 },
+  { key: 'pickupHeartSr80', label: '魔女的心片(SR) x80（非300整百抽）', rate: 0, qty: 80, itype: 17, iid: 28, milestoneOffsets: [100], milestoneCycle: 100, skipEvery: 300 },
+  { key: 'pickupInvitation', label: '魔女的邀请函 x1（300整抽）', rate: 0, qty: 1, itype: 17, iid: 26, milestoneOffsets: [100], milestoneCycle: 100, onlyEvery: 300 },
+]
+
 export const GACHA_BANNERS = {
   destiny: {
     key: 'destiny',
@@ -66,7 +80,7 @@ export const GACHA_BANNERS = {
   },
   pickup: {
     key: 'pickup',
-    label: 'pick-up 召唤',
+    label: '精选召唤',
     costPerPull: 300,
     maxPulls: 100,
     baseRates: {
@@ -76,7 +90,7 @@ export const GACHA_BANNERS = {
     hardPityAt: 100,
     permanentRate: 0.0014,
     invitationPulls: 300,
-    note: '第 100 抽指定限定概率升至 100%；300 抽赠送魔女的邀请函。',
+    note: '第 100 抽指定限定概率升至 100%；累抽奖励按 100 抽循环，300 整抽为魔女的邀请函。',
   },
 }
 
@@ -118,7 +132,43 @@ function getScoreMeta(scores, itype, iid) {
   }
 }
 
+function enrichSideDrop(drop, scores, extra = {}) {
+  const unitScore = drop.exclusive
+    ? 0
+    : getScore(scores, drop.itype, drop.iid) || (drop.itype === 1 && drop.iid === 1 ? 1 : 0)
+  const expectedQtyPerPull = drop.rate * drop.qty
+  const expectedValuePerPull = expectedQtyPerPull * unitScore
+
+  return {
+    ...drop,
+    ...extra,
+    unitScore,
+    scoreMeta: drop.exclusive ? { score: 0, batch: 1 } : getScoreMeta(scores, drop.itype, drop.iid),
+    expectedQtyPerPull,
+    expectedValuePerPull,
+    isPriced: !drop.exclusive && unitScore > 0,
+  }
+}
+
+function buildPickupSideDrops(config, scores) {
+  const otherSrRate = Math.max(0, 0.0446 - config.baseRate - (config.permanentRate || 0))
+  const characterDrops = PICKUP_CHARACTER_SIDE_DROPS.map(drop => ({
+    ...drop,
+    rate: drop.key === 'pickupOtherSr' ? otherSrRate : drop.rate,
+  }))
+
+  return [
+    ...characterDrops,
+    ...PICKUP_MILESTONE_SIDE_DROPS,
+  ].map(drop => enrichSideDrop(drop, scores, {
+    milestoneLabel: drop.milestoneCycle
+      ? `每 ${drop.milestoneCycle} 抽循环`
+      : '',
+  }))
+}
+
 function buildSideDrops(config, typeKey, scores) {
+  if (config.key === 'pickup') return buildPickupSideDrops(config, scores)
   if (config.key !== 'destiny') return []
 
   const sourceDrops = typeKey === 'lightDark'
@@ -164,6 +214,22 @@ function buildSideDrops(config, typeKey, scores) {
   })
 }
 
+function countMilestoneDrop(drop, pulls) {
+  if (!drop.milestoneCycle || !drop.milestoneOffsets?.length) return 0
+
+  let count = 0
+  for (let cycleStart = 0; cycleStart < pulls; cycleStart += drop.milestoneCycle) {
+    drop.milestoneOffsets.forEach(offset => {
+      const milestonePull = cycleStart + offset
+      if (milestonePull <= 0 || milestonePull > pulls) return
+      if (drop.onlyEvery && milestonePull % drop.onlyEvery !== 0) return
+      if (drop.skipEvery && milestonePull % drop.skipEvery === 0) return
+      count += drop.qty
+    })
+  }
+  return count
+}
+
 function buildSideProbabilityCheck(config, sideDrops) {
   const sideRate = sideDrops.reduce((sum, drop) => sum + drop.rate, 0)
   const totalRate = sideRate + config.baseRate
@@ -180,7 +246,31 @@ function buildSideProbabilityCheck(config, sideDrops) {
 export function buildGachaAnalysis(bannerKey, typeKey, scores = {}) {
   const config = getGachaConfig(bannerKey, typeKey)
   const sideDrops = buildSideDrops(config, typeKey, scores)
-  const sideValuePerPull = sideDrops.reduce((sum, drop) => sum + drop.expectedValuePerPull, 0)
+  const randomSideValuePerPull = sideDrops.reduce((sum, drop) => sum + drop.expectedValuePerPull, 0)
+  const buildSideSummaryAtPulls = pull => {
+    const sideQuantities = {}
+    const sideValues = {}
+    let sideValue = 0
+
+    sideDrops.forEach(drop => {
+      const qty = drop.milestoneCycle
+        ? countMilestoneDrop(drop, pull)
+        : pull * drop.expectedQtyPerPull
+      const value = qty * drop.unitScore
+      sideQuantities[drop.key] = qty
+      sideValues[drop.key] = value
+      sideValue += value
+    })
+
+    return {
+      pulls: pull,
+      sideValue,
+      sideRecoveryRate: pull * config.costPerPull > 0 ? sideValue / (pull * config.costPerPull) : 0,
+      netCost: pull * config.costPerPull - sideValue,
+      sideQuantities,
+      sideValues,
+    }
+  }
   let survival = 1
 
   const pulls = Array.from({ length: config.maxPulls }, (_, index) => {
@@ -188,13 +278,14 @@ export function buildGachaAnalysis(bannerKey, typeKey, scores = {}) {
     const conditionalRate = getConditionalLimitedRate(config, pull)
     const firstHitRate = survival * conditionalRate
     const cumulativeRate = 1 - survival * (1 - conditionalRate)
+    const sideSummary = buildSideSummaryAtPulls(pull)
     survival *= (1 - conditionalRate)
 
     return {
       pull,
       diamonds: pull * config.costPerPull,
-      sideValue: pull * sideValuePerPull,
-      netDiamonds: pull * (config.costPerPull - sideValuePerPull),
+      sideValue: sideSummary.sideValue,
+      netDiamonds: sideSummary.netCost,
       conditionalRate,
       firstHitRate,
       cumulativeRate,
@@ -203,7 +294,7 @@ export function buildGachaAnalysis(bannerKey, typeKey, scores = {}) {
 
   const expectedPulls = pulls.reduce((sum, row) => sum + row.pull * row.firstHitRate, 0)
   const expectedGrossCost = expectedPulls * config.costPerPull
-  const expectedSideValue = expectedPulls * sideValuePerPull
+  const expectedSideValue = pulls.reduce((sum, row) => sum + row.firstHitRate * row.sideValue, 0)
   const expectedDiamondPrize = sideDrops.length
     ? (sideDrops.find(drop => drop.key === 'diamond30000')?.expectedValuePerPull || 0) * expectedPulls
     : config.diamondPrizeRate
@@ -215,29 +306,19 @@ export function buildGachaAnalysis(bannerKey, typeKey, scores = {}) {
 
   const pricedSideDrops = sideDrops
     .filter(drop => drop.isPriced)
-    .sort((a, b) => b.expectedValuePerPull - a.expectedValuePerPull)
+    .sort((a, b) => {
+      const aValue = buildSideSummaryAtPulls(config.invitationPulls || config.maxPulls).sideValues[a.key] || 0
+      const bValue = buildSideSummaryAtPulls(config.invitationPulls || config.maxPulls).sideValues[b.key] || 0
+      return bValue - aValue
+    })
   const exclusiveSideDrops = sideDrops.filter(drop => drop.exclusive)
 
   const totalSideRate = sideDrops.reduce((sum, drop) => sum + drop.rate, 0)
   const unpricedSideRate = exclusiveSideDrops.reduce((sum, drop) => sum + drop.rate, 0)
   const pricedSideRate = totalSideRate - unpricedSideRate
+  const sideValuePerPull = expectedPulls > 0 ? expectedSideValue / expectedPulls : randomSideValuePerPull
   const netCostPerPull = config.costPerPull - sideValuePerPull
   const sideProbabilityCheck = buildSideProbabilityCheck(config, sideDrops)
-
-  const buildSideSummaryAtPulls = pull => ({
-    pulls: pull,
-    sideValue: pull * sideValuePerPull,
-    sideRecoveryRate: config.costPerPull > 0 ? sideValuePerPull / config.costPerPull : 0,
-    netCost: pull * netCostPerPull,
-    sideQuantities: Object.fromEntries(sideDrops.map(drop => [
-      drop.key,
-      pull * drop.expectedQtyPerPull,
-    ])),
-    sideValues: Object.fromEntries(sideDrops.map(drop => [
-      drop.key,
-      pull * drop.expectedValuePerPull,
-    ])),
-  })
 
   const quantilePull = (rate) => pulls.find(row => row.cumulativeRate >= rate)?.pull || config.maxPulls
 
@@ -248,7 +329,7 @@ export function buildGachaAnalysis(bannerKey, typeKey, scores = {}) {
     pricedSideDrops,
     exclusiveSideDrops,
     sideValuePerPull,
-    sideRecoveryRate: config.costPerPull > 0 ? sideValuePerPull / config.costPerPull : 0,
+    sideRecoveryRate: expectedGrossCost > 0 ? expectedSideValue / expectedGrossCost : 0,
     netCostPerPull,
     forbiddenWeaponReference: sideDrops.find(drop => drop.reference === 'forbiddenWeapon')?.unitScore || 0,
     lightWeaponReference: sideDrops.find(drop => drop.reference === 'lightWeapon')?.unitScore || 0,
@@ -262,6 +343,7 @@ export function buildGachaAnalysis(bannerKey, typeKey, scores = {}) {
     expectedSideValue,
     expectedNetCost,
     sideAtCeiling: buildSideSummaryAtPulls(config.maxPulls),
+    getSideSummaryAtPulls: buildSideSummaryAtPulls,
     quantiles: {
       p50: quantilePull(0.5),
       p80: quantilePull(0.8),

@@ -54,7 +54,7 @@
       <div class="stat-value">{{ hasSideReturn ? fmtPercent(analysis.sideRecoveryRate) : fmtDiamonds(analysis.expectedNetCost) }}</div>
       <div class="stat-label">{{ hasSideReturn ? '副产物回收率' : selectedBanner === 'destiny' ? '期望净成本' : '期望成本' }}</div>
     </div>
-    <div v-if="selectedBanner === 'destiny'" class="stat-box">
+    <div v-if="hasSideReturn" class="stat-box">
       <div class="stat-value">{{ fmtDiamonds(analysis.expectedGrossCost) }}</div>
       <div class="stat-label">期望总成本</div>
     </div>
@@ -62,17 +62,13 @@
       <div class="stat-value">{{ hasSideReturn ? fmtDiamonds(analysis.expectedNetCost) : fmtDiamonds(quantileGrossCost('p50')) }}</div>
       <div class="stat-label">{{ hasSideReturn ? '期望净成本' : '50%预算' }}</div>
     </div>
-    <div v-if="selectedBanner === 'destiny'" class="stat-box">
+    <div v-if="hasSideReturn" class="stat-box">
       <div class="stat-value">{{ fmtDiamonds(quantileGrossCost('p90')) }}</div>
       <div class="stat-label">90%总预算</div>
     </div>
     <div class="stat-box">
       <div class="stat-value">{{ fmtDiamonds(hasSideReturn ? quantileNetCost('p90') : quantileGrossCost('p90')) }}</div>
       <div class="stat-label">{{ hasSideReturn ? '90%净预算' : '90%预算' }}</div>
-    </div>
-    <div v-if="selectedBanner !== 'destiny'" class="stat-box">
-      <div class="stat-value">{{ fmtDiamonds(analysis.config.maxPulls * analysis.config.costPerPull) }}</div>
-      <div class="stat-label">保底成本</div>
     </div>
   </section>
 
@@ -107,7 +103,12 @@
       </div>
       <div class="gacha-side-note">
         <template v-if="hasSideReturn">
-          副产物按当前道具评分表估值：每抽期望回收 {{ fmtDiamondValue(analysis.sideValuePerPull) }}，目标出货前预计回收 {{ fmtDiamonds(analysis.expectedSideValue) }}。圣德芬卷轴/魔书参考天光武具隐含单价，亚斯塔禄卷轴/魔书参考禁忌武具隐含单价。
+          <template v-if="selectedBanner === 'pickup'">
+            精选召唤按角色稀有度与累抽奖励共同估值：SR 扣除指定限定与光暗常驻后折算魔女的来信(SR)，R 折算魔女的来信(R)，N 折算 0.5 个魔女的心片(SR)。300 抽内预计回收 {{ fmtDiamonds(detailSideSummary.sideValue) }}。
+          </template>
+          <template v-else>
+            副产物按当前道具评分表估值：每抽期望回收 {{ fmtDiamondValue(analysis.sideValuePerPull) }}，目标出货前预计回收 {{ fmtDiamonds(analysis.expectedSideValue) }}。圣德芬卷轴/魔书参考天光武具隐含单价，亚斯塔禄卷轴/魔书参考禁忌武具隐含单价。
+          </template>
           <span v-if="probabilityCheckNotice">{{ probabilityCheckNotice }}</span>
         </template>
         <template v-else-if="selectedBanner === 'destiny'">
@@ -164,7 +165,7 @@
         <div v-for="drop in sideDetailRows" :key="drop.key" class="gacha-side-detail-row">
           <div>
             <span>{{ drop.label }}</span>
-            <small>{{ fmtPercent(drop.rate, 4) }}，{{ analysis.config.maxPulls }} 抽期望 {{ fmtQty(drop.expectedQtyAtCeiling) }} 个</small>
+            <small>{{ drop.rateText }}，{{ sideDetailPulls }} 抽期望 {{ fmtQty(drop.expectedQtyAtCeiling) }} 个</small>
           </div>
           <b v-if="drop.isPriced">{{ fmtDiamondValue(drop.expectedValuePerPull) }}/抽</b>
           <b v-else>未计价</b>
@@ -217,14 +218,20 @@ const scoreSourceText = drop => drop.referenceLabel
   : `单个 ${fmtScore(drop.unitScore)} 钻`
 
 const probabilityCheckNotice = computed(() => {
-  if (!hasSideReturn.value || selectedType.value !== 'lightDark') return ''
+  if (!hasSideReturn.value || selectedBanner.value !== 'destiny' || selectedType.value !== 'lightDark') return ''
   const check = analysis.value.sideProbabilityCheck
   if (check.isClosed) return ''
   return ` 光暗末位抹0试算：副产物合计 ${fmtPercent(check.sideRate, 4)}，加限定为 ${fmtPercent(check.totalRate, 4)}，差 ${fmtPercent(check.gapRate, 4)}。`
 })
 
 const quantileGrossCost = (key) => analysis.value.quantiles[key] * analysis.value.config.costPerPull
-const quantileNetCost = (key) => analysis.value.quantiles[key] * analysis.value.netCostPerPull
+const sideSummaryAtPull = pull => analysis.value.getSideSummaryAtPulls?.(pull) || {
+  netCost: pull * analysis.value.config.costPerPull,
+  sideValue: 0,
+  sideQuantities: {},
+  sideValues: {},
+}
+const quantileNetCost = (key) => sideSummaryAtPull(analysis.value.quantiles[key]).netCost
 const invitationCost = computed(() => {
   const config = analysis.value.config
   return (config.invitationPulls || 0) * config.costPerPull
@@ -232,7 +239,10 @@ const invitationCost = computed(() => {
 
 const getLimitedRateAtPull = (pull) => {
   const rows = analysis.value.pulls
-  if (pull <= rows.length) return rows[pull - 1].cumulativeRate
+  const effectivePull = selectedBanner.value === 'pickup'
+    ? ((pull - 1) % analysis.value.config.maxPulls) + 1
+    : pull
+  if (effectivePull <= rows.length) return rows[effectivePull - 1].cumulativeRate
   return rows.at(-1)?.cumulativeRate || 0
 }
 
@@ -245,7 +255,7 @@ const budgetRows = computed(() => {
   return pulls.map(pull => ({
     pull,
     diamonds: pull * config.costPerPull,
-    netCost: pull * analysis.value.netCostPerPull,
+    netCost: sideSummaryAtPull(pull).netCost,
     limitedRate: getLimitedRateAtPull(pull),
   }))
 })
@@ -259,7 +269,7 @@ const cumulativeRows = computed(() => {
     return {
       pull,
       diamonds: pull * config.costPerPull,
-      netCost: pull * analysis.value.netCostPerPull,
+      netCost: sideSummaryAtPull(pull).netCost,
       limitedRate: getLimitedRateAtPull(pull),
       sideRate: selectedBanner.value === 'pickup'
         ? calcAtLeastOne(config.permanentRate, pull)
@@ -268,14 +278,26 @@ const cumulativeRows = computed(() => {
   })
 })
 
-const sideContributionRows = computed(() => analysis.value.pricedSideDrops.slice(0, 10))
+const sideDetailPulls = computed(() => selectedBanner.value === 'pickup'
+  ? analysis.value.config.invitationPulls
+  : analysis.value.config.maxPulls)
+const detailSideSummary = computed(() => sideSummaryAtPull(sideDetailPulls.value))
+const withSideSummaryMetrics = drop => ({
+  ...drop,
+  expectedQtyAtCeiling: detailSideSummary.value.sideQuantities[drop.key] || 0,
+  expectedValuePerPull: (detailSideSummary.value.sideValues[drop.key] || 0) / sideDetailPulls.value,
+  rateText: drop.milestoneCycle
+    ? drop.label.includes('300整') ? '300 整抽奖励' : drop.milestoneLabel
+    : fmtPercent(drop.rate, 4),
+})
+const sideContributionRows = computed(() => analysis.value.pricedSideDrops
+  .map(withSideSummaryMetrics)
+  .sort((a, b) => b.expectedValuePerPull - a.expectedValuePerPull)
+  .slice(0, 10))
 const sideDetailRows = computed(() => [
   ...analysis.value.pricedSideDrops,
   ...analysis.value.exclusiveSideDrops,
-].map(drop => ({
-  ...drop,
-  expectedQtyAtCeiling: drop.expectedQtyPerPull * analysis.value.config.maxPulls,
-})))
+].map(withSideSummaryMetrics))
 
 const makeTooltip = (label, rows, valueLabel = '概率') => (params) => {
   const list = Array.isArray(params) ? params : [params]
@@ -438,7 +460,7 @@ const sideContributionOption = computed(() => {
       formatter: (params) => {
         const item = params[0]
         const row = rows[item.dataIndex]
-        return `<b style="color:var(--gold)">${row.label}</b><br>概率：${fmtPercent(row.rate, 4)}<br>单个价值：${fmtScore(row.unitScore)} 钻<br>每抽期望：${fmtDiamondValue(row.expectedValuePerPull)}`
+        return `<b style="color:var(--gold)">${row.label}</b><br>来源：${row.rateText}<br>单个价值：${fmtScore(row.unitScore)} 钻<br>每抽期望：${fmtDiamondValue(row.expectedValuePerPull)}`
       },
     },
     grid: {
