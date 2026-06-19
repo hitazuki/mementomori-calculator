@@ -107,7 +107,7 @@
       </div>
       <div class="gacha-side-note">
         <template v-if="hasSideReturn">
-          副产物按当前道具评分表估值：每抽期望回收 {{ fmtDiamondValue(analysis.sideValuePerPull) }}，目标出货前预计回收 {{ fmtDiamonds(analysis.expectedSideValue) }}。亚斯塔禄卷轴/魔书参考禁忌召唤隐含单价，圣德芬卷轴/魔书仅显示数量。
+          副产物按当前道具评分表估值：每抽期望回收 {{ fmtDiamondValue(analysis.sideValuePerPull) }}，目标出货前预计回收 {{ fmtDiamonds(analysis.expectedSideValue) }}。圣德芬卷轴/魔书参考天光武具隐含单价，亚斯塔禄卷轴/魔书参考禁忌武具隐含单价。
           <span v-if="probabilityCheckNotice">{{ probabilityCheckNotice }}</span>
         </template>
         <template v-else-if="selectedBanner === 'destiny'">

@@ -37,8 +37,8 @@ export const DESTINY_FOUR_ELEMENTS_SIDE_DROPS = [
   { key: 'towerTicket2', label: '无穷之塔挑战券 x2', rate: 0.019171, qty: 2, itype: 20, iid: 1 },
   { key: 'magicCrystal', label: '魔水晶 x1', rate: 0.038361, qty: 1, itype: 13, iid: 1 },
   { key: 'perfume', label: '魔装香油 x1', rate: 0.020001, qty: 1, itype: 15, iid: 1 },
-  { key: 'sandalphonScroll', label: '圣德芬的卷轴 x1', rate: 0.072803, qty: 1, exclusive: true },
-  { key: 'sandalphonGrimoire', label: '圣德芬的魔书 x1', rate: 0.072803, qty: 1, exclusive: true },
+  { key: 'sandalphonScroll', label: '圣德芬的卷轴 x1', rate: 0.072803, qty: 1, reference: 'lightWeapon' },
+  { key: 'sandalphonGrimoire', label: '圣德芬的魔书 x1', rate: 0.072803, qty: 1, reference: 'lightWeapon' },
   { key: 'astarothScroll', label: '亚斯塔禄的卷轴 x1', rate: 0.030601, qty: 1, reference: 'forbiddenWeapon' },
   { key: 'astarothGrimoire', label: '亚斯塔禄的魔书 x1', rate: 0.030601, qty: 1, reference: 'forbiddenWeapon' },
 ]
@@ -125,13 +125,27 @@ function buildSideDrops(config, typeKey, scores) {
     ? DESTINY_LIGHT_DARK_SIDE_DROPS
     : DESTINY_FOUR_ELEMENTS_SIDE_DROPS
 
-  const forbiddenReference = buildForbiddenWeaponGachaAnalysis(scores, { maxPulls: 100, selectedPulls: 100 })
-  const forbiddenCoreValue = forbiddenReference.bestNode.implicitCoreUnit
-  const forbiddenReferenceLabel = `禁忌召唤最低隐含单价（${forbiddenReference.bestNode.pulls}抽）`
+  const weaponReferences = {
+    forbiddenWeapon: buildForbiddenWeaponGachaAnalysis(scores, {
+      bannerKey: 'forbidden',
+      maxPulls: 100,
+      selectedPulls: 100,
+    }),
+    lightWeapon: buildForbiddenWeaponGachaAnalysis(scores, {
+      bannerKey: 'light',
+      maxPulls: 100,
+      selectedPulls: 100,
+    }),
+  }
+  const referenceLabels = {
+    forbiddenWeapon: `禁忌武具最低隐含单价（${weaponReferences.forbiddenWeapon.bestNode.pulls}抽）`,
+    lightWeapon: `天光武具最低隐含单价（${weaponReferences.lightWeapon.bestNode.pulls}抽）`,
+  }
 
   return sourceDrops.map(drop => {
-    const score = drop.reference === 'forbiddenWeapon'
-      ? forbiddenCoreValue
+    const reference = drop.reference ? weaponReferences[drop.reference] : null
+    const score = reference
+      ? reference.bestNode.implicitCoreUnit
       : drop.exclusive
         ? 0
         : getScore(scores, drop.itype, drop.iid)
@@ -144,8 +158,8 @@ function buildSideDrops(config, typeKey, scores) {
       scoreMeta: drop.exclusive || drop.reference ? { score: unitScore, batch: 1 } : getScoreMeta(scores, drop.itype, drop.iid),
       expectedQtyPerPull,
       expectedValuePerPull,
-      isPriced: !drop.exclusive && unitScore > 0,
-      referenceLabel: drop.reference === 'forbiddenWeapon' ? forbiddenReferenceLabel : '',
+      isPriced: Boolean(drop.reference) || (!drop.exclusive && unitScore > 0),
+      referenceLabel: drop.reference ? referenceLabels[drop.reference] : '',
     }
   })
 }
@@ -237,6 +251,7 @@ export function buildGachaAnalysis(bannerKey, typeKey, scores = {}) {
     sideRecoveryRate: config.costPerPull > 0 ? sideValuePerPull / config.costPerPull : 0,
     netCostPerPull,
     forbiddenWeaponReference: sideDrops.find(drop => drop.reference === 'forbiddenWeapon')?.unitScore || 0,
+    lightWeaponReference: sideDrops.find(drop => drop.reference === 'lightWeapon')?.unitScore || 0,
     sideProbabilityCheck,
     totalSideRate,
     pricedSideRate,

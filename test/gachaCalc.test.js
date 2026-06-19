@@ -52,6 +52,7 @@ test('destiny four-elements side drops are included in return analysis', () => {
     '[13,1]': { score: 180, batch: 1 },
     '[13,4]': { score: 1, batch: 1 },
     '[15,1]': { score: 1, batch: 1 },
+    '[16,6]': { score: 60, batch: 1 },
     '[16,7]': { score: 300, batch: 1 },
     '[17,17]': { score: 80, batch: 1 },
     '[17,21]': { score: 720, batch: 1 },
@@ -62,9 +63,12 @@ test('destiny four-elements side drops are included in return analysis', () => {
   const analysis = buildGachaAnalysis('destiny', 'fourElements', scores)
 
   assert.equal(analysis.sideDrops.length, DESTINY_FOUR_ELEMENTS_SIDE_DROPS.length)
-  assert.equal(analysis.exclusiveSideDrops.length, 2)
+  assert.equal(analysis.exclusiveSideDrops.length, 0)
+  assert.ok(analysis.lightWeaponReference > 0)
   assert.ok(analysis.forbiddenWeaponReference > 0)
-  assert.equal(analysis.sideDrops.find(drop => drop.key === 'astarothScroll').referenceLabel.includes('禁忌召唤'), true)
+  assert.equal(analysis.sideDrops.find(drop => drop.key === 'sandalphonScroll').referenceLabel.includes('天光武具'), true)
+  assert.equal(analysis.sideDrops.find(drop => drop.key === 'sandalphonGrimoire').isPriced, true)
+  assert.equal(analysis.sideDrops.find(drop => drop.key === 'astarothScroll').referenceLabel.includes('禁忌武具'), true)
   assert.equal(analysis.sideDrops.find(drop => drop.key === 'astarothGrimoire').isPriced, true)
   assert.ok(analysis.sideValuePerPull > 50)
   assert.ok(analysis.expectedSideValue > analysis.expectedDiamondPrize)
@@ -75,6 +79,7 @@ test('destiny four-elements side drops are included in return analysis', () => {
 test('destiny light-dark side drops use zeroed rates with the water100 override', () => {
   const analysis = buildGachaAnalysis('destiny', 'lightDark', {
     '[1,1]': { score: 1, batch: 1 },
+    '[16,6]': { score: 60, batch: 1 },
     '[16,7]': { score: 300, batch: 1 },
   })
 
@@ -82,6 +87,7 @@ test('destiny light-dark side drops use zeroed rates with the water100 override'
   assert.equal(analysis.sideDrops.find(drop => drop.key === 'water300').rate, 0.0281)
   assert.equal(analysis.sideDrops.find(drop => drop.key === 'water100').rate, 0.0374)
   assert.equal(analysis.sideDrops.find(drop => drop.key === 'gold6h5').rate, 0.0936)
+  assert.equal(analysis.sideDrops.find(drop => drop.key === 'sandalphonScroll').isPriced, true)
   assert.equal(analysis.sideDrops.find(drop => drop.key === 'astarothScroll').isPriced, true)
   assert.equal(analysis.sideProbabilityCheck.sideRate.toFixed(6), '0.980000')
   assert.equal(analysis.sideProbabilityCheck.totalRate.toFixed(6), '1.000000')
