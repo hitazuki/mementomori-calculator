@@ -15,11 +15,11 @@ export default {
   planSumRetained: "未使用機会数",
   planSumResets: "日替わりリセット",
   // Common
-  appTitle: "メメントモリ 各種計算機",
+  appTitle: "メメントモリ 多機能計算機",
   appDesc:
-    "メメントモリの双路ダメージ計算、曲線スキャン、ヒートマップ、構成比較、表出力、パック CE、秘儀スコア計算ツール。",
+    "メメントモリのダメージ計算、アイテムシステム、召喚システム、秘儀システムを扱う多機能な分析・計画ツール。",
   appName: "メメントモリ",
-  appSub: "各種計算機",
+  appSub: "多機能計算機",
 
   // Navigation
   navCalc: "単体計算",
@@ -326,9 +326,9 @@ export default {
   navPackCompare: "パック一覧とコスパ比較",
 
   navGroupGacha: "召喚システム",
-  navGacha: "ガチャ分析チャート",
-  gachaTitle: "ガチャ分析チャート",
-  gachaDesc: "運命召喚と pick-up 召喚の指定限定確率、天井コスト、予算達成率を可視化します。",
+  navGacha: "キャラ召喚分析",
+  gachaTitle: "キャラ召喚価値分析",
+  gachaDesc: "運命召喚と pick-up 召喚の指定キャラ確率、天井コスト、予算達成率を可視化します。",
   navForbiddenWeaponGacha: "禁忌武具ガチャ",
   forbiddenWeaponGachaTitle: "禁忌武具ガチャ価値分析",
   forbiddenWeaponGachaDesc: "アイテムスコアと連動し、副産物回収、巻物/魔書の暗黙単価、召喚数ごとの期待数量を分析します。",

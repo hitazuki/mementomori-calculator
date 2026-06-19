@@ -15,11 +15,11 @@ export default {
   planSumRetained: "未使用機會數",
   planSumResets: "跨日重置次數",
   // Common
-  appTitle: "MementoMori 各種計算機",
+  appTitle: "MementoMori 多功能計算機",
   appDesc:
-    "MementoMori 多功能計算工具：雙路傷害計算、曲線掃描、熱力圖、多方案對比、拉表匯出、禮包 CE 與秘儀評分。",
+    "MementoMori 多功能計算機：涵蓋傷害計算、道具系統、召喚系統與秘儀系統的分析與規劃工具。",
   appName: "MementoMori",
-  appSub: "各種計算機",
+  appSub: "多功能計算機",
 
   // Navigation
   navCalc: "單體計算",
@@ -281,9 +281,9 @@ export default {
   packCompareFullSources: "包含如下觸發條件",
 
   navGroupGacha: "召喚系統",
-  navGacha: "抽卡圖表分析",
-  gachaTitle: "抽卡圖表分析",
-  gachaDesc: "對命運召喚與 pick-up 召喚的指定限定機率、保底成本和預算達成率進行視覺化分析。",
+  navGacha: "角色召喚分析",
+  gachaTitle: "角色召喚價值分析",
+  gachaDesc: "對命運召喚與 pick-up 召喚的指定角色機率、保底成本和預算達成率進行視覺化分析。",
   navForbiddenWeaponGacha: "禁忌武具召喚",
   forbiddenWeaponGachaTitle: "禁忌武具召喚價值分析",
   forbiddenWeaponGachaDesc: "連動道具評分表，分析禁忌武具召喚券的副產物回收、卷軸/魔書隱含單價與抽數產物數量。",

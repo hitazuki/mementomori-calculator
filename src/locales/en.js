@@ -15,11 +15,11 @@ export default {
   planSumRetained: "Unused Opportunities",
   planSumResets: "Daily Resets",
   // Common
-  appTitle: "MementoMori Calculators",
+  appTitle: "MementoMori Multi-Function Calculator",
   appDesc:
-    "MementoMori calculators for dual-path damage, curve scans, heatmaps, build comparison, table export, pack CE, and Mysterium scoring.",
+    "MementoMori multi-function calculator covering Damage Calc, Item System, Summon System, and Mysterium System analysis and planning.",
   appName: "MementoMori",
-  appSub: "Calculators",
+  appSub: "Multi-Function Calculator",
 
   // Navigation
   navGroupDamage: "Damage Calc",
@@ -284,9 +284,9 @@ export default {
   packCompareFullSources: "Appears in triggers",
 
   navGroupGacha: "Gacha System",
-  navGacha: "Gacha Charts",
-  gachaTitle: "Gacha Chart Analysis",
-  gachaDesc: "Visualize target-limited rates, pity cost, and budget success rates for Destiny and pick-up summons.",
+  navGacha: "Character Summon Analysis",
+  gachaTitle: "Character Summon Value Analysis",
+  gachaDesc: "Visualize target-character rates, pity cost, and budget success rates for Destiny and pick-up summons.",
   navForbiddenWeaponGacha: "Forbidden Gear Gacha",
   forbiddenWeaponGachaTitle: "Forbidden Gear Gacha Value",
   forbiddenWeaponGachaDesc: "Use item scores to evaluate side-product recovery, scroll/grimoire implied unit cost, and expected item quantities by pull count.",
