@@ -309,6 +309,14 @@ export default {
   packCompareFullSources: "다음 조건에서 등장",
   navPackCompare: "패키지 모아보기 및 가성비 비교",
 
+  navGroupGacha: "소환 시스템",
+  navGacha: "가챠 차트 분석",
+  gachaTitle: "가챠 차트 분석",
+  gachaDesc: "운명 소환과 pick-up 소환의 지정 한정 확률, 천장 비용, 예산 성공률을 시각화합니다.",
+  navForbiddenWeaponGacha: "금기무구 소환",
+  forbiddenWeaponGachaTitle: "금기무구 소환 가치 분석",
+  forbiddenWeaponGachaDesc: "아이템 점수표와 연동해 부산물 회수, 두루마리/마도서의 암묵 단가, 소환 수별 기대 수량을 분석합니다.",
+
   // Pack Planner
   planTabQuery: "패키지 검색",
   planTabPlanner: "구매 플래너",

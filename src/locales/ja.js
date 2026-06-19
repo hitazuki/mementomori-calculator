@@ -325,6 +325,14 @@ export default {
   packCompareFullSources: "以下の条件で出現",
   navPackCompare: "パック一覧とコスパ比較",
 
+  navGroupGacha: "召喚システム",
+  navGacha: "ガチャ分析チャート",
+  gachaTitle: "ガチャ分析チャート",
+  gachaDesc: "運命召喚と pick-up 召喚の指定限定確率、天井コスト、予算達成率を可視化します。",
+  navForbiddenWeaponGacha: "禁忌武具ガチャ",
+  forbiddenWeaponGachaTitle: "禁忌武具ガチャ価値分析",
+  forbiddenWeaponGachaDesc: "アイテムスコアと連動し、副産物回収、巻物/魔書の暗黙単価、召喚数ごとの期待数量を分析します。",
+
   // Pack Planner
   planTabQuery: "パック検索",
   planTabPlanner: "購入プランナー",

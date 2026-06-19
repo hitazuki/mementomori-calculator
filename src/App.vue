@@ -39,6 +39,20 @@
           <span class="nav-label">{{ $t(item.i18nLabel) }}</span>
         </li>
 
+        <li class="nav-group-title">🎲 {{ $t('navGroupGacha') }}</li>
+
+        <li
+          v-for="item in navGachaItems"
+          :key="item.id"
+          class="nav-item"
+          :class="{ active: currentView === item.id }"
+          @click="currentView = item.id"
+          :title="$t(item.i18nTitle)"
+        >
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ $t(item.i18nLabel) }}</span>
+        </li>
+
         <li class="nav-group-title">📂 {{ $t('navGroupMysterium') }}</li>
         
         <li 
@@ -136,6 +150,8 @@ const TableExportView = createAsyncView(() => import('./views/TableExportView.vu
 const MysteriumPanelView = createAsyncView(() => import('./views/MysteriumPanelView.vue'))
 const PackCalculatorView = createAsyncView(() => import('./views/PackCalculatorView.vue'))
 const PackComparisonView = createAsyncView(() => import('./views/PackComparisonView.vue'))
+const GachaAnalysisView = createAsyncView(() => import('./views/GachaAnalysisView.vue'))
+const ForbiddenWeaponGachaView = createAsyncView(() => import('./views/ForbiddenWeaponGachaView.vue'))
 
 const { locale, t } = useI18n()
 const currentLanguage = ref(locale.value)
@@ -170,7 +186,9 @@ const viewMap = {
   table: TableExportView,
   mysterium: MysteriumPanelView,
   packCalc: PackCalculatorView,
-  packCompare: PackComparisonView
+  packCompare: PackComparisonView,
+  gacha: GachaAnalysisView,
+  forbiddenWeaponGacha: ForbiddenWeaponGachaView
 }
 
 const activeComponent = computed(() => viewMap[currentView.value])
@@ -178,6 +196,7 @@ const activeComponent = computed(() => viewMap[currentView.value])
 const allNavItems = computed(() => [
   ...navDamageItems,
   ...navItemSystemItems,
+  ...navGachaItems,
   ...navMysteriumItems
 ])
 
@@ -195,6 +214,11 @@ const navDamageItems = [
 const navItemSystemItems = [
   { id: 'packCompare', icon: '📊', i18nLabel: 'navPackCompare', i18nTitle: 'navPackCompare' },
   { id: 'packCalc', icon: '💰', i18nLabel: 'navPackCalc', i18nTitle: 'navPackCalc' }
+]
+
+const navGachaItems = [
+  { id: 'gacha', icon: '🎲', i18nLabel: 'navGacha', i18nTitle: 'navGacha' },
+  { id: 'forbiddenWeaponGacha', icon: '📜', i18nLabel: 'navForbiddenWeaponGacha', i18nTitle: 'navForbiddenWeaponGacha' }
 ]
 
 const navMysteriumItems = [

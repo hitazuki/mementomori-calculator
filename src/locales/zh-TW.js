@@ -280,6 +280,14 @@ export default {
   packCompareAndOthers: "{name} 等另外 {count} 處",
   packCompareFullSources: "包含如下觸發條件",
 
+  navGroupGacha: "召喚系統",
+  navGacha: "抽卡圖表分析",
+  gachaTitle: "抽卡圖表分析",
+  gachaDesc: "對命運召喚與 pick-up 召喚的指定限定機率、保底成本和預算達成率進行視覺化分析。",
+  navForbiddenWeaponGacha: "禁忌武具召喚",
+  forbiddenWeaponGachaTitle: "禁忌武具召喚價值分析",
+  forbiddenWeaponGachaDesc: "連動道具評分表，分析禁忌武具召喚券的副產物回收、卷軸/魔書隱含單價與抽數產物數量。",
+
   packBadgePermanent: "常駐",
   packBadgeWitch: "魔女",
   packBadgeUltra: "限時",

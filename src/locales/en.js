@@ -283,6 +283,14 @@ export default {
   packCompareAndOthers: "{name} (+ {count} others)",
   packCompareFullSources: "Appears in triggers",
 
+  navGroupGacha: "Gacha System",
+  navGacha: "Gacha Charts",
+  gachaTitle: "Gacha Chart Analysis",
+  gachaDesc: "Visualize target-limited rates, pity cost, and budget success rates for Destiny and pick-up summons.",
+  navForbiddenWeaponGacha: "Forbidden Gear Gacha",
+  forbiddenWeaponGachaTitle: "Forbidden Gear Gacha Value",
+  forbiddenWeaponGachaDesc: "Use item scores to evaluate side-product recovery, scroll/grimoire implied unit cost, and expected item quantities by pull count.",
+
   packBadgePermanent: "Perm",
   packBadgeWitch: "Witch",
   packBadgeUltra: "Ultra",
