@@ -5,42 +5,79 @@
   </div>
 
   <section class="gacha-controls animate-fadeup">
-    <div class="card gacha-control-card">
-      <div class="card-title">召唤类型</div>
-      <div class="segmented-control">
-        <button
-          v-for="banner in bannerOptions"
-          :key="banner.key"
-          class="btn btn-sm"
-          :class="selectedBanner === banner.key ? 'btn-primary' : 'btn-ghost'"
-          @click="selectedBanner = banner.key"
-        >
-          {{ banner.label }}
-        </button>
+    <div class="card gacha-filter-card">
+      <div class="gacha-filter-row">
+        <div class="gacha-filter-label">召唤类型</div>
+        <div class="segmented-control">
+          <button
+            v-for="banner in bannerOptions"
+            :key="banner.key"
+            class="btn btn-sm"
+            :class="selectedBanner === banner.key ? 'btn-primary' : 'btn-ghost'"
+            @click="selectedBanner = banner.key"
+          >
+            {{ banner.label }}
+          </button>
+        </div>
       </div>
-    </div>
-
-    <div class="card gacha-control-card">
-      <div class="card-title">指定角色属性</div>
-      <div class="segmented-control">
-        <button
-          v-for="type in typeOptions"
-          :key="type.key"
-          class="btn btn-sm"
-          :class="selectedType === type.key ? 'btn-primary' : 'btn-ghost'"
-          @click="selectedType = type.key"
-        >
-          {{ type.label }}
-        </button>
+      <div class="gacha-filter-row">
+        <div class="gacha-filter-label">角色属性</div>
+        <div class="segmented-control">
+          <button
+            v-for="type in typeOptions"
+            :key="type.key"
+            class="btn btn-sm"
+            :class="selectedType === type.key ? 'btn-primary' : 'btn-ghost'"
+            @click="selectedType = type.key"
+          >
+            {{ type.label }}
+          </button>
+        </div>
       </div>
     </div>
 
     <div class="card gacha-rule-card">
-      <div class="card-title">当前规则</div>
-      <div class="gacha-rule-list">
-        <span>{{ analysis.config.bannerLabel }} / {{ analysis.config.typeLabel }}</span>
-        <span>单抽 {{ analysis.config.costPerPull.toLocaleString() }} 钻，基础概率 {{ fmtPercent(analysis.config.baseRate, 4) }}</span>
-        <span>{{ analysis.config.note }}</span>
+      <div class="gacha-rule-header">
+        <div class="card-title">当前规则</div>
+        <details class="gacha-rule-details">
+          <summary>计价口径</summary>
+          <div class="gacha-rule-detail-body">
+            <template v-if="selectedBanner === 'pickup'">
+              <span>规则：{{ analysis.config.note }}</span>
+              <span>SR：扣除限定/光暗常驻 → 魔女的来信(SR)</span>
+              <span>光暗常驻 → 魔女的邀请函</span>
+              <span>R → 魔女的来信(R)</span>
+              <span>N → 0.5 魔女的心片(SR)</span>
+              <span>累抽：20/50 符石；300 整抽邀请函；其余整百 SR心片 x80</span>
+            </template>
+            <template v-else>
+              <span>规则：{{ analysis.config.note }}</span>
+              <span>副产物 → 道具评分表</span>
+              <span>30000钻大奖 → 30000 钻</span>
+              <span>圣德芬卷轴/魔书 → 天光武具隐含单价</span>
+              <span>亚斯塔禄卷轴/魔书 → 禁忌武具隐含单价</span>
+              <span>净成本/净预算：已扣副产物回收</span>
+            </template>
+          </div>
+        </details>
+      </div>
+      <div class="gacha-rule-grid">
+        <div class="gacha-rule-cell">
+          <span>卡池</span>
+          <b>{{ analysis.config.bannerLabel }} / {{ analysis.config.typeLabel }}</b>
+        </div>
+        <div class="gacha-rule-cell">
+          <span>单抽</span>
+          <b>{{ analysis.config.costPerPull.toLocaleString() }} 钻</b>
+        </div>
+        <div class="gacha-rule-cell">
+          <span>基础</span>
+          <b>{{ fmtPercent(analysis.config.baseRate, 4) }}</b>
+        </div>
+        <div class="gacha-rule-cell gacha-rule-cell-wide">
+          <span>保底</span>
+          <b :title="analysis.config.note">{{ rulePityText }}</b>
+        </div>
       </div>
     </div>
   </section>
@@ -86,28 +123,29 @@
     </div>
 
     <div class="card gacha-budget-card">
-      <div class="card-title">常用预算参考</div>
+      <div class="card-title">关键抽数</div>
       <div class="gacha-budget-list">
-        <div v-for="row in budgetRows" :key="row.pull" class="gacha-budget-row">
-          <span>{{ row.pull }} 抽</span>
+        <div class="gacha-budget-head" :class="{ 'has-net': hasSideReturn }">
+          <span>抽数</span>
+          <span>成功率</span>
+          <span>总预算</span>
+          <span v-if="hasSideReturn">净预算</span>
+        </div>
+        <div v-for="row in budgetRows" :key="row.pull" class="gacha-budget-row" :class="{ 'has-net': hasSideReturn }">
+          <span>{{ row.pull }}抽</span>
           <b>{{ fmtPercent(row.limitedRate) }}</b>
-          <small>
-            <template v-if="hasSideReturn">
-              净 {{ fmtDiamonds(row.netCost) }} / 原 {{ fmtDiamonds(row.diamonds) }}
-            </template>
-            <template v-else>
-              {{ fmtDiamonds(row.diamonds) }}
-            </template>
-          </small>
+          <small>{{ fmtDiamonds(row.diamonds) }}</small>
+          <small v-if="hasSideReturn">{{ fmtDiamonds(row.netCost) }}</small>
         </div>
       </div>
       <div class="gacha-side-note">
+        <b>预算口径</b>
         <template v-if="hasSideReturn">
           <template v-if="selectedBanner === 'pickup'">
-            精选召唤按角色稀有度与累抽奖励共同估值：SR 扣除指定限定与光暗常驻后折算魔女的来信(SR)，R 折算魔女的来信(R)，N 折算 0.5 个魔女的心片(SR)。300 抽内预计回收 {{ fmtDiamonds(detailSideSummary.sideValue) }}。
+            净预算 = 总预算 - 副产物估值；300 抽内副产物估值 {{ fmtDiamonds(detailSideSummary.sideValue) }}。
           </template>
           <template v-else>
-            副产物按当前道具评分表估值：每抽期望回收 {{ fmtDiamondValue(analysis.sideValuePerPull) }}，目标出货前预计回收 {{ fmtDiamonds(analysis.expectedSideValue) }}。圣德芬卷轴/魔书参考天光武具隐含单价，亚斯塔禄卷轴/魔书参考禁忌武具隐含单价。
+            净预算 = 总预算 - 副产物估值；每抽期望回收 {{ fmtDiamondValue(analysis.sideValuePerPull) }}，平均出货前合计 {{ fmtDiamonds(analysis.expectedSideValue) }}。
           </template>
           <span v-if="probabilityCheckNotice">{{ probabilityCheckNotice }}</span>
         </template>
@@ -236,6 +274,9 @@ const invitationCost = computed(() => {
   const config = analysis.value.config
   return (config.invitationPulls || 0) * config.costPerPull
 })
+const rulePityText = computed(() => selectedBanner.value === 'pickup'
+  ? '100抽必出；300抽邀请函'
+  : '57-70软保底；70抽必出')
 
 const getLimitedRateAtPull = (pull) => {
   const rows = analysis.value.pulls
@@ -499,22 +540,121 @@ const sideContributionOption = computed(() => {
 <style scoped>
 .gacha-controls {
   display: grid;
-  grid-template-columns: minmax(180px, 0.8fr) minmax(180px, 0.8fr) minmax(300px, 1.4fr);
+  grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.4fr);
+  align-items: start;
   gap: 14px;
   margin-bottom: 14px;
 }
 
-.gacha-control-card,
+.gacha-filter-card,
 .gacha-rule-card {
   min-width: 0;
 }
 
-.gacha-rule-list {
+.gacha-filter-card {
   display: grid;
-  gap: 6px;
+  gap: 12px;
+  padding-block: 16px;
+}
+
+.gacha-filter-row {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.gacha-filter-label {
   color: var(--text-secondary);
   font-size: var(--fs-sm);
-  line-height: 1.45;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gacha-rule-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.gacha-rule-header .card-title {
+  margin-bottom: 0;
+}
+
+.gacha-rule-grid {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.1fr) minmax(82px, 0.7fr) minmax(90px, 0.7fr) minmax(220px, 1.6fr);
+  gap: 8px;
+}
+
+.gacha-rule-cell {
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+}
+
+.gacha-rule-cell span {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.2;
+}
+
+.gacha-rule-cell b {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.gacha-rule-cell:not(.gacha-rule-cell-wide) b {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gacha-rule-details {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.gacha-rule-details[open] {
+  flex-basis: 100%;
+  margin-left: 0;
+}
+
+.gacha-rule-details summary {
+  cursor: pointer;
+  width: fit-content;
+  margin-left: auto;
+  padding: 4px 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  color: var(--gold);
+  font-weight: 600;
+  outline: none;
+}
+
+.gacha-rule-detail-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-subtle);
+  line-height: 1.5;
+}
+
+.gacha-rule-detail-body span {
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
 }
 
 .gacha-summary {
@@ -566,11 +706,32 @@ const sideContributionOption = computed(() => {
   gap: 8px;
 }
 
+.gacha-budget-head,
 .gacha-budget-row {
   display: grid;
-  grid-template-columns: 70px 1fr auto;
+  grid-template-columns: 54px minmax(64px, 0.85fr) minmax(88px, 1fr);
   align-items: center;
   gap: 8px;
+}
+
+.gacha-budget-head.has-net,
+.gacha-budget-row.has-net {
+  grid-template-columns: 48px minmax(62px, 0.75fr) minmax(78px, 1fr) minmax(78px, 1fr);
+}
+
+.gacha-budget-head {
+  padding: 0 10px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gacha-budget-head span:nth-child(n + 2) {
+  text-align: right;
+}
+
+.gacha-budget-row {
   padding: 9px 10px;
   border-radius: var(--r-sm);
   background: rgba(var(--color-invert-rgb), 0.035);
@@ -594,6 +755,7 @@ const sideContributionOption = computed(() => {
   font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
   text-align: right;
+  white-space: nowrap;
 }
 
 .gacha-side-note {
@@ -603,6 +765,13 @@ const sideContributionOption = computed(() => {
   color: var(--text-muted);
   font-size: var(--fs-sm);
   line-height: 1.55;
+}
+
+.gacha-side-note b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
 }
 
 .gacha-side-detail-list {
@@ -678,17 +847,37 @@ const sideContributionOption = computed(() => {
     grid-template-columns: 1fr;
   }
 
+  .gacha-filter-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
   .gacha-chart-frame,
   .gacha-chart-frame-sm {
     min-height: 330px;
   }
 
-  .gacha-budget-row {
-    grid-template-columns: 60px 1fr;
+  .gacha-rule-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .gacha-budget-row small {
+  .gacha-rule-cell-wide {
     grid-column: 1 / -1;
+  }
+
+  .gacha-budget-head.has-net,
+  .gacha-budget-row.has-net {
+    grid-template-columns: 52px 1fr 1fr;
+  }
+
+  .gacha-budget-head.has-net span:last-child,
+  .gacha-budget-row small:last-child {
+    grid-column: 2 / -1;
+  }
+
+  .gacha-budget-head:not(.has-net),
+  .gacha-budget-row:not(.has-net) {
+    grid-template-columns: 52px 1fr 1fr;
   }
 
   .gacha-side-detail-row {

@@ -50,7 +50,7 @@ export const DESTINY_LIGHT_DARK_SIDE_DROPS = DESTINY_FOUR_ELEMENTS_SIDE_DROPS.ma
 
 export const PICKUP_CHARACTER_SIDE_DROPS = [
   { key: 'pickupOtherSr', label: 'SR角色（折算魔女的来信(SR)） x1', rate: 0, qty: 1, itype: 17, iid: 21 },
-  { key: 'pickupPermanentLightDark', label: '光暗常驻角色 x1', rate: 0.0014, qty: 1, exclusive: true },
+  { key: 'pickupPermanentLightDark', label: '光暗常驻角色（等同魔女的邀请函） x1', rate: 0.0014, qty: 1, itype: 17, iid: 26 },
   { key: 'pickupR', label: 'R角色（折算魔女的来信(R)） x1', rate: 0.4377, qty: 1, itype: 17, iid: 17 },
   { key: 'pickupN', label: 'N角色（折算魔女的心片(SR)） x0.5', rate: 0.5177, qty: 0.5, itype: 17, iid: 28 },
 ]
