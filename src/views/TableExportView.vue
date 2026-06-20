@@ -41,20 +41,15 @@
             v-for="(b, i) in ts.builds" 
             :key="b.id"
             class="export-build-card"
-            style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:6px;"
           >
-            <div class="export-build-head" :style="{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: b._expanded ? '12px' : '0' }">
-              <div class="export-build-title-stack">
-                <input class="form-input export-build-name" v-model="b.name">
-                <div class="export-build-summary">{{ buildSummaryText(b) }}</div>
-                <div class="export-build-axis">{{ getAxisLabel(b) }}</div>
-              </div>
-              <div style="display:flex;gap:4px">
-                <button class="btn btn-secondary btn-sm" @click="b._expanded = !b._expanded" style="padding:4px 8px;">
-                  {{ b._expanded ? '▲' : '▼ ' + $t('ui_details') }}
+            <div class="export-build-head" :class="{ expanded: b._expanded }">
+              <input class="form-input export-build-name" v-model="b.name">
+              <div class="export-build-actions">
+                <button class="btn btn-secondary btn-sm export-icon-btn" @click="b._expanded = !b._expanded" :title="$t('ui_details')">
+                  {{ b._expanded ? '▲' : '▼' }}
                 </button>
-                <button class="btn btn-secondary btn-sm" @click="copyBuild(i)" style="padding:4px 8px">⧉</button>
-                <button v-if="ts.builds.length > 1" class="btn btn-ghost btn-sm" @click="removeBuild(i)" style="padding:4px 8px">🗑</button>
+                <button class="btn btn-secondary btn-sm export-icon-btn" @click="copyBuild(i)" :title="$t('compareCopySuffix')">⧉</button>
+                <button v-if="ts.builds.length > 1" class="btn btn-ghost btn-sm export-icon-btn" @click="removeBuild(i)" title="Remove">🗑</button>
               </div>
             </div>
             
@@ -445,10 +440,6 @@ function buildSummaryText(build) {
     .join(' · ')
 }
 
-function getAxisLabel(build) {
-  return `${getVariableLabel(build.yKey)} ↓ / ${getVariableLabel(build.xKey)} →`
-}
-
 function percentDelta(compareVal, baseVal) {
   if (!Number.isFinite(compareVal) || !Number.isFinite(baseVal) || baseVal === 0) return null
   return ((compareVal - baseVal) / Math.abs(baseVal)) * 100
@@ -637,15 +628,6 @@ function downloadCsv() {
   font-size: var(--fs-base);
   font-weight: bold;
 }
-.export-build-title-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  flex: 1;
-}
-.export-build-summary,
-.export-build-axis,
 .export-table-summary {
   min-width: 0;
   overflow: hidden;
@@ -653,9 +635,6 @@ function downloadCsv() {
   white-space: nowrap;
   color: var(--text-secondary);
   font-size: var(--fs-xs);
-}
-.export-build-axis {
-  color: var(--text-muted);
 }
 .export-summary-picker {
   display: grid;
@@ -697,6 +676,32 @@ function downloadCsv() {
 .table-title-input:focus {
   border-bottom: 1px solid var(--gold);
   background: rgba(255, 255, 255, 0.03);
+}
+.export-build-card {
+  padding: 10px;
+  background: rgba(var(--color-invert-rgb), 0.03);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.06);
+  border-radius: var(--r-sm);
+}
+.export-build-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+.export-build-head.expanded {
+  margin-bottom: 12px;
+}
+.export-build-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.export-icon-btn {
+  width: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0 !important;
 }
 
 /* Layout scroll rules */
@@ -746,7 +751,6 @@ function downloadCsv() {
     padding-right: 0;
   }
   .export-build-name {
-    flex: 1;
     width: auto;
     min-width: 0;
   }
