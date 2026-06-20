@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 
 import { calculatePackCE, getBaseItemKey, normalizeScores } from '../src/engine/packCalc.js'
+import { buildDerivedScoreState } from '../src/engine/derivedScores.js'
 
 const scores = normalizeScores({
   '[2,1]': { name: 'Paid Diamond', score: 1, batch: 1, iconId: 1 },
@@ -58,4 +59,28 @@ test('getBaseItemKey maps homogeneous derived items to their editable bases', ()
   assert.equal(getBaseItemKey(15, 2), '[15,1]')
   assert.equal(getBaseItemKey(17, 10), '[17,5]')
   assert.equal(getBaseItemKey(17, 24), '[17,21]')
+})
+
+test('derived score panel merges scroll and tome rows and keeps zero values visible', () => {
+  const state = buildDerivedScoreState(normalizeScores({
+    '[1,1]': { name: 'Free Diamond', score: 1, batch: 1, iconId: 1 },
+    '[2,1]': { name: 'Paid Diamond', score: 1, batch: 1, iconId: 1 },
+    '[13,1]': { name: 'Magic Crystal', score: 1, batch: 1, iconId: 1 },
+    '[12,1]': { name: 'Water', score: 100_000, batch: 1, iconId: 1 },
+    '[13,4]': { name: 'Rune Ticket', score: 100_000, batch: 1, iconId: 4 },
+    '[15,1]': { name: 'Perfume', score: 100_000, batch: 1, iconId: 1 },
+    '[19,1]': { name: 'Boss Ticket', score: 100_000, batch: 1, iconId: 1 },
+    '[20,1]': { name: 'Tower Ticket', score: 100_000, batch: 1, iconId: 1 },
+  }))
+
+  const rowKeys = state.readonlyRows.map(row => row.key)
+  assert.deepEqual(rowKeys, [
+    '[1,1]',
+    'derived:sandalphonCore',
+    'derived:astarothCore',
+    '[13,1]',
+  ])
+  assert.equal(state.readonlyRows.find(row => row.key === 'derived:sandalphonCore').score, 0)
+  assert.equal(state.readonlyRows.find(row => row.key === 'derived:astarothCore').score, 0)
+  assert.equal(state.readonlyRows.find(row => row.key === '[13,1]').score, 0)
 })

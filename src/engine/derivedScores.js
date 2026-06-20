@@ -19,52 +19,28 @@ function setScore(scores, key, score, reason) {
   }
 }
 
-const DERIVED_CORE_ITEMS = [
+const DERIVED_CORE_ROWS = [
   {
-    key: 'derived:sandalphonScroll',
-    name: '圣德芬的卷轴',
-    nameZh: '圣德芬的卷轴',
-    nameTw: '聖德芬的卷軸',
-    nameEn: 'Sandalphon’s Scroll',
-    nameJa: 'サンダルフォンの巻物',
-    nameKo: '산달폰의 두루마리',
+    key: 'derived:sandalphonCore',
+    name: '圣德芬的卷轴/魔书',
+    nameZh: '圣德芬的卷轴/魔书',
+    nameTw: '聖德芬的卷軸/魔書',
+    nameEn: 'Sandalphon’s Scroll/Tome',
+    nameJa: 'サンダルフォンの巻物/魔書',
+    nameKo: '산달폰의 두루마리/마서',
     iconId: 61,
     reference: 'lightWeapon',
     reasonKey: 'scoreReasonLightWeapon',
   },
   {
-    key: 'derived:sandalphonTome',
-    name: '圣德芬的魔书',
-    nameZh: '圣德芬的魔书',
-    nameTw: '聖德芬的魔書',
-    nameEn: 'Sandalphon’s Tome',
-    nameJa: 'サンダルフォンの魔書',
-    nameKo: '산달폰의 마서',
-    iconId: 62,
-    reference: 'lightWeapon',
-    reasonKey: 'scoreReasonLightWeapon',
-  },
-  {
-    key: 'derived:astarothScroll',
-    name: '亚斯塔禄的卷轴',
-    nameZh: '亚斯塔禄的卷轴',
-    nameTw: '亞斯塔錄的卷軸',
-    nameEn: 'Astaroth’s Scroll',
-    nameJa: 'アスタロトの巻物',
-    nameKo: '아스타로트의 두루마리',
+    key: 'derived:astarothCore',
+    name: '亚斯塔禄的卷轴/魔书',
+    nameZh: '亚斯塔禄的卷轴/魔书',
+    nameTw: '亞斯塔錄的卷軸/魔書',
+    nameEn: 'Astaroth’s Scroll/Tome',
+    nameJa: 'アスタロトの巻物/魔書',
+    nameKo: '아스타로트의 두루마리/마서',
     iconId: 63,
-    reference: 'forbiddenWeapon',
-    reasonKey: 'scoreReasonForbiddenWeapon',
-  },
-  {
-    key: 'derived:astarothTome',
-    name: '亚斯塔禄的魔书',
-    nameZh: '亚斯塔禄的魔书',
-    nameTw: '亞斯塔錄的魔書',
-    nameEn: 'Astaroth’s Tome',
-    nameJa: 'アスタロトの魔書',
-    nameKo: '아스타로트의 마서',
-    iconId: 64,
     reference: 'forbiddenWeapon',
     reasonKey: 'scoreReasonForbiddenWeapon',
   },
@@ -113,7 +89,7 @@ export function buildDerivedScoreState(baseScores) {
       reason: '跟随付费钻石基准',
       reasonKey: 'scoreReasonFreeDiamond',
     },
-    ...DERIVED_CORE_ITEMS.map(item => ({
+    ...DERIVED_CORE_ROWS.map(item => ({
       ...item,
       score: referenceScores[item.reference],
       batch: 1,
@@ -128,7 +104,7 @@ export function buildDerivedScoreState(baseScores) {
       reason: '魔女的奥秘召唤每周35抽推算',
       reasonKey: 'scoreReasonMagicCrystal',
     },
-  ].filter(row => row.score > 0)
+  ]
 
   return {
     scores,
