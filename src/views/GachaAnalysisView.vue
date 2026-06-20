@@ -694,7 +694,7 @@ const sideContributionOption = computed(() => {
 
 .gacha-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 420px);
   gap: 14px;
   margin-bottom: 14px;
 }
@@ -737,14 +737,14 @@ const sideContributionOption = computed(() => {
 .gacha-budget-head,
 .gacha-budget-row {
   display: grid;
-  grid-template-columns: 54px minmax(64px, 0.85fr) minmax(88px, 1fr);
+  grid-template-columns: 54px minmax(64px, 0.85fr) minmax(0, 1fr);
   align-items: center;
   gap: 8px;
 }
 
 .gacha-budget-head.has-net,
 .gacha-budget-row.has-net {
-  grid-template-columns: 48px minmax(62px, 0.75fr) minmax(78px, 1fr) minmax(78px, 1fr);
+  grid-template-columns: 48px minmax(58px, 0.7fr) minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .gacha-budget-head {
@@ -752,7 +752,11 @@ const sideContributionOption = computed(() => {
   color: var(--text-muted);
   font-size: var(--fs-xs);
   font-weight: 600;
-  white-space: nowrap;
+  line-height: 1.25;
+}
+
+.gacha-budget-head span {
+  min-width: 0;
 }
 
 .gacha-budget-head span:nth-child(n + 2) {
@@ -778,12 +782,14 @@ const sideContributionOption = computed(() => {
 }
 
 .gacha-budget-row small {
+  min-width: 0;
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
+  line-height: 1.25;
   text-align: right;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .gacha-side-note {
