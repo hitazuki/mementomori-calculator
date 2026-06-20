@@ -227,6 +227,7 @@ import VChart from 'vue-echarts'
 
 import { buildGachaAnalysis, calcAtLeastOne, GACHA_BANNERS, GACHA_TYPES } from '../engine/gachaCalc.js'
 import { normalizeScores } from '../engine/packCalc.js'
+import { applyDerivedScores } from '../engine/derivedScores.js'
 import { editableScores } from '../store/itemScores.js'
 import { baseChartOption, getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
@@ -241,7 +242,7 @@ const selectedType = ref('fourElements')
 const bannerOptions = Object.values(GACHA_BANNERS).map(({ key, label }) => ({ key, label }))
 const typeOptions = Object.values(GACHA_TYPES)
 
-const normalizedScores = computed(() => normalizeScores(editableScores))
+const normalizedScores = computed(() => applyDerivedScores(normalizeScores(editableScores)))
 const analysis = computed(() => buildGachaAnalysis(selectedBanner.value, selectedType.value, normalizedScores.value))
 const hasSideReturn = computed(() => analysis.value.sideDrops.length > 0)
 

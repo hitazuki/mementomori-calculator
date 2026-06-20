@@ -315,7 +315,7 @@ export default {
   gachaDesc: "운명 소환과 픽업 뽑기의 지정 캐릭터 확률, 천장 비용, 예산 성공률을 시각화합니다.",
   navForbiddenWeaponGacha: "무구 소환 분석",
   forbiddenWeaponGachaTitle: "무구 소환 가치 분석",
-  forbiddenWeaponGachaDesc: "아이템 점수표와 연동해 천광/금기무구 소환의 부산물 회수, 두루마리/마도서의 암묵 단가, 소환 수별 기대 수량을 분석합니다.",
+  forbiddenWeaponGachaDesc: "아이템 점수표와 연동해 천광/금기무구 소환과 마녀의 심오한 경지 소환의 부산물 회수, 핵심 아이템 추정 가치, 소환 보상을 분석합니다.",
 
   // Pack Planner
   planTabQuery: "패키지 검색",

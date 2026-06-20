@@ -286,7 +286,7 @@ export default {
   gachaDesc: "对命运召唤与精选召唤的指定角色概率、保底成本和预算达成率进行可视化分析。",
   navForbiddenWeaponGacha: "武具召唤分析",
   forbiddenWeaponGachaTitle: "武具召唤价值分析",
-  forbiddenWeaponGachaDesc: "联动道具评分表，分析天光/禁忌武具召唤券的副产物回收、卷轴/魔书隐含单价与抽数产物数量。",
+  forbiddenWeaponGachaDesc: "联动道具评分表，分析天光/禁忌武具与魔女的奥秘召唤的副产物回收、核心产物推算价值与抽数收益。",
   
   packBadgePermanent: "常驻",
   packBadgeWitch: "魔女",

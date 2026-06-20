@@ -6,9 +6,12 @@ import { buildForbiddenWeaponGachaAnalysis } from '../src/engine/forbiddenWeapon
 const scores = {
   '[16,6]': { score: 60, batch: 1 },
   '[16,7]': { score: 300, batch: 1 },
+  '[16,12]': { score: 300, batch: 1 },
   '[19,1]': { score: 50, batch: 1 },
+  '[20,1]': { score: 100, batch: 1 },
   '[12,1]': { score: 1, batch: 1000 },
   '[13,4]': { score: 20, batch: 1 },
+  '[15,1]': { score: 50, batch: 1 },
 }
 
 test('forbidden weapon gacha derives side-product recovery from item scores', () => {
@@ -75,4 +78,46 @@ test('light weapon gacha uses Sandalphon drops and scaled side products', () => 
   assert.equal(analysis.sideDrops.find(drop => drop.key === 'rune').qty, 4)
   assert.equal(analysis.selected.coreCounts.scroll, 20 * 0.12 + 1)
   assert.equal(analysis.selected.coreCounts.grimoire, 20 * 0.12 + 1)
+})
+
+test('witch secret gacha values the weekly 35-pull round with seven free pulls', () => {
+  const analysis = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'witchSecret',
+    selectedPulls: 35,
+  })
+
+  const expectedSideValue =
+    (0.20 * 1 * 50) +
+    (0.08 * 1 * 150) +
+    (0.17 * 3 * 100) +
+    (0.20 * 3 * 50) +
+    (0.18 * 15 * 20) +
+    (0.09 * 9 * 20)
+
+  assert.equal(analysis.ticketValue, 300)
+  assert.equal(analysis.sideValuePerPull, expectedSideValue)
+  assert.equal(analysis.selected.freePulls, 7)
+  assert.equal(analysis.selected.paidPulls, 28)
+  assert.equal(analysis.selected.totalCost, 28 * 300)
+  assert.equal(analysis.selected.coreCounts.magicCrystal, 35 * 0.12)
+  assert.equal(analysis.selected.coreCounts.tenPullGuarantee, 35)
+  assert.equal(analysis.selected.coreCounts.weeklyBonus, 10)
+  assert.equal(analysis.selected.totalCoreCount, 49.2)
+})
+
+test('witch secret weekly rewards cap after 35 pulls but ten-pull value continues', () => {
+  const freeOnly = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'witchSecret',
+    selectedPulls: 7,
+  }).selected
+  const afterWeeklyCap = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'witchSecret',
+    selectedPulls: 45,
+  }).selected
+
+  assert.equal(freeOnly.totalCost, 0)
+  assert.equal(freeOnly.coreCounts.weeklyBonus, 2)
+  assert.equal(freeOnly.totalCoreCount, 7 * 1.12 + 2)
+  assert.equal(afterWeeklyCap.coreCounts.weeklyBonus, 10)
+  assert.ok(Math.abs(afterWeeklyCap.totalCoreCount - (45 * 1.12 + 10)) < 1e-9)
 })

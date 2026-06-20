@@ -1,3 +1,5 @@
+import { getScore } from './packCalc.js'
+
 export const WEAPON_GACHA_CONFIGS = {
   forbidden: {
     key: 'forbidden',
@@ -49,6 +51,36 @@ export const WEAPON_GACHA_CONFIGS = {
       ],
     },
   },
+  witchSecret: {
+    key: 'witchSecret',
+    label: '魔女的奥秘召唤',
+    shortLabel: '魔女奥秘',
+    costItem: { itype: 16, iid: 12, fallbackValue: 300, label: '魔女的奥秘召唤券' },
+    originalDiamondCost: 300,
+    maxPulls: 70,
+    freePullsPerPeriod: 7,
+    weeklyCap: 35,
+    coreUnitLabel: '魔水晶',
+    implicitUnitLabel: '魔水晶推算价值',
+    coreDrops: [
+      { key: 'magicCrystal', label: '随机魔水晶', rate: 0.12, qty: 1 },
+      { key: 'tenPullGuarantee', label: '10抽保证折算', perPullQty: 1 },
+    ],
+    sideDrops: [
+      { key: 'perfume', label: '魔装香油 x1', rate: 0.20, qty: 1, itype: 15, iid: 1 },
+      { key: 'grandPerfume', label: '魔装高级香油 x1', rate: 0.08, qty: 1, itype: 15, iid: 2 },
+      { key: 'tower3', label: '无穷之塔挑战券 x3', rate: 0.17, qty: 3, itype: 20, iid: 1 },
+      { key: 'boss3', label: '首领挑战券 x3', rate: 0.20, qty: 3, itype: 19, iid: 1 },
+      { key: 'rune15', label: '符石兑换券 x15', rate: 0.18, qty: 15, itype: 13, iid: 4 },
+      { key: 'rune9', label: '符石兑换券 x9', rate: 0.09, qty: 9, itype: 13, iid: 4 },
+    ],
+    weeklyMilestones: [
+      { pull: 4, key: 'weeklyBonus', label: '第4次周奖励', qty: 2 },
+      { pull: 15, key: 'weeklyBonus', label: '第15次周奖励', qty: 2 },
+      { pull: 25, key: 'weeklyBonus', label: '第25次周奖励', qty: 3 },
+      { pull: 35, key: 'weeklyBonus', label: '第35次周奖励', qty: 3 },
+    ],
+  },
 }
 
 export const FORBIDDEN_WEAPON_GACHA = WEAPON_GACHA_CONFIGS.forbidden
@@ -72,6 +104,18 @@ function getScoreMeta(scores, itype, iid) {
 }
 
 export function getForbiddenMilestoneRewards(pulls, config = FORBIDDEN_WEAPON_GACHA) {
+  if (config.weeklyMilestones?.length) {
+    const eligiblePulls = Math.min(pulls, config.weeklyCap || pulls)
+    return config.weeklyMilestones
+      .filter(reward => reward.pull <= eligiblePulls)
+      .map(reward => ({
+        ...reward,
+        label: `${reward.label} ${config.coreUnitLabel || reward.key} x${reward.qty}`,
+      }))
+  }
+
+  if (!config.milestone?.interval) return []
+
   const count = Math.floor(pulls / config.milestone.interval)
   return Array.from({ length: count }, (_, index) => {
     const milestoneIndex = index + 1
@@ -97,8 +141,11 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
   ) || config.costItem.fallbackValue
 
   const sideDrops = config.sideDrops.map(drop => {
-    const unitScore = getUnitScore(scores, drop.itype, drop.iid)
-    const scoreMeta = getScoreMeta(scores, drop.itype, drop.iid)
+    const unitScore = getScore(scores, drop.itype, drop.iid) || getUnitScore(scores, drop.itype, drop.iid)
+    const rawScoreMeta = getScoreMeta(scores, drop.itype, drop.iid)
+    const scoreMeta = rawScoreMeta.score > 0
+      ? rawScoreMeta
+      : { score: unitScore, batch: 1 }
     const expectedQtyPerPull = drop.rate * drop.qty
     const expectedValuePerPull = expectedQtyPerPull * unitScore
     return {
@@ -113,12 +160,14 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
   const sideValuePerPull = sideDrops.reduce((sum, drop) => sum + drop.expectedValuePerPull, 0)
 
   const buildAtPulls = (pulls) => {
-    const totalCost = pulls * ticketValue
+    const freePulls = Math.min(config.freePullsPerPeriod || 0, pulls)
+    const paidPulls = Math.max(0, pulls - freePulls)
+    const totalCost = paidPulls * ticketValue
     const originalDiamondCost = pulls * config.originalDiamondCost
     const sideValue = pulls * sideValuePerPull
     const coreCounts = Object.fromEntries(config.coreDrops.map(drop => [
       drop.key,
-      pulls * drop.rate * drop.qty,
+      pulls * ((drop.rate || 0) * (drop.qty || 0) + (drop.perPullQty || 0)),
     ]))
 
     const milestoneRewards = getForbiddenMilestoneRewards(pulls, config)
@@ -133,6 +182,8 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
 
     return {
       pulls,
+      paidPulls,
+      freePulls,
       totalCost,
       originalDiamondCost,
       sideValue,
@@ -161,7 +212,10 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     rows[0]
   )
 
-  const comparePulls = [...new Set([10, 20, selectedPulls].filter(pull => pull >= 1 && pull <= maxPulls))]
+  const defaultComparePulls = config.key === 'witchSecret'
+    ? [config.freePullsPerPeriod, 15, 25, config.weeklyCap, selectedPulls, (config.weeklyCap || 35) + 10]
+    : [10, 20, selectedPulls]
+  const comparePulls = [...new Set(defaultComparePulls.filter(pull => pull >= 1 && pull <= maxPulls))]
     .sort((a, b) => a - b)
 
   return {
@@ -174,5 +228,6 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     rows,
     compareRows: comparePulls.map(buildAtPulls),
     bestNode,
+    weeklyFullNode: config.weeklyCap ? buildAtPulls(config.weeklyCap) : null,
   }
 }

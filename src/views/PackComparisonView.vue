@@ -19,24 +19,35 @@
           {{ $t('packScoreDesc') }}
         </div>
         <div v-show="showScores" class="flex-col gap-8" style="overflow-y:auto; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-subtle); padding-right:4px;">
-          <div v-for="(s, key) in editableScores" :key="key" v-show="s.isBase" style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);">
+          <div v-for="row in editableScoreRows" :key="row.key" style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);">
             <img
-              :src="`${baseUrl}images/items/Item_${String(s.iconId).padStart(4,'0')}.png`"
+              :src="`${baseUrl}images/items/Item_${String(row.item.iconId).padStart(4,'0')}.png`"
               style="width:24px;height:24px;flex-shrink:0;"
               @error="e => e.target.style.display='none'"
             />
-            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="itemDisplayName(s)">{{ itemDisplayName(s) }}</span>
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="itemDisplayName(row.item)">{{ itemDisplayName(row.item) }}</span>
             <input
-              v-if="!isLocked(key)"
+              v-if="!isLocked(row.key)"
               class="form-input"
               type="number"
-              v-model.number="s.score"
+              v-model.number="editableScores[row.key].score"
               style="width:64px;padding:2px 6px;font-size:var(--fs-sm);min-height:var(--control-h-sm);text-align:right;"
               min="0"
               step="1"
             />
-            <span v-else class="num-value" style="width:64px;text-align:right;font-size:var(--fs-sm);color:var(--gold);">1</span>
-            <span v-if="s.batch > 1" style="font-size:var(--fs-xs);color:var(--text-muted);min-width:50px;text-align:left;">/ {{ s.batch.toLocaleString() }}</span>
+            <span v-else class="num-value" style="width:64px;text-align:right;font-size:var(--fs-sm);color:var(--gold);">{{ formatScoreForPanel(row.item.score) }}</span>
+            <span v-if="row.item.batch > 1" style="font-size:var(--fs-xs);color:var(--text-muted);min-width:50px;text-align:left;">/ {{ row.item.batch.toLocaleString() }}</span>
+          </div>
+          <div class="score-derived-divider">推算/只读价值</div>
+          <div v-for="row in readonlyScoreRows" :key="row.key" class="score-derived-row">
+            <img
+              :src="`${baseUrl}images/items/Item_${String(row.iconId).padStart(4,'0')}.png`"
+              style="width:24px;height:24px;flex-shrink:0;"
+              @error="e => e.target.style.display='none'"
+            />
+            <span class="score-derived-name" :title="itemDisplayName(row)">{{ itemDisplayName(row) }}</span>
+            <span class="num-value score-derived-value">{{ formatScoreForPanel(row.score) }}</span>
+            <small>{{ row.reason }}</small>
           </div>
         </div>
       </div>
@@ -244,6 +255,7 @@ onMounted(async () => {
   }
 })
 import { calculatePackCE, normalizeScores, getItemInfo, getBaseItemKey } from '../engine/packCalc.js'
+import { buildDerivedScoreState } from '../engine/derivedScores.js'
 import { editableScores } from '../store/itemScores.js'
 
 const showScores = ref(true)
@@ -317,7 +329,13 @@ function getCeColor(ce) {
 
 // --- Scores (shared) ---
 // editableScores is now imported from store/itemScores.js
-const normalizedScores = computed(() => normalizeScores(editableScores))
+const baseScores = computed(() => normalizeScores(editableScores))
+const derivedScoreState = computed(() => buildDerivedScoreState(baseScores.value))
+const normalizedScores = computed(() => derivedScoreState.value.scores)
+const readonlyScoreRows = computed(() => derivedScoreState.value.readonlyRows)
+const editableScoreRows = computed(() => Object.entries(editableScores)
+  .filter(([key, score]) => score.isBase && !isReadonlyScore(key))
+  .map(([key, item]) => ({ key, item })))
 
 // --- Filters ---
 const filter = reactive({
@@ -461,6 +479,14 @@ function toggleExpand(i) {
 
 const LOCKED_SCORES = { '[2,1]': true }
 function isLocked(key) { return !!LOCKED_SCORES[key] }
+function isReadonlyScore(key) {
+  return key === '[1,1]' || key === '[13,1]'
+}
+function formatScoreForPanel(value) {
+  const numeric = Number(value) || 0
+  if (Math.abs(numeric) > 0 && Math.abs(numeric) < 10) return numeric.toFixed(2)
+  return Math.round(numeric).toLocaleString()
+}
 
 </script>
 
@@ -485,6 +511,42 @@ function isLocked(key) { return !!LOCKED_SCORES[key] }
 .badge-other {
   background-color: #7f8c8d;
   color: white;
+}
+
+.score-derived-divider {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-subtle);
+  color: var(--gold);
+  font-size: var(--fs-xs);
+}
+
+.score-derived-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+}
+
+.score-derived-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-derived-value {
+  text-align: right;
+  color: var(--gold);
+  font-size: var(--fs-sm);
+}
+
+.score-derived-row small {
+  grid-column: 2 / -1;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.25;
 }
 
 </style>

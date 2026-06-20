@@ -29,16 +29,16 @@
           <div class="stat-label">{{ analysis.config.costItem.label }}价值</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">{{ fmtPercent(selected.sideRecoveryRate) }}</div>
-          <div class="stat-label">副产物回收率</div>
+          <div class="stat-value">{{ isWitchSecret ? `${selected.paidPulls} 抽` : fmtPercent(selected.sideRecoveryRate) }}</div>
+          <div class="stat-label">{{ isWitchSecret ? '需补付费抽' : '副产物回收率' }}</div>
         </div>
         <div class="stat-box">
           <div class="stat-value">{{ fmtDiamonds(selected.implicitCoreUnit) }}</div>
-          <div class="stat-label">卷轴/魔书隐含单价</div>
+          <div class="stat-label">{{ implicitUnitLabel }}</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">{{ analysis.bestNode.pulls }} 抽</div>
-          <div class="stat-label">最低隐含单价节点</div>
+          <div class="stat-value">{{ isWitchSecret ? fmtQty(selected.totalCoreCount) : `${analysis.bestNode.pulls} 抽` }}</div>
+          <div class="stat-label">{{ isWitchSecret ? '预计魔水晶' : '最低隐含单价节点' }}</div>
         </div>
       </section>
 
@@ -95,14 +95,11 @@
             <span>用于结论计算</span>
             <span class="value-display">{{ selectedPulls }} 抽</span>
           </label>
-          <input class="form-range" type="range" min="1" max="100" step="1" v-model.number="selectedPulls">
-          <input class="form-input weapon-pull-input" type="number" min="1" max="100" v-model.number="selectedPulls">
+          <input class="form-range" type="range" min="1" :max="pullMax" step="1" v-model.number="selectedPulls">
+          <input class="form-input weapon-pull-input" type="number" min="1" :max="pullMax" v-model.number="selectedPulls">
         </div>
         <div class="weapon-preset-row">
-          <button class="btn btn-sm" :class="selectedPulls === 10 ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = 10">10 抽</button>
-          <button class="btn btn-sm" :class="selectedPulls === 20 ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = 20">20 抽</button>
-          <button class="btn btn-sm" :class="selectedPulls === 50 ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = 50">50 抽</button>
-          <button class="btn btn-sm" :class="selectedPulls === 100 ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = 100">100 抽</button>
+          <button v-for="pull in presetPulls" :key="pull" class="btn btn-sm" :class="selectedPulls === pull ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = pull">{{ pull }} 抽</button>
         </div>
       </div>
 
@@ -113,17 +110,17 @@
           <span>总成本</span>
             <b>{{ fmtDiamonds(selected.totalCost) }}</b>
           </div>
+          <div v-if="isWitchSecret">
+            <span>免费/付费抽</span>
+            <b>{{ selected.freePulls }} / {{ selected.paidPulls }}</b>
+          </div>
           <div>
             <span>副产物抵扣</span>
             <b>{{ fmtDiamonds(selected.sideValue) }}</b>
           </div>
-          <div>
-            <span>{{ coreScrollLabel }}预计数量</span>
-            <b>{{ fmtQty(selected.coreCounts.scroll) }}</b>
-          </div>
-          <div>
-            <span>{{ coreGrimoireLabel }}预计数量</span>
-            <b>{{ fmtQty(selected.coreCounts.grimoire) }}</b>
+          <div v-for="row in selectedCoreRows" :key="row.key">
+            <span>{{ row.label }}</span>
+            <b>{{ fmtQty(row.qty) }}</b>
           </div>
           <div>
             <span>核心产物总数</span>
@@ -137,10 +134,18 @@
           {{ showFormula ? '收起公式' : '查看公式计算流程' }}
         </button>
         <div v-show="showFormula" class="weapon-formula">
+          <template v-if="isWitchSecret">
+            <p>每周按 7 次免费抽、35 次周累抽上限展示；第 4/15/25/35 次周奖励已并入魔水晶数量。</p>
+            <p>10 抽保证获得魔水晶 x10 不随周重置，折算为每抽稳定 +1 魔水晶。</p>
+            <p>魔水晶推算价值 = max(0, 付费抽成本 - 非魔水晶副产物价值) / 预计魔水晶数量。</p>
+            <p>35 抽后不再获得每周累抽奖励，但仍保留随机魔水晶与 10 抽保证折算收益。</p>
+          </template>
+          <template v-else>
           <p>副产物价值来自道具评分表，卷轴/魔书不单独手填。</p>
           <p>副产物回收率 = 副产物期望价值 / {{ analysis.config.costItem.label }}总价值。</p>
           <p>卷轴/魔书隐含单价 = max(0, 总成本 - 副产物价值) / 预计核心产物数量。</p>
           <p>每 10 抽获得一次累计奖励，卷轴/魔书交替出现，不限次数；这些奖励已并入预计数量。</p>
+          </template>
         </div>
       </div>
 
@@ -161,7 +166,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -171,6 +176,7 @@ import VChart from 'vue-echarts'
 
 import { buildForbiddenWeaponGachaAnalysis, WEAPON_GACHA_CONFIGS } from '../engine/forbiddenWeaponGachaCalc.js'
 import { normalizeScores } from '../engine/packCalc.js'
+import { applyDerivedScores } from '../engine/derivedScores.js'
 import { editableScores } from '../store/itemScores.js'
 import { baseChartOption, getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
@@ -183,16 +189,37 @@ const selectedBanner = ref('forbidden')
 const selectedPulls = ref(20)
 const showFormula = ref(false)
 const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
+const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
+const pullMax = computed(() => WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100)
+const presetPulls = computed(() => isWitchSecret.value ? [7, 15, 25, 35] : [10, 20, 50, 100])
 
-const normalizedScores = computed(() => normalizeScores(editableScores))
+const normalizedScores = computed(() => applyDerivedScores(normalizeScores(editableScores)))
 const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScores.value, {
   bannerKey: selectedBanner.value,
   selectedPulls: selectedPulls.value,
-  maxPulls: 100,
+  maxPulls: WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100,
 }))
 const selected = computed(() => analysis.value.selected)
-const coreScrollLabel = computed(() => analysis.value.config.coreDrops.find(drop => drop.key === 'scroll')?.label || '卷轴')
-const coreGrimoireLabel = computed(() => analysis.value.config.coreDrops.find(drop => drop.key === 'grimoire')?.label || '魔书')
+const implicitUnitLabel = computed(() => analysis.value.config.implicitUnitLabel || '卷轴/魔书隐含单价')
+const selectedCoreRows = computed(() => {
+  const rows = analysis.value.config.coreDrops.map(drop => ({
+    key: drop.key,
+    label: `${drop.label}预计数量`,
+    qty: selected.value.coreCounts[drop.key] || 0,
+  }))
+  if (selected.value.coreCounts.weeklyBonus) {
+    rows.push({
+      key: 'weeklyBonus',
+      label: '每周累抽奖励',
+      qty: selected.value.coreCounts.weeklyBonus,
+    })
+  }
+  return rows
+})
+
+watch(selectedBanner, banner => {
+  selectedPulls.value = banner === 'witchSecret' ? 35 : 20
+})
 
 const fmtDiamonds = value => `${Math.round(value).toLocaleString()} 钻`
 const fmtScoreValue = value => {
@@ -226,8 +253,11 @@ const implicitCostOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
   const rows = analysis.value.rows
+  const milestonePulls = analysis.value.config.weeklyMilestones?.length
+    ? analysis.value.config.weeklyMilestones.map(reward => reward.pull)
+    : rows.filter(row => row.pulls % analysis.value.config.milestone.interval === 0).map(row => row.pulls)
   const milestonePoints = rows
-    .filter(row => row.pulls % analysis.value.config.milestone.interval === 0)
+    .filter(row => milestonePulls.includes(row.pulls))
     .map(row => ({
       name: `${row.pulls}抽`,
       coord: [row.pulls, Math.round(row.implicitCoreUnit)],
@@ -258,7 +288,7 @@ const implicitCostOption = computed(() => {
     },
     series: [
       {
-        name: '卷轴/魔书隐含单价',
+        name: implicitUnitLabel.value,
         type: 'line',
         smooth: true,
         symbolSize: 4,
@@ -279,6 +309,32 @@ const quantityOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
   const rows = analysis.value.rows
+  const coreSeries = analysis.value.config.coreDrops.map((drop, index) => ({
+    name: drop.label,
+    type: 'line',
+    smooth: true,
+    lineStyle: { width: 3, color: LINE_COLORS[index % LINE_COLORS.length] },
+    itemStyle: { color: LINE_COLORS[index % LINE_COLORS.length] },
+    data: rows.map(row => +(row.coreCounts[drop.key] || 0).toFixed(2)),
+  }))
+  if (isWitchSecret.value) {
+    coreSeries.push({
+      name: '每周累抽奖励',
+      type: 'line',
+      smooth: true,
+      lineStyle: { width: 3, color: LINE_COLORS[2], type: 'dashed' },
+      itemStyle: { color: LINE_COLORS[2] },
+      data: rows.map(row => +(row.coreCounts.weeklyBonus || 0).toFixed(2)),
+    })
+  }
+  const sideSeries = analysis.value.sideDrops.slice(0, isWitchSecret.value ? 4 : 3).map((drop, index) => ({
+    name: drop.label.replace(/\sx\d+$/, ''),
+    type: 'line',
+    smooth: true,
+    lineStyle: { width: 2, color: LINE_COLORS[(index + 3) % LINE_COLORS.length], type: 'dashed' },
+    itemStyle: { color: LINE_COLORS[(index + 3) % LINE_COLORS.length] },
+    data: rows.map(row => +(row.sideQuantities[drop.key] || 0).toFixed(2)),
+  }))
 
   return {
     ...baseChartOption('', '', isDark),
@@ -286,9 +342,8 @@ const quantityOption = computed(() => {
       ...theme.tooltip,
       trigger: 'axis',
       formatter: chartTooltip(rows, '累计抽数', [
-        { label: '强化水', format: row => `${Math.round(row.sideQuantities.water).toLocaleString()}` },
-        { label: '符石兑换券', format: row => fmtQty(row.sideQuantities.rune) },
-        { label: '首领挑战券', format: row => fmtQty(row.sideQuantities.boss1 + row.sideQuantities.boss3) },
+        { label: '副产物抵扣', format: row => fmtDiamonds(row.sideValue) },
+        { label: '核心产物总数', format: row => fmtQty(row.totalCoreCount) },
       ]),
     },
     legend: { ...theme.legend, top: 8, right: 16 },
@@ -303,48 +358,7 @@ const quantityOption = computed(() => {
       axisLabel: { ...theme.axisLabel },
       splitLine: theme.splitLine,
     },
-    series: [
-      {
-        name: coreScrollLabel.value,
-        type: 'line',
-        smooth: true,
-        lineStyle: { width: 3, color: LINE_COLORS[0] },
-        itemStyle: { color: LINE_COLORS[0] },
-        data: rows.map(row => +row.coreCounts.scroll.toFixed(2)),
-      },
-      {
-        name: coreGrimoireLabel.value,
-        type: 'line',
-        smooth: true,
-        lineStyle: { width: 3, color: LINE_COLORS[1] },
-        itemStyle: { color: LINE_COLORS[1] },
-        data: rows.map(row => +row.coreCounts.grimoire.toFixed(2)),
-      },
-      {
-        name: '首领挑战券',
-        type: 'line',
-        smooth: true,
-        lineStyle: { width: 2, color: LINE_COLORS[2], type: 'dashed' },
-        itemStyle: { color: LINE_COLORS[2] },
-        data: rows.map(row => +(row.sideQuantities.boss1 + row.sideQuantities.boss3).toFixed(2)),
-      },
-      {
-        name: '符石兑换券',
-        type: 'line',
-        smooth: true,
-        lineStyle: { width: 2, color: LINE_COLORS[3], type: 'dashed' },
-        itemStyle: { color: LINE_COLORS[3] },
-        data: rows.map(row => +row.sideQuantities.rune.toFixed(2)),
-      },
-      {
-        name: '强化水(千瓶)',
-        type: 'line',
-        smooth: true,
-        lineStyle: { width: 2, color: LINE_COLORS[4], type: 'dashed' },
-        itemStyle: { color: LINE_COLORS[4] },
-        data: rows.map(row => +(row.sideQuantities.water / 1000).toFixed(2)),
-      },
-    ],
+    series: [...coreSeries, ...sideSeries],
   }
 })
 
@@ -377,7 +391,7 @@ const costBreakdownOption = computed(() => {
         data: rows.map(row => Math.round(row.sideValue)),
       },
       {
-        name: '卷轴/魔书隐含成本',
+        name: `${implicitUnitLabel.value.replace('单价', '成本')}`,
         type: 'bar',
         stack: 'cost',
         itemStyle: { color: LINE_COLORS[0] },
