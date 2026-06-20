@@ -4,12 +4,16 @@ import assert from 'node:assert/strict'
 import { buildForbiddenWeaponGachaAnalysis } from '../src/engine/forbiddenWeaponGachaCalc.js'
 
 const scores = {
+  '[16,1]': { score: 300, batch: 1 },
   '[16,6]': { score: 60, batch: 1 },
   '[16,7]': { score: 300, batch: 1 },
   '[16,12]': { score: 300, batch: 1 },
   '[19,1]': { score: 50, batch: 1 },
   '[20,1]': { score: 100, batch: 1 },
   '[12,1]': { score: 1, batch: 1000 },
+  '[12,2]': { score: 20, batch: 1 },
+  '[13,1]': { score: 180, batch: 1 },
+  '[13,3]': { score: 200, batch: 1000 },
   '[13,4]': { score: 20, batch: 1 },
   '[15,1]': { score: 50, batch: 1 },
 }
@@ -120,4 +124,44 @@ test('witch secret weekly rewards cap after 35 pulls but ten-pull value continue
   assert.equal(freeOnly.totalCoreCount, 7 * 1.12 + 2)
   assert.equal(afterWeeklyCap.coreCounts.weeklyBonus, 10)
   assert.ok(Math.abs(afterWeeklyCap.totalCoreCount - (45 * 1.12 + 10)) < 1e-9)
+})
+
+test('seraph oracle gacha repeats weekly milestone rounds without extra free pulls', () => {
+  const fullAnalysis = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'seraphOracle',
+    selectedPulls: 100,
+  })
+  const at50 = fullAnalysis.rows[49]
+  const at100 = fullAnalysis.selected
+  const noFreeCycle = fullAnalysis.noFreeCycleNode
+
+  const baseSideValue =
+    (0.20 * 200 * 0.001) +
+    (0.10 * 3 * 20) +
+    (0.15 * 3 * 50) +
+    (0.15 * 1 * 100) +
+    (0.15 * 20 * 20) +
+    (0.10 * 1 * 150) +
+    (0.15 * 1 * 50)
+  const milestoneSideValue = (1000 + 1500 + 2500) * 0.2 + (2 + 3 + 5) * 180
+
+  assert.equal(at50.freePulls, 7)
+  assert.equal(at50.paidPulls, 43)
+  assert.equal(at50.milestoneRewards.length, 9)
+  assert.equal(at50.coreCounts.relic, 1.6)
+  assert.ok(Math.abs(at50.sideValue - (baseSideValue * 50 + milestoneSideValue)) < 1e-9)
+  assert.equal(at100.freePulls, 7)
+  assert.equal(at100.paidPulls, 93)
+  assert.equal(at100.milestoneRewards.length, 18)
+  assert.equal(at100.coreCounts.relic, 3.2)
+  assert.equal(noFreeCycle.freePulls, 0)
+  assert.equal(noFreeCycle.paidPulls, 50)
+  assert.equal(noFreeCycle.coreCounts.relic, 1.6)
+  assert.equal(fullAnalysis.noFreeCycleRows.length, 50)
+  assert.equal(fullAnalysis.noFreeCycleRows[9].paidPulls, 10)
+  assert.ok(Math.abs(fullAnalysis.noFreeCycleRows[24].coreCounts.relic - 0.6) < 1e-9)
+  assert.equal(fullAnalysis.noFreeCycleRows[49].coreCounts.relic, 1.6)
+  assert.equal(fullAnalysis.rows.length, 150)
+  assert.ok(fullAnalysis.compareRows.some(row => row.pulls === 100))
+  assert.ok(fullAnalysis.compareRows.some(row => row.pulls === 150))
 })

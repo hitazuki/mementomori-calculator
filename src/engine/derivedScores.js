@@ -3,6 +3,7 @@ import { buildForbiddenWeaponGachaAnalysis } from './forbiddenWeaponGachaCalc.js
 const FREE_DIAMOND_KEY = '[1,1]'
 const PAID_DIAMOND_KEY = '[2,1]'
 const MAGIC_CRYSTAL_KEY = '[13,1]'
+const RELIC_KEYS = ['[13,6]', '[13,7]', '[13,8]', '[13,9]']
 
 function cloneScores(scores) {
   return Object.fromEntries(Object.entries(scores || {}).map(([key, value]) => [key, { ...value }]))
@@ -71,6 +72,16 @@ export function buildDerivedScoreState(baseScores) {
   const magicCrystalScore = witchSecret.weeklyFullNode?.implicitCoreUnit || 0
   setScore(scores, MAGIC_CRYSTAL_KEY, magicCrystalScore, '魔女的奥秘召唤每周35抽推算')
 
+  const seraphOracle = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'seraphOracle',
+    maxPulls: 50,
+    selectedPulls: 50,
+  })
+  const relicScore = seraphOracle.rows.find(row => row.pulls === 50)?.implicitCoreUnit || 0
+  for (const key of RELIC_KEYS) {
+    setScore(scores, key, relicScore, '圣天使的神谕召唤本周50抽推算')
+  }
+
   const referenceScores = {
     lightWeapon: lightWeapon.bestNode.implicitCoreUnit,
     forbiddenWeapon: forbiddenWeapon.bestNode.implicitCoreUnit,
@@ -104,6 +115,20 @@ export function buildDerivedScoreState(baseScores) {
       reason: '魔女的奥秘召唤每周35抽推算',
       reasonKey: 'scoreReasonMagicCrystal',
     },
+    {
+      key: RELIC_KEYS[0],
+      ...scores[RELIC_KEYS[0]],
+      score: relicScore,
+      label: '圣遗物',
+      name: '圣遗物',
+      nameZh: '圣遗物',
+      nameTw: '聖遺物',
+      nameEn: 'Relics',
+      nameJa: '聖遺物',
+      nameKo: '성유물',
+      reason: '圣天使的神谕召唤本周50抽推算',
+      reasonKey: 'scoreReasonRelic',
+    },
   ]
 
   return {
@@ -113,6 +138,7 @@ export function buildDerivedScoreState(baseScores) {
       lightWeapon,
       forbiddenWeapon,
       witchSecret,
+      seraphOracle,
     },
   }
 }

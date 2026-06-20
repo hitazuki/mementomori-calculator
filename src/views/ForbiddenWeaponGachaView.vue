@@ -29,20 +29,20 @@
           <div class="stat-label">{{ t('weaponGachaTicketValue', { item: costItemLabel }) }}</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">{{ isWitchSecret ? fmtPulls(selected.paidPulls) : fmtPercent(selected.sideRecoveryRate) }}</div>
-          <div class="stat-label">{{ isWitchSecret ? t('weaponGachaPaidPulls') : t('weaponGachaSideRecovery') }}</div>
+          <div class="stat-value">{{ hasFreePulls ? fmtPulls(selected.paidPulls) : fmtPercent(selected.sideRecoveryRate) }}</div>
+          <div class="stat-label">{{ hasFreePulls ? t('weaponGachaPaidPulls') : t('weaponGachaSideRecovery') }}</div>
         </div>
         <div class="stat-box">
           <div class="stat-value">{{ fmtDiamonds(selected.implicitCoreUnit) }}</div>
           <div class="stat-label">{{ implicitUnitLabel }}</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">{{ isWitchSecret ? fmtQty(selected.totalCoreCount) : fmtPulls(analysis.bestNode.pulls) }}</div>
-          <div class="stat-label">{{ isWitchSecret ? t('weaponGachaExpectedMagicCrystal') : t('weaponGachaBestNode') }}</div>
+          <div class="stat-value">{{ usesExpectedCoreSummary ? fmtQty(selected.totalCoreCount) : fmtPulls(analysis.bestNode.pulls) }}</div>
+          <div class="stat-label">{{ usesExpectedCoreSummary ? expectedCoreSummaryLabel : t('weaponGachaBestNode') }}</div>
         </div>
       </section>
 
-      <section class="card weapon-chart-card">
+      <section v-if="!isSeraphOracle" class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
             <div class="card-title">{{ t('weaponGachaCoreCostChart') }}</div>
@@ -54,11 +54,64 @@
         </div>
       </section>
 
+      <section v-else class="card weapon-chart-card">
+        <div class="chart-toolbar">
+          <div class="chart-toolbar-main">
+            <div class="card-title">{{ t('weaponGachaSeraphMilestoneTitle') }}</div>
+            <span class="tag tag-gold">{{ t('weaponGachaDiscreteMilestone') }}</span>
+          </div>
+        </div>
+        <div class="weapon-table-grid">
+          <div v-for="group in seraphMilestoneGroups" :key="group.key" class="weapon-table-panel">
+            <div class="weapon-table-title">{{ t(group.titleKey) }}</div>
+            <div class="weapon-table-wrap">
+              <table class="weapon-value-table">
+                <thead>
+                  <tr>
+                    <th>{{ t('weaponGachaMilestone') }}</th>
+                    <th>{{ t('weaponGachaRoundChance') }}</th>
+                    <th>{{ t('weaponGachaFreePaidPulls') }}</th>
+                    <th>{{ t('weaponGachaSideDeduction') }}</th>
+                    <th>{{ t('weaponGachaExpectedRelic') }}</th>
+                    <th>{{ t('weaponGachaRelicValue') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in group.rows" :key="`${group.key}:${row.pullInRound}`">
+                    <td>
+                      <b>{{ fmtPulls(row.pullInRound) }}</b>
+                      <small>{{ row.note }}</small>
+                    </td>
+                    <td>{{ fmtPercent(row.roundChance) }}</td>
+                    <td>{{ row.freePulls }} / {{ row.paidPulls }}</td>
+                    <td>{{ fmtDiamonds(row.sideValue) }}</td>
+                    <td>{{ fmtQty(row.totalCoreCount) }}</td>
+                    <td>{{ fmtDiamonds(row.implicitCoreUnit) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section v-if="isSeraphOracle" class="card weapon-chart-card">
+        <div class="chart-toolbar">
+          <div class="chart-toolbar-main">
+            <div class="card-title">{{ t('weaponGachaSeraphSegmentTitle') }}</div>
+            <span class="tag tag-purple">{{ t('weaponGachaMarginalValue') }}</span>
+          </div>
+        </div>
+        <div class="chart-frame weapon-chart-frame">
+          <v-chart class="chart" :option="seraphSegmentOption" autoresize />
+        </div>
+      </section>
+
       <section class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
-            <div class="card-title">{{ t('weaponGachaQuantityChart') }}</div>
-            <span class="tag tag-purple">{{ t('weaponGachaExpectedQty') }}</span>
+            <div class="card-title">{{ quantityChartTitle }}</div>
+            <span class="tag tag-purple">{{ quantityChartTag }}</span>
           </div>
         </div>
         <div class="chart-frame weapon-chart-frame">
@@ -110,7 +163,7 @@
           <span>{{ t('weaponGachaTotalCost') }}</span>
             <b>{{ fmtDiamonds(selected.totalCost) }}</b>
           </div>
-          <div v-if="isWitchSecret">
+          <div v-if="hasFreePulls">
             <span>{{ t('weaponGachaFreePaidPulls') }}</span>
             <b>{{ selected.freePulls }} / {{ selected.paidPulls }}</b>
           </div>
@@ -122,9 +175,43 @@
             <span>{{ row.label }}</span>
             <b>{{ fmtQty(row.qty) }}</b>
           </div>
+          <div v-for="row in selectedMilestoneRows" :key="row.key">
+            <span>{{ row.label }}</span>
+            <b>{{ fmtQty(row.qty) }}</b>
+          </div>
           <div>
             <span>{{ t('weaponGachaCoreTotal') }}</span>
             <b>{{ fmtQty(selected.totalCoreCount) }}</b>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="isSeraphOracle && noFreeCycle" class="card">
+        <div class="card-title">{{ t('weaponGachaNoFreeCycleTitle') }}</div>
+        <div class="weapon-result-list">
+          <div>
+            <span>{{ t('weaponGachaPullCount') }}</span>
+            <b>{{ fmtPulls(noFreeCycle.pulls) }}</b>
+          </div>
+          <div>
+            <span>{{ t('weaponGachaFreePaidPulls') }}</span>
+            <b>{{ noFreeCycle.freePulls }} / {{ noFreeCycle.paidPulls }}</b>
+          </div>
+          <div>
+            <span>{{ t('weaponGachaTotalCost') }}</span>
+            <b>{{ fmtDiamonds(noFreeCycle.totalCost) }}</b>
+          </div>
+          <div>
+            <span>{{ t('weaponGachaSideDeduction') }}</span>
+            <b>{{ fmtDiamonds(noFreeCycle.sideValue) }}</b>
+          </div>
+          <div>
+            <span>{{ t('weaponGachaExpectedRelic') }}</span>
+            <b>{{ fmtQty(noFreeCycle.totalCoreCount) }}</b>
+          </div>
+          <div>
+            <span>{{ t('weaponGachaRelicValue') }}</span>
+            <b>{{ fmtDiamonds(noFreeCycle.implicitCoreUnit) }}</b>
           </div>
         </div>
       </div>
@@ -139,6 +226,12 @@
             <p>{{ t('weaponGachaWitchFormulaGuarantee') }}</p>
             <p>{{ t('weaponGachaWitchFormulaValue') }}</p>
             <p>{{ t('weaponGachaWitchFormulaAfterCap') }}</p>
+          </template>
+          <template v-else-if="isSeraphOracle">
+            <p>{{ t('weaponGachaSeraphFormulaCycle') }}</p>
+            <p>{{ t('weaponGachaSeraphFormulaFree') }}</p>
+            <p>{{ t('weaponGachaSeraphFormulaValue') }}</p>
+            <p>{{ t('weaponGachaSeraphFormulaMilestone') }}</p>
           </template>
           <template v-else>
           <p>{{ t('weaponGachaWeaponFormulaScores') }}</p>
@@ -190,8 +283,15 @@ const selectedPulls = ref(20)
 const showFormula = ref(false)
 const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
 const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
+const isSeraphOracle = computed(() => selectedBanner.value === 'seraphOracle')
+const hasFreePulls = computed(() => Boolean(analysis.value.config.freePullsPerPeriod))
+const usesExpectedCoreSummary = computed(() => analysis.value.config.summaryMode === 'expectedCore' || isWitchSecret.value)
 const pullMax = computed(() => WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100)
-const presetPulls = computed(() => isWitchSecret.value ? [7, 15, 25, 35] : [10, 20, 50, 100])
+const presetPulls = computed(() => {
+  if (isWitchSecret.value) return [7, 15, 25, 35]
+  if (isSeraphOracle.value) return [7, 10, 25, 50, 100, 150]
+  return [10, 20, 50, 100]
+})
 
 const normalizedScores = computed(() => applyDerivedScores(normalizeScores(editableScores)))
 const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScores.value, {
@@ -200,6 +300,7 @@ const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScor
   maxPulls: WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100,
 }))
 const selected = computed(() => analysis.value.selected)
+const noFreeCycle = computed(() => analysis.value.noFreeCycleNode)
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
 const tr = (key, fallback, params = {}) => key ? t(key, params) : fallback
 const costItemLabel = computed(() => tr(analysis.value.config.costItem.nameKey, analysis.value.config.costItem.label))
@@ -207,6 +308,16 @@ const implicitUnitLabel = computed(() => tr(
   analysis.value.config.implicitUnitLabelKey,
   analysis.value.config.implicitUnitLabel || t('weaponGachaCoreImplicitUnit')
 ))
+const expectedCoreSummaryLabel = computed(() => tr(
+  analysis.value.config.summaryCoreLabelKey,
+  isWitchSecret.value ? t('weaponGachaExpectedMagicCrystal') : t('weaponGachaExpectedCore')
+))
+const quantityChartTitle = computed(() => isSeraphOracle.value
+  ? t('weaponGachaSeraphValueStructureTitle')
+  : t('weaponGachaQuantityChart'))
+const quantityChartTag = computed(() => isSeraphOracle.value
+  ? t('weaponGachaValueConverted')
+  : t('weaponGachaExpectedQty'))
 
 function itemName(itype, iid, fallback = '') {
   const item = normalizedScores.value[`[${itype},${iid}]`]
@@ -242,8 +353,139 @@ const selectedCoreRows = computed(() => {
   return rows
 })
 
+const selectedMilestoneRows = computed(() => selected.value.milestoneRewards
+  .filter(reward => !reward.core && reward.itype && reward.iid)
+  .reduce((rows, reward) => {
+    const key = `${reward.itype}:${reward.iid}`
+    const existing = rows.find(row => row.key === key)
+    const qty = reward.expectedQty ?? ((reward.qty || 0) * (reward.rate ?? 1))
+    if (existing) {
+      existing.qty += qty
+      return rows
+    }
+    rows.push({
+      key,
+      label: t('weaponGachaMilestoneRewardMerged', { item: dropBaseName(reward) }),
+      qty,
+    })
+    return rows
+  }, []))
+
+const zeroAnalysisRow = {
+  pulls: 0,
+  paidPulls: 0,
+  freePulls: 0,
+  totalCost: 0,
+  sideValue: 0,
+  coreBudget: 0,
+  totalCoreCount: 0,
+  implicitCoreUnit: 0,
+}
+
+const rowAtFrom = (rows, pulls) => pulls <= 0
+  ? zeroAnalysisRow
+  : rows[pulls - 1] || rows.at(-1) || zeroAnalysisRow
+
+const rowAtPulls = pulls => rowAtFrom(analysis.value.rows, pulls)
+
+const seraphMilestonePulls = computed(() => {
+  const rewards = analysis.value.config.milestone?.rewards || []
+  return [...new Set(rewards.map(reward => reward.pull))]
+    .filter(Boolean)
+    .sort((a, b) => a - b)
+})
+
+const seraphRoundChance = pullInRound => {
+  if (pullInRound >= 50) return 1
+  if (pullInRound >= 25) return 1 - (1 - 0.2) * (1 - 0.4)
+  if (pullInRound >= 10) return 0.2
+  return 0
+}
+
+const buildSeraphMilestoneRows = (rows, noteKey) => seraphMilestonePulls.value.map(pullInRound => ({
+  ...rowAtFrom(rows, pullInRound),
+  pullInRound,
+  roundChance: seraphRoundChance(pullInRound),
+  note: t(noteKey),
+}))
+
+const seraphMilestoneGroups = computed(() => [
+  {
+    key: 'withFree',
+    titleKey: 'weaponGachaFirstCycleTitle',
+    rows: buildSeraphMilestoneRows(analysis.value.rows, 'weaponGachaFirstCycleNote'),
+  },
+  {
+    key: 'noFree',
+    titleKey: 'weaponGachaNoFreeCycleTitle',
+    rows: buildSeraphMilestoneRows(analysis.value.noFreeCycleRows, 'weaponGachaNoFreeCycleNote'),
+  },
+])
+
+const buildSeraphSegmentRows = rows => {
+  const cycle = analysis.value.config.milestone?.cycle || 50
+  const milestones = seraphMilestonePulls.value
+  const edges = [0]
+  milestones.forEach(pull => {
+    const edge = Math.min(pull, cycle)
+    if (edge <= cycle) edges.push(edge)
+  })
+
+  return [...new Set(edges)]
+    .sort((a, b) => a - b)
+    .slice(1)
+    .map((end, index, sortedEdges) => {
+      const start = index === 0 ? 0 : sortedEdges[index - 1]
+      const before = rowAtFrom(rows, start)
+      const after = rowAtFrom(rows, end)
+      const expectedRelic = after.totalCoreCount - before.totalCoreCount
+      const totalCost = after.totalCost - before.totalCost
+      const sideValue = after.sideValue - before.sideValue
+      const coreBudget = Math.max(0, totalCost - sideValue)
+      const implicitCoreUnit = expectedRelic > 0 ? coreBudget / expectedRelic : 0
+      return {
+        key: `${start}-${end}`,
+        label: `${start + 1}-${end}`,
+        start,
+        end,
+        paidPulls: after.paidPulls - before.paidPulls,
+        freePulls: after.freePulls - before.freePulls,
+        totalCost,
+        sideValue,
+        coreBudget,
+        expectedRelic,
+        implicitCoreUnit,
+      }
+    })
+}
+
+const seraphSegmentGroups = computed(() => [
+  {
+    key: 'withFree',
+    titleKey: 'weaponGachaFirstCycleShort',
+    rows: buildSeraphSegmentRows(analysis.value.rows),
+  },
+  {
+    key: 'noFree',
+    titleKey: 'weaponGachaNoFreeCycleShort',
+    rows: buildSeraphSegmentRows(analysis.value.noFreeCycleRows),
+  },
+])
+
+const seraphSegmentRows = computed(() => seraphSegmentGroups.value[0]?.rows || [])
+
+const seraphValueStructureRows = computed(() => seraphMilestoneGroups.value.flatMap(group =>
+  group.rows.map(row => ({
+    ...row,
+    groupKey: group.key,
+    groupTitle: t(group.titleKey),
+    groupShortTitle: t(group.key === 'withFree' ? 'weaponGachaFirstCycleShort' : 'weaponGachaNoFreeCycleShort'),
+    label: `${t(group.key === 'withFree' ? 'weaponGachaFirstCycleShort' : 'weaponGachaNoFreeCycleShort')}\n${fmtPulls(row.pullInRound)}`,
+  }))
+))
+
 watch(selectedBanner, banner => {
-  selectedPulls.value = banner === 'witchSecret' ? 35 : 20
+  selectedPulls.value = banner === 'witchSecret' ? 35 : banner === 'seraphOracle' ? 50 : 20
 })
 
 const fmtDiamonds = value => t('diamondValue', { value: Math.round(value).toLocaleString() })
@@ -281,7 +523,9 @@ const implicitCostOption = computed(() => {
   const rows = analysis.value.rows
   const milestonePulls = analysis.value.config.weeklyMilestones?.length
     ? analysis.value.config.weeklyMilestones.map(reward => reward.pull)
-    : rows.filter(row => row.pulls % analysis.value.config.milestone.interval === 0).map(row => row.pulls)
+    : analysis.value.config.milestone?.rewards?.length
+      ? [...new Set(rows.flatMap(row => row.milestoneRewards.map(reward => reward.pull)))]
+      : rows.filter(row => row.pulls % analysis.value.config.milestone.interval === 0).map(row => row.pulls)
   const milestonePoints = rows
     .filter(row => milestonePulls.includes(row.pulls))
     .map(row => ({
@@ -331,7 +575,109 @@ const implicitCostOption = computed(() => {
   }
 })
 
+const seraphSegmentOption = computed(() => {
+  const isDark = currentTheme.value === 'dark'
+  const theme = getMoriTheme(isDark)
+  const rows = seraphSegmentRows.value
+  const groups = seraphSegmentGroups.value
+
+  return {
+    ...baseChartOption('', '', isDark),
+    tooltip: {
+      ...theme.tooltip,
+      trigger: 'axis',
+      formatter: params => {
+        const list = Array.isArray(params) ? params : [params]
+        const segment = rows[list[0].dataIndex]
+        let html = `<b style="color:var(--gold)">${t('weaponGachaSegment')}: ${segment.label}</b><br>`
+        list.forEach(item => {
+          const group = groups[item.seriesIndex]
+          const row = group.rows[item.dataIndex]
+          html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${fmtDiamonds(row.implicitCoreUnit)}</b><br>${t('weaponGachaFreePaidPulls')}: <b>${row.freePulls} / ${row.paidPulls}</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.expectedRelic)}</b><br>`
+        })
+        return html
+      },
+    },
+    legend: { ...theme.legend, top: 8, right: 16 },
+    grid: { top: 36, right: 18, bottom: 62, left: 72 },
+    xAxis: {
+      type: 'category',
+      data: rows.map(row => row.label),
+      axisLabel: { ...theme.axisLabel, rotate: 24 },
+      axisLine: theme.axisLine,
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { ...theme.axisLabel, formatter: value => fmtDiamonds(value) },
+      splitLine: theme.splitLine,
+    },
+    series: groups.map((group, index) => ({
+        name: t(group.titleKey),
+        type: 'bar',
+        barMaxWidth: 42,
+        itemStyle: { color: LINE_COLORS[index] },
+        data: group.rows.map(row => Math.round(row.implicitCoreUnit)),
+      })),
+  }
+})
+
+const seraphValueStructureOption = computed(() => {
+  const isDark = currentTheme.value === 'dark'
+  const theme = getMoriTheme(isDark)
+  const rows = seraphValueStructureRows.value
+
+  return {
+    ...baseChartOption('', '', isDark),
+    tooltip: {
+      ...theme.tooltip,
+      trigger: 'axis',
+      formatter: params => {
+        const list = Array.isArray(params) ? params : [params]
+        const row = rows[list[0].dataIndex]
+        let html = `<b style="color:var(--gold)">${row.groupTitle} · ${fmtPulls(row.pullInRound)}</b><br>${t('weaponGachaFreePaidPulls')}: <b>${row.freePulls} / ${row.paidPulls}</b><br>${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.totalCoreCount)}</b><br>${t('weaponGachaRelicValue')}: <b>${fmtDiamonds(row.implicitCoreUnit)}</b><br>`
+        list.forEach(item => {
+          html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${fmtDiamonds(item.value)}</b><br>`
+        })
+        return html
+      },
+    },
+    legend: { ...theme.legend, top: 8, right: 16 },
+    grid: { top: 44, right: 18, bottom: 78, left: 72 },
+    xAxis: {
+      type: 'category',
+      data: rows.map(row => row.label),
+      axisLabel: { ...theme.axisLabel, lineHeight: 16 },
+      axisLine: theme.axisLine,
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { ...theme.axisLabel, formatter: value => fmtDiamonds(value) },
+      splitLine: theme.splitLine,
+    },
+    series: [
+      {
+        name: t('weaponGachaSideDeduction'),
+        type: 'bar',
+        stack: 'value',
+        barMaxWidth: 42,
+        itemStyle: { color: LINE_COLORS[2] },
+        data: rows.map(row => Math.round(row.sideValue)),
+      },
+      {
+        name: t('weaponGachaRelicNetCost'),
+        type: 'bar',
+        stack: 'value',
+        barMaxWidth: 42,
+        itemStyle: { color: LINE_COLORS[0] },
+        data: rows.map(row => Math.round(row.coreBudget)),
+      },
+    ],
+  }
+})
+
 const quantityOption = computed(() => {
+  if (isSeraphOracle.value) return seraphValueStructureOption.value
+
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
   const rows = analysis.value.rows
@@ -516,6 +862,68 @@ const sideContributionOption = computed(() => {
 .weapon-chart-frame-sm {
   height: 300px;
   min-height: 300px;
+}
+
+.weapon-table-wrap {
+  overflow-x: auto;
+}
+
+.weapon-table-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.weapon-table-panel {
+  min-width: 0;
+}
+
+.weapon-table-title {
+  margin-bottom: 8px;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.weapon-value-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.weapon-value-table th,
+.weapon-value-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.weapon-value-table th:first-child,
+.weapon-value-table td:first-child {
+  text-align: left;
+}
+
+.weapon-value-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.weapon-value-table td {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.weapon-value-table b {
+  display: block;
+  color: var(--gold);
+}
+
+.weapon-value-table small {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-family: var(--font-main);
 }
 
 .weapon-pull-input {

@@ -131,6 +131,54 @@
     "nameKo": "룬 티켓",
     "isBase": true
   },
+  "[13,6]": {
+    "name": "天契的圣杯",
+    "score": 0,
+    "batch": 1,
+    "iconId": 41,
+    "nameZh": "天契的圣杯",
+    "nameTw": "天契的聖杯",
+    "nameEn": "Chalice of Oaths",
+    "nameJa": "天契の聖杯",
+    "nameKo": "하늘의 성배",
+    "isBase": false
+  },
+  "[13,7]": {
+    "name": "苍穹之银勋",
+    "score": 0,
+    "batch": 1,
+    "iconId": 42,
+    "nameZh": "苍穹之银勋",
+    "nameTw": "蒼穹的銀勳",
+    "nameEn": "Cerulean Medal",
+    "nameJa": "蒼穹の銀勲",
+    "nameKo": "창궁의 훈장",
+    "isBase": false
+  },
+  "[13,8]": {
+    "name": "希求之神翼",
+    "score": 0,
+    "batch": 1,
+    "iconId": 43,
+    "nameZh": "希求之神翼",
+    "nameTw": "希求的神翼",
+    "nameEn": "Wing of Aspirations",
+    "nameJa": "希求の神翼",
+    "nameKo": "희구의 날개",
+    "isBase": false
+  },
+  "[13,9]": {
+    "name": "悠园的果实",
+    "score": 0,
+    "batch": 1,
+    "iconId": 44,
+    "nameZh": "悠园的果实",
+    "nameTw": "悠園的果實",
+    "nameEn": "Fruit of Paradise",
+    "nameJa": "悠園の果実",
+    "nameKo": "낙원의 열매",
+    "isBase": false
+  },
   "[15,1]": {
     "name": "魔装香油",
     "score": 1,

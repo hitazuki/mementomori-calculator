@@ -79,8 +79,10 @@ test('derived score panel merges scroll and tome rows and keeps zero values visi
     'derived:sandalphonCore',
     'derived:astarothCore',
     '[13,1]',
+    '[13,6]',
   ])
   assert.equal(state.readonlyRows.find(row => row.key === 'derived:sandalphonCore').score, 0)
   assert.equal(state.readonlyRows.find(row => row.key === 'derived:astarothCore').score, 0)
   assert.equal(state.readonlyRows.find(row => row.key === '[13,1]').score, 0)
+  assert.equal(state.readonlyRows.find(row => row.key === '[13,6]').reasonKey, 'scoreReasonRelic')
 })
