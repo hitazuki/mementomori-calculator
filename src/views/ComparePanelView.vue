@@ -54,6 +54,7 @@
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
               <button class="btn btn-secondary btn-sm" style="min-height:30px; padding:0 8px;" @click="editBuild(i)">✏️</button>
+              <button class="btn btn-secondary btn-sm" style="min-height:30px; padding:0 8px;" @click="copyBuild(i)">⧉</button>
               <button class="btn btn-danger btn-sm" style="min-height:30px; padding:0 8px;" @click="removeBuild(i)">✖</button>
             </div>
           </div>
@@ -301,6 +302,16 @@ function editBuild(idx) {
 
 function removeBuild(idx) {
   cs.builds.splice(idx, 1)
+}
+
+function copyBuild(idx) {
+  if (cs.builds.length >= 6) return
+  const source = cs.builds[idx]
+  cs.builds.push({
+    ...clone(source),
+    id: Date.now(),
+    name: `${source.name} ${t('compareCopySuffix')}`,
+  })
 }
 
 function addBuild() {

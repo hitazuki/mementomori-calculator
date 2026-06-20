@@ -8,34 +8,7 @@
     <div class="flex-col gap-12 export-sidebar">
       <!-- Variables -->
       <div class="card">
-        <div class="card-title">{{ $t('exportVariables') }}</div>
-        
-        <div class="form-group">
-          <label class="form-label">{{ $t('exportXAxis') }}</label>
-          <select class="form-select" v-model="ts.xKey" @change="onXKeyChange">
-            <option v-for="v in TABLE_VARIABLES" :key="v.key" :value="v.key">{{ v.label }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ $t('exportXValues') }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') }}</span></label>
-          <textarea class="form-input" v-model="ts.xValsStr" rows="2" style="resize:vertical"></textarea>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="form-group">
-          <label class="form-label">{{ $t('exportYAxis') }}</label>
-          <select class="form-select" v-model="ts.yKey" @change="onYKeyChange">
-            <option v-for="v in TABLE_VARIABLES" :key="v.key" :value="v.key">{{ v.label }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ $t('exportYValues') }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') }}</span></label>
-          <textarea class="form-input" v-model="ts.yValsStr" rows="2" style="resize:vertical"></textarea>
-        </div>
-
-        <div class="divider"></div>
-
+        <div class="card-title">{{ $t('exportTableTitle') }}</div>
         <div class="form-group">
           <label class="form-label">{{ $t('exportTableTitle') }}</label>
           <input 
@@ -43,6 +16,20 @@
             v-model="displayTitle" 
             :placeholder="defaultTitle"
           >
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📌 {{ $t('compareSummaryFields') }}</div>
+        <div class="export-summary-picker">
+          <label
+            v-for="field in SUMMARY_FIELDS"
+            :key="field.key"
+            class="export-summary-option"
+          >
+            <input type="checkbox" :value="field.key" v-model="ts.summaryFields">
+            <span>{{ field.label }}</span>
+          </label>
         </div>
       </div>
 
@@ -57,11 +44,16 @@
             style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:6px;"
           >
             <div class="export-build-head" :style="{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: b._expanded ? '12px' : '0' }">
-              <input class="form-input export-build-name" v-model="b.name">
+              <div class="export-build-title-stack">
+                <input class="form-input export-build-name" v-model="b.name">
+                <div class="export-build-summary">{{ buildSummaryText(b) }}</div>
+                <div class="export-build-axis">{{ getAxisLabel(b) }}</div>
+              </div>
               <div style="display:flex;gap:4px">
                 <button class="btn btn-secondary btn-sm" @click="b._expanded = !b._expanded" style="padding:4px 8px;">
                   {{ b._expanded ? '▲' : '▼ ' + $t('ui_details') }}
                 </button>
+                <button class="btn btn-secondary btn-sm" @click="copyBuild(i)" style="padding:4px 8px">⧉</button>
                 <button v-if="ts.builds.length > 1" class="btn btn-ghost btn-sm" @click="removeBuild(i)" style="padding:4px 8px">🗑</button>
               </div>
             </div>
@@ -71,6 +63,32 @@
                 <strong>{{ b.name }}</strong>
                 <button class="modal-close" @click="b._expanded = false">&times;</button>
               </div>
+              <!-- 联动轴 -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="form-group">
+                  <label class="form-label text-xs">{{ $t('exportXAxis') }}</label>
+                  <select class="form-select" v-model="b.xKey" @change="onBuildXKeyChange(b)">
+                    <option v-for="v in TABLE_VARIABLES" :key="v.key" :value="v.key" :disabled="v.key === b.yKey">{{ v.label }}</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label text-xs">{{ $t('exportYAxis') }}</label>
+                  <select class="form-select" v-model="b.yKey" @change="onBuildYKeyChange(b)">
+                    <option v-for="v in TABLE_VARIABLES" :key="v.key" :value="v.key" :disabled="v.key === b.xKey">{{ v.label }}</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="form-group">
+                  <label class="form-label text-xs">{{ $t('exportXValues') }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') }}</span></label>
+                  <textarea class="form-input" v-model="b.xValsStr" rows="2" style="resize:vertical"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label text-xs">{{ $t('exportYValues') }} <span class="text-xs text-muted">{{ $t('exportCommaSeparated') }}</span></label>
+                  <textarea class="form-input" v-model="b.yValsStr" rows="2" style="resize:vertical"></textarea>
+                </div>
+              </div>
+              <div class="divider"></div>
               <!-- 攻击类型 + 面板攻击力 -->
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;">
                 <div class="form-group">
@@ -132,7 +150,6 @@
           </div>
         </div>
         <button class="btn btn-secondary btn-sm w-full mt-8" @click="addBuild">+ {{ $t('addBuild') }}</button>
-        <button class="btn btn-ghost btn-sm w-full mt-4" @click="importCurrentBuild">{{ $t('importCurrentParams') }}</button>
         <button class="btn btn-ghost btn-sm w-full mt-4" @click="resetDefault">{{ $t('exportResetDefault') }}</button>
       </div>
     </div>
@@ -168,6 +185,7 @@
             <div class="export-table-heading" style="font-weight:600;margin-bottom:12px">
               <span v-if="tData.isDiff" style="color:var(--purple-light)">⚖ {{ tData.name }}</span>
               <span v-else style="color:var(--gold)">📊 {{ tData.build.name }}</span>
+              <div v-if="!tData.isDiff" class="export-table-summary">{{ buildSummaryText(tData.build) }}</div>
             </div>
             <div class="mobile-export-highlights">
               <div
@@ -177,7 +195,7 @@
                 :style="getCellStyle(cell.value, tData.isDiff)"
               >
                 <div class="mobile-export-cell-value">{{ cell.text }}</div>
-                <div class="mobile-export-cell-label">{{ yLabel }} {{ cell.yVal.toLocaleString() }} · {{ xLabel }} {{ cell.xVal.toLocaleString() }}</div>
+                <div class="mobile-export-cell-label">{{ tData.yLabel }} {{ cell.yVal.toLocaleString() }} · {{ tData.xLabel }} {{ cell.xVal.toLocaleString() }}</div>
               </div>
             </div>
             <div class="table-scroll-container">
@@ -185,9 +203,9 @@
                 <thead>
                   <tr>
                     <th style="min-width:120px;color:var(--gold)">
-                      {{ yLabel }} ↓<br><span style="color:#888">{{ xLabel }} →</span>
+                      {{ tData.yLabel }} ↓<br><span style="color:#888">{{ tData.xLabel }} →</span>
                     </th>
-                    <th v-for="x in tableData.xVals" :key="x">{{ x.toLocaleString() }}</th>
+                    <th v-for="x in tData.xVals" :key="x">{{ x.toLocaleString() }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -217,10 +235,8 @@ import { useI18n } from 'vue-i18n'
 import BigNumberInput from '../components/BigNumberInput.vue'
 import { buildCrossTable } from '../engine/damageCalc.js'
 import { getTableVariables } from '../constants/presets.js'
-import { useCalcStore } from '../store/calculator.js'
 
 const { t } = useI18n()
-const store = useCalcStore()
 
 const TABLE_VARIABLES = computed(() => getTableVariables(t))
 
@@ -230,6 +246,26 @@ const getMetrics = () => ({
   defMitRate: { label: t('defMitRate'), fmt: v => `${v.toFixed(2)}%` },
   pmMitRate:  { label: t('pmMitRate'), fmt: v => `${v.toFixed(2)}%` },
 })
+
+const SUMMARY_FIELDS = computed(() => [
+  { key: 'pen', label: t('pen'), fmt: v => `PEN ${formatNumber(v)}` },
+  { key: 'pmPen', label: t('pmPen'), fmt: v => `PM ${formatNumber(v)}` },
+  { key: 'baseAtk', label: t('baseAtk'), fmt: v => `${t('baseAtk')} ${formatNumber(v)}` },
+  { key: 'skillCoeff', label: t('skillCoeff'), fmt: v => `${t('skillCoeff')} ${formatPercentValue(v, 1)}` },
+  { key: 'atkBonus', label: t('atkBonus'), fmt: v => `${t('atkBonus')} ${formatPercentValue(v)}` },
+  { key: 'dmgBonus', label: t('dmgBonus'), fmt: v => `${t('dmgBonus')} ${formatPercentValue(v)}` },
+  { key: 'defBonus', label: t('defBonus'), fmt: v => `${t('defBonus')} ${formatPercentValue(v)}` },
+  { key: 'pmDefBonus', label: t('pmDefBonus'), fmt: v => `${t('pmDefBonus')} ${formatPercentValue(v)}` },
+  { key: 'critMult', label: t('critMult'), fmt: v => `${t('critMult')} ${formatPercentValue(v, 1)}` },
+  { key: 'eleAdvantage', label: t('eleAdvantage'), fmt: v => v ? t('eleAdvantage') : t('compareNoEleAdvantage') },
+])
+
+const DEFAULT_AXIS_CONFIG = {
+  xKey: 'def',
+  yKey: 'pen',
+  xValsStr: '1000000, 3000000, 5000000, 10000000, 20000000, 50000000',
+  yValsStr: '0, 4950, 11950, 18950',
+}
 
 const DEFAULT_TABLE_PARAMS = {
   baseAtk: 1_000_000,
@@ -251,13 +287,18 @@ const DEFAULT_TABLE_PARAMS = {
 
 const clone = value => JSON.parse(JSON.stringify(value))
 
-const getCurrentParams = () => {
-  const p = { ...store.$state }
-  delete p.cPen
-  delete p.cPmPen
-  delete p.cDef
-  delete p.cPmDef
-  return p
+const formatNumber = value => Number(value || 0).toLocaleString()
+
+function formatPercentValue(value, fallback = 0) {
+  const n = Number.isFinite(Number(value)) ? Number(value) : fallback
+  return `${+(n * 100).toFixed(1)}%`
+}
+
+function normalizeBuild(build) {
+  return {
+    ...DEFAULT_AXIS_CONFIG,
+    ...build,
+  }
 }
 
 function createDefaultBuilds() {
@@ -270,37 +311,39 @@ function createDefaultBuilds() {
   }
 
   return [
-    {
+    normalizeBuild({
       id: baseId,
       name: t('buildNamePrefix') + ' 1',
       params: baseParams,
       _expanded: false
-    },
-    {
+    }),
+    normalizeBuild({
       id: baseId + 1,
       name: t('buildNamePrefix') + ' 2',
       params: compareParams,
       _expanded: false
-    }
+    })
   ]
 }
 
 const ts = reactive({
-  xKey: 'def',
-  yKey: 'pen',
-  xValsStr: '1000000, 3000000, 5000000, 10000000, 20000000, 50000000',
-  yValsStr: '0, 4950, 11950, 18950',
   builds: createDefaultBuilds(),
   metric: 'dmgRatePct',
+  summaryFields: ['pen', 'pmPen'],
   customTitle: '',
   isTitleTouched: false,
 })
 
-const xLabel = computed(() => TABLE_VARIABLES.value.find(v => v.key === ts.xKey)?.label || ts.xKey)
-const yLabel = computed(() => TABLE_VARIABLES.value.find(v => v.key === ts.yKey)?.label || ts.yKey)
+function getVariableLabel(key) {
+  return TABLE_VARIABLES.value.find(v => v.key === key)?.label || key
+}
 
 const defaultTitle = computed(() => {
-  return t('defaultTableTitle', { y: yLabel.value, x: xLabel.value })
+  const firstBuild = ts.builds[0] || DEFAULT_AXIS_CONFIG
+  return t('defaultTableTitle', {
+    y: getVariableLabel(firstBuild.yKey),
+    x: getVariableLabel(firstBuild.xKey),
+  })
 })
 
 const displayTitle = computed({
@@ -318,16 +361,6 @@ const displayTitle = computed({
   }
 })
 
-function onXKeyChange() {
-  const preset = TABLE_VARIABLES.value.find(v => v.key === ts.xKey)
-  if (preset) ts.xValsStr = preset.defaultValues
-}
-
-function onYKeyChange() {
-  const preset = TABLE_VARIABLES.value.find(v => v.key === ts.yKey)
-  if (preset) ts.yValsStr = preset.defaultValues
-}
-
 function onBuildAtkLevelChange(build) {
   // Calculated internally
 }
@@ -340,22 +373,43 @@ function setBuildDamageType(build, type) {
   build.params.damageType = type
 }
 
-function addBuild() {
-  const baseParams = JSON.parse(JSON.stringify(ts.builds[ts.builds.length-1].params))
-  ts.builds.push({
-    id: Date.now(),
-    name: `${t('buildNamePrefix')} ${ts.builds.length + 1}`,
-    params: baseParams,
-    _expanded: false
-  })
+function applyBuildAxisDefault(build, axis) {
+  const key = axis === 'x' ? build.xKey : build.yKey
+  const preset = TABLE_VARIABLES.value.find(v => v.key === key)
+  if (!preset) return
+  if (axis === 'x') build.xValsStr = preset.defaultValues
+  else build.yValsStr = preset.defaultValues
 }
 
-function importCurrentBuild() {
-  ts.builds.push({
+function onBuildXKeyChange(build) {
+  applyBuildAxisDefault(build, 'x')
+}
+
+function onBuildYKeyChange(build) {
+  applyBuildAxisDefault(build, 'y')
+}
+
+function addBuild() {
+  const source = ts.builds[ts.builds.length - 1]
+  ts.builds.push(normalizeBuild({
     id: Date.now(),
     name: `${t('buildNamePrefix')} ${ts.builds.length + 1}`,
-    params: getCurrentParams(),
-    _expanded: true
+    params: clone(source.params),
+    xKey: source.xKey,
+    yKey: source.yKey,
+    xValsStr: source.xValsStr,
+    yValsStr: source.yValsStr,
+    _expanded: false
+  }))
+}
+
+function copyBuild(idx) {
+  const source = ts.builds[idx]
+  ts.builds.push({
+    ...clone(source),
+    id: Date.now(),
+    name: `${source.name} ${t('compareCopySuffix')}`,
+    _expanded: false,
   })
 }
 
@@ -370,27 +424,71 @@ function resetDefault() {
 }
 
 function parseVals(str) {
-  return str.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n))
+  return String(str || '').split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n))
+}
+
+function axisSignature(build) {
+  const xVals = parseVals(build.xValsStr)
+  const yVals = parseVals(build.yValsStr)
+  if (!xVals.length || !yVals.length || build.xKey === build.yKey) return null
+  return [build.xKey, build.yKey, xVals.join(','), yVals.join(',')].join('|')
+}
+
+function buildSummaryText(build) {
+  return ts.summaryFields
+    .map(key => {
+      const field = SUMMARY_FIELDS.value.find(f => f.key === key)
+      if (!field) return ''
+      return field.fmt(build.params[key])
+    })
+    .filter(Boolean)
+    .join(' · ')
+}
+
+function getAxisLabel(build) {
+  return `${getVariableLabel(build.yKey)} ↓ / ${getVariableLabel(build.xKey)} →`
+}
+
+function percentDelta(compareVal, baseVal) {
+  if (!Number.isFinite(compareVal) || !Number.isFinite(baseVal) || baseVal === 0) return null
+  return ((compareVal - baseVal) / Math.abs(baseVal)) * 100
 }
 
 const tableData = computed(() => {
-  const xVals = parseVals(ts.xValsStr)
-  const yVals = parseVals(ts.yValsStr)
-  if (!xVals.length || !yVals.length || ts.builds.length === 0) return null
+  if (ts.builds.length === 0) return null
   
   const tables = ts.builds.map(b => {
+    const xVals = parseVals(b.xValsStr)
+    const yVals = parseVals(b.yValsStr)
+    if (!xVals.length || !yVals.length || b.xKey === b.yKey) return null
     return {
       build: b,
-      rows: buildCrossTable(xVals, yVals, ts.xKey, ts.yKey, b.params),
-      isDiff: false
+      xKey: b.xKey,
+      yKey: b.yKey,
+      xVals,
+      yVals,
+      xLabel: getVariableLabel(b.xKey),
+      yLabel: getVariableLabel(b.yKey),
+      signature: axisSignature(b),
+      rows: buildCrossTable(xVals, yVals, b.xKey, b.yKey, b.params),
+      isDiff: false,
     }
-  })
+  }).filter(Boolean)
+  if (!tables.length) return null
   
   const diffTables = []
-  if (tables.length > 1) {
-    const baseTable = tables[0]
-    for (let i = 1; i < tables.length; i++) {
-      const cmpTable = tables[i]
+  const grouped = new Map()
+  for (const table of tables) {
+    if (!table.signature) continue
+    if (!grouped.has(table.signature)) grouped.set(table.signature, [])
+    grouped.get(table.signature).push(table)
+  }
+
+  for (const groupTables of grouped.values()) {
+    if (groupTables.length < 2) continue
+    const baseTable = groupTables[0]
+    for (let i = 1; i < groupTables.length; i++) {
+      const cmpTable = groupTables[i]
       const diffRows = cmpTable.rows.map((row, rIdx) => {
         const baseRow = baseTable.rows[rIdx]
         return {
@@ -400,7 +498,7 @@ const tableData = computed(() => {
             const diffCols = {}
             for (const key of Object.keys(col)) {
               if (typeof col[key] === 'number') {
-                diffCols[key] = col[key] - baseCol[key]
+                diffCols[key] = percentDelta(col[key], baseCol[key])
               }
             }
             return diffCols
@@ -408,18 +506,25 @@ const tableData = computed(() => {
         }
       })
       diffTables.push({
-        name: `Diff: ${cmpTable.build.name} - ${baseTable.build.name}`,
+        name: `Diff: ${cmpTable.build.name} / ${baseTable.build.name}`,
+        xKey: baseTable.xKey,
+        yKey: baseTable.yKey,
+        xVals: baseTable.xVals,
+        yVals: baseTable.yVals,
+        xLabel: baseTable.xLabel,
+        yLabel: baseTable.yLabel,
         rows: diffRows,
         isDiff: true
       })
     }
   }
 
-  return { xVals, yVals, tables, diffTables, allTables: [...tables, ...diffTables] }
+  return { tables, diffTables, allTables: [...tables, ...diffTables] }
 })
 
 function getCellStyle(val, isDiff) {
   if (!isDiff) return {}
+  if (val === null || val === undefined || !Number.isFinite(val)) return { color: '#888' }
   const color = val > 0 ? '#2ecc71' : val < 0 ? '#e74c3c' : '#888'
   const fontWeight = val !== 0 ? '600' : 'normal'
   return { color, fontWeight }
@@ -428,8 +533,8 @@ function getCellStyle(val, isDiff) {
 function getCellText(val, isDiff) {
   const metric = getMetrics()[ts.metric]
   if (isDiff) {
-    const sign = val > 0 ? '+' : ''
-    return `${sign}${metric.fmt(val)}`
+    if (val === null || val === undefined || !Number.isFinite(val)) return '—'
+    return `${val > 0 ? '+' : ''}${val.toFixed(2)}%`
   }
   return metric.fmt(val)
 }
@@ -443,7 +548,7 @@ function getTableHighlights(tData) {
       if (tData.isDiff && value === 0) return
       cells.push({
         yVal: row.yVal,
-        xVal: tableData.value.xVals[index],
+        xVal: tData.xVals[index],
         value,
         text: getCellText(value, tData.isDiff),
         score: tData.isDiff ? Math.abs(value) : value,
@@ -458,18 +563,19 @@ function getTableHighlights(tData) {
 function copyMarkdown() {
   const data = tableData.value
   if (!data) return
-  const METRICS = getMetrics()
   
   let md = `# ${displayTitle.value}\n\n`
   data.allTables.forEach(tData => {
     md += `### ${tData.isDiff ? tData.name : tData.build.name}\n`
-    md += `| ${yLabel.value} ↓ \\ ${xLabel.value} → | ` + data.xVals.join(' | ') + ' |\n'
-    md += '| :--- | ' + data.xVals.map(() => ':---').join(' | ') + ' |\n'
+    if (!tData.isDiff) {
+      const summary = buildSummaryText(tData.build)
+      if (summary) md += `${summary}\n\n`
+    }
+    md += `| ${tData.yLabel} ↓ \\ ${tData.xLabel} → | ` + tData.xVals.join(' | ') + ' |\n'
+    md += '| :--- | ' + tData.xVals.map(() => ':---').join(' | ') + ' |\n'
     tData.rows.forEach(r => {
       md += `| **${r.yVal}** | ` + r.cols.map(c => {
-        let v = METRICS[ts.metric].fmt(c[ts.metric])
-        if (tData.isDiff && c[ts.metric] > 0) v = '+' + v
-        return v
+        return getCellText(c[ts.metric], tData.isDiff)
       }).join(' | ') + ' |\n'
     })
     md += '\n'
@@ -484,9 +590,13 @@ function downloadCsv() {
   let csv = `"${displayTitle.value}"\n\n`
   data.allTables.forEach(tData => {
     csv += `${tData.isDiff ? tData.name : tData.build.name}\n`
-    csv += `${yLabel.value} \\ ${xLabel.value},` + data.xVals.join(',') + '\n'
+    if (!tData.isDiff) {
+      const summary = buildSummaryText(tData.build)
+      if (summary) csv += `${summary}\n`
+    }
+    csv += `${tData.yLabel} \\ ${tData.xLabel},` + tData.xVals.join(',') + '\n'
     tData.rows.forEach(r => {
-      csv += `${r.yVal},` + r.cols.map(c => c[ts.metric]).join(',') + '\n'
+      csv += `${r.yVal},` + r.cols.map(c => getCellText(c[ts.metric], tData.isDiff)).join(',') + '\n'
     })
     csv += '\n'
   })
@@ -526,6 +636,48 @@ function downloadCsv() {
   padding: 2px 8px;
   font-size: var(--fs-base);
   font-weight: bold;
+}
+.export-build-title-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+.export-build-summary,
+.export-build-axis,
+.export-table-summary {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+}
+.export-build-axis {
+  color: var(--text-muted);
+}
+.export-summary-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.export-summary-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+}
+.export-summary-option input {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 .export-metric-select {
   font-size: var(--fs-sm);
@@ -597,6 +749,9 @@ function downloadCsv() {
     flex: 1;
     width: auto;
     min-width: 0;
+  }
+  .export-summary-picker {
+    grid-template-columns: 1fr;
   }
   .export-build-head {
     margin-bottom: 0 !important;
