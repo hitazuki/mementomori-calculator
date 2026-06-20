@@ -5,10 +5,12 @@ export const GACHA_TYPES = {
   lightDark: {
     key: 'lightDark',
     label: '光暗限定',
+    labelKey: 'gachaTypeLightDark',
   },
   fourElements: {
     key: 'fourElements',
     label: '四属限定',
+    labelKey: 'gachaTypeFourElements',
   },
 }
 
@@ -66,6 +68,7 @@ export const GACHA_BANNERS = {
   destiny: {
     key: 'destiny',
     label: '命运召唤',
+    labelKey: 'gachaBannerDestiny',
     costPerPull: 500,
     maxPulls: 70,
     baseRates: {
@@ -77,10 +80,12 @@ export const GACHA_BANNERS = {
     diamondPrizeRate: 0.0001,
     diamondPrizeAmount: 30000,
     note: '57-70 抽采用线性软保底假设，70 抽为 100%。',
+    noteKey: 'gachaNoteDestiny',
   },
   pickup: {
     key: 'pickup',
     label: '精选召唤',
+    labelKey: 'gachaBannerPickup',
     costPerPull: 300,
     maxPulls: 100,
     baseRates: {
@@ -91,6 +96,7 @@ export const GACHA_BANNERS = {
     permanentRate: 0.0014,
     invitationPulls: 300,
     note: '第 100 抽指定限定概率升至 100%；累抽奖励按 100 抽循环，300 整抽为魔女的邀请函。',
+    noteKey: 'gachaNotePickup',
   },
 }
 
@@ -101,6 +107,7 @@ export function getGachaConfig(bannerKey, typeKey) {
     ...banner,
     bannerLabel: banner.label,
     typeLabel: characterType.label,
+    typeLabelKey: characterType.labelKey,
     baseRate: banner.baseRates[characterType.key],
   }
 }
@@ -191,6 +198,10 @@ function buildSideDrops(config, typeKey, scores) {
     forbiddenWeapon: `禁忌武具最低隐含单价（${weaponReferences.forbiddenWeapon.bestNode.pulls}抽）`,
     lightWeapon: `天光武具最低隐含单价（${weaponReferences.lightWeapon.bestNode.pulls}抽）`,
   }
+  const referenceLabelKeys = {
+    forbiddenWeapon: 'scoreReasonForbiddenWeapon',
+    lightWeapon: 'scoreReasonLightWeapon',
+  }
 
   return sourceDrops.map(drop => {
     const reference = drop.reference ? weaponReferences[drop.reference] : null
@@ -210,6 +221,8 @@ function buildSideDrops(config, typeKey, scores) {
       expectedValuePerPull,
       isPriced: Boolean(drop.reference) || (!drop.exclusive && unitScore > 0),
       referenceLabel: drop.reference ? referenceLabels[drop.reference] : '',
+      referenceLabelKey: drop.reference ? referenceLabelKeys[drop.reference] : '',
+      referenceLabelParams: drop.reference ? { pulls: reference.bestNode.pulls } : {},
     }
   })
 }

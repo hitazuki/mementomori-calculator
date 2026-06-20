@@ -38,7 +38,7 @@
             <span v-else class="num-value" style="width:64px;text-align:right;font-size:var(--fs-sm);color:var(--gold);">{{ formatScoreForPanel(row.item.score) }}</span>
             <span v-if="row.item.batch > 1" style="font-size:var(--fs-xs);color:var(--text-muted);min-width:50px;text-align:left;">/ {{ row.item.batch.toLocaleString() }}</span>
           </div>
-          <div class="score-derived-divider">推算/只读价值</div>
+          <div class="score-derived-divider">{{ t('scoreReadonlyTitle') }}</div>
           <div v-for="row in readonlyScoreRows" :key="row.key" class="score-derived-row">
             <img
               :src="`${baseUrl}images/items/Item_${String(row.iconId).padStart(4,'0')}.png`"
@@ -47,7 +47,7 @@
             />
             <span class="score-derived-name" :title="itemDisplayName(row)">{{ itemDisplayName(row) }}</span>
             <span class="num-value score-derived-value">{{ formatScoreForPanel(row.score) }}</span>
-            <small>{{ row.reason }}</small>
+            <small>{{ scoreReasonText(row) }}</small>
           </div>
         </div>
       </div>
@@ -486,6 +486,9 @@ function formatScoreForPanel(value) {
   const numeric = Number(value) || 0
   if (Math.abs(numeric) > 0 && Math.abs(numeric) < 10) return numeric.toFixed(2)
   return Math.round(numeric).toLocaleString()
+}
+function scoreReasonText(row) {
+  return row.reasonKey ? t(row.reasonKey, row.reasonParams || {}) : row.reason
 }
 
 </script>

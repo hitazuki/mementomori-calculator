@@ -7,7 +7,7 @@
   <section class="gacha-controls animate-fadeup">
     <div class="card gacha-filter-card">
       <div class="gacha-filter-row">
-        <div class="gacha-filter-label">召唤类型</div>
+        <div class="gacha-filter-label">{{ t('gachaFilterBanner') }}</div>
         <div class="segmented-control">
           <button
             v-for="banner in bannerOptions"
@@ -16,12 +16,12 @@
             :class="selectedBanner === banner.key ? 'btn-primary' : 'btn-ghost'"
             @click="selectedBanner = banner.key"
           >
-            {{ banner.label }}
+            {{ tr(banner.labelKey, banner.label) }}
           </button>
         </div>
       </div>
       <div class="gacha-filter-row">
-        <div class="gacha-filter-label">角色属性</div>
+        <div class="gacha-filter-label">{{ t('gachaFilterType') }}</div>
         <div class="segmented-control">
           <button
             v-for="type in typeOptions"
@@ -30,7 +30,7 @@
             :class="selectedType === type.key ? 'btn-primary' : 'btn-ghost'"
             @click="selectedType = type.key"
           >
-            {{ type.label }}
+            {{ tr(type.labelKey, type.label) }}
           </button>
         </div>
       </div>
@@ -38,45 +38,45 @@
 
     <div class="card gacha-rule-card">
       <div class="gacha-rule-header">
-        <div class="card-title">当前规则</div>
+        <div class="card-title">{{ t('gachaCurrentRule') }}</div>
         <details class="gacha-rule-details">
-          <summary>计价口径</summary>
+          <summary>{{ t('gachaValuationBasis') }}</summary>
           <div class="gacha-rule-detail-body">
             <template v-if="selectedBanner === 'pickup'">
-              <span>规则：{{ analysis.config.note }}</span>
-              <span>SR：扣除限定/光暗常驻 → 魔女的来信(SR)</span>
-              <span>光暗常驻 → 魔女的邀请函</span>
-              <span>R → 魔女的来信(R)</span>
-              <span>N → 0.5 魔女的心片(SR)</span>
-              <span>累抽：20/50 符石；300 整抽邀请函；其余整百 SR心片 x80</span>
+              <span>{{ t('gachaRuleNote', { note: configNote }) }}</span>
+              <span>{{ t('gachaPickupRuleSr') }}</span>
+              <span>{{ t('gachaPickupRuleLd') }}</span>
+              <span>{{ t('gachaPickupRuleR') }}</span>
+              <span>{{ t('gachaPickupRuleN') }}</span>
+              <span>{{ t('gachaPickupRuleMilestone') }}</span>
             </template>
             <template v-else>
-              <span>规则：{{ analysis.config.note }}</span>
-              <span>副产物 → 道具评分表</span>
-              <span>30000钻大奖 → 30000 钻</span>
-              <span>圣德芬卷轴/魔书 → 天光武具隐含单价</span>
-              <span>亚斯塔禄卷轴/魔书 → 禁忌武具隐含单价</span>
-              <span>净成本/净预算：已扣副产物回收</span>
+              <span>{{ t('gachaRuleNote', { note: configNote }) }}</span>
+              <span>{{ t('gachaDestinyRuleSideScores') }}</span>
+              <span>{{ t('gachaDestinyRuleDiamondPrize') }}</span>
+              <span>{{ t('gachaDestinyRuleSandalphon') }}</span>
+              <span>{{ t('gachaDestinyRuleAstaroth') }}</span>
+              <span>{{ t('gachaDestinyRuleNetCost') }}</span>
             </template>
           </div>
         </details>
       </div>
       <div class="gacha-rule-grid">
         <div class="gacha-rule-cell">
-          <span>卡池</span>
-          <b>{{ analysis.config.bannerLabel }} / {{ analysis.config.typeLabel }}</b>
+          <span>{{ t('gachaPool') }}</span>
+          <b>{{ configBannerLabel }} / {{ configTypeLabel }}</b>
         </div>
         <div class="gacha-rule-cell">
-          <span>单抽</span>
-          <b>{{ analysis.config.costPerPull.toLocaleString() }} 钻</b>
+          <span>{{ t('gachaSinglePull') }}</span>
+          <b>{{ fmtDiamonds(analysis.config.costPerPull) }}</b>
         </div>
         <div class="gacha-rule-cell">
-          <span>基础</span>
+          <span>{{ t('gachaBaseRate') }}</span>
           <b>{{ fmtPercent(analysis.config.baseRate, 4) }}</b>
         </div>
         <div class="gacha-rule-cell gacha-rule-cell-wide">
-          <span>保底</span>
-          <b :title="analysis.config.note">{{ rulePityText }}</b>
+          <span>{{ t('gachaPity') }}</span>
+          <b :title="configNote">{{ rulePityText }}</b>
         </div>
       </div>
     </div>
@@ -85,27 +85,27 @@
   <section class="gacha-summary animate-fadeup">
     <div class="stat-box">
       <div class="stat-value">{{ fmtPulls(analysis.expectedPulls) }}</div>
-      <div class="stat-label">平均出货</div>
+      <div class="stat-label">{{ t('gachaAverageHit') }}</div>
     </div>
     <div class="stat-box">
       <div class="stat-value">{{ hasSideReturn ? fmtPercent(analysis.sideRecoveryRate) : fmtDiamonds(analysis.expectedNetCost) }}</div>
-      <div class="stat-label">{{ hasSideReturn ? '副产物回收率' : selectedBanner === 'destiny' ? '期望净成本' : '期望成本' }}</div>
+      <div class="stat-label">{{ hasSideReturn ? t('gachaSideRecovery') : selectedBanner === 'destiny' ? t('gachaExpectedNetCost') : t('gachaExpectedCost') }}</div>
     </div>
     <div v-if="hasSideReturn" class="stat-box">
       <div class="stat-value">{{ fmtDiamonds(analysis.expectedGrossCost) }}</div>
-      <div class="stat-label">期望总成本</div>
+      <div class="stat-label">{{ t('gachaExpectedGrossCost') }}</div>
     </div>
     <div class="stat-box">
       <div class="stat-value">{{ hasSideReturn ? fmtDiamonds(analysis.expectedNetCost) : fmtDiamonds(quantileGrossCost('p50')) }}</div>
-      <div class="stat-label">{{ hasSideReturn ? '期望净成本' : '50%预算' }}</div>
+      <div class="stat-label">{{ hasSideReturn ? t('gachaExpectedNetCost') : t('gachaBudgetP50') }}</div>
     </div>
     <div v-if="hasSideReturn" class="stat-box">
       <div class="stat-value">{{ fmtDiamonds(quantileGrossCost('p90')) }}</div>
-      <div class="stat-label">90%总预算</div>
+      <div class="stat-label">{{ t('gachaGrossBudgetP90') }}</div>
     </div>
     <div class="stat-box">
       <div class="stat-value">{{ fmtDiamonds(hasSideReturn ? quantileNetCost('p90') : quantileGrossCost('p90')) }}</div>
-      <div class="stat-label">{{ hasSideReturn ? '90%净预算' : '90%预算' }}</div>
+      <div class="stat-label">{{ hasSideReturn ? t('gachaNetBudgetP90') : t('gachaBudgetP90') }}</div>
     </div>
   </section>
 
@@ -113,8 +113,8 @@
     <div class="card gacha-chart-card">
       <div class="chart-toolbar">
         <div class="chart-toolbar-main">
-          <div class="card-title">预算达成概率</div>
-          <span class="tag tag-gold">指定限定</span>
+          <div class="card-title">{{ t('gachaBudgetProbability') }}</div>
+          <span class="tag tag-gold">{{ t('gachaTargetLimited') }}</span>
         </div>
       </div>
       <div class="chart-frame gacha-chart-frame">
@@ -123,37 +123,37 @@
     </div>
 
     <div class="card gacha-budget-card">
-      <div class="card-title">关键抽数</div>
+      <div class="card-title">{{ t('gachaKeyPulls') }}</div>
       <div class="gacha-budget-list">
         <div class="gacha-budget-head" :class="{ 'has-net': hasSideReturn }">
-          <span>抽数</span>
-          <span>成功率</span>
-          <span>总预算</span>
-          <span v-if="hasSideReturn">净预算</span>
+          <span>{{ t('gachaPulls') }}</span>
+          <span>{{ t('gachaSuccessRate') }}</span>
+          <span>{{ t('gachaGrossBudget') }}</span>
+          <span v-if="hasSideReturn">{{ t('gachaNetBudget') }}</span>
         </div>
         <div v-for="row in budgetRows" :key="row.pull" class="gacha-budget-row" :class="{ 'has-net': hasSideReturn }">
-          <span>{{ row.pull }}抽</span>
+          <span>{{ fmtPulls(row.pull) }}</span>
           <b>{{ fmtPercent(row.limitedRate) }}</b>
           <small>{{ fmtDiamonds(row.diamonds) }}</small>
           <small v-if="hasSideReturn">{{ fmtDiamonds(row.netCost) }}</small>
         </div>
       </div>
       <div class="gacha-side-note">
-        <b>预算口径</b>
+        <b>{{ t('gachaBudgetBasis') }}</b>
         <template v-if="hasSideReturn">
           <template v-if="selectedBanner === 'pickup'">
-            净预算 = 总预算 - 副产物估值；300 抽内副产物估值 {{ fmtDiamonds(detailSideSummary.sideValue) }}。
+            {{ t('gachaPickupBudgetNote', { value: fmtDiamonds(detailSideSummary.sideValue) }) }}
           </template>
           <template v-else>
-            净预算 = 总预算 - 副产物估值；每抽期望回收 {{ fmtDiamondValue(analysis.sideValuePerPull) }}，平均出货前合计 {{ fmtDiamonds(analysis.expectedSideValue) }}。
+            {{ t('gachaDestinyBudgetNote', { perPull: fmtDiamondValue(analysis.sideValuePerPull), total: fmtDiamonds(analysis.expectedSideValue) }) }}
           </template>
           <span v-if="probabilityCheckNotice">{{ probabilityCheckNotice }}</span>
         </template>
         <template v-else-if="selectedBanner === 'destiny'">
-          30000 钻大奖：抽到出货为止的期望返钻约 {{ fmtDiamonds(analysis.expectedDiamondPrize) }}；满 {{ analysis.config.maxPulls }} 抽至少中一次概率 {{ fmtPercent(analysis.diamondPrizeChanceAtCeiling) }}。
+          {{ t('gachaDiamondPrizeNote', { value: fmtDiamonds(analysis.expectedDiamondPrize), pulls: analysis.config.maxPulls, rate: fmtPercent(analysis.diamondPrizeChanceAtCeiling) }) }}
         </template>
         <template v-else>
-          光暗常驻按持续抽满计算：100 抽至少中一次 {{ fmtPercent(analysis.permanentChanceAtCeiling) }}，300 抽至少中一次 {{ fmtPercent(analysis.permanentChanceAtInvitation) }}。魔女的邀请函成本为 {{ fmtDiamonds(invitationCost) }}。
+          {{ t('gachaPermanentNote', { rate100: fmtPercent(analysis.permanentChanceAtCeiling), rate300: fmtPercent(analysis.permanentChanceAtInvitation), cost: fmtDiamonds(invitationCost) }) }}
         </template>
       </div>
     </div>
@@ -162,7 +162,7 @@
   <section class="gacha-secondary animate-fadeup">
     <div class="card gacha-chart-card">
       <div class="chart-toolbar">
-        <div class="card-title">首次命中分布</div>
+        <div class="card-title">{{ t('gachaFirstHitDistribution') }}</div>
       </div>
       <div class="chart-frame gacha-chart-frame-sm">
         <v-chart class="chart" :option="distributionChartOption" autoresize />
@@ -171,7 +171,7 @@
 
     <div class="card gacha-chart-card">
       <div class="chart-toolbar">
-        <div class="card-title">逐抽条件概率</div>
+        <div class="card-title">{{ t('gachaConditionalRate') }}</div>
       </div>
       <div class="chart-frame gacha-chart-frame-sm">
         <v-chart class="chart" :option="rateChartOption" autoresize />
@@ -183,8 +183,8 @@
     <div class="card gacha-chart-card">
       <div class="chart-toolbar">
         <div class="chart-toolbar-main">
-          <div class="card-title">副产物价值贡献</div>
-          <span class="tag tag-purple">每抽期望</span>
+          <div class="card-title">{{ t('gachaSideValueContribution') }}</div>
+          <span class="tag tag-purple">{{ t('gachaPerPullExpected') }}</span>
         </div>
       </div>
       <div class="chart-frame gacha-chart-frame-sm">
@@ -195,20 +195,20 @@
     <div class="card gacha-side-detail-card">
       <div class="chart-toolbar">
         <div class="chart-toolbar-main">
-          <div class="card-title">副产物评分明细</div>
-          <span class="tag tag-gold">来自评分表</span>
+          <div class="card-title">{{ t('gachaSideScoreDetail') }}</div>
+          <span class="tag tag-gold">{{ t('gachaFromScoreTable') }}</span>
         </div>
       </div>
       <div class="gacha-side-detail-list">
         <div v-for="drop in sideDetailRows" :key="drop.key" class="gacha-side-detail-row">
           <div>
-            <span>{{ drop.label }}</span>
-            <small>{{ drop.rateText }}，{{ sideDetailPulls }} 抽期望 {{ fmtQty(drop.expectedQtyAtCeiling) }} 个</small>
+            <span>{{ dropLabel(drop) }}</span>
+            <small>{{ t('gachaDropExpectedLine', { rate: drop.rateText, pulls: sideDetailPulls, qty: fmtQty(drop.expectedQtyAtCeiling) }) }}</small>
           </div>
-          <b v-if="drop.isPriced">{{ fmtDiamondValue(drop.expectedValuePerPull) }}/抽</b>
-          <b v-else>未计价</b>
+          <b v-if="drop.isPriced">{{ t('gachaPerPullValue', { value: fmtDiamondValue(drop.expectedValuePerPull) }) }}</b>
+          <b v-else>{{ t('gachaUnpriced') }}</b>
           <small v-if="drop.isPriced">{{ scoreSourceText(drop) }}</small>
-          <small v-else>专属产物</small>
+          <small v-else>{{ t('gachaExclusiveDrop') }}</small>
         </div>
       </div>
     </div>
@@ -234,33 +234,60 @@ import { currentTheme } from '../utils/themeStore.js'
 
 use([CanvasRenderer, BarChart, LineChart, GridComponent, LegendComponent, TitleComponent, TooltipComponent])
 
-useI18n()
+const { t, locale } = useI18n()
 
 const selectedBanner = ref('destiny')
 const selectedType = ref('fourElements')
 
-const bannerOptions = Object.values(GACHA_BANNERS).map(({ key, label }) => ({ key, label }))
+const tr = (key, fallback, params = {}) => key ? t(key, params) : fallback
+const bannerOptions = Object.values(GACHA_BANNERS).map(({ key, label, labelKey }) => ({ key, label, labelKey }))
 const typeOptions = Object.values(GACHA_TYPES)
 
 const normalizedScores = computed(() => applyDerivedScores(normalizeScores(editableScores)))
 const analysis = computed(() => buildGachaAnalysis(selectedBanner.value, selectedType.value, normalizedScores.value))
 const hasSideReturn = computed(() => analysis.value.sideDrops.length > 0)
+const configBannerLabel = computed(() => tr(analysis.value.config.labelKey, analysis.value.config.bannerLabel))
+const configTypeLabel = computed(() => tr(analysis.value.config.typeLabelKey, analysis.value.config.typeLabel))
+const configNote = computed(() => tr(analysis.value.config.noteKey, analysis.value.config.note))
 
 const fmtPercent = (value, digits = 2) => `${(value * 100).toFixed(digits)}%`
-const fmtPulls = (value) => `${value.toFixed(1)} 抽`
-const fmtDiamonds = (value) => `${Math.round(value).toLocaleString()} 钻`
-const fmtDiamondValue = value => `${(value >= 100 ? Math.round(value) : Number(value).toFixed(value >= 10 ? 1 : 2)).toLocaleString()} 钻`
+const fmtPulls = (value) => t('pullCount', { count: Number(value).toFixed(Number.isInteger(value) ? 0 : 1) })
+const fmtDiamonds = (value) => t('diamondValue', { value: Math.round(value).toLocaleString() })
+const fmtDiamondValue = value => t('diamondValue', { value: (value >= 100 ? Math.round(value) : Number(value).toFixed(value >= 10 ? 1 : 2)).toLocaleString() })
 const fmtScore = value => value >= 10 ? value.toFixed(1) : value.toFixed(2)
 const fmtQty = value => value >= 10 ? value.toFixed(1) : value.toFixed(2)
-const scoreSourceText = drop => drop.referenceLabel
-  ? `${drop.referenceLabel}，单个 ${fmtScore(drop.unitScore)} 钻`
-  : `单个 ${fmtScore(drop.unitScore)} 钻`
+const scoreSourceText = drop => drop.referenceLabelKey
+  ? t('gachaScoreSourceReference', { source: t(drop.referenceLabelKey, drop.referenceLabelParams || {}), value: fmtScore(drop.unitScore) })
+  : t('gachaScoreSourceSingle', { value: fmtScore(drop.unitScore) })
+
+const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
+function itemName(itype, iid, fallback = '') {
+  const item = normalizedScores.value[`[${itype},${iid}]`]
+  if (!item) return fallback
+  const field = localeNameMap[locale.value] || 'nameZh'
+  return item[field] || item.nameZh || item.name || fallback
+}
+function dropBaseName(drop) {
+  if (drop.reference === 'lightWeapon') {
+    if (drop.key.includes('Scroll')) return t('itemSandalphonScroll')
+    if (drop.key.includes('Grimoire')) return t('itemSandalphonTome')
+  }
+  if (drop.reference === 'forbiddenWeapon') {
+    if (drop.key.includes('Scroll')) return t('itemAstarothScroll')
+    if (drop.key.includes('Grimoire')) return t('itemAstarothTome')
+  }
+  if (drop.itype && drop.iid) return itemName(drop.itype, drop.iid, drop.label?.replace(/\sx[\d.]+.*/, '') || drop.label)
+  return drop.label
+}
+function dropLabel(drop) {
+  return t('itemQtyLabel', { item: dropBaseName(drop), qty: drop.qty })
+}
 
 const probabilityCheckNotice = computed(() => {
   if (!hasSideReturn.value || selectedBanner.value !== 'destiny' || selectedType.value !== 'lightDark') return ''
   const check = analysis.value.sideProbabilityCheck
   if (check.isClosed) return ''
-  return ` 光暗末位抹0试算：副产物合计 ${fmtPercent(check.sideRate, 4)}，加限定为 ${fmtPercent(check.totalRate, 4)}，差 ${fmtPercent(check.gapRate, 4)}。`
+  return ` ${t('gachaProbabilityCheckNotice', { side: fmtPercent(check.sideRate, 4), total: fmtPercent(check.totalRate, 4), gap: fmtPercent(check.gapRate, 4) })}`
 })
 
 const quantileGrossCost = (key) => analysis.value.quantiles[key] * analysis.value.config.costPerPull
@@ -276,8 +303,8 @@ const invitationCost = computed(() => {
   return (config.invitationPulls || 0) * config.costPerPull
 })
 const rulePityText = computed(() => selectedBanner.value === 'pickup'
-  ? '100抽必出；300抽邀请函'
-  : '57-70软保底；70抽必出')
+  ? t('gachaPityPickup')
+  : t('gachaPityDestiny'))
 
 const getLimitedRateAtPull = (pull) => {
   const rows = analysis.value.pulls
@@ -329,7 +356,7 @@ const withSideSummaryMetrics = drop => ({
   expectedQtyAtCeiling: detailSideSummary.value.sideQuantities[drop.key] || 0,
   expectedValuePerPull: (detailSideSummary.value.sideValues[drop.key] || 0) / sideDetailPulls.value,
   rateText: drop.milestoneCycle
-    ? drop.label.includes('300整') ? '300 整抽奖励' : drop.milestoneLabel
+    ? drop.onlyEvery ? t('gachaMilestone300Reward') : t('gachaMilestoneCycle', { pulls: drop.milestoneCycle })
     : fmtPercent(drop.rate, 4),
 })
 const sideContributionRows = computed(() => analysis.value.pricedSideDrops
@@ -341,15 +368,15 @@ const sideDetailRows = computed(() => [
   ...analysis.value.exclusiveSideDrops,
 ].map(withSideSummaryMetrics))
 
-const makeTooltip = (label, rows, valueLabel = '概率') => (params) => {
+const makeTooltip = (label, rows, valueLabel = t('gachaProbability')) => (params) => {
   const list = Array.isArray(params) ? params : [params]
   const row = rows[list[0].dataIndex]
   const costText = hasSideReturn.value
-    ? `${fmtDiamonds(row.netCost)} 净 / ${fmtDiamonds(row.diamonds)} 原`
+    ? t('gachaTooltipNetGrossCost', { net: fmtDiamonds(row.netCost), gross: fmtDiamonds(row.diamonds) })
     : fmtDiamonds(row.diamonds)
-  let html = `<b style="color:var(--gold)">${label}：第 ${row.pull} 抽 / ${costText}</b><br>`
+  let html = `<b style="color:var(--gold)">${label}: ${fmtPulls(row.pull)} / ${costText}</b><br>`
   list.forEach(item => {
-    html += `<span style="color:${item.color}">● ${item.seriesName}</span> ${valueLabel}：<b>${item.value.toFixed(2)}%</b><br>`
+    html += `<span style="color:${item.color}">● ${item.seriesName}</span> ${valueLabel}: <b>${item.value.toFixed(2)}%</b><br>`
   })
   return html
 }
@@ -358,14 +385,14 @@ const cumulativeChartOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
   const rows = cumulativeRows.value
-  const sideName = selectedBanner.value === 'pickup' ? '光暗常驻至少一次' : '30000钻至少一次'
+  const sideName = selectedBanner.value === 'pickup' ? t('gachaPermanentAtLeastOnce') : t('gachaDiamondPrizeAtLeastOnce')
 
   return {
     ...baseChartOption('', '', isDark),
     tooltip: {
       ...theme.tooltip,
       trigger: 'axis',
-      formatter: makeTooltip('预算', rows),
+      formatter: makeTooltip(t('gachaBudget'), rows),
     },
     legend: {
       ...theme.legend,
@@ -388,7 +415,7 @@ const cumulativeChartOption = computed(() => {
     },
     series: [
       {
-        name: '指定限定至少一次',
+        name: t('gachaTargetLimitedAtLeastOnce'),
         type: 'line',
         smooth: true,
         symbol: 'none',
@@ -423,7 +450,7 @@ const distributionChartOption = computed(() => {
     tooltip: {
       ...theme.tooltip,
       trigger: 'axis',
-      formatter: makeTooltip('首次命中', rows),
+      formatter: makeTooltip(t('gachaFirstHit'), rows),
     },
     xAxis: {
       type: 'category',
@@ -438,7 +465,7 @@ const distributionChartOption = computed(() => {
     },
     series: [
       {
-        name: '刚好本抽命中',
+        name: t('gachaExactHitThisPull'),
         type: 'bar',
         barMaxWidth: 12,
         itemStyle: { color: LINE_COLORS[0] },
@@ -458,7 +485,7 @@ const rateChartOption = computed(() => {
     tooltip: {
       ...theme.tooltip,
       trigger: 'axis',
-      formatter: makeTooltip('逐抽条件概率', rows),
+      formatter: makeTooltip(t('gachaConditionalRate'), rows),
     },
     xAxis: {
       type: 'category',
@@ -475,7 +502,7 @@ const rateChartOption = computed(() => {
     },
     series: [
       {
-        name: '前面未中时本抽命中',
+        name: t('gachaConditionalHitThisPull'),
         type: 'line',
         smooth: false,
         symbol: 'circle',
@@ -502,7 +529,7 @@ const sideContributionOption = computed(() => {
       formatter: (params) => {
         const item = params[0]
         const row = rows[item.dataIndex]
-        return `<b style="color:var(--gold)">${row.label}</b><br>来源：${row.rateText}<br>单个价值：${fmtScore(row.unitScore)} 钻<br>每抽期望：${fmtDiamondValue(row.expectedValuePerPull)}`
+        return `<b style="color:var(--gold)">${dropLabel(row)}</b><br>${t('gachaSource')}: ${row.rateText}<br>${t('gachaSingleValue')}: ${fmtDiamonds(row.unitScore)}<br>${t('gachaPerPullExpected')}: ${fmtDiamondValue(row.expectedValuePerPull)}`
       },
     },
     grid: {
@@ -517,7 +544,7 @@ const sideContributionOption = computed(() => {
     },
     yAxis: {
       type: 'category',
-      data: rows.map(row => row.label.replace(' x', '×')),
+      data: rows.map(row => dropLabel(row).replace(' x', '×')),
       axisLabel: {
         ...theme.axisLabel,
         width: 120,
@@ -527,7 +554,7 @@ const sideContributionOption = computed(() => {
     },
     series: [
       {
-        name: '每抽期望价值',
+        name: t('gachaPerPullExpectedValue'),
         type: 'bar',
         barMaxWidth: 16,
         itemStyle: { color: LINE_COLORS[0] },

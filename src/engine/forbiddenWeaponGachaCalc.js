@@ -4,13 +4,15 @@ export const WEAPON_GACHA_CONFIGS = {
   forbidden: {
     key: 'forbidden',
     label: '禁忌武具召唤',
+    labelKey: 'weaponGachaForbidden',
     shortLabel: '禁忌武具',
-    costItem: { itype: 16, iid: 7, fallbackValue: 300, label: '禁忌武具召唤券' },
+    shortLabelKey: 'weaponGachaForbiddenShort',
+    costItem: { itype: 16, iid: 7, fallbackValue: 300, label: '禁忌武具召唤券', nameKey: 'itemTicketForbiddenWeapon' },
     originalDiamondCost: 300,
     maxPulls: 100,
     coreDrops: [
-      { key: 'scroll', label: '亚斯塔禄的卷轴', rate: 0.12, qty: 1 },
-      { key: 'grimoire', label: '亚斯塔禄的魔书', rate: 0.12, qty: 1 },
+      { key: 'scroll', label: '亚斯塔禄的卷轴', nameKey: 'itemAstarothScroll', iconId: 63, rate: 0.12, qty: 1 },
+      { key: 'grimoire', label: '亚斯塔禄的魔书', nameKey: 'itemAstarothTome', iconId: 64, rate: 0.12, qty: 1 },
     ],
     sideDrops: [
       { key: 'boss1', label: '首领挑战券 x1', rate: 0.06, qty: 1, itype: 19, iid: 1 },
@@ -21,21 +23,23 @@ export const WEAPON_GACHA_CONFIGS = {
     milestone: {
       interval: 10,
       rotation: [
-        { key: 'scroll', label: '亚斯塔禄的卷轴', qty: 1 },
-        { key: 'grimoire', label: '亚斯塔禄的魔书', qty: 1 },
+        { key: 'scroll', label: '亚斯塔禄的卷轴', nameKey: 'itemAstarothScroll', iconId: 63, qty: 1 },
+        { key: 'grimoire', label: '亚斯塔禄的魔书', nameKey: 'itemAstarothTome', iconId: 64, qty: 1 },
       ],
     },
   },
   light: {
     key: 'light',
     label: '天光武具召唤',
+    labelKey: 'weaponGachaLight',
     shortLabel: '天光武具',
-    costItem: { itype: 16, iid: 6, fallbackValue: 60, label: '天光武具召唤券' },
+    shortLabelKey: 'weaponGachaLightShort',
+    costItem: { itype: 16, iid: 6, fallbackValue: 60, label: '天光武具召唤券', nameKey: 'itemTicketLightWeapon' },
     originalDiamondCost: 60,
     maxPulls: 100,
     coreDrops: [
-      { key: 'scroll', label: '圣德芬的卷轴', rate: 0.12, qty: 1 },
-      { key: 'grimoire', label: '圣德芬的魔书', rate: 0.12, qty: 1 },
+      { key: 'scroll', label: '圣德芬的卷轴', nameKey: 'itemSandalphonScroll', iconId: 61, rate: 0.12, qty: 1 },
+      { key: 'grimoire', label: '圣德芬的魔书', nameKey: 'itemSandalphonTome', iconId: 62, rate: 0.12, qty: 1 },
     ],
     sideDrops: [
       { key: 'boss1', label: '首领挑战券 x1', rate: 0.06, qty: 1, itype: 19, iid: 1 },
@@ -46,25 +50,29 @@ export const WEAPON_GACHA_CONFIGS = {
     milestone: {
       interval: 10,
       rotation: [
-        { key: 'scroll', label: '圣德芬的卷轴', qty: 1 },
-        { key: 'grimoire', label: '圣德芬的魔书', qty: 1 },
+        { key: 'scroll', label: '圣德芬的卷轴', nameKey: 'itemSandalphonScroll', iconId: 61, qty: 1 },
+        { key: 'grimoire', label: '圣德芬的魔书', nameKey: 'itemSandalphonTome', iconId: 62, qty: 1 },
       ],
     },
   },
   witchSecret: {
     key: 'witchSecret',
     label: '魔女的奥秘召唤',
+    labelKey: 'weaponGachaWitchSecret',
     shortLabel: '魔女奥秘',
-    costItem: { itype: 16, iid: 12, fallbackValue: 300, label: '魔女的奥秘召唤券' },
+    shortLabelKey: 'weaponGachaWitchSecretShort',
+    costItem: { itype: 16, iid: 12, fallbackValue: 300, label: '魔女的奥秘召唤券', nameKey: 'itemTicketWitchSecret' },
     originalDiamondCost: 300,
     maxPulls: 70,
     freePullsPerPeriod: 7,
     weeklyCap: 35,
     coreUnitLabel: '魔水晶',
+    coreUnitLabelKey: 'itemMagicCrystal',
     implicitUnitLabel: '魔水晶推算价值',
+    implicitUnitLabelKey: 'weaponGachaMagicCrystalValue',
     coreDrops: [
-      { key: 'magicCrystal', label: '随机魔水晶', rate: 0.12, qty: 1 },
-      { key: 'tenPullGuarantee', label: '10抽保证折算', perPullQty: 1 },
+      { key: 'magicCrystal', label: '随机魔水晶', labelKey: 'weaponGachaRandomMagicCrystal', rate: 0.12, qty: 1 },
+      { key: 'tenPullGuarantee', label: '10抽保证折算', labelKey: 'weaponGachaTenPullGuarantee', perPullQty: 1 },
     ],
     sideDrops: [
       { key: 'perfume', label: '魔装香油 x1', rate: 0.20, qty: 1, itype: 15, iid: 1 },
@@ -75,10 +83,10 @@ export const WEAPON_GACHA_CONFIGS = {
       { key: 'rune9', label: '符石兑换券 x9', rate: 0.09, qty: 9, itype: 13, iid: 4 },
     ],
     weeklyMilestones: [
-      { pull: 4, key: 'weeklyBonus', label: '第4次周奖励', qty: 2 },
-      { pull: 15, key: 'weeklyBonus', label: '第15次周奖励', qty: 2 },
-      { pull: 25, key: 'weeklyBonus', label: '第25次周奖励', qty: 3 },
-      { pull: 35, key: 'weeklyBonus', label: '第35次周奖励', qty: 3 },
+      { pull: 4, key: 'weeklyBonus', label: '第4次周奖励', labelKey: 'weaponGachaWeeklyBonusAt', qty: 2 },
+      { pull: 15, key: 'weeklyBonus', label: '第15次周奖励', labelKey: 'weaponGachaWeeklyBonusAt', qty: 2 },
+      { pull: 25, key: 'weeklyBonus', label: '第25次周奖励', labelKey: 'weaponGachaWeeklyBonusAt', qty: 3 },
+      { pull: 35, key: 'weeklyBonus', label: '第35次周奖励', labelKey: 'weaponGachaWeeklyBonusAt', qty: 3 },
     ],
   },
 }

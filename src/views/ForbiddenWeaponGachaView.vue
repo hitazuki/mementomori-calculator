@@ -6,7 +6,7 @@
 
   <section class="weapon-banner-control animate-fadeup">
     <div class="card weapon-banner-card">
-      <div class="card-title">武具召唤类型</div>
+      <div class="card-title">{{ t('weaponGachaType') }}</div>
       <div class="segmented-control">
         <button
           v-for="banner in bannerOptions"
@@ -15,7 +15,7 @@
           :class="selectedBanner === banner.key ? 'btn-primary' : 'btn-ghost'"
           @click="selectedBanner = banner.key"
         >
-          {{ banner.shortLabel }}
+          {{ tr(banner.shortLabelKey, banner.shortLabel) }}
         </button>
       </div>
     </div>
@@ -26,27 +26,27 @@
       <section class="weapon-summary">
         <div class="stat-box">
           <div class="stat-value">{{ fmtDiamonds(analysis.ticketValue) }}</div>
-          <div class="stat-label">{{ analysis.config.costItem.label }}价值</div>
+          <div class="stat-label">{{ t('weaponGachaTicketValue', { item: costItemLabel }) }}</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">{{ isWitchSecret ? `${selected.paidPulls} 抽` : fmtPercent(selected.sideRecoveryRate) }}</div>
-          <div class="stat-label">{{ isWitchSecret ? '需补付费抽' : '副产物回收率' }}</div>
+          <div class="stat-value">{{ isWitchSecret ? fmtPulls(selected.paidPulls) : fmtPercent(selected.sideRecoveryRate) }}</div>
+          <div class="stat-label">{{ isWitchSecret ? t('weaponGachaPaidPulls') : t('weaponGachaSideRecovery') }}</div>
         </div>
         <div class="stat-box">
           <div class="stat-value">{{ fmtDiamonds(selected.implicitCoreUnit) }}</div>
           <div class="stat-label">{{ implicitUnitLabel }}</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">{{ isWitchSecret ? fmtQty(selected.totalCoreCount) : `${analysis.bestNode.pulls} 抽` }}</div>
-          <div class="stat-label">{{ isWitchSecret ? '预计魔水晶' : '最低隐含单价节点' }}</div>
+          <div class="stat-value">{{ isWitchSecret ? fmtQty(selected.totalCoreCount) : fmtPulls(analysis.bestNode.pulls) }}</div>
+          <div class="stat-label">{{ isWitchSecret ? t('weaponGachaExpectedMagicCrystal') : t('weaponGachaBestNode') }}</div>
         </div>
       </section>
 
       <section class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
-            <div class="card-title">抽数与核心产物成本</div>
-            <span class="tag tag-gold">累抽奖励已并入</span>
+            <div class="card-title">{{ t('weaponGachaCoreCostChart') }}</div>
+            <span class="tag tag-gold">{{ t('weaponGachaMilestoneIncluded') }}</span>
           </div>
         </div>
         <div class="chart-frame weapon-chart-frame">
@@ -57,8 +57,8 @@
       <section class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
-            <div class="card-title">抽数与预计产物数量</div>
-            <span class="tag tag-purple">期望数量</span>
+            <div class="card-title">{{ t('weaponGachaQuantityChart') }}</div>
+            <span class="tag tag-purple">{{ t('weaponGachaExpectedQty') }}</span>
           </div>
         </div>
         <div class="chart-frame weapon-chart-frame">
@@ -69,7 +69,7 @@
       <section class="weapon-charts-row">
         <div class="card weapon-chart-card">
           <div class="chart-toolbar">
-            <div class="card-title">成本拆解</div>
+            <div class="card-title">{{ t('weaponGachaCostBreakdown') }}</div>
           </div>
           <div class="chart-frame weapon-chart-frame-sm">
             <v-chart class="chart" :option="costBreakdownOption" autoresize />
@@ -78,7 +78,7 @@
 
         <div class="card weapon-chart-card">
           <div class="chart-toolbar">
-            <div class="card-title">副产物贡献</div>
+            <div class="card-title">{{ t('weaponGachaSideContribution') }}</div>
           </div>
           <div class="chart-frame weapon-chart-frame-sm">
             <v-chart class="chart" :option="sideContributionOption" autoresize />
@@ -89,33 +89,33 @@
 
     <aside class="weapon-side">
       <div class="card">
-        <div class="card-title">累计抽数</div>
+        <div class="card-title">{{ t('weaponGachaPullCount') }}</div>
         <div class="form-group">
           <label class="form-label">
-            <span>用于结论计算</span>
-            <span class="value-display">{{ selectedPulls }} 抽</span>
+            <span>{{ t('weaponGachaForSummary') }}</span>
+            <span class="value-display">{{ fmtPulls(selectedPulls) }}</span>
           </label>
           <input class="form-range" type="range" min="1" :max="pullMax" step="1" v-model.number="selectedPulls">
           <input class="form-input weapon-pull-input" type="number" min="1" :max="pullMax" v-model.number="selectedPulls">
         </div>
         <div class="weapon-preset-row">
-          <button v-for="pull in presetPulls" :key="pull" class="btn btn-sm" :class="selectedPulls === pull ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = pull">{{ pull }} 抽</button>
+          <button v-for="pull in presetPulls" :key="pull" class="btn btn-sm" :class="selectedPulls === pull ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = pull">{{ fmtPulls(pull) }}</button>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">当前抽数结果</div>
+        <div class="card-title">{{ t('weaponGachaCurrentResult') }}</div>
         <div class="weapon-result-list">
           <div>
-          <span>总成本</span>
+          <span>{{ t('weaponGachaTotalCost') }}</span>
             <b>{{ fmtDiamonds(selected.totalCost) }}</b>
           </div>
           <div v-if="isWitchSecret">
-            <span>免费/付费抽</span>
+            <span>{{ t('weaponGachaFreePaidPulls') }}</span>
             <b>{{ selected.freePulls }} / {{ selected.paidPulls }}</b>
           </div>
           <div>
-            <span>副产物抵扣</span>
+            <span>{{ t('weaponGachaSideDeduction') }}</span>
             <b>{{ fmtDiamonds(selected.sideValue) }}</b>
           </div>
           <div v-for="row in selectedCoreRows" :key="row.key">
@@ -123,7 +123,7 @@
             <b>{{ fmtQty(row.qty) }}</b>
           </div>
           <div>
-            <span>核心产物总数</span>
+            <span>{{ t('weaponGachaCoreTotal') }}</span>
             <b>{{ fmtQty(selected.totalCoreCount) }}</b>
           </div>
         </div>
@@ -131,33 +131,33 @@
 
       <div class="card">
         <button class="btn btn-ghost weapon-formula-toggle" @click="showFormula = !showFormula">
-          {{ showFormula ? '收起公式' : '查看公式计算流程' }}
+          {{ showFormula ? t('weaponGachaHideFormula') : t('weaponGachaShowFormula') }}
         </button>
         <div v-show="showFormula" class="weapon-formula">
           <template v-if="isWitchSecret">
-            <p>每周按 7 次免费抽、35 次周累抽上限展示；第 4/15/25/35 次周奖励已并入魔水晶数量。</p>
-            <p>10 抽保证获得魔水晶 x10 不随周重置，折算为每抽稳定 +1 魔水晶。</p>
-            <p>魔水晶推算价值 = max(0, 付费抽成本 - 非魔水晶副产物价值) / 预计魔水晶数量。</p>
-            <p>35 抽后不再获得每周累抽奖励，但仍保留随机魔水晶与 10 抽保证折算收益。</p>
+            <p>{{ t('weaponGachaWitchFormulaWeekly') }}</p>
+            <p>{{ t('weaponGachaWitchFormulaGuarantee') }}</p>
+            <p>{{ t('weaponGachaWitchFormulaValue') }}</p>
+            <p>{{ t('weaponGachaWitchFormulaAfterCap') }}</p>
           </template>
           <template v-else>
-          <p>副产物价值来自道具评分表，卷轴/魔书不单独手填。</p>
-          <p>副产物回收率 = 副产物期望价值 / {{ analysis.config.costItem.label }}总价值。</p>
-          <p>卷轴/魔书隐含单价 = max(0, 总成本 - 副产物价值) / 预计核心产物数量。</p>
-          <p>每 10 抽获得一次累计奖励，卷轴/魔书交替出现，不限次数；这些奖励已并入预计数量。</p>
+          <p>{{ t('weaponGachaWeaponFormulaScores') }}</p>
+          <p>{{ t('weaponGachaWeaponFormulaRecovery', { item: costItemLabel }) }}</p>
+          <p>{{ t('weaponGachaWeaponFormulaValue') }}</p>
+          <p>{{ t('weaponGachaWeaponFormulaMilestone') }}</p>
           </template>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">产物明细</div>
+        <div class="card-title">{{ t('weaponGachaDropDetail') }}</div>
         <div class="weapon-detail-list">
           <div v-for="drop in selectedSideRows" :key="drop.key" class="weapon-detail-row">
-            <span>{{ drop.label }}</span>
+            <span>{{ dropLabel(drop) }}</span>
             <b>{{ fmtPercent(drop.rate) }}</b>
-            <small>评分：{{ fmtScoreValue(drop.scoreMeta.score) }} 钻 / {{ drop.scoreMeta.batch.toLocaleString() }} 个</small>
-            <small>当前预计：{{ fmtQty(drop.expectedQty) }} 个，价值 {{ fmtScoreValue(drop.expectedValue) }} 钻</small>
-            <small>每抽贡献：{{ fmtScoreValue(drop.expectedValuePerPull) }} 钻</small>
+            <small>{{ t('weaponGachaScoreLine', { value: fmtScoreValue(drop.scoreMeta.score), batch: drop.scoreMeta.batch.toLocaleString() }) }}</small>
+            <small>{{ t('weaponGachaExpectedLine', { qty: fmtQty(drop.expectedQty), value: fmtScoreValue(drop.expectedValue) }) }}</small>
+            <small>{{ t('weaponGachaPerPullLine', { value: fmtScoreValue(drop.expectedValuePerPull) }) }}</small>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@ import { currentTheme } from '../utils/themeStore.js'
 
 use([CanvasRenderer, BarChart, LineChart, GridComponent, LegendComponent, TitleComponent, TooltipComponent])
 
-useI18n()
+const { t, locale } = useI18n()
 
 const selectedBanner = ref('forbidden')
 const selectedPulls = ref(20)
@@ -200,17 +200,42 @@ const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScor
   maxPulls: WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100,
 }))
 const selected = computed(() => analysis.value.selected)
-const implicitUnitLabel = computed(() => analysis.value.config.implicitUnitLabel || '卷轴/魔书隐含单价')
+const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
+const tr = (key, fallback, params = {}) => key ? t(key, params) : fallback
+const costItemLabel = computed(() => tr(analysis.value.config.costItem.nameKey, analysis.value.config.costItem.label))
+const implicitUnitLabel = computed(() => tr(
+  analysis.value.config.implicitUnitLabelKey,
+  analysis.value.config.implicitUnitLabel || t('weaponGachaCoreImplicitUnit')
+))
+
+function itemName(itype, iid, fallback = '') {
+  const item = normalizedScores.value[`[${itype},${iid}]`]
+  if (!item) return fallback
+  const field = localeNameMap[locale.value] || 'nameZh'
+  return item[field] || item.nameZh || item.name || fallback
+}
+
+function dropBaseName(drop) {
+  if (drop.labelKey || drop.nameKey) return tr(drop.labelKey || drop.nameKey, drop.label)
+  if (drop.itype && drop.iid) return itemName(drop.itype, drop.iid, drop.label?.replace(/\sx\d+$/, '') || '')
+  return drop.label
+}
+
+function dropLabel(drop) {
+  const base = dropBaseName(drop)
+  return drop.qty ? t('itemQtyLabel', { item: base, qty: drop.qty }) : base
+}
+
 const selectedCoreRows = computed(() => {
   const rows = analysis.value.config.coreDrops.map(drop => ({
     key: drop.key,
-    label: `${drop.label}预计数量`,
+    label: t('weaponGachaExpectedItem', { item: dropBaseName(drop) }),
     qty: selected.value.coreCounts[drop.key] || 0,
   }))
   if (selected.value.coreCounts.weeklyBonus) {
     rows.push({
       key: 'weeklyBonus',
-      label: '每周累抽奖励',
+      label: t('weaponGachaWeeklyBonus'),
       qty: selected.value.coreCounts.weeklyBonus,
     })
   }
@@ -221,7 +246,8 @@ watch(selectedBanner, banner => {
   selectedPulls.value = banner === 'witchSecret' ? 35 : 20
 })
 
-const fmtDiamonds = value => `${Math.round(value).toLocaleString()} 钻`
+const fmtDiamonds = value => t('diamondValue', { value: Math.round(value).toLocaleString() })
+const fmtPulls = value => t('pullCount', { count: value })
 const fmtScoreValue = value => {
   if (Math.abs(value) > 0 && Math.abs(value) < 1) return value.toFixed(3)
   if (Math.abs(value) < 10) return value.toFixed(2)
@@ -239,12 +265,12 @@ const selectedSideRows = computed(() => analysis.value.sideDrops.map(drop => ({
 const chartTooltip = (rows, title, fields) => (params) => {
   const list = Array.isArray(params) ? params : [params]
   const row = rows[list[0].dataIndex]
-  let html = `<b style="color:var(--gold)">${title}：${row.pulls} 抽</b><br>`
+  let html = `<b style="color:var(--gold)">${title}: ${fmtPulls(row.pulls)}</b><br>`
   list.forEach(item => {
-    html += `<span style="color:${item.color}">● ${item.seriesName}</span>：<b>${item.value}</b><br>`
+    html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${item.value}</b><br>`
   })
   fields?.forEach(field => {
-    html += `${field.label}：<b>${field.format(row)}</b><br>`
+    html += `${field.label}: <b>${field.format(row)}</b><br>`
   })
   return html
 }
@@ -259,7 +285,7 @@ const implicitCostOption = computed(() => {
   const milestonePoints = rows
     .filter(row => milestonePulls.includes(row.pulls))
     .map(row => ({
-      name: `${row.pulls}抽`,
+      name: fmtPulls(row.pulls),
       coord: [row.pulls, Math.round(row.implicitCoreUnit)],
       value: String(row.pulls),
     }))
@@ -269,9 +295,9 @@ const implicitCostOption = computed(() => {
     tooltip: {
       ...theme.tooltip,
       trigger: 'axis',
-      formatter: chartTooltip(rows, '累计抽数', [
-        { label: '副产物回收率', format: row => fmtPercent(row.sideRecoveryRate) },
-        { label: '预计核心产物', format: row => fmtQty(row.totalCoreCount) },
+      formatter: chartTooltip(rows, t('weaponGachaPullCount'), [
+        { label: t('weaponGachaSideRecovery'), format: row => fmtPercent(row.sideRecoveryRate) },
+        { label: t('weaponGachaExpectedCore'), format: row => fmtQty(row.totalCoreCount) },
       ]),
     },
     legend: { ...theme.legend, top: 8, right: 16 },
@@ -283,7 +309,7 @@ const implicitCostOption = computed(() => {
     },
     yAxis: {
       type: 'value',
-      axisLabel: { ...theme.axisLabel, formatter: '{value} 钻' },
+      axisLabel: { ...theme.axisLabel, formatter: value => fmtDiamonds(value) },
       splitLine: theme.splitLine,
     },
     series: [
@@ -310,7 +336,7 @@ const quantityOption = computed(() => {
   const theme = getMoriTheme(isDark)
   const rows = analysis.value.rows
   const coreSeries = analysis.value.config.coreDrops.map((drop, index) => ({
-    name: drop.label,
+    name: dropBaseName(drop),
     type: 'line',
     smooth: true,
     lineStyle: { width: 3, color: LINE_COLORS[index % LINE_COLORS.length] },
@@ -319,7 +345,7 @@ const quantityOption = computed(() => {
   }))
   if (isWitchSecret.value) {
     coreSeries.push({
-      name: '每周累抽奖励',
+      name: t('weaponGachaWeeklyBonus'),
       type: 'line',
       smooth: true,
       lineStyle: { width: 3, color: LINE_COLORS[2], type: 'dashed' },
@@ -328,7 +354,7 @@ const quantityOption = computed(() => {
     })
   }
   const sideSeries = analysis.value.sideDrops.slice(0, isWitchSecret.value ? 4 : 3).map((drop, index) => ({
-    name: drop.label.replace(/\sx\d+$/, ''),
+    name: dropBaseName(drop),
     type: 'line',
     smooth: true,
     lineStyle: { width: 2, color: LINE_COLORS[(index + 3) % LINE_COLORS.length], type: 'dashed' },
@@ -341,9 +367,9 @@ const quantityOption = computed(() => {
     tooltip: {
       ...theme.tooltip,
       trigger: 'axis',
-      formatter: chartTooltip(rows, '累计抽数', [
-        { label: '副产物抵扣', format: row => fmtDiamonds(row.sideValue) },
-        { label: '核心产物总数', format: row => fmtQty(row.totalCoreCount) },
+      formatter: chartTooltip(rows, t('weaponGachaPullCount'), [
+        { label: t('weaponGachaSideDeduction'), format: row => fmtDiamonds(row.sideValue) },
+        { label: t('weaponGachaCoreTotal'), format: row => fmtQty(row.totalCoreCount) },
       ]),
     },
     legend: { ...theme.legend, top: 8, right: 16 },
@@ -369,29 +395,29 @@ const costBreakdownOption = computed(() => {
 
   return {
     ...baseChartOption('', '', isDark),
-    tooltip: { ...theme.tooltip, trigger: 'axis', formatter: chartTooltip(rows, '成本拆解') },
+    tooltip: { ...theme.tooltip, trigger: 'axis', formatter: chartTooltip(rows, t('weaponGachaCostBreakdown')) },
     legend: { ...theme.legend, top: 8, right: 16 },
     xAxis: {
       type: 'category',
-      data: rows.map(row => `${row.pulls}抽`),
+      data: rows.map(row => fmtPulls(row.pulls)),
       axisLabel: theme.axisLabel,
       axisLine: theme.axisLine,
     },
     yAxis: {
       type: 'value',
-      axisLabel: { ...theme.axisLabel, formatter: '{value} 钻' },
+      axisLabel: { ...theme.axisLabel, formatter: value => fmtDiamonds(value) },
       splitLine: theme.splitLine,
     },
     series: [
       {
-        name: '副产物抵扣',
+        name: t('weaponGachaSideDeduction'),
         type: 'bar',
         stack: 'cost',
         itemStyle: { color: LINE_COLORS[2] },
         data: rows.map(row => Math.round(row.sideValue)),
       },
       {
-        name: `${implicitUnitLabel.value.replace('单价', '成本')}`,
+        name: t('weaponGachaImplicitCost'),
         type: 'bar',
         stack: 'cost',
         itemStyle: { color: LINE_COLORS[0] },
@@ -414,13 +440,13 @@ const sideContributionOption = computed(() => {
       formatter: params => {
         const item = params[0]
         const row = rows[item.dataIndex]
-        return `<b style="color:var(--gold)">${row.label}</b><br>概率：${fmtPercent(row.rate)}<br>评分：${fmtScoreValue(row.scoreMeta.score)} 钻 / ${row.scoreMeta.batch.toLocaleString()} 个<br>期望贡献：<b>${fmtScoreValue(row.expectedValuePerPull)} 钻 / 抽</b>`
+        return `<b style="color:var(--gold)">${dropLabel(row)}</b><br>${t('weaponGachaRate')}: ${fmtPercent(row.rate)}<br>${t('weaponGachaScoreLine', { value: fmtScoreValue(row.scoreMeta.score), batch: row.scoreMeta.batch.toLocaleString() })}<br>${t('weaponGachaExpectedContribution')}: <b>${fmtScoreValue(row.expectedValuePerPull)}</b>`
       },
     },
     grid: { top: 36, right: 16, bottom: 70, left: 58 },
     xAxis: {
       type: 'category',
-      data: rows.map(row => row.label),
+      data: rows.map(row => dropLabel(row)),
       axisLabel: { ...theme.axisLabel, rotate: 24 },
       axisLine: theme.axisLine,
     },
@@ -431,7 +457,7 @@ const sideContributionOption = computed(() => {
     },
     series: [
       {
-        name: '期望贡献',
+        name: t('weaponGachaExpectedContribution'),
         type: 'bar',
         barMaxWidth: 34,
         itemStyle: { color: LINE_COLORS[0] },
