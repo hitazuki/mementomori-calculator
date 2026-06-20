@@ -243,12 +243,15 @@ const getMetrics = () => ({
 })
 
 const SUMMARY_FIELDS = computed(() => [
+  { key: 'damageType', label: t('atkType'), fmt: v => `${t('atkType')} ${v === 'mag' ? t('typeMag') : t('typePhys')}` },
   { key: 'pen', label: t('pen'), fmt: v => `PEN ${formatNumber(v)}` },
   { key: 'pmPen', label: t('pmPen'), fmt: v => `PM ${formatNumber(v)}` },
   { key: 'baseAtk', label: t('baseAtk'), fmt: v => `${t('baseAtk')} ${formatNumber(v)}` },
   { key: 'skillCoeff', label: t('skillCoeff'), fmt: v => `${t('skillCoeff')} ${formatPercentValue(v, 1)}` },
   { key: 'atkLevel', label: t('atkLevel'), fmt: v => `${t('atkLevel')} ${formatNumber(v)}` },
   { key: 'defLevel', label: t('defLevel'), fmt: v => `${t('defLevel')} ${formatNumber(v)}` },
+  { key: 'def', label: t('targetDef'), fmt: v => `${t('targetDef')} ${formatNumber(v)}` },
+  { key: 'pmDef', label: t('targetPmDef'), fmt: v => `${t('targetPmDef')} ${formatNumber(v)}` },
   { key: 'atkBonus', label: t('atkBonus'), fmt: v => `${t('atkBonus')} ${formatPercentValue(v)}` },
   { key: 'dmgBonus', label: t('dmgBonus'), fmt: v => `${t('dmgBonus')} ${formatPercentValue(v)}` },
   { key: 'defBonus', label: t('defBonus'), fmt: v => `${t('defBonus')} ${formatPercentValue(v)}` },
