@@ -36,8 +36,25 @@ test('pickup gacha keeps the normal rate until the 100-pull guarantee', () => {
   assert.equal(analysis.quantiles.p100, 100)
 })
 
+test('gacha pull costs follow ticket scores with banner defaults as fallback', () => {
+  assert.equal(getGachaConfig('destiny', 'lightDark').costPerPull, 500)
+  assert.equal(getGachaConfig('pickup', 'lightDark').costPerPull, 300)
+
+  const scores = {
+    '[16,4]': { score: 550, batch: 1 },
+    '[16,510]': { score: 360, batch: 1 },
+  }
+  const destinyConfig = getGachaConfig('destiny', 'lightDark', scores)
+  const pickupAnalysis = buildGachaAnalysis('pickup', 'lightDark', scores)
+
+  assert.equal(destinyConfig.costPerPull, 550)
+  assert.equal(pickupAnalysis.config.costPerPull, 360)
+  assert.equal(pickupAnalysis.pulls[0].diamonds, 360)
+})
+
 test('pickup side returns include rarity conversion and cyclic pull rewards', () => {
   const scores = {
+    '[16,510]': { score: 300, batch: 1 },
     '[17,5]': { score: 16, batch: 1 },
     '[17,17]': { score: 80, batch: 1 },
     '[17,21]': { score: 720, batch: 1 },

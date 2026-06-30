@@ -389,6 +389,7 @@ export default {
   scoreReasonLightWeapon: "天光武具最低隐含单价（{pulls}抽）",
   scoreReasonForbiddenWeapon: "禁忌武具最低隐含单价（{pulls}抽）",
   scoreReasonMagicCrystal: "魔女的奥秘召唤每周35抽推算",
+  scoreReasonGuildRaidWeaponFragment: "魔水晶商铺兑换比例：魔水晶 x3 -> 专武碎片 x10",
   scoreReasonRelic: "圣天使的神谕召唤本周50抽推算",
   itemQtyLabel: "{item} x{qty}",
   diamondValue: "{value} 钻",

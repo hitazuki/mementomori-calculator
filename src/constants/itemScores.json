@@ -287,6 +287,18 @@
     "nameKo": "마녀의 심오한 경지 티켓",
     "isBase": true
   },
+  "[16,510]": {
+    "name": "精选召唤券",
+    "score": 300,
+    "batch": 1,
+    "iconId": 112,
+    "nameZh": "精选召唤券",
+    "nameTw": "精選召喚券",
+    "nameEn": "Pickup Ticket",
+    "nameJa": "ピックアップガチャチケット",
+    "nameKo": "픽업 뽑기 티켓",
+    "isBase": true
+  },
   "[18,1]": {
     "name": "初级封印钥匙",
     "score": 1,

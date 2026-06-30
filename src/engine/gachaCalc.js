@@ -69,6 +69,7 @@ export const GACHA_BANNERS = {
     key: 'destiny',
     label: '命运召唤',
     labelKey: 'gachaBannerDestiny',
+    costItem: { itemType: 16, itemId: 4 },
     costPerPull: 500,
     maxPulls: 70,
     baseRates: {
@@ -86,6 +87,7 @@ export const GACHA_BANNERS = {
     key: 'pickup',
     label: '精选召唤',
     labelKey: 'gachaBannerPickup',
+    costItem: { itemType: 16, itemId: 510 },
     costPerPull: 300,
     maxPulls: 100,
     baseRates: {
@@ -100,11 +102,18 @@ export const GACHA_BANNERS = {
   },
 }
 
-export function getGachaConfig(bannerKey, typeKey) {
+function resolveCostPerPull(banner, scores) {
+  const { itemType, itemId } = banner.costItem || {}
+  const score = itemType && itemId ? getScore(scores, itemType, itemId) : 0
+  return score || banner.costPerPull
+}
+
+export function getGachaConfig(bannerKey, typeKey, scores = {}) {
   const banner = GACHA_BANNERS[bannerKey] || GACHA_BANNERS.destiny
   const characterType = GACHA_TYPES[typeKey] || GACHA_TYPES.lightDark
   return {
     ...banner,
+    costPerPull: resolveCostPerPull(banner, scores),
     bannerLabel: banner.label,
     typeLabel: characterType.label,
     typeLabelKey: characterType.labelKey,
@@ -257,7 +266,7 @@ function buildSideProbabilityCheck(config, sideDrops) {
 }
 
 export function buildGachaAnalysis(bannerKey, typeKey, scores = {}) {
-  const config = getGachaConfig(bannerKey, typeKey)
+  const config = getGachaConfig(bannerKey, typeKey, scores)
   const sideDrops = buildSideDrops(config, typeKey, scores)
   const randomSideValuePerPull = sideDrops.reduce((sum, drop) => sum + drop.expectedValuePerPull, 0)
   const buildSideSummaryAtPulls = pull => {

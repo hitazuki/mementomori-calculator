@@ -102,7 +102,6 @@
             />
             <div class="shop-product-title">
               <h2>{{ productDisplayName(product) }}</h2>
-              <span v-if="product.tier">{{ $t('shopTierLabel', { tier: product.tier }) }}</span>
             </div>
           </div>
 
@@ -140,7 +139,7 @@
             <div v-if="product.missingScoreItems.length" class="shop-missing">
               {{ $t('shopMissingScoreNotice') }}
             </div>
-            <div v-for="item in product.contentDetails" :key="`${product.id}-${item.itemType}-${item.itemId}`" class="shop-detail-row">
+            <div v-for="item in product.contentDetails" :key="`${product.id}-${item.scoreKey || `${item.itemType}-${item.itemId}`}`" class="shop-detail-row">
               <img :src="itemIconUrl(item.iconId)" @error="hideBrokenImage" />
               <span class="shop-detail-name" :title="itemDisplayName(item)">{{ itemDisplayName(item) }}</span>
               <span>×{{ formatNumber(item.quantity) }}</span>
@@ -205,6 +204,7 @@ function itemDisplayName(item) {
 }
 
 function productDisplayName(product) {
+  if (product.displayName) return product.displayName
   if (product.rewardDetails?.[0] && !product.treasureChestId) {
     return itemDisplayName(product.rewardDetails[0]) || product.name
   }

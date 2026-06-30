@@ -9,23 +9,47 @@ function normalizeItem(item) {
     itemType: item.itemType ?? item.ItemType ?? item.itype,
     itemId: item.itemId ?? item.ItemId ?? item.iid,
     quantity: item.quantity ?? item.ItemCount ?? item.qty ?? 1,
+    scoreKey: item.scoreKey ?? item.ScoreKey,
   }
 }
 
-function hasScoreEntry(scores, itemType, itemId) {
+function hasScoreEntry(scores, itemType, itemId, customScoreKey) {
+  if (customScoreKey) return Boolean(scores?.[customScoreKey])
   return Boolean(scores?.[scoreKey(itemType, itemId)] || scores?.[getBaseItemKey(itemType, itemId)])
+}
+
+function getScoreEntryValue(entry) {
+  if (!entry || entry.score <= 0) return 0
+  return entry.score / (entry.batch || 1)
+}
+
+function getVirtualItemInfo(item, scoreEntry, customScoreKey) {
+  const fallbackName = item.name || item.displayName || customScoreKey
+  return {
+    name: scoreEntry?.name || fallbackName,
+    nameZh: scoreEntry?.nameZh || item.nameZh || fallbackName,
+    nameTw: scoreEntry?.nameTw || item.nameTw || fallbackName,
+    nameEn: scoreEntry?.nameEn || item.nameEn || fallbackName,
+    nameJa: scoreEntry?.nameJa || item.nameJa || fallbackName,
+    nameKo: scoreEntry?.nameKo || item.nameKo || fallbackName,
+    iconId: item.iconId || scoreEntry?.iconId || 0,
+    batch: scoreEntry?.batch || 1,
+    score: scoreEntry?.score || 0,
+  }
 }
 
 export function calculateShopItemValue(item, scores) {
   const normalized = normalizeItem(item)
-  const { itemType, itemId, quantity } = normalized
-  const unitScore = getScore(scores, itemType, itemId)
-  const info = getItemInfo(scores, itemType, itemId)
+  const { itemType, itemId, quantity, scoreKey: customScoreKey } = normalized
+  const scoreEntry = customScoreKey ? scores?.[customScoreKey] : null
+  const unitScore = customScoreKey ? getScoreEntryValue(scoreEntry) : getScore(scores, itemType, itemId)
+  const info = customScoreKey ? getVirtualItemInfo(item, scoreEntry, customScoreKey) : getItemInfo(scores, itemType, itemId)
   const value = unitScore * quantity
-  const missingScore = unitScore === 0 && !hasScoreEntry(scores, itemType, itemId)
+  const missingScore = unitScore === 0 && !hasScoreEntry(scores, itemType, itemId, customScoreKey)
 
   return {
     ...info,
+    scoreKey: customScoreKey,
     itemType,
     itemId,
     itype: itemType,

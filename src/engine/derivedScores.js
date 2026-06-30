@@ -4,6 +4,7 @@ const FREE_DIAMOND_KEY = '[1,1]'
 const PAID_DIAMOND_KEY = '[2,1]'
 const MAGIC_CRYSTAL_KEY = '[13,1]'
 const RELIC_KEYS = ['[13,6]', '[13,7]', '[13,8]', '[13,9]']
+export const GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY = 'guild-raid-unique-weapon-fragment'
 
 function cloneScores(scores) {
   return Object.fromEntries(Object.entries(scores || {}).map(([key, value]) => [key, { ...value }]))
@@ -17,6 +18,14 @@ function setScore(scores, key, score, reason) {
     batch: 1,
     isReadonlyDerived: true,
     readonlyReason: reason,
+  }
+}
+
+function setVirtualScore(scores, key, item) {
+  scores[key] = {
+    ...item,
+    batch: item.batch || 1,
+    isReadonlyDerived: true,
   }
 }
 
@@ -71,6 +80,18 @@ export function buildDerivedScoreState(baseScores) {
 
   const magicCrystalScore = witchSecret.weeklyFullNode?.implicitCoreUnit || 0
   setScore(scores, MAGIC_CRYSTAL_KEY, magicCrystalScore, '魔女的奥秘召唤每周35抽推算')
+  const uniqueWeaponFragmentScore = magicCrystalScore * 3 / 10
+  setVirtualScore(scores, GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY, {
+    name: '专属武器碎片',
+    nameZh: '专属武器碎片',
+    nameTw: '專屬武器碎片',
+    nameEn: 'Unique Weapon Fragment',
+    nameJa: '専用武器の欠片',
+    nameKo: '전용 무기 조각',
+    iconId: 201,
+    score: uniqueWeaponFragmentScore,
+    reason: '魔水晶商铺兑换比例：魔水晶 x3 -> 专武碎片 x10',
+  })
 
   const seraphOracle = buildForbiddenWeaponGachaAnalysis(scores, {
     bannerKey: 'seraphOracle',
@@ -114,6 +135,14 @@ export function buildDerivedScoreState(baseScores) {
       label: '魔水晶',
       reason: '魔女的奥秘召唤每周35抽推算',
       reasonKey: 'scoreReasonMagicCrystal',
+    },
+    {
+      key: GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY,
+      ...scores[GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY],
+      score: uniqueWeaponFragmentScore,
+      label: '专属武器碎片',
+      reason: '魔水晶商铺兑换比例：魔水晶 x3 -> 专武碎片 x10',
+      reasonKey: 'scoreReasonGuildRaidWeaponFragment',
     },
     {
       key: RELIC_KEYS[0],

@@ -79,10 +79,13 @@ test('derived score panel merges scroll and tome rows and keeps zero values visi
     'derived:sandalphonCore',
     'derived:astarothCore',
     '[13,1]',
+    'guild-raid-unique-weapon-fragment',
     '[13,6]',
   ])
   assert.equal(state.readonlyRows.find(row => row.key === 'derived:sandalphonCore').score, 0)
   assert.equal(state.readonlyRows.find(row => row.key === 'derived:astarothCore').score, 0)
   assert.equal(state.readonlyRows.find(row => row.key === '[13,1]').score, 0)
+  assert.equal(state.readonlyRows.find(row => row.key === 'guild-raid-unique-weapon-fragment').nameZh, '专属武器碎片')
+  assert.equal(state.readonlyRows.find(row => row.key === 'guild-raid-unique-weapon-fragment').iconId, 201)
   assert.equal(state.readonlyRows.find(row => row.key === '[13,6]').reasonKey, 'scoreReasonRelic')
 })

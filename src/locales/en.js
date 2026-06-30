@@ -392,6 +392,7 @@ export default {
   scoreReasonLightWeapon: "Holy gear lowest implied unit value ({pulls} pulls)",
   scoreReasonForbiddenWeapon: "Forbidden gear lowest implied unit value ({pulls} pulls)",
   scoreReasonMagicCrystal: "Derived from a weekly 35-pull Ticket of Secrets round",
+  scoreReasonGuildRaidWeaponFragment: "Magic Crystal shop ratio: Magic Crystal x3 -> unique weapon fragments x10",
   scoreReasonRelic: "Derived from this week's 50-pull Invocation of The Seraph’s Prophecy window",
   itemQtyLabel: "{item} x{qty}",
   diamondValue: "{value} diamonds",

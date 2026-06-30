@@ -431,6 +431,7 @@ export default {
   scoreReasonLightWeapon: "天光武具の最低推定単価（{pulls}回）",
   scoreReasonForbiddenWeapon: "禁忌武具の最低推定単価（{pulls}回）",
   scoreReasonMagicCrystal: "魔女の秘奥召喚の週35回分から推定",
+  scoreReasonGuildRaidWeaponFragment: "魔水晶ショップ交換比率：魔水晶 x3 -> 専用武器の残片 x10",
   scoreReasonRelic: "聖天使の神託ガチャ今週50回から推定",
   itemQtyLabel: "{item} x{qty}",
   diamondValue: "{value} ダイヤ",

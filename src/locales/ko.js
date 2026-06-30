@@ -415,6 +415,7 @@ export default {
   scoreReasonLightWeapon: "천광무구 최저 추정 단가({pulls}회)",
   scoreReasonForbiddenWeapon: "금기무구 최저 추정 단가({pulls}회)",
   scoreReasonMagicCrystal: "마녀의 심오한 경지 소환 주간 35회 기준 추정",
+  scoreReasonGuildRaidWeaponFragment: "마수정 상점 교환 비율: 마수정 x3 -> 전용 무기 조각 x10",
   scoreReasonRelic: "성천사의 신탁 뽑기 이번 주 50회 기준 추정",
   itemQtyLabel: "{item} x{qty}",
   diamondValue: "{value} 다이아",
