@@ -1,50 +1,41 @@
-# MementoMori Calculator Project Rules (AGENTS.md)
+# MementoMori Calculator Project Rules
 
-This file contains the guidelines and references for Codex.
+## Commands
 
-## 🛠 Commands
-* **Run Dev Server**: `npm run dev`
-* **Build App**: `npm run build`
-* **Preview Production**: `npm run preview`
-* **Sync Master Data**: `npm run sync:master`
+- Run dev server: `npm run dev`
+- Build app: `npm run build`
+- Preview production: `npm run preview`
+- Sync master data: `npm run sync:master`
 
-## 📏 Coding Style & Conventions
-* **Tech Stack**: Vue 3 + Vite + Pinia + ECharts (Gothic Dark Gold theme, Vanilla CSS)
-* **Components**: Single File Components (SFC) in `src/views/` and `src/components/`
-* **State Management**: Pinia store in [calculator.js](./src/store/calculator.js)
+## Project Shape
 
-## 🧾 Git Commit Convention
-* Use Conventional Commits format: `type(scope): summary`
-* Keep the summary concise, imperative, and in English when possible.
-* Common types:
-  * `feat` — New user-facing feature or capability
-  * `fix` — Bug fix or behavior correction
-  * `refactor` — Code restructuring without intended behavior change
-  * `perf` — Performance improvement
-  * `test` — Test coverage or test infrastructure
-  * `docs` — Documentation-only changes
-  * `chore` — Tooling, config, generated data, or maintenance
-* Use a focused scope when helpful, for example:
-  * `feat(i18n): add Korean pack labels`
-  * `fix(pack): align CE formula with documentation`
-  * `refactor(damage): share level constant sync logic`
-  * `test(engine): cover damage and pack calculations`
-  * `docs(readme): update project structure`
+- Stack: Vue 3 + Vite + Pinia + ECharts, vanilla CSS.
+- Components live in `src/views/` and `src/components/`.
+- Shared state lives in `src/store/calculator.js`.
+- Prefer existing engine/helper patterns before adding new abstractions.
 
----
+## Git Commits
 
-## 📐 Damage Calculation Logic Pointer
-* **IMPORTANT**: When implementing, modifying, or testing the damage calculation engine, formulas, scanning views, or chart/table output data, you **must** read and strictly follow the definitions and formulas in [variables_glossary.md](./doc/damage/variables_glossary.md).
+- Use Conventional Commits: `type(scope): summary`.
+- Common types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`.
+- Keep the summary concise, imperative, and in English when possible.
 
-## 💰 Pack Cost-Efficiency (CE) Calculation
+## Context Budget Rules
 
-* **IMPORTANT**: When implementing, modifying, or testing the pack CE calculator (`PackCalculatorView.vue`, `packCalc.js`), you **must** reference:
-  * [items-calc-formula.md](./doc/items/items-calc-formula.md) — Scoring formulas, homogeneous item conversion rules, CE calculation logic
-  * [item-score-template.md](./doc/items/item-score-template.md) — Base item scores (user-editable, synced to `src/constants/itemScores.json`)
-  * [items.md](./doc/items/items.md) — Full item index with multi-language names and icon files
-  * [pack.md](./doc/items/pack.md) — Treasure chest / bundle data from Master files
+- Load only the files required by the current task.
+- Prefer `rg`/targeted scripts over reading large docs or JSON files in full.
+- Do not read `data/Master/*.json` wholesale. Query the specific id/name/key instead.
+- For large generated constants such as `src/constants/ultraSalePacks.json` or `src/constants/allPacks.json`, inspect targeted slices only.
 
-## 📖 Game Localization
-* **No Secondary Translation**: Never translate in-game proper nouns (packs, items, mechanics) yourself. 
-  1. **Check Docs First**: Look up existing official translations in local documentation (e.g., `doc/items/items.md`).
-  2. **Fallback to Game Text**: If not found, write a script to search the `data/Master/TextResource*MB.json` files for the official text and use that exact string.
+## Task-Specific References
+
+- Damage formula/scan/chart tasks: read `doc/damage/variables_glossary.md` first, then only the affected source/test files.
+- Pack CE calculator tasks touching `PackCalculatorView.vue`, `packCalc.js`, item scoring, or CE output:
+  - Read `doc/items/items-calc-formula.md` for formulas.
+  - Read `doc/items/item-score-template.md` only when base item scores are involved.
+  - Search `doc/items/items.md` or `doc/items/pack.md` only for the relevant item/pack rows; avoid full-file reads unless the task requires a broad audit.
+- Ultra Sale purchase planner tasks: use the local `planner-multi-agent` skill and follow its on-demand reference routing.
+- Localization/proper noun tasks:
+  - Do not create secondary translations for in-game proper nouns.
+  - Search local docs first for official names.
+  - If not found, query `data/Master/TextResource*MB.json` for the exact official game text.
