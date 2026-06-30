@@ -886,7 +886,7 @@
     "nameKey": "[CharacterName140]",
     "name2Key": "[CharacterSubName140]",
     "elementType": 6,
-    "isLimited": false
+    "isLimited": true
   },
   "141": {
     "id": 141,
