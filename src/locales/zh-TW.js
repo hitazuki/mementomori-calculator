@@ -286,6 +286,7 @@ export default {
   shopSortCe: "CE",
   shopSortValue: "價值",
   shopSortCost: "價格",
+  shopSortOriginal: "原始順序",
   shopResultCount: "{n} 個商品",
   shopRewardQty: "獲得",
   shopTierLabel: "檔位 {tier}",

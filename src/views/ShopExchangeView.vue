@@ -76,13 +76,13 @@
         <div class="shop-compact-sort">
           <label>{{ $t('shopSortLabel') }}</label>
           <select class="form-select shop-sort-select" v-model="sortState.by">
+            <option value="original">{{ $t('shopSortOriginal') }}</option>
             <option value="ce">{{ $t('shopSortCe') }}</option>
             <option value="value">{{ $t('shopSortValue') }}</option>
             <option value="cost">{{ $t('shopSortCost') }}</option>
-            <option value="name">{{ $t('packCompareColName') }}</option>
           </select>
 
-          <button class="btn btn-ghost btn-sm shop-sort-dir" @click="sortState.asc = !sortState.asc">
+          <button v-if="sortState.by !== 'original'" class="btn btn-ghost btn-sm shop-sort-dir" @click="sortState.asc = !sortState.asc">
             {{ sortState.asc ? '▲' : '▼' }}
           </button>
 
@@ -166,7 +166,7 @@ const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
 const showScores = ref(true)
 const selectedShopKey = ref(shopItems[0]?.shopKey || '')
-const sortState = reactive({ by: 'ce', asc: false })
+const sortState = reactive({ by: 'original', asc: true })
 const expanded = reactive(new Set())
 
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
@@ -189,11 +189,7 @@ const calculatedShops = computed(() => calculateShopCE(shopItems, normalizedScor
 const selectedShop = computed(() => calculatedShops.value.find(shop => shop.shopKey === selectedShopKey.value) || calculatedShops.value[0])
 const sortedProducts = computed(() => {
   const products = selectedShop.value?.products || []
-  if (sortState.by !== 'name') return sortShopProducts(products, sortState.by, sortState.asc)
-  return [...products].sort((a, b) => {
-    const result = productDisplayName(a).localeCompare(productDisplayName(b), locale.value)
-    return sortState.asc ? result : -result
-  })
+  return sortShopProducts(products, sortState.by, sortState.asc)
 })
 
 watch(selectedShopKey, () => expanded.clear())

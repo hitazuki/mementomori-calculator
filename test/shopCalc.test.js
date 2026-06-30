@@ -78,19 +78,19 @@ test('calculateShopProduct values virtual score-key items', () => {
     name: 'Unique Weapon Fragment',
     reward: { scoreKey: GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY, quantity: 10 },
     cost: 185,
-    limitTotal: null,
+    limitTotal: 10,
   }, scores)
 
   assert.equal(product.rewardValue, 540)
   assert.equal(product.ce, 540 / 185)
-  assert.equal(product.limitTotal, null)
+  assert.equal(product.limitTotal, 10)
   assert.equal(product.contentDetails[0].scoreKey, GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY)
   assert.equal(product.contentDetails[0].nameZh, '专属武器碎片')
   assert.equal(product.contentDetails[0].iconId, 201)
   assert.equal(product.missingScoreItems.length, 0)
 })
 
-test('guild raid shop data includes all documented rows and preserves unknown limits', () => {
+test('guild raid shop data includes all documented rows and confirmed limits', () => {
   const [guildRaidShop] = calculateShopCE(
     shopItems.filter(shop => shop.shopKey === 'guild-raid'),
     scores,
@@ -104,10 +104,10 @@ test('guild raid shop data includes all documented rows and preserves unknown li
       .filter(product => ['guild-raid-004', 'guild-raid-030', 'guild-raid-031', 'guild-raid-032'].includes(product.id))
       .map(product => [product.id, product.limitTotal]),
     [
-      ['guild-raid-004', null],
-      ['guild-raid-030', null],
-      ['guild-raid-031', null],
-      ['guild-raid-032', null],
+      ['guild-raid-004', 10],
+      ['guild-raid-030', Infinity],
+      ['guild-raid-031', Infinity],
+      ['guild-raid-032', Infinity],
     ],
   )
 })
@@ -120,4 +120,17 @@ test('sortShopProducts sorts by CE and pushes null CE to the end', () => {
   ]
 
   assert.deepEqual(sortShopProducts(rows).map(row => row.name), ['C', 'B', 'A'])
+})
+
+test('sortShopProducts keeps the documented product order for original sorting', () => {
+  const rows = [
+    { id: 'guild-raid-001', name: 'First', ce: 1 },
+    { id: 'guild-raid-002', name: 'Second', ce: 3 },
+    { id: 'guild-raid-003', name: 'Third', ce: 2 },
+  ]
+
+  const sorted = sortShopProducts(rows, 'original', false)
+
+  assert.deepEqual(sorted.map(row => row.id), ['guild-raid-001', 'guild-raid-002', 'guild-raid-003'])
+  assert.notEqual(sorted, rows)
 })

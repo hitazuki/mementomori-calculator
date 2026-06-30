@@ -286,6 +286,7 @@ export default {
   shopSortCe: "CE",
   shopSortValue: "价值",
   shopSortCost: "价格",
+  shopSortOriginal: "原始顺序",
   shopResultCount: "{n} 个商品",
   shopRewardQty: "获得",
   shopTierLabel: "档位 {tier}",

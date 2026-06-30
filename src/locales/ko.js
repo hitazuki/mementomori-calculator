@@ -321,6 +321,7 @@ export default {
   shopSortCe: "CE",
   shopSortValue: "가치",
   shopSortCost: "가격",
+  shopSortOriginal: "원래 순서",
   shopResultCount: "상품 {n}개",
   shopRewardQty: "획득",
   shopTierLabel: "단계 {tier}",

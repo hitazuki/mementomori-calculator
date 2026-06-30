@@ -104,6 +104,8 @@ export function calculateShopCE(shops, scores) {
 
 export function sortShopProducts(products, by = 'ce', asc = false) {
   const result = [...products]
+  if (by === 'original') return result
+
   result.sort((a, b) => {
     const va = by === 'cost' ? a.cost : by === 'value' ? a.rewardValue : by === 'name' ? a.name : a.ce
     const vb = by === 'cost' ? b.cost : by === 'value' ? b.rewardValue : by === 'name' ? b.name : b.ce

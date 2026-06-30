@@ -289,6 +289,7 @@ export default {
   shopSortCe: "CE",
   shopSortValue: "Value",
   shopSortCost: "Cost",
+  shopSortOriginal: "Original order",
   shopResultCount: "{n} products",
   shopRewardQty: "Reward",
   shopTierLabel: "Tier {tier}",

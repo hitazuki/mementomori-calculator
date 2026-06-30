@@ -337,6 +337,7 @@ export default {
   shopSortCe: "CE",
   shopSortValue: "価値",
   shopSortCost: "価格",
+  shopSortOriginal: "元の順序",
   shopResultCount: "{n} 個の商品",
   shopRewardQty: "獲得",
   shopTierLabel: "段階 {tier}",
