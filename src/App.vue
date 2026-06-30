@@ -150,6 +150,7 @@ const TableExportView = createAsyncView(() => import('./views/TableExportView.vu
 const MysteriumPanelView = createAsyncView(() => import('./views/MysteriumPanelView.vue'))
 const PackCalculatorView = createAsyncView(() => import('./views/PackCalculatorView.vue'))
 const PackComparisonView = createAsyncView(() => import('./views/PackComparisonView.vue'))
+const ShopExchangeView = createAsyncView(() => import('./views/ShopExchangeView.vue'))
 const GachaAnalysisView = createAsyncView(() => import('./views/GachaAnalysisView.vue'))
 const ForbiddenWeaponGachaView = createAsyncView(() => import('./views/ForbiddenWeaponGachaView.vue'))
 
@@ -185,6 +186,7 @@ const viewMap = {
   tornado: TornadoChartView,
   table: TableExportView,
   mysterium: MysteriumPanelView,
+  shopExchange: ShopExchangeView,
   packCalc: PackCalculatorView,
   packCompare: PackComparisonView,
   gacha: GachaAnalysisView,
@@ -212,6 +214,7 @@ const navDamageItems = [
 ]
 
 const navItemSystemItems = [
+  { id: 'shopExchange', icon: '🛒', i18nLabel: 'navShopExchange', i18nTitle: 'navShopExchange' },
   { id: 'packCompare', icon: '📊', i18nLabel: 'navPackCompare', i18nTitle: 'navPackCompare' },
   { id: 'packCalc', icon: '💰', i18nLabel: 'navPackCalc', i18nTitle: 'navPackCalc' }
 ]
