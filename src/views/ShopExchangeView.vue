@@ -66,30 +66,30 @@
         </div>
       </div>
 
-      <div class="card shop-toolbar">
-        <div class="shop-toolbar-field">
+      <div class="shop-result-bar">
+        <div class="shop-currency-strip">
+          <img :src="itemIconUrl(selectedShop.currency.iconId)" @error="hideBrokenImage" />
+          <span>{{ itemDisplayName(selectedShop) }}</span>
+          <b>{{ itemDisplayName(selectedShop.currency) }}</b>
+        </div>
+
+        <div class="shop-compact-sort">
           <label>{{ $t('shopSortLabel') }}</label>
-          <select class="form-select" v-model="sortState.by">
+          <select class="form-select shop-sort-select" v-model="sortState.by">
             <option value="ce">{{ $t('shopSortCe') }}</option>
             <option value="value">{{ $t('shopSortValue') }}</option>
             <option value="cost">{{ $t('shopSortCost') }}</option>
             <option value="name">{{ $t('packCompareColName') }}</option>
           </select>
+
+          <button class="btn btn-ghost btn-sm shop-sort-dir" @click="sortState.asc = !sortState.asc">
+            {{ sortState.asc ? '▲' : '▼' }}
+          </button>
+
+          <div class="shop-count">
+            {{ $t('shopResultCount', { n: sortedProducts.length }) }}
+          </div>
         </div>
-
-        <button class="btn btn-ghost btn-sm shop-sort-dir" @click="sortState.asc = !sortState.asc">
-          {{ sortState.asc ? '▲' : '▼' }}
-        </button>
-
-        <div class="shop-count">
-          {{ $t('shopResultCount', { n: sortedProducts.length }) }}
-        </div>
-      </div>
-
-      <div class="shop-currency-strip">
-        <img :src="itemIconUrl(selectedShop.currency.iconId)" @error="hideBrokenImage" />
-        <span>{{ itemDisplayName(selectedShop) }}</span>
-        <b>{{ itemDisplayName(selectedShop.currency) }}</b>
       </div>
 
       <div class="shop-product-grid">
@@ -354,14 +354,6 @@ function isReadonlyScore(key) {
   line-height: 1.25;
 }
 
-.shop-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px;
-  padding: 12px 14px;
-}
-
 .shop-switch-card {
   display: flex;
   align-items: center;
@@ -390,33 +382,19 @@ function isReadonlyScore(key) {
   line-height: 1.25;
 }
 
-.shop-toolbar-field {
+.shop-result-bar {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 180px;
-}
-
-.shop-toolbar-field label {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-}
-
-.shop-sort-dir {
-  min-width: 42px;
-}
-
-.shop-count {
-  margin-left: auto;
-  color: var(--text-muted);
-  font-size: var(--fs-sm);
-  padding-bottom: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
 }
 
 .shop-currency-strip {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
   color: var(--text-muted);
   font-size: var(--fs-sm);
 }
@@ -428,6 +406,48 @@ function isReadonlyScore(key) {
 
 .shop-currency-strip b {
   color: var(--gold);
+}
+
+.shop-currency-strip span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-compact-sort {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.shop-compact-sort label {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.shop-sort-select {
+  width: 132px;
+  min-height: var(--control-h-sm);
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.shop-sort-dir {
+  width: 38px;
+  min-width: 38px;
+  min-height: var(--control-h-sm);
+}
+
+.shop-count {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  margin-left: 6px;
 }
 
 .shop-product-grid {
@@ -561,14 +581,25 @@ function isReadonlyScore(key) {
     flex-direction: column;
   }
 
-  .shop-toolbar-field {
-    min-width: 100%;
+  .shop-result-bar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .shop-compact-sort {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .shop-sort-select {
+    flex: 1;
+    min-width: 140px;
   }
 
   .shop-count {
-    margin-left: 0;
-    width: 100%;
-    padding-bottom: 0;
+    margin-left: auto;
   }
 
   .shop-product-grid {
