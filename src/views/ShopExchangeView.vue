@@ -50,16 +50,23 @@
     </div>
 
     <div class="flex-col gap-12" style="min-width:0;">
-      <div class="card shop-toolbar">
-        <div class="shop-toolbar-field">
-          <label>{{ $t('shopSelectLabel') }}</label>
-          <select class="form-select" v-model="selectedShopKey">
-            <option v-for="shop in calculatedShops" :key="shop.shopKey" :value="shop.shopKey">
-              {{ shop.shopName }}
-            </option>
-          </select>
+      <div class="card shop-switch-card">
+        <div class="shop-switch-title">{{ $t('shopSelectLabel') }}</div>
+        <div class="shop-switch-buttons">
+          <button
+            v-for="shop in calculatedShops"
+            :key="shop.shopKey"
+            class="btn btn-sm"
+            :class="selectedShopKey === shop.shopKey ? 'btn-primary' : 'btn-ghost'"
+            type="button"
+            @click="selectedShopKey = shop.shopKey"
+          >
+            {{ itemDisplayName(shop) }}
+          </button>
         </div>
+      </div>
 
+      <div class="card shop-toolbar">
         <div class="shop-toolbar-field">
           <label>{{ $t('shopSortLabel') }}</label>
           <select class="form-select" v-model="sortState.by">
@@ -81,8 +88,8 @@
 
       <div class="shop-currency-strip">
         <img :src="itemIconUrl(selectedShop.currency.iconId)" @error="hideBrokenImage" />
-        <span>{{ selectedShop.shopName }}</span>
-        <b>{{ selectedShop.currency.name }}</b>
+        <span>{{ itemDisplayName(selectedShop) }}</span>
+        <b>{{ itemDisplayName(selectedShop.currency) }}</b>
       </div>
 
       <div class="shop-product-grid">
@@ -174,7 +181,14 @@ const editableScoreRows = computed(() => Object.entries(editableScores)
   .map(([key, item]) => ({ key, item })))
 const calculatedShops = computed(() => calculateShopCE(shopItems, normalizedScores.value))
 const selectedShop = computed(() => calculatedShops.value.find(shop => shop.shopKey === selectedShopKey.value) || calculatedShops.value[0])
-const sortedProducts = computed(() => sortShopProducts(selectedShop.value?.products || [], sortState.by, sortState.asc))
+const sortedProducts = computed(() => {
+  const products = selectedShop.value?.products || []
+  if (sortState.by !== 'name') return sortShopProducts(products, sortState.by, sortState.asc)
+  return [...products].sort((a, b) => {
+    const result = productDisplayName(a).localeCompare(productDisplayName(b), locale.value)
+    return sortState.asc ? result : -result
+  })
+})
 
 watch(selectedShopKey, () => expanded.clear())
 
@@ -187,7 +201,7 @@ function productDisplayName(product) {
   if (product.rewardDetails?.[0] && !product.treasureChestId) {
     return itemDisplayName(product.rewardDetails[0]) || product.name
   }
-  return product.name
+  return itemDisplayName(product)
 }
 
 function productIconId(product) {
@@ -346,6 +360,34 @@ function isReadonlyScore(key) {
   align-items: flex-end;
   gap: 12px;
   padding: 12px 14px;
+}
+
+.shop-switch-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.shop-switch-title {
+  flex: 0 0 auto;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.shop-switch-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.shop-switch-buttons .btn {
+  min-height: var(--control-h-sm);
+  white-space: normal;
+  text-align: left;
+  line-height: 1.25;
 }
 
 .shop-toolbar-field {
@@ -510,6 +552,15 @@ function isReadonlyScore(key) {
 }
 
 @media (max-width: 768px) {
+  .shop-switch-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shop-switch-buttons {
+    flex-direction: column;
+  }
+
   .shop-toolbar-field {
     min-width: 100%;
   }

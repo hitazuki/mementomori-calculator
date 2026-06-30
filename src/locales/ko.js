@@ -312,6 +312,8 @@ export default {
   packCompareFullSources: "다음 조건에서 등장",
   navPackCompare: "패키지 모아보기 및 가성비 비교",
   navShopExchange: "상점 교환 가성비",
+  sidebarCollapse: "사이드바 접기",
+  sidebarExpand: "사이드바 펼치기",
   shopExchangeDesc: "충전 가치 보정 없이 상점 재화 1개당 얻는 아이템의 다이아 가치를 계산합니다.",
   shopScoreDesc: "기준 단위 1개의 아이템 가치를 설정합니다. 상점 CE는 현재 점수로 다시 계산됩니다.",
   shopSelectLabel: "상점",

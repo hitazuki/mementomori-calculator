@@ -1,5 +1,5 @@
 <template>
-  <div class="app-shell">
+  <div class="app-shell" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-logo">
@@ -9,6 +9,16 @@
           <span class="logo-sub">{{ $t('appSub') }}</span>
         </div>
       </div>
+
+      <button
+        class="sidebar-collapse-btn"
+        type="button"
+        :title="$t(sidebarCollapsed ? 'sidebarExpand' : 'sidebarCollapse')"
+        :aria-label="$t(sidebarCollapsed ? 'sidebarExpand' : 'sidebarCollapse')"
+        @click="sidebarCollapsed = !sidebarCollapsed"
+      >
+        {{ sidebarCollapsed ? '›' : '‹' }}
+      </button>
 
       <ul class="nav-list" id="nav-list">
         <li class="nav-group-title">📂 {{ $t('navGroupDamage') }}</li>
@@ -177,6 +187,7 @@ onMounted(() => {
 })
 
 const currentView = ref('calculator')
+const sidebarCollapsed = ref(false)
 
 const viewMap = {
   calculator: CalculatorView,

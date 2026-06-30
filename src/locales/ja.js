@@ -328,6 +328,8 @@ export default {
   packCompareFullSources: "以下の条件で出現",
   navPackCompare: "パック一覧とコスパ比較",
   navShopExchange: "ショップ交換コスパ",
+  sidebarCollapse: "サイドバーを折りたたむ",
+  sidebarExpand: "サイドバーを展開",
   shopExchangeDesc: "チャージ価値補正を加えず、ショップ通貨1個あたりに戻るアイテムのダイヤ価値を計算します。",
   shopScoreDesc: "基準単位1個あたりのアイテム価値を設定します。ショップ CE は現在のスコアで再計算されます。",
   shopSelectLabel: "ショップ",

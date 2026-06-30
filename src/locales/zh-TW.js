@@ -277,6 +277,8 @@ export default {
 
   navPackCompare: "禮包全覽與對比",
   navShopExchange: "商城兌換性價比",
+  sidebarCollapse: "收起側邊欄",
+  sidebarExpand: "展開側邊欄",
   shopExchangeDesc: "按純商城兌換口徑計算每 1 個商城貨幣可換回的道具鑽石價值，不加入儲值價值補正。",
   shopScoreDesc: "設定您認為1個基準單位的道具價值多少分。商城 CE 會按目前評分即時重算。",
   shopSelectLabel: "商城",

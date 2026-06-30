@@ -280,6 +280,8 @@ export default {
 
   navPackCompare: "Pack Value Comparison",
   navShopExchange: "Shop Exchange CE",
+  sidebarCollapse: "Collapse sidebar",
+  sidebarExpand: "Expand sidebar",
   shopExchangeDesc: "Calculates item diamond value returned per 1 shop currency, without recharge value correction.",
   shopScoreDesc: "Set how many points 1 base unit of each item is worth. Shop CE recalculates from the current scores.",
   shopSelectLabel: "Shop",

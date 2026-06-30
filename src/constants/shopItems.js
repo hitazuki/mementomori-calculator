@@ -1,8 +1,18 @@
+const names = (nameZh, nameTw, nameEn, nameJa, nameKo) => ({
+  name: nameZh,
+  nameZh,
+  nameTw,
+  nameEn,
+  nameJa,
+  nameKo,
+})
+
 export const shopItems = [
   {
     shopKey: 'witch-library-cleanup',
+    ...names('魔女的书库大扫除商城', '魔女的書庫大掃除商城', 'Spellbook Sweep Shop', '魔女の書庫整理ショップ', '마녀의 서재 대청소 상점'),
     shopName: '魔女的书库大扫除商城',
-    currency: { itemType: 44, itemId: 1, name: '树影书签', iconId: 193 },
+    currency: { itemType: 44, itemId: 1, iconId: 193, ...names('树影书签', '樹影書籤', 'Arbored Bookmark', '木漏れ日の栞', '숲 정령의 책갈피') },
     products: [
       { id: 'witch-library-cleanup-001', name: '命运召唤券', tier: 'A', reward: { itemType: 16, itemId: 4, quantity: 5 }, cost: 375, limitTotal: 2, source: 'screenshot' },
       { id: 'witch-library-cleanup-002', name: '星辰的指引召唤券', tier: 'A', reward: { itemType: 16, itemId: 10, quantity: 5 }, cost: 375, limitTotal: 2, source: 'screenshot' },
@@ -39,14 +49,15 @@ export const shopItems = [
   },
   {
     shopKey: 'premium-shop',
+    ...names('精品店', '精品店', 'Special', 'スペシャル', '특별'),
     shopName: '精品店',
     tradeShopTabId: 13,
-    currency: { itemType: 1, itemId: 1, name: '免费钻石', iconId: 1 },
+    currency: { itemType: 1, itemId: 1, iconId: 1, ...names('免费钻石', '免費鑽石', 'Free Diamonds', '無償ダイヤ', '무료 다이아') },
     products: [
       {
         id: 'premium-shop-076',
         treasureChestId: 76,
-        name: '武具强化材料礼盒',
+        ...names('武具强化材料礼盒', '武具強化材料禮盒', 'Gear Upgrade Gift', '武具強化素材ギフト', '무구 강화 재료 기프트'),
         iconId: 92,
         reward: { itemType: 9, itemId: 76, quantity: 1 },
         contents: [
@@ -60,7 +71,7 @@ export const shopItems = [
       {
         id: 'premium-shop-080',
         treasureChestId: 80,
-        name: '圣装钢礼盒',
+        ...names('圣装钢礼盒', '聖裝鋼禮盒', 'Holy Fragment Gift', '聖装鋼ギフト', '성장강 기프트'),
         iconId: 95,
         reward: { itemType: 9, itemId: 80, quantity: 1 },
         contents: [
@@ -74,7 +85,7 @@ export const shopItems = [
       {
         id: 'premium-shop-081',
         treasureChestId: 81,
-        name: '精炼钢礼盒',
+        ...names('精炼钢礼盒', '精煉鋼禮盒', 'Fragment Gift', '精錬鋼ギフト', '제련강 기프트'),
         iconId: 96,
         reward: { itemType: 9, itemId: 81, quantity: 1 },
         contents: [
@@ -88,7 +99,7 @@ export const shopItems = [
       {
         id: 'premium-shop-082',
         treasureChestId: 82,
-        name: '金币礼盒',
+        ...names('金币礼盒', '金幣禮盒', 'Gold Gift', 'ゴールドギフト', '골드 기프트'),
         iconId: 101,
         reward: { itemType: 9, itemId: 82, quantity: 1 },
         contents: [
@@ -102,7 +113,7 @@ export const shopItems = [
       {
         id: 'premium-shop-083',
         treasureChestId: 83,
-        name: '封印宝箱礼盒',
+        ...names('封印宝箱礼盒', '封印寶箱禮盒', 'Sealed Chest Gift', '封印の宝箱ギフト', '봉인의 보물상자 기프트'),
         iconId: 102,
         reward: { itemType: 9, itemId: 83, quantity: 1 },
         contents: [
@@ -119,7 +130,7 @@ export const shopItems = [
       {
         id: 'premium-shop-084',
         treasureChestId: 84,
-        name: '封印钥匙礼盒',
+        ...names('封印钥匙礼盒', '封印鑰匙禮盒', 'Sealed Key Gift', '封印の鍵ギフト', '봉인의 열쇠 기프트'),
         iconId: 103,
         reward: { itemType: 9, itemId: 84, quantity: 1 },
         contents: [
@@ -136,7 +147,7 @@ export const shopItems = [
       {
         id: 'premium-shop-085',
         treasureChestId: 85,
-        name: '魔女的来信(R・忧蓝)礼袋',
+        ...names('魔女的来信(R・忧蓝)礼袋', '魔女的來信(R．憂藍)禮袋', 'Witch’s Letter (R/Azure) Gift', '魔女の手紙（R・藍）ギフト', '마녀의 편지 (R・남청) 기프트'),
         iconId: 104,
         reward: { itemType: 9, itemId: 85, quantity: 1 },
         contents: [
@@ -151,7 +162,7 @@ export const shopItems = [
       {
         id: 'premium-shop-086',
         treasureChestId: 86,
-        name: '魔女的来信(R・业红)礼袋',
+        ...names('魔女的来信(R・业红)礼袋', '魔女的來信(R．業紅)禮袋', 'Witch’s Letter (R/Crimson) Gift', '魔女の手紙（R・紅）ギフト', '마녀의 편지 (R・홍염) 기프트'),
         iconId: 104,
         reward: { itemType: 9, itemId: 86, quantity: 1 },
         contents: [
@@ -166,7 +177,7 @@ export const shopItems = [
       {
         id: 'premium-shop-087',
         treasureChestId: 87,
-        name: '魔女的来信(R・苍翠)礼袋',
+        ...names('魔女的来信(R・苍翠)礼袋', '魔女的來信(R．蒼翠)禮袋', 'Witch’s Letter (R/Emerald) Gift', '魔女の手紙（R・翠）ギフト', '마녀의 편지 (R・비취) 기프트'),
         iconId: 104,
         reward: { itemType: 9, itemId: 87, quantity: 1 },
         contents: [
@@ -181,7 +192,7 @@ export const shopItems = [
       {
         id: 'premium-shop-088',
         treasureChestId: 88,
-        name: '魔女的来信(R・流金)礼袋',
+        ...names('魔女的来信(R・流金)礼袋', '魔女的來信(R．流金)禮袋', 'Witch’s Letter (R/Amber) Gift', '魔女の手紙（R・黄）ギフト', '마녀의 편지 (R・황철) 기프트'),
         iconId: 104,
         reward: { itemType: 9, itemId: 88, quantity: 1 },
         contents: [
