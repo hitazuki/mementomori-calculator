@@ -42,9 +42,9 @@ export const shopItems = [
       { id: 'witch-library-cleanup-026', name: '中级封印宝箱', tier: 'B', reward: { itemType: 17, itemId: 36, quantity: 1 }, cost: 30, limitTotal: 20, source: 'screenshot' },
       { id: 'witch-library-cleanup-027', name: '初级封印宝箱', tier: 'A', reward: { itemType: 17, itemId: 35, quantity: 1 }, cost: 10, limitTotal: 30, source: 'screenshot' },
       { id: 'witch-library-cleanup-028', name: '初级封印宝箱', tier: 'B', reward: { itemType: 17, itemId: 35, quantity: 1 }, cost: 15, limitTotal: 20, source: 'screenshot' },
-      { id: 'witch-library-cleanup-029', name: '上级封印钥匙', tier: 'A', reward: { itemType: 18, itemId: 3, quantity: 1 }, cost: 4, limitTotal: null, source: 'screenshot' },
-      { id: 'witch-library-cleanup-030', name: '中级封印钥匙', tier: 'A', reward: { itemType: 18, itemId: 2, quantity: 1 }, cost: 2, limitTotal: null, source: 'screenshot' },
-      { id: 'witch-library-cleanup-031', name: '初级封印钥匙', tier: 'A', reward: { itemType: 18, itemId: 1, quantity: 1 }, cost: 1, limitTotal: null, source: 'screenshot' },
+      { id: 'witch-library-cleanup-029', name: '上级封印钥匙', tier: 'A', reward: { itemType: 18, itemId: 3, quantity: 1 }, cost: 4, limitTotal: Infinity, source: 'screenshot' },
+      { id: 'witch-library-cleanup-030', name: '中级封印钥匙', tier: 'A', reward: { itemType: 18, itemId: 2, quantity: 1 }, cost: 2, limitTotal: Infinity, source: 'screenshot' },
+      { id: 'witch-library-cleanup-031', name: '初级封印钥匙', tier: 'A', reward: { itemType: 18, itemId: 1, quantity: 1 }, cost: 1, limitTotal: Infinity, source: 'screenshot' },
     ],
   },
   {

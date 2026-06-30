@@ -324,6 +324,7 @@ export default {
   shopResultCount: "상품 {n}개",
   shopRewardQty: "획득",
   shopTierLabel: "단계 {tier}",
+  shopLimitUnlimited: "구매 제한 없음",
   shopLimitUnknown: "구매 제한 미확인",
   shopLimitTimes: "{n}회 제한",
   shopShowDetails: "상세",

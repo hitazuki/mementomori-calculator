@@ -289,6 +289,7 @@ export default {
   shopResultCount: "{n} 個商品",
   shopRewardQty: "獲得",
   shopTierLabel: "檔位 {tier}",
+  shopLimitUnlimited: "不限購",
   shopLimitUnknown: "限購待確認",
   shopLimitTimes: "限購 {n} 次",
   shopShowDetails: "詳情",

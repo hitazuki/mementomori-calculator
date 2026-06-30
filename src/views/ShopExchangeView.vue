@@ -171,6 +171,13 @@ const sortState = reactive({ by: 'ce', asc: false })
 const expanded = reactive(new Set())
 
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
+const unlimitedLimitText = {
+  'zh-CN': '不限购',
+  'zh-TW': '不限購',
+  en: 'Unlimited',
+  ja: '購入制限なし',
+  ko: '구매 제한 없음',
+}
 
 const baseScores = computed(() => normalizeScores(editableScores))
 const derivedScoreState = computed(() => buildDerivedScoreState(baseScores.value))
@@ -241,6 +248,10 @@ function formatPercent(value, total) {
 }
 
 function formatLimit(limit) {
+  if (limit === Infinity) {
+    const translated = t('shopLimitUnlimited')
+    return translated === 'shopLimitUnlimited' ? unlimitedLimitText[locale.value] || unlimitedLimitText['zh-CN'] : translated
+  }
   return limit == null ? t('shopLimitUnknown') : t('shopLimitTimes', { n: limit })
 }
 

@@ -292,6 +292,7 @@ export default {
   shopResultCount: "{n} products",
   shopRewardQty: "Reward",
   shopTierLabel: "Tier {tier}",
+  shopLimitUnlimited: "Unlimited",
   shopLimitUnknown: "Limit unconfirmed",
   shopLimitTimes: "Limit {n}",
   shopShowDetails: "Details",

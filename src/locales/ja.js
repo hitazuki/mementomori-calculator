@@ -340,6 +340,7 @@ export default {
   shopResultCount: "{n} 個の商品",
   shopRewardQty: "獲得",
   shopTierLabel: "段階 {tier}",
+  shopLimitUnlimited: "購入制限なし",
   shopLimitUnknown: "購入制限未確認",
   shopLimitTimes: "購入制限 {n} 回",
   shopShowDetails: "詳細",
