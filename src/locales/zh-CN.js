@@ -392,6 +392,7 @@ export default {
   scoreReasonMagicCrystal: "魔女的奥秘召唤每周35抽推算",
   scoreReasonGuildRaidWeaponFragment: "魔水晶商铺兑换比例：魔水晶 x3 -> 专武碎片 x10",
   scoreReasonRelic: "圣天使的神谕召唤本周50抽推算",
+  scoreReasonSealedChest: "封印宝箱截图奖池期望推算；钥匙按同级宝箱价值的1/2",
   itemQtyLabel: "{item} x{qty}",
   diamondValue: "{value} 钻",
   pullCount: "{count} 抽",

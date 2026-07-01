@@ -1,10 +1,21 @@
 import { buildForbiddenWeaponGachaAnalysis } from './forbiddenWeaponGachaCalc.js'
+import { getScore } from './packCalc.js'
 
 const FREE_DIAMOND_KEY = '[1,1]'
 const PAID_DIAMOND_KEY = '[2,1]'
 const MAGIC_CRYSTAL_KEY = '[13,1]'
 const RELIC_KEYS = ['[13,6]', '[13,7]', '[13,8]', '[13,9]']
 export const GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY = 'guild-raid-unique-weapon-fragment'
+
+const SEALED_CHEST_KEY_RATIO = 0.5
+const SEALED_CHEST_KEYS = {
+  bronzeChest: '[17,35]',
+  silverChest: '[17,36]',
+  goldChest: '[17,37]',
+  bronzeKey: '[18,1]',
+  silverKey: '[18,2]',
+  goldKey: '[18,3]',
+}
 
 function cloneScores(scores) {
   return Object.fromEntries(Object.entries(scores || {}).map(([key, value]) => [key, { ...value }]))
@@ -56,6 +67,146 @@ const DERIVED_CORE_ROWS = [
   },
 ]
 
+const SEALED_CHEST_BASE_DROPS = {
+  gold: [
+    { itemType: 12, itemId: 1, quantity: 100, rate: 0.15 },
+    { itemType: 12, itemId: 1, quantity: 200, rate: 0.05 },
+    { itemType: 15, itemId: 1, quantity: 3, rate: 0.15 },
+    { itemType: 17, itemId: 7, quantity: 1, rate: 0.10 },
+    { itemType: 17, itemId: 8, quantity: 1, rate: 0.03 },
+    { itemType: 17, itemId: 9, quantity: 1, rate: 0.01 },
+    { itemType: 13, itemId: 4, quantity: 20, rate: 0.10 },
+    { itemType: 13, itemId: 4, quantity: 30, rate: 0.05 },
+    { itemType: 19, itemId: 1, quantity: 1, rate: 0.07 },
+    { itemType: 20, itemId: 1, quantity: 1, rate: 0.10 },
+    { itemType: 3, itemId: 1, quantity: 100000, rate: 0.08 },
+    { itemType: 3, itemId: 1, quantity: 200000, rate: 0.05 },
+    { itemType: 10, itemId: 6, quantity: 1, rate: 0.05 },
+    { itemType: 10, itemId: 7, quantity: 1, rate: 0.01 },
+  ],
+  silver: [
+    { itemType: 12, itemId: 1, quantity: 60, rate: 0.10 },
+    { itemType: 12, itemId: 1, quantity: 100, rate: 0.04 },
+    { itemType: 15, itemId: 1, quantity: 2, rate: 0.15 },
+    { itemType: 17, itemId: 5, quantity: 1, rate: 0.06 },
+    { itemType: 17, itemId: 6, quantity: 1, rate: 0.07 },
+    { itemType: 17, itemId: 7, quantity: 1, rate: 0.03 },
+    { itemType: 13, itemId: 4, quantity: 10, rate: 0.10 },
+    { itemType: 13, itemId: 4, quantity: 15, rate: 0.05 },
+    { itemType: 19, itemId: 1, quantity: 1, rate: 0.06 },
+    { itemType: 20, itemId: 1, quantity: 1, rate: 0.08 },
+    { itemType: 3, itemId: 1, quantity: 20000, rate: 0.10 },
+    { itemType: 3, itemId: 1, quantity: 40000, rate: 0.05 },
+    { itemType: 10, itemId: 6, quantity: 1, rate: 0.05 },
+  ],
+  bronze: [
+    { itemType: 12, itemId: 1, quantity: 20, rate: 0.10 },
+    { itemType: 12, itemId: 1, quantity: 40, rate: 0.10 },
+    { itemType: 15, itemId: 1, quantity: 1, rate: 0.15 },
+    { itemType: 17, itemId: 4, quantity: 1, rate: 0.08 },
+    { itemType: 17, itemId: 5, quantity: 1, rate: 0.10 },
+    { itemType: 17, itemId: 6, quantity: 1, rate: 0.05 },
+    { itemType: 19, itemId: 1, quantity: 1, rate: 0.05 },
+    { itemType: 3, itemId: 1, quantity: 10000, rate: 0.14 },
+    { itemType: 3, itemId: 1, quantity: 20000, rate: 0.09 },
+    { itemType: 10, itemId: 6, quantity: 1, rate: 0.04 },
+  ],
+}
+
+function expectedBaseDropValue(scores, drops) {
+  return drops.reduce((sum, drop) => (
+    sum + getScore(scores, drop.itemType, drop.itemId) * drop.quantity * drop.rate
+  ), 0)
+}
+
+function roundDerivedScore(value) {
+  return Number(value.toFixed(6))
+}
+
+function itemScoreKey(itemType, itemId) {
+  return `[${itemType},${itemId}]`
+}
+
+function getScoreEntry(scores, itemType, itemId) {
+  return scores[itemScoreKey(itemType, itemId)] || {}
+}
+
+function withShares(rows, totalValue) {
+  return rows.map(row => ({
+    ...row,
+    share: totalValue > 0 ? row.value / totalValue : 0,
+  }))
+}
+
+function createDropDetail(scores, drop, overrideUnitScore = null) {
+  const entry = getScoreEntry(scores, drop.itemType, drop.itemId)
+  const unitScore = overrideUnitScore ?? getScore(scores, drop.itemType, drop.itemId)
+  const value = unitScore * drop.quantity * drop.rate
+  return {
+    ...entry,
+    itemType: drop.itemType,
+    itemId: drop.itemId,
+    quantity: drop.quantity,
+    rate: drop.rate,
+    unitScore,
+    value,
+  }
+}
+
+function calculateSealedChestScores(scores) {
+  const goldChest = expectedBaseDropValue(scores, SEALED_CHEST_BASE_DROPS.gold)
+  const goldKey = goldChest * SEALED_CHEST_KEY_RATIO
+
+  const silverChest = expectedBaseDropValue(scores, SEALED_CHEST_BASE_DROPS.silver)
+    + 0.03 * goldChest
+    + 0.03 * goldKey
+  const silverKey = silverChest * SEALED_CHEST_KEY_RATIO
+
+  const bronzeChest = expectedBaseDropValue(scores, SEALED_CHEST_BASE_DROPS.bronze)
+    + 0.05 * silverChest
+    + 0.05 * silverKey
+  const bronzeKey = bronzeChest * SEALED_CHEST_KEY_RATIO
+
+  return {
+    [SEALED_CHEST_KEYS.goldChest]: roundDerivedScore(goldChest),
+    [SEALED_CHEST_KEYS.goldKey]: roundDerivedScore(goldKey),
+    [SEALED_CHEST_KEYS.silverChest]: roundDerivedScore(silverChest),
+    [SEALED_CHEST_KEYS.silverKey]: roundDerivedScore(silverKey),
+    [SEALED_CHEST_KEYS.bronzeChest]: roundDerivedScore(bronzeChest),
+    [SEALED_CHEST_KEYS.bronzeKey]: roundDerivedScore(bronzeKey),
+  }
+}
+
+function buildSealedChestDetailRows(scores) {
+  const goldChest = scores[SEALED_CHEST_KEYS.goldChest]?.score || 0
+  const goldKey = scores[SEALED_CHEST_KEYS.goldKey]?.score || 0
+  const silverChest = scores[SEALED_CHEST_KEYS.silverChest]?.score || 0
+  const silverKey = scores[SEALED_CHEST_KEYS.silverKey]?.score || 0
+  const bronzeChest = scores[SEALED_CHEST_KEYS.bronzeChest]?.score || 0
+  const bronzeKey = scores[SEALED_CHEST_KEYS.bronzeKey]?.score || 0
+
+  const goldRows = SEALED_CHEST_BASE_DROPS.gold.map(drop => createDropDetail(scores, drop))
+  const silverRows = [
+    ...SEALED_CHEST_BASE_DROPS.silver.map(drop => createDropDetail(scores, drop)),
+    createDropDetail(scores, { itemType: 17, itemId: 37, quantity: 1, rate: 0.03 }, goldChest),
+    createDropDetail(scores, { itemType: 18, itemId: 3, quantity: 1, rate: 0.03 }, goldKey),
+  ]
+  const bronzeRows = [
+    ...SEALED_CHEST_BASE_DROPS.bronze.map(drop => createDropDetail(scores, drop)),
+    createDropDetail(scores, { itemType: 17, itemId: 36, quantity: 1, rate: 0.05 }, silverChest),
+    createDropDetail(scores, { itemType: 18, itemId: 2, quantity: 1, rate: 0.05 }, silverKey),
+  ]
+
+  return {
+    [SEALED_CHEST_KEYS.goldChest]: withShares(goldRows, goldChest),
+    [SEALED_CHEST_KEYS.goldKey]: [],
+    [SEALED_CHEST_KEYS.silverChest]: withShares(silverRows, silverChest),
+    [SEALED_CHEST_KEYS.silverKey]: [],
+    [SEALED_CHEST_KEYS.bronzeChest]: withShares(bronzeRows, bronzeChest),
+    [SEALED_CHEST_KEYS.bronzeKey]: [],
+  }
+}
+
 export function buildDerivedScoreState(baseScores) {
   const scores = cloneScores(baseScores)
   const paidDiamondScore = Number(scores[PAID_DIAMOND_KEY]?.score) || 1
@@ -102,6 +253,12 @@ export function buildDerivedScoreState(baseScores) {
   for (const key of RELIC_KEYS) {
     setScore(scores, key, relicScore, '圣天使的神谕召唤本周50抽推算')
   }
+
+  const sealedChestScores = calculateSealedChestScores(scores)
+  for (const [key, score] of Object.entries(sealedChestScores)) {
+    setScore(scores, key, score, '封印宝箱截图奖池期望推算；钥匙按同级宝箱价值的1/2')
+  }
+  const sealedChestDetailRows = buildSealedChestDetailRows(scores)
 
   const referenceScores = {
     lightWeapon: lightWeapon.bestNode.implicitCoreUnit,
@@ -158,6 +315,16 @@ export function buildDerivedScoreState(baseScores) {
       reason: '圣天使的神谕召唤本周50抽推算',
       reasonKey: 'scoreReasonRelic',
     },
+    ...Object.values(SEALED_CHEST_KEYS).filter(key => scores[key]).map(key => {
+      return {
+        key,
+        ...scores[key],
+        label: scores[key]?.nameZh || scores[key]?.name || key,
+        reason: '封印宝箱截图奖池期望推算；钥匙按同级宝箱价值的1/2',
+        reasonKey: 'scoreReasonSealedChest',
+        detailRows: sealedChestDetailRows[key] || [],
+      }
+    }),
   ]
 
   return {

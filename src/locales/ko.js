@@ -418,6 +418,7 @@ export default {
   scoreReasonMagicCrystal: "마녀의 심오한 경지 소환 주간 35회 기준 추정",
   scoreReasonGuildRaidWeaponFragment: "마수정 상점 교환 비율: 마수정 x3 -> 전용 무기 조각 x10",
   scoreReasonRelic: "성천사의 신탁 뽑기 이번 주 50회 기준 추정",
+  scoreReasonSealedChest: "봉인의 보물상자 스크린샷 확률표 기준 추정. 열쇠는 같은 등급 보물상자 가치의 1/2",
   itemQtyLabel: "{item} x{qty}",
   diamondValue: "{value} 다이아",
   pullCount: "{count}회",

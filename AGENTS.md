@@ -7,6 +7,12 @@
 - Preview production: `npm run preview`
 - Sync master data: `npm run sync:master`
 
+## Dev Server Coordination
+
+- The shared dev server should normally be the first Vite instance on port 5173.
+- Before starting `npm run dev`, check whether `127.0.0.1:5173` is already listening. If it is, reuse `http://127.0.0.1:5173/mementomori-calculator/` instead of starting another server.
+- Do not intentionally start a second Vite server on 5174+ for ordinary verification; it fragments agent/browser state. Only use another port when the user explicitly asks for an isolated server.
+
 ## Project Shape
 
 - Stack: Vue 3 + Vite + Pinia + ECharts, vanilla CSS.

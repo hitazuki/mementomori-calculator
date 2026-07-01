@@ -11,6 +11,18 @@
     "nameKo": "유료 다이아",
     "isBase": true
   },
+  "[3,1]": {
+    "name": "金币",
+    "score": 0,
+    "batch": 1,
+    "iconId": 10,
+    "nameZh": "金币",
+    "nameTw": "金幣",
+    "nameEn": "Gold",
+    "nameJa": "ゴールド",
+    "nameKo": "골드",
+    "isBase": false
+  },
   "[10,1]": {
     "name": "金币(1小时)",
     "score": 1,
@@ -301,7 +313,7 @@
   },
   "[18,1]": {
     "name": "初级封印钥匙",
-    "score": 1,
+    "score": 0,
     "batch": 1,
     "iconId": 55,
     "nameZh": "初级封印钥匙",
@@ -309,11 +321,11 @@
     "nameEn": "Bronze Key",
     "nameJa": "初級封印の鍵",
     "nameKo": "초급 봉인의 열쇠",
-    "isBase": true
+    "isBase": false
   },
   "[18,2]": {
     "name": "中级封印钥匙",
-    "score": 4,
+    "score": 0,
     "batch": 1,
     "iconId": 56,
     "nameZh": "中级封印钥匙",
@@ -321,11 +333,11 @@
     "nameEn": "Silver Key",
     "nameJa": "中級封印の鍵",
     "nameKo": "중급 봉인의 열쇠",
-    "isBase": true
+    "isBase": false
   },
   "[18,3]": {
     "name": "上级封印钥匙",
-    "score": 8,
+    "score": 0,
     "batch": 1,
     "iconId": 57,
     "nameZh": "上级封印钥匙",
@@ -333,11 +345,11 @@
     "nameEn": "Gold Key",
     "nameJa": "上級封印の鍵",
     "nameKo": "상급 봉인의 열쇠",
-    "isBase": true
+    "isBase": false
   },
   "[17,35]": {
     "name": "初级封印宝箱",
-    "score": 2,
+    "score": 0,
     "batch": 1,
     "iconId": 78,
     "nameZh": "初级封印宝箱",
@@ -345,11 +357,11 @@
     "nameEn": "Bronze Sealed Chest",
     "nameJa": "初級封印の宝箱",
     "nameKo": "초급 봉인의 보물상자",
-    "isBase": true
+    "isBase": false
   },
   "[17,36]": {
     "name": "中级封印宝箱",
-    "score": 8,
+    "score": 0,
     "batch": 1,
     "iconId": 79,
     "nameZh": "中级封印宝箱",
@@ -357,11 +369,11 @@
     "nameEn": "Silver Sealed Chest",
     "nameJa": "中級封印の宝箱",
     "nameKo": "중급 봉인의 보물상자",
-    "isBase": true
+    "isBase": false
   },
   "[17,37]": {
     "name": "上级封印宝箱",
-    "score": 16,
+    "score": 0,
     "batch": 1,
     "iconId": 80,
     "nameZh": "上级封印宝箱",
@@ -369,7 +381,7 @@
     "nameEn": "Gold Sealed Chest",
     "nameJa": "上級封印の宝箱",
     "nameKo": "상급 봉인의 보물상자",
-    "isBase": true
+    "isBase": false
   },
   "[19,1]": {
     "name": "首领挑战券",

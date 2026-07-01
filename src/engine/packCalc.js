@@ -35,8 +35,9 @@ const DERIVED_RULES = {
   },
   // 魔装高级香油 = 3 × 魔装香油
   // ItemType=15, ItemId=2 -> base is ItemType=15, ItemId=1, mult=3
-  // 未鉴定符石: LvN = Lv2 × 2^(N-2), ItemIds 5-10
+  // 未鉴定符石: LvN = Lv2 × 2^(N-2), ItemIds 4-10
   runeLevelMult: {
+    4: 0.5, // Lv1 = Lv2 / 2
     6: 2,   // Lv3 = Lv2 × 2
     7: 4,   // Lv4 = Lv2 × 4
     8: 8,   // Lv5 = Lv2 × 8
@@ -75,7 +76,7 @@ export function getScore(scores, itype, iid) {
     return getScore(scores, 15, 1) * 3
   }
 
-  // 未鉴定符石 Lv3-7 (ItemType=17)
+  // 未鉴定符石 Lv1/Lv3-7 (ItemType=17)
   if (itype === 17) {
     const mult = DERIVED_RULES.runeLevelMult[iid]
     if (mult) {
@@ -106,7 +107,7 @@ export function getBaseItemKey(itype, iid) {
   // 3. 魔装高级香油 -> 普通香油
   if (itype === 15 && iid === 2) return `[15,1]`
   
-  // 4. 未鉴定符石 (Lv3-7 映射到 Lv2 [17,5])
+  // 4. 未鉴定符石 (Lv1/Lv3-7 映射到 Lv2 [17,5])
   if (itype === 17 && DERIVED_RULES.runeLevelMult[iid]) return `[17,5]`
   
   // 5. 魔女的来信 (红翠黄 映射到 蓝)

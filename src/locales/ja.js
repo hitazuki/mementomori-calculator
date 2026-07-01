@@ -434,6 +434,7 @@ export default {
   scoreReasonMagicCrystal: "魔女の秘奥召喚の週35回分から推定",
   scoreReasonGuildRaidWeaponFragment: "魔水晶ショップ交換比率：魔水晶 x3 -> 専用武器の残片 x10",
   scoreReasonRelic: "聖天使の神託ガチャ今週50回から推定",
+  scoreReasonSealedChest: "封印の宝箱のスクリーンショット確率から推定。鍵は同ランク宝箱価値の1/2",
   itemQtyLabel: "{item} x{qty}",
   diamondValue: "{value} ダイヤ",
   pullCount: "{count} 回",

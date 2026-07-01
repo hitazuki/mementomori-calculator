@@ -395,6 +395,7 @@ export default {
   scoreReasonMagicCrystal: "Derived from a weekly 35-pull Ticket of Secrets round",
   scoreReasonGuildRaidWeaponFragment: "Magic Crystal shop ratio: Magic Crystal x3 -> unique weapon fragments x10",
   scoreReasonRelic: "Derived from this week's 50-pull Invocation of The Seraph’s Prophecy window",
+  scoreReasonSealedChest: "Derived from sealed chest screenshot odds; keys use 1/2 of the same-tier chest value",
   itemQtyLabel: "{item} x{qty}",
   diamondValue: "{value} diamonds",
   pullCount: "{count} pulls",

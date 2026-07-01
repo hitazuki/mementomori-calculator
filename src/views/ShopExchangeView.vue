@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="view-header animate-fadeup">
     <h1 class="view-title">🛒 {{ $t('navShopExchange') }}</h1>
     <p class="view-desc">{{ $t('shopExchangeDesc') }}</p>
@@ -35,15 +35,33 @@
           </div>
 
           <div class="score-derived-divider">{{ t('scoreReadonlyTitle') }}</div>
-          <div v-for="row in readonlyScoreRows" :key="row.key" class="score-derived-row">
-            <img
-              :src="itemIconUrl(row.iconId)"
-              class="shop-score-icon"
-              @error="hideBrokenImage"
-            />
-            <span class="score-derived-name" :title="itemDisplayName(row)">{{ itemDisplayName(row) }}</span>
-            <span class="num-value score-derived-value">{{ formatNumber(row.score) }}</span>
-            <small>{{ scoreReasonText(row) }}</small>
+          <div v-for="row in readonlyScoreRows" :key="row.key" class="score-derived-block">
+            <div
+              class="score-derived-row"
+              :class="{ 'score-derived-row-clickable': hasScoreDetails(row) }"
+              :role="hasScoreDetails(row) ? 'button' : undefined"
+              :tabindex="hasScoreDetails(row) ? 0 : undefined"
+              @click="toggleScoreDetail(row)"
+              @keydown.enter.prevent="toggleScoreDetail(row)"
+              @keydown.space.prevent="toggleScoreDetail(row)"
+            >
+              <img
+                :src="itemIconUrl(row.iconId)"
+                class="shop-score-icon"
+                @error="hideBrokenImage"
+              />
+              <span class="score-derived-name" :title="itemDisplayName(row)">{{ itemDisplayName(row) }}</span>
+              <span class="num-value score-derived-value">{{ formatNumber(row.score) }}</span>
+              <small>{{ scoreReasonText(row) }}</small>
+              <span v-if="hasScoreDetails(row)" class="score-detail-toggle">{{ isScoreDetailExpanded(row) ? '▲' : '▼' }}</span>
+            </div>
+            <div v-if="isScoreDetailExpanded(row)" class="score-detail-list">
+              <div v-for="(detail, idx) in row.detailRows" :key="idx" class="score-detail-row">
+                <span class="score-detail-name" :title="scoreDetailName(detail)">{{ scoreDetailLabel(detail) }}</span>
+                <span class="score-detail-value">{{ formatNumber(detail.value) }}</span>
+                <span class="score-detail-share">{{ formatScoreShare(detail.share) }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -168,6 +186,7 @@ const showScores = ref(true)
 const selectedShopKey = ref(shopItems[0]?.shopKey || '')
 const sortState = reactive({ by: 'original', asc: true })
 const expanded = reactive(new Set())
+const expandedScoreDetails = reactive(new Set())
 
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
 const unlimitedLimitText = {
@@ -272,6 +291,35 @@ function isLocked(key) {
 function isReadonlyScore(key) {
   return key === '[1,1]' || key === '[13,1]'
 }
+function hasScoreDetails(row) {
+  return Array.isArray(row.detailRows) && row.detailRows.length > 0
+}
+function toggleScoreDetail(row) {
+  if (!hasScoreDetails(row)) return
+  if (expandedScoreDetails.has(row.key)) expandedScoreDetails.delete(row.key)
+  else expandedScoreDetails.add(row.key)
+}
+function isScoreDetailExpanded(row) {
+  return hasScoreDetails(row) && expandedScoreDetails.has(row.key)
+}
+function scoreDetailName(detail) {
+  const field = localeNameMap[locale.value] || 'nameZh'
+  if (detail.kind === 'ratio') {
+    const sourceField = `source${field.charAt(0).toUpperCase()}${field.slice(1)}`
+    return detail[sourceField] || detail.sourceNameZh || detail.sourceName || itemDisplayName(detail)
+  }
+  return itemDisplayName(detail) || `T${detail.itemType}I${detail.itemId}`
+}
+function scoreDetailLabel(detail) {
+  const name = scoreDetailName(detail)
+  if (detail.kind === 'ratio') return `${name} × 1/2`
+  const quantity = Number(detail.quantity || 0).toLocaleString()
+  const rate = `${((Number(detail.rate) || 0) * 100).toFixed(1)}%`
+  return `${name} ×${quantity} · ${rate}`
+}
+function formatScoreShare(share) {
+  return `${((Number(share) || 0) * 100).toFixed(1)}%`
+}
 </script>
 
 <style scoped>
@@ -335,10 +383,19 @@ function isReadonlyScore(key) {
 
 .score-derived-row {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 64px;
+  grid-template-columns: 24px minmax(0, 1fr) 64px 16px;
   align-items: center;
   gap: 8px;
   font-size: var(--fs-sm);
+}
+
+.score-derived-row-clickable {
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.score-derived-row-clickable:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .score-derived-name {
@@ -355,10 +412,52 @@ function isReadonlyScore(key) {
 }
 
 .score-derived-row small {
-  grid-column: 2 / -1;
+  grid-column: 2 / 4;
   color: var(--text-muted);
   font-size: var(--fs-xs);
   line-height: 1.25;
+}
+
+.score-detail-toggle {
+  grid-column: 4;
+  grid-row: 1 / span 2;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  text-align: right;
+}
+
+.score-detail-list {
+  margin: 4px 0 4px 32px;
+  padding: 6px 0 6px 8px;
+  border-left: 1px solid var(--border-subtle);
+  display: grid;
+  gap: 4px;
+}
+
+.score-detail-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px 44px;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--fs-xs);
+}
+
+.score-detail-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.score-detail-value {
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.score-detail-share {
+  text-align: right;
+  color: var(--gold);
 }
 
 .shop-switch-card {
