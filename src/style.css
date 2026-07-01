@@ -621,12 +621,15 @@ body::before {
 }
 
 .pack-score-panel {
-  position: static;
+  position: sticky;
+  top: 16px;
+  align-self: start;
   height: auto;
 }
 
 .pack-score-panel > .card {
   max-height: min(820px, calc(100vh - 32px));
+  overflow: hidden;
 }
 
 .mobile-summary-grid {
@@ -1071,6 +1074,13 @@ body::before {
   .nav-item { justify-content: center; padding: 12px 0; }
   .grid-sidebar, .grid-sidebar-right { grid-template-columns: 1fr; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+  .pack-score-panel {
+    position: static;
+    top: auto;
+  }
+  .pack-score-panel > .card {
+    max-height: min(560px, 62vh);
+  }
 }
 
 @media (min-width: 1440px) {
