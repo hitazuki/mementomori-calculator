@@ -256,6 +256,25 @@ npm test
 
 ---
 
+## Development File Map
+
+Pack Calculator code is split by responsibility:
+
+- `src/views/PackCalculatorView.vue` wires the page, tabs, data loading, and child components.
+- `src/components/pack/PackScorePanel.vue` displays editable and derived item scores.
+- `src/components/pack/PackQueryResults.vue` displays pack filters, sorting, desktop table, and mobile cards.
+- `src/components/pack/PackPlannerControls.vue` displays Ultra Sale planner inputs and lane controls.
+- `src/components/pack/PackPlannerSummary.vue` displays planner option tabs and summary metrics.
+- `src/components/pack/PackPlannerStepTable.vue` displays planner step rows, expanded details, skipped batches, top-up rows, and remaining opportunities.
+- `src/composables/pack/usePackScores.js` owns score panel state and score-detail formatting.
+- `src/composables/pack/usePackQuery.js` owns pack query filters, sorting, and row expansion state.
+- `src/composables/pack/usePackPlannerView.js` owns planner view state and calls the planner engine.
+- `src/composables/pack/usePackDisplay.js` owns shared pack display formatting.
+
+`src/engine/ultraSalePlanner.js` is stable planner engine code. Prefer changing the Vue components/composables above for display, wording, and layout work; inspect or edit the engine only for planner behavior changes.
+
+Global CSS is split under `src/styles/`, while `src/style.css` remains the import entry used by `index.html`.
+
 ## 📄 License
 
 MIT — 自由使用，欢迎提交 PR 扩充游戏资料。
