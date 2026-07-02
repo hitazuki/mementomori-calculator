@@ -1,0 +1,189 @@
+/* 閳光偓閳光偓 Forms 閳光偓閳光偓 */
+.form-group { margin-bottom: 12px; }
+.form-label {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 5px;
+  font-size: var(--fs-sm); color: var(--text-secondary);
+  user-select: none;
+}
+.value-display {
+  font-family: var(--font-mono);
+  color: var(--gold); font-size: var(--fs-sm); font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.form-input {
+  width: 100%;
+  min-height: var(--control-h);
+  padding: 7px var(--control-pad-x);
+  background: rgba(var(--color-invert-rgb), 0.05);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.09);
+  border-radius: var(--r-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono); font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  appearance: textfield;
+}
+.form-input::-webkit-inner-spin-button,
+.form-input::-webkit-outer-spin-button { display: none; }
+.form-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  background: rgba(201,168,76,0.04);
+}
+
+.inline-num {
+  background: transparent; border: none; border-bottom: 1px dashed currentColor; outline: none;
+  font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 600; text-align: center;
+  font-variant-numeric: tabular-nums;
+  width: 42px; padding: 0; color: inherit;
+}
+.inline-num::-webkit-inner-spin-button, .inline-num::-webkit-outer-spin-button { display: none; }
+
+.form-range {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  background: rgba(var(--color-invert-rgb), 0.1);
+  border-radius: 2px;
+  cursor: pointer; outline: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: pan-y;
+}
+.form-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--bg-base);
+  box-shadow: 0 0 6px var(--gold-dim);
+  transition: transform 0.15s;
+}
+.form-range::-webkit-slider-thumb:hover { transform: scale(1.25); }
+
+.form-select {
+  width: 100%;
+  min-height: var(--control-h);
+  padding: 7px 32px 7px var(--control-pad-x);
+  background: rgba(var(--color-invert-rgb), 0.05);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.09);
+  border-radius: var(--r-sm);
+  color: var(--text-primary);
+  font-size: var(--fs-sm); cursor: pointer; outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23c9a84c' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.form-select:focus { border-color: var(--gold); }
+
+.form-select option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+/* 閳光偓閳光偓 Buttons 閳光偓閳光偓 */
+.btn {
+  min-height: var(--control-h);
+  padding: 8px 16px;
+  border-radius: var(--r-sm); border: none;
+  cursor: pointer;
+  font-family: var(--font-body); font-size: var(--fs-sm); font-weight: 600;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), #a87830);
+  color: #0d0b14;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(201,168,76,0.35);
+}
+.btn-secondary {
+  background: var(--purple-dim);
+  color: var(--purple-light);
+  border: 1px solid rgba(155,89,182,0.3);
+}
+.btn-secondary:hover { background: rgba(155,89,182,0.3); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.1);
+}
+.btn-ghost:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.btn-danger {
+  background: rgba(231,76,60,0.12);
+  color: var(--danger);
+  border: 1px solid rgba(231,76,60,0.25);
+}
+.btn-sm {
+  min-height: var(--control-h-sm);
+  padding: 6px 12px;
+  font-size: var(--fs-sm);
+}
+
+/* 閳光偓閳光偓 Stat Boxes 閳光偓閳光偓 */
+.stat-box {
+  background: rgba(var(--color-base-rgb), 0.35);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 14px 12px;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.stat-box:hover { border-color: var(--gold-dim); transform: translateY(-1px); }
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xl); font-weight: 650;
+  color: var(--gold);
+  margin-bottom: 3px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.stat-value.is-danger { color: var(--danger); }
+.stat-value.is-success { color: var(--success); }
+.stat-value.is-purple { color: var(--purple-light); }
+.stat-value.is-info { color: var(--info); }
+.stat-label {
+  font-size: var(--fs-xs); color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* 閳光偓閳光偓 Breakdown List 閳光偓閳光偓 */
+.breakdown-list { display: flex; flex-direction: column; gap: 2px; }
+.breakdown-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+}
+.breakdown-item:hover { background: rgba(var(--color-invert-rgb), 0.03); }
+.breakdown-label { color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+.breakdown-value { font-family: var(--font-mono); font-weight: 650; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.breakdown-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), rgba(201,168,76,0.2));
+  border-radius: 1px;
+  margin: 0 12px 6px;
+  transition: width 0.5s var(--ease);
+}
+
+/* 閳光偓閳光偓 Tag / Badge 閳光偓閳光偓 */
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px; font-size: var(--fs-xs); font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.tag-gold { background: rgba(201,168,76,0.14); color: var(--gold); border: 1px solid rgba(201,168,76,0.25); }
+.tag-purple { background: var(--purple-dim); color: var(--purple-light); border: 1px solid rgba(155,89,182,0.25); }
+.tag-red { background: rgba(231,76,60,0.12); color: var(--danger); border: 1px solid rgba(231,76,60,0.22); }
+.tag-green { background: rgba(46,204,113,0.1); color: var(--success); border: 1px solid rgba(46,204,113,0.22); }
+

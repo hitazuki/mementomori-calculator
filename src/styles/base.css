@@ -1,0 +1,101 @@
+/* ============================================================
+   MementoMori 娴笺倕顔婄拋锛勭暬閸?閳?娑撶粯鐗卞?(Gothic Dark Gold Theme)
+   ============================================================ */
+:root, [data-theme="dark"] {
+  --color-base-rgb: 0, 0, 0;
+  --color-invert-rgb: 255, 255, 255;
+  --bg-base: #0d0b14;
+  --bg-surface: rgba(19, 16, 31, 0.85);
+  --bg-card: rgba(25, 22, 35, 0.88);
+  --bg-card-hover: rgba(35, 32, 45, 0.95);
+  --border-subtle: rgba(212, 186, 112, 0.25);
+  --border-hover: rgba(212, 186, 112, 0.5);
+
+  --gold: #d4ba70;
+  --gold-light: #f5df9a;
+  --gold-dim: rgba(212, 186, 112, 0.3);
+  --purple: #866b96;
+  --purple-light: #ab93ba;
+  --purple-dim: rgba(134, 107, 150, 0.25);
+
+  --text-primary: #f0e6c8;
+  --text-secondary: rgba(240, 230, 200, 0.75);
+  --text-muted: rgba(240, 230, 200, 0.5);
+
+  --danger: #e74c3c;
+  --success: #2ecc71;
+  --info: #3498db;
+  --warning: #f39c12;
+
+  --sidebar-w: 230px;
+  --font-display: 'Cinzel', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 15px;
+  --fs-base: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-title: 21px;
+  --control-h: 34px;
+  --control-h-sm: 30px;
+  --control-pad-x: 12px;
+  --table-pad-y: 8px;
+  --table-pad-x: 12px;
+  --chip-pad-y: 4px;
+  --chip-pad-x: 11px;
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --shadow-card: 0 4px 24px rgba(var(--color-base-rgb),0.5), 0 1px 0 rgba(201,168,76,0.08);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+  --color-base-rgb: 255, 255, 255;
+  --color-invert-rgb: 0, 0, 0;
+  --bg-base: #f4f3ee;
+  --bg-surface: #e9e6df;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fbfbf9;
+  --border-subtle: rgba(184, 156, 85, 0.3);
+  --border-hover: rgba(184, 156, 85, 0.5);
+
+  --gold: #9e791b;
+  --gold-light: #755912;
+  --gold-dim: rgba(158, 121, 27, 0.25);
+  --purple: #5c436b;
+  --purple-light: #422e4d;
+  --purple-dim: rgba(92, 67, 107, 0.15);
+
+  --text-primary: #1a1614;
+  --text-secondary: rgba(26, 22, 20, 0.85);
+  --text-muted: rgba(26, 22, 20, 0.6);
+
+  --shadow-card: 0 4px 16px rgba(0,0,0,0.06), 0 1px 0 rgba(184, 156, 85, 0.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+body::before {
+  display: none;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+

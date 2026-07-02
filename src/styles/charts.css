@@ -1,0 +1,147 @@
+/* 閳光偓閳光偓 Chart 閳光偓閳光偓 */
+.chart-wrap { width: 100%; position: relative; }
+.chart {
+  width: 100%;
+  height: 100%;
+}
+.chart-page-shell {
+  min-height: 0;
+}
+.chart-main-card {
+  min-width: 0;
+}
+.chart-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.chart-toolbar-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.chart-toolbar-main .card-title {
+  min-width: 0;
+}
+.chart-frame {
+  flex: 1;
+  min-height: 400px;
+  position: relative;
+}
+.chart-control-panel {
+  min-width: 0;
+}
+.chart-control-input {
+  width: 80px;
+  padding: 2px 4px;
+  font-size: var(--fs-xs);
+  min-height: var(--control-h-sm);
+  text-align: right;
+}
+.chart-control-input-wide {
+  width: 100px;
+}
+.chart-inline-percent {
+  width: 50px;
+  text-align: right;
+  font-size: var(--fs-xs);
+  min-height: var(--control-h-sm);
+}
+.chart-info-card {
+  padding: 16px 24px;
+}
+.chart-tabs-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+}
+.chart-base-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.segmented-control {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.segmented-control .btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.mobile-summary-card,
+.mobile-compare-results,
+.mobile-chart-insights {
+  display: none;
+}
+.mobile-summary-card {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  margin-bottom: 12px;
+}
+
+.pack-score-panel {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  height: auto;
+}
+
+.pack-score-panel > .card {
+  max-height: min(820px, calc(100vh - 32px));
+  overflow: hidden;
+}
+
+.mobile-summary-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 10px;
+}
+.mobile-summary-primary,
+.mobile-summary-secondary {
+  min-width: 0;
+}
+.mobile-summary-value {
+  color: var(--danger);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+.mobile-summary-label {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.mobile-summary-secondary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mobile-summary-chip {
+  min-width: 0;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+}
+.mobile-summary-chip b {
+  display: block;
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.mobile-summary-chip span {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+

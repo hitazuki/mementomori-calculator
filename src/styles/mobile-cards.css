@@ -1,0 +1,196 @@
+.pack-item-qty {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow:
+    0 1px 0 rgba(var(--color-base-rgb), 0.75),
+    1px 0 0 rgba(var(--color-base-rgb), 0.65),
+    0 -1px 0 rgba(var(--color-base-rgb), 0.65),
+    -1px 0 0 rgba(var(--color-base-rgb), 0.65);
+}
+.pack-item-qty-muted {
+  color: var(--text-secondary);
+}
+.pack-item-qty-mark {
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-right: 1px;
+}
+.mobile-pack-list {
+  display: none;
+}
+.mobile-pack-sort {
+  display: none;
+}
+.mobile-pack-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  box-shadow: var(--shadow-card);
+}
+.mobile-pack-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.mobile-pack-title {
+  min-width: 0;
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.mobile-pack-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: var(--fs-xs);
+  line-height: 1.2;
+  vertical-align: 1px;
+}
+.mobile-pack-ce {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.mobile-pack-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+.mobile-pack-meta b {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.mobile-pack-meta em {
+  color: var(--gold);
+  font-style: normal;
+  font-family: var(--font-mono);
+}
+.mobile-pack-source {
+  margin-top: 10px;
+  padding: 7px 10px;
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  background: rgba(var(--color-base-rgb), 0.25);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+}
+.mobile-pack-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.mobile-pack-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--control-h-sm);
+  padding: 2px 6px 2px 3px;
+  border-radius: 4px;
+  background: rgba(var(--color-invert-rgb), 0.035);
+}
+.mobile-pack-item img {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.mobile-compare-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 12px;
+}
+.mobile-compare-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.mobile-compare-title {
+  min-width: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.mobile-compare-metric {
+  flex-shrink: 0;
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.mobile-compare-grid {
+  display: grid;
+  gap: 8px;
+}
+.mobile-compare-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+}
+.mobile-compare-row span {
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+.mobile-compare-row b {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.mobile-chart-insight {
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.05);
+}
+.mobile-chart-insight span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+.mobile-chart-insight b {
+  display: block;
+  margin-top: 3px;
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+}
+.font-display { font-family: var(--font-display); }
+.mb-4 { margin-bottom: 4px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.scroll-y { overflow-y: auto; }
+

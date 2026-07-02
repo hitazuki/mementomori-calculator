@@ -1,0 +1,122 @@
+/* 閳光偓閳光偓 Textarea 閳光偓閳光偓 */
+.form-textarea {
+  width: 100%;
+  padding: 8px 11px;
+  background: rgba(var(--color-invert-rgb), 0.05);
+  border: 1px solid rgba(var(--color-invert-rgb), 0.09);
+  border-radius: var(--r-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono); font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  resize: vertical; outline: none;
+  min-height: 80px;
+}
+.form-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+}
+
+/* 閳光偓閳光偓 Compare card 閳光偓閳光偓 */
+.compare-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  padding: 14px;
+  position: relative;
+}
+.compare-card-title {
+  font-family: var(--font-mono); font-size: var(--fs-md); color: var(--gold);
+  margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.compare-remove {
+  background: none; border: none;
+  color: var(--text-muted); cursor: pointer; font-size: 18px;
+  line-height: 1; padding: 0;
+  transition: color 0.2s;
+}
+.compare-remove:hover { color: var(--danger); }
+
+/* 閳光偓閳光偓 Alert 閳光偓閳光偓 */
+.alert {
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  border: 1px solid transparent;
+  margin-bottom: 12px;
+}
+.alert-info {
+  background: rgba(52,152,219,0.1);
+  border-color: rgba(52,152,219,0.25);
+  color: #5dade2;
+}
+
+/* 鈹€鈹€ Modal 鈹€鈹€ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(var(--color-base-rgb), 0.85);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.modal-overlay.active {
+  opacity: 1; pointer-events: all;
+}
+.modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  width: 100%; max-width: 700px;
+  max-height: 85vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 10px 40px rgba(var(--color-base-rgb), 0.8), 0 0 0 1px rgba(201,168,76,0.1);
+  transform: translateY(15px) scale(0.98);
+  transition: transform 0.3s var(--ease);
+}
+.modal-overlay.active .modal-content {
+  transform: translateY(0) scale(1);
+}
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(var(--color-invert-rgb), 0.02);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+}
+.modal-title {
+  font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; color: var(--gold);
+  letter-spacing: 0.03em;
+}
+.modal-close {
+  background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 26px; line-height: 1;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: var(--danger); }
+.modal-body {
+  padding: 24px; overflow-y: auto; color: var(--text-secondary); font-size: var(--fs-md); line-height: 1.7;
+}
+.modal-body h3 { color: var(--text-primary); margin-top: 20px; margin-bottom: 10px; font-size: var(--fs-base); border-bottom: 1px solid rgba(var(--color-invert-rgb), 0.05); padding-bottom: 6px; }
+.modal-body h3:first-child { margin-top: 0; }
+.modal-body p { margin-bottom: 12px; }
+.modal-body code {
+  background: rgba(201,168,76,0.1); padding: 2px 6px; border-radius: 4px; color: var(--gold-light); font-family: var(--font-mono); font-size: var(--fs-sm); border: 1px solid rgba(201,168,76,0.2);
+}
+.modal-body ul { margin-left: 20px; margin-bottom: 12px; }
+.modal-body li { margin-bottom: 6px; }
+.formula-highlight {
+  display: block; padding: 12px; background: rgba(var(--color-base-rgb), 0.4); border-left: 3px solid var(--purple); border-radius: 0 var(--r-sm) var(--r-sm) 0; margin: 12px 0; font-family: var(--font-mono); color: var(--purple-light); font-size: var(--fs-sm);
+}
+
+/* 閳光偓閳光偓 Animations 閳光偓閳光偓 */
+@keyframes glow-pulse {
+  0%, 100% { text-shadow: 0 0 6px var(--gold-dim); }
+  50% { text-shadow: 0 0 16px rgba(201,168,76,0.5); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeup { animation: fadeUp 0.3s ease forwards; }
+

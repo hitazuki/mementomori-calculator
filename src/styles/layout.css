@@ -1,0 +1,244 @@
+/* 鈹€鈹€ App Shell 鈹€鈹€ */
+.app-shell { 
+  display: flex; height: 100vh; overflow: hidden; 
+  background-color: var(--bg-base);
+  background-image: var(--body-bg-img, none);
+  background-size: cover;
+  background-position: center;
+}
+
+/* 閳光偓閳光偓 Sidebar 閳光偓閳光偓 */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  box-shadow: 2px 0 15px rgba(var(--color-base-rgb), 0.5);
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 10%; right: 0;
+  width: 1px; height: 80%;
+  background: linear-gradient(180deg, transparent, var(--gold), transparent);
+  opacity: 0.35;
+}
+
+.sidebar-logo {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 24px 12px 20px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-collapse-btn {
+  position: absolute;
+  top: 112px;
+  right: -13px;
+  z-index: 2;
+  width: 26px;
+  height: 34px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0 8px 8px 0;
+  background: var(--bg-card);
+  color: var(--gold);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.sidebar-collapse-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.logo-icon {
+  font-size: 26px;
+  color: var(--gold);
+  text-shadow: 0 0 12px var(--gold-dim);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.logo-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg); font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.logo-sub {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+}
+
+/* Nav */
+.nav-list {
+  list-style: none;
+  padding: 10px 8px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nav-group-title {
+  padding: 16px 20px 8px 20px;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  color: var(--text-secondary);
+  position: relative;
+  transition: background 0.25s var(--ease), color 0.2s;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute; left: 0; top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px; height: 55%;
+  background: var(--gold);
+  border-radius: 0 3px 3px 0;
+  transition: transform 0.2s var(--ease);
+}
+
+.nav-item:hover { background: rgba(var(--color-invert-rgb), 0.05); color: var(--text-primary); }
+
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(201,168,76,0.14), transparent);
+  color: var(--gold);
+}
+
+.nav-item.active::before { transform: translateY(-50%) scaleY(1); }
+
+.nav-icon { font-size: var(--fs-lg); width: 20px; text-align: center; flex-shrink: 0; }
+.nav-label { font-size: var(--fs-sm); font-weight: 500; }
+
+.app-shell.sidebar-collapsed .sidebar {
+  width: 56px;
+}
+
+.app-shell.sidebar-collapsed .sidebar-logo {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.app-shell.sidebar-collapsed .logo-text,
+.app-shell.sidebar-collapsed .nav-label,
+.app-shell.sidebar-collapsed .nav-group-title,
+.app-shell.sidebar-collapsed .sidebar-footer {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed .nav-list {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.app-shell.sidebar-collapsed .nav-item {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.formula-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--purple-dim);
+  border: 1px solid rgba(155,89,182,0.28);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: var(--fs-sm);
+  user-select: none;
+}
+.formula-badge:hover { background: rgba(155,89,182,0.28); }
+.formula-label { color: var(--text-muted); }
+.formula-value { color: var(--purple-light); font-weight: 600; }
+
+/* 閳光偓閳光偓 Main Content 閳光偓閳光偓 */
+.main-content { flex: 1; overflow: hidden; position: relative; }
+
+.mobile-current-view {
+  display: none;
+}
+
+.view {
+  position: absolute; inset: 0;
+  overflow-y: auto;
+  padding: 22px 24px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.view.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+/* 閳光偓閳光偓 View Header 閳光偓閳光偓 */
+.view-header { margin-bottom: 20px; }
+.view-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title); font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 3px;
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 8px rgba(var(--color-base-rgb), 0.8);
+}
+.view-desc { font-size: var(--fs-sm); color: var(--text-muted); }
+
+/* 閳光偓閳光偓 Cards 閳光偓閳光偓 */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s, background 0.2s;
+}
+.card:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+
+.card-title {
+  font-size: var(--fs-md); font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::before {
+  content: '';
+  width: 3px; height: 13px;
+  background: var(--gold);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* 閳光偓閳光偓 Grid Helpers 閳光偓閳光偓 */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.grid-sidebar { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+.grid-sidebar-right { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
+
