@@ -70,216 +70,30 @@
 
       <!-- Planner -->
       <div v-if="activePackTab === 'planner'" class="card planner-card">
-        <div class="card-title">{{ $t('planTitle') }}</div>
+        <PackPlannerControls
+          :plan-settings="planSettings"
+          :plan-lanes="planLanes"
+          :plan-price-options="planPriceOptions"
+          :planner-preference-ce-preview="plannerPreferenceCePreview"
+          :is-planning="isPlanning"
+          :planner-status-text="plannerStatusText"
+          :preference-option-label="preferenceOptionLabel"
+          :format-ce="formatCe"
+          :tier-label="tierLabel"
+          :is-attribute-tower-lane="isAttributeTowerLane"
+          :plan-lane-name="planLaneName"
+          @calculate="calculatePlanner"
+        />
 
-        <div class="planner-controls">
-          <label class="planner-field">
-            <span>{{ $t('planPreferenceLevel') || '购买意愿与偏好' }}</span>
-            <select class="form-select" v-model="planSettings.preferenceLevel">
-              <option value="conservative">{{ preferenceOptionLabel('conservative') }}</option>
-              <option value="balanced">{{ preferenceOptionLabel('balanced') }}</option>
-              <option value="aggressive">{{ preferenceOptionLabel('aggressive') }}</option>
-              <option value="custom">{{ preferenceOptionLabel('custom') }}</option>
-            </select>
-          </label>
-
-          <label v-if="planSettings.preferenceLevel === 'custom'" class="planner-field planner-field-compact">
-            <span>{{ $t('planCustomCe') || '自定义 CE' }}</span>
-            <input
-              class="form-input"
-              type="number"
-              min="0.1"
-              step="0.1"
-              :placeholder="formatCe(plannerPreferenceCePreview.balanced)"
-              v-model.number="planSettings.customExpectedRatio"
-            />
-          </label>
-
-          <label class="planner-field">
-            <span>{{ $t('planCurrentTier') }}</span>
-            <select class="form-select" v-model.number="planSettings.currentPrice">
-              <option v-for="p in planPriceOptions" :key="p" :value="p">
-                {{ tierLabel(p) }}
-              </option>
-            </select>
-          </label>
-
-          <label class="planner-field">
-            <span>{{ $t('planTopUpMode') || '补累充模式' }}</span>
-            <select class="form-select" v-model="planSettings.topUpMode">
-              <option value="auto">{{ $t('planTopUpAuto') || '自动价值判断' }}</option>
-              <option value="off">{{ $t('planTopUpOff') || '关闭' }}</option>
-            </select>
-          </label>
-
-          <label class="planner-field">
-            <span>{{ $t('planRechargeMode') || '规划模式' }}</span>
-            <select class="form-select" v-model="planSettings.rechargePlanningMode">
-              <option value="longTerm">{{ $t('planRechargeModeLongTerm') || '长期规划' }}</option>
-              <option value="rush">{{ $t('planRechargeModeRush') || '赶进度' }}</option>
-            </select>
-          </label>
-
-
-        </div>
-
-        <div class="planner-derived-note" v-html="$t('planTopUpNote')">
-        </div>
-        <div class="planner-derived-note planner-ce-note">
-          <span class="planner-ce-chip">
-            {{ $t('planCeBaselineLabel') }}
-            <b>{{ formatCe(plannerPreferenceCePreview.baseline) }}</b>
-          </span>
-          <span class="planner-ce-chip active">
-            {{ $t('planCeTargetLabel') }}
-            <b>{{ formatCe(plannerPreferenceCePreview.current) }}</b>
-          </span>
-          <span>{{ $t('planCeBaselineMeaning') }}</span>
-        </div>
-
-        <div class="planner-lane-head">
-          <span>{{ $t('planLaneSource') }}</span>
-          <span>{{ $t('planLaneCurrent') }}</span>
-          <span>{{ $t('planLaneTarget') }}</span>
-          <span>{{ $t('planLaneLimit') }}</span>
-        </div>
-
-        <div class="planner-lanes">
-          <label
-            v-for="lane in planLanes"
-            :key="lane.id"
-            class="planner-lane"
-            :class="{ disabled: !lane.enabled }"
-          >
-            <span class="planner-lane-name">
-              <input type="checkbox" v-model="lane.enabled" />
-              {{ planLaneName(lane) }}
-            </span>
-            <input
-              v-if="lane.cat === 'quest'"
-              class="form-input"
-              type="text"
-              inputmode="numeric"
-              placeholder="13-28 / 336"
-              v-model.trim="lane.startProgress"
-            />
-            <input v-else class="form-input" type="number" min="0" step="1" v-model.number="lane.startProgress" />
-            <input
-              v-if="lane.cat === 'quest'"
-              class="form-input"
-              type="text"
-              inputmode="numeric"
-              :placeholder="$t('planPlaceholderQuest')"
-              v-model.trim="lane.endProgress"
-            />
-            <input v-else class="form-input" type="number" min="0" step="1" v-model.number="lane.endProgress" />
-            <input
-              v-if="isAttributeTowerLane(lane)"
-              class="form-input"
-              type="number"
-              value="1"
-              disabled
-              :title="$t('planAttrTowerTitle')"
-            />
-            <input v-else class="form-input" type="number" min="1" max="50" step="1" v-model.number="lane.batchSize" />
-          </label>
-        </div>
-
-        <div class="planner-derived-note">
-          {{ $t('planNote1') }}
-        </div>
-
-        <div class="planner-derived-note">
-          {{ $t('planNote2') }}
-        </div>
-
-        <div class="planner-derived-note">
-          {{ $t('planNote3') }}
-        </div>
-
-        <div class="planner-doc-links">
-          <a
-            href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/game-rules.md"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {{ $t('planDocRules') }}
-          </a>
-          <span class="planner-doc-sep">|</span>
-          <a
-            href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/implementation-design.md"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {{ $t('planDocDesign') }}
-          </a>
-          <span class="planner-doc-sep">|</span>
-          <a
-            href="https://github.com/hitazuki/mementomori-calculator/blob/main/doc/items/UltraSalePack/path-planning-visual.md"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {{ $t('planDocFlowchart') }}
-          </a>
-        </div>
-
-        <div class="planner-actions">
-          <button class="btn btn-primary btn-sm" type="button" :disabled="isPlanning" @click="calculatePlanner">
-            {{ isPlanning ? $t('planStatusCalculating') : $t('planBtnCalc') }}
-          </button>
-          <span class="planner-calc-status">
-            {{ plannerStatusText }}
-          </span>
-        </div>
-
-        <div v-if="planOptions.length" class="planner-mode-tabs" role="tablist" :aria-label="$t('planTabPlanner')">
-          <button
-            v-for="option in planOptions"
-            :key="option.id"
-            class="btn btn-sm"
-            :class="activePlanId === option.id ? 'btn-primary' : 'btn-ghost'"
-            type="button"
-            role="tab"
-            :aria-selected="activePlanId === option.id"
-            @click="setActivePlan(option.id)"
-          >
-            {{ option.labelKey ? $t(option.labelKey) : option.label }}
-          </button>
-        </div>
-
-        <div v-if="planOptions.length" class="planner-mode-desc">
-          {{ selectedPlan.descKey ? $t(selectedPlan.descKey) : selectedPlan.description }}
-        </div>
-
-        <div v-if="selectedPlan" class="planner-summary">
-          <div><span>{{ $t('planSumRecommendation') || '推荐结论' }}</span><b>{{ selectedPlan.labelKey ? $t(selectedPlan.labelKey) : selectedPlan.label }}</b></div>
-          <div><span>{{ $t('planSumExpectedRatio') || '预期性价比' }}</span><b>{{ selectedPlan.expectedRatio.toFixed(1) }}</b></div>
-          <div><span>{{ $t('planSumActualCE') || '路径实际性价比' }}</span><b>{{ selectedPlan.averageCe.toFixed(1) }}</b></div>
-          <div><span>{{ $t('planSumSurplus') || '金钱净收益' }}</span><b :style="{ color: selectedPlan.moneySurplus < 0 ? '#e74c3c' : 'var(--gold)' }">{{ selectedPlan.moneySurplus.toLocaleString() }}</b></div>
-          <div><span>{{ $t('planSumDecision') || '决策价值' }}</span><b class="planner-simple-metric">{{ selectedPlan.decisionValue.toLocaleString() }}</b></div>
-          <div><span>{{ $t('planSumTotalValue') || '总价值' }}</span><b>{{ selectedPlan.value.toLocaleString() }}</b></div>
-          <div><span>{{ $t('planSumTotalSpent') || '总花费' }}</span><b>{{ formatPrice(selectedPlan.totalSpent ?? selectedPlan.spent) }}</b></div>
-          <div><span>{{ $t('planSumLimitedSpent') || '限时包花费' }}</span><b>{{ formatPrice(selectedPlan.limitedSpentYen ?? selectedPlan.spent) }}</b></div>
-          <div><span>{{ $t('planSumTopUpCost') || '补累充花费' }}</span><b>{{ formatPrice(selectedPlan.topUpTotalCost || 0) }}</b></div>
-          <div><span>{{ $t('planSumPurchase') || '购买限时包数' }}</span><b>{{ selectedPlan.purchases }}</b></div>
-          <div><span>{{ $t('planSumTriggerCount') || '已触发机会数' }}</span><b>{{ selectedPlan.triggerCount }}</b></div>
-          <div><span>{{ $t('planSumRetained') || '未使用机会数' }}</span><b>{{ selectedPlan.remainingOpportunities ?? selectedPlan.retainedOpportunities }}</b></div>
-          <div><span>{{ $t('planSumResets') || '跨日重置次数' }}</span><b>{{ selectedPlan.rechargeResets }}</b></div>
-          <div><span>{{ $t('planSumTopUpBatch') || '补累充批次数' }}</span><b>{{ selectedPlan.topUpBatches?.length || 0 }}</b></div>
-          <div><span>{{ $t('planSumFinalTier') || '下一批结束后档位' }}</span><b>{{ tierLabel(selectedPlan.finalTierPrice) }}</b></div>
-        </div>
-
-        <div v-if="selectedPlan && selectedPlan.topUpBatches && selectedPlan.topUpBatches.length" class="planner-top-up-summary">
-          <div class="planner-detail-title">{{ $t('planTopUpTitle') }}</div>
-          <div class="planner-top-up-list">
-            <div v-for="batch in selectedPlan.topUpBatches" :key="`${selectedPlan.id}-top-up-batch-${batch.index}`" class="planner-top-up-item">
-              <strong>{{ $t('planBatchNum', { n: batch.index }) }}</strong>
-              <span>{{ batch.packs.map(pack => translatePackName(pack.displayTrigger)).join(' / ') }}</span>
-              <span>{{ formatPrice(batch.cost) }}</span>
-              <span>{{ $t('planFreeDiamondAdd', { n: batch.rechargeFreeDiamonds.toLocaleString() }) }}</span>
-            </div>
-          </div>
-        </div>
+        <PackPlannerSummary
+          :plan-options="planOptions"
+          :active-plan-id="activePlanId"
+          :selected-plan="selectedPlan"
+          :format-price="formatPrice"
+          :tier-label="tierLabel"
+          :translate-pack-name="translatePackName"
+          @select-plan="setActivePlan"
+        />
 
         <div v-if="selectedPlan && selectedPlan.steps.length" class="planner-table-wrap">
           <table class="data-table planner-table">
@@ -485,6 +299,8 @@ import { buildUltraSalePlanOptions, compressUltraSalePlanSteps, paidDiamondsForP
 import { editableScores } from '../store/itemScores.js'
 import PackScorePanel from '../components/pack/PackScorePanel.vue'
 import PackQueryResults from '../components/pack/PackQueryResults.vue'
+import PackPlannerControls from '../components/pack/PackPlannerControls.vue'
+import PackPlannerSummary from '../components/pack/PackPlannerSummary.vue'
 
 const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
@@ -917,227 +733,6 @@ function formatScoreShare(share) {
   padding: 14px;
 }
 
-.planner-controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.planner-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-width: 0;
-}
-
-.planner-field span {
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-}
-
-.planner-field-compact {
-  max-width: 160px;
-}
-
-.planner-toggle-field {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: var(--control-h);
-  color: var(--text-secondary);
-  font-size: var(--fs-sm);
-}
-
-.planner-toggle-field input {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 auto;
-}
-
-.planner-lane-head,
-.planner-lane {
-  display: grid;
-  grid-template-columns: minmax(150px, 1.4fr) repeat(3, minmax(72px, 0.7fr));
-  gap: 8px;
-  align-items: center;
-}
-
-.planner-lane-head {
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-  margin-top: 12px;
-  padding: 0 8px;
-}
-
-.planner-lanes {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.planner-lane {
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--r-sm);
-  padding: 8px;
-  background: rgba(255,255,255,0.03);
-}
-
-.planner-lane.disabled {
-  opacity: 0.58;
-}
-
-.planner-lane-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-primary);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  min-width: 0;
-}
-
-.planner-lane-name input {
-  flex: 0 0 auto;
-}
-
-.planner-derived-note {
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-  line-height: 1.45;
-  margin-top: 8px;
-}
-
-.planner-ce-note {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 10px;
-  border: 1px solid rgba(199, 157, 74, 0.42);
-  border-radius: var(--r-sm);
-  padding: 8px 10px;
-  background: rgba(199, 157, 74, 0.08);
-}
-
-.planner-ce-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.planner-ce-chip b {
-  color: var(--gold);
-  font-size: var(--fs-sm);
-}
-
-.planner-ce-chip.active b {
-  color: var(--text-primary);
-}
-
-.planner-doc-links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: var(--fs-xs);
-}
-
-.planner-doc-links a {
-  color: var(--gold);
-  text-decoration: none;
-}
-
-.planner-doc-links a:hover {
-  text-decoration: underline;
-}
-
-.planner-doc-sep {
-  color: var(--border-subtle);
-  user-select: none;
-}
-
-.planner-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.planner-actions .btn {
-  min-width: 132px;
-}
-
-.planner-calc-status {
-  color: var(--text-muted);
-  font-size: var(--fs-sm);
-}
-
-.planner-mode-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 12px;
-}
-
-.planner-mode-tabs .btn {
-  min-width: 88px;
-}
-
-.planner-mode-desc {
-  color: var(--text-muted);
-  font-size: var(--fs-sm);
-  line-height: 1.45;
-  margin-top: 8px;
-}
-
-.planner-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.planner-summary div {
-  min-width: 0;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--r-sm);
-  padding: 8px;
-  background: rgba(255,255,255,0.03);
-}
-
-.planner-summary span,
-.planner-summary b {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.planner-summary span {
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-}
-
-.planner-summary b {
-  color: var(--gold);
-  font-family: var(--font-mono);
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-  margin-top: 2px;
-}
-
-.planner-top-up-summary {
-  border: 1px solid rgba(212,175,55,0.32);
-  border-radius: var(--r-sm);
-  padding: 10px;
-  margin-top: 10px;
-  background: rgba(212,175,55,0.055);
-}
-
 .planner-top-up-list {
   display: flex;
   flex-wrap: wrap;
@@ -1560,56 +1155,13 @@ function formatScoreShare(share) {
   text-align: center;
 }
 
-@media (max-width: 900px) {
-  .planner-controls {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .planner-lane-head {
-    display: none;
-  }
-
-  .planner-lane {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-
-  .planner-lane-name {
-    grid-column: 1 / -1;
-  }
-
-  .planner-mode-tabs .btn {
-    flex: 1 1 calc(50% - 6px);
-  }
-
-  .planner-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 560px) {
-  .planner-controls,
-  .planner-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .planner-field-compact {
-    max-width: none;
-  }
-
   .pack-view-tabs {
     flex-direction: column;
   }
 
   .pack-view-tabs .btn {
     width: 100%;
-  }
-
-  .planner-lane {
-    grid-template-columns: 1fr;
-  }
-
-  .planner-mode-tabs .btn {
-    flex-basis: 100%;
   }
 }
 </style>
