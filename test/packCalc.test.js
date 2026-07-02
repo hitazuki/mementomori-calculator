@@ -129,5 +129,9 @@ test('sealed chest and key scores are derived from screenshot odds', () => {
   assert.equal(bronzeChestRow.detailRows.length, 12)
   closeTo(bronzeChestRow.detailRows.reduce((sum, row) => sum + row.value, 0), state.scores['[17,35]'].score)
   assert.equal(bronzeChestRow.detailRows.find(row => row.itemType === 3 && row.itemId === 1).nameZh, '金币')
+  assert.equal(bronzeChestRow.detailRows.find(row => row.itemType === 17 && row.itemId === 4).nameZh, '未鉴定符石Lv1')
   assert.equal(bronzeKeyRow.detailRows.length, 0)
+
+  const goldChestRow = state.readonlyRows.find(row => row.key === '[17,37]')
+  assert.equal(goldChestRow.detailRows.find(row => row.itemType === 10 && row.itemId === 7).nameZh, '经验珠(2小时)')
 })

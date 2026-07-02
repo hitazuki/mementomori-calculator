@@ -1,5 +1,5 @@
 import { buildForbiddenWeaponGachaAnalysis } from './forbiddenWeaponGachaCalc.js'
-import { getScore } from './packCalc.js'
+import { getItemInfo, getScore } from './packCalc.js'
 
 const FREE_DIAMOND_KEY = '[1,1]'
 const PAID_DIAMOND_KEY = '[2,1]'
@@ -127,10 +127,6 @@ function itemScoreKey(itemType, itemId) {
   return `[${itemType},${itemId}]`
 }
 
-function getScoreEntry(scores, itemType, itemId) {
-  return scores[itemScoreKey(itemType, itemId)] || {}
-}
-
 function withShares(rows, totalValue) {
   return rows.map(row => ({
     ...row,
@@ -139,7 +135,7 @@ function withShares(rows, totalValue) {
 }
 
 function createDropDetail(scores, drop, overrideUnitScore = null) {
-  const entry = getScoreEntry(scores, drop.itemType, drop.itemId)
+  const entry = getItemInfo(scores, drop.itemType, drop.itemId)
   const unitScore = overrideUnitScore ?? getScore(scores, drop.itemType, drop.itemId)
   const value = unitScore * drop.quantity * drop.rate
   return {

@@ -52,6 +52,27 @@ function scoreKey(itype, iid) {
   return `[${itype},${iid}]`
 }
 
+const DERIVED_ITEM_INFO = {
+  '[10,7]': {
+    name: '经验珠(2小时)',
+    nameZh: '经验珠(2小时)',
+    nameTw: '經驗珠(2小時)',
+    nameEn: 'EXP Orb (2 hrs)',
+    nameJa: '経験珠（2時間）',
+    nameKo: '경험치 구슬 (2시간)',
+    iconId: 15,
+  },
+  '[17,4]': {
+    name: '未鉴定符石Lv1',
+    nameZh: '未鉴定符石Lv1',
+    nameTw: '未鑑定符石Lv1',
+    nameEn: 'Mystery Rune Lv 1',
+    nameJa: '未鑑定ルーンLv1',
+    nameKo: '미감정 룬 Lv1',
+    iconId: 58,
+  },
+}
+
 export function getScore(scores, itype, iid) {
   // Resolve derived items first
   if (itype === 10) {
@@ -120,7 +141,7 @@ export function getBaseItemKey(itype, iid) {
 
 export function getItemInfo(scores, itype, iid) {
   const key = scoreKey(itype, iid)
-  const s = scores[key]
+  const s = scores[key] || DERIVED_ITEM_INFO[key]
   return {
     name: s ? s.name : `T${itype}I${iid}`,
     nameZh: s ? s.nameZh : '',
