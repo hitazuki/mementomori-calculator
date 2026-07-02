@@ -12,70 +12,22 @@
   </div>
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
-    <!-- Left Panel: Scores -->
-    <div class="flex-col gap-12 pack-score-panel">
-
-      <!-- Scores Panel -->
-      <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
-        <div class="card-title" @click="showScores = !showScores" style="cursor:pointer;user-select:none;margin-bottom:0;display:flex;align-items:center;">
-          📊 {{ $t('packScoreTitle') }}
-          <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--gold);">{{ showScores ? '▼' : '▶' }}</span>
-        </div>
-        <div v-show="showScores" style="font-size: var(--fs-sm); color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
-          {{ $t('packScoreDesc') }}
-        </div>
-        <div v-show="showScores" class="flex-col gap-8" style="overflow-y:auto; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-subtle); padding-right:4px;">
-          <div v-for="row in editableScoreRows" :key="row.key" style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);">
-            <img
-              :src="`${baseUrl}images/items/Item_${String(row.item.iconId).padStart(4,'0')}.png`"
-              style="width:24px;height:24px;flex-shrink:0;"
-              @error="e => e.target.style.display='none'"
-            />
-            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="itemDisplayName(row.item)">{{ itemDisplayName(row.item) }}</span>
-            <input
-              v-if="!isLocked(row.key)"
-              class="form-input"
-              type="number"
-              v-model.number="editableScores[row.key].score"
-              style="width:64px;padding:2px 6px;font-size:var(--fs-sm);min-height:var(--control-h-sm);text-align:right;"
-              min="0"
-              step="1"
-            />
-            <span v-else class="num-value" style="width:64px;text-align:right;font-size:var(--fs-sm);color:var(--gold);">{{ formatScoreForPanel(row.item.score) }}</span>
-            <span v-if="row.item.batch > 1" style="font-size:var(--fs-xs);color:var(--text-muted);min-width:50px;text-align:left;">/ {{ row.item.batch.toLocaleString() }}</span>
-          </div>
-          <div class="score-derived-divider">{{ t('scoreReadonlyTitle') }}</div>
-          <div v-for="row in readonlyScoreRows" :key="row.key" class="score-derived-block">
-            <div
-              class="score-derived-row"
-              :class="{ 'score-derived-row-clickable': hasScoreDetails(row) }"
-              :role="hasScoreDetails(row) ? 'button' : undefined"
-              :tabindex="hasScoreDetails(row) ? 0 : undefined"
-              @click="toggleScoreDetail(row)"
-              @keydown.enter.prevent="toggleScoreDetail(row)"
-              @keydown.space.prevent="toggleScoreDetail(row)"
-            >
-              <img
-                :src="`${baseUrl}images/items/Item_${String(row.iconId).padStart(4,'0')}.png`"
-                style="width:24px;height:24px;flex-shrink:0;"
-                @error="e => e.target.style.display='none'"
-              />
-              <span class="score-derived-name" :title="itemDisplayName(row)">{{ itemDisplayName(row) }}</span>
-              <span class="num-value score-derived-value">{{ formatScoreForPanel(row.score) }}</span>
-              <small>{{ scoreReasonText(row) }}</small>
-              <span v-if="hasScoreDetails(row)" class="score-detail-toggle">{{ isScoreDetailExpanded(row) ? '▲' : '▼' }}</span>
-            </div>
-            <div v-if="isScoreDetailExpanded(row)" class="score-detail-list">
-              <div v-for="(detail, idx) in row.detailRows" :key="idx" class="score-detail-row">
-                <span class="score-detail-name" :title="scoreDetailName(detail)">{{ scoreDetailLabel(detail) }}</span>
-                <span class="score-detail-value">{{ formatScoreForPanel(detail.value) }}</span>
-                <span class="score-detail-share">{{ formatScoreShare(detail.share) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <PackScorePanel
+      v-model:show-scores="showScores"
+      :editable-score-rows="editableScoreRows"
+      :readonly-score-rows="readonlyScoreRows"
+      :base-url="baseUrl"
+      :item-display-name="itemDisplayName"
+      :format-score-for-panel="formatScoreForPanel"
+      :score-reason-text="scoreReasonText"
+      :score-detail-name="scoreDetailName"
+      :score-detail-label="scoreDetailLabel"
+      :format-score-share="formatScoreShare"
+      :has-score-details="hasScoreDetails"
+      :is-score-detail-expanded="isScoreDetailExpanded"
+      :is-locked="isLocked"
+      @toggle-score-detail="toggleScoreDetail"
+    />
 
     <!-- Right Panel: Results Table -->
     <div class="flex-col gap-12" style="min-width:0;">
@@ -98,48 +50,23 @@
         </button>
       </div>
 
-      <!-- Filters -->
-      <div v-if="activePackTab === 'query'" class="card pack-filters-card" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding: 10px 14px;">
-        <div style="font-weight:bold; font-size:var(--fs-sm); color:var(--text-primary); display:flex; align-items:center; white-space:nowrap;">
-          🔍 {{ $t('packFilterTitle') }}
-        </div>
-        
-        <div style="display:flex; gap:4px; align-items:center;">
-          <button class="btn btn-sm" :class="filter.cat==='tower'?'btn-primary':'btn-ghost'" @click="filter.cat='tower'" style="padding:4px 10px; white-space:nowrap;">{{ $t('origin_tower_unknown') }}</button>
-          <button class="btn btn-sm" :class="filter.cat==='rank'?'btn-primary':'btn-ghost'" @click="filter.cat='rank'" style="padding:4px 10px; white-space:nowrap;">{{ $t('origin_rank') }}</button>
-          <button class="btn btn-sm" :class="filter.cat==='quest'?'btn-primary':'btn-ghost'" @click="filter.cat='quest'" style="padding:4px 10px; white-space:nowrap;">{{ $t('origin_quest') }}</button>
-        </div>
-
-        <div v-if="filter.cat==='tower'" style="display:flex; align-items:center; gap:6px;">
-          <select class="form-select" v-model="filter.tower" style="min-width:110px; padding:4px 28px 4px 8px; font-size:var(--fs-sm); min-height:var(--control-h-sm);">
-            <option v-for="t in towerOptions" :key="t" :value="t">{{ towerName(t) }}</option>
-          </select>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:var(--fs-sm); color:var(--text-muted); white-space:nowrap;">{{ $t('packFilterPrice') }}</span>
-          <select class="form-select" v-model="filter.price" style="min-width:80px; padding:4px 28px 4px 8px; font-size:var(--fs-sm); min-height:var(--control-h-sm);">
-            <option :value="0">-- {{ $t('ui_all') }} --</option>
-            <option v-for="p in priceOptions" :key="p" :value="p">{{ formatPrice(p) }}</option>
-          </select>
-        </div>
-
-        <div style="margin-left:auto; font-size:var(--fs-sm); color:var(--text-muted); white-space:nowrap;">
-          {{ $t('packResultCount', { n: filteredPacks.length }) }}
-        </div>
-
-        <div class="mobile-pack-sort">
-          <select class="form-select" v-model="sortState.by">
-            <option value="trigger">{{ $t('packColTrigger') }}</option>
-            <option value="price">{{ $t('packColPrice') }}</option>
-            <option value="ce">CE</option>
-            <option value="value">{{ $t('packColValue') }}</option>
-          </select>
-          <button class="btn btn-ghost btn-sm" @click="sortState.asc = !sortState.asc">
-            {{ sortState.asc ? '▲' : '▼' }}
-          </button>
-        </div>
-      </div>
+      <PackQueryResults
+        v-if="activePackTab === 'query'"
+        :filter="filter"
+        :sort-state="sortState"
+        :expanded="expanded"
+        :tower-options="towerOptions"
+        :price-options="priceOptions"
+        :filtered-count="filteredPacks.length"
+        :sorted-packs="sortedPacks"
+        :base-url="baseUrl"
+        :tower-name="towerName"
+        :format-price="formatPrice"
+        :item-display-name="itemDisplayName"
+        :sort-icon="sortIcon"
+        @toggle-sort="toggleSort"
+        @toggle-expand="toggleExpand"
+      />
 
       <!-- Planner -->
       <div v-if="activePackTab === 'planner'" class="card planner-card">
@@ -542,107 +469,6 @@
         <div v-else class="planner-empty">{{ $t('planEmptyInit') }}</div>
       </div>
 
-      <div v-if="activePackTab === 'query'" class="card desktop-pack-table" style="overflow-x:auto;padding:8px;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th @click="toggleSort('trigger')" style="cursor:pointer;">{{ $t('packColTrigger') }} {{ sortIcon('trigger') }}</th>
-              <th @click="toggleSort('price')" style="cursor:pointer;">{{ $t('packColPrice') }} {{ sortIcon('price') }}</th>
-              <th @click="toggleSort('ce')" style="cursor:pointer;">CE {{ sortIcon('ce') }}</th>
-              <th @click="toggleSort('value')" style="cursor:pointer;">{{ $t('packColValue') }} {{ sortIcon('value') }}</th>
-              <th>{{ $t('packColItems') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template v-for="(p, i) in sortedPacks" :key="i">
-              <tr @click="toggleExpand(i)" style="cursor:pointer;" :class="{ 'row-expanded': expanded.has(i) }">
-                <td style="white-space:nowrap;">
-                  <span style="font-size:var(--fs-xs);margin-right:6px;">{{ expanded.has(i) ? '▼' : '▶' }}</span>
-                  {{ p.trigger }}
-                </td>
-                <td style="white-space:nowrap;">{{ formatPrice(p.price) }}</td>
-                <td :style="{color: p.ce >= 1 ? '#2ecc71' : '#e74c3c', fontWeight:'bold'}">{{ p.ce.toFixed(1) }}</td>
-                <td style="white-space:nowrap;">{{ p.originalValue.toLocaleString() }} <span style="font-size:var(--fs-xs);color:var(--gold);">+ {{ p.rechargeValue.toLocaleString() }}</span></td>
-                <td>
-                  <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;">
-                    <div
-                      v-for="(item, j) in p.items"
-                      :key="j"
-                      :title="itemDisplayName(item)"
-                      style="display:flex;align-items:center;gap:4px;font-size:var(--fs-sm);"
-                    >
-                      <img
-                        :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
-                        style="width:24px;height:24px;"
-                        @error="e => e.target.style.display='none'"
-                      />
-                      <span class="pack-item-qty"><span class="pack-item-qty-mark">×</span>{{ item.qty }}</span>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr v-if="expanded.has(i)" style="background:rgba(255,255,255,0.02);">
-                <td :colspan="5" style="padding:6px 16px;">
-                  <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:var(--fs-sm);align-items:flex-start;">
-                    <div
-                      v-for="(item, j) in p.items"
-                      :key="j"
-                      style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.03);padding:4px 10px;border-radius:4px;"
-                    >
-                      <img
-                        :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
-                        style="width:24px;height:24px;"
-                        @error="e => e.target.style.display='none'"
-                      />
-                      <span style="min-width:60px;">{{ itemDisplayName(item) }}</span>
-                      <span class="pack-item-qty pack-item-qty-muted"><span class="pack-item-qty-mark">×</span>{{ item.qty }}</span>
-                      <span style="color:var(--gold);font-weight:bold;">{{ Math.round(item.value).toLocaleString() }}</span>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-      </div>
-
-      <div v-if="activePackTab === 'query'" class="mobile-pack-list">
-        <article
-          v-for="(p, i) in sortedPacks"
-          :key="`mobile-${i}`"
-          class="mobile-pack-card"
-          @click="toggleExpand(i)"
-        >
-          <div class="mobile-pack-head">
-            <div class="mobile-pack-title">
-              <span>{{ p.trigger }}</span>
-            </div>
-            <div class="mobile-pack-ce" :style="{ color: p.ce >= 1 ? '#2ecc71' : '#e74c3c' }">
-              CE {{ p.ce.toFixed(1) }}
-            </div>
-          </div>
-
-          <div class="mobile-pack-meta">
-            <span>{{ $t('packColPrice') }} <b>{{ formatPrice(p.price) }}</b></span>
-            <span>{{ $t('packColValue') }} <b>{{ p.originalValue.toLocaleString() }}</b> <em>+ {{ p.rechargeValue.toLocaleString() }}</em></span>
-          </div>
-
-          <div class="mobile-pack-items">
-            <div
-              v-for="(item, j) in p.items"
-              :key="j"
-              class="mobile-pack-item"
-              :title="itemDisplayName(item)"
-            >
-              <img
-                :src="`${baseUrl}images/items/Item_${String(item.iconId).padStart(4,'0')}.png`"
-                @error="e => e.target.style.display='none'"
-              />
-              <span class="pack-item-qty"><span class="pack-item-qty-mark">×</span>{{ item.qty }}</span>
-            </div>
-          </div>
-        </article>
-      </div>
     </div>
   </div>
 </template>
@@ -657,6 +483,8 @@ import { calculatePackCE, normalizeScores } from '../engine/packCalc.js'
 import { buildDerivedScoreState } from '../engine/derivedScores.js'
 import { buildUltraSalePlanOptions, compressUltraSalePlanSteps, paidDiamondsForPrice, preferenceCeForLevel } from '../engine/ultraSalePlanner.js'
 import { editableScores } from '../store/itemScores.js'
+import PackScorePanel from '../components/pack/PackScorePanel.vue'
+import PackQueryResults from '../components/pack/PackQueryResults.vue'
 
 const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
@@ -1064,11 +892,6 @@ function formatScoreShare(share) {
   return `${((Number(share) || 0) * 100).toFixed(1)}%`
 }
 
-function fmtNum(n) {
-  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M'
-  if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K'
-  return String(Math.round(n))
-}
 </script>
 
 <style scoped>
@@ -1078,93 +901,6 @@ function fmtNum(n) {
 }
 :deep(.data-table th) {
   text-align: center;
-}
-
-.score-derived-divider {
-  margin-top: 6px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--border-subtle);
-  color: var(--gold);
-  font-size: var(--fs-xs);
-}
-
-.score-derived-row {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 64px 16px;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-sm);
-}
-
-.score-derived-row-clickable {
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.score-derived-row-clickable:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.score-derived-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.score-derived-value {
-  text-align: right;
-  color: var(--gold);
-  font-size: var(--fs-sm);
-}
-
-.score-derived-row small {
-  grid-column: 2 / 4;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-  line-height: 1.25;
-}
-
-.score-detail-toggle {
-  grid-column: 4;
-  grid-row: 1 / span 2;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-  text-align: right;
-}
-
-.score-detail-list {
-  margin: 4px 0 4px 32px;
-  padding: 6px 0 6px 8px;
-  border-left: 1px solid var(--border-subtle);
-  display: grid;
-  gap: 4px;
-}
-
-.score-detail-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 58px 44px;
-  gap: 6px;
-  align-items: center;
-  font-size: var(--fs-xs);
-}
-
-.score-detail-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-muted);
-}
-
-.score-detail-value {
-  text-align: right;
-  color: var(--text-primary);
-}
-
-.score-detail-share {
-  text-align: right;
-  color: var(--gold);
 }
 
 .pack-view-tabs {
