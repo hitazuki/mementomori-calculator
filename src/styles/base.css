@@ -2,6 +2,7 @@
    MementoMori 娴笺倕顔婄拋锛勭暬閸?閳?娑撶粯鐗卞?(Gothic Dark Gold Theme)
    ============================================================ */
 :root, [data-theme="dark"] {
+  color-scheme: dark;
   --color-base-rgb: 0, 0, 0;
   --color-invert-rgb: 255, 255, 255;
   --bg-base: #0d0b14;
@@ -53,6 +54,7 @@
 }
 
 [data-theme="light"] {
+  color-scheme: light;
   --color-base-rgb: 255, 255, 255;
   --color-invert-rgb: 0, 0, 0;
   --bg-base: #f4f3ee;

@@ -76,12 +76,32 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23c9a84c' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
+  color-scheme: dark;
 }
 .form-select:focus { border-color: var(--gold); }
 
-.form-select option {
+.form-select option,
+.form-select optgroup {
   background: var(--bg-surface);
   color: var(--text-primary);
+}
+
+.form-select optgroup {
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+.form-select option {
+  font-weight: 500;
+}
+
+.form-select option:checked {
+  background: var(--gold);
+  color: var(--bg-base);
+}
+
+[data-theme="light"] .form-select {
+  color-scheme: light;
 }
 
 /* 閳光偓閳光偓 Buttons 閳光偓閳光偓 */
