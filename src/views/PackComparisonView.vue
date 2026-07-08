@@ -7,69 +7,24 @@
   </div>
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
-    <!-- Left Panel: Scores -->
-    <div class="flex-col gap-12 pack-score-panel">
-      <!-- Scores Panel -->
-      <div class="card flex-col" :style="{ flex: showScores ? 1 : 'none' }" style="min-height:0; display:flex; padding-bottom:12px;">
-        <div class="card-title" @click="showScores = !showScores" style="cursor:pointer;user-select:none;margin-bottom:0;display:flex;align-items:center;">
-          📊 {{ $t('packScoreTitle') }}
-          <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--gold);">{{ showScores ? '▼' : '▶' }}</span>
-        </div>
-        <div v-show="showScores" style="font-size: var(--fs-sm); color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
-          {{ $t('packScoreDesc') }}
-        </div>
-        <div v-show="showScores" class="flex-col gap-8" style="overflow-y:auto; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-subtle); padding-right:4px;">
-          <div v-for="row in editableScoreRows" :key="row.key" style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);">
-            <img
-              :src="`${baseUrl}images/items/Item_${String(row.item.iconId).padStart(4,'0')}.png`"
-              style="width:24px;height:24px;flex-shrink:0;"
-              @error="e => e.target.style.display='none'"
-            />
-            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="itemDisplayName(row.item)">{{ itemDisplayName(row.item) }}</span>
-            <input
-              v-if="!isLocked(row.key)"
-              class="form-input"
-              type="number"
-              v-model.number="editableScores[row.key].score"
-              style="width:64px;padding:2px 6px;font-size:var(--fs-sm);min-height:var(--control-h-sm);text-align:right;"
-              min="0"
-              step="1"
-            />
-            <span v-else class="num-value" style="width:64px;text-align:right;font-size:var(--fs-sm);color:var(--gold);">{{ formatScoreForPanel(row.item.score) }}</span>
-            <span v-if="row.item.batch > 1" style="font-size:var(--fs-xs);color:var(--text-muted);min-width:50px;text-align:left;">/ {{ row.item.batch.toLocaleString() }}</span>
-          </div>
-          <div class="score-derived-divider">{{ t('scoreReadonlyTitle') }}</div>
-          <div v-for="row in readonlyScoreRows" :key="row.key" class="score-derived-block">
-            <div
-              class="score-derived-row"
-              :class="{ 'score-derived-row-clickable': hasScoreDetails(row) }"
-              :role="hasScoreDetails(row) ? 'button' : undefined"
-              :tabindex="hasScoreDetails(row) ? 0 : undefined"
-              @click="toggleScoreDetail(row)"
-              @keydown.enter.prevent="toggleScoreDetail(row)"
-              @keydown.space.prevent="toggleScoreDetail(row)"
-            >
-              <img
-                :src="`${baseUrl}images/items/Item_${String(row.iconId).padStart(4,'0')}.png`"
-                style="width:24px;height:24px;flex-shrink:0;"
-                @error="e => e.target.style.display='none'"
-              />
-              <span class="score-derived-name" :title="itemDisplayName(row)">{{ itemDisplayName(row) }}</span>
-              <span class="num-value score-derived-value">{{ formatScoreForPanel(row.score) }}</span>
-              <small>{{ scoreReasonText(row) }}</small>
-              <span v-if="hasScoreDetails(row)" class="score-detail-toggle">{{ isScoreDetailExpanded(row) ? '▲' : '▼' }}</span>
-            </div>
-            <div v-if="isScoreDetailExpanded(row)" class="score-detail-list">
-              <div v-for="(detail, idx) in row.detailRows" :key="idx" class="score-detail-row">
-                <span class="score-detail-name" :title="scoreDetailName(detail)">{{ scoreDetailLabel(detail) }}</span>
-                <span class="score-detail-value">{{ formatScoreForPanel(detail.value) }}</span>
-                <span class="score-detail-share">{{ formatScoreShare(detail.share) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ItemScorePanel
+      v-model:show-scores="showScores"
+      desc-key="packScoreDesc"
+      :editable-score-rows="editableScoreRows"
+      :readonly-score-rows="readonlyScoreRows"
+      :base-url="baseUrl"
+      :item-display-name="itemDisplayName"
+      :format-score-for-panel="formatScoreForPanel"
+      :score-reason-text="scoreReasonText"
+      :score-detail-name="scoreDetailName"
+      :score-detail-label="scoreDetailLabel"
+      :format-score-share="formatScoreShare"
+      :has-score-details="hasScoreDetails"
+      :is-score-detail-expanded="isScoreDetailExpanded"
+      :is-locked="isLocked"
+      @toggle-score-detail="toggleScoreDetail"
+      @reset-scores="resetEditableScores"
+    />
 
     <!-- Right Panel: Results Table -->
     <div class="flex-col gap-12" style="min-width:0;">
@@ -263,6 +218,7 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ItemScorePanel from '../components/ItemScorePanel.vue'
 
 const packsRaw = ref([])
 onMounted(async () => {
@@ -272,9 +228,8 @@ onMounted(async () => {
     console.error('Failed to fetch allPacks.json', e)
   }
 })
-import { calculatePackCE, normalizeScores, getItemInfo, getBaseItemKey } from '../engine/packCalc.js'
-import { buildDerivedScoreState } from '../engine/derivedScores.js'
-import { editableScores } from '../store/itemScores.js'
+import { calculatePackCE, getItemInfo, getBaseItemKey } from '../engine/packCalc.js'
+import { useItemScores } from '../composables/useItemScores.js'
 
 const showScores = ref(true)
 const { t, locale } = useI18n()
@@ -285,6 +240,10 @@ const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', 'en': 'nameEn', 'j
 function itemDisplayName(s) {
   const field = localeNameMap[locale.value] || 'nameZh'
   return s[field] || s.name || s.ItemName || ''
+}
+
+function itemLocaleField() {
+  return localeNameMap[locale.value] || 'nameZh'
 }
 
 function cleanItemName(name) {
@@ -345,16 +304,21 @@ function getCeColor(ce) {
   return '#e74c3c' // Red
 }
 
-// --- Scores (shared) ---
-// editableScores is now imported from store/itemScores.js
-const baseScores = computed(() => normalizeScores(editableScores))
-const derivedScoreState = computed(() => buildDerivedScoreState(baseScores.value))
-const normalizedScores = computed(() => derivedScoreState.value.scores)
-const readonlyScoreRows = computed(() => derivedScoreState.value.readonlyRows)
-const editableScoreRows = computed(() => Object.entries(editableScores)
-  .filter(([key, score]) => score.isBase && !isReadonlyScore(key))
-  .map(([key, item]) => ({ key, item })))
-const expandedScoreDetails = reactive(new Set())
+const {
+  normalizedScores,
+  readonlyScoreRows,
+  editableScoreRows,
+  isLocked,
+  hasScoreDetails,
+  toggleScoreDetail,
+  isScoreDetailExpanded,
+  formatScoreForPanel,
+  scoreReasonText,
+  scoreDetailName,
+  scoreDetailLabel,
+  formatScoreShare,
+  resetEditableScores,
+} = useItemScores({ t, itemDisplayName, itemLocaleField })
 
 // --- Filters ---
 const filter = reactive({
@@ -496,49 +460,6 @@ function toggleExpand(i) {
   else expanded.add(i)
 }
 
-const LOCKED_SCORES = { '[2,1]': true }
-function isLocked(key) { return !!LOCKED_SCORES[key] }
-function isReadonlyScore(key) {
-  return key === '[1,1]' || key === '[13,1]'
-}
-function hasScoreDetails(row) {
-  return Array.isArray(row.detailRows) && row.detailRows.length > 0
-}
-function toggleScoreDetail(row) {
-  if (!hasScoreDetails(row)) return
-  if (expandedScoreDetails.has(row.key)) expandedScoreDetails.delete(row.key)
-  else expandedScoreDetails.add(row.key)
-}
-function isScoreDetailExpanded(row) {
-  return hasScoreDetails(row) && expandedScoreDetails.has(row.key)
-}
-function formatScoreForPanel(value) {
-  const numeric = Number(value) || 0
-  if (Math.abs(numeric) > 0 && Math.abs(numeric) < 10) return numeric.toFixed(2)
-  return Math.round(numeric).toLocaleString()
-}
-function scoreReasonText(row) {
-  return row.reasonKey ? t(row.reasonKey, row.reasonParams || {}) : row.reason
-}
-function scoreDetailName(detail) {
-  const field = localeNameMap[locale.value] || 'nameZh'
-  if (detail.kind === 'ratio') {
-    const sourceField = `source${field.charAt(0).toUpperCase()}${field.slice(1)}`
-    return detail[sourceField] || detail.sourceNameZh || detail.sourceName || itemDisplayName(detail)
-  }
-  return itemDisplayName(detail) || `T${detail.itemType}I${detail.itemId}`
-}
-function scoreDetailLabel(detail) {
-  const name = scoreDetailName(detail)
-  if (detail.kind === 'ratio') return `${name} × 1/2`
-  const quantity = Number(detail.quantity || 0).toLocaleString()
-  const rate = `${((Number(detail.rate) || 0) * 100).toFixed(1)}%`
-  return `${name} ×${quantity} · ${rate}`
-}
-function formatScoreShare(share) {
-  return `${((Number(share) || 0) * 100).toFixed(1)}%`
-}
-
 </script>
 
 <style scoped>
@@ -562,93 +483,6 @@ function formatScoreShare(share) {
 .badge-other {
   background-color: #7f8c8d;
   color: white;
-}
-
-.score-derived-divider {
-  margin-top: 6px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--border-subtle);
-  color: var(--gold);
-  font-size: var(--fs-xs);
-}
-
-.score-derived-row {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 64px 16px;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-sm);
-}
-
-.score-derived-row-clickable {
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.score-derived-row-clickable:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.score-derived-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.score-derived-value {
-  text-align: right;
-  color: var(--gold);
-  font-size: var(--fs-sm);
-}
-
-.score-derived-row small {
-  grid-column: 2 / 4;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-  line-height: 1.25;
-}
-
-.score-detail-toggle {
-  grid-column: 4;
-  grid-row: 1 / span 2;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-  text-align: right;
-}
-
-.score-detail-list {
-  margin: 4px 0 4px 32px;
-  padding: 6px 0 6px 8px;
-  border-left: 1px solid var(--border-subtle);
-  display: grid;
-  gap: 4px;
-}
-
-.score-detail-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 58px 44px;
-  gap: 6px;
-  align-items: center;
-  font-size: var(--fs-xs);
-}
-
-.score-detail-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-muted);
-}
-
-.score-detail-value {
-  text-align: right;
-  color: var(--text-primary);
-}
-
-.score-detail-share {
-  text-align: right;
-  color: var(--gold);
 }
 
 </style>

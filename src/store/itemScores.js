@@ -20,6 +20,14 @@ if (stored) {
 
 export const editableScores = reactive(initialScores)
 
+export function resetEditableScores() {
+  for (const key in scoresRaw) {
+    if (editableScores[key]) {
+      editableScores[key].score = scoresRaw[key].score
+    }
+  }
+}
+
 watch(editableScores, (v) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(v))
 }, { deep: true })

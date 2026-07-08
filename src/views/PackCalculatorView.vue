@@ -12,8 +12,9 @@
   </div>
 
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
-    <PackScorePanel
+    <ItemScorePanel
       v-model:show-scores="showScores"
+      desc-key="packScoreDesc"
       :editable-score-rows="editableScoreRows"
       :readonly-score-rows="readonlyScoreRows"
       :base-url="baseUrl"
@@ -27,6 +28,7 @@
       :is-score-detail-expanded="isScoreDetailExpanded"
       :is-locked="isLocked"
       @toggle-score-detail="toggleScoreDetail"
+      @reset-scores="resetEditableScores"
     />
 
     <!-- Right Panel: Results Table -->
@@ -127,13 +129,13 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import PackScorePanel from '../components/pack/PackScorePanel.vue'
+import ItemScorePanel from '../components/ItemScorePanel.vue'
 import PackQueryResults from '../components/pack/PackQueryResults.vue'
 import PackPlannerControls from '../components/pack/PackPlannerControls.vue'
 import PackPlannerSummary from '../components/pack/PackPlannerSummary.vue'
 import PackPlannerStepTable from '../components/pack/PackPlannerStepTable.vue'
 import { usePackDisplay } from '../composables/pack/usePackDisplay.js'
-import { usePackScores } from '../composables/pack/usePackScores.js'
+import { useItemScores } from '../composables/useItemScores.js'
 import { usePackQuery } from '../composables/pack/usePackQuery.js'
 import { usePackPlannerView } from '../composables/pack/usePackPlannerView.js'
 
@@ -184,7 +186,8 @@ const {
   scoreDetailName,
   scoreDetailLabel,
   formatScoreShare,
-} = usePackScores({ t, itemDisplayName, itemLocaleField })
+  resetEditableScores,
+} = useItemScores({ t, itemDisplayName, itemLocaleField })
 
 const {
   filter,
