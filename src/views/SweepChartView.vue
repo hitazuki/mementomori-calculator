@@ -231,6 +231,8 @@ const fmt = (v, isBonus) => {
   return v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
 }
 
+const formatSweepX = value => currentSweepVar.value?.isBonus ? `${value}%` : fmt(Number(value))
+
 const getMetrics = () => ({
   dmgRatePct: { label: t('overallPenRate'), fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
   finalDmg:   { label: t('finalDmg'),       fmt: v=>fmt(v),                 unit:''  },
@@ -262,10 +264,9 @@ const sweepInsight = computed(() => {
   }))
   const max = points.reduce((best, point) => point.y > best.y ? point : best, points[0] || { x: 0, y: 0 })
   const min = points.reduce((best, point) => point.y < best.y ? point : best, points[0] || { x: 0, y: 0 })
-  const formatX = value => currentSweepVar.value?.isBonus ? `${value}%` : fmt(value)
   return {
-    max: { x: formatX(max.x), y: metric.fmt(max.y) },
-    min: { x: formatX(min.x), y: metric.fmt(min.y) },
+    max: { x: formatSweepX(max.x), y: metric.fmt(max.y) },
+    min: { x: formatSweepX(min.x), y: metric.fmt(min.y) },
   }
 })
 
@@ -301,14 +302,15 @@ const chartOption = computed(() => {
       ...MORI_THEME.tooltip, 
       trigger: 'axis', 
       formatter: p => {
-        let s = `<b style="color:var(--gold)">${varLabel}: ${currentSweepVar.value?.isBonus ? p[0].axisValue : fmt(p[0].axisValue)}</b><br>`
+        const rawX = xData[p[0]?.dataIndex] ?? p[0]?.axisValue
+        let s = `<b style="color:var(--gold)">${varLabel}: ${formatSweepX(rawX)}</b><br>`
         p.forEach(pp => s += `<span style="color:${pp.color}">● ${pp.seriesName}</span>: <b>${metric.fmt(pp.value)}</b><br>`)
         return s
       }
     },
     xAxis: { 
       type: 'category', 
-      data: xData.map(v=>currentSweepVar.value?.isBonus ? v + '%' : fmt(v)), 
+      data: xData.map(formatSweepX), 
       axisLabel: MORI_THEME.axisLabel, 
       axisLine: MORI_THEME.axisLine, 
       splitLine:{show:true,lineStyle:{color:isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}} 
