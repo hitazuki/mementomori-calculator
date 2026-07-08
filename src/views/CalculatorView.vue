@@ -330,6 +330,8 @@
             <li><code>DEF_eff</code> / <code>PM_DEF_eff</code> : {{ $t('effDef') }} / {{ $t('effPmDef') }}</li>
             <li><code>R_def</code> / <code>R_pmdef</code> : {{ $t('formulaModalRdefDesc') }}</li>
             <li><code>R_total</code> : {{ $t('formulaModalRtotalDesc') }}</li>
+            <li><code>EHP_def</code> / <code>EHP_pmdef</code> : {{ $t('formulaModalEhpRouteDesc') }}</li>
+            <li><code>EHP_total</code> : {{ $t('formulaModalEhpTotalDesc') }}</li>
             <li><code>D_final</code> : {{ $t('finalDmg') }}</li>
           </ul>
           
@@ -348,6 +350,12 @@
           <h3>{{ $t('formulaModalH5') }}</h3>
           <code class="formula-highlight">R_total = R_def × R_pmdef</code>
           <code class="formula-highlight">D_final = D_raw × B_dmg × C_dmg × R_total</code>
+
+          <h3>{{ $t('formulaModalH6') }}</h3>
+          <code class="formula-highlight">EHP_def = 1 / R_def = 1 + (DEF / C_def) / (PEN / C_pen + 1)</code>
+          <code class="formula-highlight">EHP_pmdef = 1 / R_pmdef = 1 + (PM_DEF / C_pmdef) / (PM_PEN / C_pmpen + 1)</code>
+          <code class="formula-highlight">EHP_total = 1 / R_total = EHP_def × EHP_pmdef</code>
+          <p style="margin-top:8px; font-size: var(--fs-sm); color:var(--text-muted);">{{ $t('formulaModalEhpNote') }}</p>
           
           <p style="margin-top:16px; font-size: var(--fs-sm); color:var(--text-muted);">{{ $t('formulaModalNote') }}</p>
         </div>

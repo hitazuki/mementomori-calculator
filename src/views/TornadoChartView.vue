@@ -191,6 +191,7 @@
           <div style="font-size:var(--fs-sm)">
             {{ $t('baseDmgDisplay') }} <b style="color:var(--gold);font-size:18px">{{ fmt(baseResult.finalDmg) }}</b>
             <span style="color:var(--text-muted);margin-left:8px">{{ $t('basePassRateDisplay') }} {{ baseResult.dmgRatePct.toFixed(1) }}%</span>
+            <span style="color:var(--text-muted);margin-left:8px">{{ $t('baseEhpDisplay') }} {{ baseResult.ehpMultiplier.toFixed(2) }}x</span>
           </div>
           <button class="btn btn-ghost btn-sm" @click="downloadChart">⬇ PNG</button>
         </div>

@@ -46,6 +46,7 @@ export default {
   formulaModalH3: "3. 防御路计算",
   formulaModalH4: "4. 物魔路计算",
   formulaModalH5: "5. 最终伤害",
+  formulaModalH6: "6. 等效生命倍率 (防守视角)",
   formulaModalNote:
     "注：降防/加防（防御加成%）会直接作用于目标的面板防御力，在此基础上再进行贯通计算。公式结构来源于 doc/damage/excel_formulas.txt 中的理论拆解。",
   formulaModalTargetPmDef: "目标物魔防御力",
@@ -53,6 +54,10 @@ export default {
   formulaModalBdmgDesc: "最终增伤系数 (包含增伤与克制)",
   formulaModalRdefDesc: "防御路伤害通过率 / 物魔路伤害通过率",
   formulaModalRtotalDesc: "综合伤害通过率",
+  formulaModalEhpRouteDesc: "单路等效生命倍率",
+  formulaModalEhpTotalDesc: "综合等效生命倍率",
+  formulaModalEhpNote:
+    "EHP倍率是伤害通过率的倒数，仅表示防守方承伤能力的倍率，不包含真实生命值。上式中的DEF与PM_DEF应理解为已应用防御加成后的面板防御值。",
 
   sweepTitle: "📈 单变量曲线扫描",
   sweepDesc:
@@ -99,8 +104,11 @@ export default {
   cPmDefConst: "C_pmdef 定数",
 
   // Stats
+  metricGroupAttack: "攻击方指标",
+  metricGroupDefense: "防守方指标",
   finalDmg: "最终伤害",
   overallPenRate: "综合穿透率 (伤害通过率)",
+  ehpMultiplier: "等效生命倍率",
   defMitRate: "防御路减伤率",
   pmMitRate: "物魔路减伤率",
   rawDmg: "技能原始伤害",
@@ -233,6 +241,7 @@ export default {
   increment: "增量",
   baseDmgDisplay: "当前基准伤害:",
   basePassRateDisplay: "基准通过率:",
+  baseEhpDisplay: "基准EHP:",
   tornadoInstTitle: "💡 龙卷风图说明",
   tornadoInstDesc:
     "龙卷风图用于**横向对比互斥的升级方案**。系统会分别将左侧各项“增量”**单独**叠加到基础面板上计算收益。<br/>排在最上方且高亮为金黄色的柱子，代表在当前环境下面板收益率（提升百分比）最高的最优解。",

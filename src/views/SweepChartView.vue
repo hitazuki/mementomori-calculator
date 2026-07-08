@@ -6,8 +6,10 @@
   <div class="grid-sidebar-right chart-page-shell animate-fadeup" style="height:calc(100vh - 110px)">
     <div class="card chart-main-card" style="height:100%;display:flex;flex-direction:column">
       <div class="chart-toolbar">
-        <select class="form-select" v-model="ss.metric" style="width:160px;margin:0">
-          <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
+        <select class="form-select" v-model="ss.metric" style="width:180px;margin:0">
+          <optgroup v-for="group in metricGroups" :key="group.key" :label="group.label">
+            <option v-for="metric in group.metrics" :key="metric.key" :value="metric.key">{{ metric.label }}</option>
+          </optgroup>
         </select>
         <button class="btn btn-ghost btn-sm" @click="downloadChart">⬇ PNG</button>
       </div>
@@ -214,6 +216,7 @@ import { buildSweepData } from '../engine/damageCalc.js'
 import { getSweepVariables } from '../constants/presets.js'
 import { getMoriTheme, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
+import { getDamageMetrics, getDamageMetricGroups } from '../utils/damageMetrics.js'
 import { useCalcStore } from '../store/calculator.js'
 import { useDamageParams } from '../composables/useDamageParams.js'
 
@@ -233,12 +236,8 @@ const fmt = (v, isBonus) => {
 
 const formatSweepX = value => currentSweepVar.value?.isBonus ? `${value}%` : fmt(Number(value))
 
-const getMetrics = () => ({
-  dmgRatePct: { label: t('overallPenRate'), fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
-  finalDmg:   { label: t('finalDmg'),       fmt: v=>fmt(v),                 unit:''  },
-  defMitPct:  { label: t('defMitRate'),     fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
-  pmMitPct:   { label: t('pmMitRate'),      fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
-})
+const metrics = computed(() => getDamageMetrics(t, fmt))
+const metricGroups = computed(() => getDamageMetricGroups(t, metrics.value))
 
 const ss = reactive({
   sweepKey: 'pen',
@@ -257,7 +256,7 @@ const sweepSeries = computed(() => buildSweepData({
 }))
 
 const sweepInsight = computed(() => {
-  const metric = getMetrics()[ss.metric]
+  const metric = metrics.value[ss.metric]
   const points = sweepSeries.value.xData.map((x, index) => ({
     x,
     y: sweepSeries.value.yData[index]?.[ss.metric] ?? 0
@@ -289,10 +288,10 @@ const {
 const chartOption = computed(() => {
   const { xData, yData } = sweepSeries.value
   const varLabel = currentSweepVarLabel.value
-  const metric = getMetrics()[ss.metric]
+  const metric = metrics.value[ss.metric]
 
   const seriesData = yData.map(r => r[ss.metric])
-  const yAxisMax = ss.metric === 'finalDmg' ? null : 100
+  const yAxisMax = metric.fixedPercentScale ? 100 : null
   const isDark = currentTheme.value === 'dark'
   const MORI_THEME = getMoriTheme(isDark)
 
@@ -303,8 +302,11 @@ const chartOption = computed(() => {
       trigger: 'axis', 
       formatter: p => {
         const rawX = xData[p[0]?.dataIndex] ?? p[0]?.axisValue
+        const row = yData[p[0]?.dataIndex]
         let s = `<b style="color:var(--gold)">${varLabel}: ${formatSweepX(rawX)}</b><br>`
         p.forEach(pp => s += `<span style="color:${pp.color}">● ${pp.seriesName}</span>: <b>${metric.fmt(pp.value)}</b><br>`)
+        if (row && ss.metric !== 'dmgRatePct') s += `${t('overallPenRate')}: <b>${metrics.value.dmgRatePct.fmt(row.dmgRatePct)}</b><br>`
+        if (row && ss.metric !== 'ehpMultiplier') s += `${t('ehpMultiplier')}: <b>${metrics.value.ehpMultiplier.fmt(row.ehpMultiplier)}</b><br>`
         return s
       }
     },
@@ -319,7 +321,7 @@ const chartOption = computed(() => {
       type: 'value', 
       min: ss.metric === 'finalDmg' ? null : 'dataMin', 
       max: yAxisMax, 
-      axisLabel: { ...MORI_THEME.axisLabel, formatter: `{value}${metric.unit}` }, 
+      axisLabel: { ...MORI_THEME.axisLabel, formatter: value => metric.fmt(value) }, 
       splitLine: MORI_THEME.splitLine 
     },
     series: [

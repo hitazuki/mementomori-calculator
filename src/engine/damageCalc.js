@@ -57,6 +57,7 @@ export function calcDamage({
 
   // 综合防御通过率
   const defMitMultiplier = drDef * drPm
+  const toEhpMultiplier = rate => rate > 0 ? +(1 / rate).toFixed(4) : Infinity
 
   // 计算最终伤害
   const actualDmgBonus = dmgBonus + (eleAdvantage ? 0.25 : 0)
@@ -78,6 +79,11 @@ export function calcDamage({
     defMitPct:   +((1 - drDef) * 100).toFixed(2),
     pmMitPct:    +((1 - drPm) * 100).toFixed(2),
     totalMitPct: +((1 - defMitMultiplier) * 100).toFixed(2),
+
+    // 等效生命倍率（防守视角）
+    ehpMultiplier: toEhpMultiplier(defMitMultiplier),
+    defEhpMultiplier: toEhpMultiplier(drDef),
+    pmEhpMultiplier: toEhpMultiplier(drPm),
 
     // 等效防御
     effectiveDef:   Math.round(actualDef * finalCPen / (pen + finalCPen)),
@@ -146,7 +152,7 @@ export function buildDynamicHeatmapData({ xKey, yKey, zKey = 'dmgRatePct', xMin,
       params[yKey] = yVal
 
       const result = calcDamage(params)
-      data.push([i, j, result[zKey]])
+      data.push([i, j, result[zKey], result])
     }
   }
 

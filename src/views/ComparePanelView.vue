@@ -104,8 +104,10 @@
             <button class="btn btn-sm" :class="cs.chartMode==='radar'?'btn-primary':'btn-ghost'" @click="cs.chartMode='radar'">{{ $t('ui_radar') }}</button>
             <button class="btn btn-sm" :class="cs.chartMode==='table'?'btn-primary':'btn-ghost'" @click="cs.chartMode='table'">{{ $t('ui_table') }}</button>
           </div>
-          <select class="form-select" v-model="cs.metric" style="width:160px">
-            <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
+          <select class="form-select" v-model="cs.metric" style="width:180px">
+            <optgroup v-for="group in metricGroups" :key="group.key" :label="group.label">
+              <option v-for="metric in group.metrics" :key="metric.key" :value="metric.key">{{ metric.label }}</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -126,7 +128,7 @@
             <tbody>
               <tr v-for="r in results" :key="r.id">
                 <td :style="{color: r.color}">{{ r.name }}</td>
-                <td v-for="(br, bi) in r.benchResults" :key="bi">{{ getMetrics()[cs.metric].fmt(br[cs.metric]) }}</td>
+                <td v-for="(br, bi) in r.benchResults" :key="bi">{{ metrics[cs.metric].fmt(br[cs.metric]) }}</td>
               </tr>
             </tbody>
           </table>
@@ -141,7 +143,7 @@
         >
           <div class="mobile-compare-head">
             <div class="mobile-compare-title" :style="{ color: r.color }">{{ r.name }}</div>
-            <div class="mobile-compare-metric">{{ getMetrics()[cs.metric].label }}</div>
+            <div class="mobile-compare-metric">{{ metrics[cs.metric].label }}</div>
           </div>
           <div class="mobile-compare-grid">
             <div
@@ -150,7 +152,7 @@
               class="mobile-compare-row"
             >
               <span>{{ cs.benchmarks[bi]?.label }}</span>
-              <b>{{ getMetrics()[cs.metric].fmt(br[cs.metric]) }}</b>
+              <b>{{ metrics[cs.metric].fmt(br[cs.metric]) }}</b>
             </div>
           </div>
         </article>
@@ -241,6 +243,7 @@ import { getDefBenchmarks } from '../constants/levelTable.js'
 import { getCompareBuildsDefault } from '../constants/presets.js'
 import { getMoriTheme, LINE_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
+import { getDamageMetrics, getDamageMetricGroups } from '../utils/damageMetrics.js'
 import { useCalcStore } from '../store/calculator.js'
 
 use([CanvasRenderer, BarChart, RadarChart, TooltipComponent, GridComponent, LegendComponent, TitleComponent])
@@ -260,12 +263,8 @@ const DEFAULT_COMMON_PARAMS = {
 
 const clone = value => JSON.parse(JSON.stringify(value))
 
-const getMetrics = () => ({
-  dmgRatePct: { label: t('overallPenRate'), fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
-  finalDmg:   { label: t('finalDmg'),       fmt: v=>fmt(v),                 unit:''  },
-  defMitPct:  { label: t('defMitRate'),     fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
-  pmMitPct:   { label: t('pmMitRate'),      fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
-})
+const metrics = computed(() => getDamageMetrics(t, fmt))
+const metricGroups = computed(() => getDamageMetricGroups(t, metrics.value))
 
 const cs = reactive({
   common: clone(DEFAULT_COMMON_PARAMS),
@@ -377,8 +376,7 @@ const results = computed(() => {
 const chartOption = computed(() => {
   if (cs.chartMode === 'table') return {}
   
-  const METRICS = getMetrics()
-  const metric = METRICS[cs.metric]
+  const metric = metrics.value[cs.metric]
   const isDark = currentTheme.value === 'dark'
   const MORI_THEME = getMoriTheme(isDark)
   
@@ -386,7 +384,7 @@ const chartOption = computed(() => {
     return {
       ...baseChartOption(t('compareTitle') + ' · ' + metric.label, '', isDark),
       xAxis: { type: 'category', data: cs.benchmarks.map(b => b.label), axisLabel: MORI_THEME.axisLabel, axisLine: MORI_THEME.axisLine },
-      yAxis: { type: 'value', axisLabel: { ...MORI_THEME.axisLabel, formatter: v => `${v}${metric.unit}` }, splitLine: MORI_THEME.splitLine },
+      yAxis: { type: 'value', axisLabel: { ...MORI_THEME.axisLabel, formatter: v => metric.fmt(v) }, splitLine: MORI_THEME.splitLine },
       legend: { ...MORI_THEME.legend, bottom: 4, left: 'center', data: results.value.map(r => ({ name: r.name, itemStyle: { color: r.color } })) },
       tooltip: { 
         ...MORI_THEME.tooltip, 
@@ -403,7 +401,7 @@ const chartOption = computed(() => {
         barMaxWidth: 36,
         itemStyle: { color: r.color, borderRadius: [4, 4, 0, 0] },
         label: { show: true, position: 'top', color: r.color, fontFamily: 'JetBrains Mono', fontSize: 10, formatter: p => metric.fmt(p.value) },
-        data: r.benchResults.map(br => +(br[cs.metric]).toFixed(1)),
+        data: r.benchResults.map(br => +(br[cs.metric]).toFixed(metric.chartDigits ?? 1)),
       }))
     }
   } else {
@@ -425,7 +423,7 @@ const chartOption = computed(() => {
         type: 'radar', 
         data: results.value.map(r => ({
           name: r.name, 
-          value: r.benchResults.map(br => +(br[cs.metric]).toFixed(1)),
+          value: r.benchResults.map(br => +(br[cs.metric]).toFixed(metric.chartDigits ?? 1)),
           lineStyle: { color: r.color, width: 2 }, 
           areaStyle: { color: r.color + '22' }, 
           itemStyle: { color: r.color },
@@ -436,11 +434,13 @@ const chartOption = computed(() => {
 })
 
 function formatDelta(delta) {
-  return (delta >= 0 ? '+' : '') + getMetrics()[cs.metric].fmt(delta)
+  return (delta >= 0 ? '+' : '') + metrics.value[cs.metric].fmt(delta)
 }
 
 function getDeltaClass(delta) {
-  return delta > 0 ? 'cell-high' : delta < 0 ? 'cell-low' : ''
+  const metric = metrics.value[cs.metric]
+  const adjusted = metric.higherIsBetter === false ? -delta : delta
+  return adjusted > 0 ? 'cell-high' : adjusted < 0 ? 'cell-low' : ''
 }
 </script>
 

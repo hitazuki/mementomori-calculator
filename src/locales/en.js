@@ -48,6 +48,7 @@ export default {
   formulaModalH3: "3. DEF Layer Calculation",
   formulaModalH4: "4. P/M.DEF Layer Calculation",
   formulaModalH5: "5. Final Damage",
+  formulaModalH6: "6. Effective HP Multiplier (Defender View)",
   formulaModalNote:
     "Note: DEF Down/Up (DEF Bonus %) applies directly to target base DEF before penetration is calculated. Formula architecture is derived from doc/damage/excel_formulas.txt.",
 
@@ -56,6 +57,10 @@ export default {
   formulaModalBdmgDesc: "Final DMG Multiplier (Includes bonus & elemental adv)",
   formulaModalRdefDesc: "DEF Pass Rate / P/M.DEF Pass Rate",
   formulaModalRtotalDesc: "Overall Pass Rate",
+  formulaModalEhpRouteDesc: "Single-layer effective HP multiplier",
+  formulaModalEhpTotalDesc: "Overall effective HP multiplier",
+  formulaModalEhpNote:
+    "EHP multiplier is the reciprocal of damage pass rate. It expresses defender durability as a multiplier and does not include actual HP. DEF and PM_DEF in these formulas should be read as panel defense after DEF bonuses are applied.",
 
   sweepTitle: "📈 Single Variable Curve Sweep",
   sweepDesc:
@@ -102,8 +107,11 @@ export default {
   cPmDefConst: "C_pmdef",
 
   // Stats
+  metricGroupAttack: "Attacker Metrics",
+  metricGroupDefense: "Defender Metrics",
   finalDmg: "Final Damage",
   overallPenRate: "Overall Pass Rate",
+  ehpMultiplier: "Effective HP Multiplier",
   defMitRate: "DEF Mitigation Rate",
   pmMitRate: "P/M.DEF Mitigation Rate",
   rawDmg: "Raw Skill Damage",
@@ -235,6 +243,7 @@ export default {
   increment: "Increment",
   baseDmgDisplay: "Current Base DMG:",
   basePassRateDisplay: "Base Pass Rate:",
+  baseEhpDisplay: "Base EHP:",
   tornadoInstTitle: "💡 Tornado Chart Instructions",
   tornadoInstDesc:
     'Tornado chart is used to **horizontally compare mutually exclusive upgrade plans**. The system calculates the benefits by applying the "increments" on the left **individually** to the base stats.<br/>The top-most golden bar represents the optimal choice with the highest return rate in the current environment.',

@@ -47,6 +47,7 @@ export default {
   formulaModalH3: "3. 防御路の計算",
   formulaModalH4: "4. 物/魔路の計算",
   formulaModalH5: "5. 最終ダメージ",
+  formulaModalH6: "6. 実効HP倍率 (防御側視点)",
   formulaModalNote:
     "注：防御力低下/増加（防御力ボーナス％）は、貫通が計算される前にターゲットの基礎防御力に直接適用されます。数式の構造は doc/damage/excel_formulas.txt の理論的分解に基づいています。",
 
@@ -55,6 +56,10 @@ export default {
   formulaModalBdmgDesc: "最終ダメージ増加係数 (ダメ増と属性相性を含む)",
   formulaModalRdefDesc: "防御路通過率 / 物魔路通過率",
   formulaModalRtotalDesc: "総合ダメージ通過率",
+  formulaModalEhpRouteDesc: "単一路の実効HP倍率",
+  formulaModalEhpTotalDesc: "総合実効HP倍率",
+  formulaModalEhpNote:
+    "EHP倍率はダメージ通過率の逆数で、防御側の耐久力を倍率として表すものであり、実際のHPは含みません。式中のDEFとPM_DEFは、防御ボーナス適用後のパネル防御値として扱います。",
 
   sweepTitle: "📈 単一変数曲線スキャン",
   sweepDesc:
@@ -101,8 +106,11 @@ export default {
   cPmDefConst: "C_pmdef 定数",
 
   // Stats
+  metricGroupAttack: "攻撃側指標",
+  metricGroupDefense: "防御側指標",
   finalDmg: "最終ダメージ",
   overallPenRate: "総合通過率 (ダメージ率)",
+  ehpMultiplier: "実効HP倍率",
   defMitRate: "防御路軽減率",
   pmMitRate: "物魔路軽減率",
   rawDmg: "スキル基礎ダメージ",
@@ -235,6 +243,7 @@ export default {
   increment: "増分",
   baseDmgDisplay: "現在の基準ダメージ:",
   basePassRateDisplay: "基準通過率:",
+  baseEhpDisplay: "基準EHP:",
   tornadoInstTitle: "💡 トルネード図の説明",
   tornadoInstDesc:
     "トルネード図は**排他的なアップグレード案の横並び比較**に使用されます。システムは左側の「増分」を基礎ステータスに**個別**に加算して利益を計算します。<br/>一番上にあり、金色に強調表示されたバーは、現在の環境で最も高い収益率（上昇率）を持つ最適解を表します。",

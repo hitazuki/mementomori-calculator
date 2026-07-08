@@ -8,8 +8,10 @@
       <div class="chart-toolbar">
         <div class="chart-toolbar-main">
           <div class="card-title" style="margin:0">{{ currentYVar?.label }} × {{ currentXVar?.label }}</div>
-          <select class="form-select btn-sm" v-model="hs.metric" style="width:160px;margin:0;">
-            <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
+          <select class="form-select btn-sm" v-model="hs.metric" style="width:180px;margin:0;">
+            <optgroup v-for="group in metricGroups" :key="group.key" :label="group.label">
+              <option v-for="metric in group.metrics" :key="metric.key" :value="metric.key">{{ metric.label }}</option>
+            </optgroup>
           </select>
         </div>
         <button class="btn btn-ghost btn-sm" @click="downloadChart">⬇ PNG</button>
@@ -176,6 +178,7 @@ import VChart from 'vue-echarts'
 import { buildDynamicHeatmapData } from '../engine/damageCalc.js'
 import { getMoriTheme, HEATMAP_COLORS, baseChartOption } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
+import { getDamageMetrics, getDamageMetricGroups } from '../utils/damageMetrics.js'
 import { useCalcStore } from '../store/calculator.js'
 import { useDamageParams } from '../composables/useDamageParams.js'
 
@@ -202,12 +205,8 @@ const fmt = (v, varObj) => {
   return v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}K` : String(Math.round(v))
 }
 
-const getMetrics = () => ({
-  dmgRatePct: { label: t('overallPenRate'), fmt: v=>`${v.toFixed(1)}%`,    unit:'%' },
-  finalDmg:   { label: t('finalDmg'),       fmt: v=>fmt(v),                 unit:''  },
-  defMitPct:  { label: t('defMitRate'),     fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
-  pmMitPct:   { label: t('pmMitRate'),      fmt: v=>`${v?.toFixed(1)}%`,    unit:'%' },
-})
+const metrics = computed(() => getDamageMetrics(t, value => fmt(value)))
+const metricGroups = computed(() => getDamageMetricGroups(t, metrics.value))
 
 const hs = reactive({
   metric: 'dmgRatePct',
@@ -229,7 +228,7 @@ const heatmapSeries = computed(() => buildDynamicHeatmapData({
 }))
 
 const heatmapInsight = computed(() => {
-  const metricObj = getMetrics()[hs.metric]
+  const metricObj = metrics.value[hs.metric]
   const best = heatmapSeries.value.data.reduce((currentBest, point) => {
     return point[2] > currentBest[2] ? point : currentBest
   }, heatmapSeries.value.data[0] || [0, 0, 0])
@@ -266,11 +265,11 @@ const chartOption = computed(() => {
 
   const isDark = currentTheme.value === 'dark'
   const MORI_THEME = getMoriTheme(isDark)
-  const metricObj = getMetrics()[hs.metric]
+  const metricObj = metrics.value[hs.metric]
   const titleText = `${currentYVar.value?.label} × ${currentXVar.value?.label} - ${metricObj.label}`
 
-  const vMin = hs.metric === 'finalDmg' ? zMin : 0
-  const vMax = hs.metric === 'finalDmg' ? zMax : 100
+  const vMin = metricObj.fixedPercentScale ? 0 : zMin
+  const vMax = metricObj.fixedPercentScale ? 100 : zMax
 
   return {
     ...baseChartOption(titleText, '', isDark),
@@ -287,13 +286,17 @@ const chartOption = computed(() => {
         const xVal = xLabels[p.data[0]]
         const yVal = yLabels[p.data[1]]
         const dmg = p.data[2]
+        const row = data.find(point => point[0] === p.data[0] && point[1] === p.data[1])
         
         const xDisp = currentXVar.value?.isBonus ? xVal + '%' : xVal?.toLocaleString()
         const yDisp = currentYVar.value?.isBonus ? yVal + '%' : yVal?.toLocaleString()
 
-        return `<b style="color:var(--purple-light)">${currentYVar.value?.label}: ${yDisp}</b><br>
+        let s = `<b style="color:var(--purple-light)">${currentYVar.value?.label}: ${yDisp}</b><br>
                 <b style="color:var(--gold)">${currentXVar.value?.label}: ${xDisp}</b><br>
                 <b>${metricObj.label}: ${metricObj.fmt(dmg)}</b>`
+        if (row && hs.metric !== 'dmgRatePct') s += `<br>${t('overallPenRate')}: <b>${metrics.value.dmgRatePct.fmt(row[3]?.dmgRatePct)}</b>`
+        if (row && hs.metric !== 'ehpMultiplier') s += `<br>${t('ehpMultiplier')}: <b>${metrics.value.ehpMultiplier.fmt(row[3]?.ehpMultiplier)}</b>`
+        return s
       }
     },
     grid: { top: 72, right: 110, bottom: 60, left: 88 },
@@ -314,7 +317,7 @@ const chartOption = computed(() => {
     visualMap: {
       type: 'continuous', min: vMin, max: vMax, calculable: true,
       orient: 'vertical', right: 8, top: 'middle',
-      text: [hs.metric === 'finalDmg' ? 'MAX' : '100%', hs.metric === 'finalDmg' ? 'MIN' : '0%'], textStyle: { color: MORI_THEME.axisLabel.color, fontSize: 10 },
+      text: [metricObj.fixedPercentScale ? '100%' : 'MAX', metricObj.fixedPercentScale ? '0%' : 'MIN'], textStyle: { color: MORI_THEME.axisLabel.color, fontSize: 10 },
       inRange: { color: HEATMAP_COLORS.map(c => c[1]) },
     },
     series: [{ 
@@ -325,7 +328,7 @@ const chartOption = computed(() => {
         show: hs.xSteps <= 16 && hs.ySteps <= 16, 
         fontSize: 9, 
         color: MORI_THEME.textStyle.color, 
-        formatter: p => hs.metric === 'finalDmg' ? fmt(p.data[2]) : `${p.data[2]}` 
+        formatter: p => metricObj.fmt(p.data[2]) 
       },
       emphasis: { 
         itemStyle: { borderWidth: 2, borderColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', shadowBlur: 8, shadowColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }

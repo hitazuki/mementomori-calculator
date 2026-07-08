@@ -47,6 +47,7 @@ export default {
   formulaModalH3: "3. 방어 경로 계산",
   formulaModalH4: "4. 물/마방 경로 계산",
   formulaModalH5: "5. 최종 데미지",
+  formulaModalH6: "6. 유효 HP 배율 (방어자 관점)",
   formulaModalNote:
     "참고: 방어력 감소/증가(방어력 보너스%)는 관통이 계산되기 전에 대상의 기본 방어력에 직접 적용됩니다. 공식 구조는 doc/damage/excel_formulas.txt 의 이론적 분석에서 파생되었습니다.",
 
@@ -55,6 +56,10 @@ export default {
   formulaModalBdmgDesc: "최종 데미지 증가 계수 (뎀증 및 속성 포함)",
   formulaModalRdefDesc: "방어 경로 통과율 / 물/마방 경로 통과율",
   formulaModalRtotalDesc: "종합 데미지 통과율",
+  formulaModalEhpRouteDesc: "단일 경로 유효 HP 배율",
+  formulaModalEhpTotalDesc: "종합 유효 HP 배율",
+  formulaModalEhpNote:
+    "EHP 배율은 데미지 통과율의 역수로, 방어자의 내구력을 배율로 나타내며 실제 HP는 포함하지 않습니다. 식의 DEF와 PM_DEF는 방어 보너스가 적용된 후의 패널 방어력으로 해석합니다.",
 
   sweepTitle: "📈 단일 변수 곡선 스캔",
   sweepDesc:
@@ -101,8 +106,11 @@ export default {
   cPmDefConst: "C_pmdef 상수",
 
   // Stats
+  metricGroupAttack: "공격자 지표",
+  metricGroupDefense: "방어자 지표",
   finalDmg: "최종 데미지",
   overallPenRate: "종합 통과율 (데미지율)",
+  ehpMultiplier: "유효 HP 배율",
   defMitRate: "방어력 경감률",
   pmMitRate: "물/마방 경감률",
   rawDmg: "스킬 기본 데미지",
@@ -235,6 +243,7 @@ export default {
   increment: "증분",
   baseDmgDisplay: "현재 기준 데미지:",
   basePassRateDisplay: "기준 통과율:",
+  baseEhpDisplay: "기준 EHP:",
   tornadoInstTitle: "💡 토네이도 차트 설명",
   tornadoInstDesc:
     '토네이도 차트는 **배타적인 업그레이드 옵션들을 비교**하는 데 사용됩니다. 시스템은 왼쪽의 "증분"을 기본 스탯에 **개별적으로** 적용하여 이익을 계산합니다.<br/>가장 상단에 금색으로 강조된 막대는 현재 환경에서 가장 높은 수익률(증가율)을 가진 최적의 선택을 나타냅니다.',

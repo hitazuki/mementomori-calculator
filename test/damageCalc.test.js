@@ -41,6 +41,9 @@ test('calcDamage combines attack, bonuses, crit, and both defense paths', () => 
   assert.equal(result.rawDmg, Math.round(rawDmg))
   assert.equal(result.finalDmg, Math.round(expectedFinal))
   assert.equal(result.dmgRatePct, +((drDef * drPm) * 100).toFixed(2))
+  assert.equal(result.ehpMultiplier, +(1 / (drDef * drPm)).toFixed(4))
+  assert.equal(result.defEhpMultiplier, +(1 / drDef).toFixed(4))
+  assert.equal(result.pmEhpMultiplier, +(1 / drPm).toFixed(4))
 })
 
 test('buildSweepData refreshes level-derived constants during scans', () => {
