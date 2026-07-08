@@ -152,14 +152,14 @@ export function buildDynamicHeatmapData({ xKey, yKey, zKey = 'dmgRatePct', xMin,
       params[yKey] = yVal
 
       const result = calcDamage(params)
-      data.push([i, j, result[zKey], result])
+      data.push({ value: [i, j, result[zKey]], result })
     }
   }
 
   let zMin = Infinity, zMax = -Infinity
   for (let i = 0; i < data.length; i++) {
-    if (data[i][2] < zMin) zMin = data[i][2]
-    if (data[i][2] > zMax) zMax = data[i][2]
+    if (data[i].value[2] < zMin) zMin = data[i].value[2]
+    if (data[i].value[2] > zMax) zMax = data[i].value[2]
   }
 
   const formattedXLabels = xLabels.map(v => formatLabel(xKey, v))

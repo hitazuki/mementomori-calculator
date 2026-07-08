@@ -230,14 +230,14 @@ const heatmapSeries = computed(() => buildDynamicHeatmapData({
 const heatmapInsight = computed(() => {
   const metricObj = metrics.value[hs.metric]
   const best = heatmapSeries.value.data.reduce((currentBest, point) => {
-    return point[2] > currentBest[2] ? point : currentBest
-  }, heatmapSeries.value.data[0] || [0, 0, 0])
-  const xVal = heatmapSeries.value.xLabels[best[0]]
-  const yVal = heatmapSeries.value.yLabels[best[1]]
+    return point.value[2] > currentBest.value[2] ? point : currentBest
+  }, heatmapSeries.value.data[0] || { value: [0, 0, 0] })
+  const xVal = heatmapSeries.value.xLabels[best.value[0]]
+  const yVal = heatmapSeries.value.yLabels[best.value[1]]
   return {
     x: currentXVar.value?.isBonus ? `${xVal}%` : xVal?.toLocaleString(),
     y: currentYVar.value?.isBonus ? `${yVal}%` : yVal?.toLocaleString(),
-    value: metricObj.fmt(best[2] || 0),
+    value: metricObj.fmt(best.value[2] || 0),
   }
 })
 
@@ -283,19 +283,19 @@ const chartOption = computed(() => {
     tooltip: { 
       ...MORI_THEME.tooltip, 
       formatter: p => {
-        const xVal = xLabels[p.data[0]]
-        const yVal = yLabels[p.data[1]]
-        const dmg = p.data[2]
-        const row = data.find(point => point[0] === p.data[0] && point[1] === p.data[1])
+        const [xIndex, yIndex, metricValue] = p.data.value
+        const xVal = xLabels[xIndex]
+        const yVal = yLabels[yIndex]
+        const row = p.data.result
         
         const xDisp = currentXVar.value?.isBonus ? xVal + '%' : xVal?.toLocaleString()
         const yDisp = currentYVar.value?.isBonus ? yVal + '%' : yVal?.toLocaleString()
 
         let s = `<b style="color:var(--purple-light)">${currentYVar.value?.label}: ${yDisp}</b><br>
                 <b style="color:var(--gold)">${currentXVar.value?.label}: ${xDisp}</b><br>
-                <b>${metricObj.label}: ${metricObj.fmt(dmg)}</b>`
-        if (row && hs.metric !== 'dmgRatePct') s += `<br>${t('overallPenRate')}: <b>${metrics.value.dmgRatePct.fmt(row[3]?.dmgRatePct)}</b>`
-        if (row && hs.metric !== 'ehpMultiplier') s += `<br>${t('ehpMultiplier')}: <b>${metrics.value.ehpMultiplier.fmt(row[3]?.ehpMultiplier)}</b>`
+                <b>${metricObj.label}: ${metricObj.fmt(metricValue)}</b>`
+        if (row && hs.metric !== 'dmgRatePct') s += `<br>${t('overallPenRate')}: <b>${metrics.value.dmgRatePct.fmt(row.dmgRatePct)}</b>`
+        if (row && hs.metric !== 'ehpMultiplier') s += `<br>${t('ehpMultiplier')}: <b>${metrics.value.ehpMultiplier.fmt(row.ehpMultiplier)}</b>`
         return s
       }
     },
@@ -316,6 +316,7 @@ const chartOption = computed(() => {
     },
     visualMap: {
       type: 'continuous', min: vMin, max: vMax, calculable: true,
+      dimension: 2,
       orient: 'vertical', right: 8, top: 'middle',
       text: [metricObj.fixedPercentScale ? '100%' : 'MAX', metricObj.fixedPercentScale ? '0%' : 'MIN'], textStyle: { color: MORI_THEME.axisLabel.color, fontSize: 10 },
       inRange: { color: HEATMAP_COLORS.map(c => c[1]) },
@@ -328,7 +329,7 @@ const chartOption = computed(() => {
         show: hs.xSteps <= 16 && hs.ySteps <= 16, 
         fontSize: 9, 
         color: MORI_THEME.textStyle.color, 
-        formatter: p => metricObj.fmt(p.data[2]) 
+        formatter: p => metricObj.fmt(p.data.value[2]) 
       },
       emphasis: { 
         itemStyle: { borderWidth: 2, borderColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', shadowBlur: 8, shadowColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-import { calcDamage, calcDamageRate, buildSweepData } from '../src/engine/damageCalc.js'
+import { calcDamage, calcDamageRate, buildDynamicHeatmapData, buildSweepData } from '../src/engine/damageCalc.js'
 
 test('calcDamageRate follows the two-step effective defense formula', () => {
   const def = 5_000_000
@@ -69,4 +69,35 @@ test('buildSweepData refreshes level-derived constants during scans', () => {
   })
 
   assert.notEqual(yData[0].finalDmg, yData[1].finalDmg)
+})
+
+test('buildDynamicHeatmapData keeps chart values numeric while retaining full results', () => {
+  const { data, zMin, zMax } = buildDynamicHeatmapData({
+    xKey: 'def',
+    yKey: 'pen',
+    zKey: 'ehpMultiplier',
+    xMin: 1_000_000,
+    xMax: 2_000_000,
+    xSteps: 2,
+    yMin: 0,
+    yMax: 1_000,
+    ySteps: 2,
+    baseParams: {
+      baseAtk: 1_000_000,
+      skillCoeff: 5.25,
+      def: 5_000_000,
+      pmDef: 5_000_000,
+      pen: 11_950,
+      pmPen: 31_200,
+      atkLevel: 500,
+      defLevel: 500,
+    },
+  })
+
+  assert.equal(data.length, 4)
+  assert.equal(Array.isArray(data[0].value), true)
+  assert.equal(typeof data[0].value[2], 'number')
+  assert.equal(typeof data[0].result.ehpMultiplier, 'number')
+  assert.equal(zMin, Math.min(...data.map(point => point.value[2])))
+  assert.equal(zMax, Math.max(...data.map(point => point.value[2])))
 })

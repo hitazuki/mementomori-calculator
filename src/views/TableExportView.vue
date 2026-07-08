@@ -161,8 +161,10 @@
               :placeholder="defaultTitle"
               :title="$t('tooltipEditTableTitle')"
             />
-            <select class="form-select export-metric-select" v-model="ts.metric" style="width:140px;padding:4px 8px;min-height:var(--control-h-sm);margin-left:4px;">
-              <option v-for="(v, k) in getMetrics()" :key="k" :value="k">{{ v.label }}</option>
+            <select class="form-select export-metric-select" v-model="ts.metric" style="width:180px;padding:4px 8px;min-height:var(--control-h-sm);margin-left:4px;">
+              <optgroup v-for="group in metricGroups" :key="group.key" :label="group.label">
+                <option v-for="metric in group.metrics" :key="metric.key" :value="metric.key">{{ metric.label }}</option>
+              </optgroup>
             </select>
           </div>
           <div class="export-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -230,17 +232,14 @@ import { useI18n } from 'vue-i18n'
 import BigNumberInput from '../components/BigNumberInput.vue'
 import { buildCrossTable } from '../engine/damageCalc.js'
 import { getTableVariables } from '../constants/presets.js'
+import { getDamageMetrics, getDamageMetricGroups } from '../utils/damageMetrics.js'
 
 const { t } = useI18n()
 
 const TABLE_VARIABLES = computed(() => getTableVariables(t))
 
-const getMetrics = () => ({
-  dmgRatePct: { label: t('overallPenRate'), fmt: v => `${v.toFixed(2)}%` },
-  finalDmg:   { label: t('finalDmg'),   fmt: v => Math.round(v).toLocaleString() },
-  defMitRate: { label: t('defMitRate'), fmt: v => `${v.toFixed(2)}%` },
-  pmMitRate:  { label: t('pmMitRate'), fmt: v => `${v.toFixed(2)}%` },
-})
+const metrics = computed(() => getDamageMetrics(t, value => Math.round(value || 0).toLocaleString()))
+const metricGroups = computed(() => getDamageMetricGroups(t, metrics.value))
 
 const SUMMARY_FIELDS = computed(() => [
   { key: 'damageType', label: t('atkType'), fmt: v => `${t('atkType')} ${v === 'mag' ? t('typeMag') : t('typePhys')}` },
@@ -527,7 +526,7 @@ function getCellStyle(val, isDiff) {
 }
 
 function getCellText(val, isDiff) {
-  const metric = getMetrics()[ts.metric]
+  const metric = metrics.value[ts.metric]
   if (isDiff) {
     if (val === null || val === undefined || !Number.isFinite(val)) return '—'
     return `${val > 0 ? '+' : ''}${val.toFixed(2)}%`
