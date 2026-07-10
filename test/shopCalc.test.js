@@ -9,11 +9,18 @@ import { GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY } from '../src/engine/derivedScor
 const scores = normalizeScores({
   '[1,1]': { name: 'Free Diamond', score: 1, batch: 1, iconId: 1 },
   '[10,1]': { name: 'Gold 1h', score: 5, batch: 1, iconId: 1 },
+  '[10,6]': { name: 'EXP Orb 1h', score: 1, batch: 1, iconId: 15 },
   '[10,11]': { name: 'Kindle 1h', score: 15, batch: 1, iconId: 11 },
+  '[12,1]': { name: 'Upgrade Water', score: 1, batch: 1000, iconId: 17 },
   '[12,2]': { name: 'Panacea', score: 20, batch: 1, iconId: 18 },
   '[18,1]': { name: 'Basic Key', score: 1, batch: 1, iconId: 1 },
   '[18,2]': { name: 'Middle Key', score: 4, batch: 1, iconId: 2 },
   '[18,3]': { name: 'Advanced Key', score: 8, batch: 1, iconId: 3 },
+  '[13,2]': { name: 'Fragment', score: 10, batch: 1000, iconId: 37 },
+  '[13,3]': { name: 'Holy Fragment', score: 100, batch: 1000, iconId: 38 },
+  '[13,4]': { name: 'Rune Ticket', score: 10, batch: 1, iconId: 39 },
+  '[15,1]': { name: 'Dark Perfume', score: 1, batch: 1, iconId: 19 },
+  '[17,5]': { name: 'Mystery Rune Lv 2', score: 8, batch: 1, iconId: 58 },
   '[20,1]': { name: 'Tower Ticket', score: 100, batch: 1, iconId: 1 },
   '[24,1]': { name: 'Tree of Life Dew', score: 400, batch: 1, iconId: 1 },
   [GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY]: {
@@ -166,6 +173,123 @@ test('battle league shop data includes every screenshot slot and Battle Coin met
       ['battle-league-014', 5, 5000, 1],
     ],
   )
+})
+
+test('legend league shop data uses the 1000 Legend Coin CE unit', () => {
+  const [legendLeagueShop] = calculateShopCE(
+    shopItems.filter(shop => shop.shopKey === 'legend-league'),
+    scores,
+  )
+
+  assert.deepEqual(legendLeagueShop.currency, {
+    itemType: 13,
+    itemId: 11,
+    iconId: 46,
+    name: '巅峰竞技币',
+    nameZh: '巅峰竞技币',
+    nameTw: '巔峰競技幣',
+    nameEn: 'Legend Coins',
+    nameJa: 'レジェンドコイン',
+    nameKo: '레전드 코인',
+  })
+  assert.equal(legendLeagueShop.ceCurrencyUnit, 1000)
+  assert.equal(legendLeagueShop.products.length, 9)
+  assert.deepEqual(
+    legendLeagueShop.products.map(product => [product.id, product.reward.quantity, product.cost, product.limitTotal]),
+    [
+      ['legend-league-001', 1, 6000, 1],
+      ['legend-league-002', 1, 6000, 1],
+      ['legend-league-003', 1, 12000, 1],
+      ['legend-league-004', 1, 12000, 1],
+      ['legend-league-005', 1, 24000, 1],
+      ['legend-league-006', 1, 24000, 1],
+      ['legend-league-007', 6000, 30000, 1],
+      ['legend-league-008', 1, 20000, 1],
+      ['legend-league-009', 1, 4000, 1],
+    ],
+  )
+  assert.equal(legendLeagueShop.products[0].ce, 64 / 6000 * 1000)
+  assert.equal(legendLeagueShop.products[6].ce, 2)
+  assert.equal(legendLeagueShop.products[7].ce, 20)
+  assert.equal(legendLeagueShop.products[8].ce, 0.25)
+})
+
+test('guild shop data includes the sold-out Rune Ticket slot', () => {
+  const [guildShop] = calculateShopCE(
+    shopItems.filter(shop => shop.shopKey === 'guild-shop'),
+    scores,
+  )
+
+  assert.deepEqual(guildShop.currency, {
+    itemType: 13,
+    itemId: 12,
+    iconId: 47,
+    name: '公会币',
+    nameZh: '公会币',
+    nameTw: '公會幣',
+    nameEn: 'Guild Coins',
+    nameJa: 'ギルドコイン',
+    nameKo: '길드 코인',
+  })
+  assert.equal(guildShop.ceCurrencyUnit, 1000)
+  assert.equal(guildShop.products.length, 12)
+  assert.deepEqual(
+    guildShop.products.map(product => [product.id, product.reward.quantity, product.cost, product.limitTotal]),
+    [
+      ['guild-shop-001', 5, 10000, 1],
+      ['guild-shop-002', 30, 12000, 1],
+      ['guild-shop-003', 10, 8000, 1],
+      ['guild-shop-004', 10, 16000, 1],
+      ['guild-shop-005', 10, 32000, 1],
+      ['guild-shop-006', 20, 10000, 1],
+      ['guild-shop-007', 20, 20000, 1],
+      ['guild-shop-008', 20, 40000, 1],
+      ['guild-shop-009', 5, 20000, 1],
+      ['guild-shop-010', 400, 20000, 1],
+      ['guild-shop-011', 400, 20000, 1],
+      ['guild-shop-012', 20, 8000, 1],
+    ],
+  )
+  const soldOutTicket = guildShop.products.find(product => product.id === 'guild-shop-012')
+  assert.equal(soldOutTicket.soldOut, true)
+  assert.equal(soldOutTicket.ce, 25)
+})
+
+test('cross-guild battle shop data uses the 100 Grand Coin CE unit', () => {
+  const [crossGuildBattleShop] = calculateShopCE(
+    shopItems.filter(shop => shop.shopKey === 'cross-guild-battle'),
+    scores,
+  )
+
+  assert.deepEqual(crossGuildBattleShop.currency, {
+    itemType: 13,
+    itemId: 15,
+    iconId: 50,
+    name: '跨服公会币',
+    nameZh: '跨服公会币',
+    nameTw: '跨服公會幣',
+    nameEn: 'Grand Coins',
+    nameJa: 'グランドコイン',
+    nameKo: '그랜드 코인',
+  })
+  assert.equal(crossGuildBattleShop.ceCurrencyUnit, 100)
+  assert.equal(crossGuildBattleShop.products.length, 18)
+  assert.deepEqual(
+    crossGuildBattleShop.products
+      .filter(product => ['cross-guild-battle-005', 'cross-guild-battle-006', 'cross-guild-battle-008', 'cross-guild-battle-009', 'cross-guild-battle-011', 'cross-guild-battle-012'].includes(product.id))
+      .map(product => [product.id, product.reward.quantity, product.cost, product.limitTotal]),
+    [
+      ['cross-guild-battle-005', 4, 160, 12],
+      ['cross-guild-battle-006', 20, 320, 6],
+      ['cross-guild-battle-008', 400, 160, 12],
+      ['cross-guild-battle-009', 2000, 320, 6],
+      ['cross-guild-battle-011', 4000, 160, 12],
+      ['cross-guild-battle-012', 20000, 320, 6],
+    ],
+  )
+  assert.equal(crossGuildBattleShop.products.find(product => product.id === 'cross-guild-battle-006').ce, 62.5)
+  assert.equal(crossGuildBattleShop.products.find(product => product.id === 'cross-guild-battle-009').ce, 62.5)
+  assert.equal(crossGuildBattleShop.products.find(product => product.id === 'cross-guild-battle-012').ce, 62.5)
 })
 
 test('sortShopProducts sorts by CE and pushes null CE to the end', () => {
