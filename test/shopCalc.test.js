@@ -15,6 +15,7 @@ const scores = normalizeScores({
   '[18,2]': { name: 'Middle Key', score: 4, batch: 1, iconId: 2 },
   '[18,3]': { name: 'Advanced Key', score: 8, batch: 1, iconId: 3 },
   '[20,1]': { name: 'Tower Ticket', score: 100, batch: 1, iconId: 1 },
+  '[24,1]': { name: 'Tree of Life Dew', score: 400, batch: 1, iconId: 1 },
   [GUILD_RAID_UNIQUE_WEAPON_FRAGMENT_KEY]: {
     name: 'Unique Weapon Fragment',
     nameZh: '专属武器碎片',
@@ -72,6 +73,19 @@ test('calculateShopProduct reports unknown scored items as zero value', () => {
   ])
 })
 
+test('calculateShopProduct scales CE to the configured shop-currency unit', () => {
+  const product = calculateShopProduct({
+    id: 'scaled-ce',
+    name: 'Scaled CE',
+    reward: { itemType: 12, itemId: 2, quantity: 5 },
+    cost: 4000,
+  }, scores, 1000)
+
+  assert.equal(product.rewardValue, 100)
+  assert.equal(product.ceCurrencyUnit, 1000)
+  assert.equal(product.ce, 25)
+})
+
 test('calculateShopProduct values virtual score-key items', () => {
   const product = calculateShopProduct({
     id: 'guild-raid-004',
@@ -108,6 +122,48 @@ test('guild raid shop data includes all documented rows and confirmed limits', (
       ['guild-raid-030', Infinity],
       ['guild-raid-031', Infinity],
       ['guild-raid-032', Infinity],
+    ],
+  )
+})
+
+test('battle league shop data includes every screenshot slot and Battle Coin metadata', () => {
+  const [battleLeagueShop] = calculateShopCE(
+    shopItems.filter(shop => shop.shopKey === 'battle-league'),
+    scores,
+  )
+
+  assert.deepEqual(battleLeagueShop.currency, {
+    itemType: 13,
+    itemId: 10,
+    iconId: 45,
+    name: '古竞技币',
+    nameZh: '古竞技币',
+    nameTw: '古競技幣',
+    nameEn: 'Battle Coins',
+    nameJa: 'バトルコイン',
+    nameKo: '배틀 코인',
+  })
+  assert.equal(battleLeagueShop.products.length, 14)
+  assert.equal(battleLeagueShop.ceCurrencyUnit, 1000)
+  assert.equal(battleLeagueShop.products[0].ce, 25)
+  assert.equal(battleLeagueShop.products[1].ce, 25)
+  assert.deepEqual(
+    battleLeagueShop.products.map(product => [product.id, product.reward.quantity, product.cost, product.limitTotal]),
+    [
+      ['battle-league-001', 1, 16000, 1],
+      ['battle-league-002', 10, 160000, 1],
+      ['battle-league-003', 5, 2500, 1],
+      ['battle-league-004', 5, 2500, 1],
+      ['battle-league-005', 5, 5000, 1],
+      ['battle-league-006', 5, 5000, 1],
+      ['battle-league-007', 5, 10000, 1],
+      ['battle-league-008', 5, 10000, 1],
+      ['battle-league-009', 5, 1300, 1],
+      ['battle-league-010', 5, 1300, 1],
+      ['battle-league-011', 5, 2500, 1],
+      ['battle-league-012', 5, 2500, 1],
+      ['battle-league-013', 5, 5000, 1],
+      ['battle-league-014', 5, 5000, 1],
     ],
   )
 })

@@ -46,6 +46,8 @@
           <img :src="itemIconUrl(selectedShop.currency.iconId)" @error="hideBrokenImage" />
           <span>{{ itemDisplayName(selectedShop) }}</span>
           <b>{{ itemDisplayName(selectedShop.currency) }}</b>
+          <code class="shop-ce-formula">{{ shopCeFormula }}</code>
+          <span class="shop-ce-color-hint" :title="$t('shopCeColorHint')" :aria-label="$t('shopCeColorHint')">ⓘ</span>
         </div>
 
         <div class="shop-compact-sort">
@@ -95,7 +97,7 @@
             </div>
             <div>
               <span>CE</span>
-              <b :style="{ color: getCeColor(product.ce) }">{{ formatCe(product.ce) }}</b>
+              <b :style="{ color: getCeColor(product.ce, bestShopCe) }">{{ formatCe(product.ce) }}</b>
             </div>
           </div>
 
@@ -173,6 +175,19 @@ const {
 } = useItemScores({ t, itemDisplayName, itemLocaleField })
 const calculatedShops = computed(() => calculateShopCE(shopItems, normalizedScores.value))
 const selectedShop = computed(() => calculatedShops.value.find(shop => shop.shopKey === selectedShopKey.value) || calculatedShops.value[0])
+const shopCeFormula = computed(() => {
+  const currency = itemDisplayName(selectedShop.value?.currency)
+  const unit = selectedShop.value?.ceCurrencyUnit || 1
+  const key = unit === 1 ? 'shopCeFormula' : 'shopCeFormulaScaled'
+  return t(key, { currency, unit: formatNumber(unit) })
+})
+const bestShopCe = computed(() => {
+  const values = (selectedShop.value?.products || [])
+    .map(product => product.ce)
+    .filter(Number.isFinite)
+  const best = values.length ? Math.max(...values) : null
+  return best > 0 ? best : null
+})
 const sortedProducts = computed(() => {
   const products = selectedShop.value?.products || []
   return sortShopProducts(products, sortState.by, sortState.asc)
@@ -237,11 +252,12 @@ function formatLimit(limit) {
   return limit == null ? t('shopLimitUnknown') : t('shopLimitTimes', { n: limit })
 }
 
-function getCeColor(ce) {
-  if (ce == null) return 'var(--text-muted)'
-  if (ce >= 2) return '#f1c40f'
-  if (ce >= 1) return '#2ecc71'
-  if (ce >= 0.5) return '#3498db'
+function getCeColor(ce, bestCe) {
+  if (!Number.isFinite(ce) || !Number.isFinite(bestCe) || bestCe <= 0) return 'var(--text-muted)'
+  const relativeCe = ce / bestCe
+  if (relativeCe >= 0.9) return '#f1c40f'
+  if (relativeCe >= 0.75) return '#2ecc71'
+  if (relativeCe >= 0.5) return '#3498db'
   return '#e74c3c'
 }
 
@@ -300,6 +316,22 @@ function getCeColor(ce) {
 
 .shop-currency-strip b {
   color: var(--gold);
+}
+
+.shop-ce-formula {
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 8px;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+
+.shop-ce-color-hint {
+  color: var(--text-muted);
+  cursor: help;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
 }
 
 .shop-currency-strip span {
@@ -479,6 +511,18 @@ function getCeColor(ce) {
     align-items: flex-start;
     flex-direction: column;
     gap: 10px;
+  }
+
+  .shop-currency-strip {
+    flex-wrap: wrap;
+  }
+
+  .shop-ce-formula,
+  .shop-ce-color-hint {
+    flex-basis: 100%;
+    border-left: 0;
+    padding-left: 32px;
+    white-space: normal;
   }
 
   .shop-compact-sort {

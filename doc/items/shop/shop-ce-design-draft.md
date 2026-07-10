@@ -34,14 +34,14 @@ FinalValue = OriginalValue + RechargeValue
 CE = FinalValue / PaidDiamonds
 ```
 
-商城兑换应使用“单位商城货币产出价值”口径：
+商城兑换应使用“指定数量商城货币的产出价值”口径：
 
 ```text
 RewardValue = Σ(奖励道具数量 × 道具单价评分)
-ShopCE = RewardValue / CostCount
+ShopCE = RewardValue / CostCount × CurrencyUnit
 ```
 
-这样 CE 表示“每消耗 1 个商城货币，换回多少钻石价值”。商城货币本身不需要额外标注价值。
+`CurrencyUnit` 默认为 1，此时 CE 表示“每消耗 1 个商城货币，换回多少钻石价值”。价格量级较大的商城可配置更易读的单位，例如古竞技商城使用 `CurrencyUnit = 1000`，此时 CE 表示每 1000 古竞技币换回的钻石价值。商城货币本身不需要额外标注价值。
 
 示例：魔女的书库大扫除商城。
 
@@ -64,6 +64,7 @@ ShopCE = RewardValue / 375
     name: '树影书签',
     iconId: 193
   },
+  ceCurrencyUnit: 1,
   products: [
     {
       id: 'witch-library-cleanup-001',
@@ -127,7 +128,8 @@ ShopCE = RewardValue / 375
 - 若 `contents` 存在，以 `contents` 的总价值作为 `rewardValue`。
 - 若 `contents` 不存在，以 `reward` 的价值作为 `rewardValue`。
 - 若 `cost` 缺失，展示价值，但 `ce = null`。
-- `ce = rewardValue / cost`，单位为“钻石价值 / 1 个商城货币”。
+- `ce = rewardValue / cost × ceCurrencyUnit`；`ceCurrencyUnit` 默认为 1。
+- 古竞技商城的 `ceCurrencyUnit = 1000`，单位为“钻石价值 / 1000 古竞技币”。
 - 若内容物有未计价道具，该道具价值记为 0，并在详情中标记。
 
 ## 页面交互
@@ -148,6 +150,16 @@ ShopCE = RewardValue / 375
 - 限购
 - 有内容物时显示可点击详情
 
+CE 颜色仅表示当前商城内的相对性价比，不跨商城比较。以当前商城最高有效 CE 为基准：
+
+- `CE / 最高 CE >= 90%`：金色
+- `CE / 最高 CE >= 75%`：绿色
+- `CE / 最高 CE >= 50%`：蓝色
+- 其余有效 CE：红色
+- CE 缺失或商城内没有正数 CE：灰色
+
+相对色阶随用户调整道具评分实时重算；`ceCurrencyUnit` 只影响 CE 的显示计价单位，不影响相对颜色。
+
 详情层展示：
 
 - 内容物图标、名称、数量
@@ -160,6 +172,7 @@ ShopCE = RewardValue / 375
 | 商城 | 内容 | 价格 | 限购 | CE 状态 | 备注 |
 | --- | --- | --- | --- | --- | --- |
 | 魔女的书库大扫除商城 | 完备 | 完备 | 完备 | 可计算 | CE 为每 1 个树影书签可兑换的钻石价值；三种封印钥匙已确认为不限购 |
+| 古竞技商城 | 截图可见 14 个兑换档位完备 | 完备 | 完备 | 可计算 | CE 为每 1000 古竞技币可兑换的钻石价值；相同道具、数量和价格的重复卡片分别保留 |
 | 公会讨伐战商城 | 截图可见 32 个兑换档位完备 | 完备 | 完备 | 可计算 | CE 为每 1 个公会讨伐战活动代币可兑换的钻石价值；专武碎片限购 10，三种封印钥匙不限购；专武碎片以项目维护的「专属武器碎片」作通用代表，按魔水晶 x3 -> 专武碎片 x10 派生；档位标签不在用户侧展示 |
 | 精品店 | 截图可见 10 个礼盒/礼袋内容完备 | 完备 | 完备 | 可计算 | 货币为免费钻石；CE 为每 1 免费钻石可兑换的道具钻石价值 |
 

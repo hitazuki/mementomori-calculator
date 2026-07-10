@@ -62,7 +62,12 @@ export function calculateShopItemValue(item, scores) {
   }
 }
 
-export function calculateShopProduct(product, scores) {
+function normalizeCeCurrencyUnit(value) {
+  const unit = Number(value)
+  return Number.isFinite(unit) && unit > 0 ? unit : 1
+}
+
+export function calculateShopProduct(product, scores, ceCurrencyUnit = 1) {
   const valueSource = Array.isArray(product.contents) && product.contents.length
     ? product.contents
     : [product.reward]
@@ -72,7 +77,8 @@ export function calculateShopProduct(product, scores) {
   const rewardDetails = product.reward ? [calculateShopItemValue(product.reward, scores)] : []
   const rewardValue = contentDetails.reduce((sum, item) => sum + item.value, 0)
   const cost = Number(product.cost)
-  const ce = Number.isFinite(cost) && cost > 0 ? rewardValue / cost : null
+  const resolvedCeCurrencyUnit = normalizeCeCurrencyUnit(ceCurrencyUnit)
+  const ce = Number.isFinite(cost) && cost > 0 ? rewardValue / cost * resolvedCeCurrencyUnit : null
   const valueShares = contentDetails.map(item => ({
     itemType: item.itemType,
     itemId: item.itemId,
@@ -87,6 +93,7 @@ export function calculateShopProduct(product, scores) {
     rewardValue,
     value: rewardValue,
     ce,
+    ceCurrencyUnit: resolvedCeCurrencyUnit,
     limitTotal: product.limitTotal ?? null,
     rewardDetails,
     contentDetails,
@@ -96,10 +103,14 @@ export function calculateShopProduct(product, scores) {
 }
 
 export function calculateShopCE(shops, scores) {
-  return shops.map(shop => ({
-    ...shop,
-    products: shop.products.map(product => calculateShopProduct(product, scores)),
-  }))
+  return shops.map(shop => {
+    const ceCurrencyUnit = normalizeCeCurrencyUnit(shop.ceCurrencyUnit)
+    return {
+      ...shop,
+      ceCurrencyUnit,
+      products: shop.products.map(product => calculateShopProduct(product, scores, ceCurrencyUnit)),
+    }
+  })
 }
 
 export function sortShopProducts(products, by = 'ce', asc = false) {
