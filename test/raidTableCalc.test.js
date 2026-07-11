@@ -19,7 +19,7 @@ import {
 
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
-  ARTORIA, LIBERIA, SPRING_SHIZU,
+  ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -38,11 +38,11 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes nine characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 9)
+test('roster exposes eleven characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 11)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-3), [ARTORIA, LIBERIA, SPRING_SHIZU])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-5), [ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE])
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -255,7 +255,50 @@ test('mechanic registry resolves counters, skill history, conditions, and target
   assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.bossStacksAtLeast(
     { statusId: 'sand', count: 4 }, { boss: { statuses: [{ id: 'sand', stacks: 4 }] } },
   ), true)
+  closeTo(DEFAULT_RAID_MECHANICS.valueResolvers.otherLineupElementCountLinear(
+    { element: 2, base: 0.1, perStack: 0.1, max: 0.5 }, {
+      actor: { id: 75 }, config: { lineup: [75, 93, 112] },
+      actors: new Map([[93, { definition: { element: 2 } }], [112, { definition: { element: 2 } }]]),
+    },
+  ), 0.3)
   assert.deepEqual(DEFAULT_RAID_MECHANICS.targetSelectors.adjacent(
     { ownerId: 2, config: { lineup: [1, 2, 3] } },
   ), [1, 3])
+  assert.deepEqual(DEFAULT_RAID_MECHANICS.targetSelectors.all({ config: { lineup: [1, 2, 3] } }), [1, 2, 3])
+})
+
+test('Morgana stacks Fighting Spirit from allied self-damage and uses the current stack on S2', () => {
+  const lineup = [MORGANA, ARTORIA]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 3 })
+  const morganaS1 = action(result, 1, MORGANA)
+  assert.equal(morganaS1.runtimeBefore.counters.fightingSpirit, 1)
+  assert.equal(morganaS1.runtimeAfter.counters.fightingSpirit, 2)
+  assert.equal(morganaS1.damageSteps[0].attackRate, 0.4)
+  const morganaS2 = action(result, 2, MORGANA)
+  assert.equal(morganaS2.actionKey, 's2')
+  assert.equal(morganaS2.damageSteps.length, 7)
+  closeTo(morganaS2.damageSteps[0].attackRate, 0.6)
+})
+
+test('Lucille applies all-target battle-start buffs, Radiant Light, damage branches, and one cooldown reduction', () => {
+  const lineup = [LUCILLE, ARTORIA, SPRING_SHIZU]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [ARTORIA, LUCILLE, SPRING_SHIZU],
+    speeds: { [LUCILLE]: 1000, [ARTORIA]: 4000, [SPRING_SHIZU]: 5000 }, turns: 3,
+  })
+  const firstLucille = action(result, 1, LUCILLE)
+  assert.equal(firstLucille.damageSteps.length, 5)
+  assert.equal(firstLucille.damageSteps[0].percent, 730)
+  assert.ok(firstLucille.damageSteps[0].scalingTerms.some(term => term.key === `ATK_${LUCILLE}/ATK_${LUCILLE}`))
+  assert.equal(result.rounds[0].speedSnapshot[LUCILLE].effectiveSpeed, 1400)
+  assert.equal(result.rounds[0].speedSnapshot[ARTORIA].effectiveSpeed, 4800)
+  assert.equal(firstLucille.bossStatusAfterAction.find(status => status.id === 'lucille-radiant-light').stacks, 3)
+  const s2 = action(result, 2, LUCILLE)
+  assert.equal(s2.actionKey, 's2')
+  const reduction = s2.effectsApplied.find(effect => effect.id === 'lucille-cooldown-reduction')
+  assert.equal(reduction.amount, 2)
+  assert.equal(reduction.targetId, ARTORIA)
+
+  const solo = simulateRaidTable(singleConfig(LUCILLE, { turns: 1 }))
+  assert.equal(action(solo, 1, LUCILLE).damageSteps[0].percent, 530)
 })

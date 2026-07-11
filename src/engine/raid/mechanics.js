@@ -5,6 +5,7 @@ function linearValue(spec, current) {
 export const DEFAULT_RAID_MECHANICS = Object.freeze({
   targetSelectors: Object.freeze({
     self: ({ ownerId }) => [ownerId],
+    all: ({ config }) => [...config.lineup],
     adjacent: ({ ownerId, config }) => {
       const index = config.lineup.indexOf(ownerId)
       return [config.lineup[index - 1], config.lineup[index + 1]].filter(Boolean)
@@ -45,6 +46,16 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     fixed: spec => spec.value,
     counterLinear: (spec, { actor }) => linearValue(spec, actor.runtime.counters[spec.counter] ?? 0),
     skillUsesLinear: (spec, { actor }) => linearValue(spec, actor.runtime.skillUses[spec.skillKey] ?? 0),
+    otherLineupElementCountLinear: (spec, { actor, config, actors }) => {
+      const count = config.lineup.filter(id => id !== actor.id).filter(id => (
+        spec.element === undefined || spec.element === null || actors.get(id).definition.element === spec.element
+      )).length
+      return linearValue(spec, count)
+    },
+    bossStatusThresholds: (spec, { boss }) => {
+      const values = spec.values ?? []
+      return values[Math.min(boss.statuses.length, values.length - 1)]
+    },
     conditional: (spec, context) => (
       context.api.evaluateCondition(spec.condition, context) ? spec.whenTrue : spec.whenFalse
     ),

@@ -415,3 +415,13 @@ eventHooks: [{
 | 概率成功 | `probabilityEnabled` 条件 + 配置开关 |
 | 当前木桩固定满足的分支 | `conditionKey`，仅说明用途 |
 | 不参与首版的技能文本 | `ignoredKeys` |
+
+## 新增通用词条（摩嘉娜、露昕鲁）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| target selector | `all` | 按站位顺序选择当前阵容全部角色；可再使用 `targetElement` 过滤。 |
+| value resolver | `otherLineupElementCountLinear` | 以施法者之外、指定属性的上阵角色数代入线性值；支持 `base`、`perStack` 和 `max`。 |
+| value resolver | `bossStatusThresholds` | 以木桩状态组数量选择 `values` 的对应档位；数量超过数组末位时使用末位。 |
+
+`bossStatusThresholds` 按不同 EffectGroup 状态计数，不把同一组的层数重复计为多个弱化效果。这与单体木桩中“目标附带的弱化效果个数”的可观测映射一致。

@@ -162,7 +162,8 @@ export function runRaidProgram(program) {
       const before = { ...target.cooldowns }
       for (const key of ['s1', 's2']) target.cooldowns[key] = Math.max(0, target.cooldowns[key] - effect.amount)
       context.effectsApplied.push({
-        type: 'cooldownReduction', phase: context.phase, sourceId: context.ownerId, targetId, amount: effect.amount,
+        type: 'cooldownReduction', id: effect.id, nameKey: effect.nameKey,
+        phase: context.phase, sourceId: context.ownerId, targetId, amount: effect.amount,
         cooldownsBefore: before, cooldownsAfter: { ...target.cooldowns },
       })
     }
