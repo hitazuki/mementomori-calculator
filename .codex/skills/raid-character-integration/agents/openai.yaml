@@ -1,0 +1,4 @@
+interface:
+  display_name: "Raid Character Integration"
+  short_description: "Guide raid character modeling, implementation, and validation."
+  default_prompt: "Use $raid-character-integration to integrate or review a raid table character from evidence through tests."

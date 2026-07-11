@@ -17,6 +17,12 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .codex/
+!.codex/
+.codex/*
+!.codex/skills/
+.codex/skills/*
+!.codex/skills/raid-character-integration/
+!.codex/skills/raid-character-integration/**
 .claude/
 .DS_Store
 *.suo
