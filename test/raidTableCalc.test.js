@@ -2,232 +2,190 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 
 import {
-  DEFAULT_RAID_BENCH_ID,
-  DEFAULT_RAID_ACTION_ORDER,
   DEFAULT_RAID_ATTACK_PRIORITY,
   DEFAULT_RAID_LINEUP,
   RAID_STATUS_CLASSES,
   RAID_TABLE_CHARACTER_IDS,
   RAID_TABLE_ROSTER,
-  replaceRaidBenchMember,
+  createDefaultRaidTableConfig,
 } from '../src/constants/raidTableCharacters.js'
 import { simulateRaidTable } from '../src/engine/raidTableCalc.js'
 
-const { FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA } = RAID_TABLE_CHARACTER_IDS
+const {
+  FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
+  ARTORIA, LIBERIA, SPRING_SHIZU,
+} = RAID_TABLE_CHARACTER_IDS
 
-function actionsFor(result, characterId) {
-  return result.rounds.map(round => round.actions.find(action => action.actorId === characterId).actionKey)
+function action(result, turn, id) {
+  return result.rounds[turn - 1].actions.find(item => item.actorId === id)
 }
 
-test('default raid table produces the expected ten-turn rotations', () => {
-  const result = simulateRaidTable()
+function actionsFor(result, id) {
+  return result.rounds.map(round => action(result, round.turn, id).actionKey)
+}
 
-  assert.deepEqual(actionsFor(result, FLORENCE), ['s1', 's2', 's1', 's2', 'normal', 's1', 's2', 'normal', 's1', 's2'])
-  assert.deepEqual(actionsFor(result, FENRIR), ['s1', 's2', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1', 's2'])
-  assert.deepEqual(actionsFor(result, MERLYN), ['s1', 's2', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1', 's2'])
-  assert.deepEqual(actionsFor(result, MERTILLIER), ['s1', 's2', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1', 's2'])
-  assert.deepEqual(actionsFor(result, LUKE), ['s1', 's2', 's1', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1'])
-})
+function singleConfig(id, extra = {}) {
+  return { lineup: [id], attackPriority: [id], turns: 10, ...extra }
+}
 
-test('default raid table matches the normalized ATK and symbolic STR golden totals', () => {
-  const result = simulateRaidTable()
+function closeTo(actual, expected, tolerance = 1e-8) {
+  assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
+}
 
-  assert.equal(result.teamAtkPercent, 49_956.25)
-  assert.equal(result.symbolicTotals.STR, 2_160)
-  assert.equal(result.characterTotals[FLORENCE].atkPercent, 39_666.25)
-  assert.equal(result.characterTotals[FENRIR].atkPercent, 4_236)
-  assert.equal(result.characterTotals[LUKE].atkPercent, 2_884)
-  assert.equal(result.characterTotals[MERLYN].atkPercent, 1_540)
-  assert.equal(result.characterTotals[MERTILLIER].atkPercent, 1_630)
-})
-
-test('Florence only consumes buffs that existed before her action', () => {
-  const result = simulateRaidTable()
-  const turn1 = result.rounds[0].actions.find(action => action.actorId === FLORENCE)
-  const turn3 = result.rounds[2].actions.find(action => action.actorId === FLORENCE)
-
-  assert.equal(turn1.baseAtkPercent, 3_150)
-  assert.equal(turn1.modifierTotals.attackRate, 0.3)
-  assert.equal(turn1.modifierTotals.damageDealtRate, 0.3)
-  assert.equal(turn1.effectiveAtkPercent, 5_323.5)
-
-  assert.equal(turn3.baseAtkPercent, 3_150)
-  assert.equal(turn3.modifierTotals.attackRate, 1.75)
-  assert.equal(turn3.modifierTotals.damageDealtRate, 0.3)
-  assert.equal(turn3.effectiveAtkPercent, 11_261.25)
-  assert.deepEqual(
-    turn3.modifierSources.filter(source => source.channel === 'attackRate').map(source => source.id).sort(),
-    ['fenrir-atk', 'florence-atk', 'merlyn-atk', 'mertillier-atk'],
-  )
-})
-
-test('moving Fenrir changes both adjacency targets and the resulting rotation', () => {
-  const lineup = [FLORENCE, LUKE, MERLYN, MERTILLIER, FENRIR]
-  const actionOrder = DEFAULT_RAID_ACTION_ORDER.filter(id => lineup.includes(id))
-  const attackPriority = DEFAULT_RAID_ATTACK_PRIORITY.filter(id => lineup.includes(id))
-  const result = simulateRaidTable({ lineup, actionOrder, attackPriority })
-  const fenrirTurn1 = result.rounds[0].actions.find(action => action.actorId === FENRIR)
-  const cooldownTargets = fenrirTurn1.effectsApplied
-    .filter(effect => effect.type === 'cooldownReduction')
-    .map(effect => effect.targetId)
-
-  assert.deepEqual(cooldownTargets, [MERTILLIER])
-  assert.notDeepEqual(actionsFor(result, FLORENCE), ['s1', 's2', 's1', 's2', 'normal', 's1', 's2', 'normal', 's1', 's2'])
-})
-
-test('attack priority reroutes Merlyn and Mertillier support effects', () => {
-  const attackPriority = [LUKE, FENRIR, FLORENCE, MERLYN, MERTILLIER]
-  const result = simulateRaidTable({
-    lineup: [...DEFAULT_RAID_LINEUP],
-    actionOrder: [...DEFAULT_RAID_ACTION_ORDER],
-    attackPriority,
-  })
-  const merlynTurn1 = result.rounds[0].actions.find(action => action.actorId === MERLYN)
-  const mertillierTurn2 = result.rounds[1].actions.find(action => action.actorId === MERTILLIER)
-
-  assert.deepEqual(
-    merlynTurn1.effectsApplied.filter(effect => effect.type === 'status').map(effect => effect.targetId),
-    [LUKE, FENRIR, LUKE, FENRIR],
-  )
-  assert.deepEqual(
-    mertillierTurn2.effectsApplied.map(effect => effect.targetId),
-    [LUKE, LUKE],
-  )
-})
-
-test('the six-character roster defaults to Rustica on the bench and swaps all orders in place', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 6)
-  assert.equal(DEFAULT_RAID_BENCH_ID, RUSTICA)
+test('roster exposes nine characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 9)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-
-  assert.deepEqual(
-    replaceRaidBenchMember(DEFAULT_RAID_LINEUP, FENRIR, RUSTICA),
-    [FLORENCE, RUSTICA, LUKE, MERLYN, MERTILLIER],
-  )
-  assert.deepEqual(
-    replaceRaidBenchMember(DEFAULT_RAID_ACTION_ORDER, FENRIR, RUSTICA),
-    [LUKE, FLORENCE, RUSTICA, MERLYN, MERTILLIER],
-  )
-  assert.deepEqual(
-    replaceRaidBenchMember(DEFAULT_RAID_ATTACK_PRIORITY, FENRIR, RUSTICA),
-    [FLORENCE, RUSTICA, LUKE, MERLYN, MERTILLIER],
-  )
+  assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-3), [ARTORIA, LIBERIA, SPRING_SHIZU])
 })
 
-test('Rustica keeps five S1 hits and grows S2 history as 4, 5, 6, 6 hits', () => {
-  const lineup = [FLORENCE, LUKE, MERLYN, MERTILLIER, RUSTICA]
-  const result = simulateRaidTable({
-    lineup,
-    actionOrder: [LUKE, FLORENCE, MERLYN, MERTILLIER, RUSTICA],
-    attackPriority: [FLORENCE, LUKE, MERLYN, MERTILLIER, RUSTICA],
-    turns: 15,
-  })
-  const rusticaActions = result.rounds.map(round => round.actions.find(action => action.actorId === RUSTICA))
-  const s1Actions = rusticaActions.filter(action => action.actionKey === 's1')
-  const s2Actions = rusticaActions.filter(action => action.actionKey === 's2')
-
-  assert.deepEqual(rusticaActions.map(action => action.actionKey), [
-    's1', 's2', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1', 's2', 'normal',
-  ])
-  assert.ok(s1Actions.every(action => action.attackTerms[0].hits === 5))
-  assert.deepEqual(s2Actions.map(action => action.attackTerms[0].hits), [4, 5, 6, 6])
-  assert.deepEqual(s2Actions.map(action => action.historyBefore.skillUses.s2), [0, 1, 2, 3])
-  assert.deepEqual(s2Actions.map(action => action.historyAfter.skillUses.s2), [1, 2, 3, 4])
+test('lineups accept one to five unique supported characters', () => {
+  assert.equal(simulateRaidTable(singleConfig(ARTORIA, { turns: 1 })).config.lineup.length, 1)
+  assert.equal(simulateRaidTable().config.lineup.length, 5)
+  assert.throws(() => simulateRaidTable({ lineup: [], attackPriority: [] }), /one to five/)
+  assert.throws(() => simulateRaidTable({ lineup: [FLORENCE, FLORENCE], attackPriority: [FLORENCE, FLORENCE] }), /one to five/)
+  assert.throws(() => simulateRaidTable({
+    lineup: [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA],
+    attackPriority: [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA],
+  }), /one to five/)
 })
 
-function rusticaBuffScenario() {
-  const lineup = [FLORENCE, FENRIR, RUSTICA, MERLYN, MERTILLIER]
-  return simulateRaidTable({
-    lineup,
-    actionOrder: [FENRIR, MERLYN, MERTILLIER, FLORENCE, RUSTICA],
-    attackPriority: [RUSTICA, MERTILLIER, FLORENCE, FENRIR, MERLYN],
-    turns: 2,
-  })
-}
+test('default speed order matches MB values and can be overridden', () => {
+  const defaults = simulateRaidTable({ turns: 1 })
+  assert.deepEqual(defaults.rounds[0].actionOrder, [LUKE, FLORENCE, FENRIR, MERLYN, MERTILLIER])
 
-test('Rustica counts only removable EffectGroups for the three/four buff passive threshold', () => {
-  const result = rusticaBuffScenario()
-  const turn1 = result.rounds[0].actions.find(action => action.actorId === RUSTICA)
-  const turn2 = result.rounds[1].actions.find(action => action.actorId === RUSTICA)
-
-  assert.equal(turn1.statusSnapshotBeforeAction[RUSTICA].removableBuffCount, 3)
-  assert.equal(turn1.effectsApplied.some(effect => effect.id === 'rustica-action-atk'), false)
-  assert.ok(turn2.statusSnapshotBeforeAction[RUSTICA].removableBuffCount >= 4)
-  assert.equal(turn2.effectsApplied.some(effect => effect.id === 'rustica-action-atk'), true)
-
-  const unremovable = turn2.statusSnapshotBeforeAction[RUSTICA].statuses
-    .filter(status => status.statusClass === RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
-  assert.ok(unremovable.length >= 2)
-  assert.ok(unremovable.every(status => status.countsTowardBuffCount === false))
-})
-
-test('Rustica applies her S2 attack buff before damage and preserves a self-applied four-action duration', () => {
-  const result = rusticaBuffScenario()
-  const turn1 = result.rounds[0].actions.find(action => action.actorId === RUSTICA)
-  const turn2 = result.rounds[1].actions.find(action => action.actorId === RUSTICA)
-  const hpDrain = turn1.effectsApplied.find(effect => effect.id === 'rustica-hp-drain')
-  const s2Attack = turn2.effectsApplied.find(effect => effect.id === 'rustica-s2-atk')
-
-  assert.equal(hpDrain.targetId, RUSTICA)
-  assert.equal(turn2.statusSnapshotBeforeAction[RUSTICA].statuses.find(status => status.id === 'rustica-hp-drain').remainingActions, 4)
-  assert.equal(s2Attack.targetId, RUSTICA)
-  assert.ok(turn2.modifierSources.some(source => source.id === 'rustica-s2-atk' && source.rate === 0.3))
-})
-
-test('highest buff count ties use lineup order and unremovable states do not affect selection', () => {
-  const lineup = [FLORENCE, FENRIR, RUSTICA, MERLYN, MERTILLIER]
-  const result = simulateRaidTable({
-    lineup,
-    actionOrder: [RUSTICA, FLORENCE, FENRIR, MERLYN, MERTILLIER],
-    attackPriority: [FLORENCE, FENRIR, RUSTICA, MERLYN, MERTILLIER],
+  const overridden = simulateRaidTable({
+    ...createDefaultRaidTableConfig(),
+    speeds: { ...createDefaultRaidTableConfig().speeds, [MERTILLIER]: 9999 },
     turns: 1,
   })
-  const rustica = result.rounds[0].actions[0]
-  const hpDrain = rustica.effectsApplied.find(effect => effect.id === 'rustica-hp-drain')
+  assert.equal(overridden.rounds[0].actionOrder[0], MERTILLIER)
+})
 
-  assert.deepEqual(hpDrain.selectionCounts, {
-    [FLORENCE]: 0, [FENRIR]: 0, [RUSTICA]: 0, [MERLYN]: 0, [MERTILLIER]: 0,
+test('Artoria speed buff changes rounds one and two but expires before round three', () => {
+  const lineup = [ARTORIA, SPRING_SHIZU, LUKE]
+  const result = simulateRaidTable({
+    lineup,
+    attackPriority: [...lineup],
+    speeds: { [ARTORIA]: 3572, [SPRING_SHIZU]: 3000, [LUKE]: 3093 },
+    turns: 3,
   })
-  assert.equal(hpDrain.targetId, FLORENCE)
+  assert.deepEqual(result.rounds[0].actionOrder, [SPRING_SHIZU, ARTORIA, LUKE])
+  assert.deepEqual(result.rounds[1].actionOrder, [SPRING_SHIZU, ARTORIA, LUKE])
+  assert.deepEqual(result.rounds[2].actionOrder, [ARTORIA, LUKE, SPRING_SHIZU])
+  assert.equal(result.rounds[0].speedSnapshot[SPRING_SHIZU].effectiveSpeed, 3600)
+  assert.equal(result.rounds[2].speedSnapshot[SPRING_SHIZU].effectiveSpeed, 3000)
 })
 
-test('Merlyn has two removable groups, Mertillier attack/defense is one, and shields keep their class', () => {
+test('default critical multiplier is 2.10 and Merlyn raises it to 2.50', () => {
   const result = simulateRaidTable()
-  const merlynS1 = result.rounds[0].actions.find(action => action.actorId === MERLYN)
-  const mertillierS1 = result.rounds[0].actions.find(action => action.actorId === MERTILLIER)
-  const mertillierS2 = result.rounds[1].actions.find(action => action.actorId === MERTILLIER)
-
-  assert.equal(merlynS1.effectsApplied.filter(effect => effect.type === 'status').length, 4)
-  assert.equal(new Set(merlynS1.effectsApplied.filter(effect => effect.type === 'status').map(effect => effect.effectGroupId)).size, 2)
-  assert.equal(mertillierS2.effectsApplied.filter(effect => effect.type === 'status').length, 1)
-  assert.equal(mertillierS2.effectsApplied.find(effect => effect.type === 'status').effectGroupId, 2900260102)
-  assert.equal(mertillierS1.effectsApplied.find(effect => effect.id === 'mertillier-shield').statusClass, RAID_STATUS_CLASSES.REMOVABLE_BUFF)
+  assert.equal(action(result, 1, LUKE).damageSteps[0].criticalMultiplier, 2.1)
+  assert.equal(action(result, 2, FLORENCE).damageSteps[0].criticalMultiplier, 2.5)
 })
 
-test('Rustica shield and guardian are unremovable states and never count as buffs', () => {
-  const result = rusticaBuffScenario()
-  const rusticaTurn1 = result.rounds[0].actions.find(action => action.actorId === RUSTICA)
-  const passiveStates = rusticaTurn1.effectsApplied.filter(effect => (
-    effect.id === 'rustica-shield-self' || effect.id === 'rustica-shield-ally' || effect.id === 'rustica-guardian'
-  ))
+test('disabling guaranteed criticals removes critical multipliers, Florence follow-ups, and Luke stacks', () => {
+  const result = simulateRaidTable({ ...createDefaultRaidTableConfig(), guaranteedCritical: false, turns: 1 })
+  assert.equal(action(result, 1, FLORENCE).damageSteps.length, 6)
+  assert.ok(action(result, 1, FLORENCE).damageSteps.every(step => step.criticalMultiplier === 1))
+  assert.equal(action(result, 1, LUKE).bossStatusAfterAction.length, 0)
+})
 
-  assert.equal(passiveStates.length, 3)
+test('Luke applies vulnerability after each step and the current step only uses prior stacks', () => {
+  const result = simulateRaidTable({ ...singleConfig(LUKE), turns: 1 })
+  const luke = action(result, 1, LUKE)
+  assert.equal(luke.damageSteps.length, 2)
+  assert.equal(luke.damageSteps[0].stat, 'ATK')
+  assert.equal(luke.damageSteps[0].bossDamageRate, 0)
+  assert.equal(luke.damageSteps[1].stat, 'STR')
+  assert.equal(luke.damageSteps[1].bossDamageRate, 0.15)
+  closeTo(luke.damageSteps[1].effectivePercent, 150 * 2.1 * 1.15)
+  assert.equal(luke.bossStatusAfterAction.find(status => status.id === 'luke-damage-taken').stacks, 2)
+})
+
+test('Florence damage bonus and two Luke stacks add in one damage-rate channel', () => {
+  const result = simulateRaidTable({ turns: 1 })
+  const florence = action(result, 1, FLORENCE)
+  assert.equal(florence.damageSteps.length, 10)
+  assert.ok(florence.damageSteps.every(step => Math.abs(step.damageRate - 0.6) < 1e-12))
+  closeTo(florence.damageSteps[0].effectivePercent, 525 * 1.3 * 1.6 * 2.1)
+})
+
+test('default lineup has a stable new critical-aware golden total', () => {
+  const result = simulateRaidTable()
+  closeTo(result.teamAtkPercent, 256388.5975, 1e-7)
+  closeTo(result.symbolicTotals.STR, 6964.65, 1e-8)
+})
+
+test('Liberia applies two Sand stacks before all eight S1 hits and the toggle can disable it', () => {
+  const enabled = simulateRaidTable({ ...singleConfig(LIBERIA), turns: 2 })
+  const s1 = action(enabled, 1, LIBERIA)
+  assert.equal(s1.damageSteps.length, 8)
+  assert.ok(s1.damageSteps.every(step => Math.abs(step.bossDamageRate - 0.1) < 1e-12))
+  assert.equal(s1.bossStatusAfterAction.find(status => status.id === 'liberia-sand').stacks, 2)
+  assert.equal(enabled.rounds[0].bossStatusAfterRound.find(status => status.id === 'liberia-sand').remainingRounds, 1)
+  assert.equal(enabled.rounds[1].bossStatusAfterRound.some(status => status.id === 'liberia-sand'), false)
+
+  const disabled = simulateRaidTable({
+    ...singleConfig(LIBERIA), turns: 1,
+    probabilityOverrides: { liberiaSand: false, shizuSpeedDown: true },
+  })
+  assert.ok(action(disabled, 1, LIBERIA).damageSteps.every(step => step.bossDamageRate === 0))
+  assert.equal(action(disabled, 1, LIBERIA).effectsApplied.find(effect => effect.id === 'liberia-sand').skipped, true)
+})
+
+test('Liberia can reach four Sand stacks and reset cooldowns only once', () => {
+  const lineup = [LIBERIA, FENRIR, MERTILLIER]
+  const result = simulateRaidTable({
+    lineup,
+    attackPriority: [LIBERIA, FENRIR, MERTILLIER],
+    speeds: { [LIBERIA]: 3597, [FENRIR]: 2894, [MERTILLIER]: 5000 },
+    turns: 3,
+  })
+  assert.deepEqual(actionsFor(result, LIBERIA), ['s1', 's1', 's2'])
+  assert.equal(action(result, 2, LIBERIA).bossStatusAfterAction.find(status => status.id === 'liberia-sand').stacks, 4)
+  const reset = action(result, 3, LIBERIA).effectsApplied.find(effect => effect.type === 'cooldownReset')
+  assert.ok(reset)
+  assert.deepEqual(action(result, 3, LIBERIA).cooldownsAfter, { s1: 0, s2: 0 })
+})
+
+test('Shizu applies damage taken on actions one, five, and nine and uses the high-HP S2 branch', () => {
+  const result = simulateRaidTable(singleConfig(SPRING_SHIZU))
+  const appliedTurns = result.rounds
+    .filter(round => action(result, round.turn, SPRING_SHIZU).effectsApplied.some(effect => effect.id === 'shizu-damage-taken'))
+    .map(round => round.turn)
+  assert.deepEqual(appliedTurns, [1, 5, 9])
+  assert.equal(action(result, 2, SPRING_SHIZU).damageSteps[0].percent, 2280)
+})
+
+test('Shizu self-damage stacks Artoria before Artoria acts and Artoria own damage stacks again', () => {
+  const lineup = [ARTORIA, SPRING_SHIZU]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 2 })
+  const artoria1 = action(result, 1, ARTORIA)
+  const artoria2 = action(result, 2, ARTORIA)
+  assert.equal(artoria1.historyBefore.justiceStacks, 1)
+  assert.equal(artoria1.historyAfter.justiceStacks, 2)
+  assert.equal(artoria1.damageSteps[0].attackRate, 0.2)
+  assert.equal(artoria2.historyAfter.justiceStacks, 4)
+  assert.equal(artoria2.damageSteps[0].percent, 1140)
+})
+
+test('panel-based attack additions remain separate symbolic terms', () => {
+  const lineup = [ARTORIA, LIBERIA, SPRING_SHIZU]
+  const result = simulateRaidTable({ lineup, attackPriority: [ARTORIA, SPRING_SHIZU, LIBERIA], turns: 1 })
+  const shizuTerms = action(result, 1, SPRING_SHIZU).scalingTotals
+  assert.ok(shizuTerms[`ATK_${ARTORIA}/ATK_${SPRING_SHIZU}`])
+  assert.ok(shizuTerms[`DEF0_${SPRING_SHIZU}/ATK_${SPRING_SHIZU}`])
+  const artoriaTerms = action(result, 1, ARTORIA).scalingTotals
+  assert.ok(artoriaTerms[`DEF0_${ARTORIA}/ATK_${ARTORIA}`])
+  assert.equal(result.teamAtkPercent > 0, true)
+  assert.ok(Object.keys(result.scalingTotals).length >= 3)
+})
+
+test('Rustica history and removable EffectGroup rules remain supported', () => {
+  const lineup = [RUSTICA]
+  const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 14 })
+  const s2 = result.rounds.map(round => action(result, round.turn, RUSTICA)).filter(item => item.actionKey === 's2')
+  assert.deepEqual(s2.map(item => item.damageSteps.length), [4, 5, 6, 6])
+  const passiveStates = action(result, 1, RUSTICA).effectsApplied.filter(effect => effect.id?.startsWith('rustica-shield') || effect.id === 'rustica-guardian')
   assert.ok(passiveStates.every(effect => effect.statusClass === RAID_STATUS_CLASSES.UNREMOVABLE_STATE))
-  assert.ok(passiveStates.every(effect => effect.countsTowardBuffCount === false))
-})
-
-test('single-target normalization keeps explicit hits and excludes symbolic terms from ATK total', () => {
-  const result = simulateRaidTable()
-  const florenceS1 = result.rounds[0].actions.find(action => action.actorId === FLORENCE)
-  const fenrirS2 = result.rounds[1].actions.find(action => action.actorId === FENRIR)
-  const lukeS2 = result.rounds[1].actions.find(action => action.actorId === LUKE)
-
-  assert.equal(florenceS1.attackTerms[0].hits, 6)
-  assert.equal(florenceS1.baseAtkPercent, 3_150)
-  assert.equal(fenrirS2.attackTerms[0].originalTargetCount, 5)
-  assert.equal(fenrirS2.baseAtkPercent, 380)
-  assert.equal(lukeS2.baseAtkPercent, 0)
-  assert.deepEqual(lukeS2.symbolicTerms, [
-    { stat: 'STR', percent: 780, hits: 1, conditionKey: 'raidConditionDummyNoShield' },
-  ])
 })

@@ -9,6 +9,73 @@
   font-size: clamp(26px, 3vw, 38px);
 }
 
+.raid-summary-extra { margin-top: 5px; color: var(--purple-light); font-family: var(--font-mono); font-size: var(--fs-xs); }
+
+.raid-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.raid-roster-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: rgba(var(--color-invert-rgb), 0.025);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.raid-roster-item.selected { border-color: var(--gold); background: var(--gold-dim); }
+.raid-roster-item:disabled { cursor: not-allowed; opacity: 0.45; }
+.raid-roster-item small { color: var(--text-muted); }
+
+.raid-assumption-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.raid-toggle-control,
+.raid-number-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: rgba(var(--color-invert-rgb), 0.025);
+}
+
+.raid-toggle-control span,
+.raid-toggle-control small,
+.raid-number-control span,
+.raid-number-control small { display: block; }
+.raid-toggle-control small,
+.raid-number-control small { color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-number-control { justify-content: space-between; }
+.raid-number-input { display: flex !important; align-items: center; gap: 5px; }
+.raid-number-input input { width: 90px; }
+.raid-number-input em { color: var(--text-muted); font-style: normal; }
+
+.raid-speed-editor {
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+}
+.raid-speed-editor h3 { margin-bottom: 8px; color: var(--text-secondary); font-size: var(--fs-sm); }
+.raid-speed-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.raid-speed-list label { display: flex; flex-direction: column; gap: 4px; color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-speed-list input { width: 100%; }
+.raid-order-grid-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
 .raid-config-card,
 .raid-matrix-card,
 .raid-detail-card {
@@ -119,6 +186,7 @@
   background: var(--bg-surface);
   color: var(--gold);
 }
+.raid-turn-order { display: block; max-width: 150px; margin-top: 3px; overflow: hidden; color: var(--text-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 
 .raid-matrix-table .raid-sticky-col {
   position: sticky;
@@ -193,6 +261,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
+.raid-detail-panel-wide { grid-column: 1 / -1; }
+.raid-step-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.raid-step-list article { padding: 9px; border: 1px solid rgba(var(--color-invert-rgb), 0.06); border-radius: var(--r-sm); background: rgba(var(--color-base-rgb), 0.18); }
+.raid-step-list header { display: flex; justify-content: space-between; gap: 8px; color: var(--gold-light); font-family: var(--font-mono); font-size: var(--fs-sm); }
+.raid-step-list small { display: block; margin-top: 4px; color: var(--text-muted); font-size: var(--fs-xs); }
 
 .raid-detail-panel {
   min-width: 0;
@@ -260,11 +333,17 @@
   .raid-summary-grid { grid-template-columns: 1fr 1fr; }
   .raid-summary-primary { grid-column: 1 / -1; }
   .raid-order-grid { grid-template-columns: 1fr; }
+  .raid-roster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .raid-speed-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 560px) {
   .raid-summary-grid,
   .raid-detail-grid { grid-template-columns: 1fr; }
+  .raid-roster-grid,
+  .raid-assumption-grid,
+  .raid-speed-list,
+  .raid-step-list { grid-template-columns: 1fr; }
   .raid-summary-primary { grid-column: auto; }
   .raid-section-head { align-items: stretch; flex-direction: column; }
   .raid-bench-control { align-items: stretch; flex-direction: column; }
