@@ -1,3 +1,5 @@
+import { raidTranslations } from './raid.js'
+
 export default {
   planRechargeMode: "Planning Mode",
   planRechargeModeLongTerm: "Long Term",
@@ -639,4 +641,5 @@ export default {
   planRemainingDesc: "These opportunities are inside the current lookahead range but are not consumed by this recommended path.",
   planRemainingCount: "{n} Opportunities",
   planRemainingRangeHint: "If you still plan to keep progressing, expand the lookahead range so later opportunities can participate in the next decision segment.",
+  ...raidTranslations.en,
 };

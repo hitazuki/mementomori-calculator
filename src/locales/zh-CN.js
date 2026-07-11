@@ -1,3 +1,5 @@
+import { raidTranslations } from './raid.js'
+
 export default {
   planRechargeMode: "规划模式",
   planRechargeModeLongTerm: "长期规划",
@@ -637,4 +639,5 @@ export default {
   planRemainingDesc: "这些机会已在当前前瞻范围内，但没有被本推荐路径消耗。",
   planRemainingCount: "{n} 个机会",
   planRemainingRangeHint: "如果你还计划继续推进，可以扩大前瞻范围，让更后面的机会参与下一段决策。",
+  ...raidTranslations['zh-CN'],
 };

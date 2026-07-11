@@ -157,6 +157,7 @@ const HeatmapChartView = createAsyncView(() => import('./views/HeatmapChartView.
 const ComparePanelView = createAsyncView(() => import('./views/ComparePanelView.vue'))
 const TornadoChartView = createAsyncView(() => import('./views/TornadoChartView.vue'))
 const TableExportView = createAsyncView(() => import('./views/TableExportView.vue'))
+const RaidTableView = createAsyncView(() => import('./views/RaidTableView.vue'))
 const MysteriumPanelView = createAsyncView(() => import('./views/MysteriumPanelView.vue'))
 const PackCalculatorView = createAsyncView(() => import('./views/PackCalculatorView.vue'))
 const PackComparisonView = createAsyncView(() => import('./views/PackComparisonView.vue'))
@@ -196,6 +197,7 @@ const viewMap = {
   compare: ComparePanelView,
   tornado: TornadoChartView,
   table: TableExportView,
+  raidTable: RaidTableView,
   mysterium: MysteriumPanelView,
   shopExchange: ShopExchangeView,
   packCalc: PackCalculatorView,
@@ -221,7 +223,8 @@ const navDamageItems = [
   { id: 'heatmap', icon: '🔥', i18nLabel: 'navHeatmap', i18nTitle: 'navHeatmap' },
   { id: 'tornado', icon: '🌪', i18nLabel: 'navTornado', i18nTitle: 'navTornado' },
   { id: 'compare', icon: '⚖', i18nLabel: 'navCompare', i18nTitle: 'navCompare' },
-  { id: 'table', icon: '📋', i18nLabel: 'navTable', i18nTitle: 'navTable' }
+  { id: 'table', icon: '📋', i18nLabel: 'navTable', i18nTitle: 'navTable' },
+  { id: 'raidTable', icon: '🪵', i18nLabel: 'navRaidTable', i18nTitle: 'navRaidTable' }
 ]
 
 const navItemSystemItems = [

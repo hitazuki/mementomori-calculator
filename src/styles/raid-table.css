@@ -1,0 +1,276 @@
+.raid-summary-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.raid-summary-primary .stat-value {
+  font-size: clamp(26px, 3vw, 38px);
+}
+
+.raid-config-card,
+.raid-matrix-card,
+.raid-detail-card {
+  margin-bottom: 16px;
+}
+
+.raid-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.raid-section-head h2 {
+  color: var(--gold-light);
+  font-size: var(--fs-lg);
+}
+
+.raid-section-head p {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.raid-order-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.raid-bench-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: rgba(var(--color-invert-rgb), 0.025);
+}
+
+.raid-bench-control span,
+.raid-bench-control small { display: block; }
+.raid-bench-control strong { color: var(--text-secondary); }
+.raid-bench-control small { margin-top: 3px; color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-bench-control select { min-width: 210px; }
+
+.raid-order-list {
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: rgba(var(--color-invert-rgb), 0.025);
+}
+
+.raid-order-list h3 {
+  margin-bottom: 9px;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.raid-order-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(var(--color-invert-rgb), 0.055);
+}
+
+.raid-order-row:first-of-type { border-top: 0; }
+.raid-order-rank { color: var(--gold); font-family: var(--font-mono); }
+.raid-order-row strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.raid-order-actions { display: flex; gap: 4px; }
+.raid-order-actions .btn { min-width: 30px; padding: 3px 8px; }
+.raid-order-actions .btn:disabled { cursor: not-allowed; opacity: 0.25; }
+
+.raid-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+}
+
+.raid-matrix-table {
+  width: 100%;
+  min-width: 1480px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fs-sm);
+}
+
+.raid-matrix-table th,
+.raid-matrix-table td {
+  min-width: 116px;
+  padding: 7px;
+  border-right: 1px solid rgba(var(--color-invert-rgb), 0.06);
+  border-bottom: 1px solid rgba(var(--color-invert-rgb), 0.06);
+  text-align: center;
+  vertical-align: stretch;
+}
+
+.raid-matrix-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-surface);
+  color: var(--gold);
+}
+
+.raid-matrix-table .raid-sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  min-width: 128px;
+  background: var(--bg-surface);
+}
+
+.raid-character-cell span,
+.raid-character-cell small,
+.raid-row-total small,
+.raid-matrix-table tfoot small {
+  display: block;
+}
+
+.raid-character-cell small,
+.raid-row-total small,
+.raid-matrix-table tfoot small {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.raid-action-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  min-height: 88px;
+  padding: 7px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.025);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.raid-action-cell:hover,
+.raid-action-cell.active {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  transform: translateY(-1px);
+}
+
+.raid-action-cell strong { color: var(--text-primary); font-size: var(--fs-sm); }
+.raid-action-cell span { color: var(--gold-light); font-family: var(--font-mono); font-size: var(--fs-xs); }
+.raid-action-cell em { color: var(--purple-light); font-size: var(--fs-xs); font-style: normal; }
+.raid-action-cell .raid-cell-buffs {
+  overflow: hidden;
+  color: var(--success);
+  font-family: var(--font-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.raid-row-total { color: var(--gold-light); font-family: var(--font-mono); font-weight: 700; }
+.raid-matrix-table tfoot th,
+.raid-matrix-table tfoot td { background: rgba(212, 186, 112, 0.08); }
+
+.raid-detail-total {
+  color: var(--gold-light);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xl);
+  white-space: nowrap;
+}
+
+.raid-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.raid-detail-panel {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: rgba(var(--color-invert-rgb), 0.025);
+}
+
+.raid-detail-panel h3 {
+  margin-bottom: 9px;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.raid-detail-panel .raid-subtitle { margin-top: 16px; }
+.raid-formula {
+  overflow-x: auto;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-left: 3px solid var(--gold);
+  background: rgba(var(--color-base-rgb), 0.22);
+  color: var(--gold-light);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.raid-detail-list {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) 1fr;
+  gap: 6px 12px;
+  font-size: var(--fs-sm);
+}
+
+.raid-detail-list dt { color: var(--text-muted); }
+.raid-detail-list dd { color: var(--text-primary); text-align: right; }
+.raid-detail-items,
+.raid-ignored-list { display: flex; flex-direction: column; gap: 7px; list-style: none; }
+.raid-detail-items li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(var(--color-invert-rgb), 0.06);
+  font-size: var(--fs-sm);
+}
+.raid-detail-items li:last-child { border-bottom: 0; }
+.raid-detail-items strong { color: var(--success); }
+.raid-detail-items small { grid-column: 1 / -1; color: var(--text-muted); }
+.raid-detail-items.compact li { display: block; }
+.raid-ignored-list li { color: var(--warning); font-size: var(--fs-sm); }
+.raid-symbolic-value { color: var(--purple-light); font-family: var(--font-mono); font-size: var(--fs-lg); }
+.raid-muted { color: var(--text-muted); font-size: var(--fs-sm); }
+
+.raid-warning-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px 2px 18px;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+@media (max-width: 900px) {
+  .raid-summary-grid { grid-template-columns: 1fr 1fr; }
+  .raid-summary-primary { grid-column: 1 / -1; }
+  .raid-order-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .raid-summary-grid,
+  .raid-detail-grid { grid-template-columns: 1fr; }
+  .raid-summary-primary { grid-column: auto; }
+  .raid-section-head { align-items: stretch; flex-direction: column; }
+  .raid-bench-control { align-items: stretch; flex-direction: column; }
+  .raid-bench-control select { width: 100%; min-width: 0; }
+  .raid-detail-total { font-size: var(--fs-lg); }
+  .raid-config-card,
+  .raid-matrix-card,
+  .raid-detail-card { padding: 12px; }
+}

@@ -1,3 +1,5 @@
+import { raidTranslations } from './raid.js'
+
 export default {
   planRechargeMode: "計画モード",
   planRechargeModeLongTerm: "長期計画",
@@ -642,4 +644,5 @@ export default {
   planRemainingDesc: "これらは現在の前方参照範囲内にありますが、この推奨経路では消費されません。",
   planRemainingCount: "{n} 件",
   planRemainingRangeHint: "さらに進める予定がある場合は、前方参照範囲を広げると、より後ろの機会も次の判断に含められます。",
+  ...raidTranslations.ja,
 };
