@@ -177,6 +177,7 @@ hits = min(4 + S2历史发动次数, 6)
   damageSteps: [
     { stat: 'ATK', percent: 640, hits: 5, damageType: 'phys' },
   ],
+  hooks: [],
 }
 ```
 
@@ -189,12 +190,11 @@ statusEffect({
   nameKey: 'raidBuffCharacterAttack',
   target: 'highestBuffCount',
   duration: 4,
-  phase: 'beforeDamage',
   statusClass: RAID_STATUS_CLASSES.REMOVABLE_BUFF,
   modifiers: [
     { id: 'character-skill-atk', channel: 'attackRate', rate: 0.3 },
   ],
-})
+}) // 放入 hook('beforeDamage', [该效果])
 ```
 
 按技能历史变化的段数：
@@ -203,7 +203,8 @@ statusEffect({
 {
   stat: 'ATK',
   percent: 740,
-  hitsByUse: {
+  hits: {
+    type: 'skillUsesLinear',
     skillKey: 's2',
     base: 4,
     increment: 1,

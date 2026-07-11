@@ -5,11 +5,17 @@ import {
   DEFAULT_RAID_ATTACK_PRIORITY,
   DEFAULT_RAID_LINEUP,
   RAID_STATUS_CLASSES,
+  RAID_TABLE_CHARACTERS,
   RAID_TABLE_CHARACTER_IDS,
   RAID_TABLE_ROSTER,
   createDefaultRaidTableConfig,
 } from '../src/constants/raidTableCharacters.js'
-import { simulateRaidTable } from '../src/engine/raidTableCalc.js'
+import {
+  DEFAULT_RAID_ENVIRONMENT,
+  DEFAULT_RAID_MECHANICS,
+  compileRaidProgram,
+  simulateRaidTable,
+} from '../src/engine/raidTableCalc.js'
 
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
@@ -162,10 +168,10 @@ test('Shizu self-damage stacks Artoria before Artoria acts and Artoria own damag
   const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 2 })
   const artoria1 = action(result, 1, ARTORIA)
   const artoria2 = action(result, 2, ARTORIA)
-  assert.equal(artoria1.historyBefore.justiceStacks, 1)
-  assert.equal(artoria1.historyAfter.justiceStacks, 2)
+  assert.equal(artoria1.runtimeBefore.counters.justice, 1)
+  assert.equal(artoria1.runtimeAfter.counters.justice, 2)
   assert.equal(artoria1.damageSteps[0].attackRate, 0.2)
-  assert.equal(artoria2.historyAfter.justiceStacks, 4)
+  assert.equal(artoria2.runtimeAfter.counters.justice, 4)
   assert.equal(artoria2.damageSteps[0].percent, 1140)
 })
 
@@ -188,4 +194,68 @@ test('Rustica history and removable EffectGroup rules remain supported', () => {
   assert.deepEqual(s2.map(item => item.damageSteps.length), [4, 5, 6, 6])
   const passiveStates = action(result, 1, RUSTICA).effectsApplied.filter(effect => effect.id?.startsWith('rustica-shield') || effect.id === 'rustica-guardian')
   assert.ok(passiveStates.every(effect => effect.statusClass === RAID_STATUS_CLASSES.UNREMOVABLE_STATE))
+})
+
+test('compiler includes hooks and event listeners only for selected characters', () => {
+  const program = compileRaidProgram(singleConfig(ARTORIA, { turns: 1 }))
+  assert.deepEqual(Object.keys(program.characters).map(Number), [ARTORIA])
+  assert.deepEqual(program.eventListeners.selfDamage.map(listener => listener.actorId), [ARTORIA])
+  assert.equal(program.characters[ARTORIA].hooksByTrigger.afterCriticalHit.length, 0)
+
+  const lukeProgram = compileRaidProgram(singleConfig(LUKE, { turns: 1 }))
+  assert.deepEqual(Object.keys(lukeProgram.eventListeners), [])
+  assert.equal(lukeProgram.characters[LUKE].hooksByTrigger.afterCriticalHit.length, 1)
+
+  const injected = simulateRaidTable(singleConfig(LUKE, { turns: 1 }), {
+    characters: { [LUKE]: RAID_TABLE_CHARACTERS[LUKE] },
+    mechanics: DEFAULT_RAID_MECHANICS,
+  })
+  assert.equal(injected.config.lineup[0], LUKE)
+  assert.equal(action(injected, 1, LUKE).damageSteps.length, 2)
+})
+
+test('compiler rejects unregistered mechanics and missing counters', () => {
+  const base = RAID_TABLE_CHARACTERS[FLORENCE]
+  const config = { lineup: [999], attackPriority: [999], speeds: { 999: 1000 }, turns: 1 }
+  const environmentFor = character => ({
+    ...DEFAULT_RAID_ENVIRONMENT,
+    characters: { 999: { ...character, id: 999, speed: 1000 } },
+  })
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    hooks: [{ trigger: 'actionStart', effects: [{ type: 'unknownEffect' }] }],
+  })), /Unregistered raid effect/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    hooks: [{ trigger: 'actionStart', effects: [{
+      type: 'status', id: 'bad-target', effectGroupId: 1, target: 'unknownTarget', duration: 1,
+    }] }],
+  })), /Unregistered raid target selector/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    runtime: { counters: {} },
+    derivedModifiers: [{
+      id: 'missing-counter', channel: 'attackRate',
+      rate: { type: 'counterLinear', counter: 'missing', base: 0, perStack: 0.1 },
+    }],
+  })), /Unknown raid counter/)
+})
+
+test('mechanic registry resolves counters, skill history, conditions, and targets generically', () => {
+  const actor = { runtime: { counters: { charge: 2 }, skillUses: { s1: 3 } } }
+  assert.equal(DEFAULT_RAID_MECHANICS.valueResolvers.counterLinear(
+    { counter: 'charge', base: 100, perStack: 25, max: 200 }, { actor },
+  ), 150)
+  assert.equal(DEFAULT_RAID_MECHANICS.valueResolvers.skillUsesLinear(
+    { skillKey: 's1', base: 2, increment: 2, max: 7 }, { actor },
+  ), 7)
+  assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.bossStacksAtLeast(
+    { statusId: 'sand', count: 4 }, { boss: { statuses: [{ id: 'sand', stacks: 4 }] } },
+  ), true)
+  assert.deepEqual(DEFAULT_RAID_MECHANICS.targetSelectors.adjacent(
+    { ownerId: 2, config: { lineup: [1, 2, 3] } },
+  ), [1, 3])
 })

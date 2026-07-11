@@ -144,8 +144,10 @@
           </template>
         </dl>
         <h3 class="raid-subtitle">{{ $t('raidSkillHistory') }}</h3>
-        <p class="raid-muted">S1 {{ selectedEvent.historyBefore.skillUses.s1 }} → {{ selectedEvent.historyAfter.skillUses.s1 }} · S2 {{ selectedEvent.historyBefore.skillUses.s2 }} → {{ selectedEvent.historyAfter.skillUses.s2 }}</p>
-        <p v-if="selectedEvent.historyAfter.justiceStacks" class="raid-muted">{{ $t('raidArtoriaJusticeStacks', { n: selectedEvent.historyAfter.justiceStacks }) }}</p>
+        <p class="raid-muted">S1 {{ selectedEvent.runtimeBefore.skillUses.s1 }} → {{ selectedEvent.runtimeAfter.skillUses.s1 }} · S2 {{ selectedEvent.runtimeBefore.skillUses.s2 }} → {{ selectedEvent.runtimeAfter.skillUses.s2 }}</p>
+        <p v-for="(value, key) in selectedEvent.runtimeAfter.counters" :key="key" class="raid-muted">
+          {{ counterLabel(selectedEvent.actorId, key) }}：{{ value }}
+        </p>
       </div>
 
       <div class="raid-detail-panel">
@@ -218,6 +220,7 @@ const result = computed(() => simulateRaidTable({
 }))
 
 function characterName(id) { return t(RAID_TABLE_CHARACTERS[id].nameKey) }
+function counterLabel(id, key) { return t(RAID_TABLE_CHARACTERS[id].counterLabels?.[key] ?? key) }
 function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(locale.value, { maximumFractionDigits, minimumFractionDigits: 0 }) }
 function formatPercent(value) { return `${formatter().format(value)}% ATK` }
 function formatRate(value) { return `${formatter().format(value * 100)}%` }
