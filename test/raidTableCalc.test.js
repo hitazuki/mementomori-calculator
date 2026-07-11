@@ -19,7 +19,7 @@ import {
 
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
-  ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE,
+  ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -38,11 +38,11 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes eleven characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 11)
+test('roster exposes fourteen characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 14)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-5), [ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-8), [ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES])
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -301,4 +301,51 @@ test('Lucille applies all-target battle-start buffs, Radiant Light, damage branc
 
   const solo = simulateRaidTable(singleConfig(LUCILLE, { turns: 1 }))
   assert.equal(action(solo, 1, LUCILLE).damageSteps[0].percent, 530)
+})
+
+test('Frack keeps separate utility debuffs on the dummy and refreshes Smile Talent from three debuff groups', () => {
+  const solo = simulateRaidTable(singleConfig(FRACK, { turns: 2 }))
+  const s1 = action(solo, 1, FRACK)
+  assert.equal(s1.damageSteps.length, 1)
+  assert.deepEqual(s1.bossStatusAfterAction.map(status => status.id), ['frack-avoidance-down', 'frack-healing-down'])
+  assert.ok(s1.bossStatusAfterAction.every(status => status.damageRatePerStack === 0))
+  assert.equal(action(solo, 2, FRACK).damageSteps[0].percent, 560)
+
+  const lineup = [FRACK, LIEBES]
+  const supported = simulateRaidTable({
+    lineup, attackPriority: [...lineup], speeds: { [FRACK]: 3000, [LIEBES]: 5000 }, turns: 2,
+  })
+  assert.equal(action(supported, 2, FRACK).actionKey, 's2')
+  assert.equal(action(supported, 2, FRACK).damageSteps[0].percent, 1120)
+})
+
+test('Guinevere emits two self-damage events, supports probability scenarios, and reads Heartful Lover before S2 history advances', () => {
+  const enabled = simulateRaidTable(singleConfig(GUINEVERE, { turns: 2 }))
+  const s1 = action(enabled, 1, GUINEVERE)
+  assert.equal(s1.runtimeAfter.counters.heartfulLover, 2)
+  assert.equal(s1.damageSteps[0].bossDamageRate, 0.1)
+  assert.deepEqual(s1.bossStatusAfterAction.map(status => status.id), ['guinevere-damage-taken', 'guinevere-weakness'])
+  const s2 = action(enabled, 2, GUINEVERE)
+  assert.equal(s2.runtimeAfter.counters.heartfulLover, 4)
+  assert.equal(s2.damageSteps[0].percent, 540)
+  assert.ok(s2.damageSteps[0].scalingTerms.some(term => term.coefficient > 0))
+
+  const disabled = simulateRaidTable(singleConfig(GUINEVERE, {
+    turns: 1, probabilityOverrides: { guinevereDamageTaken: false },
+  }))
+  assert.equal(action(disabled, 1, GUINEVERE).bossStatusAfterAction.length, 0)
+  assert.equal(action(disabled, 1, GUINEVERE).effectsApplied.filter(effect => effect.skipped).length, 2)
+})
+
+test('Liebes defense debuffs add two zero-rate Boss groups that power debuff-count effects without defense calculation', () => {
+  const result = simulateRaidTable(singleConfig(LIEBES, { turns: 2 }))
+  const s1 = action(result, 1, LIEBES)
+  const defenseDebuffs = s1.bossStatusAfterAction.filter(status => status.id.startsWith('liebes-'))
+  assert.deepEqual(defenseDebuffs.map(status => status.id), ['liebes-defense-down', 'liebes-physical-defense-down'])
+  assert.ok(defenseDebuffs.every(status => status.damageRatePerStack === 0))
+  assert.equal(s1.damageSteps[0].bossDamageRate, 0)
+  const s2 = action(result, 2, LIEBES)
+  assert.equal(s2.damageSteps[0].percent, 600)
+  assert.ok(s2.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 378) < 1e-12))
+  assert.equal(s2.damageSteps[0].attackRate, 0.1)
 })

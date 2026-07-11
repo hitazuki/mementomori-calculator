@@ -57,6 +57,10 @@
         <input v-model="probabilityOverrides.shizuSpeedDown" type="checkbox">
         <span><strong>{{ $t('raidAssumeShizuSpeedDown') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
+      <label class="raid-toggle-control">
+        <input v-model="probabilityOverrides.guinevereDamageTaken" type="checkbox">
+        <span><strong>{{ $t('raidAssumeGuinevereDamageTaken') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
     </div>
 
     <div class="raid-speed-editor">

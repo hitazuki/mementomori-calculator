@@ -6,6 +6,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
   targetSelectors: Object.freeze({
     self: ({ ownerId }) => [ownerId],
     all: ({ config }) => [...config.lineup],
+    topAttackOther: ({ ownerId, config }) => config.attackPriority.filter(id => id !== ownerId),
     adjacent: ({ ownerId, config }) => {
       const index = config.lineup.indexOf(ownerId)
       return [config.lineup[index - 1], config.lineup[index + 1]].filter(Boolean)
@@ -38,6 +39,10 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     bossStacksAtLeast: (condition, { boss }) => (
       (boss.statuses.find(status => status.id === condition.statusId)?.stacks ?? 0) >= condition.count
     ),
+    bossStatusCountAtLeast: (condition, { boss }) => boss.statuses.length >= condition.count,
+    actorHasStatus: (condition, { actors, ownerId }) => (
+      actors.get(ownerId).statuses.some(status => status.id === condition.statusId)
+    ),
     guaranteedCritical: (_condition, { config }) => config.guaranteedCritical,
     probabilityEnabled: (condition, { config }) => config.probabilityOverrides[condition.key] !== false,
   }),
@@ -56,6 +61,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       const values = spec.values ?? []
       return values[Math.min(boss.statuses.length, values.length - 1)]
     },
+    bossStatusCountLinear: (spec, { boss }) => linearValue(spec, boss.statuses.length),
     conditional: (spec, context) => (
       context.api.evaluateCondition(spec.condition, context) ? spec.whenTrue : spec.whenFalse
     ),

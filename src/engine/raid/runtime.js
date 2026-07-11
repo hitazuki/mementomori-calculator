@@ -251,8 +251,10 @@ export function runRaidProgram(program) {
     }
     const symbolicSources = []
     for (const status of actor.statuses) {
+      const sourceActor = actors.get(status.sourceId)
       for (const modifier of status.modifiers) sources.push({
-        ...modifier, id: modifier.id ?? status.id, nameKey: modifier.nameKey ?? status.nameKey,
+        ...modifier, rate: modifier.compiledRate ? resolveValue(modifier.compiledRate, sourceActor, context) : modifier.rate,
+        id: modifier.id ?? status.id, nameKey: modifier.nameKey ?? status.nameKey,
         sourceId: status.sourceId, effectGroupId: status.effectGroupId, statusClass: status.statusClass,
         permanent: status.remainingActions == null, remainingActions: status.remainingActions, appliedSequence: status.appliedSequence,
       })
@@ -261,7 +263,8 @@ export function runRaidProgram(program) {
           ? `ATK_${modifier.sourceId}/ATK_${actor.id}`
           : `DEF0_${actor.id}/ATK_${actor.id}`
         symbolicSources.push({
-          ...modifier, key, targetId: actor.id, sourceId: modifier.sourceId ?? status.sourceId,
+          ...modifier, coefficient: modifier.compiledCoefficient ? resolveValue(modifier.compiledCoefficient, sourceActor, context) : modifier.coefficient,
+          key, targetId: actor.id, sourceId: modifier.sourceId ?? status.sourceId,
           nameKey: status.nameKey, effectGroupId: status.effectGroupId, remainingActions: status.remainingActions,
         })
       }

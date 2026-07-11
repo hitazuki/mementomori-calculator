@@ -66,8 +66,22 @@ function compileEffect(effect, mechanics, path, character) {
   if (effect.type === 'changeCounter' && !(effect.counter in (character.runtime?.counters ?? {}))) {
     throw new Error(`Unknown raid counter '${effect.counter}' at ${path}`)
   }
+  const compileModifier = (modifier, modifierPath, valueKey) => {
+    const compiledValue = compileValue(modifier[valueKey], mechanics, `${modifierPath}.${valueKey}`)
+    const counter = compiledValue.definition.counter
+    if (counter && !(counter in (character.runtime?.counters ?? {}))) {
+      throw new Error(`Unknown raid counter '${counter}' at ${modifierPath}`)
+    }
+    return { ...modifier, [`compiled${valueKey[0].toUpperCase()}${valueKey.slice(1)}`]: compiledValue }
+  }
   return {
     ...effect,
+    modifiers: (effect.modifiers ?? []).map((modifier, index) => (
+      compileModifier(modifier, `${path}.modifiers[${index}]`, 'rate')
+    )),
+    symbolicModifiers: (effect.symbolicModifiers ?? []).map((modifier, index) => (
+      compileModifier(modifier, `${path}.symbolicModifiers[${index}]`, 'coefficient')
+    )),
     compiledCondition: compileCondition(effect.condition, mechanics, `${path}.condition`),
     handler,
   }

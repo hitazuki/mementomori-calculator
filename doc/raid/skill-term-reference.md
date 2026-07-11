@@ -2,7 +2,9 @@
 
 本文是 `src/constants/raidTableCharacters.js` 与 `src/engine/raidTableCalc.js` 的可复用词条索引。新增角色时先在本文查找已有结构；只有现有结构无法准确表达技能时，才新增字段或引擎分支。
 
-结算时序、Buff 计数、持续时间和待确认规则仍以 [skill-modeling-guide.md](./skill-modeling-guide.md) 为准。本文描述的是“代码中如何写”。
+结算时序、Buff 计数、持续时间和待确认规则仍以 [skill-modeling-guide.md](./skill-modeling-guide.md) 为准；游戏内指南、MB字段与标准词条的映射见 [official-battle-guide.md](./official-battle-guide.md)。本文描述的是“代码中如何写”。
+
+新增词条时应先在官方语义文档登记来源与规范化含义，再决定复用或扩展本文的数据结构。不要直接把中文词条名称当作引擎逻辑键。
 
 ## 1. 是否需要新增词条文档
 
@@ -425,3 +427,15 @@ eventHooks: [{
 | value resolver | `bossStatusThresholds` | 以木桩状态组数量选择 `values` 的对应档位；数量超过数组末位时使用末位。 |
 
 `bossStatusThresholds` 按不同 EffectGroup 状态计数，不把同一组的层数重复计为多个弱化效果。这与单体木桩中“目标附带的弱化效果个数”的可观测映射一致。
+
+## 新增通用词条（弗莱可、桂妮维亚、莉贝）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| target selector | `topAttackOther` | 按固定攻击优先级选择施法者以外的友军。 |
+| condition | `bossStatusCountAtLeast` | 木桩身上的不同 Boss 状态组数量不少于 `count`。 |
+| condition | `actorHasStatus` | 当前行动者拥有指定运行时状态。 |
+| value resolver | `bossStatusCountLinear` | 以木桩状态组数量代入 `base + perStack × count`，并按 `max` 截断。 |
+| status modifier | `rate` / `coefficient` 值解析器 | 状态的倍率或符号项系数可使用已注册 value resolver；结算时按状态来源角色读取动态计数。 |
+
+`damageRatePerStack: 0` 的 Boss 状态仍是可读取的弱化 EffectGroup：它不改变当前倍率，但会参与弱化数量、刷新与到期结算。

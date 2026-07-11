@@ -9,6 +9,9 @@ import liberia from './liberia.js'
 import springShizu from './springShizu.js'
 import morgana from './morgana.js'
 import lucille from './lucille.js'
+import frack from './frack.js'
+import guinevere from './guinevere.js'
+import liebes from './liebes.js'
 
 export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   FLORENCE: 8,
@@ -22,6 +25,9 @@ export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   SPRING_SHIZU: 112,
   MORGANA: 75,
   LUCILLE: 89,
+  FRACK: 122,
+  GUINEVERE: 148,
+  LIEBES: 102,
 })
 
 export const RAID_TABLE_ROSTER = Object.freeze([
@@ -36,7 +42,10 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.SPRING_SHIZU,
   RAID_TABLE_CHARACTER_IDS.MORGANA,
   RAID_TABLE_CHARACTER_IDS.LUCILLE,
+  RAID_TABLE_CHARACTER_IDS.FRACK,
+  RAID_TABLE_CHARACTER_IDS.GUINEVERE,
+  RAID_TABLE_CHARACTER_IDS.LIEBES,
 ])
 
-const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille]
+const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes]
 export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze(character)])))
