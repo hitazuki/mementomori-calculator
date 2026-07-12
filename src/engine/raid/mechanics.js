@@ -40,6 +40,13 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       (boss.statuses.find(status => status.id === condition.statusId)?.stacks ?? 0) >= condition.count
     ),
     bossStatusCountAtLeast: (condition, { boss }) => boss.statuses.length >= condition.count,
+    skillUsesAtLeast: (condition, { actor, actors, ownerId }) => ((actor ?? actors.get(ownerId)).runtime.skillUses[condition.skillKey] ?? 0) >= condition.count,
+    skillUsesAtMost: (condition, { actor, actors, ownerId }) => ((actor ?? actors.get(ownerId)).runtime.skillUses[condition.skillKey] ?? 0) <= condition.count,
+    otherLineupElementCountAtLeast: (condition, { actor, ownerId, config, actors }) => {
+      const sourceId = actor?.id ?? ownerId
+      return config.lineup.filter(id => id !== sourceId && actors.get(id).definition.element === condition.element).length >= condition.count
+    },
+    roundAtMost: (condition, { round }) => round <= condition.round,
     actorHasStatus: (condition, { actors, ownerId }) => (
       actors.get(ownerId).statuses.some(status => status.id === condition.statusId)
     ),
@@ -62,6 +69,14 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       return values[Math.min(boss.statuses.length, values.length - 1)]
     },
     bossStatusCountLinear: (spec, { boss }) => linearValue(spec, boss.statuses.length),
+    counterThresholds: (spec, { actor }) => {
+      const values = spec.values ?? []
+      return values[Math.min(actor.runtime.counters[spec.counter] ?? 0, values.length - 1)]
+    },
+    skillUsesThresholds: (spec, { actor }) => {
+      const values = spec.values ?? []
+      return values[Math.min(actor.runtime.skillUses[spec.skillKey] ?? 0, values.length - 1)]
+    },
     conditional: (spec, context) => (
       context.api.evaluateCondition(spec.condition, context) ? spec.whenTrue : spec.whenFalse
     ),

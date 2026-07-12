@@ -28,7 +28,7 @@ Use `git log`/`git show` when recent refactors may invalidate a requested layout
 
 ## Build an Evidence Record
 
-Before changing behavior, separate facts into game data, combat-log confirmation, project convention, and unresolved inference. For a substantial new character, copy `references/evidence-template.md` to `doc/raid/characters/<id>-<slug>/evidence.md`. Keep unresolved items in that record rather than presenting them as confirmed.
+Before changing behavior, separate facts into game data, combat-log confirmation, project convention, and unresolved inference. For a substantial new character, copy `references/evidence-template.md` and `references/record-template.json` to `doc/raid/characters/<id>-<slug>/`. `record.json` is the canonical machine-validated coverage record; `evidence.md` is the readable rationale. Keep unresolved items in both records rather than presenting them as confirmed.
 
 Describe every active skill, passive, exclusive-weapon effect, and EffectGroup. Record damage steps, target choice, trigger phase, duration clock, refresh/stack rules, history/counter read and update points, probability scenario, and intentionally ignored behavior.
 

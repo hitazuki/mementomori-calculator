@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "characterId": 122,
+  "slug": "frack",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [122001, 122002], "passiveSkillIds": [122003, 122004], "combatLogs": [] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 122001, "model": "implemented", "summary": "自伤后施加两个零倍率弱化并攻击。" },
+    { "kind": "activeSkill", "sourceId": 122002, "model": "implemented", "summary": "笑之才能状态决定倍率。" },
+    { "kind": "passiveSkill", "sourceId": 122003, "model": "implemented", "summary": "笑之才能速度与弱化组条件刷新。" },
+    { "kind": "passiveSkill", "sourceId": 122004, "model": "implemented", "summary": "首次行动的攻击符号项与弱化命中状态。" }
+  ],
+  "effectGroups": [
+    { "id": 12200330101, "model": "implemented", "summary": "笑之才能速度。" },
+    { "id": 12200430101, "model": "implemented", "summary": "攻击符号项。" },
+    { "id": 12200430102, "model": "implemented", "summary": "弱化命中状态。" },
+    { "id": 12200150201, "model": "implemented", "summary": "回避降低零倍率弱化。" },
+    { "id": 12200150202, "model": "implemented", "summary": "受治疗降低零倍率弱化。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredAvoidanceDown", "summary": "回避不结算。" },
+    { "key": "raidIgnoredHealingReceivedDown", "summary": "受治疗不结算。" }
+  ],
+  "unresolved": ["自伤的实际 HP 变化不在木桩模型内。"]
+}

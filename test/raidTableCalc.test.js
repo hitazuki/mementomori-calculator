@@ -19,7 +19,7 @@ import {
 
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
-  ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES,
+  ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -38,11 +38,11 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes fourteen characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 14)
+test('roster exposes eighteen characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 18)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-8), [ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-12), [ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN])
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -348,4 +348,42 @@ test('Liebes defense debuffs add two zero-rate Boss groups that power debuff-cou
   assert.equal(s2.damageSteps[0].percent, 600)
   assert.ok(s2.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 378) < 1e-12))
   assert.equal(s2.damageSteps[0].attackRate, 0.1)
+})
+
+test('Mifri gains Flame Lamp on each action, hastens cooldown recovery, and upgrades third skill uses', () => {
+  const result = simulateRaidTable(singleConfig(MIFRI, { turns: 8 }))
+  assert.equal(action(result, 1, MIFRI).damageSteps[0].attackRate, 0.05)
+  assert.deepEqual(actionsFor(result, MIFRI).slice(0, 5), ['s1', 's2', 'normal', 's1', 's2'])
+  assert.equal(action(result, 2, MIFRI).cooldownsAfter.s2, 2)
+  assert.equal(action(result, 7, MIFRI).damageSteps[0].percent, 1640)
+  assert.equal(action(result, 8, MIFRI).damageSteps[0].percent, 1120)
+  assert.equal(action(result, 7, MIFRI).effectsApplied.some(effect => effect.id === 'mifri-shield'), false)
+})
+
+test('Popri and Cattleya use round-start state and skill-use thresholds', () => {
+  const lineup = [POPRI, MIFRI, CATTLEYYA]
+  const popriTeam = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 6 })
+  assert.equal(action(popriTeam, 1, POPRI).runtimeAfter.counters.wordSpell, 2)
+  assert.equal(action(popriTeam, 5, POPRI).damageSteps[0].percent, 630)
+  assert.equal(action(popriTeam, 6, POPRI).damageSteps[0].percent, 1020)
+  assert.equal(popriTeam.rounds[0].roundStartEffects.filter(effect => effect.id === 'popri-buff-cover').length, 3)
+  assert.equal(popriTeam.rounds[4].roundStartEffects.filter(effect => effect.id === 'popri-buff-cover').length, 3)
+
+  const cattleyya = simulateRaidTable(singleConfig(CATTLEYYA, { turns: 10 }))
+  assert.equal(action(cattleyya, 1, CATTLEYYA).damageSteps[0].attackRate, 0.2)
+  assert.equal(action(cattleyya, 9, CATTLEYYA).damageSteps[0].attackRate, 0.8)
+  assert.equal(action(cattleyya, 10, CATTLEYYA).damageSteps.length, 12)
+})
+
+test('Merlan round-start Fairy stacks, zero-rate magic-defense debuff, and late-skill branches are deterministic', () => {
+  const solo = simulateRaidTable(singleConfig(MERLAN, { turns: 10 }))
+  assert.equal(action(solo, 1, MERLAN).runtimeAfter.counters.fairy, 1)
+  assert.equal(action(solo, 1, MERLAN).bossStatusAfterAction[0].damageRatePerStack, 0)
+  assert.equal(action(solo, 9, MERLAN).bossStatusAfterAction[0].stacks, 5)
+  assert.equal(action(solo, 10, MERLAN).damageSteps[0].percent, 630)
+
+  const lineup = [MERLAN, MIFRI, POPRI]
+  const lightTeam = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 1 })
+  assert.equal(action(lightTeam, 1, MERLAN).runtimeAfter.counters.fairy, 2)
+  assert.equal(action(lightTeam, 1, MERLAN).damageSteps[0].modifierSources.find(source => source.id === 'merlan-fairy').rate, 0.06)
 })

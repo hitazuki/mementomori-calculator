@@ -1,0 +1,22 @@
+{
+  "formatVersion": 1,
+  "characterId": 0,
+  "slug": "module-file-name",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [0, 0],
+    "passiveSkillIds": [0, 0],
+    "combatLogs": []
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 0, "model": "implemented", "summary": "" },
+    { "kind": "passiveSkill", "sourceId": 0, "model": "outOfScope", "summary": "" }
+  ],
+  "effectGroups": [
+    { "id": 0, "model": "implemented", "summary": "" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredExample", "summary": "" }
+  ],
+  "unresolved": []
+}

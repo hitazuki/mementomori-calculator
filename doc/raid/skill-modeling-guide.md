@@ -292,3 +292,9 @@ symbolicModifiers: [
 - 防御、物防、回避或受治疗量等暂不进入木桩倍率的弱化，仍须用独立 Boss EffectGroup 建模，并将 `damageRatePerStack` 设为 `0`。
 - 这种零倍率弱化会按正常 Boss 回合时钟刷新和到期，可供“每有一个弱化效果”类技能读取；同一 EffectGroup 的层数仍只算一个弱化。
 - 需要随来源角色计数器或木桩弱化数量变化的状态 Modifier，必须通过已注册的 value resolver 在读取快照时求值，不得在角色模块中写解析函数。
+
+## 13. 全局回合开始与冷却恢复速度
+
+- 标明“回合开始时”“第 N 回合”的效果使用 `roundStart`，在该回合速度快照和任何角色行动前结算；不可降级为施法者 `actionStart`。
+- 每隔 N 回合的效果使用 `everyRounds` 与 `roundOffset`，不要用角色行动次数的 `every` 代替。
+- 轻快等“提高技能冷却时间恢复速度”的效果通过 `cooldownRecoveryBonus` 在行动结束时与基础恢复 1 相加；它不等同于立即减少当前冷却。

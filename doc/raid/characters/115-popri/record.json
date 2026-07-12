@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "characterId": 115,
+  "slug": "popri",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [115001, 115002], "passiveSkillIds": [115003, 115004], "combatLogs": [] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 115001, "model": "implemented", "summary": "言灵魔咒计数决定倍率和流金加层。" },
+    { "kind": "activeSkill", "sourceId": 115002, "model": "implemented", "summary": "言灵魔咒计数决定倍率。" },
+    { "kind": "passiveSkill", "sourceId": 115003, "model": "outOfScope", "summary": "暴击抗性、防御和物防 Buff。" },
+    { "kind": "passiveSkill", "sourceId": 115004, "model": "implemented", "summary": "全体增益效果护罩及承伤降低。" }
+  ],
+  "effectGroups": [
+    { "id": 11500150101, "model": "implemented", "summary": "言灵魔咒计数。" },
+    { "id": 11500340101, "model": "outOfScope", "summary": "暴击抗性。" },
+    { "id": 11500330102, "model": "outOfScope", "summary": "防御。" },
+    { "id": 11500330103, "model": "outOfScope", "summary": "物理防御。" },
+    { "id": 11500400201, "model": "implemented", "summary": "增益效果护罩，计入 Buff 数。" },
+    { "id": 11500430101, "model": "outOfScope", "summary": "承伤降低。" }
+  ],
+  "ignored": [],
+  "unresolved": ["两个回合开始被动的游戏原生先后需要受控日志。"]
+}

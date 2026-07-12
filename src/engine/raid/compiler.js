@@ -2,7 +2,7 @@ import { RAID_TABLE_CHARACTERS, createDefaultRaidTableConfig } from '../../const
 import { DEFAULT_RAID_MECHANICS } from './mechanics.js'
 
 const SUPPORTED_TRIGGERS = new Set([
-  'battleStart', 'actionStart', 'beforeDamage', 'afterHit', 'afterCriticalHit', 'afterDamage', 'actionEnd',
+  'battleStart', 'roundStart', 'actionStart', 'beforeDamage', 'afterHit', 'afterCriticalHit', 'afterDamage', 'actionEnd',
 ])
 
 export const DEFAULT_RAID_ENVIRONMENT = Object.freeze({

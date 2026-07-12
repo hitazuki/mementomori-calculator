@@ -570,3 +570,11 @@ afterLethalProtection
 - 第三批：概率上升/下降、暴击率、命中率、弱化效果命中率；已确认对应 `[HelpMainText2217]`。
 - MB剩余指南：增益效果种类 `[HelpMainText2214]`、弱化效果种类 `[HelpMainText2215]`、其他效果 `[HelpMainText2216]`。
 - 后续批次：待用户继续补充；追加时保留官方键、规范化语义、引擎状态和差距四类信息。
+
+## 15. 讨伐引擎已接入的全局回合语义
+
+以下条目取代本文此前“当前引擎尚无 roundStart”的状态说明：
+
+- `roundStart` 在每个全局回合开始、速度快照和角色行动前执行。
+- `everyRounds` / `roundOffset` 用于以全局回合调度被动；角色行动次数冷却仍使用既有 `every`。
+- 轻快映射为 `cooldownRecoveryBonus`，在行动结束时与基础冷却恢复 1 相加，不视为即时减冷却。

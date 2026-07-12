@@ -1,0 +1,22 @@
+{
+  "formatVersion": 1,
+  "characterId": 90,
+  "slug": "cattleyya",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [90001, 90002], "passiveSkillIds": [90003, 90004], "combatLogs": [] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 90001, "model": "implemented", "summary": "按使用次数提高攻击并造成四段伤害。" },
+    { "kind": "activeSkill", "sourceId": 90002, "model": "implemented", "summary": "按使用次数增加段数。" },
+    { "kind": "passiveSkill", "sourceId": 90003, "model": "ignored", "summary": "解除自身和最高攻击友方的弱化。" },
+    { "kind": "passiveSkill", "sourceId": 90004, "model": "outOfScope", "summary": "护盾、承伤降低和防御提升。" }
+  ],
+  "effectGroups": [
+    { "id": 9000140103, "model": "implemented", "summary": "春化作用攻击。" },
+    { "id": 9000440101, "model": "outOfScope", "summary": "护盾。" },
+    { "id": 9000420101, "model": "outOfScope", "summary": "承伤降低。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredDebuffCleanse", "summary": "尚无己方弱化移除链路。" }
+  ],
+  "unresolved": ["第 4/8/12 回合弱化移除的目标并列与优先级需要受控日志。"]
+}

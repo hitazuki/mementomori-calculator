@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "characterId": 148,
+  "slug": "guinevere",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [148001, 148002], "passiveSkillIds": [148003, 148004], "combatLogs": [] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 148001, "model": "implemented", "summary": "双自伤后伤害与可切换概率弱化。" },
+    { "kind": "activeSkill", "sourceId": 148002, "model": "implemented", "summary": "双自伤后按爱由心生计数提高伤害。" },
+    { "kind": "passiveSkill", "sourceId": 148003, "model": "implemented", "summary": "自伤事件叠加攻击符号项。" },
+    { "kind": "passiveSkill", "sourceId": 148004, "model": "implemented", "summary": "开战速度状态。" }
+  ],
+  "effectGroups": [
+    { "id": 14800320101, "model": "implemented", "summary": "爱由心生攻击符号项。" },
+    { "id": 14800430101, "model": "implemented", "summary": "速度状态。" },
+    { "id": 14800120201, "model": "implemented", "summary": "承伤增加。" },
+    { "id": 14800140203, "model": "implemented", "summary": "脱力零倍率弱化。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredEnemyAttackDown", "summary": "敌方攻击降低不结算。" },
+    { "key": "raidIgnoredStunImmunity", "summary": "气绝无效不结算。" }
+  ],
+  "unresolved": ["概率效果使用成功/失败场景，不计算期望。"]
+}

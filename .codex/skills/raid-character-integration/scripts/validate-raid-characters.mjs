@@ -25,7 +25,9 @@ const [{ RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, RAID_STATUS_CLASSES, createDe
 
 const errors = []
 const warnings = []
-const knownChannels = new Set(['attackRate', 'damageRate', 'criticalDamageBonus', 'speedRate'])
+const strictDocs = process.argv.includes('--strict-docs')
+let docSummary = ''
+const knownChannels = new Set(['attackRate', 'damageRate', 'criticalDamageBonus', 'speedRate', 'cooldownRecoveryBonus'])
 const localeNames = Object.keys(raidTranslations)
 const defaultConfig = createDefaultRaidTableConfig()
 const seenCharacterIds = new Set()
@@ -128,6 +130,92 @@ function checkAction(action, location, character) {
   for (const [index, key] of (action.ignoredKeys ?? []).entries()) checkLocaleKey(key, `${location}.ignoredKeys[${index}]`)
 }
 
+const documentedModels = new Set(['implemented', 'ignored', 'unresolved', 'outOfScope'])
+
+function collectValues(value, key, values = new Set()) {
+  if (!value || typeof value !== 'object') return values
+  if (Object.prototype.hasOwnProperty.call(value, key)) values.add(value[key])
+  for (const child of Object.values(value)) collectValues(child, key, values)
+  return values
+}
+
+function checkCharacterRecord(record, directoryName, character) {
+  const location = `character record '${directoryName}'`
+  const match = /^(\d+)-([a-z][a-z0-9-]*)$/.exec(directoryName)
+  if (!match) return error(`${location}: directory must use '<id>-<slug>'`)
+  const [directoryId, directorySlug] = [Number(match[1]), match[2]]
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return error(`${location}: record.json must be an object`)
+  if (record.formatVersion !== 1) error(`${location}: unsupported formatVersion '${record.formatVersion}'`)
+  if (record.characterId !== directoryId || record.characterId !== character.id) error(`${location}: characterId must match directory and roster character`)
+  if (record.slug !== directorySlug) error(`${location}: slug must match directory name`)
+  if (record.build?.level !== 240 || record.build?.exclusive !== 'EX3') error(`${location}: build must explicitly be Lv240 / EX3`)
+  const master = masterCharacters.get(character.id)
+  if (!master) return error(`${location}: CharacterMB entry is missing`)
+  if (!same(record.sources?.activeSkillIds, master.ActiveSkillIds)) error(`${location}: activeSkillIds must match CharacterMB`)
+  if (!same(record.sources?.passiveSkillIds, master.PassiveSkillIds)) error(`${location}: passiveSkillIds must match CharacterMB`)
+  if (!Array.isArray(record.sources?.combatLogs)) error(`${location}: sources.combatLogs must be an array`)
+  if (!Array.isArray(record.terms)) error(`${location}: terms must be an array`)
+  if (!Array.isArray(record.effectGroups)) error(`${location}: effectGroups must be an array`)
+  if (!Array.isArray(record.ignored)) error(`${location}: ignored must be an array`)
+  if (!Array.isArray(record.unresolved)) error(`${location}: unresolved must be an array`)
+
+  for (const [index, term] of (record.terms ?? []).entries()) {
+    if (!['activeSkill', 'passiveSkill'].includes(term.kind)) error(`${location}.terms[${index}]: kind must be activeSkill or passiveSkill`)
+    if (!Number.isInteger(term.sourceId)) error(`${location}.terms[${index}]: sourceId must be an integer`)
+    if (!documentedModels.has(term.model)) error(`${location}.terms[${index}]: unsupported model '${term.model}'`)
+    if (!term.summary?.trim()) error(`${location}.terms[${index}]: summary is required`)
+  }
+  for (const id of master.ActiveSkillIds) {
+    if (!(record.terms ?? []).some(term => term.kind === 'activeSkill' && term.sourceId === id)) error(`${location}: ActiveSkillMB ${id} has no term record`)
+  }
+  for (const id of master.PassiveSkillIds) {
+    if (!(record.terms ?? []).some(term => term.kind === 'passiveSkill' && term.sourceId === id)) error(`${location}: PassiveSkillMB ${id} has no term record`)
+  }
+
+  for (const [index, group] of (record.effectGroups ?? []).entries()) {
+    if (!Number.isInteger(group.id)) error(`${location}.effectGroups[${index}]: id must be an integer`)
+    if (!documentedModels.has(group.model)) error(`${location}.effectGroups[${index}]: unsupported model '${group.model}'`)
+    if (!group.summary?.trim()) error(`${location}.effectGroups[${index}]: summary is required`)
+  }
+  const implementedGroups = [...collectValues(character, 'effectGroupId')].filter(Number.isInteger)
+  for (const id of implementedGroups) {
+    if (!(record.effectGroups ?? []).some(group => group.id === id)) error(`${location}: code EffectGroup ${id} has no record`)
+  }
+
+  for (const [index, ignored] of (record.ignored ?? []).entries()) {
+    if (!ignored.key?.trim() || !ignored.summary?.trim()) error(`${location}.ignored[${index}]: key and summary are required`)
+  }
+  const codeIgnoredKeys = [...collectValues(character, 'ignoredKeys')].flat()
+  for (const key of codeIgnoredKeys) {
+    if (!(record.ignored ?? []).some(ignored => ignored.key === key)) error(`${location}: code ignored key '${key}' has no record`)
+  }
+}
+
+const masterCharacters = new Map(JSON.parse(fs.readFileSync(path.join(root, 'data', 'Master', 'CharacterMB.json'), 'utf8')).map(character => [character.Id, character]))
+
+function checkCharacterRecords() {
+  const docsRoot = path.join(root, 'doc', 'raid', 'characters')
+  if (!fs.existsSync(docsRoot)) return error('doc/raid/characters directory is missing')
+  const directories = fs.readdirSync(docsRoot, { withFileTypes: true }).filter(entry => entry.isDirectory())
+  const documentedIds = new Set()
+  for (const directory of directories) {
+    const location = path.join(docsRoot, directory.name)
+    const evidencePath = path.join(location, 'evidence.md')
+    const recordPath = path.join(location, 'record.json')
+    if (!fs.existsSync(evidencePath)) error(`character record '${directory.name}': evidence.md is missing`)
+    if (!fs.existsSync(recordPath)) { error(`character record '${directory.name}': record.json is missing`); continue }
+    let record
+    try { record = JSON.parse(fs.readFileSync(recordPath, 'utf8')) } catch (parseError) { error(`character record '${directory.name}': invalid JSON (${parseError.message})`); continue }
+    const character = RAID_TABLE_CHARACTERS[record.characterId]
+    if (!character) { error(`character record '${directory.name}': characterId ${record.characterId} is not in the roster`); continue }
+    documentedIds.add(record.characterId)
+    checkCharacterRecord(record, directory.name, character)
+  }
+  const missing = RAID_TABLE_ROSTER.filter(id => !documentedIds.has(id))
+  if (strictDocs && missing.length) error(`strict docs: ${missing.length} roster character(s) have no record.json (${missing.join(', ')})`)
+  docSummary = `${documentedIds.size}/${RAID_TABLE_ROSTER.length} character records${strictDocs ? ' (strict)' : ''}`
+}
+
 if (localeNames.length !== 5) error(`expected five raid locales, found ${localeNames.length}: ${localeNames.join(', ')}`)
 const baselineKeys = Object.keys(raidTranslations[localeNames[0]] ?? {})
 for (const locale of localeNames.slice(1)) {
@@ -174,6 +262,8 @@ for (const id of Object.keys(RAID_TABLE_CHARACTERS).map(Number)) {
   if (!RAID_TABLE_ROSTER.includes(id)) warning(`character[${id}] exists but is absent from RAID_TABLE_ROSTER`)
 }
 
+checkCharacterRecords()
+
 const characterDir = path.join(root, 'src', 'constants', 'raid', 'characters')
 for (const file of fs.readdirSync(characterDir).filter(name => name.endsWith('.js') && name !== 'index.js')) {
   const source = fs.readFileSync(path.join(characterDir, file), 'utf8')
@@ -196,5 +286,5 @@ if (errors.length) {
   console.error(`Raid character validation failed with ${errors.length} error(s) and ${warnings.length} warning(s).`)
   process.exitCode = 1
 } else {
-  console.log(`Raid character validation passed: ${RAID_TABLE_ROSTER.length} characters, ${localeNames.length} locales, ${warnings.length} warning(s).`)
+  console.log(`Raid character validation passed: ${RAID_TABLE_ROSTER.length} characters, ${localeNames.length} locales, ${docSummary}, ${warnings.length} warning(s).`)
 }

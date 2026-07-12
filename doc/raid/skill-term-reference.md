@@ -439,3 +439,15 @@ eventHooks: [{
 | status modifier | `rate` / `coefficient` 值解析器 | 状态的倍率或符号项系数可使用已注册 value resolver；结算时按状态来源角色读取动态计数。 |
 
 `damageRatePerStack: 0` 的 Boss 状态仍是可读取的弱化 EffectGroup：它不改变当前倍率，但会参与弱化数量、刷新与到期结算。
+
+## 新增通用词条（米赫里、波普莉、嘉德利亚、梅尔林）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| trigger | `roundStart` | 每个全局回合开始、速度排序前执行的角色钩子。 |
+| hook schedule | `everyRounds` / `roundOffset` | 以全局回合而非角色行动次数调度钩子。 |
+| modifier channel | `cooldownRecoveryBonus` | 在行动结束时与基础冷却恢复 1 相加；恢复值最低为 0。 |
+| condition | `skillUsesAtLeast` / `skillUsesAtMost` | 当前技能本次发动前的历史使用次数比较。 |
+| condition | `otherLineupElementCountAtLeast` | 阵容中除施法者外，指定属性角色数量不少于阈值。 |
+| condition | `roundAtMost` | 当前全局回合不晚于指定回合。 |
+| value resolver | `counterThresholds` / `skillUsesThresholds` | 以计数器或技能历史为索引从 `values` 取档；超出数组时取末档。 |

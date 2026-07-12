@@ -1,0 +1,20 @@
+{
+  "formatVersion": 1,
+  "characterId": 89,
+  "slug": "lucille",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [89001, 89002], "passiveSkillIds": [89003, 89004], "combatLogs": [] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 89001, "model": "implemented", "summary": "自伤后按弱化组数量改变的五段伤害。" },
+    { "kind": "activeSkill", "sourceId": 89002, "model": "implemented", "summary": "自伤后五段伤害及一次冷却减少。" },
+    { "kind": "passiveSkill", "sourceId": 89003, "model": "implemented", "summary": "开战全体攻击与红属性速度。" },
+    { "kind": "passiveSkill", "sourceId": 89004, "model": "implemented", "summary": "自伤触发彩光易伤。" }
+  ],
+  "effectGroups": [
+    { "id": 8900330101, "model": "implemented", "summary": "全体攻击符号项。" },
+    { "id": 8900340201, "model": "implemented", "summary": "红属性速度。" },
+    { "id": 8900430101, "model": "implemented", "summary": "彩光 Boss 易伤。" }
+  ],
+  "ignored": [],
+  "unresolved": ["自伤仅作为事件，不结算 HP。"]
+}

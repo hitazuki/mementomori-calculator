@@ -1,6 +1,6 @@
 import { RAID_STATUS_CLASSES } from '../../constants/raidTableCharacters.js'
 
-const MODIFIER_CHANNELS = ['attackRate', 'damageRate', 'criticalDamageBonus', 'speedRate']
+const MODIFIER_CHANNELS = ['attackRate', 'damageRate', 'criticalDamageBonus', 'speedRate', 'cooldownRecoveryBonus']
 
 function statusKey(status) {
   return `${status.effectGroupId}:${status.sourceId}:${status.appliedSequence}`
@@ -203,7 +203,11 @@ export function runRaidProgram(program) {
     effect.handler(effect, { ...context, config, actors, boss, api })
   }
 
-  function hookIsScheduled(hook, actor) {
+  function hookIsScheduled(hook, actor, context) {
+    if (hook.everyRounds) {
+      const offset = hook.roundOffset ?? hook.everyRounds
+      if (context.round < offset || (context.round - offset) % hook.everyRounds !== 0) return false
+    }
     if (!hook.every) return true
     const offset = hook.offset ?? hook.every
     return actor.runtime.actionCount >= offset && (actor.runtime.actionCount - offset) % hook.every === 0
@@ -211,7 +215,7 @@ export function runRaidProgram(program) {
 
   function runHooks(actor, hooks, context, phase = context.phase) {
     for (const hook of hooks ?? []) {
-      if (!hookIsScheduled(hook, actor)) continue
+      if (!hookIsScheduled(hook, actor, context)) continue
       const hookContext = { ...context, ownerId: actor.id, phase, onceKey: hook.onceKey }
       if (hook.onceKey && actor.runtime.flags[hook.onceKey]) continue
       if (hook.compiledCondition && !hook.compiledCondition.handler(hook.compiledCondition.definition, { ...hookContext, config, actors, boss, api })) continue
@@ -384,10 +388,17 @@ export function runRaidProgram(program) {
   }
 
   for (let turn = 1; turn <= config.turns; turn += 1) {
+    const roundStartEffects = []
+    for (const actorId of config.lineup) {
+      const actor = actors.get(actorId)
+      runHooks(actor, actor.definition.hooksByTrigger.roundStart, {
+        config, actors, boss, sequence, round: turn, effectsApplied: roundStartEffects, phase: 'roundStart', ownerId: actorId,
+      }, 'roundStart')
+    }
     const order = roundOrder()
     const round = {
       turn, actionOrder: order.actionOrder, speedSnapshot: order.speedSnapshot,
-      actions: [], atkPercent: 0, symbolicTotals: {}, scalingTotals: {}, expiredBossEffects: [],
+      actions: [], roundStartEffects, atkPercent: 0, symbolicTotals: {}, scalingTotals: {}, expiredBossEffects: [],
     }
 
     for (const actorId of order.actionOrder) {
@@ -411,7 +422,8 @@ export function runRaidProgram(program) {
       runHooks(actor, action.hooksByTrigger.afterDamage, context, 'afterDamage')
       runHooks(actor, actor.definition.hooksByTrigger.afterDamage, context, 'afterDamage')
 
-      for (const key of ['s1', 's2']) actor.cooldowns[key] = Math.max(0, actor.cooldowns[key] - 1)
+      const cooldownRecovery = Math.max(0, 1 + modifierSnapshot(actor, { ...context, phase: 'actionEnd' }).totals.cooldownRecoveryBonus)
+      for (const key of ['s1', 's2']) actor.cooldowns[key] = Math.max(0, actor.cooldowns[key] - cooldownRecovery)
       const expiredEffects = consumeStatuses(actor, activeStatusKeys)
       if (action.key !== 'normal') actor.runtime.skillUses[action.key] += 1
       runHooks(actor, actor.definition.hooksByTrigger.actionEnd, context, 'actionEnd')
