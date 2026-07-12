@@ -1,11 +1,10 @@
 # 讨伐角色档案格式
 
-每个已写入 `doc/raid/characters/<id>-<slug>/` 的角色使用两个文件：
+每个角色目录只要求一个必选文件：`character.json`。它是唯一的机器可校验词条档案，覆盖 MB 索引、技能/被动、EffectGroup、当前模型处理、忽略项和未决项。
 
-- `record.json`：唯一的机器可校验档案。它覆盖 MB 来源、技能/被动、EffectGroup、当前模型处理、忽略项和未决项。
-- `evidence.md`：给维护者阅读的证据说明。它解释选择、时序和后续日志需求；不得替代 `record.json`。
+`evidence.md` 是可选的人读备注：只记录战斗日志、推断、冲突与补充说明；它不重复 `character.json` 的结构化字段。
 
-## `record.json` 结构
+## `character.json` 结构
 
 ```json
 {
@@ -40,4 +39,4 @@ node .codex/skills/raid-character-integration/scripts/validate-raid-characters.m
 node .codex/skills/raid-character-integration/scripts/validate-raid-characters.mjs --strict-docs
 ```
 
-普通模式校验已建档角色的格式和代码/MB 覆盖关系；严格模式额外要求讨伐角色池中的每名角色都已建档。新增或修改角色必须通过严格模式后才算完成。
+校验检查档案格式、代码中的 EffectGroup / `ignoredKeys` 覆盖关系；严格模式额外要求讨伐角色池中的每名角色都已建档。MB 通过 `skillId` 与 `effectGroupId` 按需查询，不保留副本，也不参与日常同步校验。

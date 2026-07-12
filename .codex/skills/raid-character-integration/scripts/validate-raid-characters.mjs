@@ -144,15 +144,13 @@ function checkCharacterRecord(record, directoryName, character) {
   const match = /^(\d+)-([a-z][a-z0-9-]*)$/.exec(directoryName)
   if (!match) return error(`${location}: directory must use '<id>-<slug>'`)
   const [directoryId, directorySlug] = [Number(match[1]), match[2]]
-  if (!record || typeof record !== 'object' || Array.isArray(record)) return error(`${location}: record.json must be an object`)
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return error(`${location}: character.json must be an object`)
   if (record.formatVersion !== 1) error(`${location}: unsupported formatVersion '${record.formatVersion}'`)
   if (record.characterId !== directoryId || record.characterId !== character.id) error(`${location}: characterId must match directory and roster character`)
   if (record.slug !== directorySlug) error(`${location}: slug must match directory name`)
   if (record.build?.level !== 240 || record.build?.exclusive !== 'EX3') error(`${location}: build must explicitly be Lv240 / EX3`)
-  const master = masterCharacters.get(character.id)
-  if (!master) return error(`${location}: CharacterMB entry is missing`)
-  if (!same(record.sources?.activeSkillIds, master.ActiveSkillIds)) error(`${location}: activeSkillIds must match CharacterMB`)
-  if (!same(record.sources?.passiveSkillIds, master.PassiveSkillIds)) error(`${location}: passiveSkillIds must match CharacterMB`)
+  if (!Array.isArray(record.sources?.activeSkillIds) || !record.sources.activeSkillIds.every(Number.isInteger)) error(`${location}: sources.activeSkillIds must be an integer array`)
+  if (!Array.isArray(record.sources?.passiveSkillIds) || !record.sources.passiveSkillIds.every(Number.isInteger)) error(`${location}: sources.passiveSkillIds must be an integer array`)
   if (!Array.isArray(record.sources?.combatLogs)) error(`${location}: sources.combatLogs must be an array`)
   if (!Array.isArray(record.terms)) error(`${location}: terms must be an array`)
   if (!Array.isArray(record.effectGroups)) error(`${location}: effectGroups must be an array`)
@@ -165,10 +163,10 @@ function checkCharacterRecord(record, directoryName, character) {
     if (!documentedModels.has(term.model)) error(`${location}.terms[${index}]: unsupported model '${term.model}'`)
     if (!term.summary?.trim()) error(`${location}.terms[${index}]: summary is required`)
   }
-  for (const id of master.ActiveSkillIds) {
+  for (const id of record.sources?.activeSkillIds ?? []) {
     if (!(record.terms ?? []).some(term => term.kind === 'activeSkill' && term.sourceId === id)) error(`${location}: ActiveSkillMB ${id} has no term record`)
   }
-  for (const id of master.PassiveSkillIds) {
+  for (const id of record.sources?.passiveSkillIds ?? []) {
     if (!(record.terms ?? []).some(term => term.kind === 'passiveSkill' && term.sourceId === id)) error(`${location}: PassiveSkillMB ${id} has no term record`)
   }
 
@@ -191,8 +189,6 @@ function checkCharacterRecord(record, directoryName, character) {
   }
 }
 
-const masterCharacters = new Map(JSON.parse(fs.readFileSync(path.join(root, 'data', 'Master', 'CharacterMB.json'), 'utf8')).map(character => [character.Id, character]))
-
 function checkCharacterRecords() {
   const docsRoot = path.join(root, 'doc', 'raid', 'characters')
   if (!fs.existsSync(docsRoot)) return error('doc/raid/characters directory is missing')
@@ -201,9 +197,8 @@ function checkCharacterRecords() {
   for (const directory of directories) {
     const location = path.join(docsRoot, directory.name)
     const evidencePath = path.join(location, 'evidence.md')
-    const recordPath = path.join(location, 'record.json')
-    if (!fs.existsSync(evidencePath)) error(`character record '${directory.name}': evidence.md is missing`)
-    if (!fs.existsSync(recordPath)) { error(`character record '${directory.name}': record.json is missing`); continue }
+    const recordPath = path.join(location, 'character.json')
+    if (!fs.existsSync(recordPath)) { error(`character record '${directory.name}': character.json is missing`); continue }
     let record
     try { record = JSON.parse(fs.readFileSync(recordPath, 'utf8')) } catch (parseError) { error(`character record '${directory.name}': invalid JSON (${parseError.message})`); continue }
     const character = RAID_TABLE_CHARACTERS[record.characterId]
@@ -212,7 +207,7 @@ function checkCharacterRecords() {
     checkCharacterRecord(record, directory.name, character)
   }
   const missing = RAID_TABLE_ROSTER.filter(id => !documentedIds.has(id))
-  if (strictDocs && missing.length) error(`strict docs: ${missing.length} roster character(s) have no record.json (${missing.join(', ')})`)
+  if (strictDocs && missing.length) error(`strict docs: ${missing.length} roster character(s) have no character.json (${missing.join(', ')})`)
   docSummary = `${documentedIds.size}/${RAID_TABLE_ROSTER.length} character records${strictDocs ? ' (strict)' : ''}`
 }
 

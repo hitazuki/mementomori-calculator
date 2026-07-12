@@ -1,6 +1,6 @@
 # <角色名>：讨伐拉表接入证据
 
-本文件是人读说明；同目录必须同时创建 `record.json`，并遵守 [角色档案格式](../../../../doc/raid/character-record-format.md)。
+本文件是可选的人读说明；同目录必须有 `character.json`，并遵守 [角色档案格式](../../../../doc/raid/character-record-format.md)。只记录无法由结构化词条表达的日志、推断、冲突与待确认项。
 
 ## 接入条件
 
