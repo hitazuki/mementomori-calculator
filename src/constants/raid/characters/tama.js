@@ -1,7 +1,7 @@
 import { RAID_ELEMENTS, RAID_STATUS_CLASSES, bossStatusEffect, hook, normalPhysical, statusEffect } from '../shared.js'
 
 export default {
-  id: 81, nameKey: 'raidCharTama', speed: 3286, element: RAID_ELEMENTS.LIGHT, normal: normalPhysical, permanentModifiers: [],
+  id: 81, nameKey: 'raidCharTama', speed: 3286, element: RAID_ELEMENTS.YELLOW, normal: normalPhysical, permanentModifiers: [],
   hooks: [
     hook('roundStart', [
       statusEffect({ id: 'tama-shield', effectGroupId: 8100340102, nameKey: 'raidBuffTamaShield', target: 'topAttack', targetCount: 1, duration: 8 }),

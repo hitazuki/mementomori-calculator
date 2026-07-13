@@ -1,7 +1,7 @@
 import { RAID_ELEMENTS, RAID_STATUS_CLASSES, bossStatusEffect, copyStatusesEffect, hook, normalPhysical, statusEffect } from '../shared.js'
 
 export default {
-  id: 100, nameKey: 'raidCharMowano', speed: 3145, element: RAID_ELEMENTS.LIGHT, normal: normalPhysical, permanentModifiers: [],
+  id: 100, nameKey: 'raidCharMowano', speed: 3145, element: RAID_ELEMENTS.YELLOW, normal: normalPhysical, permanentModifiers: [],
   hooks: [
     hook('roundStart', [statusEffect({ id: 'mowano-shield', effectGroupId: 10000430101, nameKey: 'raidBuffMowanoShield', target: 'self', duration: 10, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE })], { everyRounds: 10, roundOffset: 1 }),
     hook('actionStart', [copyStatusesEffect({

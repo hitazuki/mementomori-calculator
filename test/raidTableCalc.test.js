@@ -9,6 +9,7 @@ import {
   DEFAULT_RAID_PM_DEFENSE_PENETRATION,
   RAID_BOSS_TEMPLATE_IDS,
   RAID_BOSS_TEMPLATES,
+  RAID_ELEMENTS,
   RAID_JOB_FLAGS,
   RAID_STATUS_CLASSES,
   RAID_TABLE_CHARACTERS,
@@ -48,6 +49,8 @@ function closeTo(actual, expected, tolerance = 1e-8) {
 
 test('roster exposes twenty-seven characters and the original five remain the default lineup', () => {
   assert.equal(RAID_TABLE_ROSTER.length, 27)
+  assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
+  assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(-5), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA])

@@ -26,9 +26,33 @@
       <button type="button" class="btn btn-ghost btn-sm" @click="resetConfig">↻ {{ $t('raidReset') }}</button>
     </div>
 
-    <div class="raid-roster-grid">
+    <div class="raid-element-filter" role="group" :aria-label="$t('raidElementFilter')">
+      <span class="raid-element-filter-label">{{ $t('raidElementFilter') }}</span>
       <button
-        v-for="id in roster"
+        v-for="option in elementFilters"
+        :key="option.element"
+        type="button"
+        class="raid-element-filter-button"
+        :class="[`element-${option.element}`, { active: selectedRosterElement === option.element }]"
+        :aria-label="$t('raidFilterByElement', { element: $t(option.nameKey) })"
+        :aria-pressed="selectedRosterElement === option.element"
+        :title="$t(option.nameKey)"
+        @click="toggleRosterElement(option.element)"
+      >
+        <img
+          class="raid-element-icon"
+          :src="elementIconUrl(option.element)"
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+        >
+        <span>{{ $t(option.nameKey) }}</span>
+      </button>
+    </div>
+
+    <div v-if="filteredRoster.length" class="raid-roster-grid">
+      <button
+        v-for="id in filteredRoster"
         :key="id"
         type="button"
         class="raid-roster-item"
@@ -39,6 +63,7 @@
         <CharacterLabel :id="id" strong /><small>#{{ id }} · {{ $t('raidBaseSpeed') }} {{ speeds[id] }}</small>
       </button>
     </div>
+    <p v-else class="raid-roster-empty">{{ $t('raidNoCharactersForElement') }}</p>
 
     <div class="raid-assumption-grid">
       <label class="raid-number-control raid-select-control">
@@ -251,7 +276,7 @@
 <script setup>
 import { computed, defineComponent, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RAID_BOSS_TEMPLATES, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
+import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 
 const OrderList = defineComponent({
@@ -305,8 +330,17 @@ const CharacterSequence = defineComponent({
 })
 
 const roster = [...RAID_TABLE_ROSTER].sort((left, right) => left - right)
+const elementFilters = Object.freeze([
+  { element: RAID_ELEMENTS.BLUE, nameKey: 'raidElementBlue' },
+  { element: RAID_ELEMENTS.RED, nameKey: 'raidElementRed' },
+  { element: RAID_ELEMENTS.GREEN, nameKey: 'raidElementGreen' },
+  { element: RAID_ELEMENTS.YELLOW, nameKey: 'raidElementYellow' },
+  { element: RAID_ELEMENTS.LIGHT, nameKey: 'raidElementLight' },
+  { element: RAID_ELEMENTS.DARK, nameKey: 'raidElementDark' },
+])
 const bossTemplates = Object.values(RAID_BOSS_TEMPLATES)
 const defaults = createDefaultRaidTableConfig()
+const selectedRosterElement = ref(null)
 const lineup = ref([...defaults.lineup])
 const attackPriority = ref([...defaults.attackPriority])
 const speeds = reactive({ ...defaults.speeds })
@@ -318,6 +352,9 @@ const guaranteedCritical = ref(defaults.guaranteedCritical)
 const baseCriticalDamagePercent = ref(roundBaseCriticalDamagePercent(defaults.baseCriticalDamageBonus * 100))
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
 const selectedEvent = ref(null)
+const filteredRoster = computed(() => selectedRosterElement.value == null
+  ? roster
+  : roster.filter(id => RAID_TABLE_CHARACTERS[id].element === selectedRosterElement.value))
 
 const result = computed(() => simulateRaidTable({
   lineup: lineup.value,
@@ -343,6 +380,7 @@ const bossTemplateStats = computed(() => t('raidBossTemplateStats', {
 
 function characterName(id) { return t(RAID_TABLE_CHARACTERS[id].nameKey) }
 function characterIconUrl(id) { return `${import.meta.env.BASE_URL}images/characters/${id}.png` }
+function elementIconUrl(element) { return `${import.meta.env.BASE_URL}images/elements/icon_element_${element}.png` }
 function counterLabel(id, key) { return t(RAID_TABLE_CHARACTERS[id].counterLabels?.[key] ?? key) }
 function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(locale.value, { maximumFractionDigits, minimumFractionDigits: 0 }) }
 function roundBaseCriticalDamagePercent(value) { return Number((Number(value) || 0).toFixed(1)) }
@@ -373,6 +411,10 @@ function toggleCharacter(id) {
   selectedEvent.value = null
 }
 
+function toggleRosterElement(element) {
+  selectedRosterElement.value = selectedRosterElement.value === element ? null : element
+}
+
 function moveItem(list, index, delta) {
   const next = index + delta
   if (next < 0 || next >= list.length) return
@@ -383,6 +425,7 @@ function moveItem(list, index, delta) {
 
 function resetConfig() {
   const next = createDefaultRaidTableConfig()
+  selectedRosterElement.value = null
   lineup.value = [...next.lineup]; attackPriority.value = [...next.attackPriority]
   Object.assign(speeds, next.speeds); guaranteedCritical.value = next.guaranteedCritical
   bossTemplateId.value = next.bossTemplateId

@@ -1,7 +1,7 @@
 import { RAID_ELEMENTS, RAID_STATUS_CLASSES, bossStatusEffect, hook, normalPhysical, statusEffect } from '../shared.js'
 
 export default {
-  id: 128, nameKey: 'raidCharLiberia', speed: 3597, element: RAID_ELEMENTS.DARK, normal: normalPhysical, permanentModifiers: [],
+  id: 128, nameKey: 'raidCharLiberia', speed: 3597, element: RAID_ELEMENTS.LIGHT, normal: normalPhysical, permanentModifiers: [],
   hooks: [hook('battleStart', [statusEffect({
     id: 'liberia-defense-atk', effectGroupId: 12800330101, nameKey: 'raidBuffLiberiaDefenseAttack', target: 'topAttack', targetCount: 2,
     duration: 4, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE,

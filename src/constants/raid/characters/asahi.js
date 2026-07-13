@@ -7,13 +7,13 @@ const windForest = statusEffect({
 })
 
 export default {
-  id: 78, nameKey: 'raidCharAsahi', speed: 3044, element: RAID_ELEMENTS.LIGHT, normal: normalPhysical,
+  id: 78, nameKey: 'raidCharAsahi', speed: 3044, element: RAID_ELEMENTS.YELLOW, normal: normalPhysical,
   runtime: { counters: { windForest: 0 }, flags: {} }, counterLabels: { windForest: 'raidBuffAsahiWindForest' }, permanentModifiers: [],
   hooks: [
     hook('battleStart', [
       statusEffect({ id: 'asahi-damage-reduction', effectGroupId: 7800440101, nameKey: 'raidBuffAsahiDamageReduction', target: 'self', duration: 10 }),
       statusEffect({ id: 'asahi-defense', effectGroupId: 7800420102, nameKey: 'raidBuffAsahiDefense', target: 'self', duration: 10 }),
-      statusEffect({ id: 'asahi-shield', effectGroupId: 7800430103, nameKey: 'raidBuffAsahiShield', target: 'self', duration: 10, condition: { type: 'otherLineupElementCountAtLeast', element: RAID_ELEMENTS.LIGHT, count: 2 } }),
+      statusEffect({ id: 'asahi-shield', effectGroupId: 7800430103, nameKey: 'raidBuffAsahiShield', target: 'self', duration: 10, condition: { type: 'otherLineupElementCountAtLeast', element: RAID_ELEMENTS.YELLOW, count: 2 } }),
     ]),
     hook('actionEnd', [{ type: 'changeCounter', counter: 'windForest', amount: 1, max: 15, id: 'asahi-wind-forest', nameKey: 'raidBuffAsahiWindForest', eventType: 'counter' }, windForest]),
     hook('actionEnd', [{ type: 'changeCounter', counter: 'windForest', amount: 1, max: 15, id: 'asahi-wind-forest-bonus-4', nameKey: 'raidBuffAsahiWindForest', eventType: 'counter' }], { condition: { type: 'actorRemovableBuffCountAtLeast', count: 4 } }),

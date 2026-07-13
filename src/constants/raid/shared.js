@@ -6,7 +6,7 @@ export const RAID_STATUS_CLASSES = Object.freeze({
   INTERNAL_MARK: 'internalMark',
 })
 
-export const RAID_ELEMENTS = Object.freeze({ BLUE: 1, RED: 2, GREEN: 3, LIGHT: 4, DARK: 5 })
+export const RAID_ELEMENTS = Object.freeze({ BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
 
 export const RAID_JOB_FLAGS = Object.freeze({ WARRIOR: 1, SNIPER: 2, MAGE: 4 })
 

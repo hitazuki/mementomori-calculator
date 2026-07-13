@@ -1,7 +1,7 @@
 import { RAID_ELEMENTS, RAID_STATUS_CLASSES, bossStatusEffect, hook, normalPhysical, statusEffect } from '../shared.js'
 
 export default {
-  id: 113, nameKey: 'raidCharRustica', speed: 3187, element: RAID_ELEMENTS.LIGHT, normal: normalPhysical, permanentModifiers: [],
+  id: 113, nameKey: 'raidCharRustica', speed: 3187, element: RAID_ELEMENTS.YELLOW, normal: normalPhysical, permanentModifiers: [],
   hooks: [
     hook('actionStart', [statusEffect({
       id: 'rustica-action-atk', effectGroupId: 11300430301, nameKey: 'raidBuffRusticaActionAttack', target: 'self', duration: 1,

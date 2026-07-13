@@ -7,11 +7,11 @@ const fairy = statusEffect({
 })
 
 export default {
-  id: 135, nameKey: 'raidCharMerlan', speed: 3018, element: RAID_ELEMENTS.LIGHT, normal: normalMagic,
+  id: 135, nameKey: 'raidCharMerlan', speed: 3018, element: RAID_ELEMENTS.YELLOW, normal: normalMagic,
   runtime: { counters: { fairy: 0 }, flags: {} }, counterLabels: { fairy: 'raidBuffMerlanFairy' }, permanentModifiers: [],
   hooks: [
     hook('roundStart', [{ type: 'changeCounter', counter: 'fairy', amount: 1, max: 30, id: 'merlan-fairy', nameKey: 'raidBuffMerlanFairy', eventType: 'counter' }, fairy]),
-    hook('roundStart', [{ type: 'changeCounter', counter: 'fairy', amount: 1, max: 30, id: 'merlan-fairy-bonus', nameKey: 'raidBuffMerlanFairy', eventType: 'counter' }], { condition: { type: 'otherLineupElementCountAtLeast', element: RAID_ELEMENTS.LIGHT, count: 2 } }),
+    hook('roundStart', [{ type: 'changeCounter', counter: 'fairy', amount: 1, max: 30, id: 'merlan-fairy-bonus', nameKey: 'raidBuffMerlanFairy', eventType: 'counter' }], { condition: { type: 'otherLineupElementCountAtLeast', element: RAID_ELEMENTS.YELLOW, count: 2 } }),
     hook('roundStart', [statusEffect({ id: 'merlan-shield', effectGroupId: 13500340201, nameKey: 'raidBuffMerlanShield', target: 'self', duration: 4 })], { everyRounds: 4, roundOffset: 1, condition: { type: 'roundAtMost', round: 12 } }),
     hook('roundStart', [statusEffect({ id: 'merlan-guard', effectGroupId: 13500430101, nameKey: 'raidBuffMerlanGuard', target: 'self', duration: 4 })], { everyRounds: 4, roundOffset: 1 }),
   ],

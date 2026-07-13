@@ -11,6 +11,65 @@
 
 .raid-summary-extra { margin-top: 5px; color: var(--purple-light); font-family: var(--font-mono); font-size: var(--fs-xs); }
 
+.raid-element-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.raid-element-filter-label {
+  margin-right: 2px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.raid-element-filter-button {
+  --raid-element-color: var(--text-muted);
+  --raid-element-rgb: var(--color-invert-rgb);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: rgba(var(--color-invert-rgb), 0.025);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
+}
+
+.raid-element-filter-button:hover,
+.raid-element-filter-button.active {
+  border-color: var(--raid-element-color);
+  background: rgba(var(--raid-element-rgb), 0.14);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.raid-element-filter-button:focus-visible {
+  outline: 2px solid var(--raid-element-color);
+  outline-offset: 2px;
+}
+
+.raid-element-filter-button.element-1 { --raid-element-color: #64a9ff; --raid-element-rgb: 100, 169, 255; }
+.raid-element-filter-button.element-2 { --raid-element-color: #ff6f70; --raid-element-rgb: 255, 111, 112; }
+.raid-element-filter-button.element-3 { --raid-element-color: #63ce8b; --raid-element-rgb: 99, 206, 139; }
+.raid-element-filter-button.element-4 { --raid-element-color: #e8c65d; --raid-element-rgb: 232, 198, 93; }
+.raid-element-filter-button.element-5 { --raid-element-color: #f2e7bb; --raid-element-rgb: 242, 231, 187; }
+.raid-element-filter-button.element-6 { --raid-element-color: #a87be8; --raid-element-rgb: 168, 123, 232; }
+
+.raid-element-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  user-select: none;
+}
+
 .raid-roster-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -29,6 +88,16 @@
   color: var(--text-primary);
   text-align: left;
   cursor: pointer;
+}
+
+.raid-roster-empty {
+  margin: 0 0 12px;
+  padding: 18px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--r-md);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
 }
 
 .raid-character-label {

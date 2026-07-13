@@ -12,7 +12,7 @@ const flameLampOther = statusEffect({
 })
 
 export default {
-  id: 126, nameKey: 'raidCharMifri', speed: 3136, element: RAID_ELEMENTS.LIGHT, normal: normalMagic,
+  id: 126, nameKey: 'raidCharMifri', speed: 3136, element: RAID_ELEMENTS.YELLOW, normal: normalMagic,
   runtime: { counters: { flameLamp: 0 }, flags: {} }, counterLabels: { flameLamp: 'raidBuffMifriFlameLamp' }, permanentModifiers: [],
   hooks: [
     hook('actionStart', [{ type: 'changeCounter', counter: 'flameLamp', amount: 1, max: 15, id: 'mifri-flame-lamp', nameKey: 'raidBuffMifriFlameLamp', eventType: 'counter' }, flameLampSelf, flameLampOther]),

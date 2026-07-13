@@ -6,7 +6,7 @@ const wordSpell = statusEffect({
 })
 
 export default {
-  id: 115, nameKey: 'raidCharPopri', speed: 3036, element: RAID_ELEMENTS.LIGHT, normal: normalPhysical,
+  id: 115, nameKey: 'raidCharPopri', speed: 3036, element: RAID_ELEMENTS.YELLOW, normal: normalPhysical,
   runtime: { counters: { wordSpell: 0 }, flags: {} }, counterLabels: { wordSpell: 'raidBuffPopriWordSpell' }, permanentModifiers: [],
   hooks: [
     hook('roundStart', [
@@ -21,7 +21,7 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillPopriS1', cooldown: 4, damageType: 'phys', hooks: [
         hook('beforeDamage', [{ type: 'changeCounter', counter: 'wordSpell', amount: 1, max: 5, id: 'popri-word-spell', nameKey: 'raidBuffPopriWordSpell', eventType: 'counter' }, wordSpell]),
-        hook('beforeDamage', [{ type: 'changeCounter', counter: 'wordSpell', amount: 1, max: 5, id: 'popri-word-spell-bonus', nameKey: 'raidBuffPopriWordSpell', eventType: 'counter' }], { condition: { type: 'otherLineupElementCountAtLeast', element: RAID_ELEMENTS.LIGHT, count: 2 } }),
+        hook('beforeDamage', [{ type: 'changeCounter', counter: 'wordSpell', amount: 1, max: 5, id: 'popri-word-spell-bonus', nameKey: 'raidBuffPopriWordSpell', eventType: 'counter' }], { condition: { type: 'otherLineupElementCountAtLeast', element: RAID_ELEMENTS.YELLOW, count: 2 } }),
       ],
       damageSteps: [{ stat: 'ATK', percent: { type: 'counterThresholds', counter: 'wordSpell', values: [210, 210, 210, 630] }, hits: 6, damageType: 'phys' }],
     },

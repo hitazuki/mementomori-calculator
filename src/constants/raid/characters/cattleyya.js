@@ -1,7 +1,7 @@
 import { RAID_ELEMENTS, RAID_STATUS_CLASSES, hook, normalPhysical, statusEffect } from '../shared.js'
 
 export default {
-  id: 90, nameKey: 'raidCharCattleyya', speed: 2984, element: RAID_ELEMENTS.LIGHT, normal: normalPhysical, permanentModifiers: [],
+  id: 90, nameKey: 'raidCharCattleyya', speed: 2984, element: RAID_ELEMENTS.YELLOW, normal: normalPhysical, permanentModifiers: [],
   hooks: [
     hook('battleStart', [statusEffect({ id: 'cattleyya-damage-reduction', effectGroupId: 9000420101, nameKey: 'raidBuffCattleyyaDamageReduction', target: 'self', duration: null, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE })]),
     hook('roundStart', [
