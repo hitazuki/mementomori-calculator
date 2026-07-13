@@ -21,60 +21,46 @@
       </button>
 
       <ul class="nav-list" id="nav-list">
-        <li class="nav-group-title">📂 {{ $t('navGroupDamage') }}</li>
-        
-        <li 
-          v-for="item in navDamageItems" 
-          :key="item.id"
-          class="nav-item" 
-          :class="{ active: currentView === item.id }"
-          @click="currentView = item.id"
-          :title="$t(item.i18nTitle)"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label">{{ $t(item.i18nLabel) }}</span>
-        </li>
-
-        <li class="nav-group-title">📦 {{ $t('navGroupItemSystem') }}</li>
-
         <li
-          v-for="item in navItemSystemItems"
-          :key="item.id"
-          class="nav-item"
-          :class="{ active: currentView === item.id }"
-          @click="currentView = item.id"
-          :title="$t(item.i18nTitle)"
+          class="nav-item nav-home-item"
+          :class="{ active: currentView === 'home' }"
+          :title="$t('navHome')"
+          tabindex="0"
+          @click="navigateTo('home')"
+          @keydown.enter="navigateTo('home')"
         >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label">{{ $t(item.i18nLabel) }}</span>
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">{{ $t('navHome') }}</span>
         </li>
 
-        <li class="nav-group-title">🎲 {{ $t('navGroupGacha') }}</li>
+        <li v-for="group in SIDEBAR_GROUPS" :key="group.id" class="nav-group" :class="{ open: openGroup === group.id }">
+          <button
+            type="button"
+            class="nav-group-toggle"
+            :aria-expanded="openGroup === group.id"
+            :title="$t(group.labelKey)"
+            @click="toggleGroup(group.id)"
+          >
+            <span class="nav-group-icon">{{ group.icon }}</span>
+            <span class="nav-group-label">{{ $t(group.labelKey) }}</span>
+            <span class="nav-group-chevron" aria-hidden="true">›</span>
+          </button>
 
-        <li
-          v-for="item in navGachaItems"
-          :key="item.id"
-          class="nav-item"
-          :class="{ active: currentView === item.id }"
-          @click="currentView = item.id"
-          :title="$t(item.i18nTitle)"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label">{{ $t(item.i18nLabel) }}</span>
-        </li>
-
-        <li class="nav-group-title">📂 {{ $t('navGroupMysterium') }}</li>
-        
-        <li 
-          v-for="item in navMysteriumItems" 
-          :key="item.id"
-          class="nav-item" 
-          :class="{ active: currentView === item.id }"
-          @click="currentView = item.id"
-          :title="$t(item.i18nTitle)"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label">{{ $t(item.i18nLabel) }}</span>
+          <ul v-show="openGroup === group.id" class="nav-group-items">
+            <li
+              v-for="item in group.items"
+              :key="item.id"
+              class="nav-item"
+              :class="{ active: item.matchViews.includes(currentView) }"
+              :title="$t(item.labelKey)"
+              tabindex="0"
+              @click="navigateTo(item.viewId)"
+              @keydown.enter="navigateTo(item.viewId)"
+            >
+              <span class="nav-icon">{{ item.icon }}</span>
+              <span class="nav-label">{{ $t(item.labelKey) }}</span>
+            </li>
+          </ul>
         </li>
       </ul>
 
@@ -90,10 +76,13 @@
     <main class="main-content">
       <div class="mobile-current-view">
         <span class="mobile-current-icon">{{ currentNavItem?.icon }}</span>
-        <select class="mobile-view-select" v-model="currentView" :aria-label="currentNavItem ? $t(currentNavItem.i18nLabel) : ''">
-          <option v-for="item in allNavItems" :key="item.id" :value="item.id">
-            {{ item.icon }} {{ $t(item.i18nLabel) }}
-          </option>
+        <select class="mobile-view-select" v-model="currentView" :aria-label="currentNavItem ? $t(currentNavItem.labelKey) : ''">
+          <option value="home">⌂ {{ $t('navHome') }}</option>
+          <optgroup v-for="group in mobileNavGroups" :key="group.id" :label="`${group.icon} ${$t(group.labelKey)}`">
+            <option v-for="option in group.options" :key="option.id" :value="option.id">
+              {{ option.icon }} {{ option.parentLabelKey ? `${$t(option.parentLabelKey)} · ${$t(option.labelKey)}` : $t(option.labelKey) }}
+            </option>
+          </optgroup>
         </select>
       </div>
 
@@ -124,7 +113,7 @@
       <!-- Dynamic View Rendering -->
       <div class="view active">
         <KeepAlive>
-          <component :is="activeComponent" />
+          <component :is="activeComponent" @navigate="navigateTo" />
         </KeepAlive>
       </div>
     </main>
@@ -132,9 +121,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watchEffect, defineAsyncComponent, h } from 'vue'
+import { ref, computed, onMounted, watch, watchEffect, defineAsyncComponent, h } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLang } from './i18n/index.js'
+import { DAMAGE_TABS, SIDEBAR_GROUPS, findModuleByView, findSidebarGroupByView } from './constants/navigation.js'
 
 const LoadingOverlay = {
   setup() {
@@ -151,6 +141,7 @@ const createAsyncView = (loader) => defineAsyncComponent({
   delay: 0
 })
 
+const HomeView = createAsyncView(() => import('./views/HomeView.vue'))
 const CalculatorView = createAsyncView(() => import('./views/CalculatorView.vue'))
 const SweepChartView = createAsyncView(() => import('./views/SweepChartView.vue'))
 const HeatmapChartView = createAsyncView(() => import('./views/HeatmapChartView.vue'))
@@ -187,10 +178,8 @@ onMounted(() => {
   document.documentElement.style.setProperty('--body-bg-img', `linear-gradient(to bottom, rgba(var(--color-base-rgb), 0.82), rgba(var(--color-base-rgb), 0.94)), url('${basePath}assets/bg/bg.png')`)
 })
 
-const currentView = ref('calculator')
-const sidebarCollapsed = ref(false)
-
 const viewMap = {
+  home: HomeView,
   calculator: CalculatorView,
   sweep: SweepChartView,
   heatmap: HeatmapChartView,
@@ -206,41 +195,50 @@ const viewMap = {
   forbiddenWeaponGacha: ForbiddenWeaponGachaView
 }
 
+const savedView = localStorage.getItem('mmt-calc-current-view')
+const currentView = ref(Object.hasOwn(viewMap, savedView) ? savedView : 'home')
+const sidebarCollapsed = ref(localStorage.getItem('mmt-calc-sidebar-collapsed') === 'true')
+const savedGroup = localStorage.getItem('mmt-calc-open-nav-group')
+const initialGroup = findSidebarGroupByView(currentView.value)?.id
+const savedGroupIsValid = SIDEBAR_GROUPS.some((group) => group.id === savedGroup)
+const openGroup = ref(initialGroup || (savedGroupIsValid ? savedGroup : 'damage'))
+
 const activeComponent = computed(() => viewMap[currentView.value])
+const currentNavItem = computed(() => {
+  if (currentView.value === 'home') return { icon: '⌂', labelKey: 'navHome' }
+  return DAMAGE_TABS.find((item) => item.id === currentView.value) || findModuleByView(currentView.value)
+})
 
-const allNavItems = computed(() => [
-  ...navDamageItems,
-  ...navItemSystemItems,
-  ...navGachaItems,
-  ...navMysteriumItems
-])
+const mobileNavGroups = SIDEBAR_GROUPS.map((group) => ({
+  ...group,
+  options: group.items.flatMap((item) => item.childViews
+    ? item.childViews.map((child) => ({ ...child, parentLabelKey: item.labelKey }))
+    : [{ id: item.viewId, icon: item.icon, labelKey: item.labelKey }]),
+}))
 
-const currentNavItem = computed(() => allNavItems.value.find(item => item.id === currentView.value))
+function navigateTo(viewId) {
+  if (!Object.hasOwn(viewMap, viewId)) return
+  currentView.value = viewId
+}
 
-const navDamageItems = [
-  { id: 'calculator', icon: '🎯', i18nLabel: 'navCalc', i18nTitle: 'navCalc' },
-  { id: 'sweep', icon: '📈', i18nLabel: 'navSweep', i18nTitle: 'navSweep' },
-  { id: 'heatmap', icon: '🔥', i18nLabel: 'navHeatmap', i18nTitle: 'navHeatmap' },
-  { id: 'tornado', icon: '🌪', i18nLabel: 'navTornado', i18nTitle: 'navTornado' },
-  { id: 'compare', icon: '⚖', i18nLabel: 'navCompare', i18nTitle: 'navCompare' },
-  { id: 'table', icon: '📋', i18nLabel: 'navTable', i18nTitle: 'navTable' },
-  { id: 'raidTable', icon: '🪵', i18nLabel: 'navRaidTable', i18nTitle: 'navRaidTable' }
-]
+function toggleGroup(groupId) {
+  openGroup.value = openGroup.value === groupId ? '' : groupId
+}
 
-const navItemSystemItems = [
-  { id: 'shopExchange', icon: '🛒', i18nLabel: 'navShopExchange', i18nTitle: 'navShopExchange' },
-  { id: 'packCompare', icon: '📊', i18nLabel: 'navPackCompare', i18nTitle: 'navPackCompare' },
-  { id: 'packCalc', icon: '💰', i18nLabel: 'navPackCalc', i18nTitle: 'navPackCalc' }
-]
+watch(currentView, (viewId) => {
+  localStorage.setItem('mmt-calc-current-view', viewId)
+  const group = findSidebarGroupByView(viewId)
+  if (group) openGroup.value = group.id
+})
 
-const navGachaItems = [
-  { id: 'gacha', icon: '🎲', i18nLabel: 'navGacha', i18nTitle: 'navGacha' },
-  { id: 'forbiddenWeaponGacha', icon: '📜', i18nLabel: 'navForbiddenWeaponGacha', i18nTitle: 'navForbiddenWeaponGacha' }
-]
+watch(openGroup, (groupId) => {
+  if (groupId) localStorage.setItem('mmt-calc-open-nav-group', groupId)
+  else localStorage.removeItem('mmt-calc-open-nav-group')
+})
 
-const navMysteriumItems = [
-  { id: 'mysterium', icon: '🔮', i18nLabel: 'navMysterium', i18nTitle: 'navMysterium' }
-]
+watch(sidebarCollapsed, (collapsed) => {
+  localStorage.setItem('mmt-calc-sidebar-collapsed', String(collapsed))
+})
 </script>
 
 <style scoped>

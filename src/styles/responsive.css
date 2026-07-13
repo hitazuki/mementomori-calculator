@@ -1,7 +1,8 @@
 /* 閳光偓閳光偓 Responsive 閳光偓閳光偓 */
 @media (max-width: 900px) {
   .sidebar { width: 56px; }
-  .logo-text, .nav-label, .nav-group-title, .sidebar-footer, .sidebar-collapse-btn { display: none; }
+  .logo-text, .nav-label, .nav-group-title, .nav-group-toggle, .sidebar-footer, .sidebar-collapse-btn { display: none; }
+  .nav-group, .nav-group-items { display: contents !important; }
   .nav-item { justify-content: center; padding: 12px 0; }
   .grid-sidebar, .grid-sidebar-right { grid-template-columns: 1fr; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
@@ -101,6 +102,11 @@
     justify-content: center;
     padding: 0;
     scroll-snap-align: start;
+  }
+  .nav-home-item {
+    margin-bottom: 0;
+    border-bottom: 0;
+    border-radius: var(--r-sm);
   }
   .nav-item::before {
     left: 12px;
