@@ -6,7 +6,7 @@
   "sources": { "activeSkillIds": [81001, 81002], "passiveSkillIds": [81003, 81004], "combatLogs": ["data/battle-logs/y1800mrl.json"] },
   "terms": [
     { "kind": "activeSkill", "sourceId": 81001, "model": "implemented", "summary": "两名最高攻击友军命中状态和单木桩伤害。" },
-    { "kind": "activeSkill", "sourceId": 81002, "model": "implemented", "summary": "四段伤害、第三次倍率和零倍率双防降低。" },
+    { "kind": "activeSkill", "sourceId": 81002, "model": "implemented", "summary": "四段伤害、第三次倍率和防御/物防各降低50%。" },
     { "kind": "passiveSkill", "sourceId": 81003, "model": "implemented", "summary": "最高攻击友军的护盾与三个无效果娃娃 Buff。" },
     { "kind": "passiveSkill", "sourceId": 81004, "model": "ignored", "summary": "依赖受击、HP 与存活人数的透明。" }
   ],

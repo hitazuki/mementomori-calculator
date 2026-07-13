@@ -15,7 +15,7 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillCarolS2', cooldown: 4, damageType: 'mag',
       damageSteps: [{ stat: 'ATK', percent: 365, hits: 1, damageType: 'mag', originalTargetCount: 5 }],
-      hooks: [hook('beforeDamage', [bossStatusEffect({ id: 'carol-defense-down', effectGroupId: 4000230101, nameKey: 'raidDebuffCarolDefenseDown', durationRounds: 2, damageRatePerStack: 0 })])],
+      hooks: [hook('beforeDamage', [bossStatusEffect({ id: 'carol-defense-down', effectGroupId: 4000230101, nameKey: 'raidDebuffCarolDefenseDown', durationRounds: 2, defenseRatePerStack: -0.4 })])],
       ignoredKeys: ['raidIgnoredBuffDispel'],
     },
   },

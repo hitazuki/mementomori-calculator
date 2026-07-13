@@ -20,8 +20,8 @@ export default {
       key: 's1', nameKey: 'raidSkillMerlanS1', cooldown: 4, damageType: 'mag',
       damageSteps: [{ stat: 'ATK', percent: 440, hits: 1, damageType: 'mag', originalTargetCount: 5 }],
       hooks: [hook('beforeDamage', [
-        bossStatusEffect({ id: 'merlan-magic-defense-down', effectGroupId: 13500100102, nameKey: 'raidDebuffMerlanMagicDefenseDown', durationRounds: 5, addStacks: 1, maxStacks: 8, damageRatePerStack: 0 }),
-        bossStatusEffect({ id: 'merlan-magic-defense-down', effectGroupId: 13500100102, nameKey: 'raidDebuffMerlanMagicDefenseDown', durationRounds: 5, addStacks: 2, maxStacks: 8, damageRatePerStack: 0, condition: { type: 'skillUsesAtLeast', skillKey: 's1', count: 2 } }),
+        bossStatusEffect({ id: 'merlan-magic-defense-down', effectGroupId: 13500100102, nameKey: 'raidDebuffMerlanMagicDefenseDown', durationRounds: 5, addStacks: 1, maxStacks: 8, magicDefenseRatePerStack: -0.05 }),
+        bossStatusEffect({ id: 'merlan-magic-defense-down', effectGroupId: 13500100102, nameKey: 'raidDebuffMerlanMagicDefenseDown', durationRounds: 5, addStacks: 2, maxStacks: 8, magicDefenseRatePerStack: -0.05, condition: { type: 'skillUsesAtLeast', skillKey: 's1', count: 2 } }),
       ])],
     },
     s2: {

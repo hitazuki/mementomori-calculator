@@ -1,4 +1,6 @@
-import { RAID_STATUS_CLASSES } from '../../constants/raidTableCharacters.js'
+import { RAID_JOB_FLAGS, RAID_STATUS_CLASSES } from '../../constants/raidTableCharacters.js'
+import { getCoeffByLevel } from '../../constants/levelTable.js'
+import { calcDamageRate } from '../damageCalc.js'
 
 const MODIFIER_CHANNELS = ['attackRate', 'damageRate', 'criticalDamageBonus', 'speedRate', 'cooldownRecoveryBonus']
 
@@ -61,7 +63,7 @@ export function runRaidProgram(program) {
       },
     }]
   }))
-  const boss = { statuses: [] }
+  const boss = { template: config.bossTemplate, statuses: [] }
 
   function removableBuffCount(actor) {
     return actor.statuses.filter(status => status.statusClass === RAID_STATUS_CLASSES.REMOVABLE_BUFF).length
@@ -161,6 +163,9 @@ export function runRaidProgram(program) {
       id: effect.id, replacementKey, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey, statusClass: effect.statusClass, sourceId,
       stacks: Math.min(effect.maxStacks ?? 1, (existing?.stacks ?? 0) + (effect.addStacks ?? 1)),
       maxStacks: effect.maxStacks ?? 1, damageRatePerStack: effect.damageRatePerStack ?? 0,
+      defenseRatePerStack: effect.defenseRatePerStack ?? 0,
+      physicalDefenseRatePerStack: effect.physicalDefenseRatePerStack ?? 0,
+      magicDefenseRatePerStack: effect.magicDefenseRatePerStack ?? 0,
       durationRounds: effect.durationRounds, remainingRounds: effect.durationRounds, appliedRound: round,
     }
     if (index >= 0) boss.statuses.splice(index, 1, status)
@@ -245,6 +250,9 @@ export function runRaidProgram(program) {
       type: 'bossStatus', id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey,
       phase: context.phase, sourceId: context.ownerId, statusClass: effect.statusClass,
       addStacks: effect.addStacks, durationRounds: effect.durationRounds,
+      defenseRatePerStack: effect.defenseRatePerStack,
+      physicalDefenseRatePerStack: effect.physicalDefenseRatePerStack,
+      magicDefenseRatePerStack: effect.magicDefenseRatePerStack,
       before: applied.before, after: applied.after, stacks: applied.status.stacks,
     })
   }
@@ -415,6 +423,58 @@ export function runRaidProgram(program) {
     return boss.statuses.reduce((total, status) => total + status.stacks * status.damageRatePerStack, 0)
   }
 
+  function bossDefenseRates() {
+    return boss.statuses.reduce((totals, status) => ({
+      defenseRate: totals.defenseRate + status.stacks * status.defenseRatePerStack,
+      physicalDefenseRate: totals.physicalDefenseRate + status.stacks * status.physicalDefenseRatePerStack,
+      magicDefenseRate: totals.magicDefenseRate + status.stacks * status.magicDefenseRatePerStack,
+    }), {
+      defenseRate: boss.template.defenseRate ?? 0,
+      physicalDefenseRate: boss.template.physicalDefenseRate ?? 0,
+      magicDefenseRate: boss.template.magicDefenseRate ?? 0,
+    })
+  }
+
+  function actorDamageType(actor, rawStep) {
+    if (rawStep.damageType === 'direct') return 'direct'
+    return actor.definition.jobFlags === RAID_JOB_FLAGS.MAGE ? 'mag' : 'phys'
+  }
+
+  function defenseSnapshot(actor, damageType) {
+    const attackerLevel = config.levels[actor.id]
+    const defensePenetration = config.defensePenetrations[actor.id]
+    const pmDefensePenetration = config.pmDefensePenetrations[actor.id]
+    const rates = bossDefenseRates()
+    const baseDefense = boss.template.defense
+    const basePmDefense = damageType === 'mag' ? boss.template.magicDefense : boss.template.physicalDefense
+    const pmDefenseRate = damageType === 'mag' ? rates.magicDefenseRate : rates.physicalDefenseRate
+    const actualDefense = Math.max(0, baseDefense * (1 + rates.defenseRate))
+    const actualPmDefense = Math.max(0, basePmDefense * (1 + pmDefenseRate))
+    if (damageType === 'direct') return {
+      applies: false, damageType, attackerLevel, defensePenetration, pmDefensePenetration,
+      baseDefense, basePmDefense: null, defenseRate: rates.defenseRate, pmDefenseRate: 0,
+      actualDefense, actualPmDefense: null, defensePassRate: 1, pmDefensePassRate: 1,
+      defenseMitigationRate: 0, pmDefenseMitigationRate: 0, multiplier: 1,
+    }
+    const attackerCoeff = getCoeffByLevel(attackerLevel)
+    const bossCoeff = getCoeffByLevel(boss.template.level)
+    const defensePassRate = calcDamageRate(actualDefense, defensePenetration, bossCoeff.cDef, attackerCoeff.cPen)
+    const pmDefensePassRate = calcDamageRate(
+      actualPmDefense,
+      pmDefensePenetration,
+      damageType === 'mag' ? bossCoeff.cMdef : bossCoeff.cPdef,
+      attackerCoeff.cPmPen,
+    )
+    return {
+      applies: true, damageType, attackerLevel, defensePenetration, pmDefensePenetration,
+      baseDefense, basePmDefense, defenseRate: rates.defenseRate, pmDefenseRate,
+      actualDefense, actualPmDefense, defensePassRate, pmDefensePassRate,
+      defenseMitigationRate: 1 - defensePassRate,
+      pmDefenseMitigationRate: 1 - pmDefensePassRate,
+      multiplier: defensePassRate * pmDefensePassRate,
+    }
+  }
+
   function executeDamageSteps(actor, action, context) {
     const damageSteps = []
     const actionScaling = {}
@@ -435,10 +495,12 @@ export function runRaidProgram(program) {
         const critical = config.guaranteedCritical
         const criticalMultiplier = critical ? 1 + config.baseCriticalDamageBonus + modifiers.totals.criticalDamageBonus : 1
         const attackScale = rawStep.stat === 'ATK' ? 1 + modifiers.totals.attackRate : 1
-        const effectivePercent = percent * attackScale * (1 + damageRate) * criticalMultiplier
+        const damageType = actorDamageType(actor, rawStep)
+        const defense = defenseSnapshot(actor, damageType)
+        const effectivePercent = percent * attackScale * (1 + damageRate) * criticalMultiplier * defense.multiplier
         const scalingTerms = rawStep.stat === 'ATK'
           ? modifiers.symbolicSources.map(source => ({
-            ...source, coefficient: percent * source.coefficient * (1 + damageRate) * criticalMultiplier,
+            ...source, coefficient: percent * source.coefficient * (1 + damageRate) * criticalMultiplier * defense.multiplier,
           }))
           : []
 
@@ -455,11 +517,11 @@ export function runRaidProgram(program) {
         const bossAfter = snapshotBoss(boss)
 
         damageSteps.push({
-          index: hitSequence, stat: rawStep.stat, damageType: rawStep.damageType, percent,
+          index: hitSequence, stat: rawStep.stat, damageType, percent,
           hit, hits, originalTargetCount: rawStep.originalTargetCount, conditionKey: rawStep.conditionKey,
           critical, criticalMultiplier, attackRate: modifiers.totals.attackRate,
           actorDamageRate: modifiers.totals.damageRate, bossDamageRate: incomingRate, damageRate,
-          effectivePercent, scalingTerms, modifierSources: modifiers.sources,
+          defenseMultiplier: defense.multiplier, defense, effectivePercent, scalingTerms, modifierSources: modifiers.sources,
           bossStatusBefore: bossBefore, bossStatusAfter: bossAfter,
         })
       }
@@ -558,7 +620,7 @@ export function runRaidProgram(program) {
 
   return {
     config, rounds, characterTotals, teamAtkPercent, symbolicTotals, scalingTotals,
-    battleStartEffects, bossStatusFinal: snapshotBoss(boss),
+    battleStartEffects, bossTemplate: boss.template, bossStatusFinal: snapshotBoss(boss),
     warnings: ['raidWarningNormalizedAttack', 'raidWarningCriticalAssumption', 'raidWarningSymbolicScaling', 'raidWarningFixedDummy'],
   }
 }

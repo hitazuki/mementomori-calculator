@@ -12,7 +12,7 @@
   ],
   "effectGroups": [
     { "id": 13200130201, "model": "implemented", "summary": "第7回合前承伤+10%，SkillCategory 3，持续4回合。" },
-    { "id": 13200130202, "model": "implemented", "summary": "第7回合前魔防-20%，零倍率弱化。" },
+    { "id": 13200130202, "model": "implemented", "summary": "第7回合前魔防-20%，进入魔防路。" },
     { "id": 13200130203, "model": "implemented", "summary": "第7回合起承伤+20%，替换前档。" },
     { "id": 13200130204, "model": "implemented", "summary": "第7回合起魔防-40%，替换前档。" },
     { "id": 13200230501, "model": "implemented", "summary": "第7回合起概率沉默，2回合零倍率弱化。" },
@@ -24,7 +24,6 @@
   ],
   "ignored": [
     { "key": "raidIgnoredHealing", "summary": "回复量不结算，仅广播事件。" },
-    { "key": "raidIgnoredMagicDefenseDown", "summary": "保留弱化组，防御不结算。" },
     { "key": "raidIgnoredSilence", "summary": "木桩不行动，保留弱化组但不模拟禁技。" }
   ],
   "unresolved": ["沉默概率采用成功/失败场景，不计算期望。"]

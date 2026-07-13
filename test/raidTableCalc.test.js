@@ -3,7 +3,13 @@ import assert from 'node:assert/strict'
 
 import {
   DEFAULT_RAID_ATTACK_PRIORITY,
+  DEFAULT_RAID_CHARACTER_LEVEL,
+  DEFAULT_RAID_DEFENSE_PENETRATION,
   DEFAULT_RAID_LINEUP,
+  DEFAULT_RAID_PM_DEFENSE_PENETRATION,
+  RAID_BOSS_TEMPLATE_IDS,
+  RAID_BOSS_TEMPLATES,
+  RAID_JOB_FLAGS,
   RAID_STATUS_CLASSES,
   RAID_TABLE_CHARACTERS,
   RAID_TABLE_CHARACTER_IDS,
@@ -16,7 +22,7 @@ import {
   compileRaidProgram,
   simulateRaidTable,
 } from '../src/engine/raidTableCalc.js'
-import { hook, statusEffect } from '../src/constants/raid/shared.js'
+import { bossStatusEffect, hook, statusEffect } from '../src/constants/raid/shared.js'
 
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
@@ -47,6 +53,16 @@ test('roster exposes twenty-seven characters and the original five remain the de
   assert.deepEqual(RAID_TABLE_ROSTER.slice(-5), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA])
 })
 
+test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
+  const defaults = createDefaultRaidTableConfig()
+  assert.equal(defaults.bossTemplateId, RAID_BOSS_TEMPLATE_IDS.SONYA)
+  assert.equal(defaults.levels[FLORENCE], DEFAULT_RAID_CHARACTER_LEVEL)
+  assert.equal(defaults.defensePenetrations[FLORENCE], DEFAULT_RAID_DEFENSE_PENETRATION)
+  assert.equal(defaults.pmDefensePenetrations[FLORENCE], DEFAULT_RAID_PM_DEFENSE_PENETRATION)
+  assert.equal(RAID_BOSS_TEMPLATES.sonya.defense, 200_000)
+  assert.equal(RAID_BOSS_TEMPLATES.luke.physicalDefense, 600_000)
+})
+
 test('lineups accept one to five unique supported characters', () => {
   assert.equal(simulateRaidTable(singleConfig(ARTORIA, { turns: 1 })).config.lineup.length, 1)
   assert.equal(simulateRaidTable().config.lineup.length, 5)
@@ -56,6 +72,27 @@ test('lineups accept one to five unique supported characters', () => {
     lineup: [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA],
     attackPriority: [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA],
   }), /one to five/)
+  assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { bossTemplateId: 'unknown' })), /Unsupported raid Boss template/)
+  assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { levels: { [FLORENCE]: 0 } })), /Invalid level/)
+  assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { defensePenetrations: { [FLORENCE]: -1 } })), /Invalid defense penetration/)
+})
+
+test('Boss template and per-character level and penetration settings change defense pass rates', () => {
+  const sonya = simulateRaidTable(singleConfig(FLORENCE, { turns: 1 }))
+  const luke = simulateRaidTable(singleConfig(FLORENCE, {
+    turns: 1,
+    bossTemplateId: RAID_BOSS_TEMPLATE_IDS.LUKE,
+    levels: { [FLORENCE]: 240 },
+    defensePenetrations: { [FLORENCE]: 0 },
+    pmDefensePenetrations: { [FLORENCE]: 0 },
+  }))
+  const sonyaStep = action(sonya, 1, FLORENCE).damageSteps[0]
+  const lukeStep = action(luke, 1, FLORENCE).damageSteps[0]
+  assert.equal(luke.config.levels[FLORENCE], 240)
+  assert.equal(luke.config.bossTemplateId, RAID_BOSS_TEMPLATE_IDS.LUKE)
+  assert.equal(lukeStep.defense.baseDefense, 300_000)
+  assert.equal(lukeStep.defense.basePmDefense, 600_000)
+  assert.ok(lukeStep.defenseMultiplier < sonyaStep.defenseMultiplier)
 })
 
 test('default speed order matches MB values and can be overridden', () => {
@@ -115,7 +152,51 @@ test('Florence damage bonus and two Luke stacks add in one damage-rate channel',
   const florence = action(result, 1, FLORENCE)
   assert.equal(florence.damageSteps.length, 10)
   assert.ok(florence.damageSteps.every(step => Math.abs(step.damageRate - 0.6) < 1e-12))
-  closeTo(florence.damageSteps[0].effectivePercent, 525 * 1.3 * 1.6 * 2.1)
+  closeTo(florence.damageSteps[0].effectivePercent, 525 * 1.3 * 1.6 * 2.1 * florence.damageSteps[0].defenseMultiplier)
+})
+
+test('job flags select physical or magic defense while direct damage bypasses both paths', () => {
+  const lineup = [FLORENCE, FENRIR, LUKE]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 1 })
+  const florence = action(result, 1, FLORENCE).damageSteps[0]
+  const fenrir = action(result, 1, FENRIR).damageSteps[0]
+  const luke = action(result, 1, LUKE).damageSteps
+  assert.equal(RAID_TABLE_CHARACTERS[FLORENCE].jobFlags, RAID_JOB_FLAGS.WARRIOR)
+  assert.equal(RAID_TABLE_CHARACTERS[FENRIR].jobFlags, RAID_JOB_FLAGS.MAGE)
+  assert.equal(florence.damageType, 'phys')
+  assert.equal(florence.defense.basePmDefense, RAID_BOSS_TEMPLATES.sonya.physicalDefense)
+  assert.equal(fenrir.damageType, 'mag')
+  assert.equal(fenrir.defense.basePmDefense, RAID_BOSS_TEMPLATES.sonya.magicDefense)
+  assert.equal(luke[1].damageType, 'direct')
+  assert.equal(luke[1].defenseMultiplier, 1)
+})
+
+test('Boss defense buffs and differently named debuffs add by defense path before mitigation', () => {
+  const character = {
+    ...RAID_TABLE_CHARACTERS[FLORENCE],
+    hooks: [],
+    skills: {
+      ...RAID_TABLE_CHARACTERS[FLORENCE].skills,
+      s1: {
+        ...RAID_TABLE_CHARACTERS[FLORENCE].skills.s1,
+        hooks: [hook('beforeDamage', [
+          bossStatusEffect({ id: 'test-defense-down', effectGroupId: 991001, nameKey: 'raidDebuffCarolDefenseDown', defenseRatePerStack: -0.4 }),
+          bossStatusEffect({ id: 'test-defense-up', effectGroupId: 991002, nameKey: 'raidDebuffCarolDefenseDown', defenseRatePerStack: 0.1 }),
+          bossStatusEffect({ id: 'test-physical-down', effectGroupId: 991003, nameKey: 'raidDebuffLiebesPhysicalDefenseDown', physicalDefenseRatePerStack: -0.2 }),
+          bossStatusEffect({ id: 'test-physical-up', effectGroupId: 991004, nameKey: 'raidDebuffLiebesPhysicalDefenseDown', physicalDefenseRatePerStack: 0.05 }),
+        ])],
+      },
+    },
+  }
+  const result = simulateRaidTable(singleConfig(FLORENCE, { turns: 1 }), {
+    ...DEFAULT_RAID_ENVIRONMENT,
+    characters: { ...RAID_TABLE_CHARACTERS, [FLORENCE]: character },
+  })
+  const step = action(result, 1, FLORENCE).damageSteps[0]
+  closeTo(step.defense.defenseRate, -0.3)
+  closeTo(step.defense.pmDefenseRate, -0.15)
+  closeTo(step.defense.actualDefense, 140_000)
+  closeTo(step.defense.actualPmDefense, 425_000)
 })
 
 test('Florence and Luke retain their zero-rate Boss debuffs with source and removal class', () => {
@@ -131,9 +212,9 @@ test('Florence and Luke retain their zero-rate Boss debuffs with source and remo
   assert.equal(lukeStatus.damageRatePerStack, 0)
 })
 
-test('default lineup has a stable new critical-aware golden total', () => {
+test('default lineup has a stable defense-aware golden total', () => {
   const result = simulateRaidTable()
-  closeTo(result.teamAtkPercent, 256388.5975, 1e-7)
+  closeTo(result.teamAtkPercent, 156778.31312842082, 1e-7)
   closeTo(result.symbolicTotals.STR, 6964.65, 1e-8)
 })
 
@@ -264,6 +345,13 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
       type: 'bossStatus', id: 'bad-replacement', replacementKey: '', effectGroupId: 1,
     }] }],
   })), /replacementKey must be a non-empty string/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    hooks: [{ trigger: 'actionStart', effects: [{
+      type: 'bossStatus', id: 'bad-defense-rate', effectGroupId: 1, defenseRatePerStack: Number.NaN,
+    }] }],
+  })), /defenseRatePerStack must be finite/)
 })
 
 test('mechanic registry resolves counters, skill history, conditions, and targets generically', () => {
@@ -365,16 +453,20 @@ test('Guinevere emits two self-damage events, supports probability scenarios, an
   assert.equal(action(disabled, 1, GUINEVERE).effectsApplied.filter(effect => effect.skipped).length, 2)
 })
 
-test('Liebes defense debuffs add two zero-rate Boss groups that power debuff-count effects without defense calculation', () => {
+test('Liebes defense debuffs modify separate defense paths and still power debuff-count effects', () => {
   const result = simulateRaidTable(singleConfig(LIEBES, { turns: 2 }))
   const s1 = action(result, 1, LIEBES)
   const defenseDebuffs = s1.bossStatusAfterAction.filter(status => status.id.startsWith('liebes-'))
   assert.deepEqual(defenseDebuffs.map(status => status.id), ['liebes-defense-down', 'liebes-physical-defense-down'])
   assert.ok(defenseDebuffs.every(status => status.damageRatePerStack === 0))
+  assert.equal(defenseDebuffs[0].defenseRatePerStack, -0.1)
+  assert.equal(defenseDebuffs[1].physicalDefenseRatePerStack, -0.1)
   assert.equal(s1.damageSteps[0].bossDamageRate, 0)
+  assert.equal(s1.damageSteps[0].defense.defenseRate, -0.1)
+  assert.equal(s1.damageSteps[0].defense.pmDefenseRate, -0.1)
   const s2 = action(result, 2, LIEBES)
   assert.equal(s2.damageSteps[0].percent, 600)
-  assert.ok(s2.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 378) < 1e-12))
+  assert.ok(s2.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 378 * s2.damageSteps[0].defenseMultiplier) < 1e-12))
   assert.equal(s2.damageSteps[0].attackRate, 0.1)
 })
 
@@ -471,7 +563,7 @@ test('Popri and Cattleya use round-start state and skill-use thresholds', () => 
   assert.equal(action(cattleyya, 10, CATTLEYYA).damageSteps.length, 12)
 })
 
-test('Merlan round-start Fairy stacks, zero-rate magic-defense debuff, and late-skill branches are deterministic', () => {
+test('Merlan round-start Fairy stacks, magic-defense debuff, and late-skill branches are deterministic', () => {
   const solo = simulateRaidTable(singleConfig(MERLAN, { turns: 10 }))
   const firstSoloAction = action(solo, 1, MERLAN)
   assert.equal(firstSoloAction.runtimeAfter.counters.fairy, 1)
@@ -481,6 +573,8 @@ test('Merlan round-start Fairy stacks, zero-rate magic-defense debuff, and late-
   assert.equal(firstSoloAction.statusSnapshotAtDamage[MERLAN].statuses.find(status => status.id === 'merlan-shield').statusClass, 'removableBuff')
   assert.equal(firstSoloAction.statusSnapshotAtDamage[MERLAN].statuses.find(status => status.id === 'merlan-guard').statusClass, 'removableBuff')
   assert.equal(firstSoloAction.bossStatusAfterAction[0].damageRatePerStack, 0)
+  assert.equal(firstSoloAction.bossStatusAfterAction[0].magicDefenseRatePerStack, -0.05)
+  assert.equal(firstSoloAction.damageSteps[0].defense.pmDefenseRate, -0.05)
   assert.equal(action(solo, 9, MERLAN).bossStatusAfterAction[0].stacks, 5)
   assert.equal(action(solo, 10, MERLAN).damageSteps[0].percent, 630)
 
@@ -500,15 +594,22 @@ test('Tama, Mowano, Carol, and Asahi retain count-relevant groups and supported 
   assert.equal(tama.removableBuffCountsAtActionStart[TAMA], 5)
   assert.equal(tama.removableBuffCountsAtDamage[TAMA], 6)
   assert.equal(tama.damageSteps[0].percent, 280)
+  const tamaS2 = action(result, 2, TAMA).damageSteps[0]
+  assert.equal(tamaS2.defense.defenseRate, -0.9)
+  assert.equal(tamaS2.bossStatusAfter.find(status => status.id === 'tama-defense-down').defenseRatePerStack, -0.5)
+  assert.equal(tamaS2.bossStatusAfter.find(status => status.id === 'tama-defense-down').physicalDefenseRatePerStack, -0.5)
+  assert.equal(tamaS2.defense.pmDefenseRate, -0.75)
 
   const mowano = action(result, 1, MOWANO)
   assert.equal(mowano.removableBuffCountsAtActionStart[MOWANO], 2)
   assert.equal(mowano.bossStatusAfterAction.length, 2)
   assert.equal(mowano.bossStatusAfterAction.find(status => status.id === 'mowano-physical-defense-down').statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF)
+  assert.equal(mowano.damageSteps[0].defense.pmDefenseRate, -0.25)
 
   const carol = action(result, 1, CAROL)
   assert.equal(carol.removableBuffCountsAtActionStart[CAROL], 2)
   assert.equal(action(result, 2, CAROL).bossStatusAfterAction.some(status => status.id === 'carol-defense-down'), true)
+  assert.equal(action(result, 2, CAROL).damageSteps[0].defense.defenseRate, -0.4)
 
   assert.equal(action(result, 1, ASAHI).runtimeAfter.counters.windForest, 2)
   assert.equal(action(result, 2, ASAHI).damageSteps.length, 5)
@@ -537,6 +638,7 @@ test('active-skill healing events preserve recipients and apply green-team stack
   assert.equal(firstStella.runtimeAfter.counters.starlight, 3)
   closeTo(firstStella.damageSteps[0].attackRate, 0.84)
   assert.equal(firstStella.damageSteps[0].bossDamageRate, 0.1)
+  assert.equal(firstStella.damageSteps[0].defense.pmDefenseRate, -0.2)
   assert.deepEqual(firstStella.bossStatusAfterAction.filter(status => status.id.startsWith('winter-stella')).map(status => status.effectGroupId), [13200130201, 13200130202])
 
   const eideneS2 = action(result, 2, EIDENE)
@@ -576,6 +678,7 @@ test('round-seven healing branches, cooldown resets, speed, and Stella debuffs a
   const lateS1 = action(stella, 7, WINTER_STELLA)
   assert.equal(lateS1.actionKey, 's1')
   assert.equal(lateS1.damageSteps[0].bossDamageRate, 0.2)
+  assert.equal(lateS1.damageSteps[0].defense.pmDefenseRate, -0.4)
   assert.deepEqual(lateS1.bossStatusAfterAction.filter(status => status.id.startsWith('winter-stella')).map(status => status.effectGroupId), [13200130203, 13200130204])
   const lateS2 = action(stella, 8, WINTER_STELLA)
   assert.equal(lateS2.actionKey, 's2')
@@ -594,7 +697,7 @@ test('Mowano copies all removable Buffs at action start, including attack, witho
   assert.equal(firstMowano.removableBuffCountsAtActionStart[MOWANO], 0)
   assert.equal(firstMowano.removableBuffCountsAtDamage[MOWANO], 3)
   assert.equal(firstMowano.damageSteps[0].attackRate, 0)
-  closeTo(firstMowano.effectiveAtkPercent, 590 * 2.1)
+  closeTo(firstMowano.effectiveAtkPercent, 590 * 2.1 * firstMowano.damageSteps[0].defenseMultiplier)
   assert.equal(copied.find(effect => effect.effectGroupId === 9000140103).symbolicModifiers[0].coefficient, 0.2)
   const copiedAttackSource = firstMowano.damageSteps[0].scalingTerms.find(source => source.effectGroupId === 9000140103)
   assert.equal(copiedAttackSource.sourceId, CATTLEYYA)

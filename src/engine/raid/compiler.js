@@ -1,4 +1,12 @@
-import { RAID_TABLE_CHARACTERS, createDefaultRaidTableConfig } from '../../constants/raidTableCharacters.js'
+import {
+  RAID_BOSS_TEMPLATES,
+  DEFAULT_RAID_CHARACTER_LEVEL,
+  DEFAULT_RAID_DEFENSE_PENETRATION,
+  DEFAULT_RAID_PM_DEFENSE_PENETRATION,
+  RAID_JOB_FLAGS,
+  RAID_TABLE_CHARACTERS,
+  createDefaultRaidTableConfig,
+} from '../../constants/raidTableCharacters.js'
 import { DEFAULT_RAID_MECHANICS } from './mechanics.js'
 
 const SUPPORTED_TRIGGERS = new Set([
@@ -30,12 +38,30 @@ function normalizeConfig(config, characters) {
     if (!Number.isFinite(value) || value < 0) throw new Error(`Invalid speed for raid table character: ${id}`)
     return [id, value]
   }))
+  const normalizeActorValues = (name, values, defaultsValues, fallback, validator) => Object.fromEntries(lineup.map(id => {
+    const value = values?.[id] ?? defaultsValues[id] ?? fallback
+    if (!validator(value)) throw new Error(`Invalid ${name} for raid table character: ${id}`)
+    return [id, value]
+  }))
+  const levels = normalizeActorValues('level', config.levels, defaults.levels, DEFAULT_RAID_CHARACTER_LEVEL, value => Number.isInteger(value) && value >= 1)
+  const defensePenetrations = normalizeActorValues(
+    'defense penetration', config.defensePenetrations, defaults.defensePenetrations, DEFAULT_RAID_DEFENSE_PENETRATION,
+    value => Number.isFinite(value) && value >= 0,
+  )
+  const pmDefensePenetrations = normalizeActorValues(
+    'physical/magic defense penetration', config.pmDefensePenetrations, defaults.pmDefensePenetrations, DEFAULT_RAID_PM_DEFENSE_PENETRATION,
+    value => Number.isFinite(value) && value >= 0,
+  )
+  const bossTemplateId = config.bossTemplateId ?? defaults.bossTemplateId
+  const bossTemplate = RAID_BOSS_TEMPLATES[bossTemplateId]
+  if (!bossTemplate) throw new Error(`Unsupported raid Boss template: ${bossTemplateId}`)
   const turns = config.turns ?? defaults.turns
   if (!Number.isInteger(turns) || turns < 1) throw new Error('turns must be a positive integer')
   const baseCriticalDamageBonus = config.baseCriticalDamageBonus ?? defaults.baseCriticalDamageBonus
   if (!Number.isFinite(baseCriticalDamageBonus) || baseCriticalDamageBonus < 0) throw new Error('baseCriticalDamageBonus must be non-negative')
   return {
-    lineup, attackPriority, speeds, turns,
+    lineup, attackPriority, speeds, levels, defensePenetrations, pmDefensePenetrations,
+    bossTemplateId, bossTemplate, turns,
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
     baseCriticalDamageBonus,
     probabilityOverrides: { ...defaults.probabilityOverrides, ...(config.probabilityOverrides ?? {}) },
@@ -70,6 +96,11 @@ function compileEffect(effect, mechanics, path, character) {
   }
   if (effect.type === 'bossStatus' && effect.replacementKey != null && (typeof effect.replacementKey !== 'string' || !effect.replacementKey)) {
     throw new Error(`Raid bossStatus replacementKey must be a non-empty string at ${path}`)
+  }
+  if (effect.type === 'bossStatus') {
+    for (const key of ['damageRatePerStack', 'defenseRatePerStack', 'physicalDefenseRatePerStack', 'magicDefenseRatePerStack']) {
+      if (!Number.isFinite(effect[key] ?? 0)) throw new Error(`Raid bossStatus ${key} must be finite at ${path}`)
+    }
   }
   if (effect.copyAttackRateAsSourceAttack != null && typeof effect.copyAttackRateAsSourceAttack !== 'boolean') throw new Error(`Raid copyAttackRateAsSourceAttack must be boolean at ${path}`)
   if (effect.type === 'changeCounter' && !(effect.counter in (character.runtime?.counters ?? {}))) {
@@ -133,6 +164,9 @@ function compileAction(action, mechanics, path, character) {
 
 function compileCharacter(character, mechanics) {
   const path = `character[${character.id}]`
+  if (![RAID_JOB_FLAGS.WARRIOR, RAID_JOB_FLAGS.SNIPER, RAID_JOB_FLAGS.MAGE].includes(character.jobFlags)) {
+    throw new Error(`Unsupported raid job flags '${character.jobFlags}' at ${path}`)
+  }
   const hooks = (character.hooks ?? []).map((hook, index) => compileHook(hook, mechanics, `${path}.hooks[${index}]`, character))
   const eventHooks = (character.eventHooks ?? []).map((eventHook, eventIndex) => ({
     ...eventHook,

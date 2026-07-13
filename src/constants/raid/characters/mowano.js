@@ -13,7 +13,7 @@ export default {
       key: 's1', nameKey: 'raidSkillMowanoS1', cooldown: 4, damageType: 'phys',
       damageSteps: [{ stat: 'ATK', percent: 590, hits: 1, damageType: 'phys', originalTargetCount: 5 }],
       hooks: [hook('beforeDamage', [
-        bossStatusEffect({ id: 'mowano-physical-defense-down', effectGroupId: 10000120102, nameKey: 'raidDebuffMowanoPhysicalDefenseDown', durationRounds: 4, damageRatePerStack: 0, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF }),
+        bossStatusEffect({ id: 'mowano-physical-defense-down', effectGroupId: 10000120102, nameKey: 'raidDebuffMowanoPhysicalDefenseDown', durationRounds: 4, physicalDefenseRatePerStack: -0.25, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF }),
         bossStatusEffect({ id: 'mowano-weaken', effectGroupId: 10000130105, nameKey: 'raidDebuffMowanoWeaken', durationRounds: 4, damageRatePerStack: 0 }),
       ])],
     },

@@ -103,6 +103,7 @@
 .raid-number-input { display: flex !important; align-items: center; gap: 5px; }
 .raid-number-input input { width: 90px; }
 .raid-number-input em { color: var(--text-muted); font-style: normal; }
+.raid-select-control select { min-width: 130px; }
 
 .raid-speed-editor {
   height: 100%;
@@ -258,6 +259,22 @@
 .raid-matrix-table tfoot small {
   display: block;
 }
+
+.raid-penetration-editor {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+}
+.raid-penetration-editor h3 { color: var(--text-secondary); font-size: var(--fs-sm); }
+.raid-penetration-editor > p { margin: 3px 0 8px; color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-penetration-scroll { overflow-x: auto; }
+.raid-penetration-editor table { width: 100%; min-width: 620px; border-collapse: collapse; }
+.raid-penetration-editor th,
+.raid-penetration-editor td { padding: 7px 8px; border-top: 1px solid rgba(var(--color-invert-rgb), 0.06); text-align: left; }
+.raid-penetration-editor thead th { border-top: 0; color: var(--text-muted); font-size: var(--fs-xs); font-weight: 600; }
+.raid-penetration-editor tbody th { min-width: 130px; color: var(--text-primary); }
+.raid-penetration-editor input { width: 100%; min-width: 100px; }
 
 .raid-character-cell .raid-character-label { display: inline-flex; }
 .raid-detail-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
@@ -418,6 +435,8 @@
   .raid-section-head { align-items: stretch; flex-direction: column; }
   .raid-bench-control { align-items: stretch; flex-direction: column; }
   .raid-bench-control select { width: 100%; min-width: 0; }
+  .raid-select-control { align-items: stretch; flex-direction: column; }
+  .raid-select-control select { width: 100%; min-width: 0; }
   .raid-detail-total { font-size: var(--fs-lg); }
   .raid-config-card,
   .raid-matrix-card,

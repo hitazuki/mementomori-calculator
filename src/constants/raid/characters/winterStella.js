@@ -23,12 +23,12 @@ export default {
       hooks: [hook('beforeDamage', [
         selfHeal,
         bossStatusEffect({ id: 'winter-stella-damage-taken-early', replacementKey: 'winter-stella-damage-taken', effectGroupId: 13200130201, nameKey: 'raidDebuffWinterStellaDamageTaken', durationRounds: 4, damageRatePerStack: 0.1, condition: { type: 'roundAtMost', round: 6 } }),
-        bossStatusEffect({ id: 'winter-stella-magic-defense-down-early', replacementKey: 'winter-stella-magic-defense-down', effectGroupId: 13200130202, nameKey: 'raidDebuffWinterStellaMagicDefenseDown', durationRounds: 4, damageRatePerStack: 0, condition: { type: 'roundAtMost', round: 6 } }),
+        bossStatusEffect({ id: 'winter-stella-magic-defense-down-early', replacementKey: 'winter-stella-magic-defense-down', effectGroupId: 13200130202, nameKey: 'raidDebuffWinterStellaMagicDefenseDown', durationRounds: 4, magicDefenseRatePerStack: -0.2, condition: { type: 'roundAtMost', round: 6 } }),
         bossStatusEffect({ id: 'winter-stella-damage-taken-late', replacementKey: 'winter-stella-damage-taken', effectGroupId: 13200130203, nameKey: 'raidDebuffWinterStellaDamageTaken', durationRounds: 4, damageRatePerStack: 0.2, condition: { type: 'roundAtLeast', round: 7 } }),
-        bossStatusEffect({ id: 'winter-stella-magic-defense-down-late', replacementKey: 'winter-stella-magic-defense-down', effectGroupId: 13200130204, nameKey: 'raidDebuffWinterStellaMagicDefenseDown', durationRounds: 4, damageRatePerStack: 0, condition: { type: 'roundAtLeast', round: 7 } }),
+        bossStatusEffect({ id: 'winter-stella-magic-defense-down-late', replacementKey: 'winter-stella-magic-defense-down', effectGroupId: 13200130204, nameKey: 'raidDebuffWinterStellaMagicDefenseDown', durationRounds: 4, magicDefenseRatePerStack: -0.4, condition: { type: 'roundAtLeast', round: 7 } }),
       ])],
       damageSteps: [{ stat: 'ATK', percent: 720, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
-      ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredMagicDefenseDown'],
+      ignoredKeys: ['raidIgnoredHealing'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillWinterStellaS2', cooldown: 4, damageType: 'mag',

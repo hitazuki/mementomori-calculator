@@ -25,6 +25,7 @@
   nameKey: 'raidCharLiberia',
   speed: 3597,
   element: 5,
+  jobFlags: 1,
   normal: normalPhysical,
   runtime: { counters: {}, flags: {} },
   permanentModifiers: [],
@@ -41,6 +42,7 @@
 | `nameKey` | i18n 角色名键 | 五种语言必须同时补充 |
 | `speed` | MB 基础速度 | 页面可覆盖；每回合开始读取 |
 | `element` | 属性 | `1蓝 / 2红 / 3绿 / 4黄 / 5暗`，目前用于条件选目标 |
+| `jobFlags` | 职业 | `1战士 / 2射手 / 4法师`；决定普通伤害读取物防或魔防 |
 | `normal` | 普攻定义 | 复用 `normalPhysical` 或 `normalMagic` |
 | `runtime` | 角色声明的计数器和标记初值 | 引擎统一初始化为 `counters / flags / skillUses / actionCount` |
 | `permanentModifiers` | 常驻倍率修正 | 不生成可解除 Buff，不参与 Buff 数 |
@@ -69,8 +71,8 @@
 
 | 值 | 含义 | 使用方式 |
 | --- | --- | --- |
-| `phys` | 物理主动伤害 | 当前木桩不计算防御，但保留标签 |
-| `mag` | 魔法主动伤害 | 同上 |
+| `phys` | 物理主动伤害 | 按职业校验，结算 DEF 路与物防路 |
+| `mag` | 魔法主动伤害 | 按职业校验，结算 DEF 路与魔防路 |
 | `direct` | STR 等直接伤害 | 默认仍可暴击、吃增伤并触发段后机制 |
 | `support` | 纯辅助技能 | `damageSteps: []`，仍正常进入冷却和效果阶段 |
 
@@ -142,7 +144,7 @@
 | `criticalDamageBonus` | 暴击伤害加成 | 加到全局基础暴伤加成；不暴击时不使用 | 梅琳 |
 | `speedRate` | 百分比速度变化 | `基础速度 × (1 + speedRate)` | 阿尔托莉亚 |
 
-当前尚无 `fixedSpeed`、防御、暴击率、命中等通道。不要只在角色定义中写新 `channel`；未加入引擎支持的通道会被忽略。
+当前尚无 `fixedSpeed`、暴击率、命中等友方 Modifier 通道。Boss 防御百分比不属于本表的 `modifiers[channel]`，应使用 Boss 状态的三个防御字段；不要把防御降低写进 `damageRate`。
 
 ## 5. 面板引用符号项 `symbolicModifiers`
 
@@ -266,6 +268,9 @@ bossStatusEffect({
 | `addStacks` | 每次成功施加增加层数 |
 | `maxStacks` | 层数上限 |
 | `damageRatePerStack` | 每层承伤增幅，汇入 `damageRate` 渠道 |
+| `defenseRatePerStack` | 每层防御百分比增减，汇入 DEF 路面板修正 |
+| `physicalDefenseRatePerStack` | 每层物防百分比增减，仅影响战士/射手伤害 |
+| `magicDefenseRatePerStack` | 每层魔防百分比增减，仅影响法师伤害 |
 | `statusClass` | 弱化的可解除类别；默认 `removableDebuff`，需明确标记的不可解除弱化写 `UNREMOVABLE_DEBUFF` |
 | `condition` | 可使用 `probabilityEnabled` 读取 `config.probabilityOverrides` |
 | `recordSkipped` | 条件失败时仍向详情记录“已跳过”事件 |
@@ -392,7 +397,7 @@ eventHooks: [{
 
 ### 10.3 `ignoredKeys`
 
-用于明确展示当前口径不模拟的技能部分，例如击杀追加、净化、治疗、驱散、护盾数值、眩晕、防御 Buff。它不会改变结算，只防止结构化时静默丢失描述。
+用于明确展示当前口径不模拟的技能部分，例如击杀追加、净化、治疗、驱散、护盾数值和眩晕。Boss 防御/物防/魔防弱化已进入倍率，不再列为忽略项；友方承伤侧防御 Buff 仍可因木桩不受击而忽略。
 
 新增角色时，所有未进入倍率、状态计数、速度、冷却或事件模型的技能文本都应进入 `ignoredKeys`，并补齐五种语言说明。
 
@@ -466,7 +471,7 @@ eventHooks: [{
 | value resolver | `bossStatusCountLinear` | 以木桩状态组数量代入 `base + perStack × count`，并按 `max` 截断。 |
 | status modifier | `rate` / `coefficient` 值解析器 | 状态的倍率或符号项系数可使用已注册 value resolver；结算时按状态来源角色读取动态计数。 |
 
-`damageRatePerStack: 0` 的 Boss 状态仍是可读取的弱化 EffectGroup：它不改变当前倍率，但会参与弱化数量、刷新与到期结算。运行时快照保留 EffectGroup、施加者、可解除类别、层数与剩余回合；可解除与不可解除弱化都会展示，只有前者可被后续解除机制匹配。
+`damageRatePerStack: 0` 且没有防御字段的 Boss 状态仍是可读取的弱化 EffectGroup：它不改变当前倍率，但会参与弱化数量、刷新与到期结算。防御类状态分别通过 `defenseRatePerStack`、`physicalDefenseRatePerStack`、`magicDefenseRatePerStack` 改变对应面板。运行时快照保留 EffectGroup、施加者、可解除类别、层数、每层防御修正与剩余回合；可解除与不可解除弱化都会展示，只有前者可被后续解除机制匹配。
 
 ## 新增通用词条（米赫里、波普莉、嘉德利亚、梅尔林）
 

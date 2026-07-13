@@ -8,6 +8,8 @@ export const RAID_STATUS_CLASSES = Object.freeze({
 
 export const RAID_ELEMENTS = Object.freeze({ BLUE: 1, RED: 2, GREEN: 3, LIGHT: 4, DARK: 5 })
 
+export const RAID_JOB_FLAGS = Object.freeze({ WARRIOR: 1, SNIPER: 2, MAGE: 4 })
+
 export const normalPhysical = Object.freeze({
   key: 'normal', nameKey: 'raidSkillNormalPhysical', damageType: 'phys',
   damageSteps: [{ stat: 'ATK', percent: 100, hits: 1, damageType: 'phys' }],
@@ -32,10 +34,15 @@ export function removeStatusesEffect({ id, nameKey, target, count = 1, statusCla
   return { type: 'removeStatuses', id, nameKey, target, count, statusClass, ...rest }
 }
 
-export function bossStatusEffect({ id, effectGroupId, nameKey, durationRounds = null, addStacks = 1, maxStacks = 1, damageRatePerStack = 0, ...rest }) {
+export function bossStatusEffect({
+  id, effectGroupId, nameKey, durationRounds = null, addStacks = 1, maxStacks = 1,
+  damageRatePerStack = 0, defenseRatePerStack = 0, physicalDefenseRatePerStack = 0,
+  magicDefenseRatePerStack = 0, ...rest
+}) {
   return {
     type: 'bossStatus', id, effectGroupId, nameKey, durationRounds, addStacks, maxStacks,
-    damageRatePerStack, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF, ...rest,
+    damageRatePerStack, defenseRatePerStack, physicalDefenseRatePerStack, magicDefenseRatePerStack,
+    statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF, ...rest,
   }
 }
 

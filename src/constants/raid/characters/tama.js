@@ -19,7 +19,10 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillTamaS2', cooldown: 4, damageType: 'phys',
       damageSteps: [{ stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [280, 280, 1120] }, hits: 4, damageType: 'phys' }],
-      hooks: [hook('beforeDamage', [bossStatusEffect({ id: 'tama-defense-down', effectGroupId: 8100230101, nameKey: 'raidDebuffTamaDefenseDown', durationRounds: 4, damageRatePerStack: 0 })])],
+      hooks: [hook('beforeDamage', [bossStatusEffect({
+        id: 'tama-defense-down', effectGroupId: 8100230101, nameKey: 'raidDebuffTamaDefenseDown', durationRounds: 4,
+        defenseRatePerStack: -0.5, physicalDefenseRatePerStack: -0.5,
+      })])],
     },
   },
 }

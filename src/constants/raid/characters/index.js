@@ -25,6 +25,7 @@ import eidene from './eidene.js'
 import pola from './pola.js'
 import yildiz from './yildiz.js'
 import winterStella from './winterStella.js'
+import { RAID_JOB_FLAGS } from '../shared.js'
 
 export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   FLORENCE: 8,
@@ -86,5 +87,38 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.WINTER_STELLA,
 ])
 
+export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
+  8: RAID_JOB_FLAGS.WARRIOR,
+  7: RAID_JOB_FLAGS.MAGE,
+  30: RAID_JOB_FLAGS.WARRIOR,
+  26: RAID_JOB_FLAGS.MAGE,
+  29: RAID_JOB_FLAGS.MAGE,
+  113: RAID_JOB_FLAGS.WARRIOR,
+  93: RAID_JOB_FLAGS.WARRIOR,
+  128: RAID_JOB_FLAGS.SNIPER,
+  112: RAID_JOB_FLAGS.WARRIOR,
+  75: RAID_JOB_FLAGS.MAGE,
+  89: RAID_JOB_FLAGS.WARRIOR,
+  122: RAID_JOB_FLAGS.SNIPER,
+  148: RAID_JOB_FLAGS.SNIPER,
+  102: RAID_JOB_FLAGS.WARRIOR,
+  126: RAID_JOB_FLAGS.MAGE,
+  115: RAID_JOB_FLAGS.SNIPER,
+  90: RAID_JOB_FLAGS.WARRIOR,
+  135: RAID_JOB_FLAGS.MAGE,
+  81: RAID_JOB_FLAGS.SNIPER,
+  100: RAID_JOB_FLAGS.SNIPER,
+  40: RAID_JOB_FLAGS.MAGE,
+  78: RAID_JOB_FLAGS.SNIPER,
+  80: RAID_JOB_FLAGS.MAGE,
+  92: RAID_JOB_FLAGS.MAGE,
+  114: RAID_JOB_FLAGS.SNIPER,
+  124: RAID_JOB_FLAGS.WARRIOR,
+  132: RAID_JOB_FLAGS.MAGE,
+})
+
 const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella]
-export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze(character)])))
+export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze({
+  ...character,
+  jobFlags: RAID_TABLE_CHARACTER_JOB_FLAGS[character.id],
+})])))

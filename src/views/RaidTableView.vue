@@ -41,6 +41,12 @@
     </div>
 
     <div class="raid-assumption-grid">
+      <label class="raid-number-control raid-select-control">
+        <span><strong>{{ $t('raidBossTemplate') }}</strong><small>{{ bossTemplateStats }}</small></span>
+        <select v-model="bossTemplateId">
+          <option v-for="bossTemplate in bossTemplates" :key="bossTemplate.id" :value="bossTemplate.id">{{ $t(bossTemplate.nameKey) }}</option>
+        </select>
+      </label>
       <label class="raid-toggle-control">
         <input v-model="guaranteedCritical" type="checkbox">
         <span><strong>{{ $t('raidGuaranteedCritical') }}</strong><small>{{ $t('raidGuaranteedCriticalHint') }}</small></span>
@@ -90,6 +96,22 @@
           <CharacterSequence :ids="currentSpeedOrder" />
           <small>{{ $t('raidSpeedOrderHint') }}</small>
         </div>
+      </div>
+    </div>
+
+    <div class="raid-penetration-editor">
+      <h3>{{ $t('raidPenetrationSettings') }}</h3>
+      <p>{{ $t('raidPenetrationSettingsHint') }}</p>
+      <div class="raid-penetration-scroll">
+        <table>
+          <thead><tr><th>{{ $t('raidCharacter') }}</th><th>{{ $t('raidCharacterLevel') }}</th><th>{{ $t('raidDefensePenetration') }}</th><th>{{ $t('raidPmDefensePenetration') }}</th></tr></thead>
+          <tbody><tr v-for="id in lineup" :key="`penetration-${id}`">
+            <th><CharacterLabel :id="id" /></th>
+            <td><input v-model.number="levels[id]" type="number" min="1" step="1"></td>
+            <td><input v-model.number="defensePenetrations[id]" type="number" min="0" step="1"></td>
+            <td><input v-model.number="pmDefensePenetrations[id]" type="number" min="0" step="1"></td>
+          </tr></tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -160,6 +182,9 @@
           <article v-for="step in selectedEvent.damageSteps" :key="step.index">
             <header><strong>#{{ step.index }} · {{ step.percent }}% {{ step.stat }}</strong><span>{{ formatStep(step) }}</span></header>
             <small>{{ $t('raidStepCritical', { value: formatter().format(step.criticalMultiplier) }) }} · {{ $t('raidStepDamageRate', { value: formatRate(step.damageRate) }) }} · {{ bossStackSummary(step.bossStatusBefore) }}</small>
+            <small v-if="step.defense.applies">{{ $t('raidStepDefenseMultiplier', { value: formatter(4).format(step.defenseMultiplier) }) }} · {{ $t('raidStepDefenseMitigation', { value: formatRate(step.defense.defenseMitigationRate) }) }} · {{ $t(step.damageType === 'mag' ? 'raidStepMagicDefenseMitigation' : 'raidStepPhysicalDefenseMitigation', { value: formatRate(step.defense.pmDefenseMitigationRate) }) }}</small>
+            <small v-else>{{ $t('raidStepDirectIgnoresDefense') }}</small>
+            <small v-if="step.defense.applies">{{ $t('raidStepPenetrationValues', { level: step.defense.attackerLevel, defense: formatter().format(step.defense.defensePenetration), pm: formatter().format(step.defense.pmDefensePenetration) }) }}</small>
             <small v-if="step.scalingTerms.length">+ {{ formatScalingArray(step.scalingTerms) }}</small>
           </article>
         </div>
@@ -226,7 +251,7 @@
 <script setup>
 import { computed, defineComponent, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
+import { RAID_BOSS_TEMPLATES, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 
 const OrderList = defineComponent({
@@ -280,10 +305,15 @@ const CharacterSequence = defineComponent({
 })
 
 const roster = [...RAID_TABLE_ROSTER].sort((left, right) => left - right)
+const bossTemplates = Object.values(RAID_BOSS_TEMPLATES)
 const defaults = createDefaultRaidTableConfig()
 const lineup = ref([...defaults.lineup])
 const attackPriority = ref([...defaults.attackPriority])
 const speeds = reactive({ ...defaults.speeds })
+const bossTemplateId = ref(defaults.bossTemplateId)
+const levels = reactive({ ...defaults.levels })
+const defensePenetrations = reactive({ ...defaults.defensePenetrations })
+const pmDefensePenetrations = reactive({ ...defaults.pmDefensePenetrations })
 const guaranteedCritical = ref(defaults.guaranteedCritical)
 const baseCriticalDamagePercent = ref(roundBaseCriticalDamagePercent(defaults.baseCriticalDamageBonus * 100))
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
@@ -293,12 +323,23 @@ const result = computed(() => simulateRaidTable({
   lineup: lineup.value,
   attackPriority: attackPriority.value,
   speeds,
+  bossTemplateId: bossTemplateId.value,
+  levels,
+  defensePenetrations,
+  pmDefensePenetrations,
   guaranteedCritical: guaranteedCritical.value,
   baseCriticalDamageBonus: Math.max(0, Number(baseCriticalDamagePercent.value) || 0) / 100,
   probabilityOverrides,
   turns: 10,
 }))
 const currentSpeedOrder = computed(() => result.value.rounds[0]?.actionOrder ?? [])
+const selectedBossTemplate = computed(() => RAID_BOSS_TEMPLATES[bossTemplateId.value])
+const bossTemplateStats = computed(() => t('raidBossTemplateStats', {
+  level: selectedBossTemplate.value.level,
+  defense: formatter().format(selectedBossTemplate.value.defense),
+  physical: formatter().format(selectedBossTemplate.value.physicalDefense),
+  magic: formatter().format(selectedBossTemplate.value.magicDefense),
+}))
 
 function characterName(id) { return t(RAID_TABLE_CHARACTERS[id].nameKey) }
 function characterIconUrl(id) { return `${import.meta.env.BASE_URL}images/characters/${id}.png` }
@@ -344,6 +385,10 @@ function resetConfig() {
   const next = createDefaultRaidTableConfig()
   lineup.value = [...next.lineup]; attackPriority.value = [...next.attackPriority]
   Object.assign(speeds, next.speeds); guaranteedCritical.value = next.guaranteedCritical
+  bossTemplateId.value = next.bossTemplateId
+  Object.assign(levels, next.levels)
+  Object.assign(defensePenetrations, next.defensePenetrations)
+  Object.assign(pmDefensePenetrations, next.pmDefensePenetrations)
   baseCriticalDamagePercent.value = roundBaseCriticalDamagePercent(next.baseCriticalDamageBonus * 100)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
 }
@@ -388,7 +433,16 @@ function bossStatusLabel(status) {
   const source = status.sourceId != null ? `${characterName(status.sourceId)} · ` : ''
   const statusClass = status.statusClass === 'unremovableDebuff' ? t('raidStatusUnremovableDebuff') : t('raidStatusRemovableDebuff')
   const duration = status.remainingRounds != null ? ` · ${t('raidRemainingRounds', { n: status.remainingRounds })}` : ''
-  return `${source}${t(status.nameKey)} · ${statusClass} · ${t('raidStatusStacks', { n: status.stacks })}${duration}`
+  const defenseRates = bossDefenseRateSummary(status)
+  return `${source}${t(status.nameKey)} · ${statusClass} · ${t('raidStatusStacks', { n: status.stacks })}${defenseRates ? ` · ${defenseRates}` : ''}${duration}`
+}
+
+function bossDefenseRateSummary(status) {
+  return [
+    ['raidDefenseRate', status.defenseRatePerStack],
+    ['raidPhysicalDefenseRate', status.physicalDefenseRatePerStack],
+    ['raidMagicDefenseRate', status.magicDefenseRatePerStack],
+  ].filter(([, rate]) => rate).map(([key, rate]) => `${t(key)} ${rate > 0 ? '+' : ''}${formatRate(rate * status.stacks)}`).join(' · ')
 }
 
 function effectText(effect) {

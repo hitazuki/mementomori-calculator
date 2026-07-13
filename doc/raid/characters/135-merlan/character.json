@@ -5,19 +5,18 @@
   "build": { "level": 240, "exclusive": "EX3" },
   "sources": { "activeSkillIds": [135001, 135002], "passiveSkillIds": [135003, 135004], "combatLogs": ["data/battle-logs/y1800mrl.json"] },
   "terms": [
-    { "kind": "activeSkill", "sourceId": 135001, "model": "implemented", "summary": "EX3 五目标 440% 和零倍率减魔防。" },
+    { "kind": "activeSkill", "sourceId": 135001, "model": "implemented", "summary": "EX3 五目标 440% 和每层5%的减魔防。" },
     { "kind": "activeSkill", "sourceId": 135002, "model": "implemented", "summary": "七段伤害与技能历史倍率。" },
     { "kind": "passiveSkill", "sourceId": 135003, "model": "implemented", "summary": "妖精攻击层数及护盾记录。" },
     { "kind": "passiveSkill", "sourceId": 135004, "model": "outOfScope", "summary": "承伤降低和防御提升。" }
   ],
   "effectGroups": [
     { "id": 13500300101, "model": "implemented", "summary": "妖精攻击层数。" },
-    { "id": 13500100102, "model": "implemented", "summary": "魔防降低零倍率 Boss 弱化。" },
+    { "id": 13500100102, "model": "implemented", "summary": "魔防每层降低5%，最多8层。" },
     { "id": 13500340201, "model": "outOfScope", "summary": "护盾。" },
     { "id": 13500430101, "model": "outOfScope", "summary": "承伤降低与防御提升。" }
   ],
   "ignored": [
-    { "key": "raidIgnoredMagicDefenseDown", "summary": "防御不结算，保留层数。" },
     { "key": "raidIgnoredShield", "summary": "木桩没有护盾。" }
   ],
   "unresolved": []

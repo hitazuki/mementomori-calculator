@@ -31,8 +31,8 @@ export default {
       key: 's1', nameKey: 'raidSkillLiebesS1', cooldown: 4, damageType: 'phys', hooks: [
         selfDamageHook,
         hook('beforeDamage', [
-          bossStatusEffect({ id: 'liebes-defense-down', effectGroupId: 10200120201, nameKey: 'raidDebuffLiebesDefenseDown', durationRounds: 2, damageRatePerStack: 0 }),
-          bossStatusEffect({ id: 'liebes-physical-defense-down', effectGroupId: 10200120202, nameKey: 'raidDebuffLiebesPhysicalDefenseDown', durationRounds: 2, damageRatePerStack: 0 }),
+          bossStatusEffect({ id: 'liebes-defense-down', effectGroupId: 10200120201, nameKey: 'raidDebuffLiebesDefenseDown', durationRounds: 2, defenseRatePerStack: -0.1 }),
+          bossStatusEffect({ id: 'liebes-physical-defense-down', effectGroupId: 10200120202, nameKey: 'raidDebuffLiebesPhysicalDefenseDown', durationRounds: 2, physicalDefenseRatePerStack: -0.1 }),
         ]),
       ],
       damageSteps: [{ stat: 'ATK', percent: 390, hits: 5, damageType: 'phys' }],
