@@ -1,4 +1,4 @@
-import { RAID_ELEMENTS, RAID_STATUS_CLASSES, hook, normalPhysical, statusEffect } from '../shared.js'
+import { RAID_ELEMENTS, RAID_STATUS_CLASSES, bossStatusEffect, hook, normalPhysical, statusEffect } from '../shared.js'
 
 const selfDamageHook = hook('beforeDamage', [{ type: 'emitEvent', event: 'selfDamage' }])
 
@@ -40,8 +40,14 @@ export default {
   ])],
   skills: {
     s1: {
-      key: 's1', nameKey: 'raidSkillArtoriaS1', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],
-      damageSteps: [{ stat: 'ATK', percent: 520, hits: 6, damageType: 'phys' }], ignoredKeys: ['raidIgnoredStun', 'raidIgnoredShield'],
+      key: 's1', nameKey: 'raidSkillArtoriaS1', cooldown: 4, damageType: 'phys', hooks: [
+        selfDamageHook,
+        hook('afterHit', [bossStatusEffect({
+          id: 'artoria-stun', effectGroupId: 9300120202, nameKey: 'raidDebuffStun', durationRounds: 1,
+          condition: { type: 'probabilityEnabled', key: 'artoriaStun' }, recordSkipped: true,
+        })], { condition: { type: 'bossElementIs', element: RAID_ELEMENTS.GREEN } }),
+      ],
+      damageSteps: [{ stat: 'ATK', percent: 520, hits: 6, damageType: 'phys' }], ignoredKeys: ['raidIgnoredStunAction', 'raidIgnoredShield'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillArtoriaS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],

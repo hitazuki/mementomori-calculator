@@ -522,8 +522,12 @@ export function runRaidProgram(program) {
           symbolicTotals[rawStep.stat] = (symbolicTotals[rawStep.stat] ?? 0) + effectivePercent
         }
 
+        runHooks(actor, action.hooksByTrigger.afterHit, context, 'afterHit')
         runHooks(actor, actor.definition.hooksByTrigger.afterHit, context, 'afterHit')
-        if (critical) runHooks(actor, actor.definition.hooksByTrigger.afterCriticalHit, context, 'afterHit')
+        if (critical) {
+          runHooks(actor, action.hooksByTrigger.afterCriticalHit, context, 'afterHit')
+          runHooks(actor, actor.definition.hooksByTrigger.afterCriticalHit, context, 'afterHit')
+        }
         const bossAfter = snapshotBoss(boss)
 
         damageSteps.push({

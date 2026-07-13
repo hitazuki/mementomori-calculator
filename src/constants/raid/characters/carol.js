@@ -10,7 +10,12 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillCarolS1', cooldown: 5, damageType: 'mag',
       damageSteps: [{ stat: 'ATK', percent: 590, hits: 1, damageType: 'mag', originalTargetCount: 3 }],
-      hooks: [], ignoredKeys: ['raidIgnoredSilence'],
+      hooks: [hook('afterDamage', [bossStatusEffect({
+        id: 'carol-silence', effectGroupId: 4000150102, nameKey: 'raidDebuffCarolSilence', durationRounds: 1,
+        damageRatePerStack: 0, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF,
+        condition: { type: 'probabilityEnabled', key: 'carolSilence' }, recordSkipped: true,
+      })])],
+      ignoredKeys: ['raidIgnoredSilence'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillCarolS2', cooldown: 4, damageType: 'mag',

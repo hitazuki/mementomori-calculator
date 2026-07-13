@@ -16,7 +16,7 @@ function findRepoRoot(start) {
 
 const root = findRepoRoot(process.cwd())
 const importFromRoot = relative => import(pathToFileURL(path.join(root, relative)).href)
-const [{ RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, RAID_STATUS_CLASSES, createDefaultRaidTableConfig }, { DEFAULT_RAID_MECHANICS }, { compileRaidProgram }, { raidTranslations }] = await Promise.all([
+const [{ RAID_ELEMENTS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, RAID_STATUS_CLASSES, createDefaultRaidTableConfig }, { DEFAULT_RAID_MECHANICS }, { compileRaidProgram }, { raidTranslations }] = await Promise.all([
   importFromRoot('src/constants/raidTableCharacters.js'),
   importFromRoot('src/engine/raid/mechanics.js'),
   importFromRoot('src/engine/raid/compiler.js'),
@@ -33,6 +33,7 @@ const defaultConfig = createDefaultRaidTableConfig()
 const seenCharacterIds = new Set()
 const statusDefinitions = new Map()
 const groupDefinitions = new Map()
+const supportedElements = new Set(Object.values(RAID_ELEMENTS))
 
 function error(message) { errors.push(message) }
 function warning(message) { warnings.push(message) }
@@ -50,6 +51,9 @@ function checkCondition(condition, location, character) {
   if (condition.counter && !(condition.counter in (character?.runtime?.counters ?? {}))) error(`${location}: unknown counter '${condition.counter}'`)
   if (condition.type === 'probabilityEnabled' && !(condition.key in defaultConfig.probabilityOverrides)) {
     error(`${location}: probability key '${condition.key}' has no default in createDefaultRaidTableConfig()`)
+  }
+  if (condition.type === 'bossElementIs' && !supportedElements.has(condition.element)) {
+    error(`${location}: invalid Boss element '${condition.element}'`)
   }
 }
 

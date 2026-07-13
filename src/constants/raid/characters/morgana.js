@@ -1,4 +1,4 @@
-import { RAID_ELEMENTS, hook, normalMagic } from '../shared.js'
+import { RAID_ELEMENTS, RAID_STATUS_CLASSES, bossStatusEffect, hook, normalMagic } from '../shared.js'
 
 const selfDamageHook = hook('beforeDamage', [{ type: 'emitEvent', event: 'selfDamage' }])
 
@@ -26,7 +26,14 @@ export default {
   }],
   skills: {
     s1: {
-      key: 's1', nameKey: 'raidSkillMorganaS1', cooldown: 4, damageType: 'mag', hooks: [selfDamageHook],
+      key: 's1', nameKey: 'raidSkillMorganaS1', cooldown: 4, damageType: 'mag', hooks: [
+        selfDamageHook,
+        hook('afterHit', [bossStatusEffect({
+          id: 'morgana-healing-down', effectGroupId: 7500130202, nameKey: 'raidDebuffMorganaHealingDown', durationRounds: 2,
+          damageRatePerStack: 0, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF,
+          condition: { type: 'probabilityEnabled', key: 'morganaHealingDown' }, recordSkipped: true,
+        })]),
+      ],
       damageSteps: [{ stat: 'ATK', percent: 420, hits: 5, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredHealingReceivedDown'],
     },

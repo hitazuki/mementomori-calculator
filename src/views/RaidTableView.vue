@@ -92,6 +92,18 @@
         <input v-model="probabilityOverrides.guinevereDamageTaken" type="checkbox">
         <span><strong>{{ $t('raidAssumeGuinevereDamageTaken') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.CAROL)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.carolSilence" type="checkbox">
+        <span><strong>{{ $t('raidAssumeCarolSilence') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.MORGANA)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.morganaHealingDown" type="checkbox">
+        <span><strong>{{ $t('raidAssumeMorganaHealingDown') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.MOWANO)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.mowanoDelay" type="checkbox">
+        <span><strong>{{ $t('raidAssumeMowanoDelay') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.MILLA)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.millaDelay" type="checkbox">
         <span><strong>{{ $t('raidAssumeMillaDelay') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
@@ -107,6 +119,14 @@
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.LILICOTTE)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.lilicotteSilence" type="checkbox">
         <span><strong>{{ $t('raidAssumeLilicotteSilence') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.LIEBES)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.liebesStun" type="checkbox">
+        <span><strong>{{ $t('raidAssumeLiebesStun') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.ARTORIA)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.artoriaStun" type="checkbox">
+        <span><strong>{{ $t('raidAssumeArtoriaStun') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
     </div>
 

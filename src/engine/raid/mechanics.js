@@ -46,6 +46,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       (boss.statuses.find(status => status.id === condition.statusId)?.stacks ?? 0) >= condition.count
     ),
     bossStatusCountAtLeast: (condition, { boss }) => boss.statuses.length >= condition.count,
+    bossElementIs: (condition, { boss }) => boss.template.element === condition.element,
     counterAtLeast: (condition, { actor, actors, ownerId }) => (
       ((actor ?? actors.get(ownerId)).runtime.counters[condition.counter] ?? 0) >= condition.count
     ),

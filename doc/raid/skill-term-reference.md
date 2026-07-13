@@ -294,7 +294,7 @@ bossStatusEffect({
 | `condition` | 可使用 `probabilityEnabled` 读取 `config.probabilityOverrides` |
 | `recordSkipped` | 条件失败时仍向详情记录“已跳过”事件 |
 
-同 `id` 再次施加会增加层数并刷新整组持续回合。当前实例：光士易伤、利伯瑞娅沙尘、静易伤与速度降低。
+同 `id` 再次施加会增加层数并刷新整组持续回合。当前实例：光士易伤、利伯瑞娅沙尘、静易伤与速度降低、莉贝/阿尔托莉亚气绝，以及卡罗沉默、摩嘉娜受回复量降低、穆瓦诺延迟。行为效果未进入木桩模型的异常使用 `damageRatePerStack: 0`，但仍是可供弱化数量联动读取的独立 Boss EffectGroup。
 
 光士使用角色 `afterCriticalHit` 钩子：每一暴击段结算后施加，因此当前段使用旧层数，下一段使用新层数。无条件段后效果使用 `afterHit`；其他命中、伤害类型条件应通过钩子条件扩展。
 
@@ -345,7 +345,7 @@ hook('afterDamage', [{
 | `afterDamage` | 全部伤害段后 | Buff、减冷却、条件重置 |
 | `actionEnd` | 状态消费后 | 行动次数周期效果、结束条件 |
 
-行动详情同时保留 `statusSnapshotBeforeAction`、`statusSnapshotAtDamage` 与 `statusSnapshotAfterAction`。面板的可解除 Buff 数显示使用“行动前 → 行动后”；行动后快照在 `actionEnd` 钩子和本次应消耗的持续时间均结算完毕后生成。
+行动详情同时保留 `statusSnapshotBeforeAction`、`statusSnapshotAtDamage` 与 `statusSnapshotAfterAction`。面板的可解除 Buff 数显示使用“行动前 → 行动后”；行动后快照在 `actionEnd` 钩子和本次应消耗的持续时间均结算完毕后生成。`afterHit` / `afterCriticalHit` 可声明在具体技能或角色顶层；运行时先执行技能钩子，再执行角色全局钩子。
 
 ### 9.2 行动周期被动
 
@@ -404,8 +404,18 @@ eventHooks: [{
 | --- | --- |
 | `liberiaSand` | 利伯瑞娅 S1 沙尘成功 |
 | `shizuSpeedDown` | 静 S1 速度降低成功 |
+| `guinevereDamageTaken` | 桂妮维亚 S1 承伤增加与脱力成功 |
+| `millaDelay` | 蜜拉 S1 延迟成功 |
+| `yildizBuffBlock` | 耶尔德兹 S1 Buff无效成功 |
+| `winterStellaSilence` | 暗黑圣耀星史黛拉 S2 沉默成功 |
+| `lilicotteSilence` | 莉莉珂特 S2 沉默成功 |
+| `liebesStun` | 莉贝 S1 气绝成功 |
+| `artoriaStun` | 阿尔托莉亚 S1 气绝成功 |
+| `carolSilence` | 卡罗 S1 沉默成功 |
+| `morganaHealingDown` | 摩嘉娜 S1 每段受回复量降低成功 |
+| `mowanoDelay` | 穆瓦诺 S2 延迟成功 |
 
-当前只模拟确定成功/失败，不计算期望值，也不逐段重复判定。
+当前只模拟确定成功/失败，不计算概率期望，也不为每段独立抽样。逐段附带的效果会在每段读取同一个确定场景开关。
 
 ### 10.2 `conditionKey`
 
@@ -418,7 +428,9 @@ eventHooks: [{
 
 ### 10.3 `ignoredKeys`
 
-用于明确展示当前口径不模拟的技能部分，例如击杀追加、净化、治疗、驱散、护盾数值和眩晕。Boss 防御/物防/魔防弱化已进入倍率，不再列为忽略项；友方承伤侧防御 Buff 仍可因木桩不受击而忽略。
+用于明确展示当前口径不模拟的技能部分，例如击杀追加、净化、治疗、驱散、护盾数值和气绝造成的无法行动。气绝状态本身以及 Boss 防御/物防/魔防弱化已进入弱化模型，不得整体列为忽略项；友方承伤侧防御 Buff 仍可因木桩不受击而忽略。
+
+同理，沉默的技能禁用、延迟的冷却恢复停滞、Buff无效的阻止效果以及受回复量/回避/攻击降低的战斗数值可以继续列入 `ignoredKeys`，但对应可解除 EffectGroup 必须另外保留为 Boss 状态并参与弱化数量联动。
 
 新增角色时，所有未进入倍率、状态计数、速度、冷却或事件模型的技能文本都应进入 `ignoredKeys`，并补齐五种语言说明。
 
@@ -482,6 +494,15 @@ eventHooks: [{
 | actor status | `replacementKey` | 不同EffectGroup档位共享替换槽，避免换档时短暂叠加。 |
 
 `r1820` 同时确认并修正了既有实现：莉贝行动开始只选择自身与攻击最高的1名其他友军，且被动按“带弱化的敌人数”而不是目标弱化组数增长；单Boss只取10%/20%档。露昕鲁S2与S1一样先自伤；阿尔托莉亚正义和开战屏障现保留真实EffectGroup。
+
+### 气绝状态与Boss属性条件
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| condition | `bossElementIs` | 读取所选Boss模板的官方属性，仅在属性等于 `element` 时成立。 |
+| Boss status | 气绝 | 以0倍率的 `removableDebuff` 保存真实EffectGroup并参与弱化联动；无法行动明确忽略。 |
+
+索尼娅模板为蓝属性，光士模板为翠属性。阿尔托莉亚S1只在翠属性Boss上逐段尝试气绝；莉贝S1在主体伤害后尝试气绝。两者都使用确定成功/失败开关。编译器与角色校验器拒绝 `bossElementIs` 中未注册的属性值。
 
 ## 新增通用词条（摩嘉娜、露昕鲁）
 

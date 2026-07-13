@@ -5,18 +5,19 @@
   "build": { "level": 240, "exclusive": "EX3" },
   "sources": { "activeSkillIds": [75001, 75002], "passiveSkillIds": [75003, 75004], "combatLogs": [] },
   "terms": [
-    { "kind": "activeSkill", "sourceId": 75001, "model": "implemented", "summary": "自伤事件后 5 段魔法伤害。" },
+    { "kind": "activeSkill", "sourceId": 75001, "model": "implemented", "summary": "自伤事件后 5 段魔法伤害，每段可切换概率施加受回复量降低。" },
     { "kind": "activeSkill", "sourceId": 75002, "model": "implemented", "summary": "自伤事件后按奋起之心增加段数。" },
     { "kind": "passiveSkill", "sourceId": 75003, "model": "implemented", "summary": "任意友方自伤叠加奋起之心。" },
     { "kind": "passiveSkill", "sourceId": 75004, "model": "implemented", "summary": "战斗开始按同属性队友提供攻击。" }
   ],
   "effectGroups": [
+    { "id": 7500130202, "model": "implemented", "summary": "受回复量降低；可解除零倍率Boss弱化。" },
     { "id": 7500300101, "model": "implemented", "summary": "奋起之心攻击层数。" },
     { "id": 7500430101, "model": "implemented", "summary": "团结的力量攻击。" }
   ],
   "ignored": [
     { "key": "raidIgnoredHealing", "summary": "治疗不结算。" },
-    { "key": "raidIgnoredHealingReceivedDown", "summary": "受治疗降低不结算。" }
+    { "key": "raidIgnoredHealingReceivedDown", "summary": "受治疗降低对HP回复量的影响不结算。" }
   ],
-  "unresolved": ["自伤的实际 HP 变化不在木桩模型内。"]
+  "unresolved": ["自伤的实际 HP 变化不在木桩模型内。", "每段50%效果使用成功/失败场景，不计算概率期望。"]
 }

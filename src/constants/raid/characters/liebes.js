@@ -43,15 +43,20 @@ export default {
   ],
   skills: {
     s1: {
-      key: 's1', nameKey: 'raidSkillLiebesS1', cooldown: 4, damageType: 'phys', hooks: [
+      key: 's1', nameKey: 'raidSkillLiebesS1', cooldown: 4, damageType: 'phys',
+      damageSteps: [{ stat: 'ATK', percent: 390, hits: 5, damageType: 'phys' }],
+      hooks: [
         selfDamageHook,
         hook('beforeDamage', [
           bossStatusEffect({ id: 'liebes-defense-down', effectGroupId: 10200120201, nameKey: 'raidDebuffLiebesDefenseDown', durationRounds: 2, defenseRatePerStack: -0.1 }),
           bossStatusEffect({ id: 'liebes-physical-defense-down', effectGroupId: 10200120202, nameKey: 'raidDebuffLiebesPhysicalDefenseDown', durationRounds: 2, physicalDefenseRatePerStack: -0.1 }),
         ]),
+        hook('afterDamage', [bossStatusEffect({
+          id: 'liebes-stun', effectGroupId: 10200100401, nameKey: 'raidDebuffStun', durationRounds: 1,
+          condition: { type: 'probabilityEnabled', key: 'liebesStun' }, recordSkipped: true,
+        })]),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 390, hits: 5, damageType: 'phys' }],
-      ignoredKeys: ['raidIgnoredStun', 'raidIgnoredShield'],
+      ignoredKeys: ['raidIgnoredStunAction', 'raidIgnoredShield'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillLiebesS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],

@@ -64,6 +64,13 @@ test('default defense config uses Sonya and per-character Lv500 dual penetration
   assert.equal(defaults.pmDefensePenetrations[FLORENCE], DEFAULT_RAID_PM_DEFENSE_PENETRATION)
   assert.equal(RAID_BOSS_TEMPLATES.sonya.defense, 200_000)
   assert.equal(RAID_BOSS_TEMPLATES.luke.physicalDefense, 600_000)
+  assert.equal(RAID_BOSS_TEMPLATES.sonya.element, RAID_ELEMENTS.BLUE)
+  assert.equal(RAID_BOSS_TEMPLATES.luke.element, RAID_ELEMENTS.GREEN)
+  assert.equal(defaults.probabilityOverrides.liebesStun, true)
+  assert.equal(defaults.probabilityOverrides.artoriaStun, true)
+  assert.equal(defaults.probabilityOverrides.carolSilence, true)
+  assert.equal(defaults.probabilityOverrides.morganaHealingDown, true)
+  assert.equal(defaults.probabilityOverrides.mowanoDelay, true)
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -376,6 +383,13 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
 
   assert.throws(() => compileRaidProgram(config, environmentFor({
     ...base,
+    hooks: [{
+      trigger: 'actionStart', condition: { type: 'bossElementIs', element: 999 }, effects: [],
+    }],
+  })), /Invalid raid Boss element/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
     skills: {
       ...base.skills,
       s1: {
@@ -419,6 +433,9 @@ test('mechanic registry resolves counters, skill history, conditions, and target
   assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.counterAtLeast(
     { counter: 'charge', count: 2 }, { actor },
   ), true)
+  assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.bossElementIs(
+    { element: RAID_ELEMENTS.GREEN }, { boss: { template: RAID_BOSS_TEMPLATES.luke } },
+  ), true)
 })
 
 test('Morgana stacks Fighting Spirit from allied self-damage and uses the current stack on S2', () => {
@@ -432,6 +449,49 @@ test('Morgana stacks Fighting Spirit from allied self-damage and uses the curren
   assert.equal(morganaS2.actionKey, 's2')
   assert.equal(morganaS2.damageSteps.length, 7)
   closeTo(morganaS2.damageSteps[0].attackRate, 0.6)
+})
+
+test('Carol, Morgana, and Mowano retain removable utility debuffs and trigger Boss-debuff linkages', () => {
+  const oneTurnCases = [
+    { id: CAROL, key: 'carolSilence', statusId: 'carol-silence', effectGroupId: 4000150102, durationRounds: 1, attempts: 1 },
+    { id: MORGANA, key: 'morganaHealingDown', statusId: 'morgana-healing-down', effectGroupId: 7500130202, durationRounds: 2, attempts: 5 },
+  ]
+  for (const entry of oneTurnCases) {
+    const lineup = [entry.id, LIEBES]
+    const config = {
+      lineup, attackPriority: [...lineup], speeds: { [entry.id]: 5000, [LIEBES]: 1000 }, turns: 1,
+      probabilityOverrides: { [entry.key]: true, liebesStun: false },
+    }
+    const enabled = simulateRaidTable(config)
+    const sourceAction = action(enabled, 1, entry.id)
+    const status = sourceAction.bossStatusAfterAction.find(item => item.id === entry.statusId)
+    assert.equal(status.effectGroupId, entry.effectGroupId)
+    assert.equal(status.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+    assert.equal(status.durationRounds, entry.durationRounds)
+    assert.equal(status.damageRatePerStack, 0)
+    assert.equal(sourceAction.effectsApplied.filter(effect => effect.id === entry.statusId).length, entry.attempts)
+    assert.ok(action(enabled, 1, LIEBES).statusSnapshotAtDamage[LIEBES].statuses.some(item => item.effectGroupId === 10200330102))
+
+    const disabled = simulateRaidTable({ ...config, probabilityOverrides: { [entry.key]: false, liebesStun: false } })
+    assert.equal(action(disabled, 1, entry.id).bossStatusAfterAction.some(item => item.id === entry.statusId), false)
+    assert.ok(action(disabled, 1, LIEBES).statusSnapshotAtDamage[LIEBES].statuses.some(item => item.effectGroupId === 10200330101))
+  }
+
+  const mowanoConfig = {
+    lineup: [MOWANO, LIEBES], attackPriority: [MOWANO, LIEBES],
+    speeds: { [MOWANO]: 5000, [LIEBES]: 1000 }, turns: 2,
+    probabilityOverrides: { mowanoDelay: true, liebesStun: false },
+  }
+  const enabledMowano = simulateRaidTable(mowanoConfig)
+  const delay = action(enabledMowano, 2, MOWANO).bossStatusAfterAction.find(status => status.id === 'mowano-delay')
+  assert.equal(delay.effectGroupId, 10000220102)
+  assert.equal(delay.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+  assert.equal(delay.durationRounds, 1)
+  assert.equal(action(enabledMowano, 2, LIEBES).damageSteps[0].percent, 1020)
+
+  const disabledMowano = simulateRaidTable({ ...mowanoConfig, probabilityOverrides: { mowanoDelay: false, liebesStun: false } })
+  assert.equal(action(disabledMowano, 2, MOWANO).bossStatusAfterAction.some(status => status.id === 'mowano-delay'), false)
+  assert.equal(action(disabledMowano, 2, LIEBES).damageSteps[0].percent, 880)
 })
 
 test('Lucille applies all-target battle-start buffs, Radiant Light, damage branches, and one cooldown reduction', () => {
@@ -495,10 +555,13 @@ test('Liebes defense debuffs modify separate defense paths and still power debuf
   const result = simulateRaidTable(singleConfig(LIEBES, { turns: 2 }))
   const s1 = action(result, 1, LIEBES)
   const defenseDebuffs = s1.bossStatusAfterAction.filter(status => status.id.startsWith('liebes-'))
-  assert.deepEqual(defenseDebuffs.map(status => status.id), ['liebes-defense-down', 'liebes-physical-defense-down'])
+  assert.deepEqual(defenseDebuffs.map(status => status.id), ['liebes-defense-down', 'liebes-physical-defense-down', 'liebes-stun'])
   assert.ok(defenseDebuffs.every(status => status.damageRatePerStack === 0))
   assert.equal(defenseDebuffs[0].defenseRatePerStack, -0.1)
   assert.equal(defenseDebuffs[1].physicalDefenseRatePerStack, -0.1)
+  assert.equal(defenseDebuffs[2].effectGroupId, 10200100401)
+  assert.equal(defenseDebuffs[2].statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+  assert.equal(defenseDebuffs[2].durationRounds, 1)
   assert.equal(s1.damageSteps[0].bossDamageRate, 0)
   assert.equal(s1.damageSteps[0].defense.defenseRate, -0.1)
   assert.equal(s1.damageSteps[0].defense.pmDefenseRate, -0.1)
@@ -506,6 +569,38 @@ test('Liebes defense debuffs modify separate defense paths and still power debuf
   assert.equal(s2.damageSteps[0].percent, 600)
   assert.ok(s2.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 252 * s2.damageSteps[0].defenseMultiplier) < 1e-12))
   assert.equal(s2.damageSteps[0].attackRate, 0.1)
+
+  const disabled = simulateRaidTable(singleConfig(LIEBES, {
+    turns: 1, probabilityOverrides: { liebesStun: false },
+  }))
+  const disabledS1 = action(disabled, 1, LIEBES)
+  assert.equal(disabledS1.bossStatusAfterAction.some(status => status.id === 'liebes-stun'), false)
+  assert.equal(disabledS1.effectsApplied.find(effect => effect.id === 'liebes-stun').skipped, true)
+})
+
+test('Artoria Stun is a removable Boss debuff that triggers Liebes on green Bosses without simulating action loss', () => {
+  const lineup = [ARTORIA, LIEBES]
+  const config = {
+    lineup, attackPriority: [ARTORIA, LIEBES], speeds: { [ARTORIA]: 5000, [LIEBES]: 1000 }, turns: 1,
+  }
+  const luke = simulateRaidTable({ ...config, bossTemplateId: RAID_BOSS_TEMPLATE_IDS.LUKE })
+  const artoria = action(luke, 1, ARTORIA)
+  const stun = artoria.bossStatusAfterAction.find(status => status.id === 'artoria-stun')
+  assert.equal(stun.effectGroupId, 9300120202)
+  assert.equal(stun.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+  assert.equal(stun.durationRounds, 1)
+  assert.equal(artoria.effectsApplied.filter(effect => effect.id === 'artoria-stun').length, 6)
+  assert.ok(action(luke, 1, LIEBES).statusSnapshotAtDamage[LIEBES].statuses.some(status => status.effectGroupId === 10200330102))
+
+  const sonya = simulateRaidTable({ ...config, bossTemplateId: RAID_BOSS_TEMPLATE_IDS.SONYA })
+  assert.equal(action(sonya, 1, ARTORIA).bossStatusAfterAction.some(status => status.id === 'artoria-stun'), false)
+  assert.ok(action(sonya, 1, LIEBES).statusSnapshotAtDamage[LIEBES].statuses.some(status => status.effectGroupId === 10200330101))
+
+  const disabled = simulateRaidTable({
+    ...config, bossTemplateId: RAID_BOSS_TEMPLATE_IDS.LUKE, probabilityOverrides: { artoriaStun: false },
+  })
+  assert.equal(action(disabled, 1, ARTORIA).bossStatusAfterAction.some(status => status.id === 'artoria-stun'), false)
+  assert.ok(action(disabled, 1, LIEBES).statusSnapshotAtDamage[LIEBES].statuses.some(status => status.effectGroupId === 10200330101))
 })
 
 test('Liebes Flowing Time selects one other ally and uses binary debuffed-enemy scaling on a single Boss', () => {
@@ -654,7 +749,7 @@ test('Tama, Mowano, Carol, and Asahi retain count-relevant groups and supported 
 
   const mowano = action(result, 1, MOWANO)
   assert.equal(mowano.removableBuffCountsAtActionStart[MOWANO], 2)
-  assert.equal(mowano.bossStatusAfterAction.length, 2)
+  assert.equal(mowano.bossStatusAfterAction.filter(status => status.id.startsWith('mowano-')).length, 2)
   assert.equal(mowano.bossStatusAfterAction.find(status => status.id === 'mowano-physical-defense-down').statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF)
   assert.equal(mowano.damageSteps[0].defense.pmDefenseRate, -0.25)
 

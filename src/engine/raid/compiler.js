@@ -3,6 +3,7 @@ import {
   DEFAULT_RAID_CHARACTER_LEVEL,
   DEFAULT_RAID_DEFENSE_PENETRATION,
   DEFAULT_RAID_PM_DEFENSE_PENETRATION,
+  RAID_ELEMENTS,
   RAID_JOB_FLAGS,
   RAID_TABLE_CHARACTERS,
   createDefaultRaidTableConfig,
@@ -12,6 +13,7 @@ import { DEFAULT_RAID_MECHANICS } from './mechanics.js'
 const SUPPORTED_TRIGGERS = new Set([
   'battleStart', 'roundStart', 'actionStart', 'beforeDamage', 'afterHit', 'afterCriticalHit', 'afterDamage', 'actionEnd',
 ])
+const SUPPORTED_ELEMENTS = new Set(Object.values(RAID_ELEMENTS))
 
 export const DEFAULT_RAID_ENVIRONMENT = Object.freeze({
   characters: RAID_TABLE_CHARACTERS,
@@ -74,6 +76,9 @@ function compileCondition(condition, mechanics, path, character) {
   if (!handler) throw new Error(`Unregistered raid condition '${condition.type}' at ${path}`)
   if (condition.counter && !(condition.counter in (character?.runtime?.counters ?? {}))) {
     throw new Error(`Unknown raid counter '${condition.counter}' at ${path}`)
+  }
+  if (condition.type === 'bossElementIs' && !SUPPORTED_ELEMENTS.has(condition.element)) {
+    throw new Error(`Invalid raid Boss element '${condition.element}' at ${path}`)
   }
   return { definition: condition, handler }
 }

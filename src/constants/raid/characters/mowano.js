@@ -20,7 +20,12 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillMowanoS2', cooldown: 4, damageType: 'phys',
       damageSteps: [{ stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [980, 980, 2450] }, hits: 1, damageType: 'phys', originalTargetCount: 3 }],
-      hooks: [], ignoredKeys: ['raidIgnoredDelay'],
+      hooks: [hook('afterDamage', [bossStatusEffect({
+        id: 'mowano-delay', effectGroupId: 10000220102, nameKey: 'raidDebuffMowanoDelay', durationRounds: 1,
+        damageRatePerStack: 0, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF,
+        condition: { type: 'probabilityEnabled', key: 'mowanoDelay' }, recordSkipped: true,
+      })])],
+      ignoredKeys: ['raidIgnoredDelay'],
     },
   },
 }

@@ -32,7 +32,8 @@ export function createDefaultRaidTableConfig() {
     probabilityOverrides: {
       liberiaSand: true, shizuSpeedDown: true, guinevereDamageTaken: true,
       millaDelay: true, yildizBuffBlock: true, winterStellaSilence: true,
-      lilicotteSilence: true,
+      lilicotteSilence: true, liebesStun: true, artoriaStun: true,
+      carolSilence: true, morganaHealingDown: true, mowanoDelay: true,
     },
     turns: 10,
   }
