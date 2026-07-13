@@ -65,17 +65,22 @@
 .raid-number-input em { color: var(--text-muted); font-style: normal; }
 
 .raid-speed-editor {
-  margin-bottom: 12px;
+  height: 100%;
+  margin-bottom: 0;
   padding: 12px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--r-md);
 }
 .raid-speed-editor h3 { margin-bottom: 8px; color: var(--text-secondary); font-size: var(--fs-sm); }
-.raid-speed-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
-.raid-speed-list label { display: flex; flex-direction: column; gap: 4px; color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-speed-list { display: grid; grid-template-columns: 1fr; gap: 0; }
+.raid-speed-list label { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(110px, 300px); align-items: center; gap: 12px; min-width: 0; padding: 7px 0; border: 0; border-top: 1px solid rgba(var(--color-invert-rgb), 0.06); border-radius: 0; background: transparent; color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-speed-list label:first-child { border-top: 0; }
+.raid-speed-list label span { overflow: hidden; color: var(--text-primary); font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .raid-speed-list input { width: 100%; }
-.raid-order-grid-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-
+.raid-speed-order { display: grid; gap: 3px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(var(--color-invert-rgb), 0.06); font-size: var(--fs-xs); }
+.raid-speed-order strong { color: var(--text-secondary); }
+.raid-speed-order span { overflow: hidden; color: var(--gold-light); font-family: var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
+.raid-speed-order small { color: var(--text-muted); }
 .raid-config-card,
 .raid-matrix-card,
 .raid-detail-card {
@@ -356,7 +361,6 @@
   .raid-summary-primary { grid-column: 1 / -1; }
   .raid-order-grid { grid-template-columns: 1fr; }
   .raid-roster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .raid-speed-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 560px) {
@@ -374,4 +378,5 @@
   .raid-config-card,
   .raid-matrix-card,
   .raid-detail-card { padding: 12px; }
+  .raid-speed-list label { grid-template-columns: 1fr; gap: 4px; }
 }

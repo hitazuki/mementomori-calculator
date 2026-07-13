@@ -47,34 +47,38 @@
       </label>
       <label class="raid-number-control">
         <span><strong>{{ $t('raidBaseCriticalDamage') }}</strong><small>{{ $t('raidBaseCriticalDamageHint') }}</small></span>
-        <span class="raid-number-input"><input v-model.number="baseCriticalDamagePercent" type="number" min="0" step="10"><em>%</em></span>
+        <span class="raid-number-input"><input v-model.number="baseCriticalDamagePercent" type="number" min="0" step="0.1" @change="normalizeBaseCriticalDamagePercent"><em>%</em></span>
       </label>
-      <label class="raid-toggle-control">
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.LIBERIA)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.liberiaSand" type="checkbox">
         <span><strong>{{ $t('raidAssumeLiberiaSand') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
-      <label class="raid-toggle-control">
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.SPRING_SHIZU)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.shizuSpeedDown" type="checkbox">
         <span><strong>{{ $t('raidAssumeShizuSpeedDown') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
-      <label class="raid-toggle-control">
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.GUINEVERE)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.guinevereDamageTaken" type="checkbox">
         <span><strong>{{ $t('raidAssumeGuinevereDamageTaken') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
     </div>
 
-    <div class="raid-speed-editor">
-      <h3>{{ $t('raidSpeedSettings') }}</h3>
-      <div class="raid-speed-list">
-        <label v-for="id in lineup" :key="`speed-${id}`">
-          <span>{{ characterName(id) }}</span><input v-model.number="speeds[id]" type="number" min="0" step="1">
-        </label>
-      </div>
-    </div>
-
-    <div class="raid-order-grid raid-order-grid-two">
+    <div class="raid-order-grid">
       <OrderList :title="$t('raidPositionOrder')" :items="lineup" :name-of="characterName" :up-label="$t('raidMoveUp')" :down-label="$t('raidMoveDown')" @move="moveItem(lineup, $event.index, $event.delta)" />
       <OrderList :title="$t('raidAttackPriority')" :items="attackPriority" :name-of="characterName" :up-label="$t('raidMoveUp')" :down-label="$t('raidMoveDown')" @move="moveItem(attackPriority, $event.index, $event.delta)" />
+      <div class="raid-speed-editor">
+        <h3>{{ $t('raidSpeedSettings') }}</h3>
+        <div class="raid-speed-list">
+          <label v-for="id in lineup" :key="`speed-${id}`">
+            <span>{{ characterName(id) }}</span><input v-model.number="speeds[id]" type="number" min="0" step="1">
+          </label>
+        </div>
+        <div class="raid-speed-order">
+          <strong>{{ $t('raidSpeedOrder') }}</strong>
+          <span>{{ currentSpeedOrder.map(characterName).join(' → ') }}</span>
+          <small>{{ $t('raidSpeedOrderHint') }}</small>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -210,7 +214,7 @@
 <script setup>
 import { computed, defineComponent, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
+import { RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 
 const OrderList = defineComponent({
@@ -227,13 +231,13 @@ const OrderList = defineComponent({
 })
 
 const { t, locale } = useI18n()
-const roster = [...RAID_TABLE_ROSTER]
+const roster = [...RAID_TABLE_ROSTER].sort((left, right) => left - right)
 const defaults = createDefaultRaidTableConfig()
 const lineup = ref([...defaults.lineup])
 const attackPriority = ref([...defaults.attackPriority])
 const speeds = reactive({ ...defaults.speeds })
 const guaranteedCritical = ref(defaults.guaranteedCritical)
-const baseCriticalDamagePercent = ref(defaults.baseCriticalDamageBonus * 100)
+const baseCriticalDamagePercent = ref(roundBaseCriticalDamagePercent(defaults.baseCriticalDamageBonus * 100))
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
 const selectedEvent = ref(null)
 
@@ -246,10 +250,13 @@ const result = computed(() => simulateRaidTable({
   probabilityOverrides,
   turns: 10,
 }))
+const currentSpeedOrder = computed(() => result.value.rounds[0]?.actionOrder ?? [])
 
 function characterName(id) { return t(RAID_TABLE_CHARACTERS[id].nameKey) }
 function counterLabel(id, key) { return t(RAID_TABLE_CHARACTERS[id].counterLabels?.[key] ?? key) }
 function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(locale.value, { maximumFractionDigits, minimumFractionDigits: 0 }) }
+function roundBaseCriticalDamagePercent(value) { return Number((Number(value) || 0).toFixed(1)) }
+function normalizeBaseCriticalDamagePercent() { baseCriticalDamagePercent.value = roundBaseCriticalDamagePercent(baseCriticalDamagePercent.value) }
 function formatPercent(value) { return `${formatter().format(value)}% ATK` }
 function formatRate(value) { return `${formatter().format(value * 100)}%` }
 function formatSymbolic(totals) { const entries = Object.entries(totals); return entries.length ? entries.map(([stat, value]) => `${formatter().format(value)}% ${stat}`).join(' + ') : '—' }
@@ -288,7 +295,7 @@ function resetConfig() {
   const next = createDefaultRaidTableConfig()
   lineup.value = [...next.lineup]; attackPriority.value = [...next.attackPriority]
   Object.assign(speeds, next.speeds); guaranteedCritical.value = next.guaranteedCritical
-  baseCriticalDamagePercent.value = next.baseCriticalDamageBonus * 100
+  baseCriticalDamagePercent.value = roundBaseCriticalDamagePercent(next.baseCriticalDamageBonus * 100)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
 }
 
