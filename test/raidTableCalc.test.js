@@ -394,13 +394,22 @@ test('Popri and Cattleya use round-start state and skill-use thresholds', () => 
 
 test('Merlan round-start Fairy stacks, zero-rate magic-defense debuff, and late-skill branches are deterministic', () => {
   const solo = simulateRaidTable(singleConfig(MERLAN, { turns: 10 }))
-  assert.equal(action(solo, 1, MERLAN).runtimeAfter.counters.fairy, 1)
-  assert.equal(action(solo, 1, MERLAN).bossStatusAfterAction[0].damageRatePerStack, 0)
+  const firstSoloAction = action(solo, 1, MERLAN)
+  assert.equal(firstSoloAction.runtimeAfter.counters.fairy, 1)
+  assert.equal(firstSoloAction.removableBuffCountsAtActionStart[MERLAN], 2)
+  assert.equal(firstSoloAction.removableBuffCountsAtDamage[MERLAN], 2)
+  assert.equal(firstSoloAction.statusSnapshotAtDamage[MERLAN].statuses.find(status => status.id === 'merlan-fairy').statusClass, 'unremovableState')
+  assert.equal(firstSoloAction.statusSnapshotAtDamage[MERLAN].statuses.find(status => status.id === 'merlan-shield').statusClass, 'removableBuff')
+  assert.equal(firstSoloAction.statusSnapshotAtDamage[MERLAN].statuses.find(status => status.id === 'merlan-guard').statusClass, 'removableBuff')
+  assert.equal(firstSoloAction.bossStatusAfterAction[0].damageRatePerStack, 0)
   assert.equal(action(solo, 9, MERLAN).bossStatusAfterAction[0].stacks, 5)
   assert.equal(action(solo, 10, MERLAN).damageSteps[0].percent, 630)
 
   const lineup = [MERLAN, MIFRI, POPRI]
   const lightTeam = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 1 })
-  assert.equal(action(lightTeam, 1, MERLAN).runtimeAfter.counters.fairy, 2)
-  assert.equal(action(lightTeam, 1, MERLAN).damageSteps[0].modifierSources.find(source => source.id === 'merlan-fairy').rate, 0.06)
+  const firstLightAction = action(lightTeam, 1, MERLAN)
+  assert.equal(firstLightAction.runtimeAfter.counters.fairy, 2)
+  assert.equal(firstLightAction.removableBuffCountsAtActionStart[MERLAN], 3)
+  assert.equal(firstLightAction.removableBuffCountsAtDamage[MERLAN], 3)
+  assert.equal(firstLightAction.damageSteps[0].modifierSources.find(source => source.id === 'merlan-fairy').rate, 0.06)
 })

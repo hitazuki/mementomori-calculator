@@ -67,6 +67,8 @@
 
 `EffectTurn=9999`、`IsHide` 和 `RemoveEffectType` 不能单独用于判断是否可解除。当前判断应优先依据日志 `SkillCategory`，再用技能描述和 EffectGroup 文本交叉验证。
 
+**分类证据门槛：** `removableBuff` / `unremovableState` 描述的是战斗中的可解除性，不是“是否计入倍率”或“是否为护盾、防御、承伤效果”。不得用效果类型、`EffectTurn`、`IsHide` 或 `RemoveEffectType` 推断。凡是影响 Buff 数或按 Buff 数选目标的 EffectGroup，必须在证据记录中写明日志的 `AttackUnitGuid`、`TargetUnitGuid`、`GranterGuid`、阶段与 `SkillCategory`；没有日志时，除非游戏文本明确写“无法被解除”，否则分类必须标为未决，不能作为已确认结论。
+
 ### 3.2 Buff 数的计数单位
 
 - Buff 数按目标身上的可解除 EffectGroup 数量统计，不按属性条目数量统计。

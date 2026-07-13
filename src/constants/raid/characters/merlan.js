@@ -12,8 +12,8 @@ export default {
   hooks: [
     hook('roundStart', [{ type: 'changeCounter', counter: 'fairy', amount: 1, max: 30, id: 'merlan-fairy', nameKey: 'raidBuffMerlanFairy', eventType: 'counter' }, fairy]),
     hook('roundStart', [{ type: 'changeCounter', counter: 'fairy', amount: 1, max: 30, id: 'merlan-fairy-bonus', nameKey: 'raidBuffMerlanFairy', eventType: 'counter' }], { condition: { type: 'otherLineupElementCountAtLeast', element: RAID_ELEMENTS.LIGHT, count: 2 } }),
-    hook('roundStart', [statusEffect({ id: 'merlan-shield', effectGroupId: 13500340201, nameKey: 'raidBuffMerlanShield', target: 'self', duration: 4, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE })], { everyRounds: 4, roundOffset: 1, condition: { type: 'roundAtMost', round: 12 } }),
-    hook('roundStart', [statusEffect({ id: 'merlan-guard', effectGroupId: 13500430101, nameKey: 'raidBuffMerlanGuard', target: 'self', duration: 4, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE })], { everyRounds: 4, roundOffset: 1 }),
+    hook('roundStart', [statusEffect({ id: 'merlan-shield', effectGroupId: 13500340201, nameKey: 'raidBuffMerlanShield', target: 'self', duration: 4 })], { everyRounds: 4, roundOffset: 1, condition: { type: 'roundAtMost', round: 12 } }),
+    hook('roundStart', [statusEffect({ id: 'merlan-guard', effectGroupId: 13500430101, nameKey: 'raidBuffMerlanGuard', target: 'self', duration: 4 })], { everyRounds: 4, roundOffset: 1 }),
   ],
   skills: {
     s1: {

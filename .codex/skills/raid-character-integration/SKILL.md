@@ -30,6 +30,8 @@ Use `git log`/`git show` when recent refactors may invalidate a requested layout
 
 Before changing behavior, separate facts into game data, combat-log confirmation, project convention, and unresolved inference. For a substantial new character, copy `references/character-template.json` to `doc/raid/characters/<id>-<slug>/character.json`. `character.json` is the canonical machine-validated coverage record; optional `evidence.md` holds readable rationale and unresolved notes. Keep unresolved items in the canonical record rather than presenting them as confirmed.
 
+**Status-class evidence gate:** `removableBuff` / `unremovableState` is a combat behavior classification, not a judgment about whether the effect changes the multiplier. Do not infer it from a shield, defense, damage-reduction, `EffectTurn`, `IsHide`, or `RemoveEffectType`. For any EffectGroup that affects Buff count or Buff-count target selection, confirm `SkillCategory` from a combat log and record the caster, target, granter, phase, and category. An explicit “cannot be removed” game text may support an `unremovableState` provisional classification, but every other unlogged classification must remain unresolved and must not be presented as confirmed.
+
 Describe every active skill, passive, exclusive-weapon effect, and EffectGroup. Record damage steps, target choice, trigger phase, duration clock, refresh/stack rules, history/counter read and update points, probability scenario, and intentionally ignored behavior.
 
 Use `references/character-spec-template.md` to draft the normalized implementation before editing code. Every described effect must become implemented, explicitly ignored through `ignoredKeys`, or explicitly unresolved.

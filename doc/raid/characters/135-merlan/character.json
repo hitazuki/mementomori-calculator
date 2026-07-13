@@ -3,7 +3,7 @@
   "characterId": 135,
   "slug": "merlan",
   "build": { "level": 240, "exclusive": "EX3" },
-  "sources": { "activeSkillIds": [135001, 135002], "passiveSkillIds": [135003, 135004], "combatLogs": [] },
+  "sources": { "activeSkillIds": [135001, 135002], "passiveSkillIds": [135003, 135004], "combatLogs": ["data/battle-logs/y1800mrl.json"] },
   "terms": [
     { "kind": "activeSkill", "sourceId": 135001, "model": "implemented", "summary": "EX3 五目标 440% 和零倍率减魔防。" },
     { "kind": "activeSkill", "sourceId": 135002, "model": "implemented", "summary": "七段伤害与技能历史倍率。" },
