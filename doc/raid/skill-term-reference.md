@@ -159,7 +159,7 @@ symbolicModifiers: [
 ]
 ```
 
-前端将每个符号项独立显示为“系数 × ATK_来源 / ATK_目标”，并标注数值来源。不同 `sourceId` 或目标面板的项不能合并为同一条普通攻击加成；即使当前所有角色 ATK 归一化而数值恰好相同，仍须保留来源差异。穆瓦诺复制时将复制到的 `attackRate` 转为保留原 `sourceId` 的符号项，复制详情额外显示被复制的目标。
+前端将每个符号项独立显示为“系数 × ATK_来源 / ATK_目标”，并标注数值来源。不同 `sourceId` 或目标面板的项不能合并为同一条普通攻击加成；即使当前所有角色 ATK 归一化而数值恰好相同，仍须保留来源差异。穆瓦诺复制时将复制到的 `attackRate` 转为以被复制目标为 `sourceId` 的符号项；原施加者仍保留在复制状态的 Buff 来源字段，不能与数值来源混用。
 
 符号项只作用于 `stat: 'ATK'` 的主动伤害段，并继续乘增伤和暴击。新增 `kind` 时必须同步增加键生成、显示公式、合并测试和文档说明。
 
@@ -240,7 +240,7 @@ copyStatusesEffect({
 })
 ```
 
-复制会从 `sourceTarget` 选出的第一个目标读取所有可复制的 `removableBuff` 状态，并附加给 `target`。被复制的状态保留原 `effectGroupId`、原施加者、当前剩余行动次数与结算时数值；原目标的 Buff 不会移除。`copyAttackRateAsSourceAttack: true` 只改变复制体的取值方式：原状态不变，复制体的攻击率以原施加者 ATK 为数值来源，作为独立符号项展示。不可解除状态和标记为 `copyable: false` 的状态不会被复制。并列目标沿用选择器的站位顺序。当前实例：穆瓦诺（Lv240）在 `actionStart` 复制 Buff 数最高的其他友军全部可复制 Buff，每隔 4 次自身行动再次触发。
+复制会从 `sourceTarget` 选出的第一个目标读取所有可复制的 `removableBuff` 状态，并附加给 `target`。被复制的状态保留原 `effectGroupId`、原施加者、当前剩余行动次数与结算时数值；原目标的 Buff 不会移除。`copyAttackRateAsSourceAttack: true` 只改变复制体的取值方式：原状态不变，复制体的攻击率以被复制目标 ATK 为数值来源，作为独立符号项展示；原施加者仅表示该 Buff 的来源。不可解除状态和标记为 `copyable: false` 的状态不会被复制。并列目标沿用选择器的站位顺序。当前实例：穆瓦诺（Lv240）在 `actionStart` 复制 Buff 数最高的其他友军全部可复制 Buff，每隔 4 次自身行动再次触发。
 
 ## 7. Boss 状态 `type: 'bossStatus'`
 

@@ -136,7 +136,7 @@ export function runRaidProgram(program) {
       const copiedAttackModifiers = modifiers.filter(modifier => modifier.channel === 'attackRate')
       modifiers.splice(0, modifiers.length, ...modifiers.filter(modifier => modifier.channel !== 'attackRate'))
       symbolicModifiers.push(...copiedAttackModifiers.map(modifier => ({
-        kind: 'sourceAttackOverTargetAttack', coefficient: modifier.rate, sourceId: sourceStatus.sourceId,
+        kind: 'sourceAttackOverTargetAttack', coefficient: modifier.rate, sourceId: copiedFromId,
       })))
     }
     const status = {

@@ -495,6 +495,34 @@ test('Mowano copies all removable Buffs at action start, including attack, witho
   )).map(round => round.turn), [1, 5])
 })
 
+test('Mowano retains a copied Buff caster but uses the copied ally ATK as its attack value source', () => {
+  const donor = (id, buffId, effectGroupId, rate) => ({
+    ...RAID_TABLE_CHARACTERS[id],
+    hooks: [hook('battleStart', [statusEffect({
+      id: buffId, effectGroupId, nameKey: 'raidBuffMerlynAttack', target: 'topAttack', targetCount: 1,
+      duration: 2, modifiers: [{ id: buffId, channel: 'attackRate', rate }],
+    })])],
+  })
+  const lineup = [FENRIR, MERLYN, FLORENCE, MOWANO]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [FLORENCE, FENRIR, MERLYN, MOWANO],
+    speeds: { [FENRIR]: 1, [MERLYN]: 1, [FLORENCE]: 1, [MOWANO]: 5000 }, turns: 1,
+  }, {
+    ...DEFAULT_RAID_ENVIRONMENT,
+    characters: {
+      ...RAID_TABLE_CHARACTERS,
+      [FENRIR]: donor(FENRIR, 'test-fenrir-buff', 997001, 0.2),
+      [MERLYN]: donor(MERLYN, 'test-merlyn-buff', 997002, 0.4),
+    },
+  })
+  const mowano = action(result, 1, MOWANO)
+  const copied = mowano.effectsApplied.filter(effect => effect.copiedFromId === FLORENCE)
+  assert.deepEqual(copied.map(effect => effect.sourceId), [FENRIR, MERLYN])
+  assert.deepEqual(copied.map(effect => effect.copiedFromId), [FLORENCE, FLORENCE])
+  assert.deepEqual(mowano.damageSteps[0].scalingTerms.map(term => term.sourceId), [FLORENCE, FLORENCE])
+  assert.ok(mowano.damageSteps[0].scalingTerms.every(term => term.key === `ATK_${FLORENCE}/ATK_${MOWANO}`))
+})
+
 test('Cattleya and Rustica keep their ordinary attack buffs on the original target', () => {
   const lineup = [RUSTICA, CATTLEYYA]
   const result = simulateRaidTable({
