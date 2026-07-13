@@ -20,5 +20,5 @@
     { "key": "raidIgnoredMagicDefenseDown", "summary": "防御不结算，保留层数。" },
     { "key": "raidIgnoredShield", "summary": "木桩没有护盾。" }
   ],
-  "unresolved": ["多目标减魔防的逐目标堆叠与随机目标规则需要受控日志。"]
+  "unresolved": []
 }
