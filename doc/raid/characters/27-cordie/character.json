@@ -1,0 +1,29 @@
+{
+  "formatVersion": 1,
+  "characterId": 27,
+  "slug": "cordie",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [27001, 27002],
+    "passiveSkillIds": [27003, 27004],
+    "combatLogs": ["data/battle-logs/g1820-3.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 27001, "model": "implemented", "summary": "对单Boss进行5次570% ATK物理攻击，并在主体伤害前附加3回合、可解除的80%防御降低；击杀后的自身攻击提升不触发。" },
+    { "kind": "activeSkill", "sourceId": 27002, "model": "implemented", "summary": "单Boss投影为1次520% ATK物理攻击；满HP木桩不触发低HP增伤，目标有弱化时强制暴击。" },
+    { "kind": "passiveSkill", "sourceId": 27003, "model": "implemented", "summary": "开战保留不可解除的攻击+40%与防御贯通+40%状态。" },
+    { "kind": "passiveSkill", "sourceId": 27004, "model": "implemented", "summary": "第1、4、7、10回合开始刷新3次行动的不可解除弱化免疫状态；阻止弱化的行为不在木桩模型内。" }
+  ],
+  "effectGroups": [
+    { "id": 2700150102, "model": "implemented", "summary": "致命快感・防御降低；日志分类为SkillCategory=3，持续值2来自目标回合时钟，模型按技能文本保留3回合。" },
+    { "id": 2700150301, "model": "ignored", "summary": "致命快感击杀后攻击+50%；木桩永久存活，因此不附加。" },
+    { "id": 2700330101, "model": "implemented", "summary": "看过来看过来！攻击与防御贯通各+40%；日志分类为SkillCategory=4。" },
+    { "id": 2700430101, "model": "implemented", "summary": "烟雾弹・弱化效果免疫；日志在第1与第4回合开始附加，SkillCategory=4、EffectTurn=3。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredKillTriggeredAttackBuff", "summary": "击杀后攻击提升在永久存活木桩上不触发。" },
+    { "key": "raidIgnoredLowHpActiveSkillScaling", "summary": "友方保持满HP，拨扇速射不采用HP不高于50%时的2倍增伤。" },
+    { "key": "raidIgnoredDebuffImmunity", "summary": "保留弱化效果免疫状态，但木桩不会向己方施加弱化。" }
+  ],
+  "unresolved": []
+}

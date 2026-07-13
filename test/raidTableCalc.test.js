@@ -29,6 +29,7 @@ const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
   ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
+  CORDIE, SUMMER_SABRINA,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -47,13 +48,14 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes twenty-nine characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 29)
+test('roster exposes thirty-one characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 31)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-7), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-9, -2), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-2), [CORDIE, SUMMER_SABRINA])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -71,6 +73,8 @@ test('default defense config uses Sonya and per-character Lv500 dual penetration
   assert.equal(defaults.probabilityOverrides.carolSilence, true)
   assert.equal(defaults.probabilityOverrides.morganaHealingDown, true)
   assert.equal(defaults.probabilityOverrides.mowanoDelay, true)
+  assert.equal(defaults.speeds[CORDIE], 3562)
+  assert.equal(defaults.speeds[SUMMER_SABRINA], 3418)
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -332,6 +336,22 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
     ...base,
     hooks: [{ trigger: 'actionStart', effects: [{ type: 'unknownEffect' }] }],
   })), /Unregistered raid effect/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    permanentModifiers: [{ id: 'bad-channel', channel: 'unknownChannel', rate: 0.1 }],
+  })), /Unsupported raid modifier channel/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    skills: {
+      ...base.skills,
+      s1: {
+        ...base.skills.s1,
+        damageSteps: [{ ...base.skills.s1.damageSteps[0], criticalCondition: { type: 'unknownCondition' } }],
+      },
+    },
+  })), /Unregistered raid condition/)
 
   assert.throws(() => compileRaidProgram(config, environmentFor({
     ...base,
@@ -888,6 +908,95 @@ test('Lillicotte broadcasts two self-damage events, keeps enhanced normals, and 
   const disabledS2 = action(disabled, 2, LILICOTTE)
   assert.equal(disabledS2.bossStatusAfterAction.some(status => status.id === 'lilicotte-silence'), false)
   assert.equal(disabledS2.effectsApplied.find(effect => effect.id === 'lilicotte-silence').skipped, true)
+})
+
+test('Cordie applies defense down before five hits and forces S2 criticals against a debuffed Boss', () => {
+  const result = simulateRaidTable(singleConfig(CORDIE, {
+    turns: 4,
+    guaranteedCritical: false,
+    defensePenetrations: { [CORDIE]: 1000 },
+  }))
+  const s1 = action(result, 1, CORDIE)
+  assert.equal(s1.damageSteps.length, 5)
+  assert.ok(s1.damageSteps.every(step => step.percent === 570 && step.critical === false))
+  assert.ok(s1.damageSteps.every(step => step.attackRate === 0.4))
+  assert.ok(s1.damageSteps.every(step => step.defense.defenseRate === -0.8))
+  assert.ok(s1.damageSteps.every(step => step.defense.baseDefensePenetration === 1000))
+  assert.ok(s1.damageSteps.every(step => step.defense.defensePenetrationRate === 0.4))
+  assert.ok(s1.damageSteps.every(step => step.defense.defensePenetration === 1400))
+  assert.equal(s1.removableBuffCountsAtDamage[CORDIE], 0)
+  assert.deepEqual(
+    s1.statusSnapshotAtDamage[CORDIE].statuses.map(status => status.effectGroupId),
+    [2700330101, 2700430101],
+  )
+  const defenseDown = s1.bossStatusAfterAction.find(status => status.id === 'cordie-defense-down')
+  assert.equal(defenseDown.effectGroupId, 2700150102)
+  assert.equal(defenseDown.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+  assert.equal(defenseDown.remainingRounds, 3)
+
+  const s2 = action(result, 2, CORDIE)
+  assert.equal(s2.damageSteps.length, 1)
+  assert.equal(s2.damageSteps[0].percent, 520)
+  assert.equal(s2.damageSteps[0].originalTargetCount, 5)
+  assert.equal(s2.damageSteps[0].critical, true)
+  assert.equal(action(result, 4, CORDIE).statusSnapshotBeforeAction[CORDIE].statuses
+    .find(status => status.id === 'cordie-debuff-immunity').remainingActions, 3)
+
+  const withoutDebuff = {
+    ...RAID_TABLE_CHARACTERS[CORDIE],
+    skills: {
+      ...RAID_TABLE_CHARACTERS[CORDIE].skills,
+      s1: { ...RAID_TABLE_CHARACTERS[CORDIE].skills.s1, hooks: [] },
+    },
+  }
+  const noForcedCritical = simulateRaidTable(singleConfig(CORDIE, {
+    turns: 2, guaranteedCritical: false,
+  }), {
+    ...DEFAULT_RAID_ENVIRONMENT,
+    characters: { ...RAID_TABLE_CHARACTERS, [CORDIE]: withoutDebuff },
+  })
+  assert.equal(action(noForcedCritical, 2, CORDIE).damageSteps[0].critical, false)
+})
+
+test('Summer Sabrina separates pre-hit critical-resist down from post-hit Stun and conditionally adds S2 damage', () => {
+  const enabled = simulateRaidTable(singleConfig(SUMMER_SABRINA, { turns: 2 }))
+  const s1 = action(enabled, 1, SUMMER_SABRINA)
+  assert.equal(s1.damageSteps.length, 1)
+  assert.equal(s1.damageSteps[0].percent, 400)
+  assert.equal(s1.damageSteps[0].originalTargetCount, 5)
+  assert.deepEqual(s1.damageSteps[0].bossStatusBefore.map(status => status.effectGroupId), [7000130101])
+  assert.deepEqual(s1.damageSteps[0].bossStatusAfter.map(status => status.effectGroupId), [7000130101])
+  assert.deepEqual(s1.bossStatusAfterAction.map(status => status.effectGroupId), [7000130101, 7000120201])
+  assert.ok(s1.bossStatusAfterAction.every(status => status.statusClass === RAID_STATUS_CLASSES.REMOVABLE_DEBUFF))
+  assert.equal(s1.bossStatusAfterAction.find(status => status.id === 'summer-sabrina-critical-resist-down').remainingRounds, 4)
+  assert.equal(s1.bossStatusAfterAction.find(status => status.id === 'summer-sabrina-stun').remainingRounds, 2)
+  assert.equal(s1.removableBuffCountsAtDamage[SUMMER_SABRINA], 0)
+  assert.deepEqual(
+    s1.statusSnapshotAtDamage[SUMMER_SABRINA].statuses.map(status => status.effectGroupId),
+    [7000320201, 7000430101],
+  )
+
+  const s2 = action(enabled, 2, SUMMER_SABRINA)
+  assert.equal(s2.damageSteps.length, 8)
+  assert.ok(s2.damageSteps.slice(0, 7).every(step => step.percent === 200))
+  assert.equal(s2.damageSteps[7].percent, 600)
+
+  const disabled = simulateRaidTable(singleConfig(SUMMER_SABRINA, {
+    turns: 2, guaranteedCritical: false,
+  }))
+  const disabledS2 = action(disabled, 2, SUMMER_SABRINA)
+  assert.equal(disabledS2.damageSteps.length, 7)
+  assert.ok(disabledS2.damageSteps.every(step => step.percent === 200 && step.critical === false))
+
+  const lineup = [SUMMER_SABRINA, LIEBES]
+  const linked = simulateRaidTable({
+    lineup, attackPriority: [...lineup], speeds: { [SUMMER_SABRINA]: 5000, [LIEBES]: 1000 }, turns: 1,
+    probabilityOverrides: { liebesStun: false },
+  })
+  const liebes = action(linked, 1, LIEBES)
+  assert.equal(liebes.damageSteps[0].bossStatusBefore.filter(status => status.sourceId === SUMMER_SABRINA).length, 2)
+  assert.equal(liebes.statusSnapshotAtDamage[LIEBES].statuses
+    .find(status => status.id === 'liebes-flowing-time-self').effectGroupId, 10200330102)
 })
 
 test('the r1820 five-character self-damage chain reaches Ayse Analysis cap before her first damage', () => {

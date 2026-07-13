@@ -16,7 +16,7 @@ function findRepoRoot(start) {
 
 const root = findRepoRoot(process.cwd())
 const importFromRoot = relative => import(pathToFileURL(path.join(root, relative)).href)
-const [{ RAID_ELEMENTS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, RAID_STATUS_CLASSES, createDefaultRaidTableConfig }, { DEFAULT_RAID_MECHANICS }, { compileRaidProgram }, { raidTranslations }] = await Promise.all([
+const [{ RAID_ELEMENTS, RAID_MODIFIER_CHANNELS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, RAID_STATUS_CLASSES, createDefaultRaidTableConfig }, { DEFAULT_RAID_MECHANICS }, { compileRaidProgram }, { raidTranslations }] = await Promise.all([
   importFromRoot('src/constants/raidTableCharacters.js'),
   importFromRoot('src/engine/raid/mechanics.js'),
   importFromRoot('src/engine/raid/compiler.js'),
@@ -27,7 +27,7 @@ const errors = []
 const warnings = []
 const strictDocs = process.argv.includes('--strict-docs')
 let docSummary = ''
-const knownChannels = new Set(['attackRate', 'damageRate', 'criticalDamageBonus', 'speedRate', 'cooldownRecoveryBonus'])
+const knownChannels = new Set(RAID_MODIFIER_CHANNELS)
 const localeNames = Object.keys(raidTranslations)
 const defaultConfig = createDefaultRaidTableConfig()
 const seenCharacterIds = new Set()
@@ -143,6 +143,7 @@ function checkAction(action, location, character) {
   for (const [index, step] of (action.damageSteps ?? []).entries()) {
     checkValue(step.percent, `${location}.damageSteps[${index}].percent`, character)
     checkValue(step.hits ?? 1, `${location}.damageSteps[${index}].hits`, character)
+    checkCondition(step.criticalCondition, `${location}.damageSteps[${index}].criticalCondition`, character)
     checkLocaleKey(step.conditionKey, `${location}.damageSteps[${index}].conditionKey`)
     for (const [effectIndex, effect] of (step.afterEffects ?? []).entries()) {
       checkEffect(effect, `${location}.damageSteps[${index}].afterEffects[${effectIndex}]`, character)

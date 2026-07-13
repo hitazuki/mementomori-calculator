@@ -170,6 +170,7 @@
 - 战斗开始时触发的Buff/弱化属于 `combatStat`，不回写 `preStatusStat`。
 - 战斗开始时技能优先于第1回合开始时技能。
 - 普通“能力数值上升/下降”以 `preStatusStat` 为增减基准。
+- 防御贯通的百分比提升同样按状态生效前的防御贯通为基准；讨伐拉表以页面配置值作为该基准，再应用 `defensePenetrationRate`。
 - “脱力”是例外：攻击力降幅以当时 `combatStat` 为基准。
 
 新增按面板取值的效果必须记录 `statBasis`：
@@ -455,7 +456,7 @@ actionEndCooldownRecovery = max(0, 1 + hasten - delay)
 | 增加/减少技能冷却 | `changeCooldown` | 直接改变当前冷却回合数 | `cooldownReduction`与`setCooldown`已部分支持 |
 | 复活 | `revive` | 致命伤失能后恢复生命并返回战斗 | 未实现 |
 | 必定命中 | `guaranteedHit` | 绕过命中率与闪避率 | 当前默认忽略命中 |
-| 必定暴击 | `guaranteedCritical` | 攻击命中后必暴，绕过暴击率与抗暴率 | 全局配置已支持 |
+| 必定暴击 | `guaranteedCritical` | 攻击命中后必暴，绕过暴击率与抗暴率 | 全局配置与技能段 `criticalCondition` 已支持 |
 | 无视弱化命中/抵抗 | `ignoreDebuffOpposedStats` | 仅按技能基础附加率；弱化免疫仍可阻止 | 未实现 |
 | 无视多重屏障 | `ignoreMultiBarrier` | 不被屏障抵消，也不消耗层数 | 未实现 |
 | 阻绝 | `isolationMitigation` | 指定伤害比例减伤，与结界取最强 | 未实现 |

@@ -5,6 +5,7 @@ import {
   DEFAULT_RAID_PM_DEFENSE_PENETRATION,
   RAID_ELEMENTS,
   RAID_JOB_FLAGS,
+  RAID_MODIFIER_CHANNELS,
   RAID_TABLE_CHARACTERS,
   createDefaultRaidTableConfig,
 } from '../../constants/raidTableCharacters.js'
@@ -14,6 +15,7 @@ const SUPPORTED_TRIGGERS = new Set([
   'battleStart', 'roundStart', 'actionStart', 'beforeDamage', 'afterHit', 'afterCriticalHit', 'afterDamage', 'actionEnd',
 ])
 const SUPPORTED_ELEMENTS = new Set(Object.values(RAID_ELEMENTS))
+const SUPPORTED_MODIFIER_CHANNELS = new Set(RAID_MODIFIER_CHANNELS)
 
 export const DEFAULT_RAID_ENVIRONMENT = Object.freeze({
   characters: RAID_TABLE_CHARACTERS,
@@ -128,6 +130,9 @@ function compileEffect(effect, mechanics, path, character) {
     throw new Error(`Unknown raid counter '${effect.counter}' at ${path}`)
   }
   const compileModifier = (modifier, modifierPath, valueKey) => {
+    if (valueKey === 'rate' && !SUPPORTED_MODIFIER_CHANNELS.has(modifier.channel)) {
+      throw new Error(`Unsupported raid modifier channel '${modifier.channel}' at ${modifierPath}`)
+    }
     const compiledValue = compileValue(modifier[valueKey], mechanics, `${modifierPath}.${valueKey}`, character)
     const counter = compiledValue.definition.counter
     if (counter && !(counter in (character.runtime?.counters ?? {}))) {
@@ -184,6 +189,7 @@ function compileDamageStep(step, mechanics, path, character) {
     ...step,
     compiledPercent: percent,
     compiledHits: hits,
+    compiledCriticalCondition: compileCondition(step.criticalCondition, mechanics, `${path}.criticalCondition`, character),
     afterEffects: (step.afterEffects ?? []).map((effect, index) => (
       compileEffect(effect, mechanics, `${path}.afterEffects[${index}]`, character)
     )),
@@ -204,12 +210,21 @@ function compileCharacter(character, mechanics) {
   if (![RAID_JOB_FLAGS.WARRIOR, RAID_JOB_FLAGS.SNIPER, RAID_JOB_FLAGS.MAGE].includes(character.jobFlags)) {
     throw new Error(`Unsupported raid job flags '${character.jobFlags}' at ${path}`)
   }
+  for (const [index, modifier] of (character.permanentModifiers ?? []).entries()) {
+    if (!SUPPORTED_MODIFIER_CHANNELS.has(modifier.channel)) {
+      throw new Error(`Unsupported raid modifier channel '${modifier.channel}' at ${path}.permanentModifiers[${index}]`)
+    }
+    if (!Number.isFinite(modifier.rate)) throw new Error(`Invalid raid modifier rate at ${path}.permanentModifiers[${index}]`)
+  }
   const hooks = (character.hooks ?? []).map((hook, index) => compileHook(hook, mechanics, `${path}.hooks[${index}]`, character))
   const eventHooks = (character.eventHooks ?? []).map((eventHook, eventIndex) => ({
     ...eventHook,
     effects: (eventHook.effects ?? []).map((effect, effectIndex) => compileEffect(effect, mechanics, `${path}.eventHooks[${eventIndex}].effects[${effectIndex}]`, character)),
   }))
   const derivedModifiers = (character.derivedModifiers ?? []).map((modifier, index) => {
+    if (!SUPPORTED_MODIFIER_CHANNELS.has(modifier.channel)) {
+      throw new Error(`Unsupported raid modifier channel '${modifier.channel}' at ${path}.derivedModifiers[${index}]`)
+    }
     const compiledRate = compileValue(modifier.rate, mechanics, `${path}.derivedModifiers[${index}].rate`, character)
     const counter = compiledRate.definition.counter
     if (counter && !(counter in (character.runtime?.counters ?? {}))) {

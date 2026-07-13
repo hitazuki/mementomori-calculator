@@ -464,6 +464,7 @@ const modifierChannels = [
   ['attackRate', 'raidAttackRate'],
   ['damageRate', 'raidDamageRate'],
   ['criticalDamageBonus', 'raidCriticalDamage'],
+  ['defensePenetrationRate', 'raidDefensePenetration'],
 ]
 
 function modifierTotals(step) {

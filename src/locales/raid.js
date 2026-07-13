@@ -458,3 +458,63 @@ const redSelfDamageCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(redSelfDamageCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const greenClassicCharacterExtensions = {
+  'zh-CN': {
+    raidCharCordie: '科迪', raidCharSummerSabrina: '［凉风战神］萨宾娜',
+    raidSkillCordieS1: '致命快感', raidSkillCordieS2: '拨扇速射',
+    raidSkillSummerSabrinaS1: '苍穹暴风雨', raidSkillSummerSabrinaS2: '蔚蓝镇魂曲',
+    raidBuffCordieAllEyes: '看过来看过来！', raidBuffCordieDebuffImmunity: '烟雾弹・弱化效果免疫',
+    raidDebuffCordieDefenseDown: '致命快感・防御降低', raidBuffSummerSabrinaHit: '凉风战神・命中',
+    raidBuffSummerSabrinaVitality: '翱翔的梦与愿・最大生命与防御', raidDebuffSummerSabrinaCriticalResistDown: '苍穹暴风雨・暴击抵抗降低',
+    raidIgnoredKillTriggeredAttackBuff: '击杀后触发的自身攻击提升', raidIgnoredLowHpActiveSkillScaling: '低HP时的主动技能增伤',
+    raidIgnoredDebuffImmunity: '弱化效果免疫的阻止效果', raidIgnoredDeathTriggeredStun: '自身失去战斗能力后触发的晕厥',
+    raidIgnoredHitRateUp: '命中率提升对命中结算的影响',
+  },
+  'zh-TW': {
+    raidCharCordie: '科迪', raidCharSummerSabrina: '［涼風戰神］薩賓娜',
+    raidSkillCordieS1: '致命快感', raidSkillCordieS2: '撥扇速射',
+    raidSkillSummerSabrinaS1: '蒼穹暴風雨', raidSkillSummerSabrinaS2: '蔚藍鎮魂曲',
+    raidBuffCordieAllEyes: '照過來照過來！', raidBuffCordieDebuffImmunity: '煙霧彈・弱化效果免疫',
+    raidDebuffCordieDefenseDown: '致命快感・防禦降低', raidBuffSummerSabrinaHit: '涼風戰神・命中',
+    raidBuffSummerSabrinaVitality: '翱翔的夢與願・最大生命與防禦', raidDebuffSummerSabrinaCriticalResistDown: '蒼穹暴風雨・暴擊抵抗降低',
+    raidIgnoredKillTriggeredAttackBuff: '擊殺後觸發的自身攻擊提升', raidIgnoredLowHpActiveSkillScaling: '低HP時的主動技能增傷',
+    raidIgnoredDebuffImmunity: '弱化效果免疫的阻止效果', raidIgnoredDeathTriggeredStun: '自身失去戰鬥能力後觸發的暈眩',
+    raidIgnoredHitRateUp: '命中率提升對命中結算的影響',
+  },
+  en: {
+    raidCharCordie: 'Cordie', raidCharSummerSabrina: '[Soldier of the Summer Breeze] Sabrina',
+    raidSkillCordieS1: 'The Quick & The Dead', raidSkillCordieS2: 'Fanning Shots',
+    raidSkillSummerSabrinaS1: 'Cerulean Tempest', raidSkillSummerSabrinaS2: 'Ultramarine Requiem',
+    raidBuffCordieAllEyes: 'All Eyes on Me!', raidBuffCordieDebuffImmunity: 'Smoke and Gunpowder · Debuff Immunity',
+    raidDebuffCordieDefenseDown: 'The Quick & The Dead · DEF Down', raidBuffSummerSabrinaHit: 'The Summer Soldier · ACC',
+    raidBuffSummerSabrinaVitality: 'Soaring Desire · Max HP & DEF', raidDebuffSummerSabrinaCriticalResistDown: 'Cerulean Tempest · Critical Resist Down',
+    raidIgnoredKillTriggeredAttackBuff: 'Self ATK increase triggered by defeating an enemy', raidIgnoredLowHpActiveSkillScaling: 'Low-HP active-skill scaling',
+    raidIgnoredDebuffImmunity: 'Debuff-prevention behavior', raidIgnoredDeathTriggeredStun: 'Stun triggered when the character is defeated',
+    raidIgnoredHitRateUp: 'Accuracy increase in hit resolution',
+  },
+  ja: {
+    raidCharCordie: 'コルディ', raidCharSummerSabrina: '［涼風の軍神］サブリナ',
+    raidSkillCordieS1: 'クイック&デッド', raidSkillCordieS2: 'ファニングショット',
+    raidSkillSummerSabrinaS1: '蒼穹のテンペスト', raidSkillSummerSabrinaS2: '群青のレクイエム',
+    raidBuffCordieAllEyes: 'わたしにご注目！', raidBuffCordieDebuffImmunity: '硝煙に巻く・弱体効果無効',
+    raidDebuffCordieDefenseDown: 'クイック&デッド・防御力減少', raidBuffSummerSabrinaHit: '涼風の軍神・命中率',
+    raidBuffSummerSabrinaVitality: '夢翔の願い・最大HP＆防御力', raidDebuffSummerSabrinaCriticalResistDown: '蒼穹のテンペスト・クリティカル耐性率減少',
+    raidIgnoredKillTriggeredAttackBuff: '撃破後に発動する自身の攻撃力増加', raidIgnoredLowHpActiveSkillScaling: '低HP時のアクティブスキル倍率増加',
+    raidIgnoredDebuffImmunity: '弱体効果無効による付与阻止', raidIgnoredDeathTriggeredStun: '自身の戦闘不能後に発動する気絶',
+    raidIgnoredHitRateUp: '命中率増加の命中計算',
+  },
+  ko: {
+    raidCharCordie: '콜디', raidCharSummerSabrina: '[산들바람의 군신] 사브리나',
+    raidSkillCordieS1: '퀵&데드', raidSkillCordieS2: '패닝샷',
+    raidSkillSummerSabrinaS1: '창궁의 템페스트', raidSkillSummerSabrinaS2: '군청의 레퀴엠',
+    raidBuffCordieAllEyes: '모두 나에게 주목!', raidBuffCordieDebuffImmunity: '화약 연기에 휘감겨・약화 효과 면역',
+    raidDebuffCordieDefenseDown: '퀵&데드・방어력 감소', raidBuffSummerSabrinaHit: '산들바람의 군신・명중률',
+    raidBuffSummerSabrinaVitality: '비상하는 꿈의 소원・최대 HP 및 방어력', raidDebuffSummerSabrinaCriticalResistDown: '창궁의 템페스트・치명타 저항 감소',
+    raidIgnoredKillTriggeredAttackBuff: '적 처치 후 발동하는 자신의 공격력 증가', raidIgnoredLowHpActiveSkillScaling: '낮은 HP에서 액티브 스킬 배율 증가',
+    raidIgnoredDebuffImmunity: '약화 효과 면역의 부여 방지 효과', raidIgnoredDeathTriggeredStun: '자신이 전투 불능이 된 후 발동하는 기절',
+    raidIgnoredHitRateUp: '명중률 증가의 명중 계산',
+  },
+}
+
+for (const [locale, entries] of Object.entries(greenClassicCharacterExtensions)) Object.assign(raidTranslations[locale], entries)

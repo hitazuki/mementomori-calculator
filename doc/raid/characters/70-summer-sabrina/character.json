@@ -1,0 +1,38 @@
+{
+  "formatVersion": 1,
+  "characterId": 70,
+  "slug": "summer-sabrina",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [70001, 70002],
+    "passiveSkillIds": [70003, 70004],
+    "combatLogs": ["data/battle-logs/g1820-3.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 70001, "model": "implemented", "summary": "单Boss投影为1次400% ATK攻击；伤害前附加4回合暴击抵抗降低，伤害后附加2回合晕厥，两组均为可解除弱化。" },
+    { "kind": "activeSkill", "sourceId": 70002, "model": "implemented", "summary": "7次200% ATK连击；确定必暴场景下达到4次暴击后追加1次600% ATK，解除Boss增益与击杀追加不触发。" },
+    { "kind": "passiveSkill", "sourceId": 70003, "model": "implemented", "summary": "保留开战命中+40%的不可解除状态；自身失去战斗能力后对攻击者附加晕厥不在永久存活木桩内触发。" },
+    { "kind": "passiveSkill", "sourceId": 70004, "model": "implemented", "summary": "保留最大HP+40%、防御+100%的不可解除状态；HP与受击防御不进入输出木桩倍率。" }
+  ],
+  "effectGroups": [
+    { "id": 7000100103, "model": "outOfScope", "summary": "S1攻击目标内部标记，日志分类为SkillCategory=200；单Boss的最高HP目标确定为Boss。" },
+    { "id": 7000120201, "model": "implemented", "summary": "苍穹暴风雨・晕厥；日志分类为SkillCategory=3，EffectTurn=2。" },
+    { "id": 7000130101, "model": "implemented", "summary": "苍穹暴风雨・暴击抵抗降低40%；日志分类为SkillCategory=3，EffectTurn=4。" },
+    { "id": 7000200001, "model": "outOfScope", "summary": "S2内部标记清理，不作为普通状态展示或计数。" },
+    { "id": 7000200102, "model": "outOfScope", "summary": "S2逐段暴击内部标记，日志分类为SkillCategory=200；确定场景由全局必暴配置表达。" },
+    { "id": 7000230301, "model": "ignored", "summary": "S2解除目标2个增益的内部效果；当前Boss没有可解除增益。" },
+    { "id": 7000320201, "model": "implemented", "summary": "凉风战神・命中+40%；日志分类为SkillCategory=4，状态保留但命中结算忽略。" },
+    { "id": 7000330101, "model": "ignored", "summary": "自身失去战斗能力后附加的1回合晕厥；木桩角色永久存活。" },
+    { "id": 7000430101, "model": "implemented", "summary": "翱翔的梦与愿・最大HP与防御提升；日志分类为SkillCategory=4，状态保留但数值不进入输出倍率。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredStunAction", "summary": "S1晕厥状态参与Boss弱化计数，但Boss本就不行动。" },
+    { "key": "raidIgnoredBuffRemoval", "summary": "S2解除Boss增益；当前Boss没有可解除增益。" },
+    { "key": "raidIgnoredKillFollowup", "summary": "S2每次击杀增加追加攻击次数；Boss永久存活，只保留基础1次追加。" },
+    { "key": "raidIgnoredHitRateUp", "summary": "保留命中提升状态，但命中/回避不进入当前倍率。" },
+    { "key": "raidIgnoredMaxHpUp", "summary": "保留最大HP提升状态，但HP不进入当前倍率。" },
+    { "key": "raidIgnoredDefenseBuff", "summary": "保留自身防御提升状态，但己方不承受伤害。" },
+    { "key": "raidIgnoredDeathTriggeredStun", "summary": "自身失去战斗能力后的晕厥不会在永久存活木桩中触发。" }
+  ],
+  "unresolved": []
+}

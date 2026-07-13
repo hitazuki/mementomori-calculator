@@ -90,6 +90,7 @@
 | `damageType` | 本段类型 | 可与技能顶层类型不同，例如光士 S1 |
 | `originalTargetCount` | 原技能目标数 | 仅用于展示；单体木桩仍只结算一次目标 |
 | `conditionKey` | 已固定成立的口径说明 | 只用于详情说明，不由引擎动态判定 |
+| `criticalCondition` | 技能自身的必定暴击条件 | 成立时本段强制暴击；不成立时回退到全局必暴配置 |
 
 ### 3.3 暴击追加段
 
@@ -159,6 +160,7 @@
 | `damageRate` | 输出增伤及承伤增减 | 角色与 Boss 来源相加后形成一个乘区 | 佛罗伦斯；Boss 状态另见下文 |
 | `criticalDamageBonus` | 暴击伤害加成 | 加到全局基础暴伤加成；不暴击时不使用 | 梅琳 |
 | `speedRate` | 百分比速度变化 | `基础速度 × (1 + speedRate)` | 阿尔托莉亚 |
+| `defensePenetrationRate` | 防御贯通百分比变化 | `页面配置防御贯通 × (1 + defensePenetrationRate)` | 科迪 |
 
 当前尚无 `fixedSpeed`、暴击率、命中等友方 Modifier 通道。Boss 防御百分比不属于本表的 `modifiers[channel]`，应使用 Boss 状态的三个防御字段；不要把防御降低写进 `damageRate`。
 
@@ -482,6 +484,7 @@ eventHooks: [{
 | 满足异常层数后重置冷却 | `afterDamage` 钩子 + 条件 + `setCooldown` |
 | 概率成功 | `probabilityEnabled` 条件 + 配置开关 |
 | 当前木桩固定满足的分支 | `conditionKey`，仅说明用途 |
+| 目标带弱化时本段必定暴击 | `criticalCondition: { type: 'bossStatusCountAtLeast', count: 1 }` |
 | 不参与首版的技能文本 | `ignoredKeys` |
 
 ## 新增通用词条（アイシェ、リリコット及r1820复核）
@@ -551,3 +554,12 @@ eventHooks: [{
 | Boss status | `replacementKey` | 不同声明ID共享一个运行时替换槽；晚档替换早档并刷新，不叠加。 |
 
 回复事件按“效果发动次数”计数：史黛拉S2一次回复两个目标仍为一次；艾蒂涅S2连续发动三次回复则为三次。蜜拉S1在伤害后广播，其他本批即时回复在伤害前广播。回复触发的攻击状态均为不可解除状态，不计入可解除Buff数。
+
+## 新增通用词条（科迪、凉风战神萨宾娜）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| damage step | `criticalCondition` | 条件成立时本段强制暴击；不成立时回退到全局 `guaranteedCritical` 场景。 |
+| modifier channel | `defensePenetrationRate` | 以页面配置的防御贯通为基准乘算百分比变化，不影响物理/魔法防御贯通。 |
+
+科迪S2使用 `bossStatusCountAtLeast` 强制暴击，能够在关闭全局必暴时仍正确读取Boss弱化；萨宾娜S2的“4次以上暴击”在确定场景中使用现有 `conditional + guaranteedCritical`，开启时追加1段600%，关闭时不追加。

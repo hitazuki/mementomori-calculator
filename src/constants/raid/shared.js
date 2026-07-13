@@ -10,6 +10,10 @@ export const RAID_ELEMENTS = Object.freeze({ BLUE: 1, RED: 2, GREEN: 3, YELLOW: 
 
 export const RAID_JOB_FLAGS = Object.freeze({ WARRIOR: 1, SNIPER: 2, MAGE: 4 })
 
+export const RAID_MODIFIER_CHANNELS = Object.freeze([
+  'attackRate', 'damageRate', 'criticalDamageBonus', 'speedRate', 'cooldownRecoveryBonus', 'defensePenetrationRate',
+])
+
 export const normalPhysical = Object.freeze({
   key: 'normal', nameKey: 'raidSkillNormalPhysical', damageType: 'phys',
   damageSteps: [{ stat: 'ATK', percent: 100, hits: 1, damageType: 'phys' }],
