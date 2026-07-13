@@ -1,0 +1,32 @@
+{
+  "formatVersion": 1,
+  "characterId": 99,
+  "slug": "lilicotte",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [99001, 99002],
+    "passiveSkillIds": [99003, 99004],
+    "combatLogs": ["data/battle-logs/r1820.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 99001, "model": "implemented", "summary": "连续两次自伤后进行6段630% ATK攻击；敌方增益解除在无增益木桩中忽略。" },
+    { "kind": "activeSkill", "sourceId": 99002, "model": "implemented", "summary": "连续两次自伤后对单体木桩结算1段1120% ATK，并按概率场景施加2回合沉默。" },
+    { "kind": "passiveSkill", "sourceId": 99003, "model": "ignored", "summary": "成功解除敌方增益后的友方攻防提升因木桩无敌方增益而不触发。" },
+    { "kind": "passiveSkill", "sourceId": 99004, "model": "implemented", "summary": "普攻强化为3段300% ATK；开战4次行动速度+30%。低HP增伤因满血木桩假设忽略。" }
+  ],
+  "effectGroups": [
+    { "id": 9900140202, "model": "ignored", "summary": "S1敌方增益解除；木桩没有敌方正面状态。" },
+    { "id": 9900200201, "model": "ignored", "summary": "S2敌方增益解除；木桩没有敌方正面状态。" },
+    { "id": 9900250302, "model": "implemented", "summary": "S2沉默，持续2回合，按可切换概率场景保留为Boss弱化。" },
+    { "id": 9900330101, "model": "ignored", "summary": "解除敌方增益后给非红目标的20%来源攻防状态。" },
+    { "id": 9900330102, "model": "ignored", "summary": "解除敌方增益后给红目标的50%来源攻防状态。" },
+    { "id": 9900400101, "model": "implemented", "summary": "强化普攻状态；日志分类为不可解除正面状态。" },
+    { "id": 9900430201, "model": "implemented", "summary": "开战速度+30%，持续4次自身行动；日志分类为不可解除正面状态。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredBuffRemoval", "summary": "木桩没有可解除的敌方增益。" },
+    { "key": "raidIgnoredBuffRemovalTriggeredBuff", "summary": "因无法成功解除敌方增益，后续友方攻防提升不触发。" },
+    { "key": "raidIgnoredLowHpDamageScaling", "summary": "友方保持满血，强化普攻采用基础300%而不使用低HP增伤。" }
+  ],
+  "unresolved": ["S2沉默未在r1820中发动，持续时间与EffectGroup取自Lv240 / EX2以上MB。"]
+}

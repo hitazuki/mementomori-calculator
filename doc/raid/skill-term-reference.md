@@ -131,6 +131,22 @@
 
 `counterLinear` 从角色通用运行态读取计数器。计数器必须在角色 `runtime.counters` 中声明，否则阵容编译失败。相同解析器也可用于 `derivedModifiers[].rate`。
 
+### 3.6 伤害段结束效果
+
+```js
+{
+  stat: 'ATK', percent: 670, hits: 4,
+  afterEffects: [{
+    type: 'emitEvent', event: 'selfDamage',
+    condition: { type: 'counterAtLeast', counter: 'analysis', count: 3 },
+  }],
+}
+```
+
+`damageSteps[].afterEffects` 在该伤害段的全部命中结算后、下一个伤害段读取动态段数和倍率前执行。效果走普通效果注册表、条件编译和行动详情记录，详情阶段为 `afterDamageStep`。它不是任意角色钩子，不会在每次命中后重复执行；逐命中效果继续使用 `afterHit` / `afterCriticalHit`。
+
+当前用于アイシェ S1：首轮4段结束时读取解析层数，达到3层才再次广播一次自伤；第二轮4段随后读取第二次自伤后的解析状态。未注册效果、条件或未知计数器在编译期拒绝。
+
 ## 4. 修正渠道 `modifiers`
 
 ```js
@@ -200,6 +216,7 @@ statusEffect({
 | `targetElement` | 施加后按属性过滤目标，当前用于阿尔托莉亚加速 |
 | `targetCondition` | 对每个已选目标分别判断的运行时条件；不满足时跳过该目标的本次效果 |
 | `recordSkipped` | `targetCondition` 不满足时，在行动详情保留该目标的“已跳过”记录 |
+| `replacementKey` | 同一来源的不同EffectGroup档位共享替换槽；新档整体替换旧档，不并存 |
 
 ### 6.1 状态类别
 
@@ -225,6 +242,8 @@ statusEffect({
 注意：`targetElement` 是选出候选目标后的过滤条件。若技能语义是“只在某属性角色中选择最低速者”，现有执行顺序不等价，需要新增选择器或调整解析。
 
 `targetCondition` 同样在选出目标后、逐个目标判断。`targetRemovableDebuffCountAtMost` 读取该目标当前的 `removableDebuff` 数量；梅琳 S1 用它表达“目标无弱化才施加攻击 Buff”，不影响同一技能中其他 EffectGroup 的独立结算。
+
+`effectGroupId` 通常是固定整数；当前也允许使用 `conditional` 值定义选择MB的实际整数档位。莉贝“动き出した時間”在单Boss无弱化/有弱化时分别使用 `10200330101 / 10200330102`。动态档位必须同时声明稳定的 `replacementKey`，否则不同档位会被误认为可并存状态。
 
 `removeStatusesEffect({ target, count, statusClass })` 按目标当前状态顺序移除至多 `count` 个指定类别状态，并在行动详情记录被移除的完整状态。梅琳 S1 的攻击条件先读取净化前的弱化数，再移除最多 2 个可解除弱化，避免将“有弱化时不加攻击”的分支错误地改写为净化后的无弱化分支。
 
@@ -371,6 +390,8 @@ eventHooks: [{
 - 事件 `selfDamage`：自损只触发机制，不实际降低木桩模式中的生命值。
 - `changeCounter`：修改监听者声明的通用计数器；阿尔托莉亚使用 `counters.justice`。
 
+条件 `counterAtLeast` 在当前效果执行时读取所属角色的已更新计数器。事件效果按声明顺序执行，因此“先 `changeCounter`、再判断 `counterAtLeast`”读取的是加层后的值。
+
 当前事件载荷只保存事件名与来源。新增治疗、死亡、友军施法、受击等事件时，应先扩展通用事件载荷（来源、目标、数值、技能、伤害段），再增加监听器。
 
 ## 10. 概率、条件说明和忽略项
@@ -450,6 +471,17 @@ eventHooks: [{
 | 概率成功 | `probabilityEnabled` 条件 + 配置开关 |
 | 当前木桩固定满足的分支 | `conditionKey`，仅说明用途 |
 | 不参与首版的技能文本 | `ignoredKeys` |
+
+## 新增通用词条（アイシェ、リリコット及r1820复核）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| damage step | `afterEffects` | 当前伤害段全部命中后、下一伤害段解析前执行一次通用效果列表。 |
+| condition | `counterAtLeast` | 当前所属角色的已声明计数器不少于阈值。 |
+| actor status | 动态 `effectGroupId` | 使用 `conditional` 选择实际MB状态档位；编译器要求两个分支均为整数。 |
+| actor status | `replacementKey` | 不同EffectGroup档位共享替换槽，避免换档时短暂叠加。 |
+
+`r1820` 同时确认并修正了既有实现：莉贝行动开始只选择自身与攻击最高的1名其他友军，且被动按“带弱化的敌人数”而不是目标弱化组数增长；单Boss只取10%/20%档。露昕鲁S2与S1一样先自伤；阿尔托莉亚正义和开战屏障现保留真实EffectGroup。
 
 ## 新增通用词条（摩嘉娜、露昕鲁）
 

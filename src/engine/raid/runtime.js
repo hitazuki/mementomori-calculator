@@ -100,10 +100,16 @@ export function runRaidProgram(program) {
   }
 
   function applyStatus(target, effect, ownerId, context) {
-    const index = target.statuses.findIndex(status => status.effectGroupId === effect.effectGroupId && status.sourceId === ownerId)
     const sourceActor = actors.get(ownerId)
+    const effectGroupId = effect.compiledEffectGroupId
+      ? resolveValue(effect.compiledEffectGroupId, sourceActor, context)
+      : effect.effectGroupId
+    const replacementKey = effect.replacementKey ?? effectGroupId
+    const index = target.statuses.findIndex(status => (
+      (status.replacementKey ?? status.effectGroupId) === replacementKey && status.sourceId === ownerId
+    ))
     const status = {
-      id: effect.id, effectGroupId: effect.effectGroupId, sourceId: ownerId, nameKey: effect.nameKey,
+      id: effect.id, replacementKey, effectGroupId, sourceId: ownerId, nameKey: effect.nameKey,
       statusClass: effect.statusClass, countsTowardBuffCount: effect.statusClass === RAID_STATUS_CLASSES.REMOVABLE_BUFF,
       copyable: effect.copyable !== false,
       duration: effect.duration, remainingActions: effect.duration,
@@ -143,12 +149,16 @@ export function runRaidProgram(program) {
     }
     const status = {
       id: sourceStatus.id, effectGroupId: sourceStatus.effectGroupId, sourceId: sourceStatus.sourceId, nameKey: sourceStatus.nameKey,
+      replacementKey: sourceStatus.replacementKey,
       statusClass: sourceStatus.statusClass, countsTowardBuffCount: sourceStatus.countsTowardBuffCount,
       copyable: sourceStatus.copyable !== false, duration: sourceStatus.remainingActions, remainingActions: sourceStatus.remainingActions,
       modifiers, symbolicModifiers,
       appliedSequence: context.sequence, copiedFromId,
     }
-    const index = target.statuses.findIndex(existing => existing.effectGroupId === status.effectGroupId && existing.sourceId === status.sourceId)
+    const index = target.statuses.findIndex(existing => (
+      (existing.replacementKey ?? existing.effectGroupId) === (status.replacementKey ?? status.effectGroupId)
+      && existing.sourceId === status.sourceId
+    ))
     if (index >= 0) target.statuses.splice(index, 1, status)
     else target.statuses.push(status)
     return status
@@ -194,7 +204,7 @@ export function runRaidProgram(program) {
       const status = applyStatus(target, effect, context.ownerId, context)
       context.effectsApplied.push({
         type: 'status', phase: context.phase, sourceId: context.ownerId, targetId,
-        id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey,
+        id: effect.id, effectGroupId: status.effectGroupId, nameKey: effect.nameKey,
         statusClass: effect.statusClass, countsTowardBuffCount: status.countsTowardBuffCount,
         duration: effect.duration, modifiers: status.modifiers.map(modifier => ({ ...modifier })),
         symbolicModifiers: status.symbolicModifiers.map(modifier => ({ ...modifier })), selectionCounts,
@@ -483,7 +493,7 @@ export function runRaidProgram(program) {
     let effectiveAtkPercent = 0
     let hitSequence = 0
 
-    for (const rawStep of action.damageSteps) {
+    for (const [stepIndex, rawStep] of action.damageSteps.entries()) {
       const percent = resolveValue(rawStep.compiledPercent, actor, context)
       const hits = resolveValue(rawStep.compiledHits, actor, context)
       for (let hit = 1; hit <= hits; hit += 1) {
@@ -525,6 +535,9 @@ export function runRaidProgram(program) {
           bossStatusBefore: bossBefore, bossStatusAfter: bossAfter,
         })
       }
+      for (const effect of rawStep.afterEffects ?? []) applyEffect(effect, {
+        ...context, phase: 'afterDamageStep', damageStepIndex: stepIndex + 1,
+      })
     }
     return { damageSteps, baseAtkPercent, effectiveAtkPercent, symbolicTotals, scalingTotals: actionScaling }
   }

@@ -28,7 +28,7 @@ import { bossStatusEffect, hook, statusEffect } from '../src/constants/raid/shar
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
   ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
-  MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA,
+  MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -47,13 +47,13 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes twenty-seven characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 27)
+test('roster exposes twenty-nine characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 29)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-5), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-7), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -328,6 +328,24 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
 
   assert.throws(() => compileRaidProgram(config, environmentFor({
     ...base,
+    runtime: { counters: {} },
+    skills: {
+      ...base.skills,
+      s1: {
+        ...base.skills.s1,
+        damageSteps: [{
+          ...base.skills.s1.damageSteps[0],
+          afterEffects: [{
+            type: 'emitEvent', event: 'selfDamage',
+            condition: { type: 'counterAtLeast', counter: 'missing', count: 1 },
+          }],
+        }],
+      },
+    },
+  })), /Unknown raid counter/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
     hooks: [{ trigger: 'actionStart', effects: [{
       type: 'status', id: 'bad-target', effectGroupId: 1, target: 'unknownTarget', duration: 1,
     }] }],
@@ -355,6 +373,20 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
       type: 'bossStatus', id: 'bad-defense-rate', effectGroupId: 1, defenseRatePerStack: Number.NaN,
     }] }],
   })), /defenseRatePerStack must be finite/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    skills: {
+      ...base.skills,
+      s1: {
+        ...base.skills.s1,
+        damageSteps: [{
+          ...base.skills.s1.damageSteps[0],
+          afterEffects: [{ type: 'unknownAfterStepEffect' }],
+        }],
+      },
+    },
+  })), /Unregistered raid effect/)
 })
 
 test('mechanic registry resolves counters, skill history, conditions, and targets generically', () => {
@@ -383,6 +415,9 @@ test('mechanic registry resolves counters, skill history, conditions, and target
   }), [2, 3, 1])
   assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.eventTargetsIncludeOwner(
     {}, { eventTargetIds: [1, 2], ownerId: 2 },
+  ), true)
+  assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.counterAtLeast(
+    { counter: 'charge', count: 2 }, { actor },
   ), true)
 })
 
@@ -469,8 +504,22 @@ test('Liebes defense debuffs modify separate defense paths and still power debuf
   assert.equal(s1.damageSteps[0].defense.pmDefenseRate, -0.1)
   const s2 = action(result, 2, LIEBES)
   assert.equal(s2.damageSteps[0].percent, 600)
-  assert.ok(s2.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 378 * s2.damageSteps[0].defenseMultiplier) < 1e-12))
+  assert.ok(s2.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 252 * s2.damageSteps[0].defenseMultiplier) < 1e-12))
   assert.equal(s2.damageSteps[0].attackRate, 0.1)
+})
+
+test('Liebes Flowing Time selects one other ally and uses binary debuffed-enemy scaling on a single Boss', () => {
+  const lineup = [LIEBES, ARTORIA, AISHE]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [AISHE, ARTORIA, LIEBES],
+    speeds: { [LIEBES]: 5000, [ARTORIA]: 4000, [AISHE]: 3000 }, turns: 2,
+  })
+  const first = action(result, 1, LIEBES)
+  assert.deepEqual(first.effectsApplied.filter(effect => effect.id.startsWith('liebes-flowing-time')).map(effect => effect.targetId), [LIEBES, AISHE])
+  assert.ok(first.statusSnapshotAtDamage[LIEBES].statuses.some(status => status.effectGroupId === 10200330101))
+  const second = action(result, 2, LIEBES)
+  assert.ok(second.statusSnapshotAtDamage[LIEBES].statuses.some(status => status.effectGroupId === 10200330102))
+  assert.ok(second.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 252 * second.damageSteps[0].defenseMultiplier) < 1e-12))
 })
 
 test('Mifri gains Flame Lamp on each action, hastens cooldown recovery, and upgrades third skill uses', () => {
@@ -687,6 +736,84 @@ test('round-seven healing branches, cooldown resets, speed, and Stella debuffs a
   assert.equal(lateS2.actionKey, 's2')
   assert.equal(lateS2.bossStatusAfterAction.find(status => status.id === 'winter-stella-silence').statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
   assert.equal(lateS2.runtimeAfter.counters.starlight, 4)
+})
+
+test('Ayse reactivates S1 only after the first four hits and snapshots the second self-damage', () => {
+  const solo = simulateRaidTable(singleConfig(AISHE, { turns: 1 }))
+  const soloS1 = action(solo, 1, AISHE)
+  assert.equal(soloS1.damageSteps.length, 4)
+  assert.ok(soloS1.damageSteps.every(step => step.attackRate === 0.1))
+  assert.equal(soloS1.runtimeAfter.counters.analysis, 1)
+
+  const lineup = [LILICOTTE, AISHE]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [AISHE, LILICOTTE], speeds: { [LILICOTTE]: 5000, [AISHE]: 1000 }, turns: 2,
+  })
+  const aisheS1 = action(result, 1, AISHE)
+  assert.equal(aisheS1.damageSteps.length, 8)
+  assert.ok(aisheS1.damageSteps.slice(0, 4).every(step => Math.abs(step.attackRate - 0.3) < 1e-12))
+  assert.ok(aisheS1.damageSteps.slice(4).every(step => Math.abs(step.attackRate - 0.4) < 1e-12))
+  assert.equal(aisheS1.runtimeAfter.counters.analysis, 4)
+  assert.equal(aisheS1.effectsApplied.filter(effect => effect.id === 'aishe-analysis' && effect.type === 'counter').length, 2)
+
+  const aisheS2 = action(result, 2, AISHE)
+  assert.equal(aisheS2.actionKey, 's2')
+  assert.equal(aisheS2.damageSteps.length, 5)
+  assert.ok(aisheS2.damageSteps.every(step => step.percent === 1520 && step.attackRate === 0.6))
+  assert.equal(aisheS2.runtimeAfter.counters.analysis, 6)
+  assert.ok(aisheS2.statusSnapshotAtDamage[AISHE].statuses.some(status => status.effectGroupId === 13000330102))
+})
+
+test('Lillicotte broadcasts two self-damage events, keeps enhanced normals, and expires her speed after four actions', () => {
+  const result = simulateRaidTable(singleConfig(LILICOTTE, { turns: 5 }))
+  const s1 = action(result, 1, LILICOTTE)
+  assert.equal(s1.damageSteps.length, 6)
+  assert.ok(s1.damageSteps.every(step => step.percent === 630))
+  assert.equal(s1.statusSnapshotAtDamage[LILICOTTE].statuses.find(status => status.id === 'lilicotte-speed').remainingActions, 4)
+
+  const s2 = action(result, 2, LILICOTTE)
+  assert.equal(s2.damageSteps.length, 1)
+  assert.equal(s2.damageSteps[0].percent, 1120)
+  assert.equal(s2.damageSteps[0].originalTargetCount, 3)
+  assert.equal(s2.bossStatusAfterAction.find(status => status.id === 'lilicotte-silence').effectGroupId, 9900250302)
+
+  for (const turn of [3, 4]) {
+    const normal = action(result, turn, LILICOTTE)
+    assert.equal(normal.actionKey, 'normal')
+    assert.equal(normal.damageSteps.length, 3)
+    assert.ok(normal.damageSteps.every(step => step.percent === 300))
+  }
+  assert.equal(result.rounds[0].speedSnapshot[LILICOTTE].effectiveSpeed, 3064 * 1.3)
+  assert.equal(result.rounds[3].speedSnapshot[LILICOTTE].effectiveSpeed, 3064 * 1.3)
+  assert.equal(result.rounds[4].speedSnapshot[LILICOTTE].effectiveSpeed, 3064)
+
+  const disabled = simulateRaidTable(singleConfig(LILICOTTE, {
+    turns: 2, probabilityOverrides: { lilicotteSilence: false },
+  }))
+  const disabledS2 = action(disabled, 2, LILICOTTE)
+  assert.equal(disabledS2.bossStatusAfterAction.some(status => status.id === 'lilicotte-silence'), false)
+  assert.equal(disabledS2.effectsApplied.find(effect => effect.id === 'lilicotte-silence').skipped, true)
+})
+
+test('the r1820 five-character self-damage chain reaches Ayse Analysis cap before her first damage', () => {
+  const lineup = [AISHE, LIEBES, LUCILLE, ARTORIA, LILICOTTE]
+  const result = simulateRaidTable({
+    lineup,
+    attackPriority: [AISHE, ARTORIA, LUCILLE, LIEBES, LILICOTTE],
+    speeds: { [AISHE]: 1000, [LIEBES]: 2000, [LUCILLE]: 4000, [ARTORIA]: 3000, [LILICOTTE]: 5000 },
+    turns: 2,
+  })
+  const firstAishe = action(result, 1, AISHE)
+  assert.equal(firstAishe.runtimeBefore.counters.analysis, 5)
+  assert.equal(firstAishe.runtimeAfter.counters.analysis, 6)
+  assert.equal(firstAishe.damageSteps.length, 8)
+  assert.ok(firstAishe.damageSteps.every(step => step.attackRate === 0.85))
+  assert.ok(firstAishe.statusSnapshotAtDamage[AISHE].statuses.some(status => status.effectGroupId === 13000340101))
+
+  const secondLucille = action(result, 2, LUCILLE)
+  assert.equal(secondLucille.actionKey, 's2')
+  assert.equal(secondLucille.effectsApplied.some(effect => effect.id === 'artoria-justice' && effect.type === 'counter'), true)
+  assert.equal(secondLucille.effectsApplied.some(effect => effect.id === 'liebes-messenger-oath' && effect.type === 'counter'), true)
 })
 
 test('Mowano copies all removable Buffs at action start, including attack, without consuming their duration immediately', () => {

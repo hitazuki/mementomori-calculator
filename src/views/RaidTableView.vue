@@ -104,6 +104,10 @@
         <input v-model="probabilityOverrides.winterStellaSilence" type="checkbox">
         <span><strong>{{ $t('raidAssumeWinterStellaSilence') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.LILICOTTE)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.lilicotteSilence" type="checkbox">
+        <span><strong>{{ $t('raidAssumeLilicotteSilence') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
     </div>
 
     <div class="raid-order-grid">

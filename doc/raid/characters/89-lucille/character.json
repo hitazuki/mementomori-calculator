@@ -3,7 +3,7 @@
   "characterId": 89,
   "slug": "lucille",
   "build": { "level": 240, "exclusive": "EX3" },
-  "sources": { "activeSkillIds": [89001, 89002], "passiveSkillIds": [89003, 89004], "combatLogs": [] },
+  "sources": { "activeSkillIds": [89001, 89002], "passiveSkillIds": [89003, 89004], "combatLogs": ["data/battle-logs/r1820.json"] },
   "terms": [
     { "kind": "activeSkill", "sourceId": 89001, "model": "implemented", "summary": "自伤后按弱化组数量改变的五段伤害。" },
     { "kind": "activeSkill", "sourceId": 89002, "model": "implemented", "summary": "自伤后五段伤害及一次冷却减少。" },

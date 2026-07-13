@@ -46,6 +46,9 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       (boss.statuses.find(status => status.id === condition.statusId)?.stacks ?? 0) >= condition.count
     ),
     bossStatusCountAtLeast: (condition, { boss }) => boss.statuses.length >= condition.count,
+    counterAtLeast: (condition, { actor, actors, ownerId }) => (
+      ((actor ?? actors.get(ownerId)).runtime.counters[condition.counter] ?? 0) >= condition.count
+    ),
     skillUsesAtLeast: (condition, { actor, actors, ownerId }) => ((actor ?? actors.get(ownerId)).runtime.skillUses[condition.skillKey] ?? 0) >= condition.count,
     skillUsesAtMost: (condition, { actor, actors, ownerId }) => ((actor ?? actors.get(ownerId)).runtime.skillUses[condition.skillKey] ?? 0) <= condition.count,
     otherLineupElementCountAtLeast: (condition, { actor, ownerId, config, actors }) => {

@@ -382,3 +382,63 @@ const greenHealingCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(greenHealingCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const redSelfDamageCharacterExtensions = {
+  'zh-CN': {
+    raidCharAishe: '艾谢', raidCharLilicotte: '莉莉珂特',
+    raidSkillAisheS1: '睿智的信标', raidSkillAisheS2: '机关智识环',
+    raidSkillLilicotteS1: '约定所系的缎带', raidSkillLilicotteS2: '心愿所托的花伞', raidSkillLilicotteNormal: '思念所在的怀表',
+    raidBuffAisheAnalysis: '原理解读者・解析', raidBuffAisheSpeed: '原理解读者・速度', raidBuffAisheBarrier: '年轻的朋友・多重屏障',
+    raidBuffLilicotteEnhancedNormal: '思念所在的怀表・普攻强化', raidBuffLilicotteSpeed: '思念所在的怀表・速度', raidDebuffLilicotteSilence: '心愿所托的花伞・沉默',
+    raidBuffLiebesBarrier: '信使的誓言・多重屏障', raidBuffArtoriaBarrier: '振奋之义・多重屏障',
+    raidAssumeLilicotteSilence: '假设莉莉珂特「沉默」成功', raidIgnoredEnemyBuffTurnReduction: '敌方增益持续时间缩短',
+    raidIgnoredBuffRemovalTriggeredBuff: '解除敌方增益后触发的友方攻防提升', raidIgnoredLowHpDamageScaling: '低HP时的普攻倍率提升',
+    raidConditionDummyHighHp: '木桩保持高HP，采用最大倍率', raidConditionAlliesFullHp: '友方保持满HP，采用基础倍率',
+  },
+  'zh-TW': {
+    raidCharAishe: '艾謝', raidCharLilicotte: '莉莉珂特',
+    raidSkillAisheS1: '睿智的指標', raidSkillAisheS2: '智識九連環',
+    raidSkillLilicotteS1: '約定所繫的緞帶', raidSkillLilicotteS2: '心願所託的花傘', raidSkillLilicotteNormal: '思念所在的懷錶',
+    raidBuffAisheAnalysis: '原理解讀者・解析', raidBuffAisheSpeed: '原理解讀者・速度', raidBuffAisheBarrier: '年輕的朋友・多重屏障',
+    raidBuffLilicotteEnhancedNormal: '思念所在的懷錶・普攻強化', raidBuffLilicotteSpeed: '思念所在的懷錶・速度', raidDebuffLilicotteSilence: '心願所託的花傘・沉默',
+    raidBuffLiebesBarrier: '信差的誓言・多重屏障', raidBuffArtoriaBarrier: '振奮之義・多重屏障',
+    raidAssumeLilicotteSilence: '假設莉莉珂特「沉默」成功', raidIgnoredEnemyBuffTurnReduction: '敵方增益持續時間縮短',
+    raidIgnoredBuffRemovalTriggeredBuff: '解除敵方增益後觸發的友方攻防提升', raidIgnoredLowHpDamageScaling: '低HP時的普攻倍率提升',
+    raidConditionDummyHighHp: '木樁保持高HP，採用最大倍率', raidConditionAlliesFullHp: '友方保持滿HP，採用基礎倍率',
+  },
+  en: {
+    raidCharAishe: 'Ayse', raidCharLilicotte: 'Lillicotte',
+    raidSkillAisheS1: 'Wisdom’s Guide', raidSkillAisheS2: 'Wheel of Knowledge',
+    raidSkillLilicotteS1: 'Ribbon Tied With Resolve', raidSkillLilicotteS2: 'Parasol of Vested Wishes', raidSkillLilicotteNormal: 'Pocket Watch of Memory',
+    raidBuffAisheAnalysis: 'Logic Decoder · Analysis', raidBuffAisheSpeed: 'Logic Decoder · SPD', raidBuffAisheBarrier: 'A Young Friend · Multi-Barrier',
+    raidBuffLilicotteEnhancedNormal: 'Pocket Watch of Memory · Enhanced Normal Attack', raidBuffLilicotteSpeed: 'Pocket Watch of Memory · SPD', raidDebuffLilicotteSilence: 'Parasol of Vested Wishes · Silence',
+    raidBuffLiebesBarrier: 'A Mail Carrier’s Pledge · Multi-Barrier', raidBuffArtoriaBarrier: 'Roused Justice · Multi-Barrier',
+    raidAssumeLilicotteSilence: 'Assume Lillicotte Silence succeeds', raidIgnoredEnemyBuffTurnReduction: 'Enemy buff-duration reduction',
+    raidIgnoredBuffRemovalTriggeredBuff: 'Ally ATK/DEF increase triggered by enemy buff removal', raidIgnoredLowHpDamageScaling: 'Low-HP normal-attack scaling',
+    raidConditionDummyHighHp: 'Dummy remains at high HP; use maximum scaling', raidConditionAlliesFullHp: 'Ally remains at full HP; use base scaling',
+  },
+  ja: {
+    raidCharAishe: 'アイシェ', raidCharLilicotte: 'リリコット',
+    raidSkillAisheS1: '英知の標', raidSkillAisheS2: '知識の輪',
+    raidSkillLilicotteS1: '誓い結うリボン', raidSkillLilicotteS2: '願い託す花傘', raidSkillLilicotteNormal: '想い刻む懐中時計',
+    raidBuffAisheAnalysis: '理の解読者・解析', raidBuffAisheSpeed: '理の解読者・スピード', raidBuffAisheBarrier: '小さな友達・多重バリア',
+    raidBuffLilicotteEnhancedNormal: '想い刻む懐中時計・通常攻撃強化', raidBuffLilicotteSpeed: '想い刻む懐中時計・スピード', raidDebuffLilicotteSilence: '願い託す花傘・沈黙',
+    raidBuffLiebesBarrier: '郵便配達員の誓い・多重バリア', raidBuffArtoriaBarrier: '奮い立つ正義・多重バリア',
+    raidAssumeLilicotteSilence: 'リリコットの「沈黙」成功を仮定', raidIgnoredEnemyBuffTurnReduction: '敵のバフターン数減少',
+    raidIgnoredBuffRemovalTriggeredBuff: '敵のバフ解除後に発動する味方の攻撃・防御増加', raidIgnoredLowHpDamageScaling: '低HP時の通常攻撃倍率増加',
+    raidConditionDummyHighHp: 'ダミーを高HPとして最大倍率を使用', raidConditionAlliesFullHp: '味方を満HPとして基礎倍率を使用',
+  },
+  ko: {
+    raidCharAishe: '아이셰', raidCharLilicotte: '릴리코트',
+    raidSkillAisheS1: '지혜의 길잡이', raidSkillAisheS2: '정밀 측량',
+    raidSkillLilicotteS1: '맹세를 간직한 리본', raidSkillLilicotteS2: '꽃길로 이끄는 우산', raidSkillLilicotteNormal: '추억을 품은 회중시계',
+    raidBuffAisheAnalysis: '섭리를 읽는 자・해석', raidBuffAisheSpeed: '섭리를 읽는 자・속도', raidBuffAisheBarrier: '우정에 오답이란 없어・다중 배리어',
+    raidBuffLilicotteEnhancedNormal: '추억을 품은 회중시계・일반 공격 강화', raidBuffLilicotteSpeed: '추억을 품은 회중시계・속도', raidDebuffLilicotteSilence: '꽃길로 이끄는 우산・침묵',
+    raidBuffLiebesBarrier: '우편 배달부의 마음가짐・다중 배리어', raidBuffArtoriaBarrier: '분발의 정의・다중 배리어',
+    raidAssumeLilicotteSilence: '릴리코트 「침묵」 성공 가정', raidIgnoredEnemyBuffTurnReduction: '적 버프 턴 수 감소',
+    raidIgnoredBuffRemovalTriggeredBuff: '적 버프 해제 후 발동하는 아군 공격력/방어력 증가', raidIgnoredLowHpDamageScaling: '낮은 HP에서 일반 공격 배율 증가',
+    raidConditionDummyHighHp: '더미를 높은 HP로 보고 최대 배율 적용', raidConditionAlliesFullHp: '아군을 최대 HP로 보고 기본 배율 적용',
+  },
+}
+
+for (const [locale, entries] of Object.entries(redSelfDamageCharacterExtensions)) Object.assign(raidTranslations[locale], entries)

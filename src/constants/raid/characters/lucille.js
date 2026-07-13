@@ -32,12 +32,18 @@ export default {
       }],
     },
     s2: {
-      key: 's2', nameKey: 'raidSkillLucilleS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],
+      key: 's2', nameKey: 'raidSkillLucilleS2', cooldown: 4, damageType: 'phys',
       damageSteps: [{ stat: 'ATK', percent: 580, hits: 5, damageType: 'phys' }],
-      hooks: [hook('afterDamage', [{
-        type: 'cooldownReduction', id: 'lucille-cooldown-reduction', nameKey: 'raidEffectCooldownReduction', target: 'topAttack',
-        targetCount: 1, amount: 2, condition: { type: 'bossStacksAtLeast', statusId: 'lucille-radiant-light', count: 5 },
-      }], { onceKey: 'lucilleCooldownReduction' })],
+      hooks: [
+        selfDamageHook,
+        hook('afterDamage', [{
+          type: 'cooldownReduction', id: 'lucille-cooldown-reduction', nameKey: 'raidEffectCooldownReduction', target: 'topAttack',
+          targetCount: 1, amount: 2,
+        }], {
+          onceKey: 'lucilleCooldownReduction',
+          condition: { type: 'bossStacksAtLeast', statusId: 'lucille-radiant-light', count: 5 },
+        }),
+      ],
     },
   },
 }

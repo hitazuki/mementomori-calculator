@@ -1,0 +1,28 @@
+{
+  "formatVersion": 1,
+  "characterId": 130,
+  "slug": "aishe",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [130001, 130002],
+    "passiveSkillIds": [130003, 130004],
+    "combatLogs": ["data/battle-logs/r1820.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 130001, "model": "implemented", "summary": "自伤后进行4段攻击；解析达到3层时，首轮4段结束后再次自伤并仅重放一次4段攻击。" },
+    { "kind": "activeSkill", "sourceId": 130002, "model": "implemented", "summary": "自伤后进行5段攻击；木桩保持高HP，采用每段1520% ATK的最大倍率。" },
+    { "kind": "passiveSkill", "sourceId": 130003, "model": "implemented", "summary": "任意友方自伤令解析增加1层；每层攻击+10%，6层时速度+30%。" },
+    { "kind": "passiveSkill", "sourceId": 130004, "model": "implemented", "summary": "保留开战多重屏障状态；敌方增益持续时间缩短和屏障承伤不在木桩模型内。" }
+  ],
+  "effectGroups": [
+    { "id": 13000340101, "model": "implemented", "summary": "解析，最多6层，每层攻击+10%，日志分类为不可解除正面状态。" },
+    { "id": 13000330102, "model": "implemented", "summary": "解析达到6层时速度+30%，日志分类为不可解除正面状态。" },
+    { "id": 13000420201, "model": "implemented", "summary": "开战多重屏障；保留不可解除状态，屏障数值与承伤明确忽略。" },
+    { "id": 13000430101, "model": "ignored", "summary": "攻击带弱化目标时概率缩短敌方增益持续时间；木桩没有敌方增益。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredEnemyBuffTurnReduction", "summary": "敌方增益持续时间缩短不进入当前木桩模型。" },
+    { "key": "raidIgnoredShield", "summary": "多重屏障状态被保留，但屏障数值和承伤不结算。" }
+  ],
+  "unresolved": []
+}

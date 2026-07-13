@@ -44,9 +44,10 @@ function checkLocaleKey(key, location) {
   if (missing.length) error(`${location}: locale key '${key}' missing from ${missing.join(', ')}`)
 }
 
-function checkCondition(condition, location) {
+function checkCondition(condition, location, character) {
   if (!condition) return
   if (!DEFAULT_RAID_MECHANICS.conditionHandlers[condition.type]) error(`${location}: unregistered condition '${condition.type}'`)
+  if (condition.counter && !(condition.counter in (character?.runtime?.counters ?? {}))) error(`${location}: unknown counter '${condition.counter}'`)
   if (condition.type === 'probabilityEnabled' && !(condition.key in defaultConfig.probabilityOverrides)) {
     error(`${location}: probability key '${condition.key}' has no default in createDefaultRaidTableConfig()`)
   }
@@ -59,7 +60,18 @@ function checkValue(value, location, character) {
     return
   }
   if (value.counter && !(value.counter in (character.runtime?.counters ?? {}))) error(`${location}: unknown counter '${value.counter}'`)
-  if (value.type === 'conditional') checkCondition(value.condition, `${location}.condition`)
+  if (value.type === 'conditional') checkCondition(value.condition, `${location}.condition`, character)
+}
+
+function collectResolvedNumbers(value, numbers = new Set()) {
+  if (Number.isInteger(value)) numbers.add(value)
+  else if (value?.type === 'conditional') {
+    collectResolvedNumbers(value.whenTrue, numbers)
+    collectResolvedNumbers(value.whenFalse, numbers)
+  } else if (Array.isArray(value?.values)) {
+    for (const entry of value.values) collectResolvedNumbers(entry, numbers)
+  }
+  return numbers
 }
 
 function recordDefinition(map, key, semantic, location, kind) {
@@ -74,11 +86,14 @@ function checkEffect(effect, location, character) {
     return
   }
   if (effect.target && !DEFAULT_RAID_MECHANICS.targetSelectors[effect.target]) error(`${location}: unregistered target '${effect.target}'`)
-  checkCondition(effect.condition, `${location}.condition`)
+  checkCondition(effect.condition, `${location}.condition`, character)
+  checkCondition(effect.targetCondition, `${location}.targetCondition`, character)
   checkLocaleKey(effect.nameKey, `${location}.nameKey`)
 
   if (effect.type === 'status') {
-    if (!Number.isInteger(effect.effectGroupId)) error(`${location}: actor status requires an integer effectGroupId`)
+    checkValue(effect.effectGroupId, `${location}.effectGroupId`, character)
+    const effectGroupIds = [...collectResolvedNumbers(effect.effectGroupId)]
+    if (!effectGroupIds.length) error(`${location}: actor status effectGroupId must resolve to at least one integer`)
     if (!Object.prototype.hasOwnProperty.call(effect, 'duration')) error(`${location}: actor status must explicitly use duration`)
     if (Object.prototype.hasOwnProperty.call(effect, 'durationRounds')) error(`${location}: actor status cannot use durationRounds`)
     if (!Array.isArray(effect.modifiers)) error(`${location}: status must explicitly resolve modifiers to an array (use [])`)
@@ -89,11 +104,11 @@ function checkEffect(effect, location, character) {
       checkLocaleKey(modifier.nameKey, `${location}.modifiers[${index}].nameKey`)
     }
     recordDefinition(statusDefinitions, effect.id, {
-      effectGroupId: effect.effectGroupId, nameKey: effect.nameKey, statusClass: effect.statusClass,
+      effectGroupIds, nameKey: effect.nameKey, statusClass: effect.statusClass,
     }, location, 'status id')
-    recordDefinition(groupDefinitions, effect.effectGroupId, {
-      nameKey: effect.nameKey, statusClass: effect.statusClass,
-    }, location, 'EffectGroup')
+    for (const effectGroupId of effectGroupIds) recordDefinition(groupDefinitions, effectGroupId, {
+        nameKey: effect.nameKey, statusClass: effect.statusClass,
+      }, location, 'EffectGroup')
   }
 
   if (effect.type === 'bossStatus') {
@@ -114,7 +129,7 @@ function checkEffect(effect, location, character) {
 }
 
 function checkHook(hook, location, character) {
-  checkCondition(hook.condition, `${location}.condition`)
+  checkCondition(hook.condition, `${location}.condition`, character)
   for (const [index, effect] of (hook.effects ?? []).entries()) checkEffect(effect, `${location}.effects[${index}]`, character)
 }
 
@@ -125,6 +140,9 @@ function checkAction(action, location, character) {
     checkValue(step.percent, `${location}.damageSteps[${index}].percent`, character)
     checkValue(step.hits ?? 1, `${location}.damageSteps[${index}].hits`, character)
     checkLocaleKey(step.conditionKey, `${location}.damageSteps[${index}].conditionKey`)
+    for (const [effectIndex, effect] of (step.afterEffects ?? []).entries()) {
+      checkEffect(effect, `${location}.damageSteps[${index}].afterEffects[${effectIndex}]`, character)
+    }
   }
   for (const [index, hook] of (action.hooks ?? []).entries()) checkHook(hook, `${location}.hooks[${index}]`, character)
   for (const [index, key] of (action.ignoredKeys ?? []).entries()) checkLocaleKey(key, `${location}.ignoredKeys[${index}]`)
@@ -137,6 +155,13 @@ function collectValues(value, key, values = new Set()) {
   if (Object.prototype.hasOwnProperty.call(value, key)) values.add(value[key])
   for (const child of Object.values(value)) collectValues(child, key, values)
   return values
+}
+
+function collectEffectGroupIds(value, ids = new Set()) {
+  if (!value || typeof value !== 'object') return ids
+  if (Object.prototype.hasOwnProperty.call(value, 'effectGroupId')) collectResolvedNumbers(value.effectGroupId, ids)
+  for (const child of Object.values(value)) collectEffectGroupIds(child, ids)
+  return ids
 }
 
 function checkCharacterRecord(record, directoryName, character) {
@@ -175,7 +200,7 @@ function checkCharacterRecord(record, directoryName, character) {
     if (!documentedModels.has(group.model)) error(`${location}.effectGroups[${index}]: unsupported model '${group.model}'`)
     if (!group.summary?.trim()) error(`${location}.effectGroups[${index}]: summary is required`)
   }
-  const implementedGroups = [...collectValues(character, 'effectGroupId')].filter(Number.isInteger)
+  const implementedGroups = [...collectEffectGroupIds(character)]
   for (const id of implementedGroups) {
     if (!(record.effectGroups ?? []).some(group => group.id === id)) error(`${location}: code EffectGroup ${id} has no record`)
   }

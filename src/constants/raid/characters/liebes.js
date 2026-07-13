@@ -1,6 +1,13 @@
 import { RAID_ELEMENTS, RAID_STATUS_CLASSES, bossStatusEffect, hook, normalPhysical, statusEffect } from '../shared.js'
 
 const selfDamageHook = hook('beforeDamage', [{ type: 'emitEvent', event: 'selfDamage' }])
+const flowingTimeCondition = { type: 'bossStatusCountAtLeast', count: 1 }
+const flowingTimeGroupId = {
+  type: 'conditional', condition: flowingTimeCondition, whenTrue: 10200330102, whenFalse: 10200330101,
+}
+const flowingTimeRate = {
+  type: 'conditional', condition: flowingTimeCondition, whenTrue: 0.2, whenFalse: 0.1,
+}
 const messengerOathEffects = [
   { type: 'changeCounter', counter: 'messengerOath', amount: 1, max: 5, id: 'liebes-messenger-oath', nameKey: 'raidBuffLiebesAttack', eventType: 'counter' },
   statusEffect({
@@ -11,21 +18,29 @@ const messengerOathEffects = [
 ]
 
 const flowingTimeSelf = statusEffect({
-  id: 'liebes-flowing-time-self', effectGroupId: 10200330101, nameKey: 'raidBuffLiebesFlowingTime', target: 'self',
+  id: 'liebes-flowing-time-self', replacementKey: 'liebes-flowing-time', effectGroupId: flowingTimeGroupId,
+  nameKey: 'raidBuffLiebesFlowingTime', target: 'self',
   duration: 1, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE,
-  symbolicModifiers: [{ kind: 'sourceAttackOverTargetAttack', sourceId: 102, coefficient: { type: 'bossStatusCountLinear', base: 0.1, perStack: 0.1, max: 0.6 } }],
+  symbolicModifiers: [{ kind: 'sourceAttackOverTargetAttack', sourceId: 102, coefficient: flowingTimeRate }],
 })
 const flowingTimeOther = statusEffect({
-  id: 'liebes-flowing-time-other', effectGroupId: 10200330101, nameKey: 'raidBuffLiebesFlowingTime', target: 'topAttackOther', targetCount: 2,
+  id: 'liebes-flowing-time-other', replacementKey: 'liebes-flowing-time', effectGroupId: flowingTimeGroupId,
+  nameKey: 'raidBuffLiebesFlowingTime', target: 'topAttackOther', targetCount: 1,
   duration: 1, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE,
-  symbolicModifiers: [{ kind: 'sourceAttackOverTargetAttack', sourceId: 102, coefficient: { type: 'bossStatusCountLinear', base: 0.1, perStack: 0.1, max: 0.6 } }],
+  symbolicModifiers: [{ kind: 'sourceAttackOverTargetAttack', sourceId: 102, coefficient: flowingTimeRate }],
 })
 
 export default {
   id: 102, nameKey: 'raidCharLiebes', speed: 3592, element: RAID_ELEMENTS.RED, normal: normalPhysical,
   runtime: { counters: { messengerOath: 0 }, flags: {} }, counterLabels: { messengerOath: 'raidBuffLiebesAttack' }, permanentModifiers: [],
   eventHooks: [{ event: 'selfDamage', effects: messengerOathEffects }],
-  hooks: [hook('actionStart', [flowingTimeSelf, flowingTimeOther])],
+  hooks: [
+    hook('battleStart', [statusEffect({
+      id: 'liebes-barrier', effectGroupId: 10200430301, nameKey: 'raidBuffLiebesBarrier', target: 'self', duration: null,
+      statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE, modifiers: [],
+    })]),
+    hook('actionStart', [flowingTimeSelf, flowingTimeOther]),
+  ],
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillLiebesS1', cooldown: 4, damageType: 'phys', hooks: [

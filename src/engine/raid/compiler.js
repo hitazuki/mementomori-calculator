@@ -68,21 +68,34 @@ function normalizeConfig(config, characters) {
   }
 }
 
-function compileCondition(condition, mechanics, path) {
+function compileCondition(condition, mechanics, path, character) {
   if (!condition) return null
   const handler = mechanics.conditionHandlers[condition.type]
   if (!handler) throw new Error(`Unregistered raid condition '${condition.type}' at ${path}`)
+  if (condition.counter && !(condition.counter in (character?.runtime?.counters ?? {}))) {
+    throw new Error(`Unknown raid counter '${condition.counter}' at ${path}`)
+  }
   return { definition: condition, handler }
 }
 
-function compileValue(value, mechanics, path) {
+function compileValue(value, mechanics, path, character) {
   if (typeof value === 'number') return { definition: { type: 'fixed', value }, handler: mechanics.valueResolvers.fixed }
   if (!value || typeof value !== 'object') throw new Error(`Invalid raid value at ${path}`)
   const handler = mechanics.valueResolvers[value.type]
   if (!handler) throw new Error(`Unregistered raid value resolver '${value.type}' at ${path}`)
   const compiled = { definition: value, handler }
-  if (value.type === 'conditional') compiled.condition = compileCondition(value.condition, mechanics, `${path}.condition`)
+  if (value.type === 'conditional') compiled.condition = compileCondition(value.condition, mechanics, `${path}.condition`, character)
   return compiled
+}
+
+function validateEffectGroupIdValue(value, path) {
+  if (Number.isInteger(value)) return
+  if (value?.type === 'conditional') {
+    validateEffectGroupIdValue(value.whenTrue, `${path}.whenTrue`)
+    validateEffectGroupIdValue(value.whenFalse, `${path}.whenFalse`)
+    return
+  }
+  throw new Error(`Raid status effectGroupId must resolve to integers at ${path}`)
 }
 
 function compileEffect(effect, mechanics, path, character) {
@@ -97,6 +110,9 @@ function compileEffect(effect, mechanics, path, character) {
   if (effect.type === 'bossStatus' && effect.replacementKey != null && (typeof effect.replacementKey !== 'string' || !effect.replacementKey)) {
     throw new Error(`Raid bossStatus replacementKey must be a non-empty string at ${path}`)
   }
+  if (effect.type === 'status' && effect.replacementKey != null && (typeof effect.replacementKey !== 'string' || !effect.replacementKey)) {
+    throw new Error(`Raid status replacementKey must be a non-empty string at ${path}`)
+  }
   if (effect.type === 'bossStatus') {
     for (const key of ['damageRatePerStack', 'defenseRatePerStack', 'physicalDefenseRatePerStack', 'magicDefenseRatePerStack']) {
       if (!Number.isFinite(effect[key] ?? 0)) throw new Error(`Raid bossStatus ${key} must be finite at ${path}`)
@@ -107,23 +123,32 @@ function compileEffect(effect, mechanics, path, character) {
     throw new Error(`Unknown raid counter '${effect.counter}' at ${path}`)
   }
   const compileModifier = (modifier, modifierPath, valueKey) => {
-    const compiledValue = compileValue(modifier[valueKey], mechanics, `${modifierPath}.${valueKey}`)
+    const compiledValue = compileValue(modifier[valueKey], mechanics, `${modifierPath}.${valueKey}`, character)
     const counter = compiledValue.definition.counter
     if (counter && !(counter in (character.runtime?.counters ?? {}))) {
       throw new Error(`Unknown raid counter '${counter}' at ${modifierPath}`)
     }
     return { ...modifier, [`compiled${valueKey[0].toUpperCase()}${valueKey.slice(1)}`]: compiledValue }
   }
+  if (effect.type === 'status') validateEffectGroupIdValue(effect.effectGroupId, `${path}.effectGroupId`)
+  const compiledEffectGroupId = effect.type === 'status'
+    ? compileValue(effect.effectGroupId, mechanics, `${path}.effectGroupId`, character)
+    : null
+  const effectGroupCounter = compiledEffectGroupId?.definition.counter
+  if (effectGroupCounter && !(effectGroupCounter in (character.runtime?.counters ?? {}))) {
+    throw new Error(`Unknown raid counter '${effectGroupCounter}' at ${path}.effectGroupId`)
+  }
   return {
     ...effect,
+    compiledEffectGroupId,
     modifiers: (effect.modifiers ?? []).map((modifier, index) => (
       compileModifier(modifier, `${path}.modifiers[${index}]`, 'rate')
     )),
     symbolicModifiers: (effect.symbolicModifiers ?? []).map((modifier, index) => (
       compileModifier(modifier, `${path}.symbolicModifiers[${index}]`, 'coefficient')
     )),
-    compiledCondition: compileCondition(effect.condition, mechanics, `${path}.condition`),
-    compiledTargetCondition: compileCondition(effect.targetCondition, mechanics, `${path}.targetCondition`),
+    compiledCondition: compileCondition(effect.condition, mechanics, `${path}.condition`, character),
+    compiledTargetCondition: compileCondition(effect.targetCondition, mechanics, `${path}.targetCondition`, character),
     handler,
   }
 }
@@ -132,7 +157,7 @@ function compileHook(hook, mechanics, path, character) {
   if (!SUPPORTED_TRIGGERS.has(hook.trigger)) throw new Error(`Unsupported raid trigger '${hook.trigger}' at ${path}`)
   return {
     ...hook,
-    compiledCondition: compileCondition(hook.condition, mechanics, `${path}.condition`),
+    compiledCondition: compileCondition(hook.condition, mechanics, `${path}.condition`, character),
     effects: (hook.effects ?? []).map((effect, index) => compileEffect(effect, mechanics, `${path}.effects[${index}]`, character)),
   }
 }
@@ -144,13 +169,20 @@ function groupHooks(hooks) {
 }
 
 function compileDamageStep(step, mechanics, path, character) {
-  const percent = compileValue(step.percent, mechanics, `${path}.percent`)
-  const hits = compileValue(step.hits ?? 1, mechanics, `${path}.hits`)
+  const percent = compileValue(step.percent, mechanics, `${path}.percent`, character)
+  const hits = compileValue(step.hits ?? 1, mechanics, `${path}.hits`, character)
   for (const compiled of [percent, hits]) {
     const counter = compiled.definition.counter
     if (counter && !(counter in (character.runtime?.counters ?? {}))) throw new Error(`Unknown raid counter '${counter}' at ${path}`)
   }
-  return { ...step, compiledPercent: percent, compiledHits: hits }
+  return {
+    ...step,
+    compiledPercent: percent,
+    compiledHits: hits,
+    afterEffects: (step.afterEffects ?? []).map((effect, index) => (
+      compileEffect(effect, mechanics, `${path}.afterEffects[${index}]`, character)
+    )),
+  }
 }
 
 function compileAction(action, mechanics, path, character) {
@@ -173,7 +205,7 @@ function compileCharacter(character, mechanics) {
     effects: (eventHook.effects ?? []).map((effect, effectIndex) => compileEffect(effect, mechanics, `${path}.eventHooks[${eventIndex}].effects[${effectIndex}]`, character)),
   }))
   const derivedModifiers = (character.derivedModifiers ?? []).map((modifier, index) => {
-    const compiledRate = compileValue(modifier.rate, mechanics, `${path}.derivedModifiers[${index}].rate`)
+    const compiledRate = compileValue(modifier.rate, mechanics, `${path}.derivedModifiers[${index}].rate`, character)
     const counter = compiledRate.definition.counter
     if (counter && !(counter in (character.runtime?.counters ?? {}))) {
       throw new Error(`Unknown raid counter '${counter}' at ${path}.derivedModifiers[${index}]`)

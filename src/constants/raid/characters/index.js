@@ -25,6 +25,8 @@ import eidene from './eidene.js'
 import pola from './pola.js'
 import yildiz from './yildiz.js'
 import winterStella from './winterStella.js'
+import aishe from './aishe.js'
+import lilicotte from './lilicotte.js'
 import { RAID_JOB_FLAGS } from '../shared.js'
 
 export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
@@ -55,6 +57,8 @@ export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   POLA: 114,
   YILDIZ: 124,
   WINTER_STELLA: 132,
+  AISHE: 130,
+  LILICOTTE: 99,
 })
 
 export const RAID_TABLE_ROSTER = Object.freeze([
@@ -85,6 +89,8 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.POLA,
   RAID_TABLE_CHARACTER_IDS.YILDIZ,
   RAID_TABLE_CHARACTER_IDS.WINTER_STELLA,
+  RAID_TABLE_CHARACTER_IDS.AISHE,
+  RAID_TABLE_CHARACTER_IDS.LILICOTTE,
 ])
 
 export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
@@ -115,9 +121,11 @@ export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
   114: RAID_JOB_FLAGS.SNIPER,
   124: RAID_JOB_FLAGS.WARRIOR,
   132: RAID_JOB_FLAGS.MAGE,
+  130: RAID_JOB_FLAGS.SNIPER,
+  99: RAID_JOB_FLAGS.SNIPER,
 })
 
-const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella]
+const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte]
 export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze({
   ...character,
   jobFlags: RAID_TABLE_CHARACTER_JOB_FLAGS[character.id],

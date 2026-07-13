@@ -3,18 +3,24 @@
   "characterId": 102,
   "slug": "liebes",
   "build": { "level": 240, "exclusive": "EX3" },
-  "sources": { "activeSkillIds": [102001, 102002], "passiveSkillIds": [102003, 102004], "combatLogs": [] },
+  "sources": { "activeSkillIds": [102001, 102002], "passiveSkillIds": [102003, 102004], "combatLogs": ["data/battle-logs/r1820.json"] },
   "terms": [
     { "kind": "activeSkill", "sourceId": 102001, "model": "implemented", "summary": "自伤后施加防御-10%与物防-10%，再进行五段攻击。" },
     { "kind": "activeSkill", "sourceId": 102002, "model": "implemented", "summary": "按 Boss 弱化组数量提高五段伤害。" },
-    { "kind": "passiveSkill", "sourceId": 102003, "model": "implemented", "summary": "行动开始按弱化组数量提供攻击符号项。" },
-    { "kind": "passiveSkill", "sourceId": 102004, "model": "implemented", "summary": "自伤事件为全队叠加攻击。" }
+    { "kind": "passiveSkill", "sourceId": 102003, "model": "implemented", "summary": "行动开始为自身与攻击最高的1名其他友军提供攻击符号项；单Boss按是否带弱化取10%/20%。" },
+    { "kind": "passiveSkill", "sourceId": 102004, "model": "implemented", "summary": "自伤事件为全队叠加攻击；开战多重屏障保留为空状态。" }
   ],
   "effectGroups": [
     { "id": 10200120201, "model": "implemented", "summary": "防御降低10%，进入DEF路。" },
     { "id": 10200120202, "model": "implemented", "summary": "物防降低10%，进入物防路。" },
     { "id": 10200330101, "model": "implemented", "summary": "重新流动的时间攻击符号项。" },
-    { "id": 10200420101, "model": "implemented", "summary": "信使的誓言全队攻击。" }
+    { "id": 10200330102, "model": "implemented", "summary": "单体木桩带至少1个弱化时的20%来源攻击符号项。" },
+    { "id": 10200330103, "model": "outOfScope", "summary": "2名带弱化敌人时的30%档位；单Boss模型不可达。" },
+    { "id": 10200330104, "model": "outOfScope", "summary": "3名带弱化敌人时的40%档位；单Boss模型不可达。" },
+    { "id": 10200330105, "model": "outOfScope", "summary": "4名带弱化敌人时的50%档位；单Boss模型不可达。" },
+    { "id": 10200330106, "model": "outOfScope", "summary": "最高60%档位；r1820五名敌人均带弱化时实际使用，单Boss模型不可达。" },
+    { "id": 10200420101, "model": "implemented", "summary": "信使的誓言全队攻击。" },
+    { "id": 10200430301, "model": "implemented", "summary": "开战多重屏障；状态保留，屏障承伤忽略。" }
   ],
   "ignored": [
     { "key": "raidIgnoredStun", "summary": "气绝不结算。" },
