@@ -65,6 +65,9 @@ function compileEffect(effect, mechanics, path, character) {
   if (effect.target && !mechanics.targetSelectors[effect.target]) throw new Error(`Unregistered raid target selector '${effect.target}' at ${path}`)
   if (effect.sourceTarget && !mechanics.targetSelectors[effect.sourceTarget]) throw new Error(`Unregistered raid source target selector '${effect.sourceTarget}' at ${path}`)
   if (effect.type === 'copyStatuses' && !effect.sourceTarget) throw new Error(`Raid copyStatuses effect requires sourceTarget at ${path}`)
+  if (effect.type === 'removeStatuses' && (!Number.isInteger(effect.count) || effect.count < 1)) {
+    throw new Error(`Raid removeStatuses effect requires a positive integer count at ${path}`)
+  }
   if (effect.copyAttackRateAsSourceAttack != null && typeof effect.copyAttackRateAsSourceAttack !== 'boolean') throw new Error(`Raid copyAttackRateAsSourceAttack must be boolean at ${path}`)
   if (effect.type === 'changeCounter' && !(effect.counter in (character.runtime?.counters ?? {}))) {
     throw new Error(`Unknown raid counter '${effect.counter}' at ${path}`)
@@ -86,6 +89,7 @@ function compileEffect(effect, mechanics, path, character) {
       compileModifier(modifier, `${path}.symbolicModifiers[${index}]`, 'coefficient')
     )),
     compiledCondition: compileCondition(effect.condition, mechanics, `${path}.condition`),
+    compiledTargetCondition: compileCondition(effect.targetCondition, mechanics, `${path}.targetCondition`),
     handler,
   }
 }

@@ -1,1 +1,79 @@
-{"formatVersion":1,"characterId":26,"slug":"merlyn","build":{"level":240,"exclusive":"EX3"},"sources":{"activeSkillIds":[26001,26002],"passiveSkillIds":[26003,26004],"combatLogs":[]},"terms":[{"kind":"activeSkill","sourceId":26001,"model":"implemented","summary":"主伤害。"},{"kind":"activeSkill","sourceId":26002,"model":"implemented","summary":"主伤害。"},{"kind":"passiveSkill","sourceId":26003,"model":"implemented","summary":"状态效果。"},{"kind":"passiveSkill","sourceId":26004,"model":"ignored","summary":"净化、驱散和治疗。"}],"effectGroups":[{"id":2600130102,"model":"implemented","summary":"运行时状态。"},{"id":2600160103,"model":"implemented","summary":"运行时状态。"}],"ignored":[{"key":"raidIgnoredDebuffCleanse","summary":"弱化解除未建模。"},{"key":"raidIgnoredBuffRemoval","summary":"增益解除未建模。"},{"key":"raidIgnoredHealing","summary":"治疗未建模。"}],"unresolved":["解除与治疗目标待日志确认。"]}
+{
+  "formatVersion": 1,
+  "characterId": 26,
+  "slug": "merlyn",
+  "build": {
+    "level": 240,
+    "exclusive": "EX3"
+  },
+  "sources": {
+    "activeSkillIds": [
+      26001,
+      26002
+    ],
+    "passiveSkillIds": [
+      26003,
+      26004
+    ],
+    "combatLogs": [
+      "43-60.json",
+      "g1820.json"
+    ]
+  },
+  "terms": [
+    {
+      "kind": "activeSkill",
+      "sourceId": 26001,
+      "model": "implemented",
+      "summary": "Conditional attack buff, debuff removal, and critical-damage buff."
+    },
+    {
+      "kind": "activeSkill",
+      "sourceId": 26002,
+      "model": "implemented",
+      "summary": "Three-target magic damage; enemy buff removal and healing are ignored."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 26003,
+      "model": "ignored",
+      "summary": "Critical chance has no effect in the fixed-critical model."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 26004,
+      "model": "ignored",
+      "summary": "Regeneration and HP-dependent behavior are outside the fixed-full-HP model."
+    }
+  ],
+  "effectGroups": [
+    {
+      "id": 2600130102,
+      "model": "implemented",
+      "summary": "运行时状态。"
+    },
+    {
+      "id": 2600160103,
+      "model": "implemented",
+      "summary": "运行时状态。"
+    },
+    {
+      "id": 2600320101,
+      "model": "ignored",
+      "summary": "Unremovable critical-rate state confirmed by g1820."
+    }
+  ],
+  "ignored": [
+    {
+      "key": "raidIgnoredBuffRemoval",
+      "summary": "增益解除未建模。"
+    },
+    {
+      "key": "raidIgnoredHealing",
+      "summary": "治疗未建模。"
+    }
+  ],
+  "unresolved": [
+    "S2 healing target and the S1 low-HP healing branch remain outside the fixed-full-HP model."
+  ]
+}

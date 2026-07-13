@@ -16,6 +16,7 @@ import {
   compileRaidProgram,
   simulateRaidTable,
 } from '../src/engine/raidTableCalc.js'
+import { hook, statusEffect } from '../src/constants/raid/shared.js'
 
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
@@ -372,9 +373,38 @@ test('action records snapshot removable Buff counts at action start and damage t
   const florence = action(result, 1, FLORENCE)
   assert.equal(merlyn.removableBuffCountsAtActionStart[FLORENCE], 0)
   assert.equal(merlyn.removableBuffCountsAtDamage[FLORENCE], 0)
+  assert.equal(merlyn.removableBuffCountsAfterAction[FLORENCE], 2)
   assert.equal(florence.removableBuffCountsAtActionStart[FLORENCE], 2)
   assert.equal(florence.removableBuffCountsAtDamage[FLORENCE], 2)
+  assert.equal(florence.removableBuffCountsAfterAction[FLORENCE], 2)
   assert.equal(florence.statusSnapshotAtDamage[FLORENCE].statuses.length, 2)
+})
+
+test('Merlyn S1 skips its attack Buff for a selected target carrying a removable debuff', () => {
+  const debuffTargetMerlyn = {
+    ...RAID_TABLE_CHARACTERS[MERLYN],
+    hooks: [hook('battleStart', [statusEffect({
+      id: 'test-removable-debuff', effectGroupId: 990001, nameKey: 'raidBuffMerlynAttack', target: 'topAttack', targetCount: 1,
+      duration: 2, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF,
+    }), statusEffect({
+      id: 'test-second-removable-debuff', effectGroupId: 990002, nameKey: 'raidBuffMerlynAttack', target: 'topAttack', targetCount: 1,
+      duration: 2, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF,
+    })])],
+  }
+  const lineup = [MERLYN, FLORENCE]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [FLORENCE, MERLYN], speeds: { [MERLYN]: 5000, [FLORENCE]: 1 }, turns: 1,
+  }, {
+    ...DEFAULT_RAID_ENVIRONMENT,
+    characters: { ...RAID_TABLE_CHARACTERS, [MERLYN]: debuffTargetMerlyn },
+  })
+  const merlyn = action(result, 1, MERLYN)
+  assert.equal(merlyn.effectsApplied.find(effect => effect.id === 'merlyn-atk').skipped, true)
+  assert.equal(merlyn.effectsApplied.find(effect => effect.id === 'merlyn-debuff-cleanse').removed.length, 2)
+  assert.equal(merlyn.effectsApplied.find(effect => effect.id === 'merlyn-critical-damage').targetId, FLORENCE)
+  const florence = action(result, 1, FLORENCE)
+  assert.equal(florence.removableBuffCountsAtActionStart[FLORENCE], 1)
+  assert.equal(florence.statusSnapshotBeforeAction[FLORENCE].statuses.some(status => status.id === 'merlyn-atk'), false)
 })
 
 test('Popri and Cattleya use round-start state and skill-use thresholds', () => {

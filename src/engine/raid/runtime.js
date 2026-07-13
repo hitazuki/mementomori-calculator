@@ -175,7 +175,17 @@ export function runRaidProgram(program) {
     const targets = resolveTargets(effect, context.ownerId)
     const selectionCounts = effect.target?.includes('BuffCount') ? removableBuffCounts() : null
     for (const targetId of targets) {
-      const status = applyStatus(actors.get(targetId), effect, context.ownerId, context)
+      const target = actors.get(targetId)
+      if (effect.compiledTargetCondition && !effect.compiledTargetCondition.handler(effect.compiledTargetCondition.definition, {
+        ...context, config, actors, boss, api, target, targetId,
+      })) {
+        if (effect.recordSkipped) context.effectsApplied.push({
+          type: effect.type, phase: context.phase, sourceId: context.ownerId, targetId,
+          id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey, skipped: true,
+        })
+        continue
+      }
+      const status = applyStatus(target, effect, context.ownerId, context)
       context.effectsApplied.push({
         type: 'status', phase: context.phase, sourceId: context.ownerId, targetId,
         id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey,
@@ -208,6 +218,23 @@ export function runRaidProgram(program) {
           symbolicModifiers: status.symbolicModifiers.map(modifier => ({ ...modifier })),
         })
       }
+    }
+  }
+
+  function removeActorStatuses(effect, context) {
+    for (const targetId of resolveTargets(effect, context.ownerId)) {
+      const target = actors.get(targetId)
+      const removed = []
+      target.statuses = target.statuses.filter(status => {
+        if (removed.length >= effect.count || status.statusClass !== effect.statusClass) return true
+        removed.push(cloneStatus(status))
+        return false
+      })
+      context.effectsApplied.push({
+        type: 'removeStatuses', phase: context.phase, sourceId: context.ownerId, targetId,
+        id: effect.id, nameKey: effect.nameKey, statusClass: effect.statusClass, count: effect.count,
+        removed,
+      })
     }
   }
 
@@ -302,7 +329,7 @@ export function runRaidProgram(program) {
 
   const api = {
     removableBuffCount, evaluateCondition, resolveTargets,
-    applyActorStatusEffect, copyActorStatuses, applyBossStatusEffect, applyCooldownReductionEffect,
+    applyActorStatusEffect, copyActorStatuses, removeActorStatuses, applyBossStatusEffect, applyCooldownReductionEffect,
     applyCounterEffect, applySetCooldownEffect, emitBattleEvent,
   }
 
@@ -497,16 +524,18 @@ export function runRaidProgram(program) {
       runHooks(actor, action.hooksByTrigger.actionEnd, context, 'actionEnd')
 
       const runtimeAfter = snapshotRuntime(actor)
+      const statusSnapshotAfterAction = snapshotStatuses()
+      const removableBuffCountsAfterAction = Object.fromEntries(Object.entries(statusSnapshotAfterAction).map(([id, snapshot]) => [id, snapshot.removableBuffCount]))
       const event = {
         sequence, turn, actorId, actionKey: action.key, skillNameKey: action.nameKey, damageType: action.damageType,
         damageSteps: damage.damageSteps, baseAtkPercent: damage.baseAtkPercent,
         effectiveAtkPercent: damage.effectiveAtkPercent, symbolicTotals: damage.symbolicTotals,
         scalingTotals: damage.scalingTotals, cooldownsBefore, cooldownsAfter: { ...actor.cooldowns },
         effectsApplied, expiredEffects, ignoredKeys: [...(action.ignoredKeys ?? [])], runtimeBefore, runtimeAfter,
-        statusSnapshotBeforeAction, statusSnapshotAtDamage,
+        statusSnapshotBeforeAction, statusSnapshotAtDamage, statusSnapshotAfterAction,
         removableBuffCountsAtActionStart: Object.fromEntries(Object.entries(statusSnapshotBeforeAction).map(([id, snapshot]) => [id, snapshot.removableBuffCount])),
-        removableBuffCountsAtDamage,
-        removableBuffCounts: removableBuffCounts(), bossStatusAfterAction: snapshotBoss(boss),
+        removableBuffCountsAtDamage, removableBuffCountsAfterAction,
+        removableBuffCounts: removableBuffCountsAfterAction, bossStatusAfterAction: snapshotBoss(boss),
       }
       round.actions.push(event)
       round.atkPercent += event.effectiveAtkPercent

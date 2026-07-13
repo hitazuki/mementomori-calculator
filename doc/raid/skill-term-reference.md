@@ -196,6 +196,8 @@ statusEffect({
 | `modifiers` | 数值倍率修正；无倍率但需要计数时写空数组 |
 | `symbolicModifiers` | 面板引用项 |
 | `targetElement` | 施加后按属性过滤目标，当前用于阿尔托莉亚加速 |
+| `targetCondition` | 对每个已选目标分别判断的运行时条件；不满足时跳过该目标的本次效果 |
+| `recordSkipped` | `targetCondition` 不满足时，在行动详情保留该目标的“已跳过”记录 |
 
 ### 6.1 状态类别
 
@@ -219,6 +221,10 @@ statusEffect({
 | `lowestSpeedOther` | 效果施加前基础速度最低的其他友军 | 当前读取配置速度，不含局内速度 Buff；并列按站位 |
 
 注意：`targetElement` 是选出候选目标后的过滤条件。若技能语义是“只在某属性角色中选择最低速者”，现有执行顺序不等价，需要新增选择器或调整解析。
+
+`targetCondition` 同样在选出目标后、逐个目标判断。`targetRemovableDebuffCountAtMost` 读取该目标当前的 `removableDebuff` 数量；梅琳 S1 用它表达“目标无弱化才施加攻击 Buff”，不影响同一技能中其他 EffectGroup 的独立结算。
+
+`removeStatusesEffect({ target, count, statusClass })` 按目标当前状态顺序移除至多 `count` 个指定类别状态，并在行动详情记录被移除的完整状态。梅琳 S1 的攻击条件先读取净化前的弱化数，再移除最多 2 个可解除弱化，避免将“有弱化时不加攻击”的分支错误地改写为净化后的无弱化分支。
 
 ### 6.3 友方 Buff 复制 `type: 'copyStatuses'`
 
@@ -314,6 +320,8 @@ hook('afterDamage', [{
 | `afterDamage` | 全部伤害段后 | Buff、减冷却、条件重置 |
 | `actionEnd` | 状态消费后 | 行动次数周期效果、结束条件 |
 
+行动详情同时保留 `statusSnapshotBeforeAction`、`statusSnapshotAtDamage` 与 `statusSnapshotAfterAction`。面板的可解除 Buff 数显示使用“行动前 → 行动后”；行动后快照在 `actionEnd` 钩子和本次应消耗的持续时间均结算完毕后生成。
+
 ### 9.2 行动周期被动
 
 ```js
@@ -328,7 +336,7 @@ hook('afterDamage', [{
 
 - 没有 `every`：每次到达触发阶段都检查。
 - `every: 4, offset: 1`：第1、5、9……次自身行动触发。
-- 当前条件类型只有 `anyRemovableBuffCountAtLeast`，含义是任一上场友军的可解除 Buff 数达到阈值。
+- 条件可用于钩子、效果整体，或 `statusEffect.targetCondition`。`anyRemovableBuffCountAtLeast` 判断任一上场友军的可解除 Buff 数；`targetRemovableDebuffCountAtMost` 判断当前候选目标的可解除弱化数。
 
 ### 9.3 战斗事件
 

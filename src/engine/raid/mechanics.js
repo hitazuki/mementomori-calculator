@@ -1,3 +1,5 @@
+import { RAID_STATUS_CLASSES } from '../../constants/raid/shared.js'
+
 function linearValue(spec, current) {
   return Math.min(spec.max ?? Infinity, (spec.base ?? 0) + current * (spec.perStack ?? spec.increment ?? 1))
 }
@@ -53,6 +55,11 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     actorHasStatus: (condition, { actors, ownerId }) => (
       actors.get(ownerId).statuses.some(status => status.id === condition.statusId)
     ),
+    targetRemovableDebuffCountAtMost: (condition, { target, actors, targetId }) => (
+      (target ?? actors.get(targetId)).statuses.filter(status => (
+        status.statusClass === RAID_STATUS_CLASSES.REMOVABLE_DEBUFF
+      )).length <= condition.count
+    ),
     guaranteedCritical: (_condition, { config }) => config.guaranteedCritical,
     probabilityEnabled: (condition, { config }) => config.probabilityOverrides[condition.key] !== false,
   }),
@@ -88,6 +95,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
   effectHandlers: Object.freeze({
     status: (effect, context) => context.api.applyActorStatusEffect(effect, context),
     copyStatuses: (effect, context) => context.api.copyActorStatuses(effect, context),
+    removeStatuses: (effect, context) => context.api.removeActorStatuses(effect, context),
     bossStatus: (effect, context) => context.api.applyBossStatusEffect(effect, context),
     cooldownReduction: (effect, context) => context.api.applyCooldownReductionEffect(effect, context),
     changeCounter: (effect, context) => context.api.applyCounterEffect(effect, context),

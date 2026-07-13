@@ -167,7 +167,7 @@
       <div class="raid-detail-panel">
         <h3>{{ $t('raidRemovableBuffCount') }}</h3>
         <p class="raid-muted">{{ $t('raidBuffCountTiming') }}</p>
-        <dl class="raid-detail-list"><template v-for="id in lineup" :key="`buff-${id}`"><dt>{{ characterName(id) }}</dt><dd>{{ selectedEvent.removableBuffCountsAtActionStart[id] }} → {{ selectedEvent.removableBuffCountsAtDamage[id] }}</dd></template></dl>
+        <dl class="raid-detail-list"><template v-for="id in lineup" :key="`buff-${id}`"><dt>{{ characterName(id) }}</dt><dd>{{ selectedEvent.removableBuffCountsAtActionStart[id] }} → {{ selectedEvent.removableBuffCountsAfterAction[id] }}</dd></template></dl>
         <h3 class="raid-subtitle">{{ $t('raidCooldownTitle') }}</h3>
         <dl class="raid-detail-list"><dt>{{ $t('raidCooldownBefore') }}</dt><dd>S1 {{ selectedEvent.cooldownsBefore.s1 }} · S2 {{ selectedEvent.cooldownsBefore.s2 }}</dd><dt>{{ $t('raidCooldownAfter') }}</dt><dd>S1 {{ selectedEvent.cooldownsAfter.s1 }} · S2 {{ selectedEvent.cooldownsAfter.s2 }}</dd></dl>
       </div>

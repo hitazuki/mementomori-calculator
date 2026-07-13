@@ -28,6 +28,10 @@ export function copyStatusesEffect({ id, nameKey, target = 'self', sourceTarget,
   return { type: 'copyStatuses', id, nameKey, target, sourceTarget, ...rest }
 }
 
+export function removeStatusesEffect({ id, nameKey, target, count = 1, statusClass = RAID_STATUS_CLASSES.REMOVABLE_DEBUFF, ...rest }) {
+  return { type: 'removeStatuses', id, nameKey, target, count, statusClass, ...rest }
+}
+
 export function bossStatusEffect({ id, effectGroupId, nameKey, durationRounds = null, addStacks = 1, maxStacks = 1, damageRatePerStack = 0, ...rest }) {
   return {
     type: 'bossStatus', id, effectGroupId, nameKey, durationRounds, addStacks, maxStacks,
