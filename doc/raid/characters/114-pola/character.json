@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "characterId": 114,
+  "slug": "pola",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [114001, 114002], "passiveSkillIds": [114003, 114004], "combatLogs": ["data/battle-logs/g1820-2.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 114001, "model": "implemented", "summary": "第7回合前回复后单木桩590%；之后不回复并变为1180%。" },
+    { "kind": "activeSkill", "sourceId": 114002, "model": "implemented", "summary": "第7回合前回复后8段310%；之后不回复并变为620%。" },
+    { "kind": "passiveSkill", "sourceId": 114003, "model": "implemented", "summary": "每次主动回复事件令全体翠属性友军攻击+5%，最多15层；被动自身回复量忽略。" },
+    { "kind": "passiveSkill", "sourceId": 114004, "model": "implemented", "summary": "第7回合开始重置技能冷却并永久速度+30%；最大HP与承伤降低忽略。" }
+  ],
+  "effectGroups": [
+    { "id": 11400320201, "model": "implemented", "summary": "翠属性全体攻击叠层，SkillCategory 4。" },
+    { "id": 11400420301, "model": "implemented", "summary": "第7回合速度+30%，不可解除。" },
+    { "id": 11400420201, "model": "implemented", "summary": "第7回合冷却重置内部效果。" },
+    { "id": 11400440101, "model": "outOfScope", "summary": "最大HP增加。" },
+    { "id": 11400430401, "model": "outOfScope", "summary": "承伤降低。" },
+    { "id": 11400500101, "model": "outOfScope", "summary": "15次触发内部计数；以运行时计数上限表达。" }
+  ],
+  "ignored": [{ "key": "raidIgnoredHealing", "summary": "主动与被动回复量不结算；主动回复仍广播事件。" }],
+  "unresolved": []
+}

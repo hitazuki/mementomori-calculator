@@ -480,3 +480,16 @@ eventHooks: [{
 | condition | `roundAtMost` | 当前全局回合不晚于指定回合。 |
 | condition | `actorRemovableBuffCountAtLeast` | 当前行动者自身的可解除 Buff 数不少于阈值；用于朝日在行动结束、状态时钟消耗后决定风林火山增加 1/2/3 层。 |
 | value resolver | `counterThresholds` / `skillUsesThresholds` | 以计数器或技能历史为索引从 `values` 取档；超出数组时取末档。 |
+
+## 新增通用词条（蜜拉、艾蒂涅、宝拉、耶尔德兹、暗黑圣耀星史黛拉）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| battle event | `activeSkillHeal` | 主动技能即时回复事件；`emitEvent.target` 保存本次回复目标，供接收者计数和全队监听被动使用。 |
+| target selector | `selfAndTopAttackOther` | 先选择自身，再按固定攻击优先级选择其他友军；配合 `targetCount` 表达自身加攻击最高N人。 |
+| condition | `eventTargetsIncludeOwner` | 当前事件的目标列表包含监听者本人。 |
+| condition | `targetElementNot` | 候选目标不是指定属性，用于同一被动对翠/非翠使用不同EffectGroup。 |
+| condition | `roundAtLeast` | 当前全局回合不早于指定回合。 |
+| Boss status | `replacementKey` | 不同声明ID共享一个运行时替换槽；晚档替换早档并刷新，不叠加。 |
+
+回复事件按“效果发动次数”计数：史黛拉S2一次回复两个目标仍为一次；艾蒂涅S2连续发动三次回复则为三次。蜜拉S1在伤害后广播，其他本批即时回复在伤害前广播。回复触发的攻击状态均为不可解除状态，不计入可解除Buff数。

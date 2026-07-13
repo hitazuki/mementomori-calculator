@@ -1,0 +1,26 @@
+{
+  "formatVersion": 1,
+  "characterId": 92,
+  "slug": "eidene",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [92001, 92002], "passiveSkillIds": [92003, 92004], "combatLogs": ["data/battle-logs/45-57.json", "data/battle-logs/g1820.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 92001, "model": "implemented", "summary": "四段480%；最大HP和再生明确忽略。" },
+    { "kind": "activeSkill", "sourceId": 92002, "model": "implemented", "summary": "第7回合前3次回复后单木桩480%；第7回合起不回复并变为1440%。" },
+    { "kind": "passiveSkill", "sourceId": 92003, "model": "implemented", "summary": "每次主动回复事件令自身与攻击最高的两名其他友军旺花+1，最多15层，每层攻击+5%。" },
+    { "kind": "passiveSkill", "sourceId": 92004, "model": "outOfScope", "summary": "受击回复和最大HP增加。" }
+  ],
+  "effectGroups": [
+    { "id": 9200320101, "model": "implemented", "summary": "非翠目标旺花，SkillCategory 4。" },
+    { "id": 9200320102, "model": "implemented", "summary": "翠目标旺花，攻击同为每层5%，反击每层2%忽略。" },
+    { "id": 9200150101, "model": "outOfScope", "summary": "全队最大HP增加。" },
+    { "id": 9200100102, "model": "outOfScope", "summary": "全队不可解除再生。" },
+    { "id": 9200430201, "model": "outOfScope", "summary": "自身最大HP增加。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredMaxHpUp", "summary": "最大HP不进入倍率。" },
+    { "key": "raidIgnoredRegeneration", "summary": "再生回复不进入主动技能回复事件。" },
+    { "key": "raidIgnoredHealing", "summary": "即时回复量不结算。" }
+  ],
+  "unresolved": []
+}

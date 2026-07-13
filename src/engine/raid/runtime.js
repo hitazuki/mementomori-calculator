@@ -154,10 +154,11 @@ export function runRaidProgram(program) {
 
   function applyBossStatus(effect, round, sourceId) {
     const before = snapshotBoss(boss)
-    const index = boss.statuses.findIndex(status => status.id === effect.id)
+    const replacementKey = effect.replacementKey ?? effect.id
+    const index = boss.statuses.findIndex(status => (status.replacementKey ?? status.id) === replacementKey)
     const existing = index >= 0 ? boss.statuses[index] : null
     const status = {
-      id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey, statusClass: effect.statusClass, sourceId,
+      id: effect.id, replacementKey, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey, statusClass: effect.statusClass, sourceId,
       stacks: Math.min(effect.maxStacks ?? 1, (existing?.stacks ?? 0) + (effect.addStacks ?? 1)),
       maxStacks: effect.maxStacks ?? 1, damageRatePerStack: effect.damageRatePerStack ?? 0,
       durationRounds: effect.durationRounds, remainingRounds: effect.durationRounds, appliedRound: round,
@@ -316,11 +317,13 @@ export function runRaidProgram(program) {
     }
   }
 
-  function emitBattleEvent(event, sourceId, context) {
-    for (const listener of program.eventListeners[event] ?? []) {
+  function emitBattleEvent(effect, context) {
+    const sourceId = context.ownerId
+    const eventTargetIds = effect.target ? resolveTargets(effect, sourceId) : []
+    for (const listener of program.eventListeners[effect.event] ?? []) {
       const actor = actors.get(listener.actorId)
       const listenerContext = {
-        ...context, ownerId: listener.actorId, eventSourceId: sourceId, phase: context.phase,
+        ...context, ownerId: listener.actorId, eventSourceId: sourceId, eventTargetIds, phase: context.phase,
       }
       for (const effect of listener.hook.effects) applyEffect(effect, listenerContext)
       if (!actor) throw new Error(`Missing raid event listener actor: ${listener.actorId}`)

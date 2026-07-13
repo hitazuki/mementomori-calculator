@@ -332,3 +332,43 @@ for (const [locale, names] of Object.entries(raidCharacterExtensions)) {
     ...names,
   })
 }
+
+const greenHealingCharacterExtensions = {
+  'zh-CN': {
+    raidCharMilla: '蜜拉', raidCharEidene: '艾蒂涅', raidCharPola: '宝拉', raidCharYildiz: '耶尔德兹', raidCharWinterStella: '［暗黑圣耀星］史黛拉',
+    raidSkillMillaS1: '决意回旋曲', raidSkillMillaS2: '珍藏的零食', raidSkillEideneS1: '生机解放', raidSkillEideneS2: '拟花盛开', raidSkillPolaS1: '光之弹', raidSkillPolaS2: '重生与解放', raidSkillYildizS1: '不屈之牙', raidSkillYildizS2: '星狼爪击', raidSkillWinterStellaS1: '圣星脉动', raidSkillWinterStellaS2: '终焉之星',
+    raidCounterMillaHealingReceived: '受到主动技能回复次数', raidBuffEideneVigorousBloom: '生命流溢的灯匣・旺花', raidBuffPolaCourage: '决断的勇气', raidBuffPolaSpeed: '得不到回应的心意・速度', raidBuffYildizBond: '坚定的誓言・狼与人的羁绊', raidBuffWinterStellaStarlight: '暗黑圣耀星・攻击',
+    raidDebuffMillaDelay: '决意回旋曲・延迟', raidDebuffYildizBuffBlock: '不屈之牙・增益无效', raidDebuffWinterStellaDamageTaken: '圣星脉动・承伤增加', raidDebuffWinterStellaMagicDefenseDown: '圣星脉动・魔法防御降低', raidDebuffWinterStellaSilence: '终焉之星・沉默',
+    raidAssumeMillaDelay: '假设蜜拉「延迟」成功', raidAssumeYildizBuffBlock: '假设耶尔德兹「增益无效」成功', raidAssumeWinterStellaSilence: '假设史黛拉「沉默」成功', raidIgnoredMaxHpUp: '最大生命增加', raidIgnoredRegeneration: '再生回复', raidIgnoredBuffBlock: '增益无效的阻止效果',
+  },
+  'zh-TW': {
+    raidCharMilla: '蜜拉', raidCharEidene: '艾蒂涅', raidCharPola: '寶拉', raidCharYildiz: '耶爾德茲', raidCharWinterStella: '［闇黑聖耀星］史黛拉',
+    raidSkillMillaS1: '決意迴旋曲', raidSkillMillaS2: '珍藏的零食', raidSkillEideneS1: '解放綠色生命力', raidSkillEideneS2: '擬花盛開', raidSkillPolaS1: '光之彈', raidSkillPolaS2: '重生與解放', raidSkillYildizS1: '不屈之牙', raidSkillYildizS2: '星狼爪擊', raidSkillWinterStellaS1: '聖星脈動', raidSkillWinterStellaS2: '終焉之星',
+    raidCounterMillaHealingReceived: '受到主動技能回復次數', raidBuffEideneVigorousBloom: '活力流溢的燈匣・旺花', raidBuffPolaCourage: '決斷的勇氣', raidBuffPolaSpeed: '得不到回應的心意・速度', raidBuffYildizBond: '堅決的誓言・狼與人的羈絆', raidBuffWinterStellaStarlight: '闇黑聖耀星・攻擊',
+    raidDebuffMillaDelay: '決意迴旋曲・延遲', raidDebuffYildizBuffBlock: '不屈之牙・增益無效', raidDebuffWinterStellaDamageTaken: '聖星脈動・承傷增加', raidDebuffWinterStellaMagicDefenseDown: '聖星脈動・魔法防禦降低', raidDebuffWinterStellaSilence: '終焉之星・沉默',
+    raidAssumeMillaDelay: '假設蜜拉「延遲」成功', raidAssumeYildizBuffBlock: '假設耶爾德茲「增益無效」成功', raidAssumeWinterStellaSilence: '假設史黛拉「沉默」成功', raidIgnoredMaxHpUp: '最大生命增加', raidIgnoredRegeneration: '再生回復', raidIgnoredBuffBlock: '增益無效的阻止效果',
+  },
+  en: {
+    raidCharMilla: 'Milla', raidCharEidene: 'Eidene', raidCharPola: 'Pola', raidCharYildiz: 'Yildiz', raidCharWinterStella: '[Shining Star of Holy Darkness] Stella',
+    raidSkillMillaS1: 'Rondo of Courage', raidSkillMillaS2: 'Snack Stash', raidSkillEideneS1: 'Viriditas Unleashed', raidSkillEideneS2: 'Floroides in Bloom', raidSkillPolaS1: 'Gleaming Bullet', raidSkillPolaS2: 'Liberto Libertà', raidSkillYildizS1: 'Unyielding Fang', raidSkillYildizS2: 'Shining Star’s Slash', raidSkillWinterStellaS1: 'Holy Star’s Heartbeat', raidSkillWinterStellaS2: 'Stella’s Star Finale',
+    raidCounterMillaHealingReceived: 'Active-skill heals received', raidBuffEideneVigorousBloom: 'Lantern Full of Life · Vigorous Bloom', raidBuffPolaCourage: 'The Courage to Choose', raidBuffPolaSpeed: 'Unrequited Feelings · SPD', raidBuffYildizBond: 'Unwavering Resolve · Bond', raidBuffWinterStellaStarlight: 'Star of Holy Darkness · ATK',
+    raidDebuffMillaDelay: 'Rondo of Courage · Delay', raidDebuffYildizBuffBlock: 'Unyielding Fang · Buff Block', raidDebuffWinterStellaDamageTaken: 'Holy Star’s Heartbeat · Damage Taken', raidDebuffWinterStellaMagicDefenseDown: 'Holy Star’s Heartbeat · Magic DEF Down', raidDebuffWinterStellaSilence: 'Stella’s Star Finale · Silence',
+    raidAssumeMillaDelay: 'Assume Milla Delay succeeds', raidAssumeYildizBuffBlock: 'Assume Yildiz Buff Block succeeds', raidAssumeWinterStellaSilence: 'Assume Stella Silence succeeds', raidIgnoredMaxHpUp: 'Max HP increase', raidIgnoredRegeneration: 'Regeneration healing', raidIgnoredBuffBlock: 'Buff-prevention behavior',
+  },
+  ja: {
+    raidCharMilla: 'ミラ', raidCharEidene: 'イディーネ', raidCharPola: 'ポーラ', raidCharYildiz: 'ユルディズ', raidCharWinterStella: '［聖なる漆黒の輝く星］ステラ',
+    raidSkillMillaS1: '決意のロンド', raidSkillMillaS2: 'とっておきのおやつ', raidSkillEideneS1: 'ウィリディタスの解放', raidSkillEideneS2: 'フローソイデスの開花', raidSkillPolaS1: 'シャインバレット', raidSkillPolaS2: 'リベルト・リベルタ', raidSkillYildizS1: '不屈の牙', raidSkillYildizS2: '星狼の爪撃', raidSkillWinterStellaS1: '聖なる星の鼓動', raidSkillWinterStellaS2: 'ファイナルステラ',
+    raidCounterMillaHealingReceived: 'アクティブスキル回復被付与回数', raidBuffEideneVigorousBloom: '命溢るるカンテラ・旺花', raidBuffPolaCourage: '決断する勇気', raidBuffPolaSpeed: '報われない想い・スピード', raidBuffYildizBond: '揺るがぬ誓い・狼と人の絆', raidBuffWinterStellaStarlight: '聖なる漆黒の輝く星・攻撃力',
+    raidDebuffMillaDelay: '決意のロンド・遅延', raidDebuffYildizBuffBlock: '不屈の牙・バフ無効', raidDebuffWinterStellaDamageTaken: '聖なる星の鼓動・被ダメージ増加', raidDebuffWinterStellaMagicDefenseDown: '聖なる星の鼓動・魔法防御力減少', raidDebuffWinterStellaSilence: 'ファイナルステラ・沈黙',
+    raidAssumeMillaDelay: 'ミラの「遅延」成功を仮定', raidAssumeYildizBuffBlock: 'ユルディズの「バフ無効」成功を仮定', raidAssumeWinterStellaSilence: 'ステラの「沈黙」成功を仮定', raidIgnoredMaxHpUp: '最大HP増加', raidIgnoredRegeneration: '再生による回復', raidIgnoredBuffBlock: 'バフ付与阻止効果',
+  },
+  ko: {
+    raidCharMilla: '밀라', raidCharEidene: '이디네', raidCharPola: '폴라', raidCharYildiz: '이을드즈', raidCharWinterStella: '[거룩한 칠흑 속 반짝이는 별] 스텔라',
+    raidSkillMillaS1: '결의의 론도', raidSkillMillaS2: '비장의 쿠키', raidSkillEideneS1: '비리디타스의 해방', raidSkillEideneS2: '플로소이데스의 개화', raidSkillPolaS1: '샤인 불렛', raidSkillPolaS2: '리베르토 리베르타', raidSkillYildizS1: '불굴의 맹진', raidSkillYildizS2: '성랑흑조', raidSkillWinterStellaS1: '패왕별의 강림', raidSkillWinterStellaS2: '스텔라 파이널',
+    raidCounterMillaHealingReceived: '액티브 스킬 회복을 받은 횟수', raidBuffEideneVigorousBloom: '만개하는 칸델라르・왕화', raidBuffPolaCourage: '용기 있는 결단', raidBuffPolaSpeed: '갈 곳 없는 마음・속도', raidBuffYildizBond: '늑대의 딸・유대', raidBuffWinterStellaStarlight: '거룩한 칠흑 속 반짝이는 별・공격력',
+    raidDebuffMillaDelay: '결의의 론도・지연', raidDebuffYildizBuffBlock: '불굴의 맹진・버프 무효', raidDebuffWinterStellaDamageTaken: '패왕별의 강림・받는 피해 증가', raidDebuffWinterStellaMagicDefenseDown: '패왕별의 강림・마법 방어력 감소', raidDebuffWinterStellaSilence: '스텔라 파이널・침묵',
+    raidAssumeMillaDelay: '밀라 「지연」 성공 가정', raidAssumeYildizBuffBlock: '이을드즈 「버프 무효」 성공 가정', raidAssumeWinterStellaSilence: '스텔라 「침묵」 성공 가정', raidIgnoredMaxHpUp: '최대 HP 증가', raidIgnoredRegeneration: '재생 회복', raidIgnoredBuffBlock: '버프 부여 방지 효과',
+  },
+}
+
+for (const [locale, entries] of Object.entries(greenHealingCharacterExtensions)) Object.assign(raidTranslations[locale], entries)

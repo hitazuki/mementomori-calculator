@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "characterId": 124,
+  "slug": "yildiz",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [124001, 124002], "passiveSkillIds": [124003, 124004], "combatLogs": ["data/battle-logs/g1820.json", "data/battle-logs/g1820-2.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 124001, "model": "implemented", "summary": "回复后单木桩680%；伤害后概率施加6回合增益无效。" },
+    { "kind": "activeSkill", "sourceId": 124002, "model": "implemented", "summary": "回复后4段280%；羁绊10层时本次为1120%。" },
+    { "kind": "passiveSkill", "sourceId": 124003, "model": "outOfScope", "summary": "最大HP、防御、物防和物理暴伤缓和。" },
+    { "kind": "passiveSkill", "sourceId": 124004, "model": "implemented", "summary": "每次主动回复事件令自身与攻击最高其他友军羁绊+1，每层攻击+8%，最多10层。" }
+  ],
+  "effectGroups": [
+    { "id": 12400430101, "model": "implemented", "summary": "狼与人的羁绊，SkillCategory 4；命中率部分忽略。" },
+    { "id": 12400120202, "model": "implemented", "summary": "增益无效，SkillCategory 3，6回合零倍率Boss状态。" },
+    { "id": 12400330101, "model": "outOfScope", "summary": "最大HP增加。" },
+    { "id": 12400340201, "model": "outOfScope", "summary": "防御侧状态。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHealing", "summary": "回复量不结算，仅广播事件。" },
+    { "key": "raidIgnoredBuffBlock", "summary": "木桩不会获得增益，保留弱化组但不模拟阻止行为。" }
+  ],
+  "unresolved": ["增益无效概率采用成功/失败场景，不计算期望。"]
+}

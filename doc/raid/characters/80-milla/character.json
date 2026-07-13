@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "characterId": 80,
+  "slug": "milla",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [80001, 80002], "passiveSkillIds": [80003, 80004], "combatLogs": ["data/battle-logs/45-57.json", "data/battle-logs/g1820.json", "data/battle-logs/g1820-2.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 80001, "model": "implemented", "summary": "三目标180%折叠为单木桩一次；伤害后记录延迟与自身主动回复。" },
+    { "kind": "activeSkill", "sourceId": 80002, "model": "implemented", "summary": "回复后四段480%；自身累计受到6次主动回复时为1920%。" },
+    { "kind": "passiveSkill", "sourceId": 80003, "model": "outOfScope", "summary": "全队和自身最大HP增加。" },
+    { "kind": "passiveSkill", "sourceId": 80004, "model": "outOfScope", "summary": "周期性不可解除再生。" }
+  ],
+  "effectGroups": [
+    { "id": 8000120102, "model": "implemented", "summary": "可解除延迟弱化，概率场景，零倍率Boss状态。" },
+    { "id": 8000500101, "model": "implemented", "summary": "自身收到主动技能回复的内部计数，SkillCategory 200。" },
+    { "id": 8000340101, "model": "outOfScope", "summary": "最大HP增加。" },
+    { "id": 8000430101, "model": "outOfScope", "summary": "周期再生。" },
+    { "id": 8000430102, "model": "outOfScope", "summary": "翠属性周期再生。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredDelay", "summary": "延迟不影响不行动的木桩，状态组仍保留。" },
+    { "key": "raidIgnoredHealing", "summary": "回复量不结算，仅广播回复事件。" }
+  ],
+  "unresolved": ["延迟概率采用成功/失败场景，不计算期望。"]
+}

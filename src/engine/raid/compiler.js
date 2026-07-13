@@ -68,6 +68,9 @@ function compileEffect(effect, mechanics, path, character) {
   if (effect.type === 'removeStatuses' && (!Number.isInteger(effect.count) || effect.count < 1)) {
     throw new Error(`Raid removeStatuses effect requires a positive integer count at ${path}`)
   }
+  if (effect.type === 'bossStatus' && effect.replacementKey != null && (typeof effect.replacementKey !== 'string' || !effect.replacementKey)) {
+    throw new Error(`Raid bossStatus replacementKey must be a non-empty string at ${path}`)
+  }
   if (effect.copyAttackRateAsSourceAttack != null && typeof effect.copyAttackRateAsSourceAttack !== 'boolean') throw new Error(`Raid copyAttackRateAsSourceAttack must be boolean at ${path}`)
   if (effect.type === 'changeCounter' && !(effect.counter in (character.runtime?.counters ?? {}))) {
     throw new Error(`Unknown raid counter '${effect.counter}' at ${path}`)

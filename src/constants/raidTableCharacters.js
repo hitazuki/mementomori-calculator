@@ -19,7 +19,10 @@ export function createDefaultRaidTableConfig() {
     speeds: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, RAID_TABLE_CHARACTERS[id].speed])),
     guaranteedCritical: true,
     baseCriticalDamageBonus: 1.1,
-    probabilityOverrides: { liberiaSand: true, shizuSpeedDown: true, guinevereDamageTaken: true },
+    probabilityOverrides: {
+      liberiaSand: true, shizuSpeedDown: true, guinevereDamageTaken: true,
+      millaDelay: true, yildizBuffBlock: true, winterStellaSilence: true,
+    },
     turns: 10,
   }
 }

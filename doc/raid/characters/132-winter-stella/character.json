@@ -1,0 +1,31 @@
+{
+  "formatVersion": 1,
+  "characterId": 132,
+  "slug": "winter-stella",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [132001, 132002], "passiveSkillIds": [132003, 132004], "combatLogs": ["data/battle-logs/g1820-2.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 132001, "model": "implemented", "summary": "第7回合前回复并施加10%承伤/20%魔防降低；之后无回复并升级为20%/40%；单木桩720%。" },
+    { "kind": "activeSkill", "sourceId": 132002, "model": "implemented", "summary": "第7回合前回复自身与攻击最高其他友军；4段780%；之后概率沉默。" },
+    { "kind": "passiveSkill", "sourceId": 132003, "model": "implemented", "summary": "第7回合重置技能冷却；最大HP、防御与承伤降低忽略。" },
+    { "kind": "passiveSkill", "sourceId": 132004, "model": "implemented", "summary": "每次主动回复事件自身攻击+10%，最多10层；物防忽略。" }
+  ],
+  "effectGroups": [
+    { "id": 13200130201, "model": "implemented", "summary": "第7回合前承伤+10%，SkillCategory 3，持续4回合。" },
+    { "id": 13200130202, "model": "implemented", "summary": "第7回合前魔防-20%，零倍率弱化。" },
+    { "id": 13200130203, "model": "implemented", "summary": "第7回合起承伤+20%，替换前档。" },
+    { "id": 13200130204, "model": "implemented", "summary": "第7回合起魔防-40%，替换前档。" },
+    { "id": 13200230501, "model": "implemented", "summary": "第7回合起概率沉默，2回合零倍率弱化。" },
+    { "id": 13200430101, "model": "implemented", "summary": "攻击+10%叠层，SkillCategory 4；物防部分忽略。" },
+    { "id": 13200320201, "model": "implemented", "summary": "第7回合冷却重置内部效果。" },
+    { "id": 13200340101, "model": "outOfScope", "summary": "最大HP增加。" },
+    { "id": 13200330102, "model": "outOfScope", "summary": "防御增加。" },
+    { "id": 13200340103, "model": "outOfScope", "summary": "承伤降低。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHealing", "summary": "回复量不结算，仅广播事件。" },
+    { "key": "raidIgnoredMagicDefenseDown", "summary": "保留弱化组，防御不结算。" },
+    { "key": "raidIgnoredSilence", "summary": "木桩不行动，保留弱化组但不模拟禁技。" }
+  ],
+  "unresolved": ["沉默概率采用成功/失败场景，不计算期望。"]
+}

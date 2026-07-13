@@ -9,6 +9,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     self: ({ ownerId }) => [ownerId],
     all: ({ config }) => [...config.lineup],
     topAttackOther: ({ ownerId, config }) => config.attackPriority.filter(id => id !== ownerId),
+    selfAndTopAttackOther: ({ ownerId, config }) => [ownerId, ...config.attackPriority.filter(id => id !== ownerId)],
     adjacent: ({ ownerId, config }) => {
       const index = config.lineup.indexOf(ownerId)
       return [config.lineup[index - 1], config.lineup[index + 1]].filter(Boolean)
@@ -52,6 +53,9 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       return config.lineup.filter(id => id !== sourceId && actors.get(id).definition.element === condition.element).length >= condition.count
     },
     roundAtMost: (condition, { round }) => round <= condition.round,
+    roundAtLeast: (condition, { round }) => round >= condition.round,
+    eventTargetsIncludeOwner: (_condition, { eventTargetIds = [], ownerId }) => eventTargetIds.includes(ownerId),
+    targetElementNot: (condition, { target }) => target.definition.element !== condition.element,
     actorHasStatus: (condition, { actors, ownerId }) => (
       actors.get(ownerId).statuses.some(status => status.id === condition.statusId)
     ),
@@ -100,6 +104,6 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     cooldownReduction: (effect, context) => context.api.applyCooldownReductionEffect(effect, context),
     changeCounter: (effect, context) => context.api.applyCounterEffect(effect, context),
     setCooldown: (effect, context) => context.api.applySetCooldownEffect(effect, context),
-    emitEvent: (effect, context) => context.api.emitBattleEvent(effect.event, context.ownerId, context),
+    emitEvent: (effect, context) => context.api.emitBattleEvent(effect, context),
   }),
 })

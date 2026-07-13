@@ -21,6 +21,7 @@ import { hook, statusEffect } from '../src/constants/raid/shared.js'
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
   ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
+  MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -39,11 +40,11 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes twenty-two characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 22)
+test('roster exposes twenty-seven characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 27)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-16), [ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-5), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA])
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -256,6 +257,13 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
       rate: { type: 'counterLinear', counter: 'missing', base: 0, perStack: 0.1 },
     }],
   })), /Unknown raid counter/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    hooks: [{ trigger: 'actionStart', effects: [{
+      type: 'bossStatus', id: 'bad-replacement', replacementKey: '', effectGroupId: 1,
+    }] }],
+  })), /replacementKey must be a non-empty string/)
 })
 
 test('mechanic registry resolves counters, skill history, conditions, and targets generically', () => {
@@ -279,6 +287,12 @@ test('mechanic registry resolves counters, skill history, conditions, and target
     { ownerId: 2, config: { lineup: [1, 2, 3] } },
   ), [1, 3])
   assert.deepEqual(DEFAULT_RAID_MECHANICS.targetSelectors.all({ config: { lineup: [1, 2, 3] } }), [1, 2, 3])
+  assert.deepEqual(DEFAULT_RAID_MECHANICS.targetSelectors.selfAndTopAttackOther({
+    ownerId: 2, config: { attackPriority: [3, 2, 1] },
+  }), [2, 3, 1])
+  assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.eventTargetsIncludeOwner(
+    {}, { eventTargetIds: [1, 2], ownerId: 2 },
+  ), true)
 })
 
 test('Morgana stacks Fighting Spirit from allied self-damage and uses the current stack on S2', () => {
@@ -499,6 +513,74 @@ test('Tama, Mowano, Carol, and Asahi retain count-relevant groups and supported 
   assert.equal(action(result, 1, ASAHI).runtimeAfter.counters.windForest, 2)
   assert.equal(action(result, 2, ASAHI).damageSteps.length, 5)
   assert.equal(action(result, 6, ASAHI).damageSteps.length, 10)
+})
+
+test('active-skill healing events preserve recipients and apply green-team stacks before damage', () => {
+  const lineup = [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA]
+  const result = simulateRaidTable({
+    lineup,
+    attackPriority: [WINTER_STELLA, YILDIZ, MILLA, EIDENE, POLA],
+    turns: 2,
+  })
+
+  const firstMilla = action(result, 1, MILLA)
+  assert.equal(firstMilla.damageSteps[0].attackRate, 0)
+  assert.equal(firstMilla.runtimeAfter.counters.activeHealingReceived, 1)
+  assert.equal(firstMilla.effectsApplied.find(effect => effect.id === 'milla-delay').phase, 'afterDamage')
+
+  const firstYildiz = action(result, 1, YILDIZ)
+  assert.equal(firstYildiz.runtimeAfter.counters.bond, 2)
+  closeTo(firstYildiz.damageSteps[0].attackRate, 0.36)
+  assert.equal(firstYildiz.statusSnapshotAtDamage[YILDIZ].statuses.find(status => status.id === 'yildiz-bond').statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+
+  const firstStella = action(result, 1, WINTER_STELLA)
+  assert.equal(firstStella.runtimeAfter.counters.starlight, 3)
+  closeTo(firstStella.damageSteps[0].attackRate, 0.84)
+  assert.equal(firstStella.damageSteps[0].bossDamageRate, 0.1)
+  assert.deepEqual(firstStella.bossStatusAfterAction.filter(status => status.id.startsWith('winter-stella')).map(status => status.effectGroupId), [13200130201, 13200130202])
+
+  const eideneS2 = action(result, 2, EIDENE)
+  assert.equal(eideneS2.runtimeAfter.counters.vigorousBloom, 7)
+  assert.equal(eideneS2.damageSteps[0].percent, 480)
+  closeTo(eideneS2.damageSteps[0].attackRate, 0.7)
+  assert.equal(eideneS2.effectsApplied.filter(effect => effect.id === 'eidene-vigorous-bloom').length, 3)
+})
+
+test('Milla and Yildiz read healing counters before their conditional damage', () => {
+  const milla = simulateRaidTable(singleConfig(MILLA, { turns: 10 }))
+  assert.equal(action(milla, 1, MILLA).runtimeAfter.counters.activeHealingReceived, 1)
+  assert.equal(action(milla, 10, MILLA).runtimeBefore.counters.activeHealingReceived, 5)
+  assert.equal(action(milla, 10, MILLA).damageSteps[0].percent, 1920)
+  assert.equal(action(milla, 10, MILLA).runtimeAfter.counters.activeHealingReceived, 6)
+
+  const lineup = [EIDENE, YILDIZ]
+  const yildiz = simulateRaidTable({ lineup, attackPriority: [YILDIZ, EIDENE], turns: 6 })
+  assert.equal(action(yildiz, 6, YILDIZ).runtimeAfter.counters.bond, 10)
+  assert.equal(action(yildiz, 6, YILDIZ).damageSteps[0].percent, 1120)
+})
+
+test('round-seven healing branches, cooldown resets, speed, and Stella debuffs are structured', () => {
+  const eidene = simulateRaidTable(singleConfig(EIDENE, { turns: 10 }))
+  assert.equal(action(eidene, 2, EIDENE).runtimeAfter.counters.vigorousBloom, 3)
+  assert.equal(action(eidene, 10, EIDENE).damageSteps[0].percent, 1440)
+  assert.equal(action(eidene, 10, EIDENE).runtimeAfter.counters.vigorousBloom, 6)
+
+  const pola = simulateRaidTable(singleConfig(POLA, { turns: 8 }))
+  assert.equal(action(pola, 7, POLA).actionKey, 's1')
+  assert.equal(action(pola, 7, POLA).damageSteps[0].percent, 1180)
+  assert.equal(action(pola, 8, POLA).damageSteps[0].percent, 620)
+  assert.equal(pola.rounds[6].speedSnapshot[POLA].effectiveSpeed, 2956 * 1.3)
+  assert.equal(action(pola, 8, POLA).runtimeAfter.counters.courage, 4)
+
+  const stella = simulateRaidTable(singleConfig(WINTER_STELLA, { turns: 8 }))
+  const lateS1 = action(stella, 7, WINTER_STELLA)
+  assert.equal(lateS1.actionKey, 's1')
+  assert.equal(lateS1.damageSteps[0].bossDamageRate, 0.2)
+  assert.deepEqual(lateS1.bossStatusAfterAction.filter(status => status.id.startsWith('winter-stella')).map(status => status.effectGroupId), [13200130203, 13200130204])
+  const lateS2 = action(stella, 8, WINTER_STELLA)
+  assert.equal(lateS2.actionKey, 's2')
+  assert.equal(lateS2.bossStatusAfterAction.find(status => status.id === 'winter-stella-silence').statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+  assert.equal(lateS2.runtimeAfter.counters.starlight, 4)
 })
 
 test('Mowano copies all removable Buffs at action start, including attack, without consuming their duration immediately', () => {

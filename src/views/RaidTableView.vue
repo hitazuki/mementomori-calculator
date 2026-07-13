@@ -61,6 +61,18 @@
         <input v-model="probabilityOverrides.guinevereDamageTaken" type="checkbox">
         <span><strong>{{ $t('raidAssumeGuinevereDamageTaken') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.MILLA)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.millaDelay" type="checkbox">
+        <span><strong>{{ $t('raidAssumeMillaDelay') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.YILDIZ)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.yildizBuffBlock" type="checkbox">
+        <span><strong>{{ $t('raidAssumeYildizBuffBlock') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.WINTER_STELLA)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.winterStellaSilence" type="checkbox">
+        <span><strong>{{ $t('raidAssumeWinterStellaSilence') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
     </div>
 
     <div class="raid-order-grid">
