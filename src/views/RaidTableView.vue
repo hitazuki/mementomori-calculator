@@ -36,7 +36,7 @@
         :disabled="(!lineup.includes(id) && lineup.length >= 5) || (lineup.includes(id) && lineup.length <= 1)"
         @click="toggleCharacter(id)"
       >
-        <strong>{{ characterName(id) }}</strong><small>#{{ id }} · {{ $t('raidBaseSpeed') }} {{ speeds[id] }}</small>
+        <CharacterLabel :id="id" strong /><small>#{{ id }} · {{ $t('raidBaseSpeed') }} {{ speeds[id] }}</small>
       </button>
     </div>
 
@@ -70,12 +70,12 @@
         <h3>{{ $t('raidSpeedSettings') }}</h3>
         <div class="raid-speed-list">
           <label v-for="id in lineup" :key="`speed-${id}`">
-            <span>{{ characterName(id) }}</span><input v-model.number="speeds[id]" type="number" min="0" step="1">
+            <CharacterLabel :id="id" /><input v-model.number="speeds[id]" type="number" min="0" step="1">
           </label>
         </div>
         <div class="raid-speed-order">
           <strong>{{ $t('raidSpeedOrder') }}</strong>
-          <span>{{ currentSpeedOrder.map(characterName).join(' → ') }}</span>
+          <CharacterSequence :ids="currentSpeedOrder" />
           <small>{{ $t('raidSpeedOrderHint') }}</small>
         </div>
       </div>
@@ -91,12 +91,12 @@
           <th class="raid-sticky-total">{{ $t('raidCharacterTotal') }}</th>
           <th v-for="round in result.rounds" :key="round.turn">
             {{ $t('raidTurn', { n: round.turn }) }}
-            <small class="raid-turn-order">{{ round.actionOrder.map(characterName).join(' → ') }}</small>
+            <CharacterSequence :ids="round.actionOrder" compact class="raid-turn-order" />
           </th>
         </tr></thead>
         <tbody>
           <tr v-for="id in lineup" :key="id">
-            <th class="raid-sticky-col raid-character-cell"><span>{{ characterName(id) }}</span><small>#{{ id }}</small></th>
+            <th class="raid-sticky-col raid-character-cell"><CharacterLabel :id="id" /><small>#{{ id }}</small></th>
             <td class="raid-row-total raid-sticky-total">
               {{ formatPercent(result.characterTotals[id].atkPercent) }}
               <small v-if="Object.keys(result.characterTotals[id].scalingTotals).length">+ {{ formatScaling(result.characterTotals[id].scalingTotals) }}</small>
@@ -138,7 +138,7 @@
 
   <section v-if="selectedEvent" class="card raid-detail-card animate-fadeup">
     <div class="raid-section-head">
-      <div><h2>{{ $t('raidActionDetails') }}</h2><p>{{ $t('raidTurn', { n: selectedEvent.turn }) }} · {{ characterName(selectedEvent.actorId) }} · {{ $t(selectedEvent.skillNameKey) }}</p></div>
+      <div><h2>{{ $t('raidActionDetails') }}</h2><p class="raid-detail-heading">{{ $t('raidTurn', { n: selectedEvent.turn }) }} · <CharacterLabel :id="selectedEvent.actorId" /> · {{ $t(selectedEvent.skillNameKey) }}</p></div>
       <strong class="raid-detail-total">{{ formatPercent(selectedEvent.effectiveAtkPercent) }}</strong>
     </div>
     <div class="raid-detail-grid">
@@ -158,7 +158,7 @@
         <h3>{{ $t('raidSpeedSnapshot') }}</h3>
         <dl class="raid-detail-list">
           <template v-for="id in result.rounds[selectedEvent.turn - 1].actionOrder" :key="`speed-detail-${id}`">
-            <dt>{{ characterName(id) }}</dt><dd>{{ formatter().format(result.rounds[selectedEvent.turn - 1].speedSnapshot[id].effectiveSpeed) }}</dd>
+            <dt><CharacterLabel :id="id" /></dt><dd>{{ formatter().format(result.rounds[selectedEvent.turn - 1].speedSnapshot[id].effectiveSpeed) }}</dd>
           </template>
         </dl>
         <h3 class="raid-subtitle">{{ $t('raidSkillHistory') }}</h3>
@@ -171,7 +171,7 @@
       <div class="raid-detail-panel">
         <h3>{{ $t('raidRemovableBuffCount') }}</h3>
         <p class="raid-muted">{{ $t('raidBuffCountTiming') }}</p>
-        <dl class="raid-detail-list"><template v-for="id in lineup" :key="`buff-${id}`"><dt>{{ characterName(id) }}</dt><dd>{{ selectedEvent.removableBuffCountsAtActionStart[id] }} → {{ selectedEvent.removableBuffCountsAfterAction[id] }}</dd></template></dl>
+        <dl class="raid-detail-list"><template v-for="id in lineup" :key="`buff-${id}`"><dt><CharacterLabel :id="id" /></dt><dd>{{ selectedEvent.removableBuffCountsAtActionStart[id] }} → {{ selectedEvent.removableBuffCountsAfterAction[id] }}</dd></template></dl>
         <h3 class="raid-subtitle">{{ $t('raidCooldownTitle') }}</h3>
         <dl class="raid-detail-list"><dt>{{ $t('raidCooldownBefore') }}</dt><dd>S1 {{ selectedEvent.cooldownsBefore.s1 }} · S2 {{ selectedEvent.cooldownsBefore.s2 }}</dd><dt>{{ $t('raidCooldownAfter') }}</dt><dd>S1 {{ selectedEvent.cooldownsAfter.s1 }} · S2 {{ selectedEvent.cooldownsAfter.s2 }}</dd></dl>
       </div>
@@ -222,7 +222,7 @@ const OrderList = defineComponent({
   emits: ['move'],
   setup(props, { emit }) {
     return () => h('div', { class: 'raid-order-list' }, [h('h3', props.title), ...props.items.map((id, index) => h('div', { class: 'raid-order-row', key: id }, [
-      h('span', { class: 'raid-order-rank' }, String(index + 1)), h('strong', props.nameOf(id)), h('div', { class: 'raid-order-actions' }, [
+      h('span', { class: 'raid-order-rank' }, String(index + 1)), h(CharacterLabel, { id, strong: true }), h('div', { class: 'raid-order-actions' }, [
         h('button', { type: 'button', class: 'btn btn-ghost btn-sm', disabled: index === 0, title: props.upLabel, 'aria-label': `${props.upLabel} ${props.nameOf(id)}`, onClick: () => emit('move', { index, delta: -1 }) }, '↑'),
         h('button', { type: 'button', class: 'btn btn-ghost btn-sm', disabled: index === props.items.length - 1, title: props.downLabel, 'aria-label': `${props.downLabel} ${props.nameOf(id)}`, onClick: () => emit('move', { index, delta: 1 }) }, '↓'),
       ]),
@@ -231,6 +231,42 @@ const OrderList = defineComponent({
 })
 
 const { t, locale } = useI18n()
+
+const CharacterLabel = defineComponent({
+  props: {
+    id: { type: Number, required: true },
+    compact: { type: Boolean, default: false },
+    hideName: { type: Boolean, default: false },
+    strong: { type: Boolean, default: false },
+  },
+  setup(props) {
+    return () => h(props.strong ? 'strong' : 'span', {
+      class: ['raid-character-label', { compact: props.compact, 'icon-only': props.hideName }],
+      title: props.hideName ? characterName(props.id) : undefined,
+      'aria-label': props.hideName ? characterName(props.id) : undefined,
+    }, [
+      h('span', { class: 'raid-character-avatar', 'aria-hidden': 'true' }, [
+        h('span', { class: 'raid-character-avatar-fallback' }, characterName(props.id).slice(0, 1)),
+        h('img', { src: characterIconUrl(props.id), alt: '', onError: event => { event.currentTarget.style.display = 'none' } }),
+      ]),
+      props.hideName ? null : h('span', { class: 'raid-character-name' }, characterName(props.id)),
+    ])
+  },
+})
+
+const CharacterSequence = defineComponent({
+  props: {
+    ids: { type: Array, required: true },
+    compact: { type: Boolean, default: false },
+  },
+  setup(props) {
+    return () => h('span', { class: ['raid-character-sequence', { compact: props.compact }] }, props.ids.flatMap((id, index) => [
+      index ? h('span', { class: 'raid-character-arrow', 'aria-hidden': 'true' }, '→') : null,
+      h(CharacterLabel, { id, compact: props.compact, hideName: true, key: id }),
+    ]))
+  },
+})
+
 const roster = [...RAID_TABLE_ROSTER].sort((left, right) => left - right)
 const defaults = createDefaultRaidTableConfig()
 const lineup = ref([...defaults.lineup])
@@ -253,6 +289,7 @@ const result = computed(() => simulateRaidTable({
 const currentSpeedOrder = computed(() => result.value.rounds[0]?.actionOrder ?? [])
 
 function characterName(id) { return t(RAID_TABLE_CHARACTERS[id].nameKey) }
+function characterIconUrl(id) { return `${import.meta.env.BASE_URL}images/characters/${id}.png` }
 function counterLabel(id, key) { return t(RAID_TABLE_CHARACTERS[id].counterLabels?.[key] ?? key) }
 function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(locale.value, { maximumFractionDigits, minimumFractionDigits: 0 }) }
 function roundBaseCriticalDamagePercent(value) { return Number((Number(value) || 0).toFixed(1)) }
