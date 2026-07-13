@@ -16,6 +16,10 @@ import mifri from './mifri.js'
 import popri from './popri.js'
 import cattleyya from './cattleyya.js'
 import merlan from './merlan.js'
+import tama from './tama.js'
+import mowano from './mowano.js'
+import carol from './carol.js'
+import asahi from './asahi.js'
 
 export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   FLORENCE: 8,
@@ -36,6 +40,10 @@ export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   POPRI: 115,
   CATTLEYYA: 90,
   MERLAN: 135,
+  TAMA: 81,
+  MOWANO: 100,
+  CAROL: 40,
+  ASAHI: 78,
 })
 
 export const RAID_TABLE_ROSTER = Object.freeze([
@@ -57,7 +65,11 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.POPRI,
   RAID_TABLE_CHARACTER_IDS.CATTLEYYA,
   RAID_TABLE_CHARACTER_IDS.MERLAN,
+  RAID_TABLE_CHARACTER_IDS.TAMA,
+  RAID_TABLE_CHARACTER_IDS.MOWANO,
+  RAID_TABLE_CHARACTER_IDS.CAROL,
+  RAID_TABLE_CHARACTER_IDS.ASAHI,
 ])
 
-const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan]
+const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi]
 export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze(character)])))

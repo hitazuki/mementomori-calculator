@@ -4,7 +4,10 @@ export default {
   id: 90, nameKey: 'raidCharCattleyya', speed: 2984, element: RAID_ELEMENTS.LIGHT, normal: normalPhysical, permanentModifiers: [],
   hooks: [
     hook('battleStart', [statusEffect({ id: 'cattleyya-damage-reduction', effectGroupId: 9000420101, nameKey: 'raidBuffCattleyyaDamageReduction', target: 'self', duration: null, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE })]),
-    hook('roundStart', [statusEffect({ id: 'cattleyya-shield', effectGroupId: 9000440101, nameKey: 'raidBuffCattleyyaShield', target: 'self', duration: 4, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE })], { everyRounds: 4, roundOffset: 1 }),
+    hook('roundStart', [
+      statusEffect({ id: 'cattleyya-shield', effectGroupId: 9000440101, nameKey: 'raidBuffCattleyyaShield', target: 'self', duration: 4 }),
+      statusEffect({ id: 'cattleyya-defense', effectGroupId: 9000430101, nameKey: 'raidBuffCattleyyaDefense', target: 'self', duration: 4 }),
+    ], { everyRounds: 4, roundOffset: 1 }),
   ],
   skills: {
     s1: {

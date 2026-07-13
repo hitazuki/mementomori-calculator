@@ -36,6 +36,9 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     anyRemovableBuffCountAtLeast: (condition, { config, actors, api }) => (
       config.lineup.some(id => api.removableBuffCount(actors.get(id)) >= condition.count)
     ),
+    actorRemovableBuffCountAtLeast: (condition, { actor, ownerId, actors, api }) => (
+      api.removableBuffCount(actor ?? actors.get(ownerId)) >= condition.count
+    ),
     bossStacksAtLeast: (condition, { boss }) => (
       (boss.statuses.find(status => status.id === condition.statusId)?.stacks ?? 0) >= condition.count
     ),
@@ -84,6 +87,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
 
   effectHandlers: Object.freeze({
     status: (effect, context) => context.api.applyActorStatusEffect(effect, context),
+    copyStatuses: (effect, context) => context.api.copyActorStatuses(effect, context),
     bossStatus: (effect, context) => context.api.applyBossStatusEffect(effect, context),
     cooldownReduction: (effect, context) => context.api.applyCooldownReductionEffect(effect, context),
     changeCounter: (effect, context) => context.api.applyCounterEffect(effect, context),

@@ -19,7 +19,7 @@ import {
 
 const {
   FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER, RUSTICA,
-  ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN,
+  ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -38,11 +38,11 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes eighteen characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 18)
+test('roster exposes twenty-two characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 22)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-12), [ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-16), [ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI])
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -387,7 +387,10 @@ test('Popri and Cattleya use round-start state and skill-use thresholds', () => 
   assert.equal(popriTeam.rounds[4].roundStartEffects.filter(effect => effect.id === 'popri-buff-cover').length, 3)
 
   const cattleyya = simulateRaidTable(singleConfig(CATTLEYYA, { turns: 10 }))
-  assert.equal(action(cattleyya, 1, CATTLEYYA).damageSteps[0].attackRate, 0.2)
+  const firstCattleyyaAction = action(cattleyya, 1, CATTLEYYA)
+  assert.equal(firstCattleyyaAction.removableBuffCountsAtActionStart[CATTLEYYA], 2)
+  assert.equal(firstCattleyyaAction.removableBuffCountsAtDamage[CATTLEYYA], 3)
+  assert.equal(firstCattleyyaAction.damageSteps[0].attackRate, 0.2)
   assert.equal(action(cattleyya, 9, CATTLEYYA).damageSteps[0].attackRate, 0.8)
   assert.equal(action(cattleyya, 10, CATTLEYYA).damageSteps.length, 12)
 })
@@ -412,4 +415,62 @@ test('Merlan round-start Fairy stacks, zero-rate magic-defense debuff, and late-
   assert.equal(firstLightAction.removableBuffCountsAtActionStart[MERLAN], 3)
   assert.equal(firstLightAction.removableBuffCountsAtDamage[MERLAN], 3)
   assert.equal(firstLightAction.damageSteps[0].modifierSources.find(source => source.id === 'merlan-fairy').rate, 0.06)
+})
+
+test('Tama, Mowano, Carol, and Asahi retain count-relevant groups and supported rotation mechanics', () => {
+  const lineup = [TAMA, MOWANO, CAROL, ASAHI]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 6 })
+  const tama = action(result, 1, TAMA)
+  assert.equal(tama.removableBuffCountsAtActionStart[TAMA], 5)
+  assert.equal(tama.removableBuffCountsAtDamage[TAMA], 6)
+  assert.equal(tama.damageSteps[0].percent, 280)
+
+  const mowano = action(result, 1, MOWANO)
+  assert.equal(mowano.removableBuffCountsAtActionStart[MOWANO], 2)
+  assert.equal(mowano.bossStatusAfterAction.length, 2)
+
+  const carol = action(result, 1, CAROL)
+  assert.equal(carol.removableBuffCountsAtActionStart[CAROL], 2)
+  assert.equal(action(result, 2, CAROL).bossStatusAfterAction.some(status => status.id === 'carol-defense-down'), true)
+
+  assert.equal(action(result, 1, ASAHI).runtimeAfter.counters.windForest, 2)
+  assert.equal(action(result, 2, ASAHI).damageSteps.length, 5)
+  assert.equal(action(result, 6, ASAHI).damageSteps.length, 10)
+})
+
+test('Mowano copies all removable Buffs at action start, including attack, without consuming their duration immediately', () => {
+  const lineup = [CATTLEYYA, MOWANO]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [...lineup], speeds: { [CATTLEYYA]: 5000, [MOWANO]: 4000 }, turns: 5,
+  })
+  const firstMowano = action(result, 1, MOWANO)
+  const copied = firstMowano.effectsApplied.filter(effect => effect.copiedFromId === CATTLEYYA)
+  assert.deepEqual(copied.map(effect => effect.effectGroupId), [9000440101, 9000430101, 9000140103])
+  assert.equal(firstMowano.removableBuffCountsAtActionStart[MOWANO], 0)
+  assert.equal(firstMowano.removableBuffCountsAtDamage[MOWANO], 3)
+  assert.equal(firstMowano.damageSteps[0].attackRate, 0)
+  closeTo(firstMowano.effectiveAtkPercent, 590 * 2.1)
+  assert.equal(copied.find(effect => effect.effectGroupId === 9000140103).symbolicModifiers[0].coefficient, 0.2)
+  const copiedAttackSource = firstMowano.damageSteps[0].scalingTerms.find(source => source.effectGroupId === 9000140103)
+  assert.equal(copiedAttackSource.sourceId, CATTLEYYA)
+  assert.equal(copiedAttackSource.copiedFromId, CATTLEYYA)
+  assert.equal(copiedAttackSource.key, `ATK_${CATTLEYYA}/ATK_${MOWANO}`)
+
+  const secondMowano = action(result, 2, MOWANO)
+  const copiedAttack = secondMowano.statusSnapshotBeforeAction[MOWANO].statuses.find(status => status.effectGroupId === 9000140103)
+  assert.equal(copiedAttack.remainingActions, 4)
+  assert.equal(secondMowano.damageSteps[0].attackRate, 0)
+  assert.deepEqual(result.rounds.filter(round => (
+    action(result, round.turn, MOWANO).effectsApplied.some(effect => effect.copiedFromId === CATTLEYYA)
+  )).map(round => round.turn), [1, 5])
+})
+
+test('Cattleya and Rustica keep their ordinary attack buffs on the original target', () => {
+  const lineup = [RUSTICA, CATTLEYYA]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [...lineup], speeds: { [RUSTICA]: 5000, [CATTLEYYA]: 4000 }, turns: 2,
+  })
+  const cattleyya = action(result, 2, CATTLEYYA)
+  assert.equal(cattleyya.damageSteps[0].attackRate, 0.7)
+  assert.equal(Object.keys(cattleyya.scalingTotals).length, 0)
 })

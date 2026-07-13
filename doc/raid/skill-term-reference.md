@@ -150,7 +150,7 @@
 
 | `kind` | 表达式 | 示例 |
 | --- | --- | --- |
-| `sourceAttackOverTargetAttack` | `coefficient × ATK_来源 / ATK_目标` | 阿尔托莉亚给最慢友军加攻 |
+| `sourceAttackOverTargetAttack` | `coefficient × ATK_来源 / ATK_目标` | 阿尔托莉亚给最慢友军加攻；穆瓦诺复制攻击 Buff 后的来源数值 |
 | `targetBaseDefenseOverTargetAttack` | `coefficient × DEF0_目标 / ATK_目标` | 利伯瑞娅、静的防御转攻击 |
 
 ```js
@@ -158,6 +158,8 @@ symbolicModifiers: [
   { kind: 'sourceAttackOverTargetAttack', coefficient: 0.5, sourceId: 93 },
 ]
 ```
+
+前端将每个符号项独立显示为“系数 × ATK_来源 / ATK_目标”，并标注数值来源。不同 `sourceId` 或目标面板的项不能合并为同一条普通攻击加成；即使当前所有角色 ATK 归一化而数值恰好相同，仍须保留来源差异。穆瓦诺复制时将复制到的 `attackRate` 转为保留原 `sourceId` 的符号项，复制详情额外显示被复制的目标。
 
 符号项只作用于 `stat: 'ATK'` 的主动伤害段，并继续乘增伤和暴击。新增 `kind` 时必须同步增加键生成、显示公式、合并测试和文档说明。
 
@@ -217,6 +219,22 @@ statusEffect({
 | `lowestSpeedOther` | 效果施加前基础速度最低的其他友军 | 当前读取配置速度，不含局内速度 Buff；并列按站位 |
 
 注意：`targetElement` 是选出候选目标后的过滤条件。若技能语义是“只在某属性角色中选择最低速者”，现有执行顺序不等价，需要新增选择器或调整解析。
+
+### 6.3 友方 Buff 复制 `type: 'copyStatuses'`
+
+通过 `copyStatusesEffect()` 创建：
+
+```js
+copyStatusesEffect({
+  id: 'character-copy-buffs',
+  nameKey: 'raidBuffCharacterCopy',
+  target: 'self',
+  sourceTarget: 'highestBuffCountOther',
+  copyAttackRateAsSourceAttack: true,
+})
+```
+
+复制会从 `sourceTarget` 选出的第一个目标读取所有可复制的 `removableBuff` 状态，并附加给 `target`。被复制的状态保留原 `effectGroupId`、原施加者、当前剩余行动次数与结算时数值；原目标的 Buff 不会移除。`copyAttackRateAsSourceAttack: true` 只改变复制体的取值方式：原状态不变，复制体的攻击率以原施加者 ATK 为数值来源，作为独立符号项展示。不可解除状态和标记为 `copyable: false` 的状态不会被复制。并列目标沿用选择器的站位顺序。当前实例：穆瓦诺（Lv240）在 `actionStart` 复制 Buff 数最高的其他友军全部可复制 Buff，每隔 4 次自身行动再次触发。
 
 ## 7. Boss 状态 `type: 'bossStatus'`
 
@@ -407,6 +425,7 @@ eventHooks: [{
 | 攻击力/增伤/暴伤/速度提高 | `modifiers[channel]` |
 | 防御或他人攻击转自身攻击 | `symbolicModifiers` |
 | 持续N次行动 | 友方 `status.duration` |
+| 复制 Buff 数最高其他友军的所有可复制 Buff | `copyStatusesEffect({ sourceTarget: 'highestBuffCountOther' })` |
 | 持续N回合的敌方异常 | `bossStatus.durationRounds` |
 | 异常叠层并刷新 | `bossStatus.addStacks/maxStacks` |
 | 相邻、攻击最高、Buff最多、速度最低 | `target` 选择器 |
@@ -450,4 +469,5 @@ eventHooks: [{
 | condition | `skillUsesAtLeast` / `skillUsesAtMost` | 当前技能本次发动前的历史使用次数比较。 |
 | condition | `otherLineupElementCountAtLeast` | 阵容中除施法者外，指定属性角色数量不少于阈值。 |
 | condition | `roundAtMost` | 当前全局回合不晚于指定回合。 |
+| condition | `actorRemovableBuffCountAtLeast` | 当前行动者自身的可解除 Buff 数不少于阈值；用于朝日在行动结束、状态时钟消耗后决定风林火山增加 1/2/3 层。 |
 | value resolver | `counterThresholds` / `skillUsesThresholds` | 以计数器或技能历史为索引从 `values` 取档；超出数组时取末档。 |

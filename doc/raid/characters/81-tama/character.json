@@ -1,0 +1,19 @@
+{
+  "formatVersion": 1,
+  "characterId": 81,
+  "slug": "tama",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [81001, 81002], "passiveSkillIds": [81003, 81004], "combatLogs": ["data/battle-logs/y1800mrl.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 81001, "model": "implemented", "summary": "两名最高攻击友军命中状态和单木桩伤害。" },
+    { "kind": "activeSkill", "sourceId": 81002, "model": "implemented", "summary": "四段伤害、第三次倍率和零倍率双防降低。" },
+    { "kind": "passiveSkill", "sourceId": 81003, "model": "implemented", "summary": "最高攻击友军的护盾与三个无效果娃娃 Buff。" },
+    { "kind": "passiveSkill", "sourceId": 81004, "model": "ignored", "summary": "依赖受击、HP 与存活人数的透明。" }
+  ],
+  "effectGroups": [
+    { "id": 8100130101, "model": "implemented", "summary": "命中状态。" }, { "id": 8100340102, "model": "implemented", "summary": "护盾。" },
+    { "id": 8100330103, "model": "implemented", "summary": "娃娃一。" }, { "id": 8100330104, "model": "implemented", "summary": "娃娃二。" }, { "id": 8100330105, "model": "implemented", "summary": "娃娃三。" },
+    { "id": 8100230101, "model": "implemented", "summary": "防御与物防降低。" }
+  ],
+  "ignored": [], "unresolved": []
+}

@@ -278,3 +278,49 @@ export const raidTranslations = {
     raidDebuffLukeDamageTaken: '루크・받는 피해 증가', raidDebuffLiberiaSand: '모래', raidDebuffShizuDamageTaken: '시즈・받는 피해 증가', raidDebuffShizuSpeedDown: '시즈・속도 감소', raidDebuffLucilleRadiantLight: '남겨 두고 온 마음・무지갯빛', raidDebuffFrackAvoidanceDown: '트릭&샷・회피 감소', raidDebuffFrackHealingDown: '트릭&샷・받는 회복량 감소', raidDebuffGuinevereDamageTaken: '사랑의 축배・받는 피해 증가', raidDebuffGuinevereWeakness: '사랑의 축배・탈력', raidDebuffLiebesDefenseDown: '실링 스탬프・방어력 감소', raidDebuffLiebesPhysicalDefenseDown: '실링 스탬프・물리 방어력 감소', raidIgnoredHealingReceivedDown: '회복량 감소', raidIgnoredAvoidanceDown: '회피 감소', raidIgnoredDefenseDown: '방어력 감소', raidIgnoredStunImmunity: '기절 면역',
   },
 }
+
+const raidCharacterExtensions = {
+  'zh-CN': {
+    raidCharTama: '玉', raidCharMowano: '穆瓦诺', raidCharCarol: '卡罗', raidCharAsahi: '朝日',
+    raidSkillTamaS1: '妖狐燐火', raidSkillTamaS2: '狐火乱舞', raidSkillMowanoS1: '暮夜羽刃', raidSkillMowanoS2: '优雅执事', raidSkillCarolS1: '忘却的蝶翼', raidSkillCarolS2: '失却的鳞粉', raidSkillAsahiS1: '忍术・天女散花', raidSkillAsahiS2: '忍术・崩日摧影',
+  },
+  'zh-TW': {
+    raidCharTama: '玉', raidCharMowano: '穆瓦諾', raidCharCarol: '卡羅', raidCharAsahi: '朝日',
+    raidSkillTamaS1: '妖狐燐火', raidSkillTamaS2: '狐火亂舞', raidSkillMowanoS1: '暮色羽刃', raidSkillMowanoS2: '優雅的執事', raidSkillCarolS1: '忘卻的蝶翼', raidSkillCarolS2: '失卻的鱗粉', raidSkillAsahiS1: '忍術．天女散花', raidSkillAsahiS2: '忍術．崩日摧影',
+  },
+  en: {
+    raidCharTama: 'Tama', raidCharMowano: 'Moineau', raidCharCarol: 'Carol', raidCharAsahi: 'Asahi',
+    raidSkillTamaS1: 'Youko Rinka', raidSkillTamaS2: 'Kitsunebi Ranbu', raidSkillMowanoS1: 'Twilit Dagger', raidSkillMowanoS2: 'Butler’s Refinement', raidSkillCarolS1: 'Wings of Amnesia', raidSkillCarolS2: 'Scales of Oblivion', raidSkillAsahiS1: 'Ninpo Midareba', raidSkillAsahiS2: 'Ninpo Hikagekuzushi',
+  },
+  ja: {
+    raidCharTama: 'タマ', raidCharMowano: 'モワノー', raidCharCarol: 'カロル', raidCharAsahi: 'アサヒ',
+    raidSkillTamaS1: '妖狐燐火', raidSkillTamaS2: '狐火乱舞', raidSkillMowanoS1: '宵闇の羽刃', raidSkillMowanoS2: '優雅なる執事', raidSkillCarolS1: '忘却の翅', raidSkillCarolS2: '喪失の鱗粉', raidSkillAsahiS1: '忍法・乱れ刃', raidSkillAsahiS2: '忍法・日影崩し',
+  },
+  ko: {
+    raidCharTama: '타마', raidCharMowano: '무아노', raidCharCarol: '카롤', raidCharAsahi: '아사히',
+    raidSkillTamaS1: '요호인화', raidSkillTamaS2: '호화난무', raidSkillMowanoS1: '날개깃의 광시곡', raidSkillMowanoS2: '한 잔의 여유', raidSkillCarolS1: '망각의 날개', raidSkillCarolS2: '상실의 날개 가루', raidSkillAsahiS1: '인법・난투검(亂投劍)', raidSkillAsahiS2: '인법・일영타(日影打)',
+  },
+}
+
+for (const [locale, names] of Object.entries(raidCharacterExtensions)) {
+  Object.assign(raidTranslations[locale], {
+    raidBuffCattleyyaDefense: 'Defense', raidBuffTamaHit: 'Hit Up', raidBuffTamaShield: 'Shield', raidBuffTamaDoll: 'Doll', raidBuffMowanoShield: 'Shield', raidBuffMowanoCopy: 'Buff Copy', raidBuffCarolTeamDefense: 'Team Defense', raidBuffCarolSelfDefense: 'Self Defense', raidBuffAsahiDamageReduction: 'Damage Reduction', raidBuffAsahiDefense: 'Defense', raidBuffAsahiShield: 'Shield', raidBuffAsahiWindForest: 'Fuurinkazan', raidBuffAsahiCritical: 'Critical Up',
+    raidEffectCopiedStatus: {
+      'zh-CN': '{target}：复制「{status}」（复制自{from}，{valueSource}），持续{n}次行动',
+      'zh-TW': '{target}：複製「{status}」（複製自{from}，{valueSource}），持續{n}次行動',
+      en: '{target}: copied {status} from {from} ({valueSource}) for {n} actions',
+      ja: '{target}：{from}から「{status}」をコピー（{valueSource}）、{n}行動継続',
+      ko: '{target}: {from}의 「{status}」 복제（{valueSource}）, {n}회 행동 지속',
+    }[locale],
+    raidValueSourceAttack: {
+      'zh-CN': '数值来源：{source} ATK', 'zh-TW': '數值來源：{source} ATK',
+      en: 'value source: {source} ATK', ja: '数値元：{source}のATK', ko: '수치 출처: {source} ATK',
+    }[locale],
+    raidEffectStatusWithValueSource: {
+      'zh-CN': '{target}：{status}（{valueSource}），持续{n}次行动', 'zh-TW': '{target}：{status}（{valueSource}），持續{n}次行動',
+      en: '{target}: {status} ({valueSource}) for {n} actions', ja: '{target}：{status}（{valueSource}）、{n}行動継続', ko: '{target}: {status}（{valueSource}）, {n}회 행동 지속',
+    }[locale],
+    raidDebuffTamaDefenseDown: 'Defense Down', raidDebuffMowanoPhysicalDefenseDown: 'Physical Defense Down', raidDebuffMowanoWeaken: 'Weakness', raidDebuffCarolDefenseDown: 'Defense Down', raidIgnoredBuffCopy: 'Buff copy', raidIgnoredDelay: 'Delay', raidIgnoredSilence: 'Silence', raidIgnoredBuffDispel: 'Buff dispel', raidIgnoredSelfHeal: 'Self heal', raidIgnoredHitRateUp: 'Hit rate up',
+    ...names,
+  })
+}

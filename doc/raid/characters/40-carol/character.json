@@ -1,0 +1,10 @@
+{
+  "formatVersion": 1, "characterId": 40, "slug": "carol", "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [40001, 40002], "passiveSkillIds": [40003, 40004], "combatLogs": ["data/battle-logs/y1800mrl.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 40001, "model": "implemented", "summary": "三目标折叠伤害。" }, { "kind": "activeSkill", "sourceId": 40002, "model": "implemented", "summary": "无 Buff 木桩的零倍率防御降低与伤害。" },
+    { "kind": "passiveSkill", "sourceId": 40003, "model": "ignored", "summary": "受击后的自身治疗。" }, { "kind": "passiveSkill", "sourceId": 40004, "model": "implemented", "summary": "全体与自身防御 Buff。" }
+  ],
+  "effectGroups": [ { "id": 4000420101, "model": "implemented", "summary": "全体防御。" }, { "id": 4000430201, "model": "implemented", "summary": "自身防御。" }, { "id": 4000230101, "model": "implemented", "summary": "防御降低。" } ],
+  "ignored": [ { "key": "raidIgnoredSilence", "summary": "沉默。" }, { "key": "raidIgnoredBuffDispel", "summary": "敌方 Buff 驱散。" }, { "key": "raidIgnoredSelfHeal", "summary": "自身治疗。" } ], "unresolved": []
+}

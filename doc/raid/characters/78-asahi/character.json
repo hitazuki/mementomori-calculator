@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1, "characterId": 78, "slug": "asahi", "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [78001, 78002], "passiveSkillIds": [78003, 78004], "combatLogs": ["data/battle-logs/y1800mrl.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 78001, "model": "implemented", "summary": "五段伤害与木桩不击杀时的暴击状态。" }, { "kind": "activeSkill", "sourceId": 78002, "model": "implemented", "summary": "按风林火山层数的再发动总段数。" },
+    { "kind": "passiveSkill", "sourceId": 78003, "model": "implemented", "summary": "行动结束后按自身 Buff 数叠加风林火山。" }, { "kind": "passiveSkill", "sourceId": 78004, "model": "implemented", "summary": "开战防御侧状态与流金条件护盾。" }
+  ],
+  "effectGroups": [
+    { "id": 7800440101, "model": "implemented", "summary": "承伤降低。" }, { "id": 7800420102, "model": "implemented", "summary": "防御提升。" }, { "id": 7800430103, "model": "implemented", "summary": "护盾。" }, { "id": 7800300101, "model": "implemented", "summary": "风林火山攻击层数。" }, { "id": 7800130401, "model": "implemented", "summary": "暴击率提升。" }
+  ],
+  "ignored": [ { "key": "raidIgnoredHitRateUp", "summary": "攻击被闪避后的命中率提升。" } ], "unresolved": []
+}

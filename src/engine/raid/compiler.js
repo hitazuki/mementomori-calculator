@@ -63,6 +63,9 @@ function compileEffect(effect, mechanics, path, character) {
   const handler = mechanics.effectHandlers[effect.type]
   if (!handler) throw new Error(`Unregistered raid effect '${effect.type}' at ${path}`)
   if (effect.target && !mechanics.targetSelectors[effect.target]) throw new Error(`Unregistered raid target selector '${effect.target}' at ${path}`)
+  if (effect.sourceTarget && !mechanics.targetSelectors[effect.sourceTarget]) throw new Error(`Unregistered raid source target selector '${effect.sourceTarget}' at ${path}`)
+  if (effect.type === 'copyStatuses' && !effect.sourceTarget) throw new Error(`Raid copyStatuses effect requires sourceTarget at ${path}`)
+  if (effect.copyAttackRateAsSourceAttack != null && typeof effect.copyAttackRateAsSourceAttack !== 'boolean') throw new Error(`Raid copyAttackRateAsSourceAttack must be boolean at ${path}`)
   if (effect.type === 'changeCounter' && !(effect.counter in (character.runtime?.counters ?? {}))) {
     throw new Error(`Unknown raid counter '${effect.counter}' at ${path}`)
   }

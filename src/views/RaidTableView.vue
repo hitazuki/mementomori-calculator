@@ -182,23 +182,24 @@
       </div>
 
       <div class="raid-detail-panel">
-        <h3>{{ $t('raidSymbolicScaling') }}</h3>
-        <p v-if="Object.keys(selectedEvent.scalingTotals).length" class="raid-symbolic-value">{{ formatScaling(selectedEvent.scalingTotals) }}</p>
-        <p v-else class="raid-muted">—</p>
-        <h3 class="raid-subtitle">{{ $t('raidIgnoredEffects') }}</h3>
+        <h3>{{ $t('raidIgnoredEffects') }}</h3>
         <ul v-if="selectedEvent.ignoredKeys.length" class="raid-ignored-list"><li v-for="key in selectedEvent.ignoredKeys" :key="key">{{ $t(key) }}</li></ul><p v-else class="raid-muted">—</p>
       </div>
 
       <div class="raid-detail-panel raid-detail-panel-wide">
         <h3>{{ $t('raidActiveBuffs') }}</h3>
         <p v-if="modifierSummary(selectedEvent).length" class="raid-modifier-summary">{{ modifierSummary(selectedEvent).join(' · ') }}</p>
-        <p v-else class="raid-muted">{{ $t('raidNoActiveBuffs') }}</p>
+        <p v-else-if="!Object.keys(selectedEvent.scalingTotals).length" class="raid-muted">{{ $t('raidNoActiveBuffs') }}</p>
         <ul v-if="modifierBreakdown(selectedEvent).length" class="raid-detail-items raid-modifier-breakdown">
           <li v-for="item in modifierBreakdown(selectedEvent)" :key="item.channel">
             <strong>{{ item.label }} +{{ formatRate(item.total) }}</strong>
             <small>{{ item.sources.join(' · ') }}</small>
           </li>
         </ul>
+        <div v-if="Object.keys(selectedEvent.scalingTotals).length" class="raid-symbolic-breakdown">
+          <h3 class="raid-subtitle">{{ $t('raidSymbolicScaling') }}</h3>
+          <ul class="raid-detail-items compact"><li v-for="term in Object.values(selectedEvent.scalingTotals)" :key="term.key">{{ formatScalingTerm(term) }}</li></ul>
+        </div>
       </div>
     </div>
   </section>
@@ -252,8 +253,13 @@ function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(loc
 function formatPercent(value) { return `${formatter().format(value)}% ATK` }
 function formatRate(value) { return `${formatter().format(value * 100)}%` }
 function formatSymbolic(totals) { const entries = Object.entries(totals); return entries.length ? entries.map(([stat, value]) => `${formatter().format(value)}% ${stat}`).join(' + ') : '—' }
-function formatScaling(totals) { return Object.values(totals).map(term => `${formatter().format(term.coefficient)}% ATK×(${term.key})`).join(' + ') }
-function formatScalingArray(terms) { return terms.map(term => `${formatter().format(term.coefficient)}% ATK×(${term.key})`).join(' + ') }
+function valueSourceText(sourceId) { return t('raidValueSourceAttack', { source: characterName(sourceId) }) }
+function formatScalingTerm(term) {
+  const source = term.kind === 'sourceAttackOverTargetAttack' ? `（${valueSourceText(term.sourceId)}）` : ''
+  return `${formatter().format(term.coefficient)}% ATK×(${term.key})${source}`
+}
+function formatScaling(totals) { return Object.values(totals).map(formatScalingTerm).join(' + ') }
+function formatScalingArray(terms) { return terms.map(formatScalingTerm).join(' + ') }
 function formatStep(step) { return `${formatter().format(step.effectivePercent)}% ${step.stat}` }
 function eventFor(round, id) { return round.actions.find(action => action.actorId === id) }
 
@@ -312,7 +318,7 @@ function modifierBreakdown(event) {
   return modifierChannels.flatMap(([channel, labelKey]) => {
     const sources = firstStep.modifierSources
       .filter(source => source.channel === channel && source.rate)
-      .map(source => `${t(source.nameKey)} +${formatRate(source.rate)}`)
+      .map(source => `${t(source.nameKey)} +${formatRate(source.rate)}${source.copiedFromId != null ? `（${valueSourceText(source.sourceId)}）` : ''}`)
     return sources.length ? [{ channel, label: t(labelKey), total: totals[channel], sources }] : []
   })
 }
@@ -333,6 +339,13 @@ function effectText(effect) {
   if (effect.type === 'cooldownReset') return t('raidEffectCooldownReset')
   if (effect.type === 'counter') return t('raidEffectCounter', { target: characterName(effect.targetId), effect: t(effect.nameKey), n: effect.after })
   if (effect.type === 'bossStatus') return t('raidEffectBossStatus', { effect: t(effect.nameKey), n: effect.stacks ?? 0 })
+  if (effect.type === 'status' && effect.copiedFromId != null) return t('raidEffectCopiedStatus', {
+    target: characterName(effect.targetId), status: t(effect.nameKey), from: characterName(effect.copiedFromId), valueSource: valueSourceText(effect.sourceId), n: effect.duration ?? '∞',
+  })
+  const sourceAttack = effect.symbolicModifiers?.find(modifier => modifier.kind === 'sourceAttackOverTargetAttack')
+  if (effect.type === 'status' && sourceAttack) return t('raidEffectStatusWithValueSource', {
+    target: characterName(effect.targetId), status: t(effect.nameKey), valueSource: valueSourceText(sourceAttack.sourceId), n: effect.duration ?? '∞',
+  })
   if (effect.type === 'status') return t('raidEffectStatus', { target: characterName(effect.targetId), status: t(effect.nameKey), class: t(effect.statusClass === 'removableBuff' ? 'raidStatusRemovable' : 'raidStatusUnremovable'), n: effect.duration ?? '∞' })
   return effect.type
 }

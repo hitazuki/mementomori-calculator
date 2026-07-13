@@ -13,10 +13,11 @@
   "effectGroups": [
     { "id": 9000140103, "model": "implemented", "summary": "春化作用攻击。" },
     { "id": 9000440101, "model": "outOfScope", "summary": "护盾。" },
+    { "id": 9000430101, "model": "outOfScope", "summary": "防御提升。" },
     { "id": 9000420101, "model": "outOfScope", "summary": "承伤降低。" }
   ],
   "ignored": [
     { "key": "raidIgnoredDebuffCleanse", "summary": "尚无己方弱化移除链路。" }
   ],
-  "unresolved": ["第 4/8/12 回合弱化移除的目标并列与优先级需要受控日志。", "9000140103 攻击提升、9000430101 防御提升与 9000440101 护盾的 SkillCategory 尚无受控战斗日志；不可依据效果类型推断可解除性。"]
+  "unresolved": ["第 4/8/12 回合弱化移除的目标并列与优先级需要受控日志。"]
 }

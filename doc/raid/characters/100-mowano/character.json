@@ -1,0 +1,14 @@
+{
+  "formatVersion": 1, "characterId": 100, "slug": "mowano", "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [100001, 100002], "passiveSkillIds": [100003, 100004], "combatLogs": ["data/battle-logs/y1800mrl.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 100001, "model": "implemented", "summary": "五目标折叠伤害与两组零倍率弱化。" },
+    { "kind": "activeSkill", "sourceId": 100002, "model": "implemented", "summary": "第三次技能倍率。" },
+    { "kind": "passiveSkill", "sourceId": 100003, "model": "implemented", "summary": "行动开始复制 Buff 数最高其他友军的所有可复制 Buff；每 4 次自身行动触发。" },
+    { "kind": "passiveSkill", "sourceId": 100004, "model": "implemented", "summary": "首回合不可解除护盾。" }
+  ],
+  "effectGroups": [
+    { "id": 10000430101, "model": "implemented", "summary": "不可解除护盾。" }, { "id": 10000120102, "model": "implemented", "summary": "物防降低。" }, { "id": 10000130105, "model": "implemented", "summary": "脱力。" }
+  ],
+  "ignored": [ { "key": "raidIgnoredDelay", "summary": "敌方冷却延迟。" } ], "unresolved": []
+}

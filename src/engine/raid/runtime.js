@@ -89,24 +89,64 @@ export function runRaidProgram(program) {
     return compiledValue.handler(compiledValue.definition, { ...context, actor, config, actors, boss, api })
   }
 
-  function resolveTargets(effect, ownerId) {
-    const selector = mechanics.targetSelectors[effect.target]
+  function resolveTargets(effect, ownerId, targetKey = effect.target, targetCount = effect.targetCount) {
+    const selector = mechanics.targetSelectors[targetKey]
     if (!selector) return []
     let ids = selector({ effect, ownerId, config, actors, boss, api })
     if (effect.targetElement != null) ids = ids.filter(id => actors.get(id).definition.element === effect.targetElement)
-    return ids.slice(0, effect.targetCount ?? ids.length)
+    return ids.slice(0, targetCount ?? ids.length)
   }
 
-  function applyStatus(target, effect, ownerId, sequence) {
+  function applyStatus(target, effect, ownerId, context) {
     const index = target.statuses.findIndex(status => status.effectGroupId === effect.effectGroupId && status.sourceId === ownerId)
+    const sourceActor = actors.get(ownerId)
     const status = {
       id: effect.id, effectGroupId: effect.effectGroupId, sourceId: ownerId, nameKey: effect.nameKey,
       statusClass: effect.statusClass, countsTowardBuffCount: effect.statusClass === RAID_STATUS_CLASSES.REMOVABLE_BUFF,
+      copyable: effect.copyable !== false,
       duration: effect.duration, remainingActions: effect.duration,
-      modifiers: (effect.modifiers ?? []).map(modifier => ({ ...modifier })),
-      symbolicModifiers: (effect.symbolicModifiers ?? []).map(modifier => ({ ...modifier })),
-      appliedSequence: sequence,
+      modifiers: (effect.modifiers ?? []).map(modifier => ({
+        ...modifier,
+        copyRate: modifier.compiledRate ? resolveValue(modifier.compiledRate, sourceActor, context) : modifier.rate,
+      })),
+      symbolicModifiers: (effect.symbolicModifiers ?? []).map(modifier => ({
+        ...modifier,
+        copyCoefficient: modifier.compiledCoefficient ? resolveValue(modifier.compiledCoefficient, sourceActor, context) : modifier.coefficient,
+      })),
+      appliedSequence: context.sequence,
     }
+    if (index >= 0) target.statuses.splice(index, 1, status)
+    else target.statuses.push(status)
+    return status
+  }
+
+  function applyCopiedStatus(target, sourceStatus, copiedFromId, context, { copyAttackRateAsSourceAttack = false } = {}) {
+    const sourceActor = actors.get(sourceStatus.sourceId)
+    const freezeModifier = modifier => {
+      const { compiledRate, copyRate, ...plainModifier } = modifier
+      return { ...plainModifier, rate: copyRate ?? (compiledRate ? resolveValue(compiledRate, sourceActor, context) : modifier.rate) }
+    }
+    const freezeSymbolicModifier = modifier => {
+      const { compiledCoefficient, copyCoefficient, ...plainModifier } = modifier
+      return { ...plainModifier, coefficient: copyCoefficient ?? (compiledCoefficient ? resolveValue(compiledCoefficient, sourceActor, context) : modifier.coefficient) }
+    }
+    const modifiers = sourceStatus.modifiers.map(freezeModifier)
+    const symbolicModifiers = sourceStatus.symbolicModifiers.map(freezeSymbolicModifier)
+    if (copyAttackRateAsSourceAttack) {
+      const copiedAttackModifiers = modifiers.filter(modifier => modifier.channel === 'attackRate')
+      modifiers.splice(0, modifiers.length, ...modifiers.filter(modifier => modifier.channel !== 'attackRate'))
+      symbolicModifiers.push(...copiedAttackModifiers.map(modifier => ({
+        kind: 'sourceAttackOverTargetAttack', coefficient: modifier.rate, sourceId: sourceStatus.sourceId,
+      })))
+    }
+    const status = {
+      id: sourceStatus.id, effectGroupId: sourceStatus.effectGroupId, sourceId: sourceStatus.sourceId, nameKey: sourceStatus.nameKey,
+      statusClass: sourceStatus.statusClass, countsTowardBuffCount: sourceStatus.countsTowardBuffCount,
+      copyable: sourceStatus.copyable !== false, duration: sourceStatus.remainingActions, remainingActions: sourceStatus.remainingActions,
+      modifiers, symbolicModifiers,
+      appliedSequence: context.sequence, copiedFromId,
+    }
+    const index = target.statuses.findIndex(existing => existing.effectGroupId === status.effectGroupId && existing.sourceId === status.sourceId)
     if (index >= 0) target.statuses.splice(index, 1, status)
     else target.statuses.push(status)
     return status
@@ -135,7 +175,7 @@ export function runRaidProgram(program) {
     const targets = resolveTargets(effect, context.ownerId)
     const selectionCounts = effect.target?.includes('BuffCount') ? removableBuffCounts() : null
     for (const targetId of targets) {
-      const status = applyStatus(actors.get(targetId), effect, context.ownerId, context.sequence)
+      const status = applyStatus(actors.get(targetId), effect, context.ownerId, context)
       context.effectsApplied.push({
         type: 'status', phase: context.phase, sourceId: context.ownerId, targetId,
         id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey,
@@ -143,6 +183,31 @@ export function runRaidProgram(program) {
         duration: effect.duration, modifiers: status.modifiers.map(modifier => ({ ...modifier })),
         symbolicModifiers: status.symbolicModifiers.map(modifier => ({ ...modifier })), selectionCounts,
       })
+    }
+  }
+
+  function copyActorStatuses(effect, context) {
+    const sourceId = resolveTargets(effect, context.ownerId, effect.sourceTarget, 1)[0]
+    if (sourceId == null) return
+    const source = actors.get(sourceId)
+    const sourceStatuses = source.statuses.filter(status => (
+      status.statusClass === RAID_STATUS_CLASSES.REMOVABLE_BUFF
+      && status.copyable !== false
+      && (status.remainingActions == null || status.remainingActions > 0)
+    ))
+    for (const targetId of resolveTargets(effect, context.ownerId)) {
+      const target = actors.get(targetId)
+      for (const sourceStatus of sourceStatuses) {
+        const status = applyCopiedStatus(target, sourceStatus, sourceId, context, effect)
+        context.effectsApplied.push({
+          type: 'status', phase: context.phase, sourceId: status.sourceId, targetId,
+          copiedFromId: sourceId, copiedById: context.ownerId,
+          id: status.id, effectGroupId: status.effectGroupId, nameKey: status.nameKey,
+          statusClass: status.statusClass, countsTowardBuffCount: status.countsTowardBuffCount,
+          duration: status.duration, modifiers: status.modifiers.map(modifier => ({ ...modifier })),
+          symbolicModifiers: status.symbolicModifiers.map(modifier => ({ ...modifier })),
+        })
+      }
     }
   }
 
@@ -237,7 +302,7 @@ export function runRaidProgram(program) {
 
   const api = {
     removableBuffCount, evaluateCondition, resolveTargets,
-    applyActorStatusEffect, applyBossStatusEffect, applyCooldownReductionEffect,
+    applyActorStatusEffect, copyActorStatuses, applyBossStatusEffect, applyCooldownReductionEffect,
     applyCounterEffect, applySetCooldownEffect, emitBattleEvent,
   }
 
@@ -259,7 +324,7 @@ export function runRaidProgram(program) {
       for (const modifier of status.modifiers) sources.push({
         ...modifier, rate: modifier.compiledRate ? resolveValue(modifier.compiledRate, sourceActor, context) : modifier.rate,
         id: modifier.id ?? status.id, nameKey: modifier.nameKey ?? status.nameKey,
-        sourceId: status.sourceId, effectGroupId: status.effectGroupId, statusClass: status.statusClass,
+        sourceId: status.sourceId, copiedFromId: status.copiedFromId, effectGroupId: status.effectGroupId, statusClass: status.statusClass,
         permanent: status.remainingActions == null, remainingActions: status.remainingActions, appliedSequence: status.appliedSequence,
       })
       for (const modifier of status.symbolicModifiers) {
@@ -268,7 +333,7 @@ export function runRaidProgram(program) {
           : `DEF0_${actor.id}/ATK_${actor.id}`
         symbolicSources.push({
           ...modifier, coefficient: modifier.compiledCoefficient ? resolveValue(modifier.compiledCoefficient, sourceActor, context) : modifier.coefficient,
-          key, targetId: actor.id, sourceId: modifier.sourceId ?? status.sourceId,
+          key, targetId: actor.id, sourceId: modifier.sourceId ?? status.sourceId, copiedFromId: status.copiedFromId,
           nameKey: status.nameKey, effectGroupId: status.effectGroupId, remainingActions: status.remainingActions,
         })
       }
@@ -408,11 +473,11 @@ export function runRaidProgram(program) {
       actor.runtime.actionCount += 1
       const cooldownsBefore = { ...actor.cooldowns }
       const statusSnapshotBeforeAction = snapshotStatuses()
+      const activeStatusKeys = new Set(actor.statuses.map(statusKey))
       const effectsApplied = []
       const context = { config, actors, boss, sequence, round: turn, effectsApplied, phase: 'actionStart', ownerId: actorId }
 
       runHooks(actor, actor.definition.hooksByTrigger.actionStart, context, 'actionStart')
-      const activeStatusKeys = new Set(actor.statuses.map(statusKey))
       const action = selectAction(actor)
       if (action.key !== 'normal') actor.cooldowns[action.key] = action.cooldown
 

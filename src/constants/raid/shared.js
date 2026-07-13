@@ -24,6 +24,10 @@ export function statusEffect({ id, effectGroupId, nameKey, target, duration, sta
   return { type: 'status', id, effectGroupId, nameKey, target, duration, statusClass, modifiers, symbolicModifiers, ...rest }
 }
 
+export function copyStatusesEffect({ id, nameKey, target = 'self', sourceTarget, ...rest }) {
+  return { type: 'copyStatuses', id, nameKey, target, sourceTarget, ...rest }
+}
+
 export function bossStatusEffect({ id, effectGroupId, nameKey, durationRounds = null, addStacks = 1, maxStacks = 1, damageRatePerStack = 0, ...rest }) {
   return {
     type: 'bossStatus', id, effectGroupId, nameKey, durationRounds, addStacks, maxStacks,
