@@ -163,7 +163,7 @@
 
 .raid-matrix-table {
   width: 100%;
-  min-width: 1480px;
+  min-width: 1600px;
   border-collapse: separate;
   border-spacing: 0;
   font-size: var(--fs-sm);
@@ -195,6 +195,17 @@
   min-width: 128px;
   background: var(--bg-surface);
 }
+
+.raid-matrix-table .raid-sticky-total {
+  position: sticky;
+  left: 128px;
+  z-index: 2;
+  min-width: 138px;
+  background: var(--bg-surface);
+}
+
+.raid-matrix-table thead .raid-sticky-total,
+.raid-matrix-table tfoot .raid-sticky-total { z-index: 3; }
 
 .raid-character-cell span,
 .raid-character-cell small,
@@ -244,6 +255,15 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.raid-boss-status-row th,
+.raid-boss-status-row td { background: rgba(101, 191, 151, 0.05); }
+.raid-boss-status-row .raid-sticky-col,
+.raid-boss-status-row .raid-sticky-total { background: var(--bg-surface); }
+.raid-boss-status-note,
+.raid-boss-status-cell small { color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-boss-status-cell span { display: block; color: var(--success); font-size: var(--fs-xs); line-height: 1.4; }
+.raid-boss-status-cell span + span { margin-top: 4px; }
 
 .raid-row-total { color: var(--gold-light); font-family: var(--font-mono); font-weight: 700; }
 .raid-matrix-table tfoot th,
@@ -318,6 +338,8 @@
 .raid-detail-items.compact li { display: block; }
 .raid-ignored-list li { color: var(--warning); font-size: var(--fs-sm); }
 .raid-symbolic-value { color: var(--purple-light); font-family: var(--font-mono); font-size: var(--fs-lg); }
+.raid-modifier-summary { margin-bottom: 10px; color: var(--success); font-family: var(--font-mono); font-size: var(--fs-sm); }
+.raid-modifier-breakdown { margin-top: 8px; }
 .raid-muted { color: var(--text-muted); font-size: var(--fs-sm); }
 
 .raid-warning-list {

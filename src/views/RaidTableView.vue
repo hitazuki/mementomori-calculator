@@ -84,39 +84,49 @@
       <table class="raid-matrix-table">
         <thead><tr>
           <th class="raid-sticky-col">{{ $t('raidCharacter') }}</th>
+          <th class="raid-sticky-total">{{ $t('raidCharacterTotal') }}</th>
           <th v-for="round in result.rounds" :key="round.turn">
             {{ $t('raidTurn', { n: round.turn }) }}
             <small class="raid-turn-order">{{ round.actionOrder.map(characterName).join(' → ') }}</small>
           </th>
-          <th>{{ $t('raidCharacterTotal') }}</th>
         </tr></thead>
         <tbody>
           <tr v-for="id in lineup" :key="id">
             <th class="raid-sticky-col raid-character-cell"><span>{{ characterName(id) }}</span><small>#{{ id }}</small></th>
+            <td class="raid-row-total raid-sticky-total">
+              {{ formatPercent(result.characterTotals[id].atkPercent) }}
+              <small v-if="Object.keys(result.characterTotals[id].scalingTotals).length">+ {{ formatScaling(result.characterTotals[id].scalingTotals) }}</small>
+              <small v-if="Object.keys(result.characterTotals[id].symbolicTotals).length">+ {{ formatSymbolic(result.characterTotals[id].symbolicTotals) }}</small>
+            </td>
             <td v-for="round in result.rounds" :key="`${id}-${round.turn}`">
               <button type="button" class="raid-action-cell" :class="{ active: selectedEvent?.sequence === eventFor(round, id).sequence }" @click="selectedEvent = eventFor(round, id)">
                 <strong>{{ $t(eventFor(round, id).skillNameKey) }}</strong>
                 <span>{{ formatPercent(eventFor(round, id).effectiveAtkPercent) }}</span>
                 <em v-if="Object.keys(eventFor(round, id).scalingTotals).length">+ {{ formatScaling(eventFor(round, id).scalingTotals) }}</em>
                 <em v-if="Object.keys(eventFor(round, id).symbolicTotals).length">+ {{ formatSymbolic(eventFor(round, id).symbolicTotals) }}</em>
-                <span v-if="modifierLabels(eventFor(round, id)).length" class="raid-cell-buffs">{{ modifierLabels(eventFor(round, id)).join(' · ') }}</span>
+                <span v-if="modifierSummary(eventFor(round, id)).length" class="raid-cell-buffs">{{ modifierSummary(eventFor(round, id)).join(' · ') }}</span>
               </button>
             </td>
-            <td class="raid-row-total">
-              {{ formatPercent(result.characterTotals[id].atkPercent) }}
-              <small v-if="Object.keys(result.characterTotals[id].scalingTotals).length">+ {{ formatScaling(result.characterTotals[id].scalingTotals) }}</small>
-              <small v-if="Object.keys(result.characterTotals[id].symbolicTotals).length">+ {{ formatSymbolic(result.characterTotals[id].symbolicTotals) }}</small>
+          </tr>
+          <tr class="raid-boss-status-row">
+            <th class="raid-sticky-col">{{ $t('raidBossStatus') }}</th>
+            <td class="raid-sticky-total raid-boss-status-note">{{ $t('raidAfterRound') }}</td>
+            <td v-for="round in result.rounds" :key="`boss-${round.turn}`" class="raid-boss-status-cell">
+              <template v-if="round.bossStatusAfterRound.length">
+                <span v-for="status in round.bossStatusAfterRound" :key="status.id">{{ bossStatusLabel(status) }}</span>
+              </template>
+              <small v-else>{{ $t('raidNoBossStatus') }}</small>
             </td>
           </tr>
         </tbody>
         <tfoot><tr>
           <th class="raid-sticky-col">{{ $t('raidRoundTotal') }}</th>
+          <td class="raid-row-total raid-sticky-total">{{ formatPercent(result.teamAtkPercent) }}</td>
           <td v-for="round in result.rounds" :key="`total-${round.turn}`">
             <strong>{{ formatPercent(round.atkPercent) }}</strong>
             <small v-if="Object.keys(round.scalingTotals).length">+ {{ formatScaling(round.scalingTotals) }}</small>
             <small v-if="Object.keys(round.symbolicTotals).length">+ {{ formatSymbolic(round.symbolicTotals) }}</small>
           </td>
-          <td class="raid-row-total">{{ formatPercent(result.teamAtkPercent) }}</td>
         </tr></tfoot>
       </table>
     </div>
@@ -156,7 +166,8 @@
 
       <div class="raid-detail-panel">
         <h3>{{ $t('raidRemovableBuffCount') }}</h3>
-        <dl class="raid-detail-list"><template v-for="id in lineup" :key="`buff-${id}`"><dt>{{ characterName(id) }}</dt><dd>{{ selectedEvent.removableBuffCounts[id] }}</dd></template></dl>
+        <p class="raid-muted">{{ $t('raidBuffCountTiming') }}</p>
+        <dl class="raid-detail-list"><template v-for="id in lineup" :key="`buff-${id}`"><dt>{{ characterName(id) }}</dt><dd>{{ selectedEvent.removableBuffCountsAtActionStart[id] }} → {{ selectedEvent.removableBuffCountsAtDamage[id] }}</dd></template></dl>
         <h3 class="raid-subtitle">{{ $t('raidCooldownTitle') }}</h3>
         <dl class="raid-detail-list"><dt>{{ $t('raidCooldownBefore') }}</dt><dd>S1 {{ selectedEvent.cooldownsBefore.s1 }} · S2 {{ selectedEvent.cooldownsBefore.s2 }}</dd><dt>{{ $t('raidCooldownAfter') }}</dt><dd>S1 {{ selectedEvent.cooldownsAfter.s1 }} · S2 {{ selectedEvent.cooldownsAfter.s2 }}</dd></dl>
       </div>
@@ -176,6 +187,18 @@
         <p v-else class="raid-muted">—</p>
         <h3 class="raid-subtitle">{{ $t('raidIgnoredEffects') }}</h3>
         <ul v-if="selectedEvent.ignoredKeys.length" class="raid-ignored-list"><li v-for="key in selectedEvent.ignoredKeys" :key="key">{{ $t(key) }}</li></ul><p v-else class="raid-muted">—</p>
+      </div>
+
+      <div class="raid-detail-panel raid-detail-panel-wide">
+        <h3>{{ $t('raidActiveBuffs') }}</h3>
+        <p v-if="modifierSummary(selectedEvent).length" class="raid-modifier-summary">{{ modifierSummary(selectedEvent).join(' · ') }}</p>
+        <p v-else class="raid-muted">{{ $t('raidNoActiveBuffs') }}</p>
+        <ul v-if="modifierBreakdown(selectedEvent).length" class="raid-detail-items raid-modifier-breakdown">
+          <li v-for="item in modifierBreakdown(selectedEvent)" :key="item.channel">
+            <strong>{{ item.label }} +{{ formatRate(item.total) }}</strong>
+            <small>{{ item.sources.join(' · ') }}</small>
+          </li>
+        </ul>
       </div>
     </div>
   </section>
@@ -263,18 +286,45 @@ function resetConfig() {
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
 }
 
-function modifierLabels(event) {
-  const seen = new Set(); const labels = []
-  for (const step of event.damageSteps) for (const source of step.modifierSources) {
-    if (source.permanent || seen.has(source.id) || !['attackRate', 'damageRate', 'criticalDamageBonus'].includes(source.channel)) continue
-    seen.add(source.id); labels.push(`${t(source.nameKey)} +${formatRate(source.rate)}`)
-  }
-  return labels
+const modifierChannels = [
+  ['attackRate', 'raidAttackRate'],
+  ['damageRate', 'raidDamageRate'],
+  ['criticalDamageBonus', 'raidCriticalDamage'],
+]
+
+function modifierTotals(step) {
+  return Object.fromEntries(modifierChannels.map(([channel]) => [channel, step.modifierSources
+    .filter(source => source.channel === channel)
+    .reduce((total, source) => total + source.rate, 0)]))
+}
+
+function modifierSummary(event) {
+  const firstStep = event.damageSteps[0]
+  if (!firstStep) return []
+  const totals = modifierTotals(firstStep)
+  return modifierChannels.flatMap(([channel, labelKey]) => totals[channel] ? [`${t(labelKey)} +${formatRate(totals[channel])}`] : [])
+}
+
+function modifierBreakdown(event) {
+  const firstStep = event.damageSteps[0]
+  if (!firstStep) return []
+  const totals = modifierTotals(firstStep)
+  return modifierChannels.flatMap(([channel, labelKey]) => {
+    const sources = firstStep.modifierSources
+      .filter(source => source.channel === channel && source.rate)
+      .map(source => `${t(source.nameKey)} +${formatRate(source.rate)}`)
+    return sources.length ? [{ channel, label: t(labelKey), total: totals[channel], sources }] : []
+  })
 }
 
 function bossStackSummary(statuses) {
   if (!statuses.length) return t('raidNoBossStatus')
   return statuses.map(status => `${t(status.nameKey)}×${status.stacks}`).join(' · ')
+}
+
+function bossStatusLabel(status) {
+  const duration = status.remainingRounds != null ? ` · ${t('raidRemainingRounds', { n: status.remainingRounds })}` : ''
+  return `${t(status.nameKey)} · ${t('raidStatusStacks', { n: status.stacks })}${duration}`
 }
 
 function effectText(effect) {

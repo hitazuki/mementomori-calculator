@@ -352,12 +352,29 @@ test('Liebes defense debuffs add two zero-rate Boss groups that power debuff-cou
 
 test('Mifri gains Flame Lamp on each action, hastens cooldown recovery, and upgrades third skill uses', () => {
   const result = simulateRaidTable(singleConfig(MIFRI, { turns: 8 }))
-  assert.equal(action(result, 1, MIFRI).damageSteps[0].attackRate, 0.05)
+  const firstMifri = action(result, 1, MIFRI)
+  assert.equal(firstMifri.damageSteps[0].attackRate, 0.05)
+  assert.equal(firstMifri.damageSteps[0].modifierSources.find(source => source.id === 'mifri-flame-lamp').nameKey, 'raidBuffMifriFlameLamp')
   assert.deepEqual(actionsFor(result, MIFRI).slice(0, 5), ['s1', 's2', 'normal', 's1', 's2'])
   assert.equal(action(result, 2, MIFRI).cooldownsAfter.s2, 2)
   assert.equal(action(result, 7, MIFRI).damageSteps[0].percent, 1640)
   assert.equal(action(result, 8, MIFRI).damageSteps[0].percent, 1120)
   assert.equal(action(result, 7, MIFRI).effectsApplied.some(effect => effect.id === 'mifri-shield'), false)
+})
+
+test('action records snapshot removable Buff counts at action start and damage time in action order', () => {
+  const lineup = [MERLYN, FLORENCE]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [FLORENCE, MERLYN],
+    speeds: { [MERLYN]: 9999, [FLORENCE]: 1 }, turns: 1,
+  })
+  const merlyn = action(result, 1, MERLYN)
+  const florence = action(result, 1, FLORENCE)
+  assert.equal(merlyn.removableBuffCountsAtActionStart[FLORENCE], 0)
+  assert.equal(merlyn.removableBuffCountsAtDamage[FLORENCE], 0)
+  assert.equal(florence.removableBuffCountsAtActionStart[FLORENCE], 2)
+  assert.equal(florence.removableBuffCountsAtDamage[FLORENCE], 2)
+  assert.equal(florence.statusSnapshotAtDamage[FLORENCE].statuses.length, 2)
 })
 
 test('Popri and Cattleya use round-start state and skill-use thresholds', () => {

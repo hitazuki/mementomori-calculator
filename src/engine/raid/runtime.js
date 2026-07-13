@@ -418,6 +418,8 @@ export function runRaidProgram(program) {
 
       runHooks(actor, action.hooksByTrigger.beforeDamage, context, 'beforeDamage')
       runHooks(actor, actor.definition.hooksByTrigger.beforeDamage, context, 'beforeDamage')
+      const statusSnapshotAtDamage = snapshotStatuses()
+      const removableBuffCountsAtDamage = removableBuffCounts()
       const damage = executeDamageSteps(actor, action, { ...context, phase: 'damage' })
       runHooks(actor, action.hooksByTrigger.afterDamage, context, 'afterDamage')
       runHooks(actor, actor.definition.hooksByTrigger.afterDamage, context, 'afterDamage')
@@ -436,7 +438,9 @@ export function runRaidProgram(program) {
         effectiveAtkPercent: damage.effectiveAtkPercent, symbolicTotals: damage.symbolicTotals,
         scalingTotals: damage.scalingTotals, cooldownsBefore, cooldownsAfter: { ...actor.cooldowns },
         effectsApplied, expiredEffects, ignoredKeys: [...(action.ignoredKeys ?? [])], runtimeBefore, runtimeAfter,
-        statusSnapshotBeforeAction, statusSnapshotAtDamage: snapshotStatuses(),
+        statusSnapshotBeforeAction, statusSnapshotAtDamage,
+        removableBuffCountsAtActionStart: Object.fromEntries(Object.entries(statusSnapshotBeforeAction).map(([id, snapshot]) => [id, snapshot.removableBuffCount])),
+        removableBuffCountsAtDamage,
         removableBuffCounts: removableBuffCounts(), bossStatusAfterAction: snapshotBoss(boss),
       }
       round.actions.push(event)
