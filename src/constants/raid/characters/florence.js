@@ -1,4 +1,4 @@
-import { RAID_ELEMENTS, normalPhysical } from '../shared.js'
+import { RAID_ELEMENTS, bossStatusEffect, hook, normalPhysical } from '../shared.js'
 
 export default {
   id: 8, nameKey: 'raidCharFlorence', speed: 3022, element: RAID_ELEMENTS.BLUE, normal: normalPhysical,
@@ -8,7 +8,12 @@ export default {
   ],
   skills: {
     s1: {
-      key: 's1', nameKey: 'raidSkillFlorenceS1', cooldown: 5, damageType: 'phys', hooks: [],
+      key: 's1', nameKey: 'raidSkillFlorenceS1', cooldown: 5, damageType: 'phys', hooks: [hook('beforeDamage', [
+        bossStatusEffect({
+          id: 'florence-critical-resist-down', effectGroupId: 800100102, nameKey: 'raidDebuffFlorenceCriticalResistDown',
+          durationRounds: 1, damageRatePerStack: 0,
+        }),
+      ])],
       damageSteps: [{
         stat: 'ATK', percent: 525,
         hits: { type: 'conditional', condition: { type: 'guaranteedCritical' }, whenTrue: 10, whenFalse: 6 },

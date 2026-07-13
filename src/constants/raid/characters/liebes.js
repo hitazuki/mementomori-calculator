@@ -36,7 +36,7 @@ export default {
         ]),
       ],
       damageSteps: [{ stat: 'ATK', percent: 390, hits: 5, damageType: 'phys' }],
-      ignoredKeys: ['raidIgnoredDefenseDown', 'raidIgnoredStun', 'raidIgnoredShield'],
+      ignoredKeys: ['raidIgnoredStun', 'raidIgnoredShield'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillLiebesS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],

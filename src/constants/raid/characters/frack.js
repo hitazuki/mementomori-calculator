@@ -39,7 +39,6 @@ export default {
         ]),
       ],
       damageSteps: [{ stat: 'ATK', percent: 790, hits: 1, damageType: 'phys', originalTargetCount: 5 }],
-      ignoredKeys: ['raidIgnoredAvoidanceDown', 'raidIgnoredHealingReceivedDown'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillFrackS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],

@@ -14,12 +14,13 @@ export default {
   ],
   skills: {
     s1: {
-      key: 's1', nameKey: 'raidSkillLukeS1', cooldown: 4, damageType: 'phys', hooks: [],
+      key: 's1', nameKey: 'raidSkillLukeS1', cooldown: 4, damageType: 'phys', hooks: [hook('afterDamage', [bossStatusEffect({
+        id: 'luke-attack-down', effectGroupId: 3000120202, nameKey: 'raidDebuffLukeAttackDown', durationRounds: 1, damageRatePerStack: 0,
+      })])],
       damageSteps: [
         { stat: 'ATK', percent: 540, hits: 1, damageType: 'phys', originalTargetCount: 5 },
         { stat: 'STR', percent: 150, hits: 1, damageType: 'direct' },
       ],
-      ignoredKeys: ['raidIgnoredEnemyAttackDown'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillLukeS2', cooldown: 5, damageType: 'direct', hooks: [],

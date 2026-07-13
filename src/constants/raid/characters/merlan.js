@@ -23,7 +23,6 @@ export default {
         bossStatusEffect({ id: 'merlan-magic-defense-down', effectGroupId: 13500100102, nameKey: 'raidDebuffMerlanMagicDefenseDown', durationRounds: 5, addStacks: 1, maxStacks: 8, damageRatePerStack: 0 }),
         bossStatusEffect({ id: 'merlan-magic-defense-down', effectGroupId: 13500100102, nameKey: 'raidDebuffMerlanMagicDefenseDown', durationRounds: 5, addStacks: 2, maxStacks: 8, damageRatePerStack: 0, condition: { type: 'skillUsesAtLeast', skillKey: 's1', count: 2 } }),
       ])],
-      ignoredKeys: ['raidIgnoredMagicDefenseDown'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillMerlanS2', cooldown: 4, damageType: 'mag', hooks: [],

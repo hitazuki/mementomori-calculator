@@ -94,7 +94,7 @@ test('disabling guaranteed criticals removes critical multipliers, Florence foll
   const result = simulateRaidTable({ ...createDefaultRaidTableConfig(), guaranteedCritical: false, turns: 1 })
   assert.equal(action(result, 1, FLORENCE).damageSteps.length, 6)
   assert.ok(action(result, 1, FLORENCE).damageSteps.every(step => step.criticalMultiplier === 1))
-  assert.equal(action(result, 1, LUKE).bossStatusAfterAction.length, 0)
+  assert.equal(action(result, 1, LUKE).bossStatusAfterAction.some(status => status.id === 'luke-damage-taken'), false)
 })
 
 test('Luke applies vulnerability after each step and the current step only uses prior stacks', () => {
@@ -115,6 +115,19 @@ test('Florence damage bonus and two Luke stacks add in one damage-rate channel',
   assert.equal(florence.damageSteps.length, 10)
   assert.ok(florence.damageSteps.every(step => Math.abs(step.damageRate - 0.6) < 1e-12))
   closeTo(florence.damageSteps[0].effectivePercent, 525 * 1.3 * 1.6 * 2.1)
+})
+
+test('Florence and Luke retain their zero-rate Boss debuffs with source and removal class', () => {
+  const lineup = [FLORENCE, LUKE]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 1 })
+  const florenceStatus = action(result, 1, FLORENCE).bossStatusAfterAction.find(status => status.id === 'florence-critical-resist-down')
+  assert.equal(florenceStatus.sourceId, FLORENCE)
+  assert.equal(florenceStatus.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+  assert.equal(florenceStatus.damageRatePerStack, 0)
+  const lukeStatus = action(result, 1, LUKE).bossStatusAfterAction.find(status => status.id === 'luke-attack-down')
+  assert.equal(lukeStatus.sourceId, LUKE)
+  assert.equal(lukeStatus.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+  assert.equal(lukeStatus.damageRatePerStack, 0)
 })
 
 test('default lineup has a stable new critical-aware golden total', () => {
@@ -356,11 +369,30 @@ test('Mifri gains Flame Lamp on each action, hastens cooldown recovery, and upgr
   const firstMifri = action(result, 1, MIFRI)
   assert.equal(firstMifri.damageSteps[0].attackRate, 0.05)
   assert.equal(firstMifri.damageSteps[0].modifierSources.find(source => source.id === 'mifri-flame-lamp').nameKey, 'raidBuffMifriFlameLamp')
+  assert.equal(firstMifri.statusSnapshotAtDamage[MIFRI].statuses.find(status => status.id === 'mifri-shield').statusClass, RAID_STATUS_CLASSES.REMOVABLE_BUFF)
+  assert.equal(firstMifri.removableBuffCountsAtDamage[MIFRI], 1)
+  const firstHasten = action(result, 2, MIFRI)
+  assert.equal(firstHasten.statusSnapshotAfterAction[MIFRI].statuses.find(status => status.id === 'mifri-hasten').statusClass, RAID_STATUS_CLASSES.REMOVABLE_BUFF)
+  assert.equal(firstHasten.removableBuffCountsAfterAction[MIFRI], 2)
   assert.deepEqual(actionsFor(result, MIFRI).slice(0, 5), ['s1', 's2', 'normal', 's1', 's2'])
   assert.equal(action(result, 2, MIFRI).cooldownsAfter.s2, 2)
   assert.equal(action(result, 7, MIFRI).damageSteps[0].percent, 1640)
   assert.equal(action(result, 8, MIFRI).damageSteps[0].percent, 1120)
   assert.equal(action(result, 7, MIFRI).effectsApplied.some(effect => effect.id === 'mifri-shield'), false)
+})
+
+test('highest Buff-count selectors choose one frontmost target on a tie', () => {
+  const lineup = [RUSTICA, FLORENCE, MIFRI]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [...lineup], speeds: { [RUSTICA]: 5000, [FLORENCE]: 3000, [MIFRI]: 2000 }, turns: 1,
+  })
+  const rustica = action(result, 1, RUSTICA)
+  const drainEffects = rustica.effectsApplied.filter(effect => effect.id === 'rustica-hp-drain')
+  assert.deepEqual(drainEffects.map(effect => effect.targetId), [RUSTICA])
+  assert.deepEqual(DEFAULT_RAID_MECHANICS.targetSelectors.highestBuffCount({
+    config: { lineup: [1, 2] }, actors: new Map([[1, { statuses: [] }], [2, { statuses: [] }]]),
+    api: { removableBuffCount: () => 0 },
+  }), [1])
 })
 
 test('action records snapshot removable Buff counts at action start and damage time in action order', () => {
@@ -442,8 +474,8 @@ test('Merlan round-start Fairy stacks, zero-rate magic-defense debuff, and late-
   const lightTeam = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 1 })
   const firstLightAction = action(lightTeam, 1, MERLAN)
   assert.equal(firstLightAction.runtimeAfter.counters.fairy, 2)
-  assert.equal(firstLightAction.removableBuffCountsAtActionStart[MERLAN], 3)
-  assert.equal(firstLightAction.removableBuffCountsAtDamage[MERLAN], 3)
+  assert.equal(firstLightAction.removableBuffCountsAtActionStart[MERLAN], 4)
+  assert.equal(firstLightAction.removableBuffCountsAtDamage[MERLAN], 4)
   assert.equal(firstLightAction.damageSteps[0].modifierSources.find(source => source.id === 'merlan-fairy').rate, 0.06)
 })
 
@@ -458,6 +490,7 @@ test('Tama, Mowano, Carol, and Asahi retain count-relevant groups and supported 
   const mowano = action(result, 1, MOWANO)
   assert.equal(mowano.removableBuffCountsAtActionStart[MOWANO], 2)
   assert.equal(mowano.bossStatusAfterAction.length, 2)
+  assert.equal(mowano.bossStatusAfterAction.find(status => status.id === 'mowano-physical-defense-down').statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF)
 
   const carol = action(result, 1, CAROL)
   assert.equal(carol.removableBuffCountsAtActionStart[CAROL], 2)

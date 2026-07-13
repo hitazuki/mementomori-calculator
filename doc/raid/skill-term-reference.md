@@ -206,7 +206,7 @@ statusEffect({
 | `REMOVABLE_BUFF` | `removableBuff` | 计入 | 攻击、暴伤、护盾、吸血等可解除 Buff |
 | `UNREMOVABLE_STATE` | `unremovableState` | 不计 | 被动、守护、不可解除护盾和加攻 |
 | `REMOVABLE_DEBUFF` | `removableDebuff` | 不计友方 Buff | Boss 沙尘、易伤、减速 |
-| `UNREMOVABLE_DEBUFF` | `unremovableDebuff` | 不计 | 已预留，当前没有角色实例 |
+| `UNREMOVABLE_DEBUFF` | `unremovableDebuff` | 不计 | 不可解除的 Boss 弱化；当前穆瓦诺 S1 的物理防御降低为实例 |
 | `INTERNAL_MARK` | `internalMark` | 不计且不作为普通状态展示 | 已预留；技能历史目前直接存在运行态 |
 
 ### 6.2 目标选择器
@@ -266,6 +266,7 @@ bossStatusEffect({
 | `addStacks` | 每次成功施加增加层数 |
 | `maxStacks` | 层数上限 |
 | `damageRatePerStack` | 每层承伤增幅，汇入 `damageRate` 渠道 |
+| `statusClass` | 弱化的可解除类别；默认 `removableDebuff`，需明确标记的不可解除弱化写 `UNREMOVABLE_DEBUFF` |
 | `condition` | 可使用 `probabilityEnabled` 读取 `config.probabilityOverrides` |
 | `recordSkipped` | 条件失败时仍向详情记录“已跳过”事件 |
 
@@ -465,7 +466,7 @@ eventHooks: [{
 | value resolver | `bossStatusCountLinear` | 以木桩状态组数量代入 `base + perStack × count`，并按 `max` 截断。 |
 | status modifier | `rate` / `coefficient` 值解析器 | 状态的倍率或符号项系数可使用已注册 value resolver；结算时按状态来源角色读取动态计数。 |
 
-`damageRatePerStack: 0` 的 Boss 状态仍是可读取的弱化 EffectGroup：它不改变当前倍率，但会参与弱化数量、刷新与到期结算。
+`damageRatePerStack: 0` 的 Boss 状态仍是可读取的弱化 EffectGroup：它不改变当前倍率，但会参与弱化数量、刷新与到期结算。运行时快照保留 EffectGroup、施加者、可解除类别、层数与剩余回合；可解除与不可解除弱化都会展示，只有前者可被后续解除机制匹配。
 
 ## 新增通用词条（米赫里、波普莉、嘉德利亚、梅尔林）
 

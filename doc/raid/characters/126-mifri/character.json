@@ -5,18 +5,18 @@
   "build": { "level": 240, "exclusive": "EX3" },
   "sources": { "activeSkillIds": [126001, 126002], "passiveSkillIds": [126003, 126004], "combatLogs": [] },
   "terms": [
-    { "kind": "activeSkill", "sourceId": 126001, "model": "implemented", "summary": "前两次护盾后 410%，第三次起 1640%。" },
+    { "kind": "activeSkill", "sourceId": 126001, "model": "implemented", "summary": "前两次提供可解除护盾后 410%，第三次起 1640%。" },
     { "kind": "activeSkill", "sourceId": 126002, "model": "implemented", "summary": "EX3 倍率与轻快冷却恢复。" },
     { "kind": "passiveSkill", "sourceId": 126003, "model": "implemented", "summary": "阳焰灯火计数和攻击提升。" },
     { "kind": "passiveSkill", "sourceId": 126004, "model": "outOfScope", "summary": "承伤降低与物理暴伤缓和。" }
   ],
   "effectGroups": [
     { "id": 12600300101, "model": "implemented", "summary": "阳焰灯火。" },
-    { "id": 12600140101, "model": "outOfScope", "summary": "薪火相传护盾。" },
-    { "id": 12600230301, "model": "implemented", "summary": "轻快冷却恢复。" }
+    { "id": 12600140101, "model": "implemented", "summary": "薪火相传可解除护盾；护盾数值不结算但计入 Buff 数。" },
+    { "id": 12600230301, "model": "implemented", "summary": "可解除轻快，冷却恢复 +1 并计入 Buff 数。" }
   ],
   "ignored": [
-    { "key": "raidIgnoredShield", "summary": "护盾数值不结算。" }
+    { "key": "raidIgnoredShield", "summary": "仅护盾数值不结算；状态本身已建模。" }
   ],
   "unresolved": ["轻快的游戏原生冷却恢复顺序需要受控日志。"]
 }

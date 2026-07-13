@@ -351,7 +351,7 @@ actionEndCooldownRecovery = max(0, 1 + hasten - delay)
 - 除部分特例外不显示图标。
 - 仍可触发以“获得主动技能附加的增益”或“被主动技能附加弱化”为条件的技能。
 
-这支持当前鹭丝堤卡Buff计数只统计可解除 EffectGroup 的实现。`unremovableState` 与未来 `unremovableDebuff` 应同时保留“是否计总数”和“是否可匹配特定状态条件”两种独立属性，不能用一个布尔值代替全部语义。
+这支持当前鹭丝堤卡Buff计数只统计可解除 EffectGroup 的实现。`unremovableState` 与 `unremovableDebuff` 应同时保留“是否计总数”和“是否可匹配特定状态条件”两种独立属性，不能用一个布尔值代替全部语义；木桩表的 Boss 快照也保留并展示不可解除弱化，供后续功能直接读取。
 
 ## 10. 概率上升与下降
 

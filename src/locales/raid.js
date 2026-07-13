@@ -320,7 +320,15 @@ for (const [locale, names] of Object.entries(raidCharacterExtensions)) {
       'zh-CN': '{target}：{status}（{valueSource}），持续{n}次行动', 'zh-TW': '{target}：{status}（{valueSource}），持續{n}次行動',
       en: '{target}: {status} ({valueSource}) for {n} actions', ja: '{target}：{status}（{valueSource}）、{n}行動継続', ko: '{target}: {status}（{valueSource}）, {n}회 행동 지속',
     }[locale],
-    raidDebuffTamaDefenseDown: 'Defense Down', raidDebuffMowanoPhysicalDefenseDown: 'Physical Defense Down', raidDebuffMowanoWeaken: 'Weakness', raidDebuffCarolDefenseDown: 'Defense Down', raidIgnoredBuffCopy: 'Buff copy', raidIgnoredDelay: 'Delay', raidIgnoredSilence: 'Silence', raidIgnoredBuffDispel: 'Buff dispel', raidIgnoredSelfHeal: 'Self heal', raidIgnoredHitRateUp: 'Hit rate up',
+    raidStatusRemovableDebuff: { 'zh-CN': '可解除弱化', 'zh-TW': '可解除弱化', en: 'Removable Debuff', ja: '解除可能デバフ', ko: '해제 가능 약화' }[locale],
+    raidStatusUnremovableDebuff: { 'zh-CN': '不可解除弱化', 'zh-TW': '不可解除弱化', en: 'Unremovable Debuff', ja: '解除不可デバフ', ko: '해제 불가 약화' }[locale],
+    raidDebuffFlorenceCriticalResistDown: { 'zh-CN': '红光破天枪・暴击抵抗降低', 'zh-TW': '紅光破天槍・暴擊抵抗降低', en: 'Scarlet Shimmer · Critical Resist Down', ja: '紅天光槍・クリティカル耐性率減少', ko: '홍천광창・치명타 저항 감소' }[locale],
+    raidDebuffLukeAttackDown: { 'zh-CN': '引光一闪・攻击降低', 'zh-TW': '引光一閃・攻擊降低', en: 'Herald’s Flash · ATK Down', ja: '光導の一閃・攻撃力減少', ko: '빛의 인도자의 일섬・공격력 감소' }[locale],
+    raidDebuffTamaDefenseDown: { 'zh-CN': '狐火乱舞・防御降低', 'zh-TW': '狐火亂舞・防禦降低', en: 'Kitsunebi Ranbu · DEF Down', ja: '狐火乱舞・防御力減少', ko: '호화난무・방어력 감소' }[locale],
+    raidDebuffMowanoPhysicalDefenseDown: { 'zh-CN': '暮夜羽刃・物理防御降低', 'zh-TW': '暮色羽刃・物理防禦降低', en: 'Twilit Dagger · Physical DEF Down', ja: '宵闇の羽刃・物理防御力減少', ko: '날개깃의 광시곡・물리 방어력 감소' }[locale],
+    raidDebuffMowanoWeaken: { 'zh-CN': '暮夜羽刃・脱力', 'zh-TW': '暮色羽刃・脫力', en: 'Twilit Dagger · Weakness', ja: '宵闇の羽刃・脱力', ko: '날개깃의 광시곡・탈력' }[locale],
+    raidDebuffCarolDefenseDown: { 'zh-CN': '失却的鳞粉・防御降低', 'zh-TW': '失卻的鱗粉・防禦降低', en: 'Scales of Oblivion · DEF Down', ja: '喪失の鱗粉・防御力減少', ko: '상실의 날개 가루・방어력 감소' }[locale],
+    raidIgnoredBuffCopy: 'Buff copy', raidIgnoredDelay: 'Delay', raidIgnoredSilence: 'Silence', raidIgnoredBuffDispel: 'Buff dispel', raidIgnoredSelfHeal: 'Self heal', raidIgnoredHitRateUp: 'Hit rate up',
     ...names,
   })
 }

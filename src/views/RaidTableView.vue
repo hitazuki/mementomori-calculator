@@ -177,7 +177,7 @@
         <ul v-if="selectedEvent.effectsApplied.length" class="raid-detail-items compact"><li v-for="(effect, index) in selectedEvent.effectsApplied" :key="`${effect.type}-${effect.id}-${index}`">{{ effectText(effect) }}</li></ul>
         <p v-else class="raid-muted">—</p>
         <h3 class="raid-subtitle">{{ $t('raidBossStatus') }}</h3>
-        <ul v-if="selectedEvent.bossStatusAfterAction.length" class="raid-detail-items compact"><li v-for="status in selectedEvent.bossStatusAfterAction" :key="status.id">{{ $t(status.nameKey) }} · {{ $t('raidStatusStacks', { n: status.stacks }) }}<span v-if="status.remainingRounds != null"> · {{ $t('raidRemainingRounds', { n: status.remainingRounds }) }}</span></li></ul>
+        <ul v-if="selectedEvent.bossStatusAfterAction.length" class="raid-detail-items compact"><li v-for="status in selectedEvent.bossStatusAfterAction" :key="status.id">{{ bossStatusLabel(status) }}</li></ul>
         <p v-else class="raid-muted">—</p>
       </div>
 
@@ -329,8 +329,10 @@ function bossStackSummary(statuses) {
 }
 
 function bossStatusLabel(status) {
+  const source = status.sourceId != null ? `${characterName(status.sourceId)} · ` : ''
+  const statusClass = status.statusClass === 'unremovableDebuff' ? t('raidStatusUnremovableDebuff') : t('raidStatusRemovableDebuff')
   const duration = status.remainingRounds != null ? ` · ${t('raidRemainingRounds', { n: status.remainingRounds })}` : ''
-  return `${t(status.nameKey)} · ${t('raidStatusStacks', { n: status.stacks })}${duration}`
+  return `${source}${t(status.nameKey)} · ${statusClass} · ${t('raidStatusStacks', { n: status.stacks })}${duration}`
 }
 
 function effectText(effect) {
@@ -338,7 +340,7 @@ function effectText(effect) {
   if (effect.type === 'cooldownReduction') return t('raidEffectCooldownReduction', { target: characterName(effect.targetId), n: effect.amount })
   if (effect.type === 'cooldownReset') return t('raidEffectCooldownReset')
   if (effect.type === 'counter') return t('raidEffectCounter', { target: characterName(effect.targetId), effect: t(effect.nameKey), n: effect.after })
-  if (effect.type === 'bossStatus') return t('raidEffectBossStatus', { effect: t(effect.nameKey), n: effect.stacks ?? 0 })
+  if (effect.type === 'bossStatus') return `${characterName(effect.sourceId)} · ${t('raidEffectBossStatus', { effect: t(effect.nameKey), n: effect.stacks ?? 0 })}`
   if (effect.type === 'status' && effect.copiedFromId != null) return t('raidEffectCopiedStatus', {
     target: characterName(effect.targetId), status: t(effect.nameKey), from: characterName(effect.copiedFromId), valueSource: valueSourceText(effect.sourceId), n: effect.duration ?? '∞',
   })

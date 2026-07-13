@@ -152,12 +152,12 @@ export function runRaidProgram(program) {
     return status
   }
 
-  function applyBossStatus(effect, round) {
+  function applyBossStatus(effect, round, sourceId) {
     const before = snapshotBoss(boss)
     const index = boss.statuses.findIndex(status => status.id === effect.id)
     const existing = index >= 0 ? boss.statuses[index] : null
     const status = {
-      id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey, statusClass: effect.statusClass,
+      id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey, statusClass: effect.statusClass, sourceId,
       stacks: Math.min(effect.maxStacks ?? 1, (existing?.stacks ?? 0) + (effect.addStacks ?? 1)),
       maxStacks: effect.maxStacks ?? 1, damageRatePerStack: effect.damageRatePerStack ?? 0,
       durationRounds: effect.durationRounds, remainingRounds: effect.durationRounds, appliedRound: round,
@@ -239,7 +239,7 @@ export function runRaidProgram(program) {
   }
 
   function applyBossStatusEffect(effect, context) {
-    const applied = applyBossStatus(effect, context.round)
+    const applied = applyBossStatus(effect, context.round, context.ownerId)
     context.effectsApplied.push({
       type: 'bossStatus', id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey,
       phase: context.phase, sourceId: context.ownerId, statusClass: effect.statusClass,

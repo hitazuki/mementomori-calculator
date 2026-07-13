@@ -23,14 +23,14 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     highestBuffCount: ({ config, actors, api }) => {
       const counts = Object.fromEntries(config.lineup.map(id => [id, api.removableBuffCount(actors.get(id))]))
       const maximum = Math.max(...Object.values(counts))
-      return config.lineup.filter(id => counts[id] === maximum)
+      return [config.lineup.find(id => counts[id] === maximum)]
     },
     highestBuffCountOther: ({ ownerId, config, actors, api }) => {
       const candidates = config.lineup.filter(id => id !== ownerId)
       if (!candidates.length) return []
       const counts = Object.fromEntries(candidates.map(id => [id, api.removableBuffCount(actors.get(id))]))
       const maximum = Math.max(...Object.values(counts))
-      return candidates.filter(id => counts[id] === maximum)
+      return [candidates.find(id => counts[id] === maximum)]
     },
   }),
 

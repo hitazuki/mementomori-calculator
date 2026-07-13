@@ -24,7 +24,6 @@ export default {
       damageSteps: [{ stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's1', values: [410, 410, 1640] }, hits: 1, damageType: 'mag', originalTargetCount: 4 }],
       hooks: [hook('beforeDamage', [statusEffect({
         id: 'mifri-shield', effectGroupId: 12600140101, nameKey: 'raidBuffMifriShield', target: 'all', duration: 4,
-        statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE,
       })], { condition: { type: 'skillUsesAtMost', skillKey: 's1', count: 1 } })],
       ignoredKeys: ['raidIgnoredShield'],
     },
@@ -33,7 +32,6 @@ export default {
       damageSteps: [{ stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [280, 280, 1120] }, hits: 4, damageType: 'mag' }],
       hooks: [hook('afterDamage', [statusEffect({
         id: 'mifri-hasten', effectGroupId: 12600230301, nameKey: 'raidBuffMifriHasten', target: 'self', duration: 1,
-        statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE,
         modifiers: [{ id: 'mifri-hasten', channel: 'cooldownRecoveryBonus', rate: 1 }],
       })])],
     },
