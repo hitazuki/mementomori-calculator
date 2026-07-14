@@ -33,11 +33,11 @@
           <span class="nav-label">{{ $t('navHome') }}</span>
         </li>
 
-        <li v-for="group in SIDEBAR_GROUPS" :key="group.id" class="nav-group" :class="{ open: openGroup === group.id }">
+        <li v-for="group in SIDEBAR_GROUPS" :key="group.id" class="nav-group" :class="{ open: openGroups.includes(group.id) }">
           <button
             type="button"
             class="nav-group-toggle"
-            :aria-expanded="openGroup === group.id"
+            :aria-expanded="openGroups.includes(group.id)"
             :title="$t(group.labelKey)"
             @click="toggleGroup(group.id)"
           >
@@ -46,7 +46,7 @@
             <span class="nav-group-chevron" aria-hidden="true">›</span>
           </button>
 
-          <ul v-show="openGroup === group.id" class="nav-group-items">
+          <ul v-show="openGroups.includes(group.id)" class="nav-group-items">
             <li
               v-for="item in group.items"
               :key="item.id"
@@ -198,10 +198,22 @@ const viewMap = {
 const savedView = localStorage.getItem('mmt-calc-current-view')
 const currentView = ref(Object.hasOwn(viewMap, savedView) ? savedView : 'home')
 const sidebarCollapsed = ref(localStorage.getItem('mmt-calc-sidebar-collapsed') === 'true')
-const savedGroup = localStorage.getItem('mmt-calc-open-nav-group')
 const initialGroup = findSidebarGroupByView(currentView.value)?.id
-const savedGroupIsValid = SIDEBAR_GROUPS.some((group) => group.id === savedGroup)
-const openGroup = ref(initialGroup || (savedGroupIsValid ? savedGroup : 'damage'))
+const validGroupIds = new Set(SIDEBAR_GROUPS.map((group) => group.id))
+const savedGroupsRaw = localStorage.getItem('mmt-calc-open-nav-groups')
+const legacySavedGroup = localStorage.getItem('mmt-calc-open-nav-group')
+let savedGroups = []
+try {
+  const parsedGroups = JSON.parse(savedGroupsRaw)
+  if (Array.isArray(parsedGroups)) savedGroups = parsedGroups.filter((groupId) => validGroupIds.has(groupId))
+} catch {
+  savedGroups = []
+}
+if (savedGroupsRaw === null) {
+  savedGroups = validGroupIds.has(legacySavedGroup) ? [legacySavedGroup] : ['damage']
+}
+if (initialGroup && !savedGroups.includes(initialGroup)) savedGroups.push(initialGroup)
+const openGroups = ref(savedGroups)
 
 const activeComponent = computed(() => viewMap[currentView.value])
 const currentNavItem = computed(() => {
@@ -222,18 +234,22 @@ function navigateTo(viewId) {
 }
 
 function toggleGroup(groupId) {
-  openGroup.value = openGroup.value === groupId ? '' : groupId
+  openGroups.value = openGroups.value.includes(groupId)
+    ? openGroups.value.filter((id) => id !== groupId)
+    : [...openGroups.value, groupId]
 }
 
 watch(currentView, (viewId) => {
   localStorage.setItem('mmt-calc-current-view', viewId)
   const group = findSidebarGroupByView(viewId)
-  if (group) openGroup.value = group.id
+  if (group && !openGroups.value.includes(group.id)) {
+    openGroups.value = [...openGroups.value, group.id]
+  }
 })
 
-watch(openGroup, (groupId) => {
-  if (groupId) localStorage.setItem('mmt-calc-open-nav-group', groupId)
-  else localStorage.removeItem('mmt-calc-open-nav-group')
+watch(openGroups, (groupIds) => {
+  localStorage.setItem('mmt-calc-open-nav-groups', JSON.stringify(groupIds))
+  localStorage.removeItem('mmt-calc-open-nav-group')
 })
 
 watch(sidebarCollapsed, (collapsed) => {

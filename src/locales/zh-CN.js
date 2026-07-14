@@ -37,6 +37,7 @@ export default {
   navGroupOtherTools: "其他工具",
   homeTitle: "功能主页",
   homeDesc: "按使用目标选择计算、模拟或规划工具。",
+  homeRecommended: "推荐功能",
   homeModulesCount: "项功能",
   homeOpenModule: "进入功能",
   homeRaidDesc: "配置讨伐阵容、Boss与站位，模拟10回合技能循环和队伍累计倍率。",

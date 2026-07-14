@@ -37,6 +37,7 @@ export default {
   navGroupOtherTools: "기타 도구",
   homeTitle: "기능 홈",
   homeDesc: "목적에 맞는 계산기, 시뮬레이터 또는 계획 도구를 선택하세요.",
+  homeRecommended: "추천 기능",
   homeModulesCount: "개 기능",
   homeOpenModule: "기능 열기",
   homeRaidDesc: "레이드 파티, Boss, 배치를 설정하고 10턴 스킬 순환과 팀 배율을 시뮬레이션합니다.",

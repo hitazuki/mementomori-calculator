@@ -38,6 +38,7 @@ export default {
   navGroupOtherTools: "Other Tools",
   homeTitle: "Feature Home",
   homeDesc: "Choose a calculator, simulator, or planner by what you want to accomplish.",
+  homeRecommended: "Recommended",
   homeModulesCount: "modules",
   homeOpenModule: "Open module",
   homeRaidDesc: "Configure a raid lineup, boss, and positions to simulate ten turns of skills and team multipliers.",

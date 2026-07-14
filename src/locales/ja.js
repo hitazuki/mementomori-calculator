@@ -37,6 +37,7 @@ export default {
   navGroupOtherTools: "その他のツール",
   homeTitle: "機能ホーム",
   homeDesc: "目的に合わせて計算、シミュレーション、計画ツールを選択します。",
+  homeRecommended: "おすすめ機能",
   homeModulesCount: "機能",
   homeOpenModule: "機能を開く",
   homeRaidDesc: "レイド編成、Boss、配置を設定し、10ターンのスキル循環と倍率を模擬します。",

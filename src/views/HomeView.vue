@@ -7,6 +7,26 @@
       </div>
     </div>
 
+    <section class="home-recommended animate-fadeup" aria-labelledby="home-recommended-title">
+      <div class="home-recommended-heading">
+        <span aria-hidden="true">★</span>
+        <h2 id="home-recommended-title">{{ $t('homeRecommended') }}</h2>
+      </div>
+      <div class="home-recommended-list">
+        <button
+          v-for="item in RECOMMENDED_MODULES"
+          :key="item.id"
+          type="button"
+          class="home-recommended-item"
+          @click="navigate(item.viewId)"
+        >
+          <span class="home-recommended-icon" aria-hidden="true">{{ item.icon }}</span>
+          <span>{{ $t(item.labelKey) }}</span>
+          <span class="home-recommended-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
     <section
       v-for="(group, groupIndex) in NAV_GROUPS"
       :key="group.id"
@@ -41,7 +61,7 @@
 </template>
 
 <script setup>
-import { NAV_GROUPS } from '../constants/navigation.js'
+import { NAV_GROUPS, RECOMMENDED_MODULES } from '../constants/navigation.js'
 
 const emit = defineEmits(['navigate'])
 
@@ -58,7 +78,74 @@ function navigate(viewId) {
 
 .home-header {
   padding-right: 210px;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
+}
+
+.home-recommended {
+  padding: 14px;
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, rgba(201, 168, 76, 0.09), rgba(var(--color-invert-rgb), 0.025));
+}
+
+.home-recommended-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+  color: var(--gold);
+}
+
+.home-recommended-heading h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--fs-md);
+}
+
+.home-recommended-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.home-recommended-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 11px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: left;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.home-recommended-item:hover {
+  border-color: rgba(201, 168, 76, 0.55);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.home-recommended-icon,
+.home-recommended-arrow {
+  flex-shrink: 0;
+}
+
+.home-recommended-item > span:nth-child(2) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-recommended-arrow {
+  margin-left: auto;
+  color: var(--gold);
 }
 
 .home-section {
@@ -161,6 +248,19 @@ function navigate(viewId) {
 }
 
 @media (max-width: 900px) {
+  .home-recommended-list {
+    grid-auto-columns: minmax(180px, 34vw);
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+  }
+
+  .home-recommended-item {
+    scroll-snap-align: start;
+  }
+
   .home-module-grid,
   .home-module-grid-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -174,6 +274,14 @@ function navigate(viewId) {
 
   .home-section {
     margin-top: 22px;
+  }
+
+  .home-recommended {
+    padding: 12px;
+  }
+
+  .home-recommended-list {
+    grid-auto-columns: minmax(170px, 72vw);
   }
 
   .home-module-grid,

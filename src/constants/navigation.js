@@ -105,6 +105,12 @@ export const NAV_GROUPS = [
 
 export const NAV_MODULES = NAV_GROUPS.flatMap((group) => group.items)
 
+const RECOMMENDED_MODULE_IDS = ['raid', 'packCompare', 'shopExchange', 'mysterium', 'sweep']
+
+export const RECOMMENDED_MODULES = RECOMMENDED_MODULE_IDS
+  .map((id) => NAV_MODULES.find((item) => item.id === id))
+  .filter(Boolean)
+
 export const SIDEBAR_GROUPS = NAV_GROUPS
 
 export function findModuleByView(viewId) {
