@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import {
   DEFAULT_RAID_ATTACK_PRIORITY,
   DEFAULT_RAID_CHARACTER_LEVEL,
+  DEFAULT_RAID_CRITICAL_DAMAGE_BONUS,
   DEFAULT_RAID_DEFENSE_PENETRATION,
   DEFAULT_RAID_LINEUP,
   DEFAULT_RAID_PM_DEFENSE_PENETRATION,
@@ -65,7 +66,16 @@ test('default defense config uses Sonya and per-character Lv500 dual penetration
   assert.equal(defaults.bossTemplateId, RAID_BOSS_TEMPLATE_IDS.SONYA)
   assert.equal(defaults.levels[FLORENCE], DEFAULT_RAID_CHARACTER_LEVEL)
   assert.equal(defaults.defensePenetrations[FLORENCE], DEFAULT_RAID_DEFENSE_PENETRATION)
-  assert.equal(defaults.pmDefensePenetrations[FLORENCE], DEFAULT_RAID_PM_DEFENSE_PENETRATION)
+  assert.equal(defaults.pmDefensePenetrations[FLORENCE], DEFAULT_RAID_PM_DEFENSE_PENETRATION + 7_000)
+  assert.equal(defaults.pmDefensePenetrations[LIBERIA], DEFAULT_RAID_PM_DEFENSE_PENETRATION + 7_000)
+  assert.equal(defaults.pmDefensePenetrations[FLOWER_NATASHA], DEFAULT_RAID_PM_DEFENSE_PENETRATION + 7_000)
+  assert.equal(defaults.defensePenetrations[FLOWER_NATASHA], DEFAULT_RAID_DEFENSE_PENETRATION + 7_000)
+  assert.equal(defaults.defensePenetrations[CANDY_CERBERUS], DEFAULT_RAID_DEFENSE_PENETRATION + 7_000)
+  assert.equal(defaults.defensePenetrations[WITCH_ILLYA], DEFAULT_RAID_DEFENSE_PENETRATION + 7_000)
+  assert.equal(defaults.criticalDamageBonuses[CORDIE], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + 0.35)
+  assert.equal(defaults.criticalDamageBonuses[WITCH_ILLYA], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + 0.35)
+  assert.equal(defaults.criticalDamageBonuses[ARMSTRONG], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + 0.35)
+  assert.equal(defaults.criticalDamageBonuses[FLORENCE], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS)
   assert.equal(RAID_BOSS_TEMPLATES.sonya.defense, 200_000)
   assert.equal(RAID_BOSS_TEMPLATES.luke.physicalDefense, 600_000)
   assert.equal(RAID_BOSS_TEMPLATES.sonya.element, RAID_ELEMENTS.BLUE)
@@ -93,6 +103,7 @@ test('lineups accept one to five unique supported characters', () => {
   assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { bossTemplateId: 'unknown' })), /Unsupported raid Boss template/)
   assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { levels: { [FLORENCE]: 0 } })), /Invalid level/)
   assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { defensePenetrations: { [FLORENCE]: -1 } })), /Invalid defense penetration/)
+  assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { criticalDamageBonuses: { [FLORENCE]: -1 } })), /Invalid critical damage bonus/)
   assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, {
     activationRounds: { witchIllyaCurseUnleashed: 0 },
   })), /Invalid raid activation round/)
@@ -150,6 +161,20 @@ test('default critical multiplier is 2.10 and Merlyn raises it to 2.50', () => {
   const result = simulateRaidTable()
   assert.equal(action(result, 1, LUKE).damageSteps[0].criticalMultiplier, 2.1)
   assert.equal(action(result, 2, FLORENCE).damageSteps[0].criticalMultiplier, 2.5)
+})
+
+test('critical damage panel values are per character and remain separate from temporary skill states', () => {
+  const lineup = [CORDIE, ARMSTRONG, FLORENCE]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 1 })
+  assert.equal(action(result, 1, CORDIE).damageSteps[0].criticalMultiplier, 2.45)
+  assert.equal(action(result, 1, ARMSTRONG).damageSteps[0].criticalMultiplier, 2.85)
+  assert.equal(action(result, 1, FLORENCE).damageSteps[0].criticalMultiplier, 2.1)
+
+  const edited = simulateRaidTable({
+    lineup: [CORDIE], attackPriority: [CORDIE], turns: 1,
+    criticalDamageBonuses: { [CORDIE]: 0.8 },
+  })
+  assert.equal(action(edited, 1, CORDIE).damageSteps[0].criticalMultiplier, 1.8)
 })
 
 test('disabling guaranteed criticals removes critical multipliers, Florence follow-ups, and Luke stacks', () => {
@@ -238,7 +263,7 @@ test('Florence and Luke retain their zero-rate Boss debuffs with source and remo
 
 test('default lineup has a stable defense-aware golden total', () => {
   const result = simulateRaidTable()
-  closeTo(result.teamAtkPercent, 156778.31312842082, 1e-7)
+  closeTo(result.teamAtkPercent, 159836.93406942682, 1e-7)
   closeTo(result.symbolicTotals.STR, 6964.65, 1e-8)
 })
 
@@ -1197,6 +1222,15 @@ test('Witch Paladia consumes twenty team-critical stacks before Black Bullet Rai
 })
 
 test('Witch Illya only selects S2 while God Curse Unleashed is present', () => {
+  const penetrationResult = simulateRaidTable({
+    lineup: [FLOWER_NATASHA, CANDY_CERBERUS, WITCH_ILLYA],
+    attackPriority: [FLOWER_NATASHA, CANDY_CERBERUS, WITCH_ILLYA], turns: 1,
+  })
+  const penetration = action(penetrationResult, 1, WITCH_ILLYA).damageSteps[0].defense
+  assert.equal(penetration.baseDefensePenetration, 18_950)
+  assert.equal(penetration.defensePenetrationRate, 0.4)
+  assert.equal(penetration.defensePenetration, 26_530)
+
   const solo = simulateRaidTable(singleConfig(WITCH_ILLYA, { turns: 9 }))
   assert.deepEqual(actionsFor(solo, WITCH_ILLYA).slice(0, 5), ['s1', 's2', 's2', 's2', 's1'])
   assert.ok(action(solo, 2, WITCH_ILLYA).damageSteps.every(step => step.percent === 440))

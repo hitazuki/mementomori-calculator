@@ -76,10 +76,6 @@
         <input v-model="guaranteedCritical" type="checkbox">
         <span><strong>{{ $t('raidGuaranteedCritical') }}</strong><small>{{ $t('raidGuaranteedCriticalHint') }}</small></span>
       </label>
-      <label class="raid-number-control">
-        <span><strong>{{ $t('raidBaseCriticalDamage') }}</strong><small>{{ $t('raidBaseCriticalDamageHint') }}</small></span>
-        <span class="raid-number-input"><input v-model.number="baseCriticalDamagePercent" type="number" min="0" step="0.1" @change="normalizeBaseCriticalDamagePercent"><em>%</em></span>
-      </label>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.LIBERIA)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.liberiaSand" type="checkbox">
         <span><strong>{{ $t('raidAssumeLiberiaSand') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
@@ -165,10 +161,11 @@
       <p>{{ $t('raidPenetrationSettingsHint') }}</p>
       <div class="raid-penetration-scroll">
         <table>
-          <thead><tr><th>{{ $t('raidCharacter') }}</th><th>{{ $t('raidCharacterLevel') }}</th><th>{{ $t('raidDefensePenetration') }}</th><th>{{ $t('raidPmDefensePenetration') }}</th></tr></thead>
+          <thead><tr><th>{{ $t('raidCharacter') }}</th><th>{{ $t('raidCharacterLevel') }}</th><th>{{ $t('raidBaseCriticalDamage') }}</th><th>{{ $t('raidDefensePenetration') }}</th><th>{{ $t('raidPmDefensePenetration') }}</th></tr></thead>
           <tbody><tr v-for="id in lineup" :key="`penetration-${id}`">
             <th><CharacterLabel :id="id" /></th>
             <td><input v-model.number="levels[id]" type="number" min="1" step="1"></td>
+            <td><span class="raid-number-input"><input v-model.number="criticalDamagePercents[id]" type="number" min="0" step="0.1" @change="normalizeCriticalDamagePercent(id)"><em>%</em></span></td>
             <td><input v-model.number="defensePenetrations[id]" type="number" min="0" step="1"></td>
             <td><input v-model.number="pmDefensePenetrations[id]" type="number" min="0" step="1"></td>
           </tr></tbody>
@@ -384,8 +381,8 @@ const bossTemplateId = ref(defaults.bossTemplateId)
 const levels = reactive({ ...defaults.levels })
 const defensePenetrations = reactive({ ...defaults.defensePenetrations })
 const pmDefensePenetrations = reactive({ ...defaults.pmDefensePenetrations })
+const criticalDamagePercents = reactive(Object.fromEntries(Object.entries(defaults.criticalDamageBonuses).map(([id, value]) => [id, roundCriticalDamagePercent(value * 100)])))
 const guaranteedCritical = ref(defaults.guaranteedCritical)
-const baseCriticalDamagePercent = ref(roundBaseCriticalDamagePercent(defaults.baseCriticalDamageBonus * 100))
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
 const activationRounds = reactive({ ...defaults.activationRounds })
 const selectedEvent = ref(null)
@@ -401,8 +398,8 @@ const result = computed(() => simulateRaidTable({
   levels,
   defensePenetrations,
   pmDefensePenetrations,
+  criticalDamageBonuses: Object.fromEntries(Object.keys(criticalDamagePercents).map(id => [id, Math.max(0, Number(criticalDamagePercents[id]) || 0) / 100])),
   guaranteedCritical: guaranteedCritical.value,
-  baseCriticalDamageBonus: Math.max(0, Number(baseCriticalDamagePercent.value) || 0) / 100,
   probabilityOverrides,
   activationRounds: Object.fromEntries(Object.keys(activationRounds).map(key => [key, normalizedActivationRound(key)])),
   turns: 10,
@@ -421,8 +418,8 @@ function characterIconUrl(id) { return `${import.meta.env.BASE_URL}images/charac
 function elementIconUrl(element) { return `${import.meta.env.BASE_URL}images/elements/icon_element_${element}.png` }
 function counterLabel(id, key) { return t(RAID_TABLE_CHARACTERS[id].counterLabels?.[key] ?? key) }
 function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(locale.value, { maximumFractionDigits, minimumFractionDigits: 0 }) }
-function roundBaseCriticalDamagePercent(value) { return Number((Number(value) || 0).toFixed(1)) }
-function normalizeBaseCriticalDamagePercent() { baseCriticalDamagePercent.value = roundBaseCriticalDamagePercent(baseCriticalDamagePercent.value) }
+function roundCriticalDamagePercent(value) { return Number((Number(value) || 0).toFixed(1)) }
+function normalizeCriticalDamagePercent(id) { criticalDamagePercents[id] = roundCriticalDamagePercent(criticalDamagePercents[id]) }
 function normalizedActivationRound(key) { return Math.min(10, Math.max(1, Math.trunc(Number(activationRounds[key]) || defaults.activationRounds[key] || 1))) }
 function normalizeActivationRound(key) { activationRounds[key] = normalizedActivationRound(key) }
 function formatPercent(value) { return `${formatter().format(value)}% ATK` }
@@ -472,7 +469,7 @@ function resetConfig() {
   Object.assign(levels, next.levels)
   Object.assign(defensePenetrations, next.defensePenetrations)
   Object.assign(pmDefensePenetrations, next.pmDefensePenetrations)
-  baseCriticalDamagePercent.value = roundBaseCriticalDamagePercent(next.baseCriticalDamageBonus * 100)
+  Object.assign(criticalDamagePercents, Object.fromEntries(Object.entries(next.criticalDamageBonuses).map(([id, value]) => [id, roundCriticalDamagePercent(value * 100)])))
   Object.assign(activationRounds, next.activationRounds)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
 }

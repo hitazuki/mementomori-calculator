@@ -8,6 +8,17 @@ import { RAID_BOSS_TEMPLATE_IDS } from './raid/bosses.js'
 export const DEFAULT_RAID_CHARACTER_LEVEL = 500
 export const DEFAULT_RAID_DEFENSE_PENETRATION = 11_950
 export const DEFAULT_RAID_PM_DEFENSE_PENETRATION = 65_700
+export const DEFAULT_RAID_CRITICAL_DAMAGE_BONUS = 1.1
+
+export const RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES = Object.freeze({
+  [RAID_TABLE_CHARACTER_IDS.FLORENCE]: Object.freeze({ pmDefensePenetration: 7_000 }),
+  [RAID_TABLE_CHARACTER_IDS.LIBERIA]: Object.freeze({ pmDefensePenetration: 7_000 }),
+  [RAID_TABLE_CHARACTER_IDS.CORDIE]: Object.freeze({ criticalDamageBonus: 0.35 }),
+  [RAID_TABLE_CHARACTER_IDS.FLOWER_NATASHA]: Object.freeze({ defensePenetration: 7_000, pmDefensePenetration: 7_000 }),
+  [RAID_TABLE_CHARACTER_IDS.CANDY_CERBERUS]: Object.freeze({ defensePenetration: 7_000 }),
+  [RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA]: Object.freeze({ defensePenetration: 7_000, criticalDamageBonus: 0.35 }),
+  [RAID_TABLE_CHARACTER_IDS.ARMSTRONG]: Object.freeze({ criticalDamageBonus: 0.35 }),
+})
 
 export const DEFAULT_RAID_LINEUP = Object.freeze(RAID_TABLE_ROSTER.slice(0, 5))
 export const DEFAULT_RAID_ATTACK_PRIORITY = Object.freeze([
@@ -25,10 +36,11 @@ export function createDefaultRaidTableConfig() {
     speeds: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, RAID_TABLE_CHARACTERS[id].speed])),
     bossTemplateId: RAID_BOSS_TEMPLATE_IDS.SONYA,
     levels: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_CHARACTER_LEVEL])),
-    defensePenetrations: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_DEFENSE_PENETRATION])),
-    pmDefensePenetrations: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_PM_DEFENSE_PENETRATION])),
+    defensePenetrations: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_DEFENSE_PENETRATION + (RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES[id]?.defensePenetration ?? 0)])),
+    pmDefensePenetrations: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_PM_DEFENSE_PENETRATION + (RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES[id]?.pmDefensePenetration ?? 0)])),
+    criticalDamageBonuses: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + (RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES[id]?.criticalDamageBonus ?? 0)])),
     guaranteedCritical: true,
-    baseCriticalDamageBonus: 1.1,
+    baseCriticalDamageBonus: DEFAULT_RAID_CRITICAL_DAMAGE_BONUS,
     probabilityOverrides: {
       liberiaSand: true, shizuSpeedDown: true, guinevereDamageTaken: true,
       millaDelay: true, yildizBuffBlock: true, winterStellaSilence: true,

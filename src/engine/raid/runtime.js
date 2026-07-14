@@ -529,7 +529,7 @@ export function runRaidProgram(program) {
             ...context, actor, ownerId: actor.id, config, actors, boss, api,
           })
         ))
-        const criticalMultiplier = critical ? 1 + config.baseCriticalDamageBonus + modifiers.totals.criticalDamageBonus : 1
+        const criticalMultiplier = critical ? 1 + config.criticalDamageBonuses[actor.id] + modifiers.totals.criticalDamageBonus : 1
         const attackScale = rawStep.stat === 'ATK' ? 1 + modifiers.totals.attackRate : 1
         const damageType = actorDamageType(actor, rawStep)
         const defense = defenseSnapshot(actor, damageType, modifiers.totals)

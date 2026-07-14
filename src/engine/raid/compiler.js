@@ -1,6 +1,7 @@
 import {
   RAID_BOSS_TEMPLATES,
   DEFAULT_RAID_CHARACTER_LEVEL,
+  DEFAULT_RAID_CRITICAL_DAMAGE_BONUS,
   DEFAULT_RAID_DEFENSE_PENETRATION,
   DEFAULT_RAID_PM_DEFENSE_PENETRATION,
   RAID_ELEMENTS,
@@ -56,22 +57,29 @@ function normalizeConfig(config, characters) {
     'physical/magic defense penetration', config.pmDefensePenetrations, defaults.pmDefensePenetrations, DEFAULT_RAID_PM_DEFENSE_PENETRATION,
     value => Number.isFinite(value) && value >= 0,
   )
+  const legacyCriticalDamageBonus = config.baseCriticalDamageBonus
+  if (legacyCriticalDamageBonus != null && (!Number.isFinite(legacyCriticalDamageBonus) || legacyCriticalDamageBonus < 0)) {
+    throw new Error('baseCriticalDamageBonus must be non-negative')
+  }
+  const criticalDamageBonuses = normalizeActorValues(
+    'critical damage bonus', config.criticalDamageBonuses,
+    legacyCriticalDamageBonus == null ? defaults.criticalDamageBonuses : Object.fromEntries(lineup.map(id => [id, legacyCriticalDamageBonus])),
+    DEFAULT_RAID_CRITICAL_DAMAGE_BONUS, value => Number.isFinite(value) && value >= 0,
+  )
   const bossTemplateId = config.bossTemplateId ?? defaults.bossTemplateId
   const bossTemplate = RAID_BOSS_TEMPLATES[bossTemplateId]
   if (!bossTemplate) throw new Error(`Unsupported raid Boss template: ${bossTemplateId}`)
   const turns = config.turns ?? defaults.turns
   if (!Number.isInteger(turns) || turns < 1) throw new Error('turns must be a positive integer')
-  const baseCriticalDamageBonus = config.baseCriticalDamageBonus ?? defaults.baseCriticalDamageBonus
-  if (!Number.isFinite(baseCriticalDamageBonus) || baseCriticalDamageBonus < 0) throw new Error('baseCriticalDamageBonus must be non-negative')
   const activationRounds = { ...defaults.activationRounds, ...(config.activationRounds ?? {}) }
   for (const [key, value] of Object.entries(activationRounds)) {
     if (!Number.isInteger(value) || value < 1 || value > 10) throw new Error(`Invalid raid activation round: ${key}`)
   }
   return {
-    lineup, attackPriority, speeds, levels, defensePenetrations, pmDefensePenetrations,
+    lineup, attackPriority, speeds, levels, defensePenetrations, pmDefensePenetrations, criticalDamageBonuses,
     bossTemplateId, bossTemplate, turns,
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
-    baseCriticalDamageBonus,
+    baseCriticalDamageBonus: legacyCriticalDamageBonus ?? defaults.baseCriticalDamageBonus,
     probabilityOverrides: { ...defaults.probabilityOverrides, ...(config.probabilityOverrides ?? {}) },
     activationRounds,
   }
