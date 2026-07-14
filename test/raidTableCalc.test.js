@@ -30,6 +30,7 @@ const {
   ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
+  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -48,14 +49,15 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes thirty-one characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 31)
+test('roster exposes thirty-six characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 36)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-9, -2), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-2), [CORDIE, SUMMER_SABRINA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-14, -7), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-7, -5), [CORDIE, SUMMER_SABRINA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-5), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -73,6 +75,8 @@ test('default defense config uses Sonya and per-character Lv500 dual penetration
   assert.equal(defaults.probabilityOverrides.carolSilence, true)
   assert.equal(defaults.probabilityOverrides.morganaHealingDown, true)
   assert.equal(defaults.probabilityOverrides.mowanoDelay, true)
+  assert.equal(defaults.activationRounds.witchIllyaCurseUnleashed, 2)
+  assert.equal(defaults.activationRounds.candyCerberusKindMagic, 2)
   assert.equal(defaults.speeds[CORDIE], 3562)
   assert.equal(defaults.speeds[SUMMER_SABRINA], 3418)
 })
@@ -89,6 +93,12 @@ test('lineups accept one to five unique supported characters', () => {
   assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { bossTemplateId: 'unknown' })), /Unsupported raid Boss template/)
   assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { levels: { [FLORENCE]: 0 } })), /Invalid level/)
   assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, { defensePenetrations: { [FLORENCE]: -1 } })), /Invalid defense penetration/)
+  assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, {
+    activationRounds: { witchIllyaCurseUnleashed: 0 },
+  })), /Invalid raid activation round/)
+  assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, {
+    activationRounds: { witchIllyaCurseUnleashed: 11 },
+  })), /Invalid raid activation round/)
 })
 
 test('Boss template and per-character level and penetration settings change defense pass rates', () => {
@@ -421,6 +431,22 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
       },
     },
   })), /Unregistered raid effect/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    skills: { ...base.skills, s2: { ...base.skills.s2, condition: { type: 'unknownAvailability' } } },
+  })), /Unregistered raid condition/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    hooks: [{ trigger: 'actionStart', effects: [{ type: 'removeStatus', target: 'self', statusId: '' }] }],
+  })), /removeStatus effect requires a non-empty statusId/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    runtime: { counters: { charge: 0 } },
+    hooks: [{ trigger: 'actionStart', effects: [{ type: 'changeCounter', counter: 'charge', amount: 1, record: 'no' }] }],
+  })), /changeCounter record must be boolean/)
 })
 
 test('mechanic registry resolves counters, skill history, conditions, and targets generically', () => {
@@ -1083,4 +1109,115 @@ test('Cattleya and Rustica keep their ordinary attack buffs on the original targ
   const cattleyya = action(result, 2, CATTLEYYA)
   assert.equal(cattleyya.damageSteps[0].attackRate, 0.7)
   assert.equal(Object.keys(cattleyya.scalingTotals).length, 0)
+})
+
+test('Regina uses the logged base-ATK branch and spends Remnant on round three cooldown support', () => {
+  const lineup = [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 6 })
+  const s1 = action(result, 1, REGINA)
+  assert.equal(s1.damageSteps.length, 1)
+  assert.equal(s1.damageSteps[0].percent, 480)
+  assert.equal(s1.damageSteps[0].originalTargetCount, 5)
+  assert.equal(s1.damageSteps[0].bossDamageRate, 0.1)
+  assert.equal(s1.bossStatusAfterAction.find(status => status.id === 'regina-damage-taken').effectGroupId, 13700120201)
+
+  const s2 = action(result, 2, REGINA)
+  assert.equal(s2.damageSteps[0].percent, 1520)
+  assert.equal(s2.damageSteps[0].originalTargetCount, 2)
+  assert.equal(action(result, 3, REGINA).runtimeBefore.counters.remnant, 3)
+  assert.ok(result.rounds[2].roundStartEffects.some(effect => effect.type === 'cooldownReduction' && effect.targetId === REGINA))
+  assert.equal(action(result, 6, REGINA).statusSnapshotAfterAction[REGINA].statuses.some(status => status.id === 'regina-remnant'), false)
+})
+
+test('Flower Natasha displays Aggravation and Poison without adding DOT damage', () => {
+  const result = simulateRaidTable(singleConfig(FLOWER_NATASHA, { turns: 2 }))
+  const s1 = action(result, 1, FLOWER_NATASHA)
+  assert.equal(s1.damageSteps.length, 2)
+  assert.ok(s1.damageSteps.every(step => step.percent === 680 && step.attackRate === 0.1))
+  assert.equal(s1.damageSteps[0].bossStatusBefore.find(status => status.id === 'flower-natasha-aggravation').statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF)
+  assert.equal(s1.statusSnapshotAtDamage[FLOWER_NATASHA].statuses.find(status => status.id === 'flower-natasha-self-aggravation').statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF)
+
+  const s2 = action(result, 2, FLOWER_NATASHA)
+  assert.equal(s2.damageSteps[0].percent, 1320)
+  assert.equal(s2.damageSteps[0].bossDamageRate, 0)
+  const poison = s2.bossStatusAfterAction.find(status => status.id === 'flower-natasha-poison')
+  assert.equal(poison.effectGroupId, 10500250102)
+  assert.equal(poison.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
+  assert.equal(poison.remainingRounds, 2)
+  assert.equal(poison.damageRatePerStack, 0)
+})
+
+test('Candy Cerberus buffs adjacent allies and uses Kindest Magic after the configured revival round', () => {
+  const lineup = [REGINA, CANDY_CERBERUS, FLOWER_NATASHA]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 5 })
+  const s1 = action(result, 1, CANDY_CERBERUS)
+  assert.equal(s1.damageSteps.length, 10)
+  assert.ok(s1.damageSteps.every(step => step.percent === 340 && step.damageType === 'mag'))
+  closeTo(result.rounds[0].speedSnapshot[REGINA].effectiveSpeed, 2856 * 1.1)
+  closeTo(result.rounds[0].speedSnapshot[FLOWER_NATASHA].effectiveSpeed, 2601 * 1.1)
+  assert.equal(action(result, 1, REGINA).damageSteps[0].attackRate, 0.5)
+  const s2 = action(result, 2, CANDY_CERBERUS)
+  assert.equal(s2.damageSteps[0].percent, 1980)
+  assert.equal(s2.statusSnapshotAtDamage[CANDY_CERBERUS].statuses.find(status => status.id === 'candy-cerberus-kind-magic').effectGroupId, 12900340202)
+  assert.equal(s1.statusSnapshotAtDamage[CANDY_CERBERUS].statuses.some(status => status.id === 'candy-cerberus-kind-magic'), false)
+  assert.equal(action(result, 5, CANDY_CERBERUS).damageSteps[0].percent, 510)
+  assert.equal(action(result, 5, CANDY_CERBERUS).statusSnapshotAfterAction[CANDY_CERBERUS].statuses.some(status => status.id === 'candy-cerberus-kind-magic'), false)
+
+  const delayed = simulateRaidTable({
+    lineup, attackPriority: [...lineup], turns: 6,
+    activationRounds: { candyCerberusKindMagic: 5 },
+  })
+  assert.equal(action(delayed, 2, CANDY_CERBERUS).damageSteps[0].percent, 1320)
+  assert.equal(action(delayed, 5, CANDY_CERBERUS).damageSteps[0].percent, 510)
+  assert.equal(action(delayed, 6, CANDY_CERBERUS).damageSteps[0].percent, 1980)
+  assert.ok(action(delayed, 5, CANDY_CERBERUS).statusSnapshotAtDamage[CANDY_CERBERUS].statuses.some(status => status.id === 'candy-cerberus-kind-magic'))
+})
+
+test('Witch Paladia consumes twenty team-critical stacks before Black Bullet Rain and rebuilds four', () => {
+  const lineup = [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 2 })
+  const s1 = action(result, 1, WITCH_PALADIA)
+  assert.equal(s1.damageSteps[0].percent, 580)
+  assert.equal(s1.bossStatusAfterAction.find(status => status.id === 'witch-paladia-critical-resist-down').effectGroupId, 6300120101)
+
+  const s2 = action(result, 2, WITCH_PALADIA)
+  assert.equal(s2.runtimeBefore.counters.criticalStacks, 20)
+  assert.equal(s2.damageSteps.length, 4)
+  assert.ok(s2.damageSteps.every(step => step.percent === 1960 && step.critical))
+  assert.equal(s2.runtimeAfter.counters.criticalStacks, 4)
+  assert.ok(s2.effectsApplied.some(effect => effect.type === 'removeStatus' && effect.statusId === 'witch-paladia-critical-rate'))
+  assert.ok(s2.statusSnapshotAfterAction[WITCH_PALADIA].statuses.some(status => status.id === 'witch-paladia-critical-rate'))
+  assert.ok(s2.statusSnapshotAfterAction[REGINA].statuses.some(status => status.id === 'witch-paladia-earned-barrier'))
+
+  const disabled = simulateRaidTable(singleConfig(WITCH_PALADIA, {
+    turns: 2, guaranteedCritical: false, probabilityOverrides: { paladiaCriticalResistDown: false },
+  }))
+  assert.equal(action(disabled, 1, WITCH_PALADIA).bossStatusAfterAction.some(status => status.id === 'witch-paladia-critical-resist-down'), false)
+  assert.ok(action(disabled, 2, WITCH_PALADIA).damageSteps.every(step => step.percent === 980 && !step.critical))
+})
+
+test('Witch Illya only selects S2 while God Curse Unleashed is present', () => {
+  const solo = simulateRaidTable(singleConfig(WITCH_ILLYA, { turns: 9 }))
+  assert.deepEqual(actionsFor(solo, WITCH_ILLYA).slice(0, 5), ['s1', 's2', 's2', 's2', 's1'])
+  assert.ok(action(solo, 2, WITCH_ILLYA).damageSteps.every(step => step.percent === 440))
+  assert.ok(action(solo, 1, WITCH_ILLYA).statusSnapshotAfterAction[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-devotion'))
+  assert.ok(action(solo, 2, WITCH_ILLYA).statusSnapshotAtDamage[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-curse-unleashed'))
+  assert.ok(action(solo, 9, WITCH_ILLYA).damageSteps.slice(0, 10).every(step => step.percent === 720))
+  assert.equal(action(solo, 9, WITCH_ILLYA).statusSnapshotAfterAction[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-curse-unleashed'), false)
+
+  const lineup = [FLOWER_NATASHA, WITCH_ILLYA]
+  const multi = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 2 })
+  assert.deepEqual(actionsFor(multi, WITCH_ILLYA), ['s1', 's2'])
+  const first = action(multi, 1, WITCH_ILLYA)
+  assert.equal(first.statusSnapshotAtDamage[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-devotion'), true)
+  assert.ok(first.statusSnapshotAtDamage[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-barrier'))
+
+  const delayed = simulateRaidTable({
+    lineup, attackPriority: [...lineup], turns: 6,
+    activationRounds: { witchIllyaCurseUnleashed: 5 },
+  })
+  assert.deepEqual(actionsFor(delayed, WITCH_ILLYA), ['s1', 'normal', 'normal', 'normal', 's1', 's2'])
+  assert.ok(action(delayed, 4, WITCH_ILLYA).statusSnapshotAfterAction[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-devotion'))
+  assert.equal(action(delayed, 5, WITCH_ILLYA).statusSnapshotAtDamage[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-devotion'), false)
+  assert.ok(action(delayed, 5, WITCH_ILLYA).statusSnapshotAtDamage[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-curse-unleashed'))
 })

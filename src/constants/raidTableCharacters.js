@@ -34,6 +34,11 @@ export function createDefaultRaidTableConfig() {
       millaDelay: true, yildizBuffBlock: true, winterStellaSilence: true,
       lilicotteSilence: true, liebesStun: true, artoriaStun: true,
       carolSilence: true, morganaHealingDown: true, mowanoDelay: true,
+      paladiaCriticalResistDown: true,
+    },
+    activationRounds: {
+      candyCerberusKindMagic: 2,
+      witchIllyaCurseUnleashed: 2,
     },
     turns: 10,
   }

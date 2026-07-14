@@ -38,6 +38,10 @@ export function removeStatusesEffect({ id, nameKey, target, count = 1, statusCla
   return { type: 'removeStatuses', id, nameKey, target, count, statusClass, ...rest }
 }
 
+export function removeStatusEffect({ id, nameKey, target, statusId, ...rest }) {
+  return { type: 'removeStatus', id, nameKey, target, statusId, ...rest }
+}
+
 export function bossStatusEffect({
   id, effectGroupId, nameKey, durationRounds = null, addStacks = 1, maxStacks = 1,
   damageRatePerStack = 0, defenseRatePerStack = 0, physicalDefenseRatePerStack = 0,

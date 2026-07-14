@@ -29,6 +29,11 @@ import aishe from './aishe.js'
 import lilicotte from './lilicotte.js'
 import cordie from './cordie.js'
 import summerSabrina from './summerSabrina.js'
+import regina from './regina.js'
+import flowerNatasha from './flowerNatasha.js'
+import candyCerberus from './candyCerberus.js'
+import witchPaladia from './witchPaladia.js'
+import witchIllya from './witchIllya.js'
 import { RAID_JOB_FLAGS } from '../shared.js'
 
 export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
@@ -63,6 +68,11 @@ export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   LILICOTTE: 99,
   CORDIE: 27,
   SUMMER_SABRINA: 70,
+  REGINA: 137,
+  FLOWER_NATASHA: 105,
+  CANDY_CERBERUS: 129,
+  WITCH_PALADIA: 63,
+  WITCH_ILLYA: 61,
 })
 
 export const RAID_TABLE_ROSTER = Object.freeze([
@@ -97,6 +107,11 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.LILICOTTE,
   RAID_TABLE_CHARACTER_IDS.CORDIE,
   RAID_TABLE_CHARACTER_IDS.SUMMER_SABRINA,
+  RAID_TABLE_CHARACTER_IDS.REGINA,
+  RAID_TABLE_CHARACTER_IDS.FLOWER_NATASHA,
+  RAID_TABLE_CHARACTER_IDS.CANDY_CERBERUS,
+  RAID_TABLE_CHARACTER_IDS.WITCH_PALADIA,
+  RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA,
 ])
 
 export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
@@ -131,9 +146,14 @@ export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
   99: RAID_JOB_FLAGS.SNIPER,
   27: RAID_JOB_FLAGS.SNIPER,
   70: RAID_JOB_FLAGS.WARRIOR,
+  137: RAID_JOB_FLAGS.SNIPER,
+  105: RAID_JOB_FLAGS.SNIPER,
+  129: RAID_JOB_FLAGS.MAGE,
+  63: RAID_JOB_FLAGS.SNIPER,
+  61: RAID_JOB_FLAGS.WARRIOR,
 })
 
-const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina]
+const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya]
 export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze({
   ...character,
   jobFlags: RAID_TABLE_CHARACTER_JOB_FLAGS[character.id],

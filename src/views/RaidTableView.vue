@@ -128,6 +128,18 @@
         <input v-model="probabilityOverrides.artoriaStun" type="checkbox">
         <span><strong>{{ $t('raidAssumeArtoriaStun') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.WITCH_PALADIA)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.paladiaCriticalResistDown" type="checkbox">
+        <span><strong>{{ $t('raidAssumeWitchPaladiaCriticalResistDown') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA)" class="raid-number-control">
+        <span><strong>{{ $t('raidWitchIllyaCurseUnleashedRound') }}</strong><small>{{ $t('raidWitchIllyaCurseUnleashedRoundHint') }}</small></span>
+        <span class="raid-number-input"><input v-model.number="activationRounds.witchIllyaCurseUnleashed" type="number" min="1" max="10" step="1" @change="normalizeActivationRound('witchIllyaCurseUnleashed')"><em>{{ $t('raidRoundUnit') }}</em></span>
+      </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.CANDY_CERBERUS)" class="raid-number-control">
+        <span><strong>{{ $t('raidCandyCerberusReviveRound') }}</strong><small>{{ $t('raidCandyCerberusReviveRoundHint') }}</small></span>
+        <span class="raid-number-input"><input v-model.number="activationRounds.candyCerberusKindMagic" type="number" min="1" max="10" step="1" @change="normalizeActivationRound('candyCerberusKindMagic')"><em>{{ $t('raidRoundUnit') }}</em></span>
+      </label>
     </div>
 
     <div class="raid-order-grid">
@@ -375,6 +387,7 @@ const pmDefensePenetrations = reactive({ ...defaults.pmDefensePenetrations })
 const guaranteedCritical = ref(defaults.guaranteedCritical)
 const baseCriticalDamagePercent = ref(roundBaseCriticalDamagePercent(defaults.baseCriticalDamageBonus * 100))
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
+const activationRounds = reactive({ ...defaults.activationRounds })
 const selectedEvent = ref(null)
 const filteredRoster = computed(() => selectedRosterElement.value == null
   ? roster
@@ -391,6 +404,7 @@ const result = computed(() => simulateRaidTable({
   guaranteedCritical: guaranteedCritical.value,
   baseCriticalDamageBonus: Math.max(0, Number(baseCriticalDamagePercent.value) || 0) / 100,
   probabilityOverrides,
+  activationRounds: Object.fromEntries(Object.keys(activationRounds).map(key => [key, normalizedActivationRound(key)])),
   turns: 10,
 }))
 const currentSpeedOrder = computed(() => result.value.rounds[0]?.actionOrder ?? [])
@@ -409,6 +423,8 @@ function counterLabel(id, key) { return t(RAID_TABLE_CHARACTERS[id].counterLabel
 function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(locale.value, { maximumFractionDigits, minimumFractionDigits: 0 }) }
 function roundBaseCriticalDamagePercent(value) { return Number((Number(value) || 0).toFixed(1)) }
 function normalizeBaseCriticalDamagePercent() { baseCriticalDamagePercent.value = roundBaseCriticalDamagePercent(baseCriticalDamagePercent.value) }
+function normalizedActivationRound(key) { return Math.min(10, Math.max(1, Math.trunc(Number(activationRounds[key]) || defaults.activationRounds[key] || 1))) }
+function normalizeActivationRound(key) { activationRounds[key] = normalizedActivationRound(key) }
 function formatPercent(value) { return `${formatter().format(value)}% ATK` }
 function formatRate(value) { return `${formatter().format(value * 100)}%` }
 function formatSymbolic(totals) { const entries = Object.entries(totals); return entries.length ? entries.map(([stat, value]) => `${formatter().format(value)}% ${stat}`).join(' + ') : '—' }
@@ -457,6 +473,7 @@ function resetConfig() {
   Object.assign(defensePenetrations, next.defensePenetrations)
   Object.assign(pmDefensePenetrations, next.pmDefensePenetrations)
   baseCriticalDamagePercent.value = roundBaseCriticalDamagePercent(next.baseCriticalDamageBonus * 100)
+  Object.assign(activationRounds, next.activationRounds)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
 }
 
@@ -505,6 +522,13 @@ function bossStatusLabel(status) {
   return `${source}${t(status.nameKey)} · ${statusClass} · ${t('raidStatusStacks', { n: status.stacks })}${defenseRates ? ` · ${defenseRates}` : ''}${duration}`
 }
 
+function statusClassLabel(statusClass) {
+  if (statusClass === 'removableBuff') return t('raidStatusRemovable')
+  if (statusClass === 'removableDebuff') return t('raidStatusRemovableDebuff')
+  if (statusClass === 'unremovableDebuff') return t('raidStatusUnremovableDebuff')
+  return t('raidStatusUnremovable')
+}
+
 function bossDefenseRateSummary(status) {
   return [
     ['raidDefenseRate', status.defenseRatePerStack],
@@ -517,6 +541,7 @@ function effectText(effect) {
   if (effect.skipped) return t('raidEffectSkipped', { effect: t(effect.nameKey) })
   if (effect.type === 'cooldownReduction') return t('raidEffectCooldownReduction', { target: characterName(effect.targetId), n: effect.amount })
   if (effect.type === 'cooldownReset') return t('raidEffectCooldownReset')
+  if (effect.type === 'removeStatus') return t('raidEffectStatusRemoved', { target: characterName(effect.targetId), status: t(effect.nameKey) })
   if (effect.type === 'counter') return t('raidEffectCounter', { target: characterName(effect.targetId), effect: t(effect.nameKey), n: effect.after })
   if (effect.type === 'bossStatus') return `${characterName(effect.sourceId)} · ${t('raidEffectBossStatus', { effect: t(effect.nameKey), n: effect.stacks ?? 0 })}`
   if (effect.type === 'status' && effect.copiedFromId != null) return t('raidEffectCopiedStatus', {
@@ -526,7 +551,7 @@ function effectText(effect) {
   if (effect.type === 'status' && sourceAttack) return t('raidEffectStatusWithValueSource', {
     target: characterName(effect.targetId), status: t(effect.nameKey), valueSource: valueSourceText(sourceAttack.sourceId), n: effect.duration ?? '∞',
   })
-  if (effect.type === 'status') return t('raidEffectStatus', { target: characterName(effect.targetId), status: t(effect.nameKey), class: t(effect.statusClass === 'removableBuff' ? 'raidStatusRemovable' : 'raidStatusUnremovable'), n: effect.duration ?? '∞' })
+  if (effect.type === 'status') return t('raidEffectStatus', { target: characterName(effect.targetId), status: t(effect.nameKey), class: statusClassLabel(effect.statusClass), n: effect.duration ?? '∞' })
   return effect.type
 }
 </script>

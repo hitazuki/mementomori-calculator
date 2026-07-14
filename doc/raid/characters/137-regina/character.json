@@ -1,0 +1,30 @@
+{
+  "formatVersion": 1,
+  "characterId": 137,
+  "slug": "regina",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [137001, 137002],
+    "passiveSkillIds": [137003, 137004],
+    "combatLogs": ["data/battle-logs/54-57-d1.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 137001, "model": "implemented", "summary": "按日志确认的基础攻击力比较分支，在攻击前施加4回合10%承伤增加，并对单体木桩结算1段480% ATK。" },
+    { "kind": "activeSkill", "sourceId": 137002, "model": "implemented", "summary": "按同一日志分支对单体木桩结算1段1520% ATK。" },
+    { "kind": "passiveSkill", "sourceId": 137003, "model": "implemented", "summary": "开战获得10层身影；每回合消耗1层并给攻击最高2人30%攻击，第三回合满足5次全队暴击时再消耗4层并减最高攻击友军2点冷却。" },
+    { "kind": "passiveSkill", "sourceId": 137004, "model": "implemented", "summary": "开战为攻击最高友军保留不可解除的最大HP状态；最大HP数值和雷金娜受击减伤不进入输出模型。" }
+  ],
+  "effectGroups": [
+    { "id": 13700120201, "model": "implemented", "summary": "S1承伤增加，日志分类3、持续4回合、实测值10%。" },
+    { "id": 13700300101, "model": "implemented", "summary": "身影，不可解除状态；层数由运行时计数器维护。" },
+    { "id": 13700320201, "model": "implemented", "summary": "身影消耗产生的30%攻击Buff，日志分类2、持续1回合。" },
+    { "id": 13700440201, "model": "implemented", "summary": "给攻击最高友军的50%最大HP不可解除状态；状态显示但数值不进入输出公式。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredBaseAttackComparisonBranch", "summary": "当前没有双方基础攻击面板输入，采用日志确认的10%承伤与1520%伤害分支。" },
+    { "key": "raidIgnoredCriticalRateUp", "summary": "身影的暴击率数值不改变确定暴击场景。" },
+    { "key": "raidIgnoredMaxHpUp", "summary": "最大HP不进入输出倍率。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "木桩模式不模拟雷金娜受到攻击与伤害阻绝。" }
+  ],
+  "unresolved": ["若后续加入角色与Boss基础攻击面板，应将雷金娜的10%/30%承伤和1520%/2280%伤害改为动态比较。"]
+}

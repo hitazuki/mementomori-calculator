@@ -1,0 +1,33 @@
+{
+  "formatVersion": 1,
+  "characterId": 61,
+  "slug": "witch-illya",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [61001, 61002],
+    "passiveSkillIds": [61003, 61004, 61005],
+    "combatLogs": ["data/battle-logs/54-57-d1.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 61001, "model": "implemented", "summary": "伤害前显示1回合命中Buff，结算10段240%（第3次起720%）和目标存活时追加1段580% ATK。" },
+    { "kind": "activeSkill", "sourceId": 61002, "model": "implemented", "summary": "仅在神咒解放状态存在时可选；结算5段440% ATK，Boss带任意弱化时为660%。" },
+    { "kind": "passiveSkill", "sourceId": 61003, "model": "implemented", "summary": "开战显示献身；由用户填写1至10回合的生效时点，在该回合开始移除献身并获得8次自身行动的神咒解放。默认第2回合，对应54-57-d1日志。" },
+    { "kind": "passiveSkill", "sourceId": 61004, "model": "implemented", "summary": "开战显示3层多重屏障；伤害阻绝、保命与回复不进入输出模型。" },
+    { "kind": "passiveSkill", "sourceId": 61005, "model": "implemented", "summary": "其他幽冥友军至少2名时，开战获得不可解除40%防御穿透。" }
+  ],
+  "effectGroups": [
+    { "id": 6100100101, "model": "implemented", "summary": "S1命中+50%可解除Buff，日志分类2。" },
+    { "id": 6100300101, "model": "implemented", "summary": "献身，日志分类4；状态显示但不转移伤害。" },
+    { "id": 6100330402, "model": "implemented", "summary": "神咒解放，日志分类4、持续8回合；控制S2可用性。" },
+    { "id": 6100440101, "model": "implemented", "summary": "开战多重屏障，日志分类4。" },
+    { "id": 6100500101, "model": "implemented", "summary": "幽冥队条件下40%防御穿透，日志分类4。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHitRateUp", "summary": "命中率不进入当前倍率。" },
+    { "key": "raidIgnoredBuffRemoval", "summary": "S1追加攻击前的敌方增益解除在无增益Boss上不触发。" },
+    { "key": "raidIgnoredIncomingAttackTrigger", "summary": "不模拟实际受击次数或最后存活判定，改由用户填写神咒解放的生效回合。" },
+    { "key": "raidIgnoredBarrierDamageNullification", "summary": "多重屏障只显示状态，不抵消伤害。" },
+    { "key": "raidIgnoredReviveHealing", "summary": "保命与生命回复不进入当前模型。" }
+  ],
+  "unresolved": []
+}

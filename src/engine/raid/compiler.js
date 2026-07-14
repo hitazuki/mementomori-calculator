@@ -63,12 +63,17 @@ function normalizeConfig(config, characters) {
   if (!Number.isInteger(turns) || turns < 1) throw new Error('turns must be a positive integer')
   const baseCriticalDamageBonus = config.baseCriticalDamageBonus ?? defaults.baseCriticalDamageBonus
   if (!Number.isFinite(baseCriticalDamageBonus) || baseCriticalDamageBonus < 0) throw new Error('baseCriticalDamageBonus must be non-negative')
+  const activationRounds = { ...defaults.activationRounds, ...(config.activationRounds ?? {}) }
+  for (const [key, value] of Object.entries(activationRounds)) {
+    if (!Number.isInteger(value) || value < 1 || value > 10) throw new Error(`Invalid raid activation round: ${key}`)
+  }
   return {
     lineup, attackPriority, speeds, levels, defensePenetrations, pmDefensePenetrations,
     bossTemplateId, bossTemplate, turns,
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
     baseCriticalDamageBonus,
     probabilityOverrides: { ...defaults.probabilityOverrides, ...(config.probabilityOverrides ?? {}) },
+    activationRounds,
   }
 }
 
@@ -81,6 +86,9 @@ function compileCondition(condition, mechanics, path, character) {
   }
   if (condition.type === 'bossElementIs' && !SUPPORTED_ELEMENTS.has(condition.element)) {
     throw new Error(`Invalid raid Boss element '${condition.element}' at ${path}`)
+  }
+  if (condition.type === 'configuredActivationRoundReached' && (typeof condition.key !== 'string' || !condition.key)) {
+    throw new Error(`Configured activation round condition requires a non-empty key at ${path}`)
   }
   return { definition: condition, handler }
 }
@@ -113,6 +121,12 @@ function compileEffect(effect, mechanics, path, character) {
   if (effect.type === 'copyStatuses' && !effect.sourceTarget) throw new Error(`Raid copyStatuses effect requires sourceTarget at ${path}`)
   if (effect.type === 'removeStatuses' && (!Number.isInteger(effect.count) || effect.count < 1)) {
     throw new Error(`Raid removeStatuses effect requires a positive integer count at ${path}`)
+  }
+  if (effect.type === 'removeStatus' && (typeof effect.statusId !== 'string' || !effect.statusId)) {
+    throw new Error(`Raid removeStatus effect requires a non-empty statusId at ${path}`)
+  }
+  if (effect.type === 'changeCounter' && effect.record != null && typeof effect.record !== 'boolean') {
+    throw new Error(`Raid changeCounter record must be boolean at ${path}`)
   }
   if (effect.type === 'bossStatus' && effect.replacementKey != null && (typeof effect.replacementKey !== 'string' || !effect.replacementKey)) {
     throw new Error(`Raid bossStatus replacementKey must be a non-empty string at ${path}`)
@@ -200,6 +214,7 @@ function compileAction(action, mechanics, path, character) {
   const hooks = (action.hooks ?? []).map((hook, index) => compileHook(hook, mechanics, `${path}.hooks[${index}]`, character))
   return {
     ...action,
+    compiledCondition: compileCondition(action.condition, mechanics, `${path}.condition`, character),
     damageSteps: (action.damageSteps ?? []).map((step, index) => compileDamageStep(step, mechanics, `${path}.damageSteps[${index}]`, character)),
     hooksByTrigger: groupHooks(hooks),
   }

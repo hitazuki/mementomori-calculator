@@ -140,6 +140,7 @@ function checkHook(hook, location, character) {
 function checkAction(action, location, character) {
   if (!action) return error(`${location}: missing action definition`)
   checkLocaleKey(action.nameKey, `${location}.nameKey`)
+  checkCondition(action.condition, `${location}.condition`, character)
   for (const [index, step] of (action.damageSteps ?? []).entries()) {
     checkValue(step.percent, `${location}.damageSteps[${index}].percent`, character)
     checkValue(step.hits ?? 1, `${location}.damageSteps[${index}].hits`, character)

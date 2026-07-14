@@ -579,3 +579,12 @@ afterLethalProtection
 - `roundStart` 在每个全局回合开始、速度快照和角色行动前执行。
 - `everyRounds` / `roundOffset` 用于以全局回合调度被动；角色行动次数冷却仍使用既有 `every`。
 - 轻快映射为 `cooldownRecoveryBonus`，在行动结束时与基础冷却恢复 1 相加，不视为即时减冷却。
+
+## 16. `54-57-d1`日志补充映射
+
+- 娜塔夏「中毒」实际记录为 `SkillCategory=3 / EffectGroupId=10500250102 / EffectTurn=2`；`EffectType=8001` 的5%当前HP伤害属于持续伤害，不并入主动技能伤害段。
+- 娜塔夏对自身与敌方施加的「恶化」分别为 `10500300301 / 10500300401`，均为 `SkillCategory=5 / EffectTurn=1`。不可解除弱化仍应显示并参与“是否带弱化”判断。
+- 帕拉底亚「正义魔女」为 `SkillCategory=4 / EffectGroupId=6300330101`，日志显示友军每次暴击都会使层数增加；20层时后续行动切换为 `ActiveSkillId=63101`，消费后该技能自身4次暴击重新积层。
+- 雷金娜S1承伤增加为 `SkillCategory=3 / EffectGroupId=13700120201 / EffectTurn=4`；本日志中的实际数值为10%，说明日志目标的状态生效前攻击力不低于雷金娜。
+- 伊利亚「献身」「神咒解放」分别为 `SkillCategory=4 / EffectGroupId=6100300101 / 6100330402`；神咒解放出现后，日志轮转由S1切换到零冷却S2，状态结束后S2不可发动。
+- 克尔柏洛丝在第1回合自身行动后触发保命，并获得 `SkillCategory=4 / EffectGroupId=12900340202 / EffectTurn=4` 的「温柔的魔法」；状态覆盖第2至第5回合自身行动，S1/S2读取强化倍率。

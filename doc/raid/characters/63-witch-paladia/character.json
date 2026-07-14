@@ -1,0 +1,32 @@
+{
+  "formatVersion": 1,
+  "characterId": 63,
+  "slug": "witch-paladia",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [63001, 63002],
+    "passiveSkillIds": [63003, 63004, 63005],
+    "combatLogs": ["data/battle-logs/54-57-d1.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 63001, "model": "implemented", "summary": "攻击前按70%成功场景施加2回合抗暴率降低，对单体结算1段580% ATK。" },
+    { "kind": "activeSkill", "sourceId": 63002, "model": "implemented", "summary": "行动开始前达到20层正义魔女时消耗20层并改为4段1960%必暴漆黑弹雨，否则为4段980%弹雨风暴。" },
+    { "kind": "passiveSkill", "sourceId": 63003, "model": "implemented", "summary": "通过通用criticalHit战斗事件统计自身与友军暴击，最高20层；漆黑弹雨消费发生在伤害前，技能自身暴击可重新积层。" },
+    { "kind": "passiveSkill", "sourceId": 63004, "model": "implemented", "summary": "开战显示自身与其他幽冥友军的多重屏障；帕拉底亚每2次自身暴击再给攻击最高3名幽冥友军屏障。" },
+    { "kind": "passiveSkill", "sourceId": 63005, "model": "implemented", "summary": "内部技能切换标记由行动开始前的20层条件等价表达。" }
+  ],
+  "effectGroups": [
+    { "id": 6300120101, "model": "implemented", "summary": "抗暴率降低，日志分类3、持续2回合；倍率为0但保留Boss状态。" },
+    { "id": 6300330101, "model": "implemented", "summary": "正义魔女暴击率状态，日志分类4；层数由运行时计数器维护。" },
+    { "id": 6300400101, "model": "implemented", "summary": "自身开战多重屏障，日志分类4。" },
+    { "id": 6300420401, "model": "implemented", "summary": "每2次自身暴击授予的多重屏障，日志分类4。" },
+    { "id": 6300440201, "model": "implemented", "summary": "EX2给其他幽冥友军的开战多重屏障，日志分类4。" },
+    { "id": 6300200001, "model": "implemented", "summary": "内部漆黑弹雨技能替换标记，不作为普通状态显示。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredCriticalRateUp", "summary": "暴击率数值不改变确定暴击场景，但层数仍用于技能切换。" },
+    { "key": "raidIgnoredBarrierDamageNullification", "summary": "多重屏障保留状态，不模拟抵消伤害。" },
+    { "key": "raidIgnoredBuffRemoval", "summary": "漆黑弹雨的敌方增益解除在无增益Boss上不触发。" }
+  ],
+  "unresolved": ["多重屏障的实际层数目前只以状态存在表示，运行时状态快照尚不展示1/2/3层数值。"]
+}

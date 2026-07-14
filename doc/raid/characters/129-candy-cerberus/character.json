@@ -1,0 +1,30 @@
+{
+  "formatVersion": 1,
+  "characterId": 129,
+  "slug": "candy-cerberus",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [129001, 129002],
+    "passiveSkillIds": [129003, 129004],
+    "combatLogs": ["data/battle-logs/54-57-d1.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 129001, "model": "implemented", "summary": "S1基础结算10段340% ATK；温柔的魔法存在时改为10段510%。" },
+    { "kind": "activeSkill", "sourceId": 129002, "model": "implemented", "summary": "对单体木桩基础结算1段1320% ATK，温柔的魔法存在时改为1980%；Boss无多重屏障，因此抵消量追加直伤不触发。" },
+    { "kind": "passiveSkill", "sourceId": 129003, "model": "implemented", "summary": "由用户填写1至10回合的复活触发时点，在该回合开始获得4次自身行动的温柔的魔法。默认第2回合，对应54-57-d1日志；保命、回复与阻绝仍不计算。" },
+    { "kind": "passiveSkill", "sourceId": 129004, "model": "implemented", "summary": "开战给自身显示命中状态，并给相邻2名友军不可解除的10%攻击和10%速度。" }
+  ],
+  "effectGroups": [
+    { "id": 12900340202, "model": "implemented", "summary": "温柔的魔法，日志分类4、持续4次自身行动；控制S1与S2的强化倍率。" },
+    { "id": 12900420201, "model": "implemented", "summary": "相邻友军攻击+10%，日志分类4。" },
+    { "id": 12900430301, "model": "implemented", "summary": "相邻友军速度+10%，日志分类4。" },
+    { "id": 12900440101, "model": "implemented", "summary": "自身命中+50%，日志分类4；状态显示但不进入命中计算。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHitRateUp", "summary": "命中率不进入当前倍率。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "木桩模式不模拟友方承伤与伤害阻绝。" },
+    { "key": "raidIgnoredReviveHealing", "summary": "保命与生命回复不进入当前模型。" },
+    { "key": "raidIgnoredMultiBarrierReflectedDamage", "summary": "Boss固定无多重屏障，没有可读取的抵消伤害量。" }
+  ],
+  "unresolved": []
+}

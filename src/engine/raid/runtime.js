@@ -40,9 +40,12 @@ function addSymbolicTotals(target, totals) {
   for (const [stat, value] of Object.entries(totals)) target[stat] = (target[stat] ?? 0) + value
 }
 
-function selectAction(actor) {
-  if (actor.cooldowns.s1 === 0) return actor.definition.skills.s1
-  if (actor.cooldowns.s2 === 0) return actor.definition.skills.s2
+function selectAction(actor, context, evaluateCondition) {
+  const isAvailable = action => !action.compiledCondition || evaluateCondition(action.compiledCondition.definition, {
+    ...context, actor, ownerId: actor.id,
+  })
+  if (actor.cooldowns.s1 === 0 && isAvailable(actor.definition.skills.s1)) return actor.definition.skills.s1
+  if (actor.cooldowns.s2 === 0 && isAvailable(actor.definition.skills.s2)) return actor.definition.skills.s2
   return actor.definition.normal
 }
 
@@ -254,6 +257,18 @@ export function runRaidProgram(program) {
     }
   }
 
+  function removeActorStatus(effect, context) {
+    for (const targetId of resolveTargets(effect, context.ownerId)) {
+      const target = actors.get(targetId)
+      const removed = target.statuses.filter(status => status.id === effect.statusId).map(cloneStatus)
+      target.statuses = target.statuses.filter(status => status.id !== effect.statusId)
+      context.effectsApplied.push({
+        type: 'removeStatus', phase: context.phase, sourceId: context.ownerId, targetId,
+        id: effect.id, nameKey: effect.nameKey, statusId: effect.statusId, removed,
+      })
+    }
+  }
+
   function applyBossStatusEffect(effect, context) {
     const applied = applyBossStatus(effect, context.round, context.ownerId)
     context.effectsApplied.push({
@@ -285,10 +300,12 @@ export function runRaidProgram(program) {
     const before = target.runtime.counters[effect.counter] ?? 0
     const after = Math.min(effect.max ?? Infinity, Math.max(effect.min ?? -Infinity, before + effect.amount))
     target.runtime.counters[effect.counter] = after
-    context.effectsApplied.push({
-      type: effect.eventType ?? 'counter', phase: context.phase, id: effect.id, nameKey: effect.nameKey,
-      sourceId: effectSourceId(context), targetId: context.ownerId, counter: effect.counter, before, after,
-    })
+    if (effect.record !== false) {
+      context.effectsApplied.push({
+        type: effect.eventType ?? 'counter', phase: context.phase, id: effect.id, nameKey: effect.nameKey,
+        sourceId: effectSourceId(context), targetId: context.ownerId, counter: effect.counter, before, after,
+      })
+    }
   }
 
   function applySetCooldownEffect(effect, context) {
@@ -350,7 +367,7 @@ export function runRaidProgram(program) {
 
   const api = {
     removableBuffCount, evaluateCondition, resolveTargets,
-    applyActorStatusEffect, copyActorStatuses, removeActorStatuses, applyBossStatusEffect, applyCooldownReductionEffect,
+    applyActorStatusEffect, copyActorStatuses, removeActorStatuses, removeActorStatus, applyBossStatusEffect, applyCooldownReductionEffect,
     applyCounterEffect, applySetCooldownEffect, emitBattleEvent,
   }
 
@@ -533,6 +550,7 @@ export function runRaidProgram(program) {
         if (critical) {
           runHooks(actor, action.hooksByTrigger.afterCriticalHit, context, 'afterHit')
           runHooks(actor, actor.definition.hooksByTrigger.afterCriticalHit, context, 'afterHit')
+          emitBattleEvent({ event: 'criticalHit' }, { ...context, actor, phase: 'afterHit' })
         }
         const bossAfter = snapshotBoss(boss)
 
@@ -590,10 +608,10 @@ export function runRaidProgram(program) {
       const statusSnapshotBeforeAction = snapshotStatuses()
       const activeStatusKeys = new Set(actor.statuses.map(statusKey))
       const effectsApplied = []
-      const context = { config, actors, boss, sequence, round: turn, effectsApplied, phase: 'actionStart', ownerId: actorId }
+      const context = { config, actors, boss, sequence, round: turn, effectsApplied, phase: 'actionStart', ownerId: actorId, runtimeBefore }
 
       runHooks(actor, actor.definition.hooksByTrigger.actionStart, context, 'actionStart')
-      const action = selectAction(actor)
+      const action = selectAction(actor, context, evaluateCondition)
       if (action.key !== 'normal') actor.cooldowns[action.key] = action.cooldown
 
       runHooks(actor, action.hooksByTrigger.beforeDamage, context, 'beforeDamage')

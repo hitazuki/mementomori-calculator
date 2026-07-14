@@ -1,0 +1,36 @@
+{
+  "formatVersion": 1,
+  "characterId": 105,
+  "slug": "flower-natasha",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [105001, 105002],
+    "passiveSkillIds": [105003, 105004, 105005],
+    "combatLogs": ["data/battle-logs/54-57-d1.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 105001, "model": "implemented", "summary": "满血且不受击的木桩口径下心花盛开为0层，S1重发1次，对单体结算2段680% ATK。" },
+    { "kind": "activeSkill", "sourceId": 105002, "model": "implemented", "summary": "结算1段1320% ATK并在伤害后附加2回合中毒；中毒状态显示但不计算当前HP 5%的DOT。" },
+    { "kind": "passiveSkill", "sourceId": 105003, "model": "implemented", "summary": "每回合给自身和Boss显示不可解除恶化；开战给全队不可解除10%攻击，最大HP和命中部分仅保留状态/忽略说明。" },
+    { "kind": "passiveSkill", "sourceId": 105004, "model": "outOfScope", "summary": "心花盛开依赖娜塔夏受到攻击；木桩模式友方不受击，因此层数保持0。" },
+    { "kind": "passiveSkill", "sourceId": 105005, "model": "implemented", "summary": "开战3层多重屏障作为不可解除状态显示；抵消伤害行为不模拟。" }
+  ],
+  "effectGroups": [
+    { "id": 10500250102, "model": "implemented", "summary": "中毒，日志分类3、持续2回合；DOT倍率明确为0，仅保留Boss状态。" },
+    { "id": 10500300301, "model": "implemented", "summary": "自身恶化，日志分类5、持续1回合。" },
+    { "id": 10500300401, "model": "implemented", "summary": "敌方恶化，日志分类5、持续1回合；仅显示和参与弱化组计数。" },
+    { "id": 10500320101, "model": "implemented", "summary": "自身命中+50%的不可解除状态；不进入命中计算。" },
+    { "id": 10500330201, "model": "implemented", "summary": "全队攻击与最大HP状态，日志分类4；攻击+10%进入倍率。" },
+    { "id": 10500500101, "model": "implemented", "summary": "开战多重屏障，日志分类4；状态显示但不抵消伤害。" },
+    { "id": 10500400201, "model": "outOfScope", "summary": "受击获得的心花盛开，木桩模式不触发。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHeartBloomIncomingStacks", "summary": "友方不受击，因此不增加心花盛开。" },
+    { "key": "raidIgnoredHeartBloomEnhancedSkill", "summary": "心花盛开不会达到5层，S1/S2不进入强化分支。" },
+    { "key": "raidIgnoredHitRateUp", "summary": "命中率不进入当前倍率。" },
+    { "key": "raidIgnoredMaxHpUp", "summary": "最大HP不进入当前倍率。" },
+    { "key": "raidIgnoredBarrierDamageNullification", "summary": "多重屏障只显示状态，不模拟承伤。" },
+    { "key": "raidIgnoredDotDamage", "summary": "中毒与恶化状态显示，但当前不结算DOT伤害。" }
+  ],
+  "unresolved": []
+}

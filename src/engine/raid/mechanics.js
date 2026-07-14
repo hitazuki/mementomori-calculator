@@ -8,6 +8,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
   targetSelectors: Object.freeze({
     self: ({ ownerId }) => [ownerId],
     all: ({ config }) => [...config.lineup],
+    allOther: ({ ownerId, config }) => config.lineup.filter(id => id !== ownerId),
     topAttackOther: ({ ownerId, config }) => config.attackPriority.filter(id => id !== ownerId),
     selfAndTopAttackOther: ({ ownerId, config }) => [ownerId, ...config.attackPriority.filter(id => id !== ownerId)],
     adjacent: ({ ownerId, config }) => {
@@ -50,15 +51,29 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     counterAtLeast: (condition, { actor, actors, ownerId }) => (
       ((actor ?? actors.get(ownerId)).runtime.counters[condition.counter] ?? 0) >= condition.count
     ),
+    counterAtMost: (condition, { actor, actors, ownerId }) => (
+      ((actor ?? actors.get(ownerId)).runtime.counters[condition.counter] ?? 0) <= condition.count
+    ),
+    counterBeforeActionAtLeast: (condition, { runtimeBefore }) => (
+      (runtimeBefore?.counters?.[condition.counter] ?? 0) >= condition.count
+    ),
     skillUsesAtLeast: (condition, { actor, actors, ownerId }) => ((actor ?? actors.get(ownerId)).runtime.skillUses[condition.skillKey] ?? 0) >= condition.count,
     skillUsesAtMost: (condition, { actor, actors, ownerId }) => ((actor ?? actors.get(ownerId)).runtime.skillUses[condition.skillKey] ?? 0) <= condition.count,
     otherLineupElementCountAtLeast: (condition, { actor, ownerId, config, actors }) => {
       const sourceId = actor?.id ?? ownerId
       return config.lineup.filter(id => id !== sourceId && actors.get(id).definition.element === condition.element).length >= condition.count
     },
+    otherLineupCountAtLeast: (condition, { actor, ownerId, config }) => (
+      config.lineup.filter(id => id !== (actor?.id ?? ownerId)).length >= condition.count
+    ),
+    otherLineupCountAtMost: (condition, { actor, ownerId, config }) => (
+      config.lineup.filter(id => id !== (actor?.id ?? ownerId)).length <= condition.count
+    ),
     roundAtMost: (condition, { round }) => round <= condition.round,
     roundAtLeast: (condition, { round }) => round >= condition.round,
+    configuredActivationRoundReached: (condition, { config, round }) => round >= config.activationRounds[condition.key],
     eventTargetsIncludeOwner: (_condition, { eventTargetIds = [], ownerId }) => eventTargetIds.includes(ownerId),
+    eventSourceIsOwner: (_condition, { eventSourceId, ownerId }) => eventSourceId === ownerId,
     targetElementNot: (condition, { target }) => target.definition.element !== condition.element,
     actorHasStatus: (condition, { actors, ownerId }) => (
       actors.get(ownerId).statuses.some(status => status.id === condition.statusId)
@@ -104,6 +119,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     status: (effect, context) => context.api.applyActorStatusEffect(effect, context),
     copyStatuses: (effect, context) => context.api.copyActorStatuses(effect, context),
     removeStatuses: (effect, context) => context.api.removeActorStatuses(effect, context),
+    removeStatus: (effect, context) => context.api.removeActorStatus(effect, context),
     bossStatus: (effect, context) => context.api.applyBossStatusEffect(effect, context),
     cooldownReduction: (effect, context) => context.api.applyCooldownReductionEffect(effect, context),
     changeCounter: (effect, context) => context.api.applyCounterEffect(effect, context),

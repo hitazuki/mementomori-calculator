@@ -563,3 +563,26 @@ eventHooks: [{
 | modifier channel | `defensePenetrationRate` | 以页面配置的防御贯通为基准乘算百分比变化，不影响物理/魔法防御贯通。 |
 
 科迪S2使用 `bossStatusCountAtLeast` 强制暴击，能够在关闭全局必暴时仍正确读取Boss弱化；萨宾娜S2的“4次以上暴击”在确定场景中使用现有 `conditional + guaranteedCritical`，开启时追加1段600%，关闭时不追加。
+
+## 新增通用词条（54-57-d1幽冥队）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| battle event | `criticalHit` | 每个实际判定为暴击的伤害命中结束后自动广播；事件来源是本次攻击者。 |
+| action | `condition` | 主动技能的可用条件；不满足时继续检查下一主动技能，最后回退普通攻击。 |
+| target selector | `allOther` | 按站位选择施法者以外的全部上阵友军。 |
+| condition | `counterAtMost` | 当前所属角色的已声明计数器不高于阈值。 |
+| condition | `counterBeforeActionAtLeast` | 读取本次行动开始、任何行动钩子执行前的计数器快照。 |
+| condition | `eventSourceIsOwner` | 当前战斗事件的来源角色就是监听者本人。 |
+| condition | `otherLineupCountAtLeast` / `otherLineupCountAtMost` | 读取施法者以外的静态上阵人数。 |
+| condition | `configuredActivationRoundReached` | 读取 `config.activationRounds[key]`；达到所填全局回合后成立，配合 `roundStart + onceKey` 在指定回合触发一次。 |
+| effect | `removeStatus` | 按运行时状态 `id` 精确移除目标状态，不按状态类别误删其他EffectGroup。 |
+| effect option | `changeCounter.record: false` | 仍更新计数器，但不把高频内部计数写入行动效果列表。 |
+
+帕拉底亚通过 `criticalHit` 统计全队暴击，S2使用 `counterBeforeActionAtLeast` 决定是否在伤害前消费20层并切换为漆黑弹雨。消费后的4次必暴会重新广播事件，因此行动后保留4层。雷金娜复用同一事件统计第三回合的全队暴击条件。
+
+伊利亚S2使用主动技能 `condition` 检查神咒解放。页面在选中伊利亚时显示1至10回合的生效回合配置；指定回合开始移除献身并施加8次行动的神咒解放，默认第2回合以复现 `54-57-d1` 的行动轮转。
+
+克尔柏洛丝复用同一配置机制：指定复活触发回合开始施加4次行动的温柔的魔法，S1/S2通过 `conditional + actorHasStatus` 切换340→510与1320→1980的倍率。
+
+中毒、恶化、抗暴率降低等当前不改变主动伤害倍率的弱化仍使用真实EffectGroup和可解除类别进入Boss状态。它们的 `damageRatePerStack` 为0，不代表状态被忽略，也不产生DOT伤害。
