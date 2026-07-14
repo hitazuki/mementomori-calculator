@@ -668,3 +668,43 @@ const revisedDarkCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(revisedDarkCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const siviEireneCharacterExtensions = {
+  'zh-CN': {
+    raidCharSivi: '希维', raidCharEirene: '厄瑞涅',
+    raidSkillSiviS1: '反击之剑', raidSkillSiviS2: '噬命之剑', raidSkillEireneS1: '古典枪炮射击术', raidSkillEireneS2: '星火／新星之火',
+    raidBuffSiviReactiveBlade: '反击之剑・伤害提升', raidDebuffEireneDefense: '古典枪炮射击术・防御力降低', raidBuffEireneHitRate: '新星之火・命中率', raidBuffEireneEnhancedNormal: '暗夜契约・普攻强化', raidBuffEireneBarrier: '结界',
+    raidSiviDamageTier: '希维统一增伤档位', raidSiviDamageTierHint: '当前不记录每名角色的受击次数，所有目标统一使用此档位。', raidSiviDamageTierOption: '本回合受击 {hits} 次：伤害 +{rate}%',
+    raidIgnoredPerTargetIncomingHitCount: '逐目标受击次数（使用统一配置档位）',
+  },
+  'zh-TW': {
+    raidCharSivi: '希維', raidCharEirene: '厄瑞涅',
+    raidSkillSiviS1: '反擊之劍', raidSkillSiviS2: '噬命之劍', raidSkillEireneS1: '古典槍砲射擊術', raidSkillEireneS2: '星火／新星之火',
+    raidBuffSiviReactiveBlade: '反擊之劍・傷害提升', raidDebuffEireneDefense: '古典槍砲射擊術・防禦力降低', raidBuffEireneHitRate: '新星之火・命中率', raidBuffEireneEnhancedNormal: '暗夜契約・普攻強化', raidBuffEireneBarrier: '結界',
+    raidSiviDamageTier: '希維統一增傷檔位', raidSiviDamageTierHint: '目前不記錄每名角色的受擊次數，所有目標統一使用此檔位。', raidSiviDamageTierOption: '本回合受擊 {hits} 次：傷害 +{rate}%',
+    raidIgnoredPerTargetIncomingHitCount: '逐目標受擊次數（使用統一設定檔位）',
+  },
+  en: {
+    raidCharSivi: 'Sivi', raidCharEirene: 'Eirene',
+    raidSkillSiviS1: 'Fortifying Blade', raidSkillSiviS2: 'Life-Stealing Strike', raidSkillEireneS1: 'Weathered Shot', raidSkillEireneS2: 'Astrum / Astrum Natalis',
+    raidBuffSiviReactiveBlade: 'Fortifying Blade · Damage Dealt', raidDebuffEireneDefense: 'Weathered Shot · DEF Down', raidBuffEireneHitRate: 'Astrum Natalis · Hit Rate', raidBuffEireneEnhancedNormal: 'Contract of the Night · Enhanced Normal', raidBuffEireneBarrier: 'Barrier',
+    raidSiviDamageTier: 'Sivi Shared Damage Tier', raidSiviDamageTierHint: 'Incoming hits are not tracked per ally yet, so every recipient uses this tier.', raidSiviDamageTierOption: '{hits} hit(s) this turn: Damage +{rate}%',
+    raidIgnoredPerTargetIncomingHitCount: 'Per-recipient incoming-hit counts (shared configured tier used)',
+  },
+  ja: {
+    raidCharSivi: 'シヴィ', raidCharEirene: 'アイリーン',
+    raidSkillSiviS1: 'リアクティブブレイド', raidSkillSiviS2: 'アブソーブブレイド', raidSkillEireneS1: 'アンティークショット', raidSkillEireneS2: 'アストルム／アストルム・ナタリス',
+    raidBuffSiviReactiveBlade: 'リアクティブブレイド・与ダメージ', raidDebuffEireneDefense: 'アンティークショット・防御力減少', raidBuffEireneHitRate: 'アストルム・ナタリス・命中率', raidBuffEireneEnhancedNormal: '暗き夜の契約・通常攻撃強化', raidBuffEireneBarrier: '結界',
+    raidSiviDamageTier: 'シヴィ共通与ダメージ段階', raidSiviDamageTierHint: '対象ごとの被攻撃回数は未追跡のため、全対象に同じ段階を使用します。', raidSiviDamageTierOption: 'このターンに{hits}回被攻撃：与ダメージ+{rate}%',
+    raidIgnoredPerTargetIncomingHitCount: '対象別の被攻撃回数（共通設定段階を使用）',
+  },
+  ko: {
+    raidCharSivi: '시뷔', raidCharEirene: '아이린',
+    raidSkillSiviS1: '리액티브 블레이드', raidSkillSiviS2: '앱소브 블레이드', raidSkillEireneS1: '앤티크 샷', raidSkillEireneS2: '아스트럼 / 아스트럼 나탈리스',
+    raidBuffSiviReactiveBlade: '리액티브 블레이드 · 피해 증가', raidDebuffEireneDefense: '앤티크 샷 · 방어력 감소', raidBuffEireneHitRate: '아스트럼 나탈리스 · 명중률', raidBuffEireneEnhancedNormal: '어두운 밤의 계약 · 일반 공격 강화', raidBuffEireneBarrier: '결계',
+    raidSiviDamageTier: '시뷔 공통 피해 증가 단계', raidSiviDamageTierHint: '대상별 피격 횟수는 아직 추적하지 않으므로 모든 대상에 같은 단계를 사용합니다.', raidSiviDamageTierOption: '이번 턴 {hits}회 피격: 피해 +{rate}%',
+    raidIgnoredPerTargetIncomingHitCount: '대상별 피격 횟수(공통 설정 단계 사용)',
+  },
+}
+
+for (const [locale, entries] of Object.entries(siviEireneCharacterExtensions)) Object.assign(raidTranslations[locale], entries)

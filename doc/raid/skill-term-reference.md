@@ -598,3 +598,19 @@ eventHooks: [{
 | `calculateRaidElementBonus(lineup, characters)` | 读取静态上阵属性，自动选择天光分配后的最高普通档，并生成幽冥累计加成。 |
 
 普通属性攻击的伤害段使用 `preStatusAttackScale × combatAttackScale`。`attackRate` Modifier只属于后一层；组队加成不生成EffectGroup、不计入Buff数，也不能被复制或解除。
+
+## 配置档位与速度最低的多目标选择（シヴィ、アイリーン）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| config | `scenarioTiers` | 确定性场景档位表；当前值必须是0～4的整数。 |
+| value resolver | `configuredTier` | 使用 `config.scenarioTiers[key]` 作为下标，从角色声明的五档 `values` 中读取数值。 |
+| target selector | `lowestSpeedOthers` | 按配置速度从低到高选择其他友军；配合 `targetCount` 限制人数，同速按站位顺序。 |
+| target selector | `selfAndLowestSpeedOthers` | 先选择自身，再按配置速度从低到高选择其他友军；同速按站位顺序。 |
+| battle event | `normalAttack` | 任意上阵角色完成普通攻击伤害与自身钩子后广播，发生在基础冷却恢复之前。 |
+| condition | `eventSourceHasStatus` | 检查本次事件来源角色是否持有指定运行时状态。 |
+| target selector | `eventSource` | 将效果施加给本次战斗事件的来源角色。 |
+
+シヴィ的 `siviReactiveBladeIncomingHits` 对应本回合受击0/1/2/3/4次，统一映射为30%/54%/72%/84%/90%增伤。该配置只替代尚未实现的逐目标受击计数，不改变真实EffectGroup `5200150101`、四次目标行动持续时间和可解除Buff分类。
+
+アイリーン复用 `skillUsesThresholds` 表示第三次起的S2形态。自身强化普攻在 `afterDamage` 钩子中组合 `cooldownReduction` 与 `removeStatus`；其他友军则由 `normalAttack` 事件监听同样减少事件来源角色的冷却并移除 `10900330201`。两条路径都先减冷却1，再执行本次行动的基础冷却恢复1。

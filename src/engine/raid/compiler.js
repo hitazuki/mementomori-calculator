@@ -76,6 +76,10 @@ function normalizeConfig(config, characters) {
   for (const [key, value] of Object.entries(activationRounds)) {
     if (!Number.isInteger(value) || value < 1 || value > 10) throw new Error(`Invalid raid activation round: ${key}`)
   }
+  const scenarioTiers = { ...defaults.scenarioTiers, ...(config.scenarioTiers ?? {}) }
+  for (const [key, value] of Object.entries(scenarioTiers)) {
+    if (!Number.isInteger(value) || value < 0 || value > 4) throw new Error(`Invalid raid scenario tier: ${key}`)
+  }
   const elementBonus = calculateRaidElementBonus(lineup, characters)
   return {
     lineup, attackPriority, speeds, levels, defensePenetrations, pmDefensePenetrations, criticalDamageBonuses,
@@ -84,7 +88,7 @@ function normalizeConfig(config, characters) {
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
     baseCriticalDamageBonus: legacyCriticalDamageBonus ?? defaults.baseCriticalDamageBonus,
     probabilityOverrides: { ...defaults.probabilityOverrides, ...(config.probabilityOverrides ?? {}) },
-    activationRounds,
+    activationRounds, scenarioTiers,
   }
 }
 
@@ -101,6 +105,9 @@ function compileCondition(condition, mechanics, path, character) {
   if (condition.type === 'configuredActivationRoundReached' && (typeof condition.key !== 'string' || !condition.key)) {
     throw new Error(`Configured activation round condition requires a non-empty key at ${path}`)
   }
+  if (['actorHasStatus', 'eventSourceHasStatus'].includes(condition.type) && (typeof condition.statusId !== 'string' || !condition.statusId)) {
+    throw new Error(`Raid ${condition.type} condition requires a non-empty statusId at ${path}`)
+  }
   return { definition: condition, handler }
 }
 
@@ -109,6 +116,12 @@ function compileValue(value, mechanics, path, character) {
   if (!value || typeof value !== 'object') throw new Error(`Invalid raid value at ${path}`)
   const handler = mechanics.valueResolvers[value.type]
   if (!handler) throw new Error(`Unregistered raid value resolver '${value.type}' at ${path}`)
+  if (value.type === 'configuredTier') {
+    if (typeof value.key !== 'string' || !value.key) throw new Error(`Configured raid tier requires a non-empty key at ${path}`)
+    if (!Array.isArray(value.values) || value.values.length !== 5 || value.values.some(item => !Number.isFinite(item))) {
+      throw new Error(`Configured raid tier requires five finite values at ${path}`)
+    }
+  }
   const compiled = { definition: value, handler }
   if (value.type === 'conditional') compiled.condition = compileCondition(value.condition, mechanics, `${path}.condition`, character)
   return compiled

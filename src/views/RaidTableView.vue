@@ -142,6 +142,12 @@
         <span><strong>{{ $t('raidCandyCerberusReviveRound') }}</strong><small>{{ $t('raidCandyCerberusReviveRoundHint') }}</small></span>
         <span class="raid-number-input"><input v-model.number="activationRounds.candyCerberusKindMagic" type="number" min="1" max="10" step="1" @change="normalizeActivationRound('candyCerberusKindMagic')"><em>{{ $t('raidRoundUnit') }}</em></span>
       </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.SIVI)" class="raid-number-control raid-select-control">
+        <span><strong>{{ $t('raidSiviDamageTier') }}</strong><small>{{ $t('raidSiviDamageTierHint') }}</small></span>
+        <select v-model.number="scenarioTiers.siviReactiveBladeIncomingHits">
+          <option v-for="tier in siviDamageTiers" :key="tier.hits" :value="tier.hits">{{ $t('raidSiviDamageTierOption', { hits: tier.hits, rate: tier.rate }) }}</option>
+        </select>
+      </label>
     </div>
 
     <div class="raid-order-grid">
@@ -273,6 +279,13 @@
         <h3>{{ $t('raidRemovableBuffCount') }}</h3>
         <p class="raid-muted">{{ $t('raidBuffCountTiming') }}</p>
         <dl class="raid-detail-list"><template v-for="id in lineup" :key="`buff-${id}`"><dt><CharacterLabel :id="id" /></dt><dd>{{ selectedEvent.removableBuffCountsAtActionStart[id] }} → {{ selectedEvent.removableBuffCountsAfterAction[id] }}</dd></template></dl>
+        <h3 class="raid-subtitle">{{ $t('raidStatusSnapshot') }}</h3>
+        <dl class="raid-detail-list">
+          <dt>{{ $t('raidCooldownBefore') }}</dt>
+          <dd><ul v-if="actorStatuses(selectedEvent, 'statusSnapshotBeforeAction').length" class="raid-detail-items compact"><li v-for="status in actorStatuses(selectedEvent, 'statusSnapshotBeforeAction')" :key="`before-${status.effectGroupId}-${status.sourceId}-${status.appliedSequence}`">{{ actorStatusText(status) }}</li></ul><span v-else>—</span></dd>
+          <dt>{{ $t('raidCooldownAfter') }}</dt>
+          <dd><ul v-if="actorStatuses(selectedEvent, 'statusSnapshotAfterAction').length" class="raid-detail-items compact"><li v-for="status in actorStatuses(selectedEvent, 'statusSnapshotAfterAction')" :key="`after-${status.effectGroupId}-${status.sourceId}-${status.appliedSequence}`">{{ actorStatusText(status) }}</li></ul><span v-else>—</span></dd>
+        </dl>
         <h3 class="raid-subtitle">{{ $t('raidCooldownTitle') }}</h3>
         <dl class="raid-detail-list"><dt>{{ $t('raidCooldownBefore') }}</dt><dd>S1 {{ selectedEvent.cooldownsBefore.s1 }} · S2 {{ selectedEvent.cooldownsBefore.s2 }}</dd><dt>{{ $t('raidCooldownAfter') }}</dt><dd>S1 {{ selectedEvent.cooldownsAfter.s1 }} · S2 {{ selectedEvent.cooldownsAfter.s2 }}</dd></dl>
       </div>
@@ -280,6 +293,9 @@
       <div class="raid-detail-panel">
         <h3>{{ $t('raidAppliedEffects') }}</h3>
         <ul v-if="selectedEvent.effectsApplied.length" class="raid-detail-items compact"><li v-for="(effect, index) in selectedEvent.effectsApplied" :key="`${effect.type}-${effect.id}-${index}`">{{ effectText(effect) }}</li></ul>
+        <p v-else class="raid-muted">—</p>
+        <h3 class="raid-subtitle">{{ $t('raidExpiredEffects') }}</h3>
+        <ul v-if="selectedEvent.expiredEffects.length" class="raid-detail-items compact"><li v-for="status in selectedEvent.expiredEffects" :key="`expired-${status.effectGroupId}-${status.sourceId}-${status.appliedSequence}`">{{ actorStatusText(status, false) }}</li></ul>
         <p v-else class="raid-muted">—</p>
         <h3 class="raid-subtitle">{{ $t('raidBossStatus') }}</h3>
         <ul v-if="selectedEvent.bossStatusAfterAction.length" class="raid-detail-items compact"><li v-for="status in selectedEvent.bossStatusAfterAction" :key="status.id">{{ bossStatusLabel(status) }}</li></ul>
@@ -391,6 +407,10 @@ const criticalDamagePercents = reactive(Object.fromEntries(Object.entries(defaul
 const guaranteedCritical = ref(defaults.guaranteedCritical)
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
 const activationRounds = reactive({ ...defaults.activationRounds })
+const scenarioTiers = reactive({ ...defaults.scenarioTiers })
+const siviDamageTiers = Object.freeze([
+  { hits: 0, rate: 30 }, { hits: 1, rate: 54 }, { hits: 2, rate: 72 }, { hits: 3, rate: 84 }, { hits: 4, rate: 90 },
+])
 const selectedEvent = ref(null)
 const filteredRoster = computed(() => selectedRosterElement.value == null
   ? roster
@@ -408,6 +428,7 @@ const result = computed(() => simulateRaidTable({
   guaranteedCritical: guaranteedCritical.value,
   probabilityOverrides,
   activationRounds: Object.fromEntries(Object.keys(activationRounds).map(key => [key, normalizedActivationRound(key)])),
+  scenarioTiers: { ...scenarioTiers },
   turns: 10,
 }))
 const currentSpeedOrder = computed(() => result.value.rounds[0]?.actionOrder ?? [])
@@ -496,6 +517,7 @@ function resetConfig() {
   Object.assign(pmDefensePenetrations, next.pmDefensePenetrations)
   Object.assign(criticalDamagePercents, Object.fromEntries(Object.entries(next.criticalDamageBonuses).map(([id, value]) => [id, roundCriticalDamagePercent(value * 100)])))
   Object.assign(activationRounds, next.activationRounds)
+  Object.assign(scenarioTiers, next.scenarioTiers)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
 }
 
@@ -551,6 +573,17 @@ function statusClassLabel(statusClass) {
   return t('raidStatusUnremovable')
 }
 
+function actorStatuses(event, snapshotKey) {
+  return event[snapshotKey]?.[event.actorId]?.statuses ?? []
+}
+
+function actorStatusText(status, includeDuration = true) {
+  const duration = includeDuration
+    ? ` · ${status.remainingActions == null ? t('raidPermanent') : t('raidRemainingActions', { n: status.remainingActions })}`
+    : ''
+  return `${t(status.nameKey)} · ${statusClassLabel(status.statusClass)}${duration}`
+}
+
 function bossDefenseRateSummary(status) {
   return [
     ['raidDefenseRate', status.defenseRatePerStack],
@@ -563,7 +596,11 @@ function effectText(effect) {
   if (effect.skipped) return t('raidEffectSkipped', { effect: t(effect.nameKey) })
   if (effect.type === 'cooldownReduction') return t('raidEffectCooldownReduction', { target: characterName(effect.targetId), n: effect.amount })
   if (effect.type === 'cooldownReset') return t('raidEffectCooldownReset')
-  if (effect.type === 'removeStatus') return t('raidEffectStatusRemoved', { target: characterName(effect.targetId), status: t(effect.nameKey) })
+  if (effect.type === 'removeStatus') {
+    const removedNameKey = effect.nameKey ?? effect.removed?.[0]?.nameKey
+    const status = removedNameKey ? t(removedNameKey) : effect.statusId
+    return t('raidEffectStatusRemoved', { target: characterName(effect.targetId), status })
+  }
   if (effect.type === 'counter') return t('raidEffectCounter', { target: characterName(effect.targetId), effect: t(effect.nameKey), n: effect.after })
   if (effect.type === 'bossStatus') return `${characterName(effect.sourceId)} · ${t('raidEffectBossStatus', { effect: t(effect.nameKey), n: effect.stacks ?? 0 })}`
   if (effect.type === 'status' && effect.copiedFromId != null) return t('raidEffectCopiedStatus', {

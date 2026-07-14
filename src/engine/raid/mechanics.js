@@ -7,10 +7,20 @@ function linearValue(spec, current) {
 export const DEFAULT_RAID_MECHANICS = Object.freeze({
   targetSelectors: Object.freeze({
     self: ({ ownerId }) => [ownerId],
+    eventSource: ({ eventSourceId }) => eventSourceId == null ? [] : [eventSourceId],
     all: ({ config }) => [...config.lineup],
     allOther: ({ ownerId, config }) => config.lineup.filter(id => id !== ownerId),
     topAttackOther: ({ ownerId, config }) => config.attackPriority.filter(id => id !== ownerId),
     selfAndTopAttackOther: ({ ownerId, config }) => [ownerId, ...config.attackPriority.filter(id => id !== ownerId)],
+    lowestSpeedOthers: ({ ownerId, config }) => config.lineup.filter(id => id !== ownerId).sort((left, right) => (
+      config.speeds[left] - config.speeds[right] || config.lineup.indexOf(left) - config.lineup.indexOf(right)
+    )),
+    selfAndLowestSpeedOthers: ({ ownerId, config }) => [
+      ownerId,
+      ...config.lineup.filter(id => id !== ownerId).sort((left, right) => (
+        config.speeds[left] - config.speeds[right] || config.lineup.indexOf(left) - config.lineup.indexOf(right)
+      )),
+    ],
     adjacent: ({ ownerId, config }) => {
       const index = config.lineup.indexOf(ownerId)
       return [config.lineup[index - 1], config.lineup[index + 1]].filter(Boolean)
@@ -80,6 +90,9 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     configuredActivationRoundReached: (condition, { config, round }) => round >= config.activationRounds[condition.key],
     eventTargetsIncludeOwner: (_condition, { eventTargetIds = [], ownerId }) => eventTargetIds.includes(ownerId),
     eventSourceIsOwner: (_condition, { eventSourceId, ownerId }) => eventSourceId === ownerId,
+    eventSourceHasStatus: (condition, { eventSourceId, actors }) => (
+      eventSourceId != null && actors.get(eventSourceId).statuses.some(status => status.id === condition.statusId)
+    ),
     targetElementNot: (condition, { target }) => target.definition.element !== condition.element,
     actorHasStatus: (condition, { actors, ownerId }) => (
       actors.get(ownerId).statuses.some(status => status.id === condition.statusId)
@@ -95,6 +108,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
 
   valueResolvers: Object.freeze({
     fixed: spec => spec.value,
+    configuredTier: (spec, { config }) => spec.values[config.scenarioTiers[spec.key]],
     counterLinear: (spec, { actor }) => linearValue(spec, actor.runtime.counters[spec.counter] ?? 0),
     skillUsesLinear: (spec, { actor }) => linearValue(spec, actor.runtime.skillUses[spec.skillKey] ?? 0),
     previousActionCriticalHitsLinear: (spec, { actor }) => linearValue(spec, actor.runtime.lastActionCriticalHits ?? 0),

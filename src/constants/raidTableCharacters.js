@@ -53,6 +53,9 @@ export function createDefaultRaidTableConfig() {
       candyCerberusKindMagic: 2,
       witchIllyaCurseUnleashed: 2,
     },
+    scenarioTiers: {
+      siviReactiveBladeIncomingHits: 0,
+    },
     turns: 10,
   }
 }

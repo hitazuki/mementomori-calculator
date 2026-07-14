@@ -96,10 +96,10 @@ export function runRaidProgram(program) {
     return compiledValue.handler(compiledValue.definition, { ...context, actor, config, actors, boss, api })
   }
 
-  function resolveTargets(effect, ownerId, targetKey = effect.target, targetCount = effect.targetCount) {
+  function resolveTargets(effect, ownerId, targetKey = effect.target, targetCount = effect.targetCount, context = {}) {
     const selector = mechanics.targetSelectors[targetKey]
     if (!selector) return []
-    let ids = selector({ effect, ownerId, config, actors, boss, api })
+    let ids = selector({ ...context, effect, ownerId, config, actors, boss, api })
     if (effect.targetElement != null) ids = ids.filter(id => actors.get(id).definition.element === effect.targetElement)
     return ids.slice(0, targetCount ?? ids.length)
   }
@@ -193,7 +193,7 @@ export function runRaidProgram(program) {
   }
 
   function applyActorStatusEffect(effect, context) {
-    const targets = resolveTargets(effect, context.ownerId)
+    const targets = resolveTargets(effect, context.ownerId, undefined, undefined, context)
     const selectionCounts = effect.target?.includes('BuffCount') ? removableBuffCounts() : null
     for (const targetId of targets) {
       const target = actors.get(targetId)
@@ -218,7 +218,7 @@ export function runRaidProgram(program) {
   }
 
   function copyActorStatuses(effect, context) {
-    const sourceId = resolveTargets(effect, context.ownerId, effect.sourceTarget, 1)[0]
+    const sourceId = resolveTargets(effect, context.ownerId, effect.sourceTarget, 1, context)[0]
     if (sourceId == null) return
     const source = actors.get(sourceId)
     const sourceStatuses = source.statuses.filter(status => (
@@ -226,7 +226,7 @@ export function runRaidProgram(program) {
       && status.copyable !== false
       && (status.remainingActions == null || status.remainingActions > 0)
     ))
-    for (const targetId of resolveTargets(effect, context.ownerId)) {
+    for (const targetId of resolveTargets(effect, context.ownerId, undefined, undefined, context)) {
       const target = actors.get(targetId)
       for (const sourceStatus of sourceStatuses) {
         const status = applyCopiedStatus(target, sourceStatus, sourceId, context, effect)
@@ -243,7 +243,7 @@ export function runRaidProgram(program) {
   }
 
   function removeActorStatuses(effect, context) {
-    for (const targetId of resolveTargets(effect, context.ownerId)) {
+    for (const targetId of resolveTargets(effect, context.ownerId, undefined, undefined, context)) {
       const target = actors.get(targetId)
       const removed = []
       target.statuses = target.statuses.filter(status => {
@@ -260,7 +260,7 @@ export function runRaidProgram(program) {
   }
 
   function removeActorStatus(effect, context) {
-    for (const targetId of resolveTargets(effect, context.ownerId)) {
+    for (const targetId of resolveTargets(effect, context.ownerId, undefined, undefined, context)) {
       const target = actors.get(targetId)
       const removed = target.statuses.filter(status => status.id === effect.statusId).map(cloneStatus)
       target.statuses = target.statuses.filter(status => status.id !== effect.statusId)
@@ -285,7 +285,7 @@ export function runRaidProgram(program) {
   }
 
   function applyCooldownReductionEffect(effect, context) {
-    for (const targetId of resolveTargets(effect, context.ownerId)) {
+    for (const targetId of resolveTargets(effect, context.ownerId, undefined, undefined, context)) {
       const target = actors.get(targetId)
       const before = { ...target.cooldowns }
       for (const key of ['s1', 's2']) target.cooldowns[key] = Math.max(0, target.cooldowns[key] - effect.amount)
@@ -311,7 +311,7 @@ export function runRaidProgram(program) {
   }
 
   function applySetCooldownEffect(effect, context) {
-    for (const targetId of resolveTargets(effect, context.ownerId)) {
+    for (const targetId of resolveTargets(effect, context.ownerId, undefined, undefined, context)) {
       const target = actors.get(targetId)
       const before = { ...target.cooldowns }
       for (const key of effect.skills ?? ['s1', 's2']) target.cooldowns[key] = Math.max(0, effect.value)
@@ -356,7 +356,7 @@ export function runRaidProgram(program) {
 
   function emitBattleEvent(effect, context) {
     const sourceId = context.ownerId
-    const eventTargetIds = effect.target ? resolveTargets(effect, sourceId) : []
+    const eventTargetIds = effect.target ? resolveTargets(effect, sourceId, undefined, undefined, context) : []
     for (const listener of program.eventListeners[effect.event] ?? []) {
       const actor = actors.get(listener.actorId)
       const listenerContext = {
@@ -636,6 +636,7 @@ export function runRaidProgram(program) {
       const damage = executeDamageSteps(actor, action, { ...context, phase: 'damage' })
       runHooks(actor, action.hooksByTrigger.afterDamage, context, 'afterDamage')
       runHooks(actor, actor.definition.hooksByTrigger.afterDamage, context, 'afterDamage')
+      if (action.key === 'normal') emitBattleEvent({ event: 'normalAttack' }, context)
       actor.runtime.lastActionCriticalHits = damage.criticalHitCount
 
       const cooldownRecovery = Math.max(0, 1 + modifierSnapshot(actor, { ...context, phase: 'actionEnd' }).totals.cooldownRecoveryBonus)

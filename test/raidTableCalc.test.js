@@ -32,7 +32,7 @@ const {
   ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
-  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA,
+  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -51,15 +51,15 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes forty characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 40)
+test('roster exposes forty-two characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 42)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-9), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-11), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -89,6 +89,7 @@ test('default defense config uses Sonya and per-character Lv500 dual penetration
   assert.equal(defaults.probabilityOverrides.mowanoDelay, true)
   assert.equal(defaults.activationRounds.witchIllyaCurseUnleashed, 2)
   assert.equal(defaults.activationRounds.candyCerberusKindMagic, 2)
+  assert.equal(defaults.scenarioTiers.siviReactiveBladeIncomingHits, 0)
   assert.equal(defaults.speeds[CORDIE], 3562)
   assert.equal(defaults.speeds[SUMMER_SABRINA], 3418)
 })
@@ -112,6 +113,9 @@ test('lineups accept one to five unique supported characters', () => {
   assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, {
     activationRounds: { witchIllyaCurseUnleashed: 11 },
   })), /Invalid raid activation round/)
+  assert.throws(() => simulateRaidTable(singleConfig(FLORENCE, {
+    scenarioTiers: { siviReactiveBladeIncomingHits: 5 },
+  })), /Invalid raid scenario tier/)
 })
 
 test('lineup element bonuses follow MB tiers and let Light fill the best non-Dark group', () => {
@@ -521,6 +525,14 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
 
   assert.throws(() => compileRaidProgram(config, environmentFor({
     ...base,
+    eventHooks: [{ event: 'normalAttack', effects: [{
+      type: 'cooldownReduction', target: 'eventSource', amount: 1,
+      condition: { type: 'eventSourceHasStatus', statusId: '' },
+    }] }],
+  })), /eventSourceHasStatus condition requires a non-empty statusId/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
     runtime: { counters: { charge: 0 } },
     hooks: [{ trigger: 'actionStart', effects: [{ type: 'changeCounter', counter: 'charge', amount: 1, record: 'no' }] }],
   })), /changeCounter record must be boolean/)
@@ -552,6 +564,11 @@ test('mechanic registry resolves counters, skill history, conditions, and target
   }), [2, 3, 1])
   assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.eventTargetsIncludeOwner(
     {}, { eventTargetIds: [1, 2], ownerId: 2 },
+  ), true)
+  const eventActors = new Map([[3, { statuses: [{ id: 'enhanced-normal' }] }]])
+  assert.deepEqual(DEFAULT_RAID_MECHANICS.targetSelectors.eventSource({ eventSourceId: 3 }), [3])
+  assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.eventSourceHasStatus(
+    { statusId: 'enhanced-normal' }, { eventSourceId: 3, actors: eventActors },
   ), true)
   assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.counterAtLeast(
     { counter: 'charge', count: 2 }, { actor },
@@ -1383,4 +1400,95 @@ test('A.A. uses reworked EX3 skills and replaces normal attacks with direct MAG 
   assert.equal(normal.damageSteps[0].percent, 330)
   assert.equal(normal.damageSteps[0].originalTargetCount, 3)
   closeTo(normal.symbolicTotals.MAG, 330 * 2.45)
+})
+
+test('Sivi uses one configured incoming-hit tier for every Reactive Blade recipient', () => {
+  const rates = [0.3, 0.54, 0.72, 0.84, 0.9]
+  for (const [tier, rate] of rates.entries()) {
+    const result = simulateRaidTable(singleConfig(SIVI, {
+      turns: 1, scenarioTiers: { siviReactiveBladeIncomingHits: tier },
+    }))
+    const s1 = action(result, 1, SIVI)
+    assert.equal(s1.damageSteps.length, 1)
+    assert.equal(s1.damageSteps[0].percent, 1170)
+    closeTo(s1.damageSteps[0].damageRate, rate)
+    const status = s1.statusSnapshotAtDamage[SIVI].statuses.find(item => item.id === 'sivi-reactive-blade')
+    assert.equal(status.effectGroupId, 5200150101)
+    assert.equal(status.statusClass, RAID_STATUS_CLASSES.REMOVABLE_BUFF)
+    closeTo(status.modifiers[0].copyRate, rate)
+  }
+
+  const lineup = [SIVI, FLORENCE, FENRIR, LUKE, MERTILLIER]
+  const shared = simulateRaidTable({
+    lineup, attackPriority: [...lineup], turns: 1,
+    scenarioTiers: { siviReactiveBladeIncomingHits: 3 },
+  })
+  const s1 = action(shared, 1, SIVI)
+  const recipients = lineup.filter(id => s1.statusSnapshotAfterAction[id].statuses.some(status => status.id === 'sivi-reactive-blade'))
+  assert.deepEqual(recipients, [SIVI, FENRIR, MERTILLIER])
+  for (const id of recipients) {
+    const status = s1.statusSnapshotAfterAction[id].statuses.find(item => item.id === 'sivi-reactive-blade')
+    closeTo(status.modifiers[0].copyRate, 0.84)
+  }
+  assert.deepEqual(actionsFor(shared, SIVI), ['s1'])
+})
+
+test('Eirene applies DEF down before S1 and upgrades every S2 from its third use', () => {
+  const result = simulateRaidTable(singleConfig(EIRENE, { turns: 11 }))
+  assert.deepEqual(actionsFor(result, EIRENE), ['s1', 's2', 'normal', 's1', 's2', 'normal', 's1', 's2', 'normal', 's1', 's2'])
+
+  const s1 = action(result, 1, EIRENE)
+  assert.equal(s1.damageSteps[0].percent, 280)
+  assert.equal(s1.damageSteps[0].originalTargetCount, 5)
+  closeTo(s1.damageSteps[0].defense.defenseRate, -0.25)
+  closeTo(s1.damageSteps[0].defense.actualDefense, 150_000)
+  const defenseDown = s1.bossStatusAfterAction.find(status => status.id === 'eirene-defense-down')
+  assert.equal(defenseDown.effectGroupId, 10900120101)
+  assert.equal(defenseDown.statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF)
+  assert.equal(defenseDown.remainingRounds, 4)
+
+  const firstS2 = action(result, 2, EIRENE)
+  assert.equal(firstS2.damageSteps.length, 4)
+  assert.ok(firstS2.damageSteps.every(step => step.percent === 380))
+  assert.equal(firstS2.removableBuffCountsAtDamage[EIRENE], 0)
+
+  const thirdS2 = action(result, 8, EIRENE)
+  assert.equal(thirdS2.damageSteps.length, 8)
+  assert.ok(thirdS2.damageSteps.every(step => step.percent === 760))
+  assert.equal(thirdS2.removableBuffCountsAtDamage[EIRENE], 1)
+  const hitRate = thirdS2.statusSnapshotAtDamage[EIRENE].statuses.find(status => status.id === 'eirene-natalis-hit-rate')
+  assert.equal(hitRate.effectGroupId, 10900220301)
+  assert.equal(hitRate.statusClass, RAID_STATUS_CLASSES.REMOVABLE_BUFF)
+})
+
+test('Eirene enhanced normal reduces her and the slowest ally cooldowns and retains the ally barrier state', () => {
+  const solo = simulateRaidTable(singleConfig(EIRENE, { turns: 4 }))
+  const normal = action(solo, 3, EIRENE)
+  assert.equal(normal.actionKey, 'normal')
+  assert.deepEqual(normal.cooldownsBefore, { s1: 2, s2: 3 })
+  assert.deepEqual(normal.cooldownsAfter, { s1: 0, s2: 1 })
+  assert.ok(normal.effectsApplied.some(effect => effect.type === 'cooldownReduction' && effect.amount === 1))
+  assert.ok(normal.effectsApplied.some(effect => effect.type === 'removeStatus' && effect.statusId === 'eirene-enhanced-normal-self'))
+  assert.equal(normal.statusSnapshotAfterAction[EIRENE].statuses.some(status => status.id === 'eirene-enhanced-normal-self'), false)
+  assert.equal(action(solo, 4, EIRENE).actionKey, 's1')
+
+  const lineup = [EIRENE, SIVI, MERTILLIER]
+  const team = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 4 })
+  const eirene = action(team, 1, EIRENE)
+  const enhanced = eirene.statusSnapshotBeforeAction[MERTILLIER].statuses.find(status => status.id === 'eirene-enhanced-normal-ally')
+  const barrier = eirene.statusSnapshotBeforeAction[MERTILLIER].statuses.find(status => status.id === 'eirene-barrier')
+  assert.equal(enhanced.effectGroupId, 10900330201)
+  assert.equal(barrier.effectGroupId, 10900440201)
+  assert.equal(enhanced.statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+  assert.equal(barrier.statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+  assert.equal(eirene.statusSnapshotBeforeAction[SIVI].statuses.some(status => status.id === 'eirene-barrier'), false)
+
+  const allyNormal = action(team, 3, MERTILLIER)
+  assert.equal(allyNormal.actionKey, 'normal')
+  assert.deepEqual(allyNormal.cooldownsBefore, { s1: 2, s2: 3 })
+  assert.deepEqual(allyNormal.cooldownsAfter, { s1: 0, s2: 1 })
+  assert.ok(allyNormal.effectsApplied.some(effect => effect.type === 'cooldownReduction' && effect.targetId === MERTILLIER))
+  assert.ok(allyNormal.effectsApplied.some(effect => effect.type === 'removeStatus' && effect.statusId === 'eirene-enhanced-normal-ally'))
+  assert.equal(allyNormal.statusSnapshotAfterAction[MERTILLIER].statuses.some(status => status.id === 'eirene-enhanced-normal-ally'), false)
+  assert.equal(action(team, 4, MERTILLIER).actionKey, 's1')
 })

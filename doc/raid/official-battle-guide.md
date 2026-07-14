@@ -462,7 +462,7 @@ actionEndCooldownRecovery = max(0, 1 + hasten - delay)
 | 阻绝 | `isolationMitigation` | 指定伤害比例减伤，与结界取最强 | 未实现 |
 | 保留1点生命值不死 | `surviveAtOneHp` | 致命伤保留1生命；不可解除/复制/夺取 | 未实现 |
 | 吸收 | `absorbStat` | 对敌附加属性下降，同时获得等量属性增益；弱化失败则无增益 | 未实现 |
-| 普攻强化 | `normalAttackEnhancement` | 修改普攻；不可解除/复制/夺取/改时长，按特殊优先级保留1种 | 未实现 |
+| 普攻强化 | `normalAttackEnhancement` | 修改普攻；不可解除/复制/夺取/改时长，按特殊优先级保留1种 | 部分实现：厄瑞涅的自身/友军强化普攻减冷却 |
 | 自损伤害 | `selfDamage` | 不受防御、增伤/减伤、防护、屏障和免死影响 | 当前只广播事件，不扣生命 |
 | 伤害反弹 | `damageReflection` | 按反弹值与实际承受伤害反弹；必定命中且不计攻击次数 | 未实现 |
 | 反弹伤害 | `reflectedDamage` | 独立伤害类型，受防护/阻绝/不死影响，不受攻防与增伤/承伤影响 | 未实现 |
@@ -588,3 +588,11 @@ afterLethalProtection
 - 雷金娜S1承伤增加为 `SkillCategory=3 / EffectGroupId=13700120201 / EffectTurn=4`；本日志中的实际数值为10%，说明日志目标的状态生效前攻击力不低于雷金娜。
 - 伊利亚「献身」「神咒解放」分别为 `SkillCategory=4 / EffectGroupId=6100300101 / 6100330402`；神咒解放出现后，日志轮转由S1切换到零冷却S2，状态结束后S2不可发动。
 - 克尔柏洛丝在第1回合自身行动后触发保命，并获得 `SkillCategory=4 / EffectGroupId=12900340202 / EffectTurn=4` 的「温柔的魔法」；状态覆盖第2至第5回合自身行动，S1/S2读取强化倍率。
+
+## 17. `45-57-g`日志补充映射
+
+- シヴィ为 `UnitId=52 / BattleCharacterGuid=11`。S1 `ActiveSkillId=52001` 在伤害前给自身及速度最低的其他两人施加 `EffectGroupId=5200150101 / SkillCategory=2`；日志因目标本回合受击次数不同分别记录72%、84%、90%，证明该组是可解除的逐目标动态增伤。当前实现按用户选择统一档位，不声称日志中的三个值相同。
+- シヴィ S1/S2 与MB最高档一致：S1为单次1170%物理伤害，S2为随机4目标530%物理伤害；单Boss投影分别结算1段。伤害回血、净化、己方防御和受击减伤不进入木桩倍率。
+- アイリーン为 `UnitId=109 / BattleCharacterGuid=21`。S1 `ActiveSkillId=109001` 在伤害前写入 `EffectGroupId=10900120101 / SkillCategory=5 / EffectTurn=4`，对应Boss战不可解除的防御力降低25%。
+- アイリーン S2 在第2、5回合仍为 `ActiveSkillId=109002`，第8回合起切换为 `ActiveSkillId=109101`；与MB“第三次起改为アストルム・ナタリス”的 `4×380% → 8×760%` 规则一致。强化形态的命中率状态为 `EffectGroupId=10900220301 / SkillCategory=2`。
+- アイリーン的通常攻击强化在第1、4、7回合开始施加，日志中自身为 `10900320101`、最低速其他友军为 `10900330201`。第1回合 `10900330201` 由 `Guid 21` 施加给 `Guid 31`，类别为 `SkillCategory=4 / EffectTurn=3`；`Guid 31` 第3回合普通攻击（`ActiveSkillId=-1`）时移除该状态，并在第4回合重新发动S1，确认其他友军同样获得减冷却。结界 `10900440201 / SkillCategory=4` 每4回合施加给最低速其他友军，其承伤阻断不在当前木桩模型中计算。
