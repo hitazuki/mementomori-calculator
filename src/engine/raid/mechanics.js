@@ -22,6 +22,12 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       const minimum = Math.min(...candidates.map(id => config.speeds[id]))
       return candidates.filter(id => config.speeds[id] === minimum)
     },
+    highestSpeedOther: ({ ownerId, config }) => {
+      const candidates = config.lineup.filter(id => id !== ownerId)
+      if (!candidates.length) return []
+      const maximum = Math.max(...candidates.map(id => config.speeds[id]))
+      return [candidates.find(id => config.speeds[id] === maximum)]
+    },
     highestBuffCount: ({ config, actors, api }) => {
       const counts = Object.fromEntries(config.lineup.map(id => [id, api.removableBuffCount(actors.get(id))]))
       const maximum = Math.max(...Object.values(counts))
@@ -91,6 +97,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     fixed: spec => spec.value,
     counterLinear: (spec, { actor }) => linearValue(spec, actor.runtime.counters[spec.counter] ?? 0),
     skillUsesLinear: (spec, { actor }) => linearValue(spec, actor.runtime.skillUses[spec.skillKey] ?? 0),
+    previousActionCriticalHitsLinear: (spec, { actor }) => linearValue(spec, actor.runtime.lastActionCriticalHits ?? 0),
     otherLineupElementCountLinear: (spec, { actor, config, actors }) => {
       const count = config.lineup.filter(id => id !== actor.id).filter(id => (
         spec.element === undefined || spec.element === null || actors.get(id).definition.element === spec.element

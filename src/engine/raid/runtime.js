@@ -22,6 +22,7 @@ function snapshotRuntime(actor) {
     flags: { ...actor.runtime.flags },
     skillUses: { ...actor.runtime.skillUses },
     actionCount: actor.runtime.actionCount,
+    lastActionCriticalHits: actor.runtime.lastActionCriticalHits,
   }
 }
 
@@ -63,6 +64,7 @@ export function runRaidProgram(program) {
         flags: { ...(definition.runtime?.flags ?? {}) },
         skillUses: { s1: 0, s2: 0 },
         actionCount: 0,
+        lastActionCriticalHits: 0,
       },
     }]
   }))
@@ -511,6 +513,7 @@ export function runRaidProgram(program) {
     let baseAtkPercent = 0
     let effectiveAtkPercent = 0
     let hitSequence = 0
+    let criticalHitCount = 0
 
     for (const [stepIndex, rawStep] of action.damageSteps.entries()) {
       const percent = resolveValue(rawStep.compiledPercent, actor, context)
@@ -548,6 +551,7 @@ export function runRaidProgram(program) {
         runHooks(actor, action.hooksByTrigger.afterHit, context, 'afterHit')
         runHooks(actor, actor.definition.hooksByTrigger.afterHit, context, 'afterHit')
         if (critical) {
+          criticalHitCount += 1
           runHooks(actor, action.hooksByTrigger.afterCriticalHit, context, 'afterHit')
           runHooks(actor, actor.definition.hooksByTrigger.afterCriticalHit, context, 'afterHit')
           emitBattleEvent({ event: 'criticalHit' }, { ...context, actor, phase: 'afterHit' })
@@ -567,7 +571,7 @@ export function runRaidProgram(program) {
         ...context, phase: 'afterDamageStep', damageStepIndex: stepIndex + 1,
       })
     }
-    return { damageSteps, baseAtkPercent, effectiveAtkPercent, symbolicTotals, scalingTotals: actionScaling }
+    return { damageSteps, baseAtkPercent, effectiveAtkPercent, symbolicTotals, scalingTotals: actionScaling, criticalHitCount }
   }
 
   const rounds = []
@@ -621,6 +625,7 @@ export function runRaidProgram(program) {
       const damage = executeDamageSteps(actor, action, { ...context, phase: 'damage' })
       runHooks(actor, action.hooksByTrigger.afterDamage, context, 'afterDamage')
       runHooks(actor, actor.definition.hooksByTrigger.afterDamage, context, 'afterDamage')
+      actor.runtime.lastActionCriticalHits = damage.criticalHitCount
 
       const cooldownRecovery = Math.max(0, 1 + modifierSnapshot(actor, { ...context, phase: 'actionEnd' }).totals.cooldownRecoveryBonus)
       for (const key of ['s1', 's2']) actor.cooldowns[key] = Math.max(0, actor.cooldowns[key] - cooldownRecovery)

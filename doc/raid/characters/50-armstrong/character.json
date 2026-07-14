@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "characterId": 50,
+  "slug": "armstrong",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [50001, 50002], "passiveSkillIds": [50003, 50004], "combatLogs": ["data/battle-logs/45-57-d2.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 50001, "model": "implemented", "summary": "3目标600%物理伤害；木桩存活时再发动一次。" },
+    { "kind": "activeSkill", "sourceId": 50002, "model": "implemented", "summary": "8段300%物理伤害；高生命木桩分支倍率翻倍。" },
+    { "kind": "passiveSkill", "sourceId": 50003, "model": "implemented", "summary": "永久暴伤提升；每4回合为自身与最高速其他友方提供暴击率状态。" },
+    { "kind": "passiveSkill", "sourceId": 50004, "model": "implemented", "summary": "按上一次行动暴击次数提升下一次行动攻击力，最高40%。" }
+  ],
+  "effectGroups": [
+    { "id": 5000330101, "model": "implemented", "summary": "永久暴击伤害提升。" },
+    { "id": 5000330201, "model": "implemented", "summary": "周期暴击率状态。" },
+    { "id": 5000440202, "model": "implemented", "summary": "上一行动暴击次数转换为攻击提升。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredCriticalRateUp", "summary": "暴击率提升不改变确定暴击场景。" },
+    { "key": "raidIgnoredLowHpGuaranteedHit", "summary": "低生命目标的必中效果不进入倍率。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "木桩模式不模拟弹性防御的受击阻绝与衰减。" }
+  ],
+  "unresolved": []
+}

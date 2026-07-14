@@ -30,7 +30,7 @@ const {
   ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
-  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA,
+  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -49,15 +49,15 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes thirty-six characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 36)
+test('roster exposes thirty-eight characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 38)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-14, -7), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-7, -5), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-5), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-16, -9), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-9, -7), [CORDIE, SUMMER_SABRINA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-7), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -1220,4 +1220,47 @@ test('Witch Illya only selects S2 while God Curse Unleashed is present', () => {
   assert.ok(action(delayed, 4, WITCH_ILLYA).statusSnapshotAfterAction[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-devotion'))
   assert.equal(action(delayed, 5, WITCH_ILLYA).statusSnapshotAtDamage[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-devotion'), false)
   assert.ok(action(delayed, 5, WITCH_ILLYA).statusSnapshotAtDamage[WITCH_ILLYA].statuses.some(status => status.id === 'witch-illya-curse-unleashed'))
+})
+
+test('Lunalynn displays Silence and Poison while leaving Poison DOT at zero', () => {
+  const result = simulateRaidTable(singleConfig(LUNALYNN, { turns: 8 }))
+  assert.deepEqual(actionsFor(result, LUNALYNN), ['s1', 's2', 'normal', 'normal', 'normal', 's2', 'normal', 's1'])
+
+  const s1 = action(result, 1, LUNALYNN)
+  assert.equal(s1.damageSteps[0].percent, 300)
+  assert.equal(s1.damageSteps[0].originalTargetCount, 5)
+  assert.ok(s1.statusSnapshotAtDamage[LUNALYNN].statuses.some(status => status.effectGroupId === 4600160101))
+  const silence = s1.bossStatusAfterAction.find(status => status.id === 'lunalynn-silence')
+  assert.equal(silence.effectGroupId, 4600150202)
+  assert.equal(silence.remainingRounds, 3)
+
+  const s2 = action(result, 2, LUNALYNN)
+  assert.equal(s2.damageSteps[0].percent, 285)
+  const poison = s2.bossStatusAfterAction.find(status => status.id === 'lunalynn-poison')
+  assert.equal(poison.effectGroupId, 4600240102)
+  assert.equal(poison.remainingRounds, 3)
+  assert.equal(poison.damageRatePerStack, 0)
+  assert.ok(s2.statusSnapshotAtDamage[LUNALYNN].statuses.some(status => status.effectGroupId === 4600330101))
+  assert.ok(s2.statusSnapshotAtDamage[LUNALYNN].statuses.some(status => status.effectGroupId === 4600430101))
+})
+
+test('Armstrong reactivates S1 and converts previous-action critical hits into next-action ATK', () => {
+  const lineup = [ARMSTRONG, LUNALYNN]
+  const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 5 })
+  const s1 = action(result, 1, ARMSTRONG)
+  assert.equal(s1.damageSteps.length, 2)
+  assert.ok(s1.damageSteps.every(step => step.percent === 600 && step.originalTargetCount === 3))
+  assert.equal(s1.runtimeAfter.lastActionCriticalHits, 2)
+  assert.ok(s1.statusSnapshotAtDamage[LUNALYNN].statuses.some(status => status.effectGroupId === 5000330201))
+
+  const s2 = action(result, 2, ARMSTRONG)
+  assert.equal(s2.damageSteps.length, 8)
+  assert.ok(s2.damageSteps.every(step => step.percent === 600 && step.attackRate === 0.08))
+  assert.equal(s2.runtimeAfter.lastActionCriticalHits, 8)
+  assert.equal(action(result, 3, ARMSTRONG).damageSteps[0].attackRate, 0.32)
+  assert.equal(action(result, 4, ARMSTRONG).damageSteps[0].attackRate, 0.04)
+  assert.ok(action(result, 5, ARMSTRONG).statusSnapshotAtDamage[ARMSTRONG].statuses.some(status => status.effectGroupId === 5000330201))
+
+  const nonCritical = simulateRaidTable(singleConfig(ARMSTRONG, { turns: 2, guaranteedCritical: false }))
+  assert.equal(action(nonCritical, 2, ARMSTRONG).damageSteps[0].attackRate, 0)
 })

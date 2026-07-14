@@ -34,6 +34,8 @@ import flowerNatasha from './flowerNatasha.js'
 import candyCerberus from './candyCerberus.js'
 import witchPaladia from './witchPaladia.js'
 import witchIllya from './witchIllya.js'
+import lunalynn from './lunalynn.js'
+import armstrong from './armstrong.js'
 import { RAID_JOB_FLAGS } from '../shared.js'
 
 export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
@@ -73,6 +75,8 @@ export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   CANDY_CERBERUS: 129,
   WITCH_PALADIA: 63,
   WITCH_ILLYA: 61,
+  LUNALYNN: 46,
+  ARMSTRONG: 50,
 })
 
 export const RAID_TABLE_ROSTER = Object.freeze([
@@ -112,6 +116,8 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.CANDY_CERBERUS,
   RAID_TABLE_CHARACTER_IDS.WITCH_PALADIA,
   RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA,
+  RAID_TABLE_CHARACTER_IDS.LUNALYNN,
+  RAID_TABLE_CHARACTER_IDS.ARMSTRONG,
 ])
 
 export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
@@ -151,9 +157,11 @@ export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
   129: RAID_JOB_FLAGS.MAGE,
   63: RAID_JOB_FLAGS.SNIPER,
   61: RAID_JOB_FLAGS.WARRIOR,
+  46: RAID_JOB_FLAGS.MAGE,
+  50: RAID_JOB_FLAGS.SNIPER,
 })
 
-const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya]
+const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya, lunalynn, armstrong]
 export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze({
   ...character,
   jobFlags: RAID_TABLE_CHARACTER_JOB_FLAGS[character.id],

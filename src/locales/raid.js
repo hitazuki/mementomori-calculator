@@ -593,3 +593,48 @@ const darkLogCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(darkLogCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const classicDarkCharacterExtensions = {
+  'zh-CN': {
+    raidCharLunalynn: '露娜琳德', raidCharArmstrong: '阿姆斯特朗',
+    raidSkillLunalynnS1: '幽冥冰棺', raidSkillLunalynnS2: '绝望风雪', raidSkillArmstrongS1: '闪击战', raidSkillArmstrongS2: '齐射',
+    raidBuffLunalynnSisterlyBond: '姐妹情深・物理防御', raidBuffLunalynnFrozenHeart: '冰封之心', raidBuffLunalynnCriticalRate: '幽冥冰棺・暴击率', raidDebuffLunalynnSilence: '幽冥冰棺・沉默', raidDebuffLunalynnPoison: '绝望风雪・中毒',
+    raidBuffArmstrongCriticalDamage: '备战・暴击伤害', raidBuffArmstrongCriticalRate: '备战・暴击率', raidBuffArmstrongElasticAttack: '弹性防御・攻击',
+    raidConditionLoggedTargetMagicLower: '按日志采用目标魔力低于露娜琳德的中毒分支', raidConditionBossHpAtLeastHalf: '木桩生命比例不低于50%',
+    raidIgnoredBaseMagicComparisonBranch: '魔力比较的中毒分支（采用日志实测分支）', raidIgnoredLowHpGuaranteedHit: '低生命目标的必定命中效果',
+  },
+  'zh-TW': {
+    raidCharLunalynn: '露娜琳德', raidCharArmstrong: '阿姆斯壯',
+    raidSkillLunalynnS1: '幽冥冰棺', raidSkillLunalynnS2: '絕望風雪', raidSkillArmstrongS1: '閃擊戰', raidSkillArmstrongS2: '齊射',
+    raidBuffLunalynnSisterlyBond: '姊妹情深・物理防禦', raidBuffLunalynnFrozenHeart: '冰封之心', raidBuffLunalynnCriticalRate: '幽冥冰棺・暴擊率', raidDebuffLunalynnSilence: '幽冥冰棺・沉默', raidDebuffLunalynnPoison: '絕望風雪・中毒',
+    raidBuffArmstrongCriticalDamage: '備戰・暴擊傷害', raidBuffArmstrongCriticalRate: '備戰・暴擊率', raidBuffArmstrongElasticAttack: '彈性防禦・攻擊',
+    raidConditionLoggedTargetMagicLower: '依日誌採用目標魔力低於露娜琳德的中毒分支', raidConditionBossHpAtLeastHalf: '木樁生命比例不低於50%',
+    raidIgnoredBaseMagicComparisonBranch: '魔力比較的中毒分支（採用日誌實測分支）', raidIgnoredLowHpGuaranteedHit: '低生命目標的必定命中效果',
+  },
+  en: {
+    raidCharLunalynn: 'Lunalynn', raidCharArmstrong: 'Armstrong',
+    raidSkillLunalynnS1: 'Ice Coffin', raidSkillLunalynnS2: 'Blizzard of Despair', raidSkillArmstrongS1: 'Blitzkrieg Operation', raidSkillArmstrongS2: 'Volley Fire',
+    raidBuffLunalynnSisterlyBond: 'Sisterly Bond · Physical DEF', raidBuffLunalynnFrozenHeart: 'Frozen Heart', raidBuffLunalynnCriticalRate: 'Ice Coffin · Critical', raidDebuffLunalynnSilence: 'Ice Coffin · Silence', raidDebuffLunalynnPoison: 'Blizzard of Despair · Poison',
+    raidBuffArmstrongCriticalDamage: 'Parabellum · Critical Damage', raidBuffArmstrongCriticalRate: 'Parabellum · Critical', raidBuffArmstrongElasticAttack: 'Elastic Defense · ATK',
+    raidConditionLoggedTargetMagicLower: 'Use the logged Poison branch where target MAG is lower than Lunalynn’s', raidConditionBossHpAtLeastHalf: 'Dummy HP is at least 50%',
+    raidIgnoredBaseMagicComparisonBranch: 'MAG-comparison Poison branch (combat-log branch used)', raidIgnoredLowHpGuaranteedHit: 'Guaranteed hit against low-HP targets',
+  },
+  ja: {
+    raidCharLunalynn: 'ルナリンド', raidCharArmstrong: 'アームストロング',
+    raidSkillLunalynnS1: 'アイスコフィン', raidSkillLunalynnS2: 'ディスペアード', raidSkillArmstrongS1: '電撃作戦', raidSkillArmstrongS2: '一斉射撃',
+    raidBuffLunalynnSisterlyBond: '姉妹の絆・物理防御力', raidBuffLunalynnFrozenHeart: '凍てついた心', raidBuffLunalynnCriticalRate: 'アイスコフィン・クリティカル率', raidDebuffLunalynnSilence: 'アイスコフィン・沈黙', raidDebuffLunalynnPoison: 'ディスペアード・毒',
+    raidBuffArmstrongCriticalDamage: 'パラ・ベラム・クリティカルダメージ', raidBuffArmstrongCriticalRate: 'パラ・ベラム・クリティカル率', raidBuffArmstrongElasticAttack: '弾性防御・攻撃力',
+    raidConditionLoggedTargetMagicLower: 'ログで確認した対象の魔力がルナリンド未満の毒分岐を使用', raidConditionBossHpAtLeastHalf: 'ダミーのHPが50%以上',
+    raidIgnoredBaseMagicComparisonBranch: '魔力比較による毒分岐（ログ確認分岐を使用）', raidIgnoredLowHpGuaranteedHit: '低HP対象への必中効果',
+  },
+  ko: {
+    raidCharLunalynn: '루나린드', raidCharArmstrong: '암스트롱',
+    raidSkillLunalynnS1: '아이스 코핀', raidSkillLunalynnS2: '디스페어드', raidSkillArmstrongS1: '전격전', raidSkillArmstrongS2: '일제 사격',
+    raidBuffLunalynnSisterlyBond: '자매의 인연・물리 방어력', raidBuffLunalynnFrozenHeart: '얼어붙은 마음', raidBuffLunalynnCriticalRate: '아이스 코핀・치명타율', raidDebuffLunalynnSilence: '아이스 코핀・침묵', raidDebuffLunalynnPoison: '디스페어드・독',
+    raidBuffArmstrongCriticalDamage: '파라벨룸・치명타 피해', raidBuffArmstrongCriticalRate: '파라벨룸・치명타율', raidBuffArmstrongElasticAttack: '탄성 방어・공격력',
+    raidConditionLoggedTargetMagicLower: '로그에서 확인한 대상 마력이 루나린드보다 낮은 독 분기 적용', raidConditionBossHpAtLeastHalf: '더미 HP가 50% 이상',
+    raidIgnoredBaseMagicComparisonBranch: '마력 비교 독 분기(로그 확인 분기 적용)', raidIgnoredLowHpGuaranteedHit: '낮은 HP 대상에 대한 필중 효과',
+  },
+}
+
+for (const [locale, entries] of Object.entries(classicDarkCharacterExtensions)) Object.assign(raidTranslations[locale], entries)

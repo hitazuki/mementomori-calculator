@@ -1,0 +1,30 @@
+{
+  "formatVersion": 1,
+  "characterId": 46,
+  "slug": "lunalynn",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [46001, 46002], "passiveSkillIds": [46003, 46004], "combatLogs": ["data/battle-logs/45-57-d2.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 46001, "model": "implemented", "summary": "300%魔法伤害；伤害前暴击率状态；暴击后沉默。" },
+    { "kind": "activeSkill", "sourceId": 46002, "model": "implemented", "summary": "285%魔法伤害，并按日志分支施加3回合中毒。" },
+    { "kind": "passiveSkill", "sourceId": 46003, "model": "implemented", "summary": "全体物理防御状态显示。" },
+    { "kind": "passiveSkill", "sourceId": 46004, "model": "implemented", "summary": "自身减伤与吸血状态显示。" }
+  ],
+  "effectGroups": [
+    { "id": 4600160101, "model": "implemented", "summary": "幽冥冰棺暴击率。" },
+    { "id": 4600150202, "model": "implemented", "summary": "沉默状态。" },
+    { "id": 4600240102, "model": "implemented", "summary": "中毒显示，DOT伤害不结算。" },
+    { "id": 4600330101, "model": "implemented", "summary": "姐妹情深。" },
+    { "id": 4600430101, "model": "implemented", "summary": "冰封之心。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredCriticalRateUp", "summary": "暴击率提升不改变确定暴击场景。" },
+    { "key": "raidIgnoredSilence", "summary": "木桩不行动，沉默仅显示。" },
+    { "key": "raidIgnoredBaseMagicComparisonBranch", "summary": "使用战斗日志确认的魔力比较分支。" },
+    { "key": "raidIgnoredDotDamage", "summary": "中毒状态显示，但不结算DOT伤害。" },
+    { "key": "raidIgnoredDefenseBuff", "summary": "己方物理防御不影响输出。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "自身承伤降低不进入木桩输出。" },
+    { "key": "raidIgnoredHpDrain", "summary": "吸血不结算。" }
+  ],
+  "unresolved": []
+}
