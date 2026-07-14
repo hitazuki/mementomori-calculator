@@ -1,0 +1,31 @@
+{
+  "formatVersion": 1,
+  "characterId": 109,
+  "slug": "eirene",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [109001, 109002],
+    "passiveSkillIds": [109003, 109004, 109005],
+    "combatLogs": ["data/battle-logs/45-57-g.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 109001, "model": "implemented", "summary": "S1 applies an unremovable four-round DEF -25% status before one 280% ATK dummy hit." },
+    { "kind": "activeSkill", "sourceId": 109002, "model": "implemented", "summary": "S2 uses 4 hits at 380% for its first two activations and Astrum Natalis, 8 hits at 760%, from the third activation." },
+    { "kind": "passiveSkill", "sourceId": 109003, "model": "implemented", "summary": "Every three rounds, enhanced normal is granted to self and the slowest other ally; either recipient's enhanced normal reduces that actor's cooldowns by one." },
+    { "kind": "passiveSkill", "sourceId": 109004, "model": "outOfScope", "summary": "Barrier states are retained for display; their incoming damage blocking is not calculated." },
+    { "kind": "passiveSkill", "sourceId": 109005, "model": "implemented", "summary": "Internal skill replacement marker is represented by S2 use-history thresholds." }
+  ],
+  "effectGroups": [
+    { "id": 10900120101, "model": "implemented", "summary": "Unremovable Boss DEF -25% for four rounds." },
+    { "id": 10900220301, "model": "implemented", "summary": "Removable hit-rate buff on Astrum Natalis; retained for Buff count only." },
+    { "id": 10900320101, "model": "implemented", "summary": "Self enhanced-normal state." },
+    { "id": 10900330201, "model": "implemented", "summary": "Slowest-other-ally enhanced-normal state; consumed after that ally's normal attack reduces both skill cooldowns by one." },
+    { "id": 10900440201, "model": "implemented", "summary": "Unremovable barrier state retained without incoming-damage calculation." }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHitRateUp", "summary": "Hit rate does not change deterministic dummy damage." },
+    { "key": "raidIgnoredDebuffCleanse", "summary": "Enhanced-normal debuff cleansing is not simulated." },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "Self and barrier incoming damage blocking are not simulated." }
+  ],
+  "unresolved": []
+}

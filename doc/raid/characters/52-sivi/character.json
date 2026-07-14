@@ -1,0 +1,30 @@
+{
+  "formatVersion": 1,
+  "characterId": 52,
+  "slug": "sivi",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [52001, 52002],
+    "passiveSkillIds": [52003, 52004],
+    "combatLogs": ["data/battle-logs/45-57-g.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 52001, "model": "implemented", "summary": "S1 deals 1170% ATK physical damage and grants four-action damage dealt up to self and the two slowest other allies." },
+    { "kind": "activeSkill", "sourceId": 52002, "model": "implemented", "summary": "S2 projects its four-target 530% ATK physical attack onto the single raid dummy." },
+    { "kind": "passiveSkill", "sourceId": 52003, "model": "outOfScope", "summary": "Self and adjacent ally defense buffs do not affect outgoing damage against a non-attacking dummy." },
+    { "kind": "passiveSkill", "sourceId": 52004, "model": "outOfScope", "summary": "Debuff cleansing and incoming damage reduction are outside the current dummy model." }
+  ],
+  "effectGroups": [
+    { "id": 5200150101, "model": "implemented", "summary": "Removable damage dealt buff; one configured 0-4 incoming-hit tier is shared by all recipients." },
+    { "id": 5200330101, "model": "outOfScope", "summary": "Adjacent ally DEF and physical DEF increase." },
+    { "id": 5200330201, "model": "outOfScope", "summary": "Self DEF and physical DEF increase." }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHealing", "summary": "Damage-based healing is not calculated." },
+    { "key": "raidIgnoredDebuffCleanse", "summary": "Debuff cleansing is not simulated." },
+    { "key": "raidIgnoredDefenseBuff", "summary": "Ally-side defense buffs have no outgoing-damage effect on the dummy." },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "Incoming damage reduction is not simulated." },
+    { "key": "raidIgnoredPerTargetIncomingHitCount", "summary": "Per-recipient incoming-hit history is replaced by one shared configured tier." }
+  ],
+  "unresolved": []
+}
