@@ -638,3 +638,28 @@ const classicDarkCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(classicDarkCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const revisedDarkCharacterExtensions = {
+  'zh-CN': {
+    raidCharValeriede: '瓦尔丽黛', raidCharAa: 'A.A.', raidSkillValeriedeS1: '神怒之爆炎', raidSkillValeriedeS2: '炎龙的恸哭', raidSkillAaS1: '锈铁之剑芒', raidSkillAaS2: '限制器解除', raidSkillAaEnhancedNormal: '最佳杰作・强化普攻',
+    raidBuffValeriedeFerventAttack: '斗志的烈焰・攻击', raidBuffValeriedeBlaze: '斗志的烈焰・焰', raidIgnoredKillFlameExtension: '击杀延长「焰」的持续时间',
+  },
+  'zh-TW': {
+    raidCharValeriede: '瓦爾麗黛', raidCharAa: 'A.A.', raidSkillValeriedeS1: '神怒之爆炎', raidSkillValeriedeS2: '炎龍的慟哭', raidSkillAaS1: '鏽鐵之劍芒', raidSkillAaS2: '限制器解除', raidSkillAaEnhancedNormal: '最佳傑作・強化普攻',
+    raidBuffValeriedeFerventAttack: '鬥志的烈焰・攻擊', raidBuffValeriedeBlaze: '鬥志的烈焰・焰', raidIgnoredKillFlameExtension: '擊殺延長「焰」的持續時間',
+  },
+  en: {
+    raidCharValeriede: 'Valeriede', raidCharAa: 'A.A.', raidSkillValeriedeS1: 'Explosive Nemesis', raidSkillValeriedeS2: 'Fire Dragon’s Wail', raidSkillAaS1: 'Severing Rust', raidSkillAaS2: 'Limiter Release', raidSkillAaEnhancedNormal: 'The Perfect Specimen · Enhanced Normal',
+    raidBuffValeriedeFerventAttack: 'Fervent Blaze · ATK', raidBuffValeriedeBlaze: 'Fervent Blaze · Blaze', raidIgnoredKillFlameExtension: 'Blaze duration extension after a kill',
+  },
+  ja: {
+    raidCharValeriede: 'ヴァルリーデ', raidCharAa: 'Ａ.Ａ.', raidSkillValeriedeS1: 'バーストネメシス', raidSkillValeriedeS2: '炎龍の慟哭', raidSkillAaS1: '錆鉄の剣閃', raidSkillAaS2: 'リミッター解除', raidSkillAaEnhancedNormal: '最高傑作・強化通常攻撃',
+    raidBuffValeriedeFerventAttack: '闘志の焔・攻撃力', raidBuffValeriedeBlaze: '闘志の焔・焔', raidIgnoredKillFlameExtension: '撃破による「焔」のターン延長',
+  },
+  ko: {
+    raidCharValeriede: '발리데', raidCharAa: 'A.A.', raidSkillValeriedeS1: '버스트 네메시스', raidSkillValeriedeS2: '염룡의 통곡', raidSkillAaS1: '녹슨 검의 섬광', raidSkillAaS2: '리미터 해제', raidSkillAaEnhancedNormal: '최고의 걸작・강화 일반 공격',
+    raidBuffValeriedeFerventAttack: '투지의 화염・공격력', raidBuffValeriedeBlaze: '투지의 화염・화염', raidIgnoredKillFlameExtension: '처치로 인한 「화염」 지속 턴 연장',
+  },
+}
+
+for (const [locale, entries] of Object.entries(revisedDarkCharacterExtensions)) Object.assign(raidTranslations[locale], entries)

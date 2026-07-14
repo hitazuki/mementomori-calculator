@@ -18,6 +18,7 @@ export const RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES = Object.freeze({
   [RAID_TABLE_CHARACTER_IDS.CANDY_CERBERUS]: Object.freeze({ defensePenetration: 7_000 }),
   [RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA]: Object.freeze({ defensePenetration: 7_000, criticalDamageBonus: 0.35 }),
   [RAID_TABLE_CHARACTER_IDS.ARMSTRONG]: Object.freeze({ criticalDamageBonus: 0.35 }),
+  [RAID_TABLE_CHARACTER_IDS.AA]: Object.freeze({ criticalDamageBonus: 0.35 }),
 })
 
 export const DEFAULT_RAID_LINEUP = Object.freeze(RAID_TABLE_ROSTER.slice(0, 5))

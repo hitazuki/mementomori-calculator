@@ -31,7 +31,7 @@ const {
   ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
-  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG,
+  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -50,15 +50,15 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes thirty-eight characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 38)
+test('roster exposes forty characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 40)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-16, -9), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-9, -7), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-7), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-9), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -75,6 +75,7 @@ test('default defense config uses Sonya and per-character Lv500 dual penetration
   assert.equal(defaults.criticalDamageBonuses[CORDIE], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + 0.35)
   assert.equal(defaults.criticalDamageBonuses[WITCH_ILLYA], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + 0.35)
   assert.equal(defaults.criticalDamageBonuses[ARMSTRONG], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + 0.35)
+  assert.equal(defaults.criticalDamageBonuses[AA], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + 0.35)
   assert.equal(defaults.criticalDamageBonuses[FLORENCE], DEFAULT_RAID_CRITICAL_DAMAGE_BONUS)
   assert.equal(RAID_BOSS_TEMPLATES.sonya.defense, 200_000)
   assert.equal(RAID_BOSS_TEMPLATES.luke.physicalDefense, 600_000)
@@ -1297,4 +1298,38 @@ test('Armstrong reactivates S1 and converts previous-action critical hits into n
 
   const nonCritical = simulateRaidTable(singleConfig(ARMSTRONG, { turns: 2, guaranteedCritical: false }))
   assert.equal(action(nonCritical, 2, ARMSTRONG).damageSteps[0].attackRate, 0)
+})
+
+test('Valeriede uses the current reworked MB rotation and permanent-dummy S2 branch', () => {
+  const result = simulateRaidTable(singleConfig(VALERIEDE, { turns: 6 }))
+  assert.deepEqual(actionsFor(result, VALERIEDE), ['s1', 's2', 'normal', 'normal', 's1', 's2'])
+  const s1 = action(result, 1, VALERIEDE)
+  assert.equal(s1.damageSteps.length, 10)
+  assert.ok(s1.damageSteps.every(step => step.percent === 380 && step.attackRate === 0.7))
+  assert.ok(s1.statusSnapshotAtDamage[VALERIEDE].statuses.some(status => status.effectGroupId === 4700340001))
+  const s2 = action(result, 2, VALERIEDE)
+  assert.equal(s2.damageSteps.length, 6)
+  assert.ok(s2.damageSteps.every(step => step.percent === 620 && step.conditionKey === 'raidConditionDummySurvives'))
+  assert.equal(s2.statusSnapshotAfterAction[VALERIEDE].statuses.some(status => status.effectGroupId === 4700340001), false)
+  assert.ok(s2.statusSnapshotAfterAction[VALERIEDE].statuses.some(status => status.effectGroupId === 4700330101))
+})
+
+test('A.A. uses reworked EX3 skills and replaces normal attacks with direct MAG damage', () => {
+  const result = simulateRaidTable(singleConfig(AA, { turns: 4 }))
+  assert.deepEqual(actionsFor(result, AA), ['s1', 's2', 'normal', 'normal'])
+  const s1 = action(result, 1, AA)
+  assert.equal(s1.damageSteps.length, 4)
+  assert.ok(s1.damageSteps.every(step => step.percent === 710 && step.damageType === 'mag' && step.criticalMultiplier === 2.45))
+  const s2 = action(result, 2, AA)
+  assert.equal(s2.damageSteps.length, 1)
+  assert.equal(s2.damageSteps[0].stat, 'MAG')
+  assert.equal(s2.damageSteps[0].percent, 980)
+  assert.equal(s2.damageSteps[0].originalTargetCount, 4)
+  assert.equal(s2.damageSteps[0].defenseMultiplier, 1)
+  closeTo(s2.symbolicTotals.MAG, 980 * 2.45)
+  const normal = action(result, 3, AA)
+  assert.equal(normal.damageSteps[0].stat, 'MAG')
+  assert.equal(normal.damageSteps[0].percent, 330)
+  assert.equal(normal.damageSteps[0].originalTargetCount, 3)
+  closeTo(normal.symbolicTotals.MAG, 330 * 2.45)
 })

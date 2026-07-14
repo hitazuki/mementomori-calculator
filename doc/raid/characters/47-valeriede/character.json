@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "characterId": 47,
+  "slug": "valeriede",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [47001, 47002], "passiveSkillIds": [47003, 47004, 47005], "combatLogs": ["data/battle-logs/41-60-d.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 47001, "model": "implemented", "summary": "当前MB与日志均为10段380%物理伤害。" },
+    { "kind": "activeSkill", "sourceId": 47002, "model": "implemented", "summary": "永久存活木桩采用未击杀分支，共6段620%物理伤害。" },
+    { "kind": "passiveSkill", "sourceId": 47003, "model": "implemented", "summary": "满生命木桩场景常驻攻击+70%，并显示开战2回合的焰。" },
+    { "kind": "passiveSkill", "sourceId": 47004, "model": "ignored", "summary": "低生命受击减伤、再生与解除条件不进入输出模型。" },
+    { "kind": "passiveSkill", "sourceId": 47005, "model": "ignored", "summary": "主动技能恢复相关隐藏被动不影响倍率。" }
+  ],
+  "effectGroups": [
+    { "id": 4700330101, "model": "implemented", "summary": "斗志的烈焰攻击状态，日志确认SkillCategory=4。" },
+    { "id": 4700340001, "model": "implemented", "summary": "焰状态，日志确认SkillCategory=4、初始2回合。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHealing", "summary": "技能恢复和再生不结算。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "焰与劫火魔女的承伤降低不结算。" },
+    { "key": "raidIgnoredKillFollowup", "summary": "木桩永久存活，不进入击杀后的5目标追击。" },
+    { "key": "raidIgnoredKillFlameExtension", "summary": "木桩永久存活，不延长焰。" }
+  ],
+  "unresolved": []
+}

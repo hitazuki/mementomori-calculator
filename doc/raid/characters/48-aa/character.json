@@ -1,0 +1,20 @@
+{
+  "formatVersion": 1,
+  "characterId": 48,
+  "slug": "aa",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [48001, 48002], "passiveSkillIds": [48003, 48004, 48005], "combatLogs": ["data/battle-logs/41-60-d.json"] },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 48001, "model": "implemented", "summary": "当前MB与日志均为4段710%魔法伤害。" },
+    { "kind": "activeSkill", "sourceId": 48002, "model": "implemented", "summary": "当前EX3为4目标魔力980%直接伤害，单木桩投影1段。" },
+    { "kind": "passiveSkill", "sourceId": 48003, "model": "implemented", "summary": "普攻替换为3目标魔力330%直接伤害，单木桩投影1段。" },
+    { "kind": "passiveSkill", "sourceId": 48004, "model": "ignored", "summary": "承伤阻绝不进入木桩输出。" },
+    { "kind": "passiveSkill", "sourceId": 48005, "model": "ignored", "summary": "日志确认伤害后恢复，当前不结算治疗。" }
+  ],
+  "effectGroups": [],
+  "ignored": [
+    { "key": "raidIgnoredHealing", "summary": "主动技能与强化普攻后的恢复不结算。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "爱的天使承伤阻绝不结算。" }
+  ],
+  "unresolved": []
+}

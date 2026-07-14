@@ -36,6 +36,8 @@ import witchPaladia from './witchPaladia.js'
 import witchIllya from './witchIllya.js'
 import lunalynn from './lunalynn.js'
 import armstrong from './armstrong.js'
+import valeriede from './valeriede.js'
+import aa from './aa.js'
 import { RAID_JOB_FLAGS } from '../shared.js'
 
 export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
@@ -77,6 +79,8 @@ export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   WITCH_ILLYA: 61,
   LUNALYNN: 46,
   ARMSTRONG: 50,
+  VALERIEDE: 47,
+  AA: 48,
 })
 
 export const RAID_TABLE_ROSTER = Object.freeze([
@@ -118,6 +122,8 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA,
   RAID_TABLE_CHARACTER_IDS.LUNALYNN,
   RAID_TABLE_CHARACTER_IDS.ARMSTRONG,
+  RAID_TABLE_CHARACTER_IDS.VALERIEDE,
+  RAID_TABLE_CHARACTER_IDS.AA,
 ])
 
 export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
@@ -159,9 +165,11 @@ export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
   61: RAID_JOB_FLAGS.WARRIOR,
   46: RAID_JOB_FLAGS.MAGE,
   50: RAID_JOB_FLAGS.SNIPER,
+  47: RAID_JOB_FLAGS.WARRIOR,
+  48: RAID_JOB_FLAGS.MAGE,
 })
 
-const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya, lunalynn, armstrong]
+const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya, lunalynn, armstrong, valeriede, aa]
 export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze({
   ...character,
   jobFlags: RAID_TABLE_CHARACTER_JOB_FLAGS[character.id],
