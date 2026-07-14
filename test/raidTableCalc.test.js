@@ -21,6 +21,7 @@ import {
 import {
   DEFAULT_RAID_ENVIRONMENT,
   DEFAULT_RAID_MECHANICS,
+  calculateRaidElementBonus,
   compileRaidProgram,
   simulateRaidTable,
 } from '../src/engine/raidTableCalc.js'
@@ -113,6 +114,56 @@ test('lineups accept one to five unique supported characters', () => {
   })), /Invalid raid activation round/)
 })
 
+test('lineup element bonuses follow MB tiers and let Light fill the best non-Dark group', () => {
+  const bonus = lineup => calculateRaidElementBonus(lineup, RAID_TABLE_CHARACTERS)
+
+  assert.deepEqual(bonus([FLORENCE]).normal, { phase: 0, hpRate: 0, attackRate: 0 })
+  assert.deepEqual(bonus([LUKE, MERLYN, MERTILLIER]).normal, { phase: 1, hpRate: 0.1, attackRate: 0.1 })
+  assert.deepEqual(bonus([LUKE, MERLYN, MERTILLIER, FLORENCE, FENRIR]).normal, { phase: 2, hpRate: 0.15, attackRate: 0.15 })
+  assert.deepEqual(bonus([LUKE, MERLYN, MERTILLIER, MILLA, FLORENCE]).normal, { phase: 3, hpRate: 0.2, attackRate: 0.15 })
+  assert.deepEqual(bonus([LUKE, MERLYN, MERTILLIER, MILLA, EIDENE]).normal, { phase: 4, hpRate: 0.25, attackRate: 0.25 })
+  assert.equal(bonus([LUKE, MERLYN, MERTILLIER, FLORENCE, LIBERIA]).normal.phase, 3)
+  assert.equal(bonus([LUKE, MERLYN, FLORENCE, FENRIR, LIBERIA]).normal.phase, 2)
+})
+
+test('formation ATK is a pre-status multiplier and temporary ATK buffs multiply after it', () => {
+  const result = simulateRaidTable({ turns: 1 })
+  const step = action(result, 1, FLORENCE).damageSteps[0]
+
+  assert.equal(result.config.elementBonus.normal.attackRate, 0.15)
+  closeTo(step.preStatusAttackScale, 1.15)
+  closeTo(step.combatAttackScale, 1.3)
+  closeTo(step.attackScale, 1.15 * 1.3)
+  closeTo(step.effectivePercent, 525 * 1.15 * 1.3 * 1.6 * 2.1 * step.defenseMultiplier)
+})
+
+test('Dark formation bonuses add pre-status penetration and critical damage cumulatively', () => {
+  const shizuSolo = simulateRaidTable(singleConfig(SPRING_SHIZU, { turns: 1 }))
+  const shizuWithDark = simulateRaidTable({
+    lineup: [SPRING_SHIZU, REGINA], attackPriority: [SPRING_SHIZU, REGINA], turns: 1,
+  })
+  const soloDefenseTerm = action(shizuSolo, 1, SPRING_SHIZU).damageSteps[0].scalingTerms.find(term => term.kind === 'targetBaseDefenseOverTargetAttack')
+  const darkDefenseTerm = action(shizuWithDark, 1, SPRING_SHIZU).damageSteps[0].scalingTerms.find(term => term.kind === 'targetBaseDefenseOverTargetAttack')
+  closeTo(darkDefenseTerm.coefficient, soloDefenseTerm.coefficient * 1.25)
+
+  const threeDark = simulateRaidTable({
+    lineup: [FLOWER_NATASHA, CANDY_CERBERUS, WITCH_ILLYA],
+    attackPriority: [FLOWER_NATASHA, CANDY_CERBERUS, WITCH_ILLYA], turns: 1,
+  })
+  const illyaStep = action(threeDark, 1, WITCH_ILLYA).damageSteps[0]
+  assert.equal(threeDark.config.elementBonus.dark.defensePenetration, 1_000)
+  assert.equal(illyaStep.defense.panelDefensePenetration, DEFAULT_RAID_DEFENSE_PENETRATION + 7_000)
+  assert.equal(illyaStep.defense.baseDefensePenetration, DEFAULT_RAID_DEFENSE_PENETRATION + 8_000)
+  closeTo(illyaStep.defense.defensePenetration, (DEFAULT_RAID_DEFENSE_PENETRATION + 8_000) * 1.4)
+
+  const fiveDark = simulateRaidTable({
+    lineup: [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA],
+    attackPriority: [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA], turns: 1,
+  })
+  assert.equal(fiveDark.config.elementBonus.dark.criticalDamageBonus, 0.3)
+  closeTo(action(fiveDark, 1, WITCH_ILLYA).damageSteps[0].criticalMultiplier, 2.75)
+})
+
 test('Boss template and per-character level and penetration settings change defense pass rates', () => {
   const sonya = simulateRaidTable(singleConfig(FLORENCE, { turns: 1 }))
   const luke = simulateRaidTable(singleConfig(FLORENCE, {
@@ -202,7 +253,7 @@ test('Florence damage bonus and two Luke stacks add in one damage-rate channel',
   const florence = action(result, 1, FLORENCE)
   assert.equal(florence.damageSteps.length, 10)
   assert.ok(florence.damageSteps.every(step => Math.abs(step.damageRate - 0.6) < 1e-12))
-  closeTo(florence.damageSteps[0].effectivePercent, 525 * 1.3 * 1.6 * 2.1 * florence.damageSteps[0].defenseMultiplier)
+  closeTo(florence.damageSteps[0].effectivePercent, 525 * 1.15 * 1.3 * 1.6 * 2.1 * florence.damageSteps[0].defenseMultiplier)
 })
 
 test('job flags select physical or magic defense while direct damage bypasses both paths', () => {
@@ -264,7 +315,7 @@ test('Florence and Luke retain their zero-rate Boss debuffs with source and remo
 
 test('default lineup has a stable defense-aware golden total', () => {
   const result = simulateRaidTable()
-  closeTo(result.teamAtkPercent, 159836.93406942682, 1e-7)
+  closeTo(result.teamAtkPercent, 183812.4741798407, 1e-7)
   closeTo(result.symbolicTotals.STR, 6964.65, 1e-8)
 })
 
@@ -686,7 +737,7 @@ test('Liebes Flowing Time selects one other ally and uses binary debuffed-enemy 
   assert.ok(first.statusSnapshotAtDamage[LIEBES].statuses.some(status => status.effectGroupId === 10200330101))
   const second = action(result, 2, LIEBES)
   assert.ok(second.statusSnapshotAtDamage[LIEBES].statuses.some(status => status.effectGroupId === 10200330102))
-  assert.ok(second.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 252 * second.damageSteps[0].defenseMultiplier) < 1e-12))
+  assert.ok(second.damageSteps[0].scalingTerms.some(term => Math.abs(term.coefficient - 252 * 1.1 * second.damageSteps[0].defenseMultiplier) < 1e-12))
 })
 
 test('Mifri gains Flame Lamp on each action, hastens cooldown recovery, and upgrades third skill uses', () => {
@@ -1228,9 +1279,9 @@ test('Witch Illya only selects S2 while God Curse Unleashed is present', () => {
     attackPriority: [FLOWER_NATASHA, CANDY_CERBERUS, WITCH_ILLYA], turns: 1,
   })
   const penetration = action(penetrationResult, 1, WITCH_ILLYA).damageSteps[0].defense
-  assert.equal(penetration.baseDefensePenetration, 18_950)
+  assert.equal(penetration.baseDefensePenetration, 19_950)
   assert.equal(penetration.defensePenetrationRate, 0.4)
-  assert.equal(penetration.defensePenetration, 26_530)
+  assert.equal(penetration.defensePenetration, 27_930)
 
   const solo = simulateRaidTable(singleConfig(WITCH_ILLYA, { turns: 9 }))
   assert.deepEqual(actionsFor(solo, WITCH_ILLYA).slice(0, 5), ['s1', 's2', 's2', 's2', 's1'])

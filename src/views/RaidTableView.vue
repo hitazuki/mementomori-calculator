@@ -66,6 +66,12 @@
     <p v-else class="raid-roster-empty">{{ $t('raidNoCharactersForElement') }}</p>
 
     <div class="raid-assumption-grid">
+      <div class="raid-number-control">
+        <span>
+          <strong>{{ $t('raidElementBonusTitle') }}</strong>
+          <small v-for="line in elementBonusLines" :key="line">{{ line }}</small>
+        </span>
+      </div>
       <label class="raid-number-control raid-select-control">
         <span><strong>{{ $t('raidBossTemplate') }}</strong><small>{{ bossTemplateStats }}</small></span>
         <select v-model="bossTemplateId">
@@ -405,6 +411,25 @@ const result = computed(() => simulateRaidTable({
   turns: 10,
 }))
 const currentSpeedOrder = computed(() => result.value.rounds[0]?.actionOrder ?? [])
+const elementBonusLines = computed(() => {
+  const { normal, dark } = result.value.config.elementBonus
+  const lines = []
+  if (normal.phase > 0) lines.push(t('raidElementBonusNormalPhase', {
+    phase: normal.phase,
+    hp: formatter().format(normal.hpRate * 100),
+    attack: formatter().format(normal.attackRate * 100),
+  }))
+  if (dark.count > 0) {
+    const effects = []
+    if (dark.defenseRate) effects.push(`${t('raidElementBonusDefense')} +${formatter().format(dark.defenseRate * 100)}%`)
+    if (dark.hpDrainRate) effects.push(`${t('raidElementBonusHpDrain')} +${formatter().format(dark.hpDrainRate * 100)}%`)
+    if (dark.defensePenetration) effects.push(`${t('raidDefensePenetration')} +${formatter().format(dark.defensePenetration)}`)
+    if (dark.damageReflectRate) effects.push(`${t('raidElementBonusDamageReflect')} +${formatter().format(dark.damageReflectRate * 100)}%`)
+    if (dark.criticalDamageBonus) effects.push(`${t('raidCriticalDamage')} +${formatter().format(dark.criticalDamageBonus * 100)}%`)
+    lines.push(`${t('raidElementBonusDarkCount', { count: dark.count })}：${effects.join(' · ')}`)
+  }
+  return lines.length ? lines : [t('raidElementBonusNone')]
+})
 const selectedBossTemplate = computed(() => RAID_BOSS_TEMPLATES[bossTemplateId.value])
 const bossTemplateStats = computed(() => t('raidBossTemplateStats', {
   level: selectedBossTemplate.value.level,

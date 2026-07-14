@@ -11,6 +11,7 @@ import {
   createDefaultRaidTableConfig,
 } from '../../constants/raidTableCharacters.js'
 import { DEFAULT_RAID_MECHANICS } from './mechanics.js'
+import { calculateRaidElementBonus } from './elementBonus.js'
 
 const SUPPORTED_TRIGGERS = new Set([
   'battleStart', 'roundStart', 'actionStart', 'beforeDamage', 'afterHit', 'afterCriticalHit', 'afterDamage', 'actionEnd',
@@ -75,8 +76,10 @@ function normalizeConfig(config, characters) {
   for (const [key, value] of Object.entries(activationRounds)) {
     if (!Number.isInteger(value) || value < 1 || value > 10) throw new Error(`Invalid raid activation round: ${key}`)
   }
+  const elementBonus = calculateRaidElementBonus(lineup, characters)
   return {
     lineup, attackPriority, speeds, levels, defensePenetrations, pmDefensePenetrations, criticalDamageBonuses,
+    elementBonus,
     bossTemplateId, bossTemplate, turns,
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
     baseCriticalDamageBonus: legacyCriticalDamageBonus ?? defaults.baseCriticalDamageBonus,

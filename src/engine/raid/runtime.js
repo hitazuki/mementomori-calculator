@@ -471,7 +471,9 @@ export function runRaidProgram(program) {
 
   function defenseSnapshot(actor, damageType, modifierTotals) {
     const attackerLevel = config.levels[actor.id]
-    const baseDefensePenetration = config.defensePenetrations[actor.id]
+    const panelDefensePenetration = config.defensePenetrations[actor.id]
+    const formationDefensePenetration = config.elementBonus.dark.defensePenetration
+    const baseDefensePenetration = panelDefensePenetration + formationDefensePenetration
     const defensePenetrationRate = modifierTotals.defensePenetrationRate
     const defensePenetration = baseDefensePenetration * (1 + defensePenetrationRate)
     const pmDefensePenetration = config.pmDefensePenetrations[actor.id]
@@ -482,7 +484,8 @@ export function runRaidProgram(program) {
     const actualDefense = Math.max(0, baseDefense * (1 + rates.defenseRate))
     const actualPmDefense = Math.max(0, basePmDefense * (1 + pmDefenseRate))
     if (damageType === 'direct') return {
-      applies: false, damageType, attackerLevel, baseDefensePenetration, defensePenetrationRate, defensePenetration, pmDefensePenetration,
+      applies: false, damageType, attackerLevel, panelDefensePenetration, formationDefensePenetration,
+      baseDefensePenetration, defensePenetrationRate, defensePenetration, pmDefensePenetration,
       baseDefense, basePmDefense: null, defenseRate: rates.defenseRate, pmDefenseRate: 0,
       actualDefense, actualPmDefense: null, defensePassRate: 1, pmDefensePassRate: 1,
       defenseMitigationRate: 0, pmDefenseMitigationRate: 0, multiplier: 1,
@@ -497,7 +500,8 @@ export function runRaidProgram(program) {
       attackerCoeff.cPmPen,
     )
     return {
-      applies: true, damageType, attackerLevel, baseDefensePenetration, defensePenetrationRate, defensePenetration, pmDefensePenetration,
+      applies: true, damageType, attackerLevel, panelDefensePenetration, formationDefensePenetration,
+      baseDefensePenetration, defensePenetrationRate, defensePenetration, pmDefensePenetration,
       baseDefense, basePmDefense, defenseRate: rates.defenseRate, pmDefenseRate,
       actualDefense, actualPmDefense, defensePassRate, pmDefensePassRate,
       defenseMitigationRate: 1 - defensePassRate,
@@ -529,14 +533,20 @@ export function runRaidProgram(program) {
             ...context, actor, ownerId: actor.id, config, actors, boss, api,
           })
         ))
-        const criticalMultiplier = critical ? 1 + config.criticalDamageBonuses[actor.id] + modifiers.totals.criticalDamageBonus : 1
-        const attackScale = rawStep.stat === 'ATK' ? 1 + modifiers.totals.attackRate : 1
+        const preStatusCriticalDamageBonus = config.criticalDamageBonuses[actor.id] + config.elementBonus.dark.criticalDamageBonus
+        const criticalMultiplier = critical ? 1 + preStatusCriticalDamageBonus + modifiers.totals.criticalDamageBonus : 1
+        const preStatusAttackScale = rawStep.stat === 'ATK' ? 1 + config.elementBonus.normal.attackRate : 1
+        const combatAttackScale = rawStep.stat === 'ATK' ? 1 + modifiers.totals.attackRate : 1
+        const attackScale = preStatusAttackScale * combatAttackScale
         const damageType = actorDamageType(actor, rawStep)
         const defense = defenseSnapshot(actor, damageType, modifiers.totals)
         const effectivePercent = percent * attackScale * (1 + damageRate) * criticalMultiplier * defense.multiplier
         const scalingTerms = rawStep.stat === 'ATK'
           ? modifiers.symbolicSources.map(source => ({
-            ...source, coefficient: percent * source.coefficient * (1 + damageRate) * criticalMultiplier * defense.multiplier,
+            ...source,
+            coefficient: percent * source.coefficient
+              * (source.kind === 'targetBaseDefenseOverTargetAttack' ? 1 + config.elementBonus.dark.defenseRate : preStatusAttackScale)
+              * (1 + damageRate) * criticalMultiplier * defense.multiplier,
           }))
           : []
 
@@ -561,7 +571,8 @@ export function runRaidProgram(program) {
         damageSteps.push({
           index: hitSequence, stat: rawStep.stat, damageType, percent,
           hit, hits, originalTargetCount: rawStep.originalTargetCount, conditionKey: rawStep.conditionKey,
-          critical, criticalMultiplier, attackRate: modifiers.totals.attackRate,
+          critical, criticalMultiplier, preStatusCriticalDamageBonus,
+          preStatusAttackScale, combatAttackScale, attackScale, attackRate: modifiers.totals.attackRate,
           actorDamageRate: modifiers.totals.damageRate, bossDamageRate: incomingRate, damageRate,
           defenseMultiplier: defense.multiplier, defense, effectivePercent, scalingTerms, modifierSources: modifiers.sources,
           bossStatusBefore: bossBefore, bossStatusAfter: bossAfter,

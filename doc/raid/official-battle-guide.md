@@ -163,14 +163,14 @@
 | 官方名称 | 规范化键 | 涵盖范围 | 引擎状态 |
 | --- | --- | --- | --- |
 | 角色培育能力数值 | `trainedStat` | 潜能、武具基础/附加属性、神装、套装、专武被动、符石、秘仪、玩家等级等 | 当前不输入实际面板 |
-| 状态效果生效前的能力数值 | `preStatusStat` | `trainedStat` 加属性加成、魔女赠礼等；不含战斗中Buff/弱化 | 符号项中的 `ATK_x/DEF0_x` 抽象表达该层 |
+| 状态效果生效前的能力数值 | `preStatusStat` | `trainedStat` 加属性加成、魔女赠礼等；不含战斗中Buff/弱化 | 已实现编队属性加成；符号项中的 `ATK_x/DEF0_x` 抽象表达该层 |
 | 战斗期间的能力数值 | `combatStat` | `preStatusStat` 加全部战斗中Buff/弱化、加护和公会战效果 | 当前仅对归一攻击、速度及少量修正建模 |
 
 - `preStatusStat` 是 `combatStat` 的计算基础，也可直接用于战斗条件判断。
 - 战斗开始时触发的Buff/弱化属于 `combatStat`，不回写 `preStatusStat`。
 - 战斗开始时技能优先于第1回合开始时技能。
 - 普通“能力数值上升/下降”以 `preStatusStat` 为增减基准。
-- 防御贯通的百分比提升同样按状态生效前的防御贯通为基准；讨伐拉表以页面配置值作为该基准，再应用 `defensePenetrationRate`。
+- 防御贯通的百分比提升同样按状态生效前的防御贯通为基准；讨伐拉表先在页面配置值上加入幽冥3人加成1000，再应用 `defensePenetrationRate`。
 - “脱力”是例外：攻击力降幅以当时 `combatStat` 为基准。
 
 新增按面板取值的效果必须记录 `statBasis`：

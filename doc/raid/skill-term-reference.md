@@ -586,3 +586,15 @@ eventHooks: [{
 克尔柏洛丝复用同一配置机制：指定复活触发回合开始施加4次行动的温柔的魔法，S1/S2通过 `conditional + actorHasStatus` 切换340→510与1320→1980的倍率。
 
 中毒、恶化、抗暴率降低等当前不改变主动伤害倍率的弱化仍使用真实EffectGroup和可解除类别进入Boss状态。它们的 `damageRatePerStack` 为0，不代表状态被忽略，也不产生DOT伤害。
+
+## 编队属性加成
+
+| 结构 | 含义 |
+| --- | --- |
+| `config.elementBonus.normal.phase` | 普通属性加成档位：0无、1为3人、2为3+2人、3为4人、4为5人。 |
+| `config.elementBonus.normal.attackRate` | 面板之后、技能状态之前的攻击力系数；与后一层普通百分比攻击Buff乘算。 |
+| `config.elementBonus.dark.defensePenetration` | 幽冥3人起在页面面板贯通上加1000，再接受技能贯通百分比修正。 |
+| `config.elementBonus.dark.criticalDamageBonus` | 幽冥5人时在角色面板暴击伤害强化上加30%。 |
+| `calculateRaidElementBonus(lineup, characters)` | 读取静态上阵属性，自动选择天光分配后的最高普通档，并生成幽冥累计加成。 |
+
+普通属性攻击的伤害段使用 `preStatusAttackScale × combatAttackScale`。`attackRate` Modifier只属于后一层；组队加成不生成EffectGroup、不计入Buff数，也不能被复制或解除。
