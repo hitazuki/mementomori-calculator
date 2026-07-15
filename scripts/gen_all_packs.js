@@ -166,7 +166,8 @@ const permPackNameMap = {
   "钻石组合包 3000": "origin_perm_diamond_3000",
   "钻石组合包 3000 (首次双倍)": "origin_perm_diamond_3000_double",
   "钻石组合包 5900": "origin_perm_diamond_5900",
-  "钻石组合包 5900 (首次双倍)": "origin_perm_diamond_5900_double"
+  "钻石组合包 5900 (首次双倍)": "origin_perm_diamond_5900_double",
+  "月卡": "origin_monthly_card"
 }
 
 function synthesizeI18nKeys(rawPacks) {

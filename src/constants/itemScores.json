@@ -838,5 +838,17 @@
     "nameJa": "無償ダイヤ",
     "nameKo": "무료 다이아",
     "isBase": true
+  },
+  "[99,1]": {
+    "name": "Daily Free Sweep",
+    "score": 30,
+    "batch": 1,
+    "iconId": 9,
+    "nameZh": "每日免费扫荡",
+    "nameTw": "每日免費掃蕩",
+    "nameEn": "Daily Free Sweep",
+    "nameJa": "毎日無料掃討",
+    "nameKo": "매일 무료 소탕",
+    "isBase": false
   }
 }

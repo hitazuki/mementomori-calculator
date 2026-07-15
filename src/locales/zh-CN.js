@@ -554,6 +554,7 @@ export default {
   origin_rank: "玩家等级",
   origin_quest: "主线通关",
   origin_unknown: "未知",
+  origin_monthly_card: "月卡",
   sourceTypeUltra: "超值限时组合包",
   sourceTypePermanent: "常驻礼包",
   sourceTypeWitch: "魔女的赠礼",

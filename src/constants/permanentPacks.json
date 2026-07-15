@@ -571,5 +571,26 @@
         "ItemCount": 1620
       }
     ]
+  },
+  {
+    "name": "月卡",
+    "price": 1000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 500
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 4500
+      },
+      {
+        "ItemType": 99,
+        "ItemId": 1,
+        "ItemCount": 30
+      }
+    ]
   }
 ]

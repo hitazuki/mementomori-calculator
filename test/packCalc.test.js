@@ -53,6 +53,27 @@ test('zero-price packs use contained paid diamonds as denominator', () => {
   assert.equal(pack.ce, pack.value / 100)
 })
 
+test('monthly card includes 30 days of diamonds, sweeps, and recharge value', () => {
+  const monthlyScores = normalizeScores({
+    ...scores,
+    '[1,1]': { name: 'Free Diamond', score: 1, batch: 1, iconId: 9 },
+    '[99,1]': { name: 'Daily Free Sweep', score: 30, batch: 1, iconId: 9 },
+  })
+  const [pack] = calculatePackCE([{
+    name: 'Monthly Card',
+    price: 1_000,
+    items: [
+      { ItemType: 2, ItemId: 1, ItemCount: 500 },
+      { ItemType: 1, ItemId: 1, ItemCount: 4_500 },
+      { ItemType: 99, ItemId: 1, ItemCount: 30 },
+    ],
+  }], monthlyScores)
+
+  assert.equal(pack.originalValue, 5_900)
+  assert.equal(pack.rechargeValue, 600)
+  assert.equal(pack.value, 6_500)
+})
+
 test('getBaseItemKey maps homogeneous derived items to their editable bases', () => {
   assert.equal(getBaseItemKey(10, 4), '[10,1]')
   assert.equal(getBaseItemKey(10, 20), '[10,20]')

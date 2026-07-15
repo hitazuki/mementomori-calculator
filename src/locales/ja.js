@@ -351,6 +351,7 @@ export default {
   origin_rank: "プレイヤーランク",
   origin_quest: "メインクエスト",
   origin_unknown: "不明",
+  origin_monthly_card: "マンスリーカード",
 
   packCompareDesc: "異なる入手先や内容のパックを比較し、最もお得な購入プランを探します。",
   packCompareColName: "パックの種類",

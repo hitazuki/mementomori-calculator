@@ -328,6 +328,7 @@ export default {
   origin_rank: "플레이어 랭크",
   origin_quest: "메인 퀘스트",
   origin_unknown: "알 수 없음",
+  origin_monthly_card: "월정액 카드",
   sourceTypeUltra: "울트라 세일 팩",
   sourceTypePermanent: "상시 패키지",
   sourceTypeWitch: "마녀의 선물",

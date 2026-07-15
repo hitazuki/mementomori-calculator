@@ -556,6 +556,7 @@ export default {
   origin_rank: "Player Rank",
   origin_quest: "Main Quest",
   origin_unknown: "Unknown",
+  origin_monthly_card: "Monthly Card",
   sourceTypeUltra: "Ultra Sale Packs",
   sourceTypePermanent: "Permanent Packs",
   sourceTypeWitch: "Witch's Gift",
