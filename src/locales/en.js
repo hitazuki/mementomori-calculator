@@ -19,7 +19,7 @@ export default {
   // Common
   appTitle: "MementoMori Multi-Function Calculator",
   appDesc:
-    "MementoMori multi-function calculator covering Damage Calc, Item System, Summon System, and Mysterium System analysis and planning.",
+    "A calculator and planning toolkit for MementoMori players, covering damage analysis, raid simulation, resource value, pack planning, gacha returns, and Mysterium scoring.",
   appName: "MementoMori",
   appSub: "Multi-Function Calculator",
 
@@ -37,7 +37,7 @@ export default {
   navGroupGachaAnalysis: "Gacha Analysis",
   navGroupOtherTools: "Other Tools",
   homeTitle: "Feature Home",
-  homeDesc: "Choose a calculator, simulator, or planner by what you want to accomplish.",
+  homeDesc: "Damage analysis, raid simulation, resource and pack planning, gacha returns, and Mysterium scoring in one place.",
   homeRecommended: "Recommended",
   homeModulesCount: "modules",
   homeOpenModule: "Open module",

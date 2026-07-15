@@ -1,280 +1,67 @@
-# ⚔ MementoMori 多功能计算器
+# MementoMori 多功能计算器
 
-> 覆盖伤害计算、道具系统、召唤系统与秘仪系统的多功能分析与规划工具。
-> 包含：伤害计算 · 道具价值与礼包规划 · 角色/武具召唤分析 · 秘仪模拟评分
+面向《MementoMori》玩家的计算与规划工具集，提供伤害分析、讨伐模拟、资源性价比、礼包规划、抽卡收益与秘仪评分。
 
----
+[在线使用](https://hitazuki.github.io/mementomori-calculator/)
 
-## 🚀 快速开始
+## 功能
 
-本项目已全面重构至 **Vue 3 + Vite + Pinia** 的现代化技术栈，提供了更好的模块化维护能力和毫秒级的热更新体验。
+- **伤害分析**：单体伤害、变量扫描、热力图、敏感性分析、多方案对比及交叉拉表。
+- **讨伐模拟**：配置阵容、Boss 与站位，模拟 10 回合技能循环和队伍倍率。
+- **资源规划**：比较商店兑换、礼包价值与超值限时组合包购买方案。
+- **抽卡分析**：估算角色与禁忌武具卡池的概率、成本和回收价值。
+- **秘仪评分**：按自定义权重评估秘仪组合与角色配置。
+- **多语言与主题**：支持简体中文、繁体中文、英文及明暗主题。
+
+## 本地运行
+
+需要 Node.js 和 npm。
 
 ```bash
-# 安装依赖
 npm install
-
-# 启动开发服务器
 npm run dev
-# → 打开浏览器访问 http://localhost:5173/
-
-# 构建生产版本
-npm run build
-
-# 校验翻译与核心计算公式
-npm test
 ```
 
----
+开发服务器默认访问地址：<http://127.0.0.1:5173/mementomori-calculator/>
 
-## 📦 项目结构
+## 常用命令
 
-```
-mmt-calculator/
-├── index.html                     # 主页面挂载点
-├── vite.config.js                 # Vite 配置文件
-├── src/
-│   ├── main.js                    # 应用入口，挂载 Vue 实例、Pinia 与 i18n
-│   ├── App.vue                    # 主应用壳（侧边栏、路由动态加载机制）
-│   ├── style.css                  # 哥特暗金主题（Gothic Dark Gold）
-│   │
-│   ├── store/
-│   │   └── calculator.js          # 【全局状态】基于 Pinia 的核心参数状态管理
-│   │
-│   ├── composables/
-│   │   └── useDamageParams.js     # 伤害参数、等级常量、攻击类型切换的复用逻辑
-│   │
-│   ├── constants/
-│   │   ├── level_coefficient.csv  # 【核心数据】1-900级官方防御及贯通定数表
-│   │   ├── levelTable.js          # 解析 CSV 系数、提供常用等级预设
-│   │   ├── presets.js             # 提供不同场景对标数值和方案默认值
-│   │   ├── itemScores.json        # 礼包 CE 基准道具评分
-│   │   ├── allPacks.json          # 去重后的礼包对比数据
-│   │   ├── ultraSalePacks.json    # 超值限时组合包数据（按页面异步加载）
-│   │   ├── characters.json        # 角色数据（用于秘仪计算）
-│   │   └── mysterium_data.json    # 秘仪组合数据（用于秘仪计算）
-│   │
-│   ├── engine/
-│   │   ├── damageCalc.js          # 【核心逻辑】真实双路贯通减伤公式计算
-│   │   ├── packCalc.js            # 【核心逻辑】礼包道具价值与 CE 计算
-│   │   └── mysteriumCalc.js       # 【核心逻辑】秘仪组合性价比算法
-│   │
-│   ├── i18n/                      # Vue-i18n 多语言系统
-│   ├── utils/
-│   │   └── chartTheme.js          # ECharts 统一主风格配置
-│   │
-│   └── views/                     # 功能页面（Vue 单文件组件，按页面异步加载）
-│       ├── CalculatorView.vue     # 模块一：单体计算器
-│       ├── SweepChartView.vue     # 模块二：穿透扫描曲线
-│       ├── HeatmapChartView.vue   # 模块三：贯通×防御 热力图
-│       ├── ComparePanelView.vue   # 模块四：多方案配装对比
-│       ├── TableExportView.vue    # 模块五：交叉拉表 & 导出
-│       ├── PackComparisonView.vue # 模块六：礼包总表对比
-│       ├── PackCalculatorView.vue # 模块七：超值限时组合包 CE 计算
-│       └── MysteriumPanelView.vue # 模块八：秘仪配置评级
-│
-├── scripts/
-│   ├── gen_all_packs.js           # 生成礼包对比数据与文档
-│   ├── extract_master_data.js     # 从 Master 数据同步角色/秘仪/词典
-│   ├── test_i18n.js               # 多语言 key 一致性校验
-│   └── registerRawLoader.mjs      # Node 测试读取 Vite ?raw 资源的 loader 注册
-│
-└── test/
-    ├── damageCalc.test.js         # 伤害公式单元测试
-    └── packCalc.test.js           # 礼包 CE 与同质道具换算单元测试
+| 命令 | 用途 |
+| --- | --- |
+| `npm run dev` | 启动 Vite 开发服务器 |
+| `npm test` | 运行多语言与核心逻辑测试 |
+| `npm run build` | 测试、生成礼包数据并构建生产版本 |
+| `npm run preview` | 预览生产构建 |
+| `npm run sync:master` | 从 Master 数据同步项目所需资料 |
+| `npm run sync:assets` | 同步角色与道具图片资源 |
+
+## 技术栈
+
+Vue 3 · Vite · Pinia · Vue I18n · ECharts · 原生 CSS
+
+## 目录说明
+
+```text
+src/
+├── components/   # 通用及功能组件
+├── composables/  # 页面状态与复用逻辑
+├── constants/    # 计算所需的静态数据
+├── engine/       # 伤害、礼包、抽卡、讨伐等核心逻辑
+├── locales/      # 多语言文案
+├── styles/       # 全局样式
+└── views/        # 功能页面
+doc/               # 公式、数据口径与功能说明
+scripts/           # 数据生成和同步脚本
+test/              # 单元测试
 ```
 
----
+## 数据与计算口径
 
-## 📐 核心伤害公式 (双路乘算)
+- 伤害公式与变量说明见 [`doc/damage/`](doc/damage/)。
+- 道具评分及礼包 CE 口径见 [`doc/items/items-calc-formula.md`](doc/items/items-calc-formula.md)。
+- 部分评分可在网页中调整，并保存在浏览器本地。
+- 游戏版本更新可能影响数据与结果；重要决策请结合当前游戏内信息核对。
 
-本项目采用了最新的从客户端逆向工程得出的**双路真实减伤公式**，取消了以往简单的“平减”和“比例”的粗略估计。
+## License
 
-游戏中的减伤分别由两条独立路线组成：
-1. **防御路（DEF）**：目标防御力 (DEF) vs 攻击方防御贯通 (DEF Break)
-2. **物魔路（PM.DEF）**：目标物理/魔法防御力 (P.DEF/M.DEF) vs 攻击方物魔防御贯通 (PM.DEF Break)
-
-针对任意一条路线，伤害的通过率（Damage Rate，即 100% - 减伤率）公式为：
-```
-有效防御 (effective_DEF) = 目标防御 × ( 贯通定数 / ( 穿透值 + 贯通定数 ) )
-伤害通过率 (Damage Rate) = 防御定数 / ( 有效防御 + 防御定数 )
-```
-*这里的防御定数 (C_def/C_pdef/C_mdef) 与 贯通定数 (C_pen/C_pmpen) 均随等级变化，游戏 1-900 级的定数已收录于 `level_coefficient.csv` 中由引擎动态读取。*
-
-最终伤害由两路通过率相乘计算：
-```
-综合通过率 = 路线1通过率 × 路线2通过率
-最终伤害 = 面板攻击 × 技能倍率 × 增伤区 × 爆击区 × 阵营克制 × 综合通过率
-```
-
-### 📊 数据与公式来源参考
-
-本计算器使用的数据和推导过程已随附在 `doc/damage/` 目录下，以便于社区核对与二次验证：
-1. **公式推导 (`doc/damage/excel_formulas.txt` & `doc/damage/combat_formula_analysis.md`)**：
-   详尽还原了客户端内部攻击判定的计算过程，重点确立了 `Damage Rate = 1 - DR` 及两路独立乘算的算法结构。
-2. **常量数据 (`doc/damage/level_coefficient.csv` & `doc/damage/IMG_4312.png`)**：
-   提取自客户端原始表结构，收录了完整的 Lv1 - Lv900 敌方各类防御定数和贯通定数。
-   - `C_def` 对应表中的 `防御力(DEF)`
-   - `C_pdef / C_mdef` 对应表中的 `物理防御力(P.DEF) / 魔法防御力(M.DEF)`
-   - `C_pen` 对应表中的 `防御贯通(DEF Break)`
-   - `C_pmpen` 对应表中的 `物理魔法防御贯通(PM.DEF Break)`
-
----
-
-## 💰 礼包 CE 计算口径
-
-礼包系统使用 `doc/items/items-calc-formula.md` 中定义的道具评分与同质道具换算规则。当前计算器采用“道具原始价值 + 充值价值补正”的口径：
-
-```
-OriginalValue(P) = Σ( S(item_i) × Qty_i )
-PaidDiamonds(P) = price > 0 ? price / 2 : DiamondCount(P)
-RechargeValue(P) = PaidDiamonds(P) × S(有償ダイヤ) × 1.2
-FinalValue(P) = OriginalValue(P) + RechargeValue(P)
-CE(P) = FinalValue(P) / PaidDiamonds(P)
-```
-
-道具评分可在礼包页面中编辑，并会保存到浏览器本地存储；礼包数据由 `scripts/gen_all_packs.js` 从文档与抓取数据生成。
-
----
-
-## ✅ 质量校验
-
-```bash
-# 多语言 key 一致性
-npm run test:i18n
-
-# 伤害公式与礼包 CE 单元测试
-npm run test:unit
-
-# 完整测试
-npm test
-```
-
-`npm run build` 会先执行完整测试，再重新生成礼包数据并打包生产版本。
-
----
-
-## 🔧 功能模块指南
-
-### 🎯 一、单体计算器 (`CalculatorView.vue`)
-
-最基础的计算面板，输入攻击方和防守方的所有详细参数，实时展示拆解过程。
-
-**使用方法：**
-- **攻击类型切换**：点击「物理攻击(P.DEF)」或「魔法攻击(M.DEF)」，系统会自动在防守方参数中加载正确的对应的物理/魔法防御定数。
-- **全局状态联通**：借助 Vue 3 的响应式全局商店（Pinia），此处的攻击/防御面板配置将会自动同步成为其余分析视图的基础背景参数。
-- **结果查看**：右侧「伤害拆解」区展示了由表攻开始，通过「增伤」「防御路」「物魔路」和「爆击」的瀑布式缩减/放大过程。
-
----
-
-### 📈 二、穿透扫描曲线 (`SweepChartView.vue`)
-
-当你疑惑“我的穿透堆到多少收益最高”时使用的模块。它固定其他所有参数，仅对某个自变量（如“防御贯通”）进行扫描。
-
-**使用方法：**
-- **选择扫描变量**：除了属性数值外，现已支持直接扫描 `攻击方等级(Atk Level)` 或 `防守方等级(Def Level)`，探究等级压制带来的防御面减伤陡增效应。
-- **设置范围**：设定下限，上限和采样点数。
-- **局部重写参数**：在此页面中所有的「独立参数」更改仅对当前图表生效，允许你在全局参数基础之上推演不同的情境。
-
----
-
-### 🔥 三、贯通 × 防御 热力图 (`HeatmapChartView.vue`)
-
-高阶可视化模块，一张图看尽当前等级下的破防全局。
-
-**使用方法：**
-- **选择计算路线**：选「防御路」或「物魔路」。热力图绘制的是**单路伤害通过率**。
-- **X轴与Y轴**：X轴是目标防御，Y轴是你的贯通值。
-- **色阶指示**：深色（深蓝/紫）表示严重刮痧，亮色（金/红）表示伤害通过率高。
-- 点击图表右上角的 `⬇ 保存PNG` 可以直接导出高质量配图。
-
----
-
-### ⚖ 四、多方案配装对比 (`ComparePanelView.vue`)
-
-如果你有几套符文/魔装方案在纠结，这里能直接给出哪套伤害最高。
-
-**使用方法：**
-- **添加方案**：在左侧可创建多套配装，比如“方案1：高增伤低穿透” vs “方案2：平衡双穿” vs “方案3：极限物魔穿透”。
-- **目标档位**：设定假想敌（如“1000万防”、“3000万防”档位）。
-- **查看模式**：可切换“柱状图”、“雷达图”或“数据表”。
-- **差值对比（Δ）**：下方会自动列出其他方案相较于【方案1】的绝对伤害优势，方便做决策。
-
----
-
-### 📋 五、交叉拉表与导出 (`TableExportView.vue`)
-
-为硬核玩家或做攻略的 UP 主准备的数据矩阵生成器。
-
-**使用方法：**
-- 设定 X 轴（如：目标防御）和 Y 轴（如：防御贯通）的取值集合（用英文逗号隔开，如 `100万, 500万, 1000万`）。
-- 系统会自动渲染出一张两两对应的矩阵表，格子里的数值可以切换为“综合伤害通过率%”、“最终伤害”或单路“减伤率”。
-- 支持对多个不同的构建方案同时进行对比。
-- 点击 `Markdown` 或 `复制 CSV`，即可一键将矩阵带走到飞书/Notion/Excel 中编辑。
-
----
-
-### 💰 六、礼包总表对比 (`PackComparisonView.vue`)
-
-聚合常驻礼包、魔女的赠礼和超值限时组合包，按照价格、来源、内容物和 CE 进行筛选、排序与展开查看。
-
-**使用方法：**
-- 在左侧编辑道具基准评分，钻石基准锁定为 1。
-- 使用来源、价格、内容物筛选快速定位目标礼包。
-- 表格中展示原始价值、充值价值补正、最终 CE 和包内道具明细。
-
----
-
-### 📦 七、超值限时组合包 CE 计算 (`PackCalculatorView.vue`)
-
-面向无穷之塔等超值限时组合包的细分分析页面。礼包原始数据按页面异步加载，避免进入伤害计算首页时加载大体积礼包数据。
-
-**使用方法：**
-- 选择礼包类型、塔类别和价格档位。
-- 展开行查看单个礼包的道具构成、单项价值和总价值。
-- 修改道具评分后，CE 会实时重新计算。
-
----
-
-### 🔮 八、秘仪配置评级 (`MysteriumPanelView.vue`)
-
-针对游戏内的“秘仪”（Mysterium）系统提供的收益评估和配对算法。
-
-**使用方法：**
-- **自定权重体系**：左侧提供了高度可定制的评分模板，包括固定值、百分比、成长属性以及各词条的具体权重分数。你可以完全基于你所在的战区环境进行微调。
-- **多维度排解算法**：
-  - **秘仪组合性价比榜（Collection Rank）**：罗列了每个秘仪组合单体的最高性价比。
-  - **独立分摊法（Algo 1）**：评估单体角色价值，将秘仪组合总分通过需求角色的造价比例分摊给角色个体。
-  - **成套绑定法（Algo 2）**：评估完整套装性价比，将秘仪组合视为一个不可分割的整体直接计算成本与收益。
-  - **方案枚举法（Algo 3）**：寻找全局最优解，智能计算多套秘仪之间的角色重叠红利，为您推导最具性价比的组合路线。
-
----
-
-## 🎨 UI 极简美学
-
-本项目全面采用 **Gothic Dark Gold (哥特暗金)** 主题。
-没有引用臃肿的 UI 框架（如 Tailwind 或 ElementUI），采用纯原生 CSS (`style.css`) 构建，最大程度保证了定制化、性能和动态模糊（Glassmorphism）效果。图表基于 `vue-echarts` 自动跟随窗口自适应调整。
-
----
-
-## Development File Map
-
-Pack Calculator code is split by responsibility:
-
-- `src/views/PackCalculatorView.vue` wires the page, tabs, data loading, and child components.
-- `src/components/pack/PackScorePanel.vue` displays editable and derived item scores.
-- `src/components/pack/PackQueryResults.vue` displays pack filters, sorting, desktop table, and mobile cards.
-- `src/components/pack/PackPlannerControls.vue` displays Ultra Sale planner inputs and lane controls.
-- `src/components/pack/PackPlannerSummary.vue` displays planner option tabs and summary metrics.
-- `src/components/pack/PackPlannerStepTable.vue` displays planner step rows, expanded details, skipped batches, top-up rows, and remaining opportunities.
-- `src/composables/pack/usePackScores.js` owns score panel state and score-detail formatting.
-- `src/composables/pack/usePackQuery.js` owns pack query filters, sorting, and row expansion state.
-- `src/composables/pack/usePackPlannerView.js` owns planner view state and calls the planner engine.
-- `src/composables/pack/usePackDisplay.js` owns shared pack display formatting.
-
-`src/engine/ultraSalePlanner.js` is stable planner engine code. Prefer changing the Vue components/composables above for display, wording, and layout work; inspect or edit the engine only for planner behavior changes.
-
-Global CSS is split under `src/styles/`, while `src/style.css` remains the import entry used by `index.html`.
-
-## 📄 License
-
-MIT — 自由使用，欢迎提交 PR 扩充游戏资料。
+[MIT](LICENSE)

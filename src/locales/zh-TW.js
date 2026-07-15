@@ -19,7 +19,7 @@ export default {
   // Common
   appTitle: "MementoMori 多功能計算機",
   appDesc:
-    "MementoMori 多功能計算機：涵蓋傷害計算、道具系統、召喚系統與秘儀系統的分析與規劃工具。",
+    "面向《MementoMori》玩家的計算與規劃工具集，提供傷害分析、討伐模擬、資源性價比、禮包規劃、抽卡收益與秘儀評分。",
   appName: "MementoMori",
   appSub: "多功能計算機",
 
@@ -36,7 +36,7 @@ export default {
   navGroupGachaAnalysis: "抽卡分析",
   navGroupOtherTools: "其他工具",
   homeTitle: "功能首頁",
-  homeDesc: "按使用目標選擇計算、模擬或規劃工具。",
+  homeDesc: "集中提供傷害分析、討伐模擬、資源與禮包規劃、抽卡收益及秘儀評分。",
   homeRecommended: "推薦功能",
   homeModulesCount: "項功能",
   homeOpenModule: "進入功能",
