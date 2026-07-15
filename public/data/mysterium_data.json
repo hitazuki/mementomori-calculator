@@ -2185,5 +2185,29 @@
       }
     ],
     "baseParams": []
+  },
+  {
+    "id": 97,
+    "nameKey": "[CharacterCollectionName97]",
+    "reqCids": [
+      149,
+      72
+    ],
+    "params": [
+      {
+        "ptype": 4,
+        "nameKey": "[BattleParameterTypeMagicDamageRelax]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 2,
+        "nameKey": "appBasicDex",
+        "ctype": 3,
+        "val": 70
+      }
+    ]
   }
 ]

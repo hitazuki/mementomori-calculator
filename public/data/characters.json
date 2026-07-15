@@ -901,5 +901,12 @@
     "name2Key": null,
     "elementType": 2,
     "isLimited": true
+  },
+  "149": {
+    "id": 149,
+    "nameKey": "[CharacterName149]",
+    "name2Key": "[CharacterSubName149]",
+    "elementType": 1,
+    "isLimited": true
   }
 }
