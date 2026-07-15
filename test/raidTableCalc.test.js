@@ -377,7 +377,7 @@ test('Shizu self-damage stacks Artoria before Artoria acts and Artoria own damag
   assert.equal(artoria2.damageSteps[0].percent, 1140)
 })
 
-test('panel-based attack additions split normalized ATK and independent DEF totals', () => {
+test('panel-based additions keep DEF as a sourced unit while normalized ATK additions enter ATK totals', () => {
   const lineup = [ARTORIA, LIBERIA, SPRING_SHIZU]
   const result = simulateRaidTable({ lineup, attackPriority: [ARTORIA, SPRING_SHIZU, LIBERIA], turns: 1 })
   const shizuTerms = action(result, 1, SPRING_SHIZU).scalingTotals
@@ -386,12 +386,15 @@ test('panel-based attack additions split normalized ATK and independent DEF tota
   const shizu = action(result, 1, SPRING_SHIZU)
   const shizuDefenseTerms = shizu.damageSteps.flatMap(step => step.scalingTerms)
     .filter(term => term.kind === 'targetBaseDefenseOverTargetAttack')
-  closeTo(shizu.symbolicTotals.DEF, shizuDefenseTerms.reduce((total, term) => total + term.coefficient, 0))
+  assert.ok(shizuDefenseTerms.every(term => term.valueSourceId === SPRING_SHIZU))
+  closeTo(shizu.conversionTotals[`DEF_${SPRING_SHIZU}`].value, shizuDefenseTerms.reduce((total, term) => total + term.coefficient, 0))
   const artoria = action(result, 1, ARTORIA)
   const artoriaDefenseTerms = artoria.damageSteps.flatMap(step => step.scalingTerms)
     .filter(term => term.kind === 'targetBaseDefenseOverTargetAttack')
-  closeTo(artoria.symbolicTotals.DEF, artoriaDefenseTerms.reduce((total, term) => total + term.coefficient, 0))
-  closeTo(result.symbolicTotals.DEF, result.rounds[0].actions.reduce((total, event) => total + (event.symbolicTotals.DEF ?? 0), 0))
+  assert.ok(artoriaDefenseTerms.every(term => term.valueSourceId === ARTORIA))
+  closeTo(artoria.conversionTotals[`DEF_${ARTORIA}`].value, artoriaDefenseTerms.reduce((total, term) => total + term.coefficient, 0))
+  assert.equal(result.symbolicTotals.DEF, undefined)
+  assert.deepEqual(Object.keys(result.conversionTotals).sort(), [`DEF_${SPRING_SHIZU}`, `DEF_${ARTORIA}`].sort())
   assert.equal(result.teamAtkPercent > 0, true)
   assert.ok(Object.keys(result.scalingTotals).length >= 1)
   const shizuSourceAttack = shizuTerms[`ATK_${ARTORIA}/ATK_${SPRING_SHIZU}`].coefficient
@@ -400,7 +403,10 @@ test('panel-based attack additions split normalized ATK and independent DEF tota
   assert.ok(shizu.damageSteps.every(step => (
     step.effectivePercent === step.effectivePercentBeforeSourceAttack + step.normalizedSourceAttackPercent
   )))
+  assert.ok(shizu.damageSteps.some(step => step.normalizedDefensePercent > 0))
   closeTo(result.rounds[0].atkPercent, result.rounds[0].actions.reduce((total, event) => total + event.effectiveAtkPercent, 0))
+  closeTo(result.rounds[0].conversionTotals[`DEF_${SPRING_SHIZU}`].value, shizu.conversionTotals[`DEF_${SPRING_SHIZU}`].value)
+  closeTo(result.rounds[0].conversionTotals[`DEF_${ARTORIA}`].value, artoria.conversionTotals[`DEF_${ARTORIA}`].value)
   closeTo(result.teamAtkPercent, Object.values(result.characterTotals).reduce((total, character) => total + character.atkPercent, 0))
 })
 

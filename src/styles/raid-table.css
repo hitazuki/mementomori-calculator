@@ -9,6 +9,11 @@
   font-size: clamp(26px, 3vw, 38px);
 }
 
+.raid-summary-primary .raid-value-source {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+
 .raid-summary-symbolic .stat-value {
   font-size: clamp(26px, 3vw, 38px);
 }
@@ -410,6 +415,7 @@
 .raid-row-total { color: var(--gold-light); font-family: var(--font-mono); font-weight: 700; }
 .raid-row-total .raid-converted-stat,
 .raid-matrix-table tfoot .raid-converted-stat { color: var(--gold-light); font-family: var(--font-mono); }
+.raid-conversion-sources { color: var(--text-muted); font-family: var(--font-mono); font-size: var(--fs-xs) !important; font-weight: 500; }
 .raid-step-list .raid-converted-stat { color: var(--gold-light); font-family: var(--font-mono); }
 .raid-detail-converted-stat { color: var(--gold-light); font-family: var(--font-mono); font-size: var(--fs-lg); font-weight: 700; }
 .raid-matrix-table tfoot th,
@@ -417,6 +423,8 @@
 
 .raid-detail-total {
   color: var(--gold-light);
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-mono);
   font-size: var(--fs-xl);
   white-space: nowrap;

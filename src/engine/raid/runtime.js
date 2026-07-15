@@ -41,6 +41,21 @@ function addSymbolicTotals(target, totals) {
   for (const [stat, value] of Object.entries(totals)) target[stat] = (target[stat] ?? 0) + value
 }
 
+function addConversionTotal(target, term) {
+  const stat = term.stat ?? 'DEF'
+  const key = `${stat}_${term.valueSourceId}`
+  if (!target[key]) target[key] = { stat, sourceId: term.valueSourceId, value: 0 }
+  target[key].value += term.coefficient
+}
+
+function addConversionTotals(target, totals) {
+  for (const term of Object.values(totals)) {
+    const key = `${term.stat}_${term.sourceId}`
+    if (!target[key]) target[key] = { ...term, value: 0 }
+    target[key].value += term.value
+  }
+}
+
 function selectAction(actor, context, evaluateCondition) {
   const isAvailable = action => !action.compiledCondition || evaluateCondition(action.compiledCondition.definition, {
     ...context, actor, ownerId: actor.id,
@@ -400,7 +415,8 @@ export function runRaidProgram(program) {
           : `DEF0_${actor.id}/ATK_${actor.id}`
         symbolicSources.push({
           ...modifier, coefficient: modifier.compiledCoefficient ? resolveValue(modifier.compiledCoefficient, sourceActor, context) : modifier.coefficient,
-          key, targetId: actor.id, sourceId: modifier.sourceId ?? status.sourceId, copiedFromId: status.copiedFromId,
+          key, targetId: actor.id, valueSourceId: modifier.kind === 'targetBaseDefenseOverTargetAttack' ? actor.id : modifier.sourceId,
+          sourceId: modifier.sourceId ?? status.sourceId, copiedFromId: status.copiedFromId,
           nameKey: status.nameKey, effectGroupId: status.effectGroupId, remainingActions: status.remainingActions,
         })
       }
@@ -514,6 +530,7 @@ export function runRaidProgram(program) {
     const damageSteps = []
     const actionScaling = {}
     const symbolicTotals = {}
+    const conversionTotals = {}
     let baseAtkPercent = 0
     let effectiveAtkPercent = 0
     let hitSequence = 0
@@ -552,16 +569,17 @@ export function runRaidProgram(program) {
         const normalizedSourceAttackPercent = scalingTerms
           .filter(term => term.kind === 'sourceAttackOverTargetAttack')
           .reduce((total, term) => total + term.coefficient, 0)
+        const defenseScalingTerms = scalingTerms.filter(term => term.kind === 'targetBaseDefenseOverTargetAttack')
+        const normalizedDefensePercent = defenseScalingTerms.reduce((total, term) => total + term.coefficient, 0)
         const normalizedEffectivePercent = effectivePercent + normalizedSourceAttackPercent
 
         if (rawStep.stat === 'ATK') {
           baseAtkPercent += percent
           effectiveAtkPercent += normalizedEffectivePercent
-          mergeScaling(actionScaling, scalingTerms.filter(term => term.kind !== 'targetBaseDefenseOverTargetAttack'))
-          const defenseScalingPercent = scalingTerms
-            .filter(term => term.kind === 'targetBaseDefenseOverTargetAttack')
-            .reduce((total, term) => total + term.coefficient, 0)
-          if (defenseScalingPercent) symbolicTotals.DEF = (symbolicTotals.DEF ?? 0) + defenseScalingPercent
+          mergeScaling(actionScaling, scalingTerms.filter(term => (
+            term.kind === 'sourceAttackOverTargetAttack' && term.valueSourceId !== actor.id
+          )))
+          for (const term of defenseScalingTerms) addConversionTotal(conversionTotals, term)
         } else {
           symbolicTotals[rawStep.stat] = (symbolicTotals[rawStep.stat] ?? 0) + effectivePercent
         }
@@ -584,7 +602,7 @@ export function runRaidProgram(program) {
           actorDamageRate: modifiers.totals.damageRate, bossDamageRate: incomingRate, damageRate,
           defenseMultiplier: defense.multiplier, defense,
           effectivePercent: normalizedEffectivePercent, effectivePercentBeforeSourceAttack: effectivePercent,
-          normalizedSourceAttackPercent, scalingTerms, modifierSources: modifiers.sources,
+          normalizedDefensePercent, normalizedSourceAttackPercent, scalingTerms, modifierSources: modifiers.sources,
           bossStatusBefore: bossBefore, bossStatusAfter: bossAfter,
         })
       }
@@ -592,12 +610,13 @@ export function runRaidProgram(program) {
         ...context, phase: 'afterDamageStep', damageStepIndex: stepIndex + 1,
       })
     }
-    return { damageSteps, baseAtkPercent, effectiveAtkPercent, symbolicTotals, scalingTotals: actionScaling, criticalHitCount }
+    return { damageSteps, baseAtkPercent, effectiveAtkPercent, symbolicTotals, conversionTotals, scalingTotals: actionScaling, criticalHitCount }
   }
 
   const rounds = []
-  const characterTotals = Object.fromEntries(config.lineup.map(id => [id, { atkPercent: 0, symbolicTotals: {}, scalingTotals: {} }]))
+  const characterTotals = Object.fromEntries(config.lineup.map(id => [id, { atkPercent: 0, symbolicTotals: {}, conversionTotals: {}, scalingTotals: {} }]))
   const symbolicTotals = {}
+  const conversionTotals = {}
   const scalingTotals = {}
   const battleStartEffects = []
   let teamAtkPercent = 0
@@ -621,7 +640,7 @@ export function runRaidProgram(program) {
     const order = roundOrder()
     const round = {
       turn, actionOrder: order.actionOrder, speedSnapshot: order.speedSnapshot,
-      actions: [], roundStartEffects, atkPercent: 0, symbolicTotals: {}, scalingTotals: {}, expiredBossEffects: [],
+      actions: [], roundStartEffects, atkPercent: 0, symbolicTotals: {}, conversionTotals: {}, scalingTotals: {}, expiredBossEffects: [],
     }
 
     for (const actorId of order.actionOrder) {
@@ -662,7 +681,7 @@ export function runRaidProgram(program) {
       const event = {
         sequence, turn, actorId, actionKey: action.key, skillNameKey: action.nameKey, damageType: action.damageType,
         damageSteps: damage.damageSteps, baseAtkPercent: damage.baseAtkPercent,
-        effectiveAtkPercent: damage.effectiveAtkPercent, symbolicTotals: damage.symbolicTotals,
+        effectiveAtkPercent: damage.effectiveAtkPercent, symbolicTotals: damage.symbolicTotals, conversionTotals: damage.conversionTotals,
         scalingTotals: damage.scalingTotals, cooldownsBefore, cooldownsAfter: { ...actor.cooldowns },
         effectsApplied, expiredEffects, ignoredKeys: [...(action.ignoredKeys ?? [])], runtimeBefore, runtimeAfter,
         statusSnapshotBeforeAction, statusSnapshotAtDamage, statusSnapshotAfterAction,
@@ -673,12 +692,15 @@ export function runRaidProgram(program) {
       round.actions.push(event)
       round.atkPercent += event.effectiveAtkPercent
       addSymbolicTotals(round.symbolicTotals, event.symbolicTotals)
+      addConversionTotals(round.conversionTotals, event.conversionTotals)
       mergeScaling(round.scalingTotals, Object.values(event.scalingTotals))
       characterTotals[actorId].atkPercent += event.effectiveAtkPercent
       addSymbolicTotals(characterTotals[actorId].symbolicTotals, event.symbolicTotals)
+      addConversionTotals(characterTotals[actorId].conversionTotals, event.conversionTotals)
       mergeScaling(characterTotals[actorId].scalingTotals, Object.values(event.scalingTotals))
       teamAtkPercent += event.effectiveAtkPercent
       addSymbolicTotals(symbolicTotals, event.symbolicTotals)
+      addConversionTotals(conversionTotals, event.conversionTotals)
       mergeScaling(scalingTotals, Object.values(event.scalingTotals))
     }
     round.expiredBossEffects = expireBossStatuses()
@@ -687,7 +709,7 @@ export function runRaidProgram(program) {
   }
 
   return {
-    config, rounds, characterTotals, teamAtkPercent, symbolicTotals, scalingTotals,
+    config, rounds, characterTotals, teamAtkPercent, symbolicTotals, conversionTotals, scalingTotals,
     battleStartEffects, bossTemplate: boss.template, bossStatusFinal: snapshotBoss(boss),
     warnings: ['raidWarningNormalizedAttack', 'raidWarningCriticalAssumption', 'raidWarningSymbolicScaling', 'raidWarningFixedDummy'],
   }
