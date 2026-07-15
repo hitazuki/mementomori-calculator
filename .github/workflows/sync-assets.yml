@@ -26,36 +26,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            6.0.x
-            8.0.x
-            9.0.x
-
-      - name: Install archive tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y p7zip-full
-
-      - name: Cache AssetStudio
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/mmt-calculator-asset-sync
-          key: assetstudio-v0.19.0-net9-linux64
-
       - name: Sync image assets
         working-directory: mmt-calculator
-        env:
-          SYNC_ASSETS_GRACEFUL_FAILURE: '1'
         run: npm run sync:assets
 
       - name: Check for changes
         id: git-check
         working-directory: mmt-calculator
         run: |
-          git add public/images/ public/data/asset_version.txt public/data/asset_catalog_version.txt
+          git add public/images/characters/
           if git diff --staged --quiet; then
             echo "changes=false" >> $GITHUB_OUTPUT
             echo "No image asset changes detected."

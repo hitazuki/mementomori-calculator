@@ -14,7 +14,8 @@
     "preview": "vite preview",
     "fetch-packs": "node scripts/fetch_ultra_sale.js",
     "sync:master": "node scripts/extract_master_data.js",
-    "sync:assets": "node scripts/sync_assets.js"
+    "sync:assets": "node scripts/sync_assets.js",
+    "sync:assets:legacy": "node scripts/sync_assets.js --legacy"
   },
   "devDependencies": {
     "vite": "^8.0.12"

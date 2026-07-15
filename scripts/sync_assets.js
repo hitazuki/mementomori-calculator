@@ -14,14 +14,13 @@ const PROJECT_ROOT = path.resolve(__dirname, '..');
 const VARS_URL = 'https://mememori-game.com/apps/vars.js';
 const BOI_AUTH_URL = 'https://prd1-auth.mememori-boi.com/api/auth/getDataUri';
 const APK_URL_TEMPLATE = 'https://mememori-game.com/apps/mementomori_{version}.apk';
+const MOONHEART_CHARACTER_BASE_URL = 'https://list.moonheart.dev/p/public/mmtm/AddressableConvertAssets/CharacterIcon';
 const ASSETSTUDIO_RELEASE_URL = 'https://api.github.com/repos/aelurum/AssetStudio/releases/latest';
 const FALLBACK_ASSETSTUDIO_ASSET = {
   name: 'AssetStudioModCLI_net9_linux64.zip',
   browser_download_url: 'https://github.com/aelurum/AssetStudio/releases/download/v0.19.0/AssetStudioModCLI_net9_linux64.zip',
 };
 
-const VERSION_FILE = path.join(PROJECT_ROOT, 'public/data/asset_version.txt');
-const ASSET_CATALOG_VERSION_FILE = path.join(PROJECT_ROOT, 'public/data/asset_catalog_version.txt');
 const CHARACTERS_DATA_FILE = path.join(PROJECT_ROOT, 'public/data/characters.json');
 const ITEM_MASTER_FILE = path.join(PROJECT_ROOT, 'data/Master/ItemMB.json');
 const CHARACTER_DEST_DIR = path.join(PROJECT_ROOT, 'public/images/characters');
@@ -29,6 +28,9 @@ const ITEM_DEST_DIR = path.join(PROJECT_ROOT, 'public/images/items');
 const WORK_DIR = process.env.SYNC_ASSETS_WORK_DIR
   ? path.resolve(process.env.SYNC_ASSETS_WORK_DIR)
   : path.join(process.env.RUNNER_TEMP || os.tmpdir(), 'mmt-calculator-asset-sync');
+const LEGACY_CACHE_DIR = path.join(WORK_DIR, 'legacy-cache');
+const VERSION_FILE = path.join(LEGACY_CACHE_DIR, 'asset_version.txt');
+const ASSET_CATALOG_VERSION_FILE = path.join(LEGACY_CACHE_DIR, 'asset_catalog_version.txt');
 
 const HTTP_TIMEOUT_MS = Number(process.env.SYNC_ASSETS_HTTP_TIMEOUT_MS || 10 * 60 * 1000);
 const TEXTURE_EXPORT_RETRIES = Number(process.env.SYNC_ASSETS_TEXTURE_EXPORT_RETRIES || 2);
@@ -313,6 +315,160 @@ export function missingIds(expectedIds, actualIds) {
   return [...expectedIds]
     .filter((id) => !actualIds.has(id))
     .sort((a, b) => a - b);
+}
+
+export function moonheartCharacterPath(id) {
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new TypeError(`Invalid character ID: ${id}`);
+  }
+
+  const paddedId = String(id).padStart(6, '0');
+  return `CHR_${paddedId}/CHR_${paddedId}_00_m.png`;
+}
+
+export function moonheartCharacterUrl(id, baseUrl = MOONHEART_CHARACTER_BASE_URL) {
+  return `${baseUrl.replace(/\/$/, '')}/${moonheartCharacterPath(id)}`;
+}
+
+export function isValidPng(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 45) return false;
+
+  const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  if (!buffer.subarray(0, signature.length).equals(signature)) return false;
+
+  let offset = signature.length;
+  let chunkIndex = 0;
+  let sawIend = false;
+
+  while (offset + 12 <= buffer.length) {
+    const dataLength = buffer.readUInt32BE(offset);
+    const chunkEnd = offset + 12 + dataLength;
+    if (chunkEnd > buffer.length) return false;
+
+    const type = buffer.toString('ascii', offset + 4, offset + 8);
+    if (chunkIndex === 0 && (type !== 'IHDR' || dataLength !== 13)) return false;
+    if (type === 'IEND') {
+      if (dataLength !== 0) return false;
+      sawIend = true;
+      offset = chunkEnd;
+      break;
+    }
+
+    offset = chunkEnd;
+    chunkIndex++;
+  }
+
+  return sawIend && offset === buffer.length;
+}
+
+function isMoonheartObjectMissing(status, responseText) {
+  return status === 404 || /(?:object not found|failed to get obj)/i.test(responseText);
+}
+
+async function fetchWithAbort(fetchImpl, url, timeoutMs) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetchImpl(url, {
+      signal: controller.signal,
+      headers: { 'user-agent': 'mmt-calculator-asset-sync' },
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function downloadMoonheartCharacterIcon(id, {
+  destDir = CHARACTER_DEST_DIR,
+  baseUrl = MOONHEART_CHARACTER_BASE_URL,
+  fetchImpl = fetch,
+  retries = 2,
+  timeoutMs = HTTP_TIMEOUT_MS,
+} = {}) {
+  const url = moonheartCharacterUrl(id, baseUrl);
+  const destPath = path.join(destDir, `${id}.png`);
+  if (fs.existsSync(destPath)) return { status: 'existing', id, destPath, url };
+
+  let lastError;
+  for (let attempt = 1; attempt <= retries + 1; attempt++) {
+    let tempPath;
+    try {
+      const response = await fetchWithAbort(fetchImpl, url, timeoutMs);
+      if (!response.ok) {
+        const responseText = await response.text();
+        if (isMoonheartObjectMissing(response.status, responseText)) {
+          return { status: 'unavailable', id, destPath, url };
+        }
+        throw new Error(`Moonheart character ${id} returned HTTP ${response.status}`);
+      }
+
+      const contentType = response.headers?.get?.('content-type') || '';
+      if (!contentType.toLowerCase().includes('image/png')) {
+        throw new Error(`Moonheart character ${id} returned unexpected content-type: ${contentType || 'missing'}`);
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      if (!isValidPng(buffer)) {
+        throw new Error(`Moonheart character ${id} returned an invalid or truncated PNG`);
+      }
+
+      ensureDir(destDir);
+      tempPath = `${destPath}.tmp-${process.pid}-${Math.random().toString(16).slice(2)}`;
+      fs.writeFileSync(tempPath, buffer);
+      fs.renameSync(tempPath, destPath);
+      return { status: 'downloaded', id, destPath, url, bytes: buffer.length };
+    } catch (error) {
+      lastError = error;
+      if (tempPath) fs.rmSync(tempPath, { force: true });
+      if (attempt <= retries) {
+        warn(`Moonheart character ${id} failed on attempt ${attempt}: ${error.message}`);
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+export async function syncMoonheartCharacterIcons({
+  expectedFile = CHARACTERS_DATA_FILE,
+  destDir = CHARACTER_DEST_DIR,
+  baseUrl = MOONHEART_CHARACTER_BASE_URL,
+  fetchImpl = fetch,
+  retries = 2,
+  timeoutMs = HTTP_TIMEOUT_MS,
+  logFn = log,
+  warnFn = warn,
+} = {}) {
+  const expectedIds = readExpectedCharacterIds(expectedFile);
+  const existingIds = readCharacterIconIds(destDir);
+  const targets = missingIds(expectedIds, existingIds);
+  const downloaded = [];
+  const unavailable = [];
+
+  logFn(`Missing Moonheart character icons: ${targets.length ? formatIdList(targets) : 'none'}.`);
+  for (const id of targets) {
+    const result = await downloadMoonheartCharacterIcon(id, {
+      destDir,
+      baseUrl,
+      fetchImpl,
+      retries,
+      timeoutMs,
+    });
+
+    if (result.status === 'downloaded') {
+      downloaded.push(id);
+      logFn(`Downloaded Moonheart character ${id} (${formatBytes(result.bytes)}).`);
+    } else if (result.status === 'unavailable') {
+      unavailable.push(id);
+      const message = `Moonheart character icon ${id} is not available yet; it will be retried on the next run.`;
+      warnFn(message);
+      if (process.env.GITHUB_ACTIONS === 'true') console.log(`::warning::${message}`);
+    }
+  }
+
+  logFn(`Moonheart character sync complete: ${downloaded.length} downloaded, ${unavailable.length} unavailable.`);
+  return { changed: downloaded.length > 0, targets, downloaded, unavailable };
 }
 
 function parseAddressableKeys(catalogPath) {
@@ -1259,7 +1415,7 @@ async function trySyncMissingIconsFromBoi(currentVersion, assetStudioCli) {
   };
 }
 
-export async function syncAssets() {
+export async function syncLegacyAssets() {
   ensureDir(WORK_DIR);
 
   const currentVersion = await checkVersion();
@@ -1348,13 +1504,24 @@ export async function syncAssets() {
   };
 }
 
+export async function syncAssets(options) {
+  return syncMoonheartCharacterIcons(options);
+}
+
 async function main() {
+  const useLegacySource = process.argv.includes('--legacy');
+
   try {
-    await syncAssets();
+    if (useLegacySource) {
+      log('Using legacy BOI/APK asset source by explicit request.');
+      await syncLegacyAssets();
+    } else {
+      await syncAssets();
+    }
   } catch (error) {
     const message = error?.stack || error?.message || String(error);
 
-    if (process.env.SYNC_ASSETS_GRACEFUL_FAILURE === '1') {
+    if (useLegacySource && process.env.SYNC_ASSETS_GRACEFUL_FAILURE === '1') {
       warn(message);
       if (process.env.GITHUB_ACTIONS === 'true') {
         console.log(`::warning::Image asset sync skipped: ${error.message}`);
