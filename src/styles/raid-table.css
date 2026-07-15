@@ -9,6 +9,12 @@
   font-size: clamp(26px, 3vw, 38px);
 }
 
+.raid-summary-symbolic .stat-value {
+  font-size: clamp(26px, 3vw, 38px);
+}
+
+.raid-summary-symbolic .stat-value + .stat-value { margin-top: 8px; }
+
 .raid-summary-extra { margin-top: 5px; color: var(--purple-light); font-family: var(--font-mono); font-size: var(--fs-xs); }
 
 .raid-element-filter {
@@ -383,6 +389,7 @@
 .raid-action-cell strong { color: var(--text-primary); font-size: var(--fs-sm); }
 .raid-action-cell span { color: var(--gold-light); font-family: var(--font-mono); font-size: var(--fs-xs); }
 .raid-action-cell em { color: var(--purple-light); font-size: var(--fs-xs); font-style: normal; }
+.raid-action-cell .raid-converted-stat { color: var(--gold-light); font-family: var(--font-mono); }
 .raid-action-cell .raid-cell-buffs {
   overflow: hidden;
   color: var(--success);
@@ -401,6 +408,10 @@
 .raid-boss-status-cell span + span { margin-top: 4px; }
 
 .raid-row-total { color: var(--gold-light); font-family: var(--font-mono); font-weight: 700; }
+.raid-row-total .raid-converted-stat,
+.raid-matrix-table tfoot .raid-converted-stat { color: var(--gold-light); font-family: var(--font-mono); }
+.raid-step-list .raid-converted-stat { color: var(--gold-light); font-family: var(--font-mono); }
+.raid-detail-converted-stat { color: var(--gold-light); font-family: var(--font-mono); font-size: var(--fs-lg); font-weight: 700; }
 .raid-matrix-table tfoot th,
 .raid-matrix-table tfoot td { background: rgba(212, 186, 112, 0.08); }
 

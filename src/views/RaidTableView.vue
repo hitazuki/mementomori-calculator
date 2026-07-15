@@ -11,8 +11,9 @@
       <div v-if="Object.keys(unresolvedScaling(result.scalingTotals)).length" class="raid-summary-extra">+ {{ formatScaling(unresolvedScaling(result.scalingTotals)) }}</div>
       <div class="stat-label">{{ $t('raidTeamAtkTotal') }}</div>
     </div>
-    <div class="stat-box">
-      <div class="stat-value is-purple">{{ formatSymbolic(result.symbolicTotals) }}</div>
+    <div class="stat-box raid-summary-symbolic">
+      <div v-for="([stat, value]) in symbolicEntries(result.symbolicTotals)" :key="stat" class="stat-value">{{ formatStat(value, stat) }}</div>
+      <div v-if="!symbolicEntries(result.symbolicTotals).length" class="stat-value">—</div>
       <div class="stat-label">{{ $t('raidTeamSymbolicTotal') }}</div>
     </div>
     <div class="stat-box">
@@ -206,7 +207,7 @@
               {{ formatPercent(result.characterTotals[id].atkPercent) }}
               <small v-if="Object.keys(includedScaling(result.characterTotals[id].scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(result.characterTotals[id].scalingTotals)) }) }}</small>
               <small v-if="Object.keys(unresolvedScaling(result.characterTotals[id].scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(result.characterTotals[id].scalingTotals)) }}</small>
-              <small v-if="Object.keys(result.characterTotals[id].symbolicTotals).length">+ {{ formatSymbolic(result.characterTotals[id].symbolicTotals) }}</small>
+              <small v-if="Object.keys(result.characterTotals[id].symbolicTotals).length" class="raid-converted-stat">+ {{ formatSymbolic(result.characterTotals[id].symbolicTotals) }}</small>
             </td>
             <td v-for="round in result.rounds" :key="`${id}-${round.turn}`">
               <button type="button" class="raid-action-cell" :class="{ active: selectedEvent?.sequence === eventFor(round, id).sequence }" @click="selectedEvent = eventFor(round, id)">
@@ -214,7 +215,7 @@
                 <span>{{ formatPercent(eventFor(round, id).effectiveAtkPercent) }}</span>
                 <em v-if="Object.keys(includedScaling(eventFor(round, id).scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(eventFor(round, id).scalingTotals)) }) }}</em>
                 <em v-if="Object.keys(unresolvedScaling(eventFor(round, id).scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(eventFor(round, id).scalingTotals)) }}</em>
-                <em v-if="Object.keys(eventFor(round, id).symbolicTotals).length">+ {{ formatSymbolic(eventFor(round, id).symbolicTotals) }}</em>
+                <span v-if="Object.keys(eventFor(round, id).symbolicTotals).length" class="raid-converted-stat">+ {{ formatSymbolic(eventFor(round, id).symbolicTotals) }}</span>
                 <span v-if="modifierSummary(eventFor(round, id)).length" class="raid-cell-buffs">{{ modifierSummary(eventFor(round, id)).join(' · ') }}</span>
               </button>
             </td>
@@ -241,7 +242,7 @@
             <strong>{{ formatPercent(round.atkPercent) }}</strong>
             <small v-if="Object.keys(includedScaling(round.scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(round.scalingTotals)) }) }}</small>
             <small v-if="Object.keys(unresolvedScaling(round.scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(round.scalingTotals)) }}</small>
-            <small v-if="Object.keys(round.symbolicTotals).length">+ {{ formatSymbolic(round.symbolicTotals) }}</small>
+            <small v-if="Object.keys(round.symbolicTotals).length" class="raid-converted-stat">+ {{ formatSymbolic(round.symbolicTotals) }}</small>
           </td>
         </tr></tfoot>
       </table>
@@ -263,7 +264,7 @@
             <small v-if="step.defense.applies">{{ $t('raidStepDefenseMultiplier', { value: formatter(4).format(step.defenseMultiplier) }) }} · {{ $t('raidStepDefenseMitigation', { value: formatRate(step.defense.defenseMitigationRate) }) }} · {{ $t(step.damageType === 'mag' ? 'raidStepMagicDefenseMitigation' : 'raidStepPhysicalDefenseMitigation', { value: formatRate(step.defense.pmDefenseMitigationRate) }) }}</small>
             <small v-else>{{ $t('raidStepDirectIgnoresDefense') }}</small>
             <small v-if="step.defense.applies">{{ $t('raidStepPenetrationValues', { level: step.defense.attackerLevel, defense: formatter().format(step.defense.defensePenetration), pm: formatter().format(step.defense.pmDefensePenetration) }) }}</small>
-            <small v-if="step.scalingTerms.length">+ {{ formatScalingArray(step.scalingTerms) }}</small>
+            <small v-if="step.scalingTerms.length" class="raid-converted-stat">+ {{ formatScalingArray(step.scalingTerms) }}</small>
           </article>
         </div>
         <p v-else class="raid-muted">{{ $t('raidNoDamageSteps') }}</p>
@@ -318,7 +319,7 @@
       <div class="raid-detail-panel raid-detail-panel-wide">
         <h3>{{ $t('raidActiveBuffs') }}</h3>
         <p v-if="modifierSummary(selectedEvent).length" class="raid-modifier-summary">{{ modifierSummary(selectedEvent).join(' · ') }}</p>
-        <p v-else-if="!Object.keys(selectedEvent.scalingTotals).length" class="raid-muted">{{ $t('raidNoActiveBuffs') }}</p>
+        <p v-else-if="!Object.keys(selectedEvent.scalingTotals).length && !Object.keys(selectedEvent.symbolicTotals).length" class="raid-muted">{{ $t('raidNoActiveBuffs') }}</p>
         <ul v-if="modifierBreakdown(selectedEvent).length" class="raid-detail-items raid-modifier-breakdown">
           <li v-for="item in modifierBreakdown(selectedEvent)" :key="item.channel">
             <strong>{{ item.label }} +{{ formatRate(item.total) }}</strong>
@@ -328,6 +329,10 @@
         <div v-if="Object.keys(selectedEvent.scalingTotals).length" class="raid-symbolic-breakdown">
           <h3 class="raid-subtitle">{{ $t('raidSymbolicScaling') }}</h3>
           <ul class="raid-detail-items compact"><li v-for="term in Object.values(selectedEvent.scalingTotals)" :key="term.key">{{ formatScalingTerm(term) }}</li></ul>
+        </div>
+        <div v-if="Object.keys(selectedEvent.symbolicTotals).length" class="raid-symbolic-breakdown">
+          <h3 class="raid-subtitle">{{ $t('raidSymbolicDamage') }}</h3>
+          <p class="raid-detail-converted-stat">{{ formatSymbolic(selectedEvent.symbolicTotals) }}</p>
         </div>
       </div>
     </div>
@@ -478,9 +483,12 @@ function normalizedActivationRound(key) { return Math.min(10, Math.max(1, Math.t
 function normalizeActivationRound(key) { activationRounds[key] = normalizedActivationRound(key) }
 function formatPercent(value) { return `${formatter().format(value)}% ATK` }
 function formatRate(value) { return `${formatter().format(value * 100)}%` }
-function formatSymbolic(totals) { const entries = Object.entries(totals); return entries.length ? entries.map(([stat, value]) => `${formatter().format(value)}% ${stat}`).join(' + ') : '—' }
+function formatStat(value, stat) { return `${formatter().format(value)}% ${stat}` }
+function symbolicEntries(totals) { return Object.entries(totals) }
+function formatSymbolic(totals) { const entries = symbolicEntries(totals); return entries.length ? entries.map(([stat, value]) => formatStat(value, stat)).join(' + ') : '—' }
 function valueSourceText(sourceId) { return t('raidValueSourceAttack', { source: characterName(sourceId) }) }
 function formatScalingTerm(term) {
+  if (term.kind === 'targetBaseDefenseOverTargetAttack') return formatStat(term.coefficient, 'DEF')
   const source = term.kind === 'sourceAttackOverTargetAttack' ? `（${valueSourceText(term.sourceId)}）` : ''
   return `${formatter().format(term.coefficient)}% ATK×(${term.key})${source}`
 }

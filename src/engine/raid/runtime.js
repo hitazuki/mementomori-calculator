@@ -557,7 +557,11 @@ export function runRaidProgram(program) {
         if (rawStep.stat === 'ATK') {
           baseAtkPercent += percent
           effectiveAtkPercent += normalizedEffectivePercent
-          mergeScaling(actionScaling, scalingTerms)
+          mergeScaling(actionScaling, scalingTerms.filter(term => term.kind !== 'targetBaseDefenseOverTargetAttack'))
+          const defenseScalingPercent = scalingTerms
+            .filter(term => term.kind === 'targetBaseDefenseOverTargetAttack')
+            .reduce((total, term) => total + term.coefficient, 0)
+          if (defenseScalingPercent) symbolicTotals.DEF = (symbolicTotals.DEF ?? 0) + defenseScalingPercent
         } else {
           symbolicTotals[rawStep.stat] = (symbolicTotals[rawStep.stat] ?? 0) + effectivePercent
         }

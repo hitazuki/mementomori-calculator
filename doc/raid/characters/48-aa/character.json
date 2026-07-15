@@ -6,8 +6,8 @@
   "sources": { "activeSkillIds": [48001, 48002], "passiveSkillIds": [48003, 48004, 48005], "combatLogs": ["data/battle-logs/41-60-d.json"] },
   "terms": [
     { "kind": "activeSkill", "sourceId": 48001, "model": "implemented", "summary": "当前MB与日志均为4段710%魔法伤害。" },
-    { "kind": "activeSkill", "sourceId": 48002, "model": "implemented", "summary": "当前EX3为4目标魔力980%直接伤害，单木桩投影1段。" },
-    { "kind": "passiveSkill", "sourceId": 48003, "model": "implemented", "summary": "普攻替换为3目标魔力330%直接伤害，单木桩投影1段。" },
+    { "kind": "activeSkill", "sourceId": 48002, "model": "implemented", "summary": "当前EX3为4目标魔力980%直接伤害，单木桩投影1段；41-60-d第6回合以HitType=3精确闭合MAG×980%×3.48，确认可暴击且无视防御。" },
+    { "kind": "passiveSkill", "sourceId": 48003, "model": "implemented", "summary": "普攻替换为3目标魔力330%直接伤害，单木桩投影1段；41-60-d确认暴击倍率与目标承伤降低30%均参与结算。" },
     { "kind": "passiveSkill", "sourceId": 48004, "model": "ignored", "summary": "承伤阻绝不进入木桩输出。" },
     { "kind": "passiveSkill", "sourceId": 48005, "model": "ignored", "summary": "日志确认伤害后恢复，当前不结算治疗。" }
   ],
@@ -16,5 +16,7 @@
     { "key": "raidIgnoredHealing", "summary": "主动技能与强化普攻后的恢复不结算。" },
     { "key": "raidIgnoredIncomingDamageReduction", "summary": "爱的天使承伤阻绝不结算。" }
   ],
-  "unresolved": []
+  "unresolved": [
+    "41-60-d仅隔离证明目标承伤降低会作用于MAG直接伤害；攻击者输出增伤与目标承伤增加同时存在时是否按当前damageRate加算，仍待受控日志。"
+  ]
 }
