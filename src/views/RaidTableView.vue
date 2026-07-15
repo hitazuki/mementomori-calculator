@@ -7,7 +7,8 @@
   <section class="raid-summary-grid animate-fadeup">
     <div class="stat-box raid-summary-primary">
       <div class="stat-value">{{ formatPercent(result.teamAtkPercent) }}</div>
-      <div v-if="Object.keys(result.scalingTotals).length" class="raid-summary-extra">+ {{ formatScaling(result.scalingTotals) }}</div>
+      <div v-if="Object.keys(includedScaling(result.scalingTotals)).length" class="raid-summary-extra">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(result.scalingTotals)) }) }}</div>
+      <div v-if="Object.keys(unresolvedScaling(result.scalingTotals)).length" class="raid-summary-extra">+ {{ formatScaling(unresolvedScaling(result.scalingTotals)) }}</div>
       <div class="stat-label">{{ $t('raidTeamAtkTotal') }}</div>
     </div>
     <div class="stat-box">
@@ -203,14 +204,16 @@
             <th class="raid-sticky-col raid-character-cell"><CharacterLabel :id="id" /><small>#{{ id }}</small></th>
             <td class="raid-row-total raid-sticky-total">
               {{ formatPercent(result.characterTotals[id].atkPercent) }}
-              <small v-if="Object.keys(result.characterTotals[id].scalingTotals).length">+ {{ formatScaling(result.characterTotals[id].scalingTotals) }}</small>
+              <small v-if="Object.keys(includedScaling(result.characterTotals[id].scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(result.characterTotals[id].scalingTotals)) }) }}</small>
+              <small v-if="Object.keys(unresolvedScaling(result.characterTotals[id].scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(result.characterTotals[id].scalingTotals)) }}</small>
               <small v-if="Object.keys(result.characterTotals[id].symbolicTotals).length">+ {{ formatSymbolic(result.characterTotals[id].symbolicTotals) }}</small>
             </td>
             <td v-for="round in result.rounds" :key="`${id}-${round.turn}`">
               <button type="button" class="raid-action-cell" :class="{ active: selectedEvent?.sequence === eventFor(round, id).sequence }" @click="selectedEvent = eventFor(round, id)">
                 <strong>{{ $t(eventFor(round, id).skillNameKey) }}</strong>
                 <span>{{ formatPercent(eventFor(round, id).effectiveAtkPercent) }}</span>
-                <em v-if="Object.keys(eventFor(round, id).scalingTotals).length">+ {{ formatScaling(eventFor(round, id).scalingTotals) }}</em>
+                <em v-if="Object.keys(includedScaling(eventFor(round, id).scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(eventFor(round, id).scalingTotals)) }) }}</em>
+                <em v-if="Object.keys(unresolvedScaling(eventFor(round, id).scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(eventFor(round, id).scalingTotals)) }}</em>
                 <em v-if="Object.keys(eventFor(round, id).symbolicTotals).length">+ {{ formatSymbolic(eventFor(round, id).symbolicTotals) }}</em>
                 <span v-if="modifierSummary(eventFor(round, id)).length" class="raid-cell-buffs">{{ modifierSummary(eventFor(round, id)).join(' · ') }}</span>
               </button>
@@ -229,10 +232,15 @@
         </tbody>
         <tfoot><tr>
           <th class="raid-sticky-col">{{ $t('raidRoundTotal') }}</th>
-          <td class="raid-row-total raid-sticky-total">{{ formatPercent(result.teamAtkPercent) }}</td>
+          <td class="raid-row-total raid-sticky-total">
+            {{ formatPercent(result.teamAtkPercent) }}
+            <small v-if="Object.keys(includedScaling(result.scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(result.scalingTotals)) }) }}</small>
+            <small v-if="Object.keys(unresolvedScaling(result.scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(result.scalingTotals)) }}</small>
+          </td>
           <td v-for="round in result.rounds" :key="`total-${round.turn}`">
             <strong>{{ formatPercent(round.atkPercent) }}</strong>
-            <small v-if="Object.keys(round.scalingTotals).length">+ {{ formatScaling(round.scalingTotals) }}</small>
+            <small v-if="Object.keys(includedScaling(round.scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(round.scalingTotals)) }) }}</small>
+            <small v-if="Object.keys(unresolvedScaling(round.scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(round.scalingTotals)) }}</small>
             <small v-if="Object.keys(round.symbolicTotals).length">+ {{ formatSymbolic(round.symbolicTotals) }}</small>
           </td>
         </tr></tfoot>
@@ -478,6 +486,8 @@ function formatScalingTerm(term) {
 }
 function formatScaling(totals) { return Object.values(totals).map(formatScalingTerm).join(' + ') }
 function formatScalingArray(terms) { return terms.map(formatScalingTerm).join(' + ') }
+function includedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind === 'sourceAttackOverTargetAttack')) }
+function unresolvedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind !== 'sourceAttackOverTargetAttack')) }
 function formatStep(step) { return `${formatter().format(step.effectivePercent)}% ${step.stat}` }
 function eventFor(round, id) { return round.actions.find(action => action.actorId === id) }
 

@@ -549,10 +549,14 @@ export function runRaidProgram(program) {
               * (1 + damageRate) * criticalMultiplier * defense.multiplier,
           }))
           : []
+        const normalizedSourceAttackPercent = scalingTerms
+          .filter(term => term.kind === 'sourceAttackOverTargetAttack')
+          .reduce((total, term) => total + term.coefficient, 0)
+        const normalizedEffectivePercent = effectivePercent + normalizedSourceAttackPercent
 
         if (rawStep.stat === 'ATK') {
           baseAtkPercent += percent
-          effectiveAtkPercent += effectivePercent
+          effectiveAtkPercent += normalizedEffectivePercent
           mergeScaling(actionScaling, scalingTerms)
         } else {
           symbolicTotals[rawStep.stat] = (symbolicTotals[rawStep.stat] ?? 0) + effectivePercent
@@ -574,7 +578,9 @@ export function runRaidProgram(program) {
           critical, criticalMultiplier, preStatusCriticalDamageBonus,
           preStatusAttackScale, combatAttackScale, attackScale, attackRate: modifiers.totals.attackRate,
           actorDamageRate: modifiers.totals.damageRate, bossDamageRate: incomingRate, damageRate,
-          defenseMultiplier: defense.multiplier, defense, effectivePercent, scalingTerms, modifierSources: modifiers.sources,
+          defenseMultiplier: defense.multiplier, defense,
+          effectivePercent: normalizedEffectivePercent, effectivePercentBeforeSourceAttack: effectivePercent,
+          normalizedSourceAttackPercent, scalingTerms, modifierSources: modifiers.sources,
           bossStatusBefore: bossBefore, bossStatusAfter: bossAfter,
         })
       }

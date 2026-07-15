@@ -386,6 +386,15 @@ test('panel-based attack additions remain separate symbolic terms', () => {
   assert.ok(artoriaTerms[`DEF0_${ARTORIA}/ATK_${ARTORIA}`])
   assert.equal(result.teamAtkPercent > 0, true)
   assert.ok(Object.keys(result.scalingTotals).length >= 3)
+  const shizuSourceAttack = shizuTerms[`ATK_${ARTORIA}/ATK_${SPRING_SHIZU}`].coefficient
+  const shizu = action(result, 1, SPRING_SHIZU)
+  closeTo(shizu.effectiveAtkPercent, shizu.damageSteps.reduce((total, step) => total + step.effectivePercent, 0))
+  closeTo(shizu.damageSteps.reduce((total, step) => total + step.normalizedSourceAttackPercent, 0), shizuSourceAttack)
+  assert.ok(shizu.damageSteps.every(step => (
+    step.effectivePercent === step.effectivePercentBeforeSourceAttack + step.normalizedSourceAttackPercent
+  )))
+  closeTo(result.rounds[0].atkPercent, result.rounds[0].actions.reduce((total, event) => total + event.effectiveAtkPercent, 0))
+  closeTo(result.teamAtkPercent, Object.values(result.characterTotals).reduce((total, character) => total + character.atkPercent, 0))
 })
 
 test('Rustica history and removable EffectGroup rules remain supported', () => {
@@ -1151,7 +1160,8 @@ test('Mowano copies all removable Buffs at action start, including attack, witho
   assert.equal(firstMowano.removableBuffCountsAtActionStart[MOWANO], 0)
   assert.equal(firstMowano.removableBuffCountsAtDamage[MOWANO], 3)
   assert.equal(firstMowano.damageSteps[0].attackRate, 0)
-  closeTo(firstMowano.effectiveAtkPercent, 590 * 2.1 * firstMowano.damageSteps[0].defenseMultiplier)
+  closeTo(firstMowano.effectiveAtkPercent, 590 * 1.2 * 2.1 * firstMowano.damageSteps[0].defenseMultiplier)
+  closeTo(firstMowano.damageSteps[0].normalizedSourceAttackPercent, 590 * 0.2 * 2.1 * firstMowano.damageSteps[0].defenseMultiplier)
   assert.equal(copied.find(effect => effect.effectGroupId === 9000140103).symbolicModifiers[0].coefficient, 0.2)
   const copiedAttackSource = firstMowano.damageSteps[0].scalingTerms.find(source => source.effectGroupId === 9000140103)
   assert.equal(copiedAttackSource.sourceId, CATTLEYYA)
