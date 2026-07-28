@@ -32,7 +32,7 @@ const {
   ARTORIA, LIBERIA, SPRING_SHIZU, MORGANA, LUCILLE, FRACK, GUINEVERE, LIEBES, MIFRI, POPRI, CATTLEYYA, MERLAN, TAMA, MOWANO, CAROL, ASAHI,
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
-  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE,
+  REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -51,15 +51,15 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes forty-two characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 42)
+test('roster exposes forty-three characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 43)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-11), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-12), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -465,6 +465,23 @@ test('compiler rejects unregistered mechanics and missing counters', () => {
       },
     },
   })), /Unregistered raid condition/)
+
+  assert.throws(() => compileRaidProgram(config, environmentFor({
+    ...base,
+    skills: {
+      ...base.skills,
+      s1: {
+        ...base.skills.s1,
+        damageSteps: [{
+          ...base.skills.s1.damageSteps[0],
+          percent: {
+            type: 'conditional', condition: { type: 'roundAtLeast', round: 9 },
+            whenTrue: { type: 'unknownNestedValue' }, whenFalse: 100,
+          },
+        }],
+      },
+    },
+  })), /Unregistered raid value resolver/)
 
   assert.throws(() => compileRaidProgram(config, environmentFor({
     ...base,
@@ -1514,4 +1531,59 @@ test('Eirene enhanced normal reduces her and the slowest ally cooldowns and reta
   assert.ok(allyNormal.effectsApplied.some(effect => effect.type === 'removeStatus' && effect.statusId === 'eirene-enhanced-normal-ally'))
   assert.equal(allyNormal.statusSnapshotAfterAction[MERTILLIER].statuses.some(status => status.id === 'eirene-enhanced-normal-ally'), false)
   assert.equal(action(team, 4, MERTILLIER).actionKey, 's1')
+})
+
+test('Shiloh applies logged EffectGroups before S1 damage and refreshes her four-action passives', () => {
+  const result = simulateRaidTable(singleConfig(SHILOH, { turns: 5 }))
+  assert.deepEqual(actionsFor(result, SHILOH), ['s1', 's2', 'normal', 'normal', 's1'])
+
+  const s1 = action(result, 1, SHILOH)
+  assert.equal(s1.damageSteps.length, 1)
+  assert.equal(s1.damageSteps[0].percent, 580)
+  assert.equal(s1.damageSteps[0].originalTargetCount, 5)
+  assert.equal(s1.damageSteps[0].attackRate, 0.5)
+  assert.equal(s1.damageSteps[0].criticalMultiplier, 2.4)
+  assert.equal(s1.removableBuffCountsAtDamage[SHILOH], 6)
+
+  const statuses = s1.statusSnapshotAtDamage[SHILOH].statuses
+  assert.equal(statuses.find(status => status.id === 'shiloh-happiness-magic').effectGroupId, 15300330102)
+  assert.equal(statuses.find(status => status.id === 'shiloh-critical-rate').effectGroupId, 15300120202)
+  assert.equal(statuses.find(status => status.id === 'shiloh-critical-damage').effectGroupId, 15300120204)
+  assert.equal(statuses.find(status => status.id === 'shiloh-incoming-damage-reduction').statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+  assert.deepEqual(statuses.filter(status => status.id.startsWith('shiloh-heartfelt-smile-defense-')).map(status => status.effectGroupId), [15300400101, 15300400102, 15300400103])
+  assert.ok(statuses.filter(status => status.id.startsWith('shiloh-heartfelt-smile-defense-')).every(status => status.statusClass === RAID_STATUS_CLASSES.REMOVABLE_BUFF))
+
+  const refreshed = action(result, 5, SHILOH)
+  assert.equal(refreshed.removableBuffCountsAtDamage[SHILOH], 6)
+  assert.ok(refreshed.statusSnapshotAfterAction[SHILOH].statuses.filter(status => status.id.startsWith('shiloh-heartfelt-smile-defense-')).every(status => status.remainingActions === 4))
+
+  const noCritical = simulateRaidTable(singleConfig(SHILOH, { turns: 1, guaranteedCritical: false }))
+  assert.equal(action(noCritical, 1, SHILOH).damageSteps[0].criticalMultiplier, 1)
+  assert.equal(action(noCritical, 1, SHILOH).removableBuffCountsAtDamage[SHILOH], 6)
+})
+
+test('Shiloh S2 reads the maximum removable-Buff count only from round nine onward', () => {
+  const result = simulateRaidTable(singleConfig(SHILOH, { turns: 10 }))
+  const early = action(result, 2, SHILOH)
+  assert.equal(early.damageSteps.length, 5)
+  assert.ok(early.damageSteps.every(step => step.percent === 640))
+
+  const late = action(result, 10, SHILOH)
+  assert.equal(late.removableBuffCountsAtDamage[SHILOH], 6)
+  assert.equal(late.damageSteps.length, 5)
+  assert.ok(late.damageSteps.every(step => step.percent === 820))
+
+  const removable = RAID_STATUS_CLASSES.REMOVABLE_BUFF
+  const actors = new Map([
+    [1, { statuses: Array.from({ length: 11 }, (_, index) => ({ id: index, statusClass: removable })) }],
+    [2, { statuses: [{ id: 'ignored', statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE }] }],
+  ])
+  const capped = DEFAULT_RAID_MECHANICS.valueResolvers.maxLineupRemovableBuffCountLinear(
+    { base: 640, perStack: 30, max: 940 },
+    {
+      config: { lineup: [1, 2] }, actors,
+      api: { removableBuffCount: actor => actor.statuses.filter(status => status.statusClass === removable).length },
+    },
+  )
+  assert.equal(capped, 940)
 })

@@ -123,6 +123,9 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       return values[Math.min(boss.statuses.length, values.length - 1)]
     },
     bossStatusCountLinear: (spec, { boss }) => linearValue(spec, boss.statuses.length),
+    maxLineupRemovableBuffCountLinear: (spec, { config, actors, api }) => linearValue(spec, Math.max(
+      ...config.lineup.map(id => api.removableBuffCount(actors.get(id))),
+    )),
     counterThresholds: (spec, { actor }) => {
       const values = spec.values ?? []
       return values[Math.min(actor.runtime.counters[spec.counter] ?? 0, values.length - 1)]
@@ -131,9 +134,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
       const values = spec.values ?? []
       return values[Math.min(actor.runtime.skillUses[spec.skillKey] ?? 0, values.length - 1)]
     },
-    conditional: (spec, context) => (
-      context.api.evaluateCondition(spec.condition, context) ? spec.whenTrue : spec.whenFalse
-    ),
+    conditional: (spec, context) => context.api.evaluateCondition(spec.condition, context) ? spec.whenTrue : spec.whenFalse,
   }),
 
   effectHandlers: Object.freeze({

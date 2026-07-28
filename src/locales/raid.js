@@ -712,3 +712,33 @@ const siviEireneCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(siviEireneCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const shilohCharacterExtensions = {
+  'zh-CN': {
+    raidCharShiloh: '小白', raidSkillShilohS1: '小白来帮忙！', raidSkillShilohS2: '小安一起来！',
+    raidBuffShilohCriticalRate: '小白来帮忙！・暴击率', raidBuffShilohCriticalDamage: '小白来帮忙！・暴击伤害',
+    raidBuffShilohHappinessMagic: '幸福的魔法', raidBuffShilohHeartfeltSmileDefense: '发自内心的笑容・防御力', raidBuffShilohHeartfeltSmile: '发自内心的笑容',
+  },
+  'zh-TW': {
+    raidCharShiloh: '小白', raidSkillShilohS1: '小白來幫忙！', raidSkillShilohS2: '小安一起來！',
+    raidBuffShilohCriticalRate: '小白來幫忙！・暴擊率', raidBuffShilohCriticalDamage: '小白來幫忙！・暴擊傷害',
+    raidBuffShilohHappinessMagic: '幸福的魔法', raidBuffShilohHeartfeltSmileDefense: '發自內心的笑容・防禦力', raidBuffShilohHeartfeltSmile: '發自內心的笑容',
+  },
+  en: {
+    raidCharShiloh: 'Shiloh', raidSkillShilohS1: 'Let Me Help!', raidSkillShilohS2: 'Anne, Let’s Go!',
+    raidBuffShilohCriticalRate: 'Let Me Help! · CRIT', raidBuffShilohCriticalDamage: 'Let Me Help! · CRIT DMG',
+    raidBuffShilohHappinessMagic: 'The Magic of Happiness', raidBuffShilohHeartfeltSmileDefense: 'A Smile from the Heart · DEF', raidBuffShilohHeartfeltSmile: 'A Smile from the Heart',
+  },
+  ja: {
+    raidCharShiloh: 'シロ', raidSkillShilohS1: 'お手伝いするねっ！', raidSkillShilohS2: 'アンと一緒！',
+    raidBuffShilohCriticalRate: 'お手伝いするねっ！・クリティカル率', raidBuffShilohCriticalDamage: 'お手伝いするねっ！・クリダメ強化',
+    raidBuffShilohHappinessMagic: '幸せの魔法', raidBuffShilohHeartfeltSmileDefense: '心からの笑顔・防御力', raidBuffShilohHeartfeltSmile: '心からの笑顔',
+  },
+  ko: {
+    raidCharShiloh: '시로', raidSkillShilohS1: '해맑은 보답', raidSkillShilohS2: '안과 함께',
+    raidBuffShilohCriticalRate: '해맑은 보답 · 치명타율', raidBuffShilohCriticalDamage: '해맑은 보답 · 치명타 피해',
+    raidBuffShilohHappinessMagic: '행복을 부르는 마법', raidBuffShilohHeartfeltSmileDefense: '진심 미소! · 방어력', raidBuffShilohHeartfeltSmile: '진심 미소!',
+  },
+}
+
+for (const [locale, entries] of Object.entries(shilohCharacterExtensions)) Object.assign(raidTranslations[locale], entries)

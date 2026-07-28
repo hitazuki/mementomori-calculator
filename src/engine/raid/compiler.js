@@ -122,8 +122,17 @@ function compileValue(value, mechanics, path, character) {
       throw new Error(`Configured raid tier requires five finite values at ${path}`)
     }
   }
+  if (value.type === 'maxLineupRemovableBuffCountLinear') {
+    if (![value.base ?? 0, value.perStack ?? value.increment ?? 1, value.max ?? Infinity].every(Number.isFinite)) {
+      throw new Error(`Max-lineup removable-Buff linear value requires finite base, increment, and max at ${path}`)
+    }
+  }
   const compiled = { definition: value, handler }
-  if (value.type === 'conditional') compiled.condition = compileCondition(value.condition, mechanics, `${path}.condition`, character)
+  if (value.type === 'conditional') {
+    compiled.condition = compileCondition(value.condition, mechanics, `${path}.condition`, character)
+    compiled.whenTrue = compileValue(value.whenTrue, mechanics, `${path}.whenTrue`, character)
+    compiled.whenFalse = compileValue(value.whenFalse, mechanics, `${path}.whenFalse`, character)
+  }
   return compiled
 }
 

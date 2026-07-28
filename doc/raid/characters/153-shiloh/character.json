@@ -1,0 +1,41 @@
+{
+  "formatVersion": 1,
+  "characterId": 153,
+  "slug": "shiloh",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [153001, 153002],
+    "passiveSkillIds": [153003, 153004],
+    "combatLogs": ["data/battle-logs/y49-50.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 153001, "model": "implemented", "summary": "S1以EX3的580%单体木桩投影结算；伤害前向攻击最高2名友军施加4次行动的30%暴击率与30%暴击伤害强化。" },
+    { "kind": "activeSkill", "sourceId": 153002, "model": "implemented", "summary": "S2结算5次640%物理伤害；第9回合起读取全队最高可解除Buff数，每组增加30%，单段上限940%。" },
+    { "kind": "passiveSkill", "sourceId": 153003, "model": "implemented", "summary": "第1、5、9回合开始向攻击最高2名友军施加4次行动的50%攻击力Buff。" },
+    { "kind": "passiveSkill", "sourceId": 153004, "model": "implemented", "summary": "第1、5、9次自身行动开始向自身及攻击最高2名其他友军分别施加3个4次行动的可解除防御Buff；开战保留75%不可解除承伤降低状态。" }
+  ],
+  "effectGroups": [
+    { "id": 15300120201, "model": "outOfScope", "summary": "S1非自动/非Boss且第9回合前的15%暴击率低档；讨伐Boss固定使用30%档。" },
+    { "id": 15300120202, "model": "implemented", "summary": "S1的30%暴击率可解除Buff；日志确认SkillCategory=2、GranterGuid=31、持续4次目标行动。" },
+    { "id": 15300120203, "model": "outOfScope", "summary": "S1非自动/非Boss且第9回合前的15%暴击伤害低档；讨伐Boss固定使用30%档。" },
+    { "id": 15300120204, "model": "implemented", "summary": "S1的30%暴击伤害可解除Buff；日志确认SkillCategory=2、GranterGuid=31、持续4次目标行动。" },
+    { "id": 15300300101, "model": "outOfScope", "summary": "幸福的魔法Lv1的10%攻击、2回合、单目标低档。" },
+    { "id": 15300320101, "model": "outOfScope", "summary": "幸福的魔法Lv2非自动/非Boss低档。" },
+    { "id": 15300320102, "model": "outOfScope", "summary": "幸福的魔法Lv2自动/ Boss的50%攻击、2回合低等级档。" },
+    { "id": 15300330101, "model": "outOfScope", "summary": "幸福的魔法Lv3非自动/非Boss低档。" },
+    { "id": 15300330102, "model": "implemented", "summary": "幸福的魔法Lv3在讨伐Boss中的50%攻击Buff；日志确认两名目标、SkillCategory=2和4次行动持续时间。" },
+    { "id": 15300400101, "model": "implemented", "summary": "发自内心的笑容第1个防御Buff；日志确认SkillCategory=2及施法者/目标/持续时间。" },
+    { "id": 15300400102, "model": "implemented", "summary": "发自内心的笑容第2个独立防御Buff；作为独立可解除Buff计数。" },
+    { "id": 15300400103, "model": "implemented", "summary": "发自内心的笑容第3个独立防御Buff；作为独立可解除Buff计数。" },
+    { "id": 15300420301, "model": "outOfScope", "summary": "被动Lv2的25%不可解除承伤降低低档；Lv240使用75%档。" },
+    { "id": 15300430301, "model": "implemented", "summary": "开战75%不可解除承伤降低状态；日志确认SkillCategory=4与GranterGuid=31。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredCriticalRateUp", "summary": "暴击率数值不进入确定性必暴模型，但真实EffectGroup仍保留并计入Buff数。" },
+    { "key": "raidIgnoredDefenseBuff", "summary": "友方防御力提升不改变木桩输出，但三个真实EffectGroup分别保留并计入Buff数。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "友方承伤不结算；不可解除承伤降低状态仍作为真实EffectGroup展示。" }
+  ],
+  "unresolved": [
+    { "summary": "多敌人场景中S2的随机连续攻击是否允许重复选中同一目标尚未由受控日志隔离；单Boss投影不受影响。" }
+  ]
+}

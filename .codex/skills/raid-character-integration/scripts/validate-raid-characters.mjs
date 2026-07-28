@@ -64,7 +64,11 @@ function checkValue(value, location, character) {
     return
   }
   if (value.counter && !(value.counter in (character.runtime?.counters ?? {}))) error(`${location}: unknown counter '${value.counter}'`)
-  if (value.type === 'conditional') checkCondition(value.condition, `${location}.condition`, character)
+  if (value.type === 'conditional') {
+    checkCondition(value.condition, `${location}.condition`, character)
+    checkValue(value.whenTrue, `${location}.whenTrue`, character)
+    checkValue(value.whenFalse, `${location}.whenFalse`, character)
+  }
 }
 
 function collectResolvedNumbers(value, numbers = new Set()) {

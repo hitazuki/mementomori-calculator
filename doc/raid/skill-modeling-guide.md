@@ -378,3 +378,10 @@ symbolicModifiers: [
 - アイリーン S1 在主体伤害前施加不可解除的四回合防御力降低25%，因此当前 S1 立即读取降低后的 Boss 防御。
 - アイリーン S2 使用发动前历史：前两次为 `4×380% ATK`，第三次起为 `8×760% ATK`。第三次起的命中率状态仍作为可解除 EffectGroup 参与 Buff 数显示，但命中率数值不进入确定性木桩伤害。
 - アイリーン的普攻强化每3回合在 `roundStart` 施加给自身与速度最低的其他友军。持有对应强化状态的角色发动普通攻击后，会先立即减少自身S1/S2冷却1并精确移除强化状态，再进行通常的行动结束冷却恢复1。其他友军通过通用 `normalAttack` 事件、`eventSourceHasStatus` 条件与 `eventSource` 目标选择器执行，不向角色定义注入专用分支。
+
+## 19. 小白的最高Buff数倍率与嵌套动态值
+
+- 小白S2第9回合起读取当前阵容中“可解除EffectGroup数最多的友军”的Buff数，使用 `640 + 30 × count`，并在940%封顶；并列目标是谁不影响该最大计数值。
+- `maxLineupRemovableBuffCountLinear` 只统计 `removableBuff`，不可解除状态、内部标记和弱化不计入。
+- `conditional` 数值的 `whenTrue / whenFalse` 可继续使用已注册值解析器；编译器递归校验每个分支，运行时只解析实际选中的分支。小白以 `roundAtLeast: 9` 选择固定640%或最高Buff数线性倍率。
+- 发自内心的笑容的三个防御EffectGroup均为 `SkillCategory=2`，即使防御数值不进入木桩输出，也必须分别保存并计入3个可解除Buff。

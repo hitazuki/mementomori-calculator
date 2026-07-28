@@ -108,6 +108,12 @@ export function runRaidProgram(program) {
   }
 
   function resolveValue(compiledValue, actor, context) {
+    if (compiledValue.whenTrue && compiledValue.whenFalse) {
+      const branch = evaluateCondition(compiledValue.condition.definition, { ...context, actor, ownerId: actor.id })
+        ? compiledValue.whenTrue
+        : compiledValue.whenFalse
+      return resolveValue(branch, actor, context)
+    }
     return compiledValue.handler(compiledValue.definition, { ...context, actor, config, actors, boss, api })
   }
 
