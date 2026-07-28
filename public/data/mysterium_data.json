@@ -2209,5 +2209,29 @@
         "val": 70
       }
     ]
+  },
+  {
+    "id": 98,
+    "nameKey": "[CharacterCollectionName98]",
+    "reqCids": [
+      153,
+      54,
+      10
+    ],
+    "params": [
+      {
+        "ptype": 10,
+        "nameKey": "[BattleParameterTypePhysicalCriticalDamageRelax]",
+        "ctype": 2,
+        "val": 1000
+      },
+      {
+        "ptype": 6,
+        "nameKey": "[BattleParameterTypeAvoidance]",
+        "ctype": 3,
+        "val": 50
+      }
+    ],
+    "baseParams": []
   }
 ]
