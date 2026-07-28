@@ -41,6 +41,9 @@ import aa from './aa.js'
 import sivi from './sivi.js'
 import eirene from './eirene.js'
 import shiloh from './shiloh.js'
+import matilda from './matilda.js'
+import warmMemorySoltina from './warmMemorySoltina.js'
+import artie from './artie.js'
 import { RAID_JOB_FLAGS } from '../shared.js'
 
 export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
@@ -87,6 +90,9 @@ export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   SIVI: 52,
   EIRENE: 109,
   SHILOH: 153,
+  MATILDA: 85,
+  WARM_MEMORY_SOLTINA: 107,
+  ARTIE: 58,
 })
 
 export const RAID_TABLE_ROSTER = Object.freeze([
@@ -133,6 +139,9 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.SIVI,
   RAID_TABLE_CHARACTER_IDS.EIRENE,
   RAID_TABLE_CHARACTER_IDS.SHILOH,
+  RAID_TABLE_CHARACTER_IDS.MATILDA,
+  RAID_TABLE_CHARACTER_IDS.WARM_MEMORY_SOLTINA,
+  RAID_TABLE_CHARACTER_IDS.ARTIE,
 ])
 
 export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
@@ -179,9 +188,12 @@ export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
   52: RAID_JOB_FLAGS.WARRIOR,
   109: RAID_JOB_FLAGS.SNIPER,
   153: RAID_JOB_FLAGS.SNIPER,
+  85: RAID_JOB_FLAGS.MAGE,
+  107: RAID_JOB_FLAGS.WARRIOR,
+  58: RAID_JOB_FLAGS.MAGE,
 })
 
-const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya, lunalynn, armstrong, valeriede, aa, sivi, eirene, shiloh]
+const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya, lunalynn, armstrong, valeriede, aa, sivi, eirene, shiloh, matilda, warmMemorySoltina, artie]
 export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze({
   ...character,
   jobFlags: RAID_TABLE_CHARACTER_JOB_FLAGS[character.id],

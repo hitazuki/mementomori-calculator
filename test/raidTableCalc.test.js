@@ -33,6 +33,7 @@ const {
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
   REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH,
+  MATILDA, WARM_MEMORY_SOLTINA, ARTIE,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -51,15 +52,15 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes forty-three characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 43)
+test('roster exposes forty-six characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 46)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-12), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-15), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -87,11 +88,15 @@ test('default defense config uses Sonya and per-character Lv500 dual penetration
   assert.equal(defaults.probabilityOverrides.carolSilence, true)
   assert.equal(defaults.probabilityOverrides.morganaHealingDown, true)
   assert.equal(defaults.probabilityOverrides.mowanoDelay, true)
+  assert.equal(defaults.probabilityOverrides.warmMemorySoltinaStun, true)
   assert.equal(defaults.activationRounds.witchIllyaCurseUnleashed, 2)
   assert.equal(defaults.activationRounds.candyCerberusKindMagic, 2)
   assert.equal(defaults.scenarioTiers.siviReactiveBladeIncomingHits, 0)
   assert.equal(defaults.speeds[CORDIE], 3562)
   assert.equal(defaults.speeds[SUMMER_SABRINA], 3418)
+  assert.equal(defaults.speeds[MATILDA], 3181)
+  assert.equal(defaults.speeds[WARM_MEMORY_SOLTINA], 3073)
+  assert.equal(defaults.speeds[ARTIE], 2734)
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -1586,4 +1591,80 @@ test('Shiloh S2 reads the maximum removable-Buff count only from round nine onwa
     },
   )
   assert.equal(capped, 940)
+})
+
+test('Matilda replaces Selected Banana with the four-action Queen buff before S1 damage', () => {
+  const result = simulateRaidTable(singleConfig(MATILDA, { turns: 2 }))
+  assert.deepEqual(actionsFor(result, MATILDA), ['s1', 's2'])
+
+  const s1 = action(result, 1, MATILDA)
+  assert.equal(s1.damageSteps.length, 1)
+  assert.equal(s1.damageSteps[0].percent, 680)
+  assert.equal(s1.damageSteps[0].attackRate, 0.5)
+  assert.equal(s1.removableBuffCountsAtDamage[MATILDA], 0)
+  const queen = s1.statusSnapshotAtDamage[MATILDA].statuses.find(status => status.id === 'matilda-queen-long')
+  assert.equal(queen.effectGroupId, 8500140101)
+  assert.equal(queen.remainingActions, 4)
+  assert.equal(queen.statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+  assert.equal(s1.statusSnapshotAtDamage[MATILDA].statuses.some(status => status.id === 'matilda-banana'), false)
+
+  const s2 = action(result, 2, MATILDA)
+  assert.equal(s2.damageSteps.length, 2)
+  assert.ok(s2.damageSteps.every(step => step.percent === 380 && step.originalTargetCount === 2))
+
+  const targetWithStatus = { definition: { element: RAID_ELEMENTS.RED }, statuses: [{ id: 'matilda-banana' }] }
+  const targetWithoutStatus = { definition: { element: RAID_ELEMENTS.RED }, statuses: [] }
+  assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.targetHasStatus({ statusId: 'matilda-banana' }, { target: targetWithStatus }), true)
+  assert.equal(DEFAULT_RAID_MECHANICS.conditionHandlers.targetLacksStatus({ statusId: 'matilda-banana' }, { target: targetWithoutStatus }), true)
+})
+
+test('Heartwarming Memories Soltina selects the red-green Snow Fairy tier and applies Stun after every hit', () => {
+  const redLineup = [WARM_MEMORY_SOLTINA, ARTIE]
+  const red = simulateRaidTable({ lineup: redLineup, attackPriority: [ARTIE, WARM_MEMORY_SOLTINA], turns: 2 })
+  const redS1 = action(red, 1, WARM_MEMORY_SOLTINA)
+  const enhanced = redS1.statusSnapshotAtDamage[ARTIE].statuses.find(status => status.id === 'warm-memory-soltina-snow-fairy-enhanced')
+  assert.equal(enhanced.effectGroupId, 10700150102)
+  assert.equal(enhanced.remainingActions, 32)
+  assert.equal(enhanced.modifiers[0].copyRate, 0.6)
+  assert.equal(red.rounds[0].speedSnapshot[WARM_MEMORY_SOLTINA].effectiveSpeed, 3073 * 1.3)
+  assert.equal(red.rounds[1].speedSnapshot[WARM_MEMORY_SOLTINA].effectiveSpeed, 3073 * 1.3)
+
+  const yellowLineup = [WARM_MEMORY_SOLTINA, SHILOH]
+  const yellow = simulateRaidTable({ lineup: yellowLineup, attackPriority: [SHILOH, WARM_MEMORY_SOLTINA], turns: 1 })
+  const normal = action(yellow, 1, WARM_MEMORY_SOLTINA).statusSnapshotAtDamage[SHILOH].statuses.find(status => status.id === 'warm-memory-soltina-snow-fairy-normal')
+  assert.equal(normal.effectGroupId, 10700150101)
+  assert.equal(normal.remainingActions, 4)
+  assert.equal(normal.modifiers[0].copyRate, 0.3)
+
+  const enabled = simulateRaidTable(singleConfig(WARM_MEMORY_SOLTINA, { turns: 2, probabilityOverrides: { warmMemorySoltinaStun: true } }))
+  const enabledS2 = action(enabled, 2, WARM_MEMORY_SOLTINA)
+  assert.equal(enabledS2.damageSteps.length, 5)
+  assert.equal(enabledS2.effectsApplied.filter(effect => effect.id === 'warm-memory-soltina-stun' && !effect.skipped).length, 5)
+  assert.equal(enabledS2.bossStatusAfterAction.find(status => status.id === 'warm-memory-soltina-stun').effectGroupId, 10700240102)
+
+  const disabled = simulateRaidTable(singleConfig(WARM_MEMORY_SOLTINA, { turns: 2, probabilityOverrides: { warmMemorySoltinaStun: false } }))
+  const disabledS2 = action(disabled, 2, WARM_MEMORY_SOLTINA)
+  assert.equal(disabledS2.effectsApplied.filter(effect => effect.id === 'warm-memory-soltina-stun' && effect.skipped).length, 5)
+  assert.equal(disabledS2.bossStatusAfterAction.some(status => status.id === 'warm-memory-soltina-stun'), false)
+})
+
+test('Artie applies one combined S1 debuff and guarantees S2 criticals against the weakened Boss', () => {
+  const result = simulateRaidTable(singleConfig(ARTIE, { turns: 2, guaranteedCritical: false }))
+  assert.deepEqual(actionsFor(result, ARTIE), ['s1', 's2'])
+
+  const s1 = action(result, 1, ARTIE)
+  assert.equal(s1.damageSteps.length, 1)
+  assert.equal(s1.damageSteps[0].percent, 350)
+  assert.equal(s1.damageSteps[0].originalTargetCount, 5)
+  assert.equal(s1.damageSteps[0].bossDamageRate, 0.2)
+  assert.equal(s1.damageSteps[0].defense.pmDefenseRate, -0.4)
+  assert.equal(s1.runtimeAfter.counters.criticalResistStacks, 10)
+  assert.equal(s1.bossStatusAfterAction.filter(status => status.id === 'artie-s1-debuff').length, 1)
+  assert.equal(s1.bossStatusAfterAction.find(status => status.id === 'artie-s1-debuff').effectGroupId, 5800140101)
+  assert.ok(s1.statusSnapshotBeforeAction[ARTIE].statuses.some(status => status.effectGroupId === 5800330101))
+  assert.ok(s1.statusSnapshotBeforeAction[ARTIE].statuses.some(status => status.effectGroupId === 5800400101))
+
+  const s2 = action(result, 2, ARTIE)
+  assert.equal(s2.damageSteps.length, 7)
+  assert.ok(s2.damageSteps.every(step => step.percent === 200 && step.critical))
 })

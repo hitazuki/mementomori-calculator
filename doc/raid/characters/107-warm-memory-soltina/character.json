@@ -1,0 +1,40 @@
+{
+  "formatVersion": 1,
+  "characterId": 107,
+  "slug": "warm-memory-soltina",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [107001, 107002],
+    "passiveSkillIds": [107003, 107004],
+    "combatLogs": ["data/battle-logs/r1820-2.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 107001, "model": "implemented", "summary": "伤害前给攻击最高友军施加攻击+30%、命中+50%的不可解除复合Buff；红/绿目标强化为攻击+60%、持续32次行动，其他属性持续4次，再造成480%物理伤害。" },
+    { "kind": "activeSkill", "sourceId": 107002, "model": "implemented", "summary": "造成5次420%物理伤害，每次命中按独立40%概率尝试施加2回合晕厥；页面用确定场景开关统一启闭。" },
+    { "kind": "passiveSkill", "sourceId": 107003, "model": "ignored", "summary": "受到主动技能弱化且自身至少有2个弱化时清除全部弱化；不行动木桩不会向己方施加弱化。" },
+    { "kind": "passiveSkill", "sourceId": 107004, "model": "implemented", "summary": "开战自身速度+30%，不可解除，持续2次自身行动并参与回合速度排序。" }
+  ],
+  "effectGroups": [
+    { "id": 10700100101, "model": "outOfScope", "summary": "S1初始15%攻击/30%命中低档。" },
+    { "id": 10700120101, "model": "outOfScope", "summary": "Lv81普通属性低档。" },
+    { "id": 10700120102, "model": "outOfScope", "summary": "Lv81红绿强化低档。" },
+    { "id": 10700140101, "model": "outOfScope", "summary": "EX1普通属性30%攻击/30%命中低档。" },
+    { "id": 10700140102, "model": "outOfScope", "summary": "EX1红绿强化60%攻击/30%命中；参考日志实际使用该档。" },
+    { "id": 10700150101, "model": "implemented", "summary": "EX2普通属性最终复合Buff，攻击30%、命中50%、持续4次行动。" },
+    { "id": 10700150102, "model": "implemented", "summary": "EX2红绿最终复合Buff，攻击60%、命中50%、持续32次行动。" },
+    { "id": 10700200102, "model": "outOfScope", "summary": "S2一回合晕厥低档。" },
+    { "id": 10700240102, "model": "implemented", "summary": "S2最终两回合晕厥组；日志在5次命中中的3次成功写入SkillCategory=3。" },
+    { "id": 10700300101, "model": "outOfScope", "summary": "清除1个弱化低档。" },
+    { "id": 10700320101, "model": "outOfScope", "summary": "清除2个弱化低档。" },
+    { "id": 10700330101, "model": "ignored", "summary": "清除全部弱化最终隐藏执行组；木桩无己方受弱化事件。" },
+    { "id": 10700400101, "model": "outOfScope", "summary": "速度+15%持续1次行动低档。" },
+    { "id": 10700420101, "model": "outOfScope", "summary": "速度+15%持续2次行动低档。" },
+    { "id": 10700430101, "model": "implemented", "summary": "速度+30%持续2次行动最终组；日志为SkillCategory=4。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHitRateUp", "summary": "命中率不进入确定性命中计算，复合EffectGroup仍保留。" },
+    { "key": "raidIgnoredStunAction", "summary": "晕厥状态与五次尝试均保留，但Boss不行动。" },
+    { "key": "raidIgnoredDebuffCleanse", "summary": "木桩不会向己方施加主动技能弱化，因此被动清除不触发。" }
+  ],
+  "unresolved": []
+}

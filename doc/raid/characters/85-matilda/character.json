@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "characterId": 85,
+  "slug": "matilda",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [85001, 85002],
+    "passiveSkillIds": [85003, 85004],
+    "combatLogs": ["data/battle-logs/r1820-2.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 85001, "model": "implemented", "summary": "S1在伤害前给自身和攻击最高的其他友军施加攻击/暴击/命中+50%的不可解除状态；目标有精选香蕉时替换该Buff并持续4次行动，否则持续1次，再造成680%魔法伤害。" },
+    { "kind": "activeSkill", "sourceId": 85002, "model": "implemented", "summary": "满HP木桩口径下先后投影两波380%魔法伤害；低于50%生命时改为治疗的分支不触发。" },
+    { "kind": "passiveSkill", "sourceId": 85003, "model": "implemented", "summary": "第1、5、9回合开始向自身和攻击最高的其他友军施加4次行动的攻击/暴击+10%、命中+30%可解除Buff。" },
+    { "kind": "passiveSkill", "sourceId": 85004, "model": "ignored", "summary": "受击伤害阻绝依赖敌方攻击，木桩模型不触发。" }
+  ],
+  "effectGroups": [
+    { "id": 8500100101, "model": "outOfScope", "summary": "S1初始20%低档。" },
+    { "id": 8500120101, "model": "outOfScope", "summary": "S1 Lv81的20%低档。" },
+    { "id": 8500120102, "model": "implemented", "summary": "检测并解除精选香蕉的隐藏执行组；模型以目标状态条件和共同replacementKey表达同等替换结果。" },
+    { "id": 8500140101, "model": "implemented", "summary": "S1 EX1的50%不可解除复合Buff；日志为SkillCategory=4。" },
+    { "id": 8500220201, "model": "ignored", "summary": "S2 HP分支内部标记，不作为可见Buff。" },
+    { "id": 8500230502, "model": "ignored", "summary": "S2内部标记解除组。" },
+    { "id": 8500240503, "model": "ignored", "summary": "S2首次治疗分支内部标记；满HP木桩不进入治疗分支。" },
+    { "id": 8500300101, "model": "outOfScope", "summary": "精选香蕉5%初始低档。" },
+    { "id": 8500320101, "model": "outOfScope", "summary": "精选香蕉10%三属性低档。" },
+    { "id": 8500330101, "model": "outOfScope", "summary": "精选香蕉命中20%低档；参考日志角色未达到EX2时使用该组。" },
+    { "id": 8500340101, "model": "implemented", "summary": "Lv240 EX2的精选香蕉最终组；可解除、持续4次目标行动。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredCriticalRateUp", "summary": "暴击率不进入确定性必暴概率结算，真实复合EffectGroup仍保留。" },
+    { "key": "raidIgnoredHitRateUp", "summary": "命中率不进入木桩确定性命中结算，真实复合EffectGroup仍保留。" },
+    { "key": "raidIgnoredHealing", "summary": "S2低生命治疗分支在友方满HP口径下不触发。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "受击伤害阻绝不进入不行动木桩输出。" }
+  ],
+  "unresolved": []
+}

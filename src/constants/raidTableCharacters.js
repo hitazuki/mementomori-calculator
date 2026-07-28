@@ -48,6 +48,7 @@ export function createDefaultRaidTableConfig() {
       lilicotteSilence: true, liebesStun: true, artoriaStun: true,
       carolSilence: true, morganaHealingDown: true, mowanoDelay: true,
       paladiaCriticalResistDown: true,
+      warmMemorySoltinaStun: true,
     },
     activationRounds: {
       candyCerberusKindMagic: 2,

@@ -1,0 +1,38 @@
+{
+  "formatVersion": 1,
+  "characterId": 58,
+  "slug": "artie",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [58001, 58002],
+    "passiveSkillIds": [58003, 58004],
+    "combatLogs": ["data/battle-logs/r1820-2.json"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 58001, "model": "implemented", "summary": "伤害前给Boss施加4回合魔防-40%与承伤+20%的单一可解除EffectGroup，并把自身抗暴层数增加2层至最多10层，再造成350%魔法伤害。" },
+    { "kind": "activeSkill", "sourceId": 58002, "model": "implemented", "summary": "造成7次200%魔法伤害，Boss有任一弱化时强制暴击；目标生命比例低于自身的2倍分支和20%总伤害治疗不触发/不结算。" },
+    { "kind": "passiveSkill", "sourceId": 58003, "model": "implemented", "summary": "开战保留最大生命+30%、承伤-30%的不可解除复合状态；数值不改变木桩输出。" },
+    { "kind": "passiveSkill", "sourceId": 58004, "model": "implemented", "summary": "开战记录8层抗暴率状态；木桩无敌方攻击，层数不会被消耗，S1按已有状态每次补2层。" }
+  ],
+  "effectGroups": [
+    { "id": 5800100101, "model": "outOfScope", "summary": "S1魔防-20%/承伤+10%两回合低档。" },
+    { "id": 5800120202, "model": "ignored", "summary": "S1补充2层抗暴的隐藏执行组；模型以计数器表达。" },
+    { "id": 5800130101, "model": "outOfScope", "summary": "S1四回合低数值档。" },
+    { "id": 5800140101, "model": "implemented", "summary": "S1最终魔防-40%/承伤+20%的单一可解除弱化组，日志为SkillCategory=3、EffectTurn=4。" },
+    { "id": 5800300101, "model": "outOfScope", "summary": "最大生命+15%低档。" },
+    { "id": 5800320101, "model": "outOfScope", "summary": "最大生命+15%/承伤-15%低档。" },
+    { "id": 5800330101, "model": "implemented", "summary": "最大生命+30%/承伤-30%最终不可解除组；日志为SkillCategory=4。" },
+    { "id": 5800400101, "model": "implemented", "summary": "抗暴率每层+10%、最多10层的不可解除状态；日志记录EffectCount变化。" },
+    { "id": 5800400102, "model": "ignored", "summary": "补充2层抗暴的隐藏执行组。" },
+    { "id": 5800400301, "model": "ignored", "summary": "受击消耗1层的隐藏执行组；木桩无敌方攻击。" },
+    { "id": 5800430102, "model": "implemented", "summary": "被动最终开战增加8层的隐藏执行组；模型初始化计数器为8。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredCriticalResistStacks", "summary": "保留抗暴EffectGroup与木桩内层数变化，但不模拟受击消耗和超量伤害阻绝。" },
+    { "key": "raidIgnoredMaxHpUp", "summary": "最大生命提升不改变输出倍率。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "承伤降低与伤害阻绝不进入输出倍率。" },
+    { "key": "raidIgnoredTargetLowerHpDamageScaling", "summary": "木桩HP比例不低于满HP友方，S2使用200%基础倍率。" },
+    { "key": "raidIgnoredHealing", "summary": "S2总伤害20%的自身治疗不结算。" }
+  ],
+  "unresolved": []
+}

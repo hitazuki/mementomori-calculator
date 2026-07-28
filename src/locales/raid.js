@@ -742,3 +742,38 @@ const shilohCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(shilohCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const redLogCharacterExtensions = {
+  'zh-CN': {
+    raidCharMatilda: '玛提尔德', raidCharWarmMemorySoltina: '［温暖的回忆］索尔缇娜', raidCharArtie: '亚缇',
+    raidSkillMatildaS1: '乔巴里的女王', raidSkillMatildaS2: '小小的勇气', raidSkillWarmMemorySoltinaS1: '冰雪妖精', raidSkillWarmMemorySoltinaS2: '冰柱术', raidSkillArtieS1: '抗争到底！', raidSkillArtieS2: '灾厄之剑',
+    raidBuffMatildaBanana: '玛提尔德严选香蕉', raidBuffMatildaQueen: '乔巴里的女王', raidBuffWarmMemorySoltinaSnowFairy: '冰雪妖精', raidBuffWarmMemorySoltinaSpeed: '温暖的回忆・速度', raidBuffArtiePartnerPresence: '搭档的身影', raidBuffArtieCriticalResist: '魔剑锻造者・抗暴率', raidDebuffArtieDoOrDie: '抗争到底！・魔防降低与承伤增加',
+    raidAssumeWarmMemorySoltinaStun: '假设索尔缇娜晕厥成功', raidConditionSelfHpAtLeastHalf: '自身保持50%以上生命，发动第二波攻击', raidIgnoredCriticalResistStacks: '抗暴率层数的受击消耗与伤害阻绝', raidIgnoredTargetLowerHpDamageScaling: '目标生命比例低于自身时的伤害翻倍',
+  },
+  'zh-TW': {
+    raidCharMatilda: '瑪提爾德', raidCharWarmMemorySoltina: '［溫暖的回憶］索爾緹娜', raidCharArtie: '亞緹',
+    raidSkillMatildaS1: '喬巴里的女王', raidSkillMatildaS2: '小小的勇氣', raidSkillWarmMemorySoltinaS1: '冰雪妖精', raidSkillWarmMemorySoltinaS2: '冰柱術', raidSkillArtieS1: '全面抗戰！', raidSkillArtieS2: '災厄之劍',
+    raidBuffMatildaBanana: '瑪提爾德嚴選香蕉', raidBuffMatildaQueen: '喬巴里的女王', raidBuffWarmMemorySoltinaSnowFairy: '冰雪妖精', raidBuffWarmMemorySoltinaSpeed: '溫暖的回憶・速度', raidBuffArtiePartnerPresence: '搭檔的身影', raidBuffArtieCriticalResist: '魔劍鍛造者・抗暴率', raidDebuffArtieDoOrDie: '全面抗戰！・魔防降低與承傷增加',
+    raidAssumeWarmMemorySoltinaStun: '假設索爾緹娜暈厥成功', raidConditionSelfHpAtLeastHalf: '自身維持50%以上生命，發動第二波攻擊', raidIgnoredCriticalResistStacks: '抗暴率層數的受擊消耗與傷害阻絕', raidIgnoredTargetLowerHpDamageScaling: '目標生命比例低於自身時的傷害翻倍',
+  },
+  en: {
+    raidCharMatilda: 'Matilda', raidCharWarmMemorySoltina: '[Heartwarming Memories] Soltina', raidCharArtie: 'Artie',
+    raidSkillMatildaS1: 'Queen of Jobari', raidSkillMatildaS2: 'Tiny Courage', raidSkillWarmMemorySoltinaS1: 'Snow Fairy', raidSkillWarmMemorySoltinaS2: 'Ice Cascade', raidSkillArtieS1: 'It’s Do-or-Die!', raidSkillArtieS2: 'Sword of Calamity',
+    raidBuffMatildaBanana: 'Royally Certified Banana', raidBuffMatildaQueen: 'Queen of Jobari', raidBuffWarmMemorySoltinaSnowFairy: 'Snow Fairy', raidBuffWarmMemorySoltinaSpeed: 'Heartwarming Memories · SPD', raidBuffArtiePartnerPresence: 'Her Partner’s Presence', raidBuffArtieCriticalResist: 'Evil Sword’s Creator · CRIT RES', raidDebuffArtieDoOrDie: 'It’s Do-or-Die! · M.DEF Down & Damage Taken',
+    raidAssumeWarmMemorySoltinaStun: 'Assume Soltina Stun succeeds', raidConditionSelfHpAtLeastHalf: 'Self remains at 50%+ HP; perform the second attack', raidIgnoredCriticalResistStacks: 'CRIT RES stack consumption and damage blocking from incoming hits', raidIgnoredTargetLowerHpDamageScaling: 'Double damage when the target has a lower HP percentage',
+  },
+  ja: {
+    raidCharMatilda: 'マチルダ', raidCharWarmMemorySoltina: '［温かな記憶］ソルティーナ', raidCharArtie: 'アーティ',
+    raidSkillMatildaS1: 'ジョバリの女王', raidSkillMatildaS2: '小さな勇気', raidSkillWarmMemorySoltinaS1: '雪の妖精', raidSkillWarmMemorySoltinaS2: 'アイシクル', raidSkillArtieS1: '徹底抗戦！', raidSkillArtieS2: '災厄の剣',
+    raidBuffMatildaBanana: 'マチルダ厳選バナナ', raidBuffMatildaQueen: 'ジョバリの女王', raidBuffWarmMemorySoltinaSnowFairy: '雪の妖精', raidBuffWarmMemorySoltinaSpeed: '温かな思い出・スピード', raidBuffArtiePartnerPresence: '相棒の影', raidBuffArtieCriticalResist: '魔剣の創造主・クリティカル耐性', raidDebuffArtieDoOrDie: '徹底抗戦！・魔法防御減少＆被ダメージ増加',
+    raidAssumeWarmMemorySoltinaStun: 'ソルティーナの気絶成功を仮定', raidConditionSelfHpAtLeastHalf: '自身のHPを50%以上として2回目の攻撃を実行', raidIgnoredCriticalResistStacks: '被攻撃によるクリティカル耐性スタック消費とダメージ遮断', raidIgnoredTargetLowerHpDamageScaling: '対象のHP割合が自身より低い場合のダメージ2倍',
+  },
+  ko: {
+    raidCharMatilda: '마틸다', raidCharWarmMemorySoltina: '［따뜻한 기억］솔티나', raidCharArtie: '아티',
+    raidSkillMatildaS1: '죠바리 족의 여왕', raidSkillMatildaS2: '자그마한 용기', raidSkillWarmMemorySoltinaS1: '겨울 요정의 축복', raidSkillWarmMemorySoltinaS2: '아이시클', raidSkillArtieS1: '결사 항전!', raidSkillArtieS2: '재액의 검',
+    raidBuffMatildaBanana: '마틸다 특선 바나나', raidBuffMatildaQueen: '죠바리 족의 여왕', raidBuffWarmMemorySoltinaSnowFairy: '겨울 요정의 축복', raidBuffWarmMemorySoltinaSpeed: '따뜻한 추억 · 스피드', raidBuffArtiePartnerPresence: '파트너의 그림자', raidBuffArtieCriticalResist: '마검의 창조주 · 치명타 내성', raidDebuffArtieDoOrDie: '결사 항전! · 마법 방어력 감소 및 받는 피해 증가',
+    raidAssumeWarmMemorySoltinaStun: '솔티나 기절 성공 가정', raidConditionSelfHpAtLeastHalf: '자신의 HP를 50% 이상으로 보고 두 번째 공격 실행', raidIgnoredCriticalResistStacks: '피격으로 인한 치명타 내성 스택 소모 및 피해 차단', raidIgnoredTargetLowerHpDamageScaling: '대상의 HP 비율이 자신보다 낮을 때 피해 2배',
+  },
+}
+
+for (const [locale, entries] of Object.entries(redLogCharacterExtensions)) Object.assign(raidTranslations[locale], entries)

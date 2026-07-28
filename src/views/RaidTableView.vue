@@ -136,6 +136,10 @@
         <input v-model="probabilityOverrides.paladiaCriticalResistDown" type="checkbox">
         <span><strong>{{ $t('raidAssumeWitchPaladiaCriticalResistDown') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
       </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.WARM_MEMORY_SOLTINA)" class="raid-toggle-control">
+        <input v-model="probabilityOverrides.warmMemorySoltinaStun" type="checkbox">
+        <span><strong>{{ $t('raidAssumeWarmMemorySoltinaStun') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+      </label>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA)" class="raid-number-control">
         <span><strong>{{ $t('raidWitchIllyaCurseUnleashedRound') }}</strong><small>{{ $t('raidWitchIllyaCurseUnleashedRoundHint') }}</small></span>
         <span class="raid-number-input"><input v-model.number="activationRounds.witchIllyaCurseUnleashed" type="number" min="1" max="10" step="1" @change="normalizeActivationRound('witchIllyaCurseUnleashed')"><em>{{ $t('raidRoundUnit') }}</em></span>

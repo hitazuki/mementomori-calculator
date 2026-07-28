@@ -385,3 +385,10 @@ symbolicModifiers: [
 - `maxLineupRemovableBuffCountLinear` 只统计 `removableBuff`，不可解除状态、内部标记和弱化不计入。
 - `conditional` 数值的 `whenTrue / whenFalse` 可继续使用已注册值解析器；编译器递归校验每个分支，运行时只解析实际选中的分支。小白以 `roundAtLeast: 9` 选择固定640%或最高Buff数线性倍率。
 - 发自内心的笑容的三个防御EffectGroup均为 `SkillCategory=2`，即使防御数值不进入木桩输出，也必须分别保存并计入3个可解除Buff。
+
+## 20. 目标级状态与属性集合分支
+
+- 玛提尔德S1对每个候选目标分别检查其是否持有「玛提尔德严选香蕉」。使用 `targetHasStatus` / `targetLacksStatus` 拆分4次与1次行动档，并让两档和香蕉共享 `replacementKey`；短档必须先声明，避免长档替换香蕉后又被短档覆盖。
+- `targetHasStatus` 与 `targetLacksStatus` 读取当前候选目标的运行时状态，不等同于 `actorHasStatus`（施法者状态）或 `eventSourceHasStatus`（事件来源状态）。
+- ［温暖的回忆］索尔缇娜S1使用 `targetElementIn` / `targetElementNotIn` 按目标是否属于红、绿属性选择真实EffectGroup、攻击倍率和持续行动数。集合条件必须显式列出有限属性值，不把天光等其他属性误判为强化档。
+- 同一复合Buff内的攻击、命中或暴击属性仍只计为一个EffectGroup。模型只把攻击写入数值Modifier，命中/暴击的忽略不拆分或删除真实状态。

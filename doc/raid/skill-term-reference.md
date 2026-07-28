@@ -623,3 +623,14 @@ eventHooks: [{
 | value resolver | 嵌套 `conditional` | `whenTrue / whenFalse` 可为数字或另一个已注册值解析器；编译与校验递归覆盖所有分支，运行时只解析命中的分支。 |
 
 小白S2用 `roundAtLeast: 9` 在固定640%和 `maxLineupRemovableBuffCountLinear({ base: 640, perStack: 30, max: 940 })` 之间切换。三个防御Buff使用三个真实EffectGroup和空 `modifiers` 数组，保留各自的可解除Buff计数。
+
+## 目标状态与属性集合条件（玛提尔德、［温暖的回忆］索尔缇娜）
+
+| 类别 | 名称 | 含义 |
+| --- | --- | --- |
+| condition | `targetHasStatus` | 当前候选目标持有指定运行时状态 `statusId` 时成立。 |
+| condition | `targetLacksStatus` | 当前候选目标不持有指定运行时状态 `statusId` 时成立。 |
+| condition | `targetElementIn` | 当前候选目标属性包含在显式 `elements` 集合中时成立。 |
+| condition | `targetElementNotIn` | 当前候选目标属性不在显式 `elements` 集合中时成立。 |
+
+这些条件用于 `effect.targetCondition`，由目标选择器产生候选列表后逐目标判断。玛提尔德用目标状态决定S1持续1次或4次行动，索尔缇娜用目标属性集合决定普通/红绿强化档；两者都通过共同 `replacementKey` 保证同源档位互斥。
