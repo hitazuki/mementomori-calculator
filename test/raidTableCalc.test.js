@@ -1488,8 +1488,8 @@ test('Eirene applies DEF down before S1 and upgrades every S2 from its third use
   closeTo(s1.damageSteps[0].defense.defenseRate, -0.25)
   closeTo(s1.damageSteps[0].defense.actualDefense, 150_000)
   const defenseDown = s1.bossStatusAfterAction.find(status => status.id === 'eirene-defense-down')
-  assert.equal(defenseDown.effectGroupId, 10900120101)
-  assert.equal(defenseDown.statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF)
+  assert.equal(defenseDown.effectGroupId, 10900120103)
+  assert.equal(defenseDown.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
   assert.equal(defenseDown.remainingRounds, 4)
 
   const firstS2 = action(result, 2, EIRENE)
@@ -1546,14 +1546,14 @@ test('Shiloh applies logged EffectGroups before S1 damage and refreshes her four
   assert.equal(s1.damageSteps.length, 1)
   assert.equal(s1.damageSteps[0].percent, 580)
   assert.equal(s1.damageSteps[0].originalTargetCount, 5)
-  assert.equal(s1.damageSteps[0].attackRate, 0.5)
-  assert.equal(s1.damageSteps[0].criticalMultiplier, 2.4)
+  assert.equal(s1.damageSteps[0].attackRate, 0.1)
+  assert.equal(s1.damageSteps[0].criticalMultiplier, 2.25)
   assert.equal(s1.removableBuffCountsAtDamage[SHILOH], 6)
 
   const statuses = s1.statusSnapshotAtDamage[SHILOH].statuses
-  assert.equal(statuses.find(status => status.id === 'shiloh-happiness-magic').effectGroupId, 15300330102)
-  assert.equal(statuses.find(status => status.id === 'shiloh-critical-rate').effectGroupId, 15300120202)
-  assert.equal(statuses.find(status => status.id === 'shiloh-critical-damage').effectGroupId, 15300120204)
+  assert.equal(statuses.find(status => status.id === 'shiloh-happiness-magic').effectGroupId, 15300330101)
+  assert.equal(statuses.find(status => status.id === 'shiloh-critical-rate').effectGroupId, 15300120201)
+  assert.equal(statuses.find(status => status.id === 'shiloh-critical-damage').effectGroupId, 15300120203)
   assert.equal(statuses.find(status => status.id === 'shiloh-incoming-damage-reduction').statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
   assert.deepEqual(statuses.filter(status => status.id.startsWith('shiloh-heartfelt-smile-defense-')).map(status => status.effectGroupId), [15300400101, 15300400102, 15300400103])
   assert.ok(statuses.filter(status => status.id.startsWith('shiloh-heartfelt-smile-defense-')).every(status => status.statusClass === RAID_STATUS_CLASSES.REMOVABLE_BUFF))
@@ -1577,6 +1577,13 @@ test('Shiloh S2 reads the maximum removable-Buff count only from round nine onwa
   assert.equal(late.removableBuffCountsAtDamage[SHILOH], 6)
   assert.equal(late.damageSteps.length, 5)
   assert.ok(late.damageSteps.every(step => step.percent === 820))
+
+  const turnNine = action(result, 9, SHILOH)
+  assert.equal(turnNine.damageSteps[0].attackRate, 0.5)
+  assert.equal(turnNine.damageSteps[0].criticalMultiplier, 2.4)
+  assert.equal(turnNine.statusSnapshotAtDamage[SHILOH].statuses.find(status => status.id === 'shiloh-happiness-magic').effectGroupId, 15300330102)
+  assert.equal(turnNine.statusSnapshotAtDamage[SHILOH].statuses.find(status => status.id === 'shiloh-critical-rate').effectGroupId, 15300120202)
+  assert.equal(turnNine.statusSnapshotAtDamage[SHILOH].statuses.find(status => status.id === 'shiloh-critical-damage').effectGroupId, 15300120204)
 
   const removable = RAID_STATUS_CLASSES.REMOVABLE_BUFF
   const actors = new Map([

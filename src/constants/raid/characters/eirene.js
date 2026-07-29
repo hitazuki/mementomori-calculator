@@ -52,8 +52,8 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillEireneS1', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [bossStatusEffect({
-        id: 'eirene-defense-down', effectGroupId: 10900120101, nameKey: 'raidDebuffEireneDefense',
-        durationRounds: 4, defenseRatePerStack: -0.25, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF,
+        id: 'eirene-defense-down', effectGroupId: 10900120103, nameKey: 'raidDebuffEireneDefense',
+        durationRounds: 4, defenseRatePerStack: -0.25,
       })])],
       damageSteps: [{ stat: 'ATK', percent: 280, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredIncomingDamageReduction'],

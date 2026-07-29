@@ -613,7 +613,7 @@ eventHooks: [{
 
 シヴィ的 `siviReactiveBladeIncomingHits` 对应本回合受击0/1/2/3/4次，统一映射为30%/54%/72%/84%/90%增伤。该配置只替代尚未实现的逐目标受击计数，不改变真实EffectGroup `5200150101`、四次目标行动持续时间和可解除Buff分类。
 
-アイリーン复用 `skillUsesThresholds` 表示第三次起的S2形态。自身强化普攻在 `afterDamage` 钩子中组合 `cooldownReduction` 与 `removeStatus`；其他友军则由 `normalAttack` 事件监听同样减少事件来源角色的冷却并移除 `10900330201`。两条路径都先减冷却1，再执行本次行动的基础冷却恢复1。
+アイリーン复用 `skillUsesThresholds` 表示第三次起的S2形态。S1在讨伐使用默认的可解除防御降低组 `10900120103`；`10900120101` 是仅限自动战斗/Boss战的不可解除组。自身强化普攻在 `afterDamage` 钩子中组合 `cooldownReduction` 与 `removeStatus`；其他友军则由 `normalAttack` 事件监听同样减少事件来源角色的冷却并移除 `10900330201`。两条路径都先减冷却1，再执行本次行动的基础冷却恢复1。
 
 ## 阵容最高Buff数与嵌套条件值（小白）
 
@@ -622,7 +622,7 @@ eventHooks: [{
 | value resolver | `maxLineupRemovableBuffCountLinear` | 读取全队角色中最大的可解除EffectGroup数量，代入 `base + perStack × count` 并按 `max` 封顶。 |
 | value resolver | 嵌套 `conditional` | `whenTrue / whenFalse` 可为数字或另一个已注册值解析器；编译与校验递归覆盖所有分支，运行时只解析命中的分支。 |
 
-小白S2用 `roundAtLeast: 9` 在固定640%和 `maxLineupRemovableBuffCountLinear({ base: 640, perStack: 30, max: 940 })` 之间切换。三个防御Buff使用三个真实EffectGroup和空 `modifiers` 数组，保留各自的可解除Buff计数。
+小白S1和回合开始被动也用 `roundAtLeast: 9` 切换真实EffectGroup及数值：前8回合分别采用暴击率/暴击伤害15%与攻击力10%的低档，第9回合起采用30%与50%的高档。各档声明同一 `replacementKey`，避免换档时并存；“自动战斗・Boss战”限定不适用于讨伐。小白S2用同一回合条件在固定640%和 `maxLineupRemovableBuffCountLinear({ base: 640, perStack: 30, max: 940 })` 之间切换。三个防御Buff使用三个真实EffectGroup和空 `modifiers` 数组，保留各自的可解除Buff计数。
 
 ## 目标状态与属性集合条件（玛提尔德、［温暖的回忆］索尔缇娜）
 

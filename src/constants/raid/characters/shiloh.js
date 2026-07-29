@@ -1,9 +1,16 @@
 import { RAID_ELEMENTS, RAID_STATUS_CLASSES, hook, normalPhysical, statusEffect } from '../shared.js'
 
+const turnNineCondition = { type: 'roundAtLeast', round: 9 }
+
 const happinessMagic = statusEffect({
-  id: 'shiloh-happiness-magic', effectGroupId: 15300330102, nameKey: 'raidBuffShilohHappinessMagic',
+  id: 'shiloh-happiness-magic',
+  effectGroupId: { type: 'conditional', condition: turnNineCondition, whenTrue: 15300330102, whenFalse: 15300330101 },
+  replacementKey: 'shiloh-happiness-magic', nameKey: 'raidBuffShilohHappinessMagic',
   target: 'topAttack', targetCount: 2, duration: 4,
-  modifiers: [{ id: 'shiloh-happiness-magic', channel: 'attackRate', rate: 0.5 }],
+  modifiers: [{
+    id: 'shiloh-happiness-magic', channel: 'attackRate',
+    rate: { type: 'conditional', condition: turnNineCondition, whenTrue: 0.5, whenFalse: 0.1 },
+  }],
 })
 
 const heartfeltSmileDefense = [
@@ -39,13 +46,20 @@ export default {
       key: 's1', nameKey: 'raidSkillShilohS1', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [
         statusEffect({
-          id: 'shiloh-critical-rate', effectGroupId: 15300120202, nameKey: 'raidBuffShilohCriticalRate',
+          id: 'shiloh-critical-rate',
+          effectGroupId: { type: 'conditional', condition: turnNineCondition, whenTrue: 15300120202, whenFalse: 15300120201 },
+          replacementKey: 'shiloh-critical-rate', nameKey: 'raidBuffShilohCriticalRate',
           target: 'topAttack', targetCount: 2, duration: 4, modifiers: [],
         }),
         statusEffect({
-          id: 'shiloh-critical-damage', effectGroupId: 15300120204, nameKey: 'raidBuffShilohCriticalDamage',
+          id: 'shiloh-critical-damage',
+          effectGroupId: { type: 'conditional', condition: turnNineCondition, whenTrue: 15300120204, whenFalse: 15300120203 },
+          replacementKey: 'shiloh-critical-damage', nameKey: 'raidBuffShilohCriticalDamage',
           target: 'topAttack', targetCount: 2, duration: 4,
-          modifiers: [{ id: 'shiloh-critical-damage', channel: 'criticalDamageBonus', rate: 0.3 }],
+          modifiers: [{
+            id: 'shiloh-critical-damage', channel: 'criticalDamageBonus',
+            rate: { type: 'conditional', condition: turnNineCondition, whenTrue: 0.3, whenFalse: 0.15 },
+          }],
         }),
       ])],
       damageSteps: [{ stat: 'ATK', percent: 580, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
@@ -56,7 +70,7 @@ export default {
       damageSteps: [{
         stat: 'ATK', hits: 5, damageType: 'phys',
         percent: {
-          type: 'conditional', condition: { type: 'roundAtLeast', round: 9 }, whenFalse: 640,
+          type: 'conditional', condition: turnNineCondition, whenFalse: 640,
           whenTrue: { type: 'maxLineupRemovableBuffCountLinear', base: 640, perStack: 30, max: 940 },
         },
       }],
