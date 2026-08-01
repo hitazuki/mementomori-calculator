@@ -26,7 +26,7 @@ export default {
       key: 's1', nameKey: 'raidSkillCordieS1', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [bossStatusEffect({
         id: 'cordie-defense-down', effectGroupId: 2700150102, nameKey: 'raidDebuffCordieDefenseDown',
-        durationRounds: 3, defenseRatePerStack: -0.8,
+        durationRounds: 2, defenseRatePerStack: -0.8,
       })])],
       damageSteps: [{ stat: 'ATK', percent: 570, hits: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredKillTriggeredAttackBuff', 'raidIgnoredDebuffImmunity'],

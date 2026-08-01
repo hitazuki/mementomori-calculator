@@ -1158,7 +1158,7 @@ test('Lillicotte broadcasts two self-damage events, keeps enhanced normals, and 
   assert.equal(disabledS2.effectsApplied.find(effect => effect.id === 'lilicotte-silence').skipped, true)
 })
 
-test('Cordie applies defense down before five hits and forces S2 criticals against a debuffed Boss', () => {
+test('Cordie applies two-round defense down before five hits and forces S2 criticals while it remains', () => {
   const result = simulateRaidTable(singleConfig(CORDIE, {
     turns: 4,
     guaranteedCritical: false,
@@ -1180,13 +1180,19 @@ test('Cordie applies defense down before five hits and forces S2 criticals again
   const defenseDown = s1.bossStatusAfterAction.find(status => status.id === 'cordie-defense-down')
   assert.equal(defenseDown.effectGroupId, 2700150102)
   assert.equal(defenseDown.statusClass, RAID_STATUS_CLASSES.REMOVABLE_DEBUFF)
-  assert.equal(defenseDown.remainingRounds, 3)
+  assert.equal(defenseDown.remainingRounds, 2)
+  assert.equal(result.rounds[0].bossStatusAfterRound
+    .find(status => status.id === 'cordie-defense-down').remainingRounds, 1)
 
   const s2 = action(result, 2, CORDIE)
   assert.equal(s2.damageSteps.length, 1)
   assert.equal(s2.damageSteps[0].percent, 520)
   assert.equal(s2.damageSteps[0].originalTargetCount, 5)
   assert.equal(s2.damageSteps[0].critical, true)
+  assert.equal(result.rounds[1].bossStatusAfterRound
+    .some(status => status.id === 'cordie-defense-down'), false)
+  assert.equal(action(result, 3, CORDIE).damageSteps[0].bossStatusBefore
+    .some(status => status.id === 'cordie-defense-down'), false)
   assert.equal(action(result, 4, CORDIE).statusSnapshotBeforeAction[CORDIE].statuses
     .find(status => status.id === 'cordie-debuff-immunity').remainingActions, 3)
 
