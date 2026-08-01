@@ -34,6 +34,7 @@ export function createDefaultRaidTableConfig() {
   return {
     lineup: [...DEFAULT_RAID_LINEUP],
     attackPriority: [...DEFAULT_RAID_ATTACK_PRIORITY],
+    actionOrderOverrides: {},
     speeds: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, RAID_TABLE_CHARACTERS[id].speed])),
     bossTemplateId: RAID_BOSS_TEMPLATE_IDS.SONYA,
     levels: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_CHARACTER_LEVEL])),

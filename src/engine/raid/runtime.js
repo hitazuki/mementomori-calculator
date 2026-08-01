@@ -450,6 +450,16 @@ export function runRaidProgram(program) {
     return { actionOrder, speedSnapshot }
   }
 
+  function finalRoundOrder(turn, speedOrder) {
+    const override = config.actionOrderOverrides[turn]
+    if (!override) return { actionOrder: [...speedOrder], orderSource: 'speed' }
+    if (override.every((id, index) => id === speedOrder[index])) {
+      delete config.actionOrderOverrides[turn]
+      return { actionOrder: [...speedOrder], orderSource: 'speed' }
+    }
+    return { actionOrder: [...override], orderSource: 'manual' }
+  }
+
   function consumeStatuses(actor, activeKeys) {
     const expired = []
     for (const status of actor.statuses) {
@@ -644,12 +654,14 @@ export function runRaidProgram(program) {
       }, 'roundStart')
     }
     const order = roundOrder()
+    const finalOrder = finalRoundOrder(turn, order.actionOrder)
     const round = {
-      turn, actionOrder: order.actionOrder, speedSnapshot: order.speedSnapshot,
+      turn, speedOrder: order.actionOrder, actionOrder: finalOrder.actionOrder, orderSource: finalOrder.orderSource,
+      speedSnapshot: order.speedSnapshot,
       actions: [], roundStartEffects, atkPercent: 0, symbolicTotals: {}, conversionTotals: {}, scalingTotals: {}, expiredBossEffects: [],
     }
 
-    for (const actorId of order.actionOrder) {
+    for (const actorId of finalOrder.actionOrder) {
       sequence += 1
       const actor = actors.get(actorId)
       const runtimeBefore = snapshotRuntime(actor)

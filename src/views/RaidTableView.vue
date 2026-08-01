@@ -193,15 +193,33 @@
   </section>
 
   <section class="card raid-matrix-card animate-fadeup">
-    <div class="raid-section-head"><div><h2>{{ $t('raidMatrixTitle') }}</h2><p>{{ $t('raidSelectCellHint') }}</p></div></div>
+    <div class="raid-section-head">
+      <div><h2>{{ $t('raidMatrixTitle') }}</h2><p>{{ $t('raidSelectCellHint') }}</p></div>
+      <button type="button" class="btn btn-ghost btn-sm" @click="openActionOrderEditor()">
+        ↕ {{ $t('raidAdjustActionOrder') }}<template v-if="manualOrderCount"> · {{ $t('raidAdjustedRoundCount', { n: manualOrderCount }) }}</template>
+      </button>
+    </div>
     <div class="raid-table-scroll">
       <table class="raid-matrix-table">
         <thead><tr>
           <th class="raid-sticky-col">{{ $t('raidCharacter') }}</th>
           <th class="raid-sticky-total">{{ $t('raidCharacterTotal') }}</th>
           <th v-for="round in result.rounds" :key="round.turn">
-            {{ $t('raidTurn', { n: round.turn }) }}
-            <CharacterSequence :ids="round.actionOrder" compact class="raid-turn-order" />
+            <span>{{ $t('raidTurn', { n: round.turn }) }}</span>
+            <button
+              type="button"
+              class="raid-turn-order-button"
+              :class="{ manual: round.orderSource === 'manual' }"
+              :aria-label="$t('raidEditRoundOrder', { n: round.turn })"
+              @click="openActionOrderEditor(round.turn)"
+            >
+              <CharacterSequence :ids="round.actionOrder" compact class="raid-turn-order" />
+              <small>{{ $t(round.orderSource === 'manual' ? 'raidOrderManual' : 'raidOrderAutomatic') }}</small>
+            </button>
+            <span v-if="round.orderSource === 'manual'" class="raid-turn-speed-reference">
+              <small>{{ $t('raidSpeedReference') }}</small>
+              <CharacterSequence :ids="round.speedOrder" compact />
+            </span>
           </th>
         </tr></thead>
         <tbody>
@@ -282,7 +300,7 @@
       <div class="raid-detail-panel">
         <h3>{{ $t('raidSpeedSnapshot') }}</h3>
         <dl class="raid-detail-list">
-          <template v-for="id in result.rounds[selectedEvent.turn - 1].actionOrder" :key="`speed-detail-${id}`">
+          <template v-for="id in result.rounds[selectedEvent.turn - 1].speedOrder" :key="`speed-detail-${id}`">
             <dt><CharacterLabel :id="id" /></dt><dd>{{ formatter().format(result.rounds[selectedEvent.turn - 1].speedSnapshot[id].effectiveSpeed) }}</dd>
           </template>
         </dl>
@@ -348,10 +366,71 @@
   </section>
 
   <section class="raid-warning-list animate-fadeup"><p v-for="warning in result.warnings" :key="warning">ℹ {{ $t(warning) }}</p></section>
+
+  <Teleport to="body">
+    <div
+      v-if="showActionOrderEditor"
+      ref="actionOrderDialog"
+      class="modal-overlay active"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="raid-action-order-editor-title"
+      tabindex="-1"
+      @keydown.esc.stop="closeActionOrderEditor"
+      @mousedown.self="closeActionOrderEditor"
+    >
+      <div class="modal-content raid-action-order-modal">
+        <div class="modal-header">
+          <h2 id="raid-action-order-editor-title" class="modal-title">{{ $t('raidActionOrderEditorTitle') }}</h2>
+          <button type="button" class="modal-close" :aria-label="$t('raidCloseActionOrderEditor')" @click="closeActionOrderEditor">&times;</button>
+        </div>
+        <div class="modal-body raid-action-order-modal-body">
+          <p class="raid-order-editor-hint">{{ $t('raidActionOrderEditorHint') }}</p>
+          <article
+            v-for="round in result.rounds"
+            :key="`order-editor-${round.turn}`"
+            :ref="element => setRoundOrderCardRef(round.turn, element)"
+            class="raid-round-order-card"
+            :class="{ manual: round.orderSource === 'manual', editing: editingOrderRound === round.turn }"
+          >
+            <button type="button" class="raid-round-order-summary" @click="startRoundOrderEdit(round.turn)">
+              <strong>{{ $t('raidTurn', { n: round.turn }) }}</strong>
+              <CharacterSequence :ids="round.actionOrder" compact />
+              <span class="raid-order-source" :class="round.orderSource">{{ $t(round.orderSource === 'manual' ? 'raidOrderManual' : 'raidOrderAutomatic') }}</span>
+            </button>
+            <div v-if="editingOrderRound === round.turn" class="raid-round-order-editor">
+              <div class="raid-round-speed-reference">
+                <span>{{ $t('raidSpeedReference') }}</span>
+                <CharacterSequence :ids="round.speedOrder" compact />
+              </div>
+              <p>{{ $t('raidRoundOrderHint') }}</p>
+              <div class="raid-round-order-list">
+                <div v-for="(id, index) in orderDraft" :key="`draft-${round.turn}-${id}`" class="raid-round-order-row">
+                  <span class="raid-order-rank">{{ index + 1 }}</span>
+                  <CharacterLabel :id="id" strong />
+                  <small>{{ $t('raidEffectiveSpeed', { value: formatter().format(round.speedSnapshot[id].effectiveSpeed) }) }}</small>
+                  <div class="raid-order-actions">
+                    <button type="button" class="btn btn-ghost btn-sm" :disabled="index === 0" :aria-label="`${$t('raidMoveUp')} ${characterName(id)}`" @click="moveDraftOrder(index, -1)">↑</button>
+                    <button type="button" class="btn btn-ghost btn-sm" :disabled="index === orderDraft.length - 1" :aria-label="`${$t('raidMoveDown')} ${characterName(id)}`" @click="moveDraftOrder(index, 1)">↓</button>
+                  </div>
+                </div>
+              </div>
+              <div class="raid-round-order-actions">
+                <button v-if="round.orderSource === 'manual'" type="button" class="btn btn-ghost btn-sm" @click="restoreSpeedOrder(round.turn)">{{ $t('raidRestoreSpeedOrder') }}</button>
+                <span></span>
+                <button type="button" class="btn btn-ghost btn-sm" @click="cancelRoundOrderEdit">{{ $t('raidCancel') }}</button>
+                <button type="button" class="btn btn-primary btn-sm" @click="applyRoundOrder">{{ $t('raidApply') }}</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
-import { computed, defineComponent, h, reactive, ref } from 'vue'
+import { computed, defineComponent, h, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
@@ -420,6 +499,7 @@ const defaults = createDefaultRaidTableConfig()
 const selectedRosterElement = ref(null)
 const lineup = ref([...defaults.lineup])
 const attackPriority = ref([...defaults.attackPriority])
+const actionOrderOverrides = ref(cloneActionOrderOverrides(defaults.actionOrderOverrides))
 const speeds = reactive({ ...defaults.speeds })
 const bossTemplateId = ref(defaults.bossTemplateId)
 const levels = reactive({ ...defaults.levels })
@@ -434,6 +514,11 @@ const siviDamageTiers = Object.freeze([
   { hits: 0, rate: 30 }, { hits: 1, rate: 54 }, { hits: 2, rate: 72 }, { hits: 3, rate: 84 }, { hits: 4, rate: 90 },
 ])
 const selectedEvent = ref(null)
+const showActionOrderEditor = ref(false)
+const editingOrderRound = ref(null)
+const orderDraft = ref([])
+const actionOrderDialog = ref(null)
+const roundOrderCardRefs = new Map()
 const filteredRoster = computed(() => selectedRosterElement.value == null
   ? roster
   : roster.filter(id => RAID_TABLE_CHARACTERS[id].element === selectedRosterElement.value))
@@ -441,6 +526,7 @@ const filteredRoster = computed(() => selectedRosterElement.value == null
 const result = computed(() => simulateRaidTable({
   lineup: lineup.value,
   attackPriority: attackPriority.value,
+  actionOrderOverrides: actionOrderOverrides.value,
   speeds,
   bossTemplateId: bossTemplateId.value,
   levels,
@@ -453,7 +539,14 @@ const result = computed(() => simulateRaidTable({
   scenarioTiers: { ...scenarioTiers },
   turns: 10,
 }))
-const currentSpeedOrder = computed(() => result.value.rounds[0]?.actionOrder ?? [])
+const currentSpeedOrder = computed(() => result.value.rounds[0]?.speedOrder ?? [])
+const manualOrderCount = computed(() => result.value.rounds.filter(round => round.orderSource === 'manual').length)
+
+watch(() => result.value.config.actionOrderOverrides, normalized => {
+  if (sameActionOrderOverrides(actionOrderOverrides.value, normalized)) return
+  actionOrderOverrides.value = cloneActionOrderOverrides(normalized)
+  selectedEvent.value = null
+})
 const elementBonusLines = computed(() => {
   const { normal, dark } = result.value.config.elementBonus
   const lines = []
@@ -522,6 +615,78 @@ function unresolvedScaling(totals) { return Object.fromEntries(Object.entries(to
 function formatStep(step) { return `${formatter().format(step.effectivePercent)}% ${step.stat}` }
 function eventFor(round, id) { return round.actions.find(action => action.actorId === id) }
 
+function cloneActionOrderOverrides(overrides) {
+  return Object.fromEntries(Object.entries(overrides ?? {}).map(([round, order]) => [round, [...order]]))
+}
+
+function sameOrder(left, right) {
+  return left?.length === right?.length && left.every((id, index) => id === right[index])
+}
+
+function sameActionOrderOverrides(left, right) {
+  const leftRounds = Object.keys(left)
+  const rightRounds = Object.keys(right)
+  return leftRounds.length === rightRounds.length && leftRounds.every(round => sameOrder(left[round], right[round]))
+}
+
+function startRoundOrderEdit(turn) {
+  const round = result.value.rounds[turn - 1]
+  editingOrderRound.value = turn
+  orderDraft.value = [...round.actionOrder]
+}
+
+function setRoundOrderCardRef(turn, element) {
+  if (element) roundOrderCardRefs.set(turn, element)
+  else roundOrderCardRefs.delete(turn)
+}
+
+function openActionOrderEditor(turn = null) {
+  showActionOrderEditor.value = true
+  if (turn == null) cancelRoundOrderEdit()
+  else startRoundOrderEdit(turn)
+  nextTick(() => {
+    actionOrderDialog.value?.focus()
+    if (turn != null) roundOrderCardRefs.get(turn)?.scrollIntoView({ block: 'center' })
+  })
+}
+
+function closeActionOrderEditor() {
+  showActionOrderEditor.value = false
+  cancelRoundOrderEdit()
+}
+
+function cancelRoundOrderEdit() {
+  editingOrderRound.value = null
+  orderDraft.value = []
+}
+
+function moveDraftOrder(index, delta) {
+  const next = index + delta
+  if (next < 0 || next >= orderDraft.value.length) return
+  const copy = [...orderDraft.value]; [copy[index], copy[next]] = [copy[next], copy[index]]
+  orderDraft.value = copy
+}
+
+function applyRoundOrder() {
+  const turn = editingOrderRound.value
+  if (turn == null) return
+  const speedOrder = result.value.rounds[turn - 1].speedOrder
+  const next = cloneActionOrderOverrides(actionOrderOverrides.value)
+  if (sameOrder(orderDraft.value, speedOrder)) delete next[turn]
+  else next[turn] = [...orderDraft.value]
+  actionOrderOverrides.value = next
+  selectedEvent.value = null
+  cancelRoundOrderEdit()
+}
+
+function restoreSpeedOrder(turn) {
+  const next = cloneActionOrderOverrides(actionOrderOverrides.value)
+  delete next[turn]
+  actionOrderOverrides.value = next
+  selectedEvent.value = null
+  cancelRoundOrderEdit()
+}
+
 function toggleCharacter(id) {
   if (lineup.value.includes(id)) {
     if (lineup.value.length <= 1) return
@@ -532,6 +697,7 @@ function toggleCharacter(id) {
     lineup.value = [...lineup.value, id]
     attackPriority.value = [...attackPriority.value, id]
   }
+  actionOrderOverrides.value = {}
   selectedEvent.value = null
 }
 
@@ -551,6 +717,7 @@ function resetConfig() {
   const next = createDefaultRaidTableConfig()
   selectedRosterElement.value = null
   lineup.value = [...next.lineup]; attackPriority.value = [...next.attackPriority]
+  actionOrderOverrides.value = cloneActionOrderOverrides(next.actionOrderOverrides)
   Object.assign(speeds, next.speeds); guaranteedCritical.value = next.guaranteedCritical
   bossTemplateId.value = next.bossTemplateId
   Object.assign(levels, next.levels)
@@ -560,6 +727,7 @@ function resetConfig() {
   Object.assign(activationRounds, next.activationRounds)
   Object.assign(scenarioTiers, next.scenarioTiers)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
+  closeActionOrderEditor()
 }
 
 const modifierChannels = [

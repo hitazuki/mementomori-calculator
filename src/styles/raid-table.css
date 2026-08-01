@@ -312,7 +312,38 @@
   background: var(--bg-surface);
   color: var(--gold);
 }
-.raid-turn-order { display: flex; max-width: 150px; margin-top: 3px; overflow: hidden; color: var(--text-muted); font-size: 9px; white-space: nowrap; }
+.raid-turn-order { display: flex; max-width: 150px; overflow: hidden; color: var(--text-muted); font-size: 9px; white-space: nowrap; }
+
+.raid-turn-order-button {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  width: 100%;
+  margin-top: 3px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.raid-turn-order-button:hover,
+.raid-turn-order-button:focus-visible { border-color: var(--gold); background: var(--gold-dim); outline: none; }
+.raid-turn-order-button.manual { border-color: rgba(201, 168, 76, 0.38); background: var(--gold-dim); }
+.raid-turn-order-button small { color: inherit; font-size: 9px; }
+.raid-turn-order-button.manual small { color: var(--gold-light); }
+
+.raid-turn-speed-reference {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(var(--color-invert-rgb), 0.12);
+  color: var(--text-muted);
+}
+.raid-turn-speed-reference small { font-size: 9px; }
 
 .raid-matrix-table .raid-sticky-col {
   position: sticky;
@@ -505,6 +536,77 @@
   font-size: var(--fs-sm);
 }
 
+.raid-action-order-modal { max-width: 720px; }
+.raid-action-order-modal-body { display: grid; gap: 8px; }
+.raid-action-order-modal-body .raid-order-editor-hint { margin: 0 0 4px; color: var(--text-muted); font-size: var(--fs-sm); }
+
+.raid-round-order-card {
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: rgba(var(--color-invert-rgb), 0.025);
+}
+.raid-round-order-card.manual { border-color: rgba(201, 168, 76, 0.35); }
+.raid-round-order-card.editing { box-shadow: 0 0 0 1px rgba(201, 168, 76, 0.18); }
+
+.raid-round-order-summary {
+  display: grid;
+  grid-template-columns: minmax(72px, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.raid-round-order-summary:hover,
+.raid-round-order-summary:focus-visible { background: rgba(var(--color-invert-rgb), 0.045); outline: none; }
+.raid-round-order-summary .raid-character-sequence { justify-content: flex-start; }
+
+.raid-order-source {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(var(--color-invert-rgb), 0.06);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+.raid-order-source.manual { background: var(--gold-dim); color: var(--gold-light); }
+
+.raid-round-order-editor {
+  padding: 12px;
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(var(--color-base-rgb), 0.18);
+}
+.raid-round-order-editor > p { margin: 6px 0 8px; color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-round-speed-reference { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: var(--fs-xs); }
+.raid-round-speed-reference > span { flex: 0 0 auto; }
+
+.raid-round-order-list { display: grid; }
+.raid-round-order-row {
+  display: grid;
+  grid-template-columns: 24px minmax(120px, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(var(--color-invert-rgb), 0.055);
+}
+.raid-round-order-row:first-child { border-top: 0; }
+.raid-round-order-row > small { color: var(--text-muted); font-family: var(--font-mono); font-size: var(--fs-xs); white-space: nowrap; }
+
+.raid-round-order-actions {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(var(--color-invert-rgb), 0.07);
+}
+
 @media (max-width: 900px) {
   .raid-summary-grid { grid-template-columns: 1fr 1fr; }
   .raid-summary-primary { grid-column: 1 / -1; }
@@ -530,4 +632,14 @@
   .raid-matrix-card,
   .raid-detail-card { padding: 12px; }
   .raid-speed-list label { grid-template-columns: 1fr; gap: 4px; }
+  .raid-action-order-modal { max-width: none; max-height: 92vh; }
+  .raid-action-order-modal .modal-header { padding: 14px 16px; }
+  .raid-action-order-modal-body { padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  .raid-round-order-summary { grid-template-columns: minmax(64px, auto) minmax(0, 1fr) auto; gap: 7px; padding: 9px; }
+  .raid-round-order-row { grid-template-columns: 24px minmax(0, 1fr) auto; }
+  .raid-round-order-row > small { grid-column: 2; }
+  .raid-round-order-row .raid-order-actions { grid-column: 3; grid-row: 1 / span 2; }
+  .raid-round-order-actions { grid-template-columns: 1fr 1fr; }
+  .raid-round-order-actions > span { display: none; }
+  .raid-round-order-actions .btn { width: 100%; }
 }

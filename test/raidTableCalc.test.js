@@ -194,6 +194,8 @@ test('Boss template and per-character level and penetration settings change defe
 test('default speed order matches MB values and can be overridden', () => {
   const defaults = simulateRaidTable({ turns: 1 })
   assert.deepEqual(defaults.rounds[0].actionOrder, [LUKE, FLORENCE, FENRIR, MERLYN, MERTILLIER])
+  assert.deepEqual(defaults.rounds[0].speedOrder, defaults.rounds[0].actionOrder)
+  assert.equal(defaults.rounds[0].orderSource, 'speed')
 
   const overridden = simulateRaidTable({
     ...createDefaultRaidTableConfig(),
@@ -201,6 +203,77 @@ test('default speed order matches MB values and can be overridden', () => {
     turns: 1,
   })
   assert.equal(overridden.rounds[0].actionOrder[0], MERTILLIER)
+})
+
+test('round action-order overrides preserve the speed reference and change execution order', () => {
+  const lineup = [LUKE, FLORENCE, FENRIR]
+  const speedOrder = [LUKE, FLORENCE, FENRIR]
+  const manualOrder = [FLORENCE, FENRIR, LUKE]
+  const result = simulateRaidTable({
+    lineup,
+    attackPriority: [...lineup],
+    speeds: { [LUKE]: 5000, [FLORENCE]: 4000, [FENRIR]: 3000 },
+    actionOrderOverrides: { 2: manualOrder },
+    turns: 2,
+  })
+
+  assert.deepEqual(result.rounds[0].actionOrder, speedOrder)
+  assert.equal(result.rounds[0].orderSource, 'speed')
+  assert.deepEqual(result.rounds[1].speedOrder, speedOrder)
+  assert.deepEqual(result.rounds[1].actionOrder, manualOrder)
+  assert.equal(result.rounds[1].orderSource, 'manual')
+  assert.equal(result.rounds[1].speedSnapshot[LUKE].effectiveSpeed, 5000)
+  assert.deepEqual(result.config.actionOrderOverrides[2], manualOrder)
+})
+
+test('a round override identical to the current speed order is removed as redundant', () => {
+  const lineup = [LUKE, FLORENCE, FENRIR]
+  const speedOrder = [LUKE, FLORENCE, FENRIR]
+  const result = simulateRaidTable({
+    lineup,
+    attackPriority: [...lineup],
+    speeds: { [LUKE]: 5000, [FLORENCE]: 4000, [FENRIR]: 3000 },
+    actionOrderOverrides: { 1: speedOrder },
+    turns: 1,
+  })
+
+  assert.deepEqual(result.rounds[0].actionOrder, speedOrder)
+  assert.equal(result.rounds[0].orderSource, 'speed')
+  assert.deepEqual(result.config.actionOrderOverrides, {})
+
+  const becameRedundant = simulateRaidTable({
+    lineup: [LUKE, FLORENCE],
+    attackPriority: [LUKE, FLORENCE],
+    speeds: { [LUKE]: 4000, [FLORENCE]: 5000 },
+    actionOrderOverrides: { 1: [FLORENCE, LUKE] },
+    turns: 1,
+  })
+  assert.deepEqual(becameRedundant.config.actionOrderOverrides, {})
+  assert.equal(becameRedundant.rounds[0].orderSource, 'speed')
+})
+
+test('compiler rejects invalid round action-order overrides', () => {
+  const defaults = createDefaultRaidTableConfig()
+  assert.throws(() => simulateRaidTable({ ...defaults, actionOrderOverrides: [] }), /must be an object/)
+  assert.throws(() => simulateRaidTable({ ...defaults, actionOrderOverrides: { 0: defaults.lineup } }), /override round/)
+  assert.throws(() => simulateRaidTable({ ...defaults, turns: 1, actionOrderOverrides: { 2: defaults.lineup } }), /override round/)
+  assert.throws(() => simulateRaidTable({ ...defaults, actionOrderOverrides: { 1: defaults.lineup.slice(1) } }), /exactly once/)
+  assert.throws(() => simulateRaidTable({ ...defaults, actionOrderOverrides: { 1: defaults.lineup.map(() => defaults.lineup[0]) } }), /exactly once/)
+})
+
+test('manual action order changes same-round downstream status timing', () => {
+  const lineup = [LUKE, FLORENCE]
+  const config = {
+    lineup,
+    attackPriority: [...lineup],
+    speeds: { [LUKE]: 5000, [FLORENCE]: 4000 },
+    turns: 1,
+  }
+  const speedOrdered = simulateRaidTable(config)
+  const manuallyOrdered = simulateRaidTable({ ...config, actionOrderOverrides: { 1: [FLORENCE, LUKE] } })
+
+  assert.ok(action(speedOrdered, 1, FLORENCE).effectiveAtkPercent > action(manuallyOrdered, 1, FLORENCE).effectiveAtkPercent)
+  assert.deepEqual(manuallyOrdered.rounds[0].actions.map(entry => entry.actorId), [FLORENCE, LUKE])
 })
 
 test('Artoria speed buff changes rounds one and two but expires before round three', () => {
@@ -216,6 +289,17 @@ test('Artoria speed buff changes rounds one and two but expires before round thr
   assert.deepEqual(result.rounds[2].actionOrder, [ARTORIA, LUKE, SPRING_SHIZU])
   assert.equal(result.rounds[0].speedSnapshot[SPRING_SHIZU].effectiveSpeed, 3600)
   assert.equal(result.rounds[2].speedSnapshot[SPRING_SHIZU].effectiveSpeed, 3000)
+
+  const manual = simulateRaidTable({
+    lineup,
+    attackPriority: [...lineup],
+    speeds: { [ARTORIA]: 3572, [SPRING_SHIZU]: 3000, [LUKE]: 3093 },
+    actionOrderOverrides: { 1: [ARTORIA, LUKE, SPRING_SHIZU] },
+    turns: 1,
+  })
+  assert.deepEqual(manual.rounds[0].speedOrder, [SPRING_SHIZU, ARTORIA, LUKE])
+  assert.deepEqual(manual.rounds[0].actionOrder, [ARTORIA, LUKE, SPRING_SHIZU])
+  assert.equal(manual.rounds[0].speedSnapshot[SPRING_SHIZU].effectiveSpeed, 3600)
 })
 
 test('default critical multiplier is 2.10 and Merlyn raises it to 2.50', () => {

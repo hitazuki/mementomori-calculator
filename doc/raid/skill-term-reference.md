@@ -487,6 +487,14 @@ eventHooks: [{
 | 目标带弱化时本段必定暴击 | `criticalCondition: { type: 'bossStatusCountAtLeast', count: 1 }` |
 | 不参与首版的技能文本 | `ignoredKeys` |
 
+## 14. 指定回合行动顺序 `actionOrderOverrides`
+
+页面配置可使用 `{ [round]: characterId[] }` 为指定全局回合提供完整行动顺序。每个数组必须恰好包含当前阵容全部角色一次，回合必须位于 `1..turns`；编译器拒绝缺失、重复、阵容外角色和越界回合。
+
+运行时仍在 `roundStart` 效果后生成 `speedSnapshot` 与 `speedOrder`，再决定最终 `actionOrder`。非冗余覆盖使用 `orderSource: 'manual'`，否则使用 `orderSource: 'speed'`；与当前 `speedOrder` 完全相同的覆盖会从规范化配置中删除。该配置只覆盖执行时序，不修改速度数值，也不改变 `lowestSpeedOther` 等选择器。
+
+这是确定场景配置，不进行随机抽样或概率期望计算。较早回合的覆盖会通过正常状态、冷却和技能历史结算影响后续回合；后续回合已有的非冗余覆盖继续生效。
+
 ## 新增通用词条（アイシェ、リリコット及r1820复核）
 
 | 类别 | 名称 | 含义 |

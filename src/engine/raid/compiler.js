@@ -30,6 +30,21 @@ function validateOrder(name, values, lineup) {
   if (unique.size !== lineup.length || lineup.some(id => !unique.has(id))) throw new Error(`${name} must contain every lineup character exactly once`)
 }
 
+function normalizeActionOrderOverrides(values, lineup, turns) {
+  if (values == null || typeof values !== 'object' || Array.isArray(values)) {
+    throw new Error('actionOrderOverrides must be an object keyed by round')
+  }
+  const normalized = {}
+  for (const [roundKey, order] of Object.entries(values)) {
+    if (!/^[1-9]\d*$/.test(roundKey)) throw new Error(`Invalid raid action-order override round: ${roundKey}`)
+    const round = Number(roundKey)
+    if (round > turns) throw new Error(`Invalid raid action-order override round: ${roundKey}`)
+    validateOrder(`actionOrderOverrides[${round}]`, order, lineup)
+    normalized[round] = [...order]
+  }
+  return normalized
+}
+
 function normalizeConfig(config, characters) {
   const defaults = createDefaultRaidTableConfig()
   const lineup = [...(config.lineup ?? defaults.lineup)]
@@ -72,6 +87,7 @@ function normalizeConfig(config, characters) {
   if (!bossTemplate) throw new Error(`Unsupported raid Boss template: ${bossTemplateId}`)
   const turns = config.turns ?? defaults.turns
   if (!Number.isInteger(turns) || turns < 1) throw new Error('turns must be a positive integer')
+  const actionOrderOverrides = normalizeActionOrderOverrides(config.actionOrderOverrides ?? defaults.actionOrderOverrides, lineup, turns)
   const activationRounds = { ...defaults.activationRounds, ...(config.activationRounds ?? {}) }
   for (const [key, value] of Object.entries(activationRounds)) {
     if (!Number.isInteger(value) || value < 1 || value > 10) throw new Error(`Invalid raid activation round: ${key}`)
@@ -82,7 +98,7 @@ function normalizeConfig(config, characters) {
   }
   const elementBonus = calculateRaidElementBonus(lineup, characters)
   return {
-    lineup, attackPriority, speeds, levels, defensePenetrations, pmDefensePenetrations, criticalDamageBonuses,
+    lineup, attackPriority, actionOrderOverrides, speeds, levels, defensePenetrations, pmDefensePenetrations, criticalDamageBonuses,
     elementBonus,
     bossTemplateId, bossTemplate, turns,
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
