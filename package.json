@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare": "node scripts/install_git_hooks.js",
+    "commit:check": "node scripts/validate_commit_message.js --message",
     "test:i18n": "node scripts/test_i18n.js",
     "test:unit": "node --import ./scripts/registerRawLoader.mjs --test",
     "test": "npm run test:i18n && npm run test:unit",

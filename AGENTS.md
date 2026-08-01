@@ -25,8 +25,10 @@
 ## Git Commits
 
 - Use Conventional Commits: `type(scope): summary`.
-- Common types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`.
+- Allowed types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`, `build`, `ci`, `style`, `revert`.
+- Scope is optional, lowercase, and may contain digits, `.`, `_`, `/`, or `-`. Breaking changes may add `!` before `:`.
 - Keep the summary concise, imperative, and in English when possible.
+- The repository `commit-msg` hook enforces the format. Run `npm run commit:check -- "feat(scope): summary"` to validate a message manually.
 
 ## Context Budget Rules
 
