@@ -537,7 +537,13 @@
 }
 
 .raid-action-order-modal { max-width: 720px; }
-.raid-action-order-modal-body { display: grid; gap: 8px; }
+.raid-action-order-modal-body {
+  display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
+  min-height: 0;
+  gap: 8px;
+}
 .raid-action-order-modal-body .raid-order-editor-hint { margin: 0 0 4px; color: var(--text-muted); font-size: var(--fs-sm); }
 
 .raid-round-order-card {
