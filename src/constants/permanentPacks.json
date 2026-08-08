@@ -573,6 +573,22 @@
     ]
   },
   {
+    "name": "通关组合包",
+    "price": 3000,
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 1500
+      },
+      {
+        "ItemType": 1,
+        "ItemId": 1,
+        "ItemCount": 45000
+      }
+    ]
+  },
+  {
     "name": "月卡",
     "price": 1000,
     "items": [

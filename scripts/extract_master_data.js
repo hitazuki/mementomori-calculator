@@ -192,6 +192,7 @@ requiredKeys.add('[ItemName1]'); // Diamond Paid
 requiredKeys.add('[ItemName2]'); // Diamond
 requiredKeys.add('[ShopFirstRewardLabel]'); // First time
 requiredKeys.add('[ShopProductCurrencyBonusText]'); // Double
+requiredKeys.add('[AchievementName1]'); // Achievement Pack
 
 // Add ChargeBonus texts to extract Diamond Packs
 for (let i = 1; i <= 7; i++) {

@@ -153,6 +153,7 @@ const permPackNameMap = {
   "天使的指引 组合包": "[ShopCommonProductName31]",
   "天使的羽翼 组合包": "[ShopCommonProductName39]",
   "奇迹的恩赐 组合包": "[ShopCommonProductName40]",
+  "通关组合包": "[AchievementName1]",
   "钻石组合包 80": "origin_perm_diamond_80",
   "钻石组合包 80 (首次双倍)": "origin_perm_diamond_80_double",
   "钻石组合包 325": "origin_perm_diamond_325",
