@@ -35,7 +35,7 @@ test('userscript has install and update metadata', async () => {
   const source = await readFile(userscriptPath, 'utf8')
   assert.match(source, /\/\/ ==UserScript==/)
   assert.match(source, /@version\s+\d+\.\d+\.\d+/)
-  assert.match(source, /@version\s+0\.3\.0/)
+  assert.match(source, /@version\s+0\.3\.1/)
   assert.match(source, /@match\s+https:\/\/mememori-game\.com\/code\*/)
   assert.match(source, /@updateURL\s+https:\/\/hitazuki\.github\.io\/mementomori-calculator\/userscripts\/mememori-code-batch\.user\.js/)
   assert.match(source, /MAX_CONSECUTIVE_ERRORS = 2/)

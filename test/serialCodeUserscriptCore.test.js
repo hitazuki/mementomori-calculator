@@ -11,6 +11,7 @@ const core = context.__MMT_SERIAL_CODE_CORE__
 const plain = value => JSON.parse(JSON.stringify(value))
 
 test('userscript selects all official page languages and has complete translations', () => {
+  assert.equal(core.API_TIMEOUT_MS, 15000)
   assert.equal(core.localeFromHtml('ja'), 'ja')
   assert.equal(core.localeFromHtml('en'), 'en')
   assert.equal(core.localeFromHtml('zh-cmn-Hant'), 'zh-TW')
@@ -96,4 +97,16 @@ test('multi-account tasks are account-major and use safe delays', () => {
   assert.equal(core.delayFor(tasks[0], tasks[1]), 10000)
   assert.equal(core.delayFor(tasks[1], tasks[2]), 4000)
   assert.equal(core.delayFor(tasks[2], null), 0)
+})
+
+test('an account failure advances past all remaining tasks for that account', () => {
+  const tasks = [
+    { accountId: 'a', code: 'CODE1' },
+    { accountId: 'a', code: 'CODE2' },
+    { accountId: 'a', code: 'CODE3' },
+    { accountId: 'b', code: 'CODE1' },
+  ]
+
+  assert.equal(core.nextAccountTaskIndex(tasks, 0), 3)
+  assert.equal(core.nextAccountTaskIndex(tasks, 3), 4)
 })

@@ -6,7 +6,7 @@
 // @name:ja      メメントモリ シリアルコード一括入力
 // @name:ko      메멘토모리 시리얼 코드 일괄 입력
 // @namespace    https://github.com/hitazuki/mementomori-calculator
-// @version      0.3.0
+// @version      0.3.1
 // @description  在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-CN 在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-TW 在 MementoMori 官方兌換頁為多個帳號依序填寫公開序號
@@ -33,9 +33,10 @@
 
   const Core = (() => {
     const LOCALES = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko'];
+    const API_TIMEOUT_MS = 15000;
     const MESSAGE_ROWS = [
       ['title', '序列码批量兑换', '序號批次兌換', 'Serial Code Batch Redeemer', 'シリアルコード一括入力', '시리얼 코드 일괄 입력'],
-      ['description', '选择批次和账号，核对玩家后按账号顺序逐个提交。', '選擇批次與帳號，核對玩家後依帳號順序逐一送出。', 'Choose a batch and accounts, verify players, then submit sequentially.', 'グループとアカウントを選択し、プレイヤー確認後に順番に送信します。', '코드 묶음과 계정을 선택하고 플레이어 확인 후 순차 제출합니다.'],
+      ['description', '选择批次和账号后按账号顺序逐个提交；核对账号为可选操作。', '選擇批次與帳號後依帳號順序逐一送出；核對帳號為選用操作。', 'Choose a batch and accounts, then submit sequentially. Account verification is optional.', 'グループとアカウントを選択して順番に送信します。事前確認は任意です。', '코드 묶음과 계정을 선택한 뒤 순차 제출합니다. 사전 계정 확인은 선택 사항입니다.'],
       ['safetyNote', '错误代码过多可能触发官方临时限制；脚本不会并发请求。', '錯誤序號過多可能觸發官方暫時限制；腳本不會並行請求。', 'Too many invalid codes may trigger an official lockout. Requests are never concurrent.', '誤ったコードが多いと公式の一時制限が発生する場合があります。同時送信は行いません。', '잘못된 코드가 많으면 공식 일시 제한이 발생할 수 있습니다. 동시 요청은 하지 않습니다.'],
       ['batch', '兑换码批次', '序號批次', 'Code batch', 'コードグループ', '코드 묶음'],
       ['accounts', '账号', '帳號', 'Accounts', 'アカウント', '계정'],
@@ -54,19 +55,20 @@
       ['codeCount', '{count} 个', '{count} 個', '{count} codes', '{count}件', '{count}개'],
       ['taskSummary', '{accounts} 个账号，待兑换 {tasks} 项', '{accounts} 個帳號，待兌換 {tasks} 項', '{accounts} accounts, {tasks} pending tasks', '{accounts}アカウント、未入力{tasks}件', '{accounts}개 계정, 대기 작업 {tasks}개'],
       ['accountProgress', '{done}/{total} 已完成', '{done}/{total} 已完成', '{done}/{total} completed', '{done}/{total} 完了', '{done}/{total} 완료'],
-      ['statusReady', '请选择批次和账号，然后核对玩家。', '請選擇批次與帳號，然後核對玩家。', 'Choose a batch and accounts, then verify players.', 'グループとアカウントを選択し、プレイヤーを確認してください。', '코드 묶음과 계정을 선택한 뒤 플레이어를 확인하세요.'],
+      ['statusReady', '请选择批次和账号；可直接兑换或先核对玩家。', '請選擇批次與帳號；可直接兌換或先核對玩家。', 'Choose a batch and accounts. You can redeem directly or verify players first.', 'グループとアカウントを選択してください。直接入力するか、先にプレイヤーを確認できます。', '코드 묶음과 계정을 선택하세요. 바로 입력하거나 먼저 플레이어를 확인할 수 있습니다.'],
       ['statusSyncing', '正在同步公开序列码…', '正在同步公開序號…', 'Syncing public codes…', '公開コードを同期中…', '공개 코드 동기화 중…'],
       ['statusLoaded', '已载入 {batches} 个批次，当前批次 {codes} 个代码。', '已載入 {batches} 個批次，目前批次有 {codes} 個序號。', 'Loaded {batches} batches; the current batch has {codes} codes.', '{batches}グループを読み込みました。現在は{codes}件です。', '{batches}개 묶음을 불러왔습니다. 현재 묶음은 {codes}개입니다.'],
-      ['statusBatchChanged', '已切换批次，请重新核对账号。', '已切換批次，請重新核對帳號。', 'Batch changed. Verify the accounts again.', 'グループを変更しました。アカウントを再確認してください。', '코드 묶음이 변경되었습니다. 계정을 다시 확인하세요.'],
-      ['statusNeedVerify', '账号或代码发生变化，请重新核对。', '帳號或序號已變更，請重新核對。', 'Accounts or codes changed. Verify again.', 'アカウントまたはコードが変更されました。再確認してください。', '계정 또는 코드가 변경되었습니다. 다시 확인하세요.'],
+      ['statusBatchChanged', '已切换批次，可直接开始兑换或先核对账号。', '已切換批次，可直接開始兌換或先核對帳號。', 'Batch changed. Start directly or verify accounts first.', 'グループを変更しました。直接開始するか、先にアカウントを確認できます。', '코드 묶음이 변경되었습니다. 바로 시작하거나 먼저 계정을 확인할 수 있습니다.'],
+      ['statusNeedVerify', '账号或代码已变化，可直接兑换或重新核对。', '帳號或序號已變更，可直接兌換或重新核對。', 'Accounts or codes changed. Redeem directly or verify again.', 'アカウントまたはコードが変更されました。直接開始するか、再確認できます。', '계정 또는 코드가 변경되었습니다. 바로 입력하거나 다시 확인할 수 있습니다.'],
       ['statusVerifying', '正在核对 {current}/{total}：{account}', '正在核對 {current}/{total}：{account}', 'Verifying {current}/{total}: {account}', '確認中 {current}/{total}：{account}', '확인 중 {current}/{total}: {account}'],
       ['statusVerified', '已核对 {accounts} 个账号，待兑换 {tasks} 项。请确认玩家信息后开始。', '已核對 {accounts} 個帳號，待兌換 {tasks} 項。請確認玩家資訊後開始。', 'Verified {accounts} accounts with {tasks} pending tasks. Review players before starting.', '{accounts}アカウントを確認しました。未入力は{tasks}件です。内容を確認して開始してください。', '{accounts}개 계정을 확인했습니다. 대기 작업은 {tasks}개입니다. 플레이어 정보를 확인하고 시작하세요.'],
+      ['statusVerifyPartial', '核对完成：成功 {success} 个，失败 {failed} 个。失败账号仍可直接兑换，但首次请求失败会跳过该账号后续代码。', '核對完成：成功 {success} 個，失敗 {failed} 個。失敗帳號仍可直接兌換，但首次請求失敗會略過該帳號後續序號。', 'Verification finished: {success} succeeded, {failed} failed. Failed accounts can still be started, but their remaining codes will be skipped after the first request failure.', '確認完了：成功{success}件、失敗{failed}件。失敗したアカウントも開始できますが、最初のリクエスト失敗後は残りのコードをスキップします。', '확인 완료: 성공 {success}개, 실패 {failed}개. 실패한 계정도 시작할 수 있지만 첫 요청 실패 후 남은 코드는 건너뜁니다.'],
       ['statusRunning', '正在处理 {current}/{total}：{account} / {code}', '正在處理 {current}/{total}：{account} / {code}', 'Processing {current}/{total}: {account} / {code}', '処理中 {current}/{total}：{account} / {code}', '처리 중 {current}/{total}: {account} / {code}'],
       ['statusPausePending', '将在当前请求结束后暂停。', '將在目前請求結束後暫停。', 'Pausing after the current request.', '現在のリクエスト完了後に停止します。', '현재 요청이 끝난 뒤 일시 정지합니다.'],
       ['statusPaused', '任务已暂停，可稍后恢复。', '工作已暫停，可稍後恢復。', 'Queue paused. It can be restored later.', 'キューを一時停止しました。後で復元できます。', '작업이 일시 정지되었습니다. 나중에 복원할 수 있습니다.'],
       ['statusCompleted', '处理完成：成功 {success} 项，失败 {failed} 项，跳过 {skipped} 项。', '處理完成：成功 {success} 項，失敗 {failed} 項，略過 {skipped} 項。', 'Completed: {success} succeeded, {failed} failed, {skipped} skipped.', '完了：成功{success}件、失敗{failed}件、スキップ{skipped}件。', '완료: 성공 {success}개, 실패 {failed}개, 건너뜀 {skipped}개.'],
-      ['statusResumeFound', '检测到未完成任务，需重新核对账号后才能继续。', '偵測到未完成工作，需重新核對帳號後才能繼續。', 'An unfinished queue was found. Accounts must be verified before continuing.', '未完了のキューがあります。再開前にアカウント確認が必要です。', '미완료 작업이 있습니다. 계속하려면 계정을 다시 확인해야 합니다.'],
-      ['statusResumeReady', '旧任务已恢复并完成核对，请确认后继续。', '舊工作已恢復並完成核對，請確認後繼續。', 'The old queue is restored and verified. Review it, then continue.', '古いキューを復元して確認しました。内容を確認して再開してください。', '이전 작업을 복원하고 확인했습니다. 검토 후 계속하세요.'],
+      ['statusResumeFound', '检测到未完成任务，可恢复后直接继续。', '偵測到未完成工作，可恢復後直接繼續。', 'An unfinished queue was found and can be restored directly.', '未完了のキューがあります。そのまま復元して再開できます。', '미완료 작업이 있습니다. 바로 복원해 계속할 수 있습니다.'],
+      ['statusResumeReady', '旧任务已恢复，可直接继续；每次兑换前仍会核对玩家。', '舊工作已恢復，可直接繼續；每次兌換前仍會核對玩家。', 'The old queue is restored. Continue directly; the player is still confirmed before each redemption.', '古いキューを復元しました。そのまま再開できます。各入力前のプレイヤー確認は引き続き行います。', '이전 작업을 복원했습니다. 바로 계속할 수 있으며 각 입력 전 플레이어 확인은 계속 수행됩니다.'],
       ['statusQueueInvalid', '旧任务与当前账号或批次不兼容，请放弃后重新创建。', '舊工作與目前帳號或批次不相容，請放棄後重新建立。', 'The old queue no longer matches the accounts or active batch. Discard it and create a new one.', '古いキューは現在のアカウントまたはグループと一致しません。破棄して作り直してください。', '이전 작업이 현재 계정 또는 묶음과 맞지 않습니다. 삭제 후 다시 만드세요.'],
       ['statusSyncFailed', '公开码同步失败：{message}。仍可手动填写。', '公開序號同步失敗：{message}。仍可手動填寫。', 'Public-code sync failed: {message}. Codes can still be entered manually.', '公開コードの同期に失敗しました：{message}。手動入力は可能です。', '공개 코드 동기화 실패: {message}. 직접 입력할 수 있습니다.'],
       ['tableAccount', '账号', '帳號', 'Account', 'アカウント', '계정'],
@@ -82,6 +84,7 @@
       ['completed', '已完成', '已完成', 'Completed', '完了', '완료'],
       ['rewardDetail', '奖励将在稍后发送至礼物箱。', '獎勵將稍後發送至禮物箱。', 'Rewards will be delivered to the Presents Box later.', '報酬は後ほどプレゼントボックスに届きます。', '보상은 잠시 후 선물함으로 지급됩니다.'],
       ['historySkipped', '本机记录于 {date} 兑换成功。', '本機記錄於 {date} 兌換成功。', 'Recorded as successful on this device at {date}.', 'この端末で{date}に成功済みです。', '이 기기에서 {date}에 성공으로 기록되었습니다.'],
+      ['accountStopped', '该账号前一项失败，已跳过后续序列码。', '該帳號前一項失敗，已略過後續序號。', 'Skipped because an earlier task failed for this account.', 'このアカウントの前の処理が失敗したため、残りをスキップしました。', '이 계정의 이전 작업이 실패하여 남은 코드를 건너뛰었습니다.'],
       ['managerTitle', '账号管理', '帳號管理', 'Account management', 'アカウント管理', '계정 관리'],
       ['alias', '备注', '備註', 'Alias', 'メモ', '별칭'],
       ['server', 'Server', 'Server', 'Server', 'Server', 'Server'],
@@ -111,6 +114,7 @@
       ['errorRegistryFormat', '公开码数据格式错误。', '公開序號資料格式錯誤。', 'The public-code data format is invalid.', '公開コードのデータ形式が不正です。', '공개 코드 데이터 형식이 잘못되었습니다.'],
       ['errorImport', '备份文件无效：{message}', '備份檔案無效：{message}', 'Invalid backup: {message}', 'バックアップが無効です：{message}', '잘못된 백업 파일: {message}'],
       ['httpError', '请求失败（HTTP {status}）', '請求失敗（HTTP {status}）', 'Request failed (HTTP {status})', 'リクエスト失敗（HTTP {status}）', '요청 실패 (HTTP {status})'],
+      ['requestTimeout', '请求超过 {seconds} 秒未响应。', '請求超過 {seconds} 秒未回應。', 'The request did not respond within {seconds} seconds.', 'リクエストが{seconds}秒以内に応答しませんでした。', '요청이 {seconds}초 안에 응답하지 않았습니다.'],
     ];
     const messages = Object.fromEntries(MESSAGE_ROWS.map(row => [
       row[0],
@@ -250,8 +254,16 @@
       return currentTask.accountId === nextTask.accountId ? 4000 : 10000;
     }
 
+    function nextAccountTaskIndex(tasks, currentIndex) {
+      const accountId = tasks[currentIndex]?.accountId;
+      let index = currentIndex + 1;
+      while (index < tasks.length && tasks[index].accountId === accountId) index += 1;
+      return index;
+    }
+
     return {
       LOCALES,
+      API_TIMEOUT_MS,
       messages,
       dateLocaleMap,
       localeFromHtml,
@@ -267,6 +279,7 @@
       buildTasks,
       taskFingerprint,
       delayFor,
+      nextAccountTaskIndex,
     };
   })();
 
@@ -285,6 +298,7 @@
   const QUEUE_KEY = 'mmt-serial-code-queue-v1';
   const PREFERENCES_KEY = 'mmt-serial-code-preferences-v1';
   const SYNC_INTERVAL = 60 * 60 * 1000;
+  const API_TIMEOUT_MS = Core.API_TIMEOUT_MS;
   const MAX_CONSECUTIVE_ERRORS = 2;
   const locale = Core.localeFromHtml(document.documentElement.lang);
   const t = (key, params) => Core.translate(locale, key, params);
@@ -307,7 +321,6 @@
     redemptions: {},
     preferences: { selectedAccountIds: [], lastAccountId: null },
     verifiedAccounts: new Map(),
-    verifiedFingerprint: null,
     queue: null,
     resumeCandidate: null,
     rows: new Map(),
@@ -516,14 +529,28 @@
   function invalidateVerification(message = t('statusNeedVerify')) {
     if (state.running) return;
     state.verifiedAccounts.clear();
-    state.verifiedFingerprint = null;
-    startButton.disabled = true;
+    state.resumeCandidate = null;
     startButton.textContent = t('start');
+    updateStartAvailability();
     setStatus(message);
   }
 
-  function currentFingerprint() {
-    return Core.taskFingerprint(selectedAccounts().map(account => account.id), batchSelect.value, parseCodes());
+  function updateStartAvailability() {
+    if (state.running) {
+      startButton.disabled = true;
+      return;
+    }
+    if (state.queue && !state.resumeCandidate) {
+      startButton.disabled = true;
+      return;
+    }
+    try {
+      const accounts = selectedAccounts();
+      const codes = parseCodes();
+      startButton.disabled = accounts.length === 0 || Core.buildTasks(accounts, codes, state.redemptions).length === 0;
+    } catch {
+      startButton.disabled = true;
+    }
   }
 
   function completedCount(account, codes) {
@@ -742,16 +769,31 @@
   }
 
   async function requestApi(path, account, serialCode) {
-    const response = await fetch(`${API_BASE}/${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-      body: new URLSearchParams({
-        ServerId: account.serverId,
-        PlayerId: account.playerId,
-        SerialCode: serialCode,
-      }),
-    });
-    const raw = await response.text();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+    let response;
+    let raw;
+    try {
+      response = await fetch(`${API_BASE}/${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: new URLSearchParams({
+          ServerId: account.serverId,
+          PlayerId: account.playerId,
+          SerialCode: serialCode,
+        }),
+        signal: controller.signal,
+      });
+      raw = await response.text();
+    } catch (error) {
+      if (error?.name !== 'AbortError') throw error;
+      const timeoutError = new Error(t('requestTimeout', { seconds: API_TIMEOUT_MS / 1000 }));
+      timeoutError.status = 0;
+      timeoutError.isTimeout = true;
+      throw timeoutError;
+    } finally {
+      clearTimeout(timeoutId);
+    }
     let data = null;
     try { data = raw ? JSON.parse(raw) : {}; } catch { data = raw; }
     if (!response.ok) {
@@ -879,6 +921,23 @@
       && String(data.world) === String(verified.world);
   }
 
+  function accountFromConfirmation(account, data) {
+    return {
+      ...account,
+      playerId: String(data.playerId),
+      userName: String(data.userName || ''),
+      world: String(data.world || ''),
+      lastVerifiedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  function persistVerifiedAccount(account) {
+    state.accounts = state.accounts.map(item => item.id === account.id ? account : item);
+    state.verifiedAccounts.set(account.id, account);
+    saveAccounts();
+  }
+
   function setControlsRunning(running) {
     syncButton.disabled = running;
     verifyButton.disabled = running;
@@ -889,7 +948,7 @@
     renderAccounts();
   }
 
-  async function verifySelectedAccounts(options = {}) {
+  async function verifySelectedAccounts() {
     if (state.running) return false;
     let accounts;
     let codes;
@@ -904,60 +963,51 @@
     state.running = true;
     state.paused = false;
     state.verifiedAccounts.clear();
-    state.verifiedFingerprint = null;
     setControlsRunning(true);
     pauseButton.disabled = true;
-    let success = true;
+    let verifiedCount = 0;
+    let failedCount = 0;
     try {
       for (let index = 0; index < accounts.length; index += 1) {
         const account = accounts[index];
         const pending = codes.filter(code => !state.redemptions[Core.redemptionKey(account.serverId, account.playerId, code)]);
         if (!pending.length) {
-          state.verifiedAccounts.set(account.id, { ...account });
           updateResult(account, '—', 'completed', t('accountProgress', { done: codes.length, total: codes.length }), 'success');
           continue;
         }
         setStatus(t('statusVerifying', { current: index + 1, total: accounts.length, account: account.alias }));
         updateResult(account, pending[0], 'verifying', '', 'pending');
-        setOfficialAccount(account);
-        const data = await requestApi('Confirm', account, pending[0]);
-        const verified = {
-          ...account,
-          playerId: String(data.playerId),
-          userName: String(data.userName || ''),
-          world: String(data.world || ''),
-          lastVerifiedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        state.accounts = state.accounts.map(item => item.id === account.id ? verified : item);
-        state.verifiedAccounts.set(account.id, verified);
-        updateResult(verified, pending[0], 'verified', `${verified.userName} / ${verified.world}`, 'success');
-        saveAccounts();
+        try {
+          setOfficialAccount(account);
+          const data = await requestApi('Confirm', account, pending[0]);
+          const verified = accountFromConfirmation(account, data);
+          persistVerifiedAccount(verified);
+          verifiedCount += 1;
+          updateResult(verified, pending[0], 'verified', `${verified.userName} / ${verified.world}`, 'success');
+        } catch (error) {
+          failedCount += 1;
+          updateResult(account, pending[0], 'failed', error.message, 'error');
+        }
         if (index < accounts.length - 1) await sleep(4000);
       }
-      state.verifiedFingerprint = currentFingerprint();
       const tasks = Core.buildTasks(selectedAccounts(), codes, state.redemptions);
       startButton.disabled = tasks.length === 0;
-      startButton.textContent = options.resume ? t('continueRun') : t('start');
-      if (options.resume) {
-        state.resumeCandidate = options.resume;
-        setStatus(t('statusResumeReady'), 'success');
+      startButton.textContent = t('start');
+      state.resumeCandidate = null;
+      if (failedCount) {
+        setStatus(t('statusVerifyPartial', { success: verifiedCount, failed: failedCount }), 'error');
       } else {
-        state.resumeCandidate = null;
         setStatus(t('statusVerified', { accounts: accounts.length, tasks: tasks.length }), 'success');
       }
       renderAccounts();
     } catch (error) {
-      success = false;
-      state.verifiedAccounts.clear();
-      state.verifiedFingerprint = null;
-      startButton.disabled = true;
       setStatus(error.message, 'error');
     } finally {
       state.running = false;
       setControlsRunning(false);
+      updateStartAvailability();
     }
-    return success;
+    return failedCount === 0;
   }
 
   function createQueue() {
@@ -1004,7 +1054,6 @@
     if (state.running) return;
     let queue;
     try {
-      if (currentFingerprint() !== state.verifiedFingerprint) throw new Error(t('statusNeedVerify'));
       queue = state.resumeCandidate || createQueue();
       if (state.resumeCandidate && !queueIsCompatible(queue)) throw new Error(t('statusQueueInvalid'));
     } catch (error) {
@@ -1044,32 +1093,43 @@
         }
         setStatus(t('statusRunning', { current: index + 1, total: queue.tasks.length, account: account.alias, code: task.code }));
         updateResult(account, task.code, 'pending', '', 'pending');
+        let completedIndex = index;
         try {
           setOfficialAccount(account);
           const confirmed = await requestApi('Confirm', account, task.code);
-          const verified = state.verifiedAccounts.get(account.id);
-          if (!verified || !samePlayer(confirmed, verified)) throw new Error(t('errorPlayerMismatch'));
+          const verified = state.verifiedAccounts.get(account.id) || (account.lastVerifiedAt ? account : null);
+          if (verified && !samePlayer(confirmed, verified)) throw new Error(t('errorPlayerMismatch'));
+          const confirmedAccount = accountFromConfirmation(account, confirmed);
           await requestApi('Register', account, task.code);
           const record = { status: 'success', redeemedAt: new Date().toISOString(), batchKey: queue.batchKey };
           state.redemptions[historyKey] = record;
           saveRedemptions();
+          persistVerifiedAccount(confirmedAccount);
           succeeded += 1;
           consecutiveErrors = 0;
-          updateResult(account, task.code, 'success', t('rewardDetail'), 'success');
+          updateResult(confirmedAccount, task.code, 'success', t('rewardDetail'), 'success');
         } catch (error) {
           failed += 1;
           consecutiveErrors += 1;
           updateResult(account, task.code, 'failed', error.message, 'error');
+          const nextAccountIndex = Core.nextAccountTaskIndex(queue.tasks, index);
+          for (let skipIndex = index + 1; skipIndex < nextAccountIndex; skipIndex += 1) {
+            const skippedTask = queue.tasks[skipIndex];
+            skipped += 1;
+            updateResult(account, skippedTask.code, 'skipped', t('accountStopped'), 'error');
+          }
+          completedIndex = nextAccountIndex - 1;
           const fatal = error.status === 403 || error.status === 429 || error.status >= 500 || error.message === t('errorPlayerMismatch');
           if (fatal || consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) state.paused = true;
         }
-        queue.nextTaskIndex = index + 1;
+        queue.nextTaskIndex = completedIndex + 1;
         saveQueue(queue, state.paused ? 'paused' : 'running');
         renderAccounts();
         if (state.paused) break;
-        const nextTask = queue.tasks[index + 1];
+        const nextTask = queue.tasks[queue.nextTaskIndex];
         const delay = Core.delayFor(task, nextTask);
         if (delay && !await waitWithPause(delay)) break;
+        index = completedIndex;
       }
       if (state.paused || queue.nextTaskIndex < queue.tasks.length) {
         saveQueue(queue, 'paused');
@@ -1088,7 +1148,7 @@
     }
   }
 
-  async function restoreQueue() {
+  function restoreQueue() {
     const queue = state.queue || GM_getValue(QUEUE_KEY, null);
     if (!queueIsCompatible(queue)) {
       setStatus(t('statusQueueInvalid'), 'error');
@@ -1100,7 +1160,11 @@
     state.preferences.lastAccountId = queue.accountIds[0] || null;
     savePreferences();
     renderAccounts();
-    await verifySelectedAccounts({ resume: queue });
+    state.resumeCandidate = queue;
+    startButton.textContent = t('continueRun');
+    startButton.disabled = queue.nextTaskIndex >= queue.tasks.length;
+    showQueuePrompt(false);
+    setStatus(t('statusResumeReady'), 'success');
   }
 
   syncButton.addEventListener('click', async () => {
@@ -1150,6 +1214,7 @@
     state.queue = null;
     state.resumeCandidate = null;
     showQueuePrompt(false);
+    updateStartAvailability();
     setStatus(t('statusReady'));
   });
 
@@ -1174,6 +1239,7 @@
       const batch = state.batches.find(item => item.key === batchSelect.value);
       codeInput.value = batch ? batch.codes.map(item => item.code).join('\n') : '';
       renderAccounts();
+      updateStartAvailability();
       if (!state.queue) setStatus(t('statusLoaded', { batches: state.batches.length, codes: batch?.codes.length || 0 }));
       else if (!queueIsCompatible(state.queue)) setStatus(t('statusQueueInvalid'), 'error');
     })
