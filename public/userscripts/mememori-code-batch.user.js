@@ -6,7 +6,7 @@
 // @name:ja      メメントモリ シリアルコード一括入力
 // @name:ko      메멘토모리 시리얼 코드 일괄 입력
 // @namespace    https://github.com/hitazuki/mementomori-calculator
-// @version      0.3.1
+// @version      0.3.2
 // @description  在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-CN 在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-TW 在 MementoMori 官方兌換頁為多個帳號依序填寫公開序號
@@ -80,6 +80,7 @@
       ['verified', '已核对', '已核對', 'Verified', '確認済み', '확인됨'],
       ['success', '成功', '成功', 'Success', '成功', '성공'],
       ['failed', '失败', '失敗', 'Failed', '失敗', '실패'],
+      ['alreadyUsed', '已使用（本机未记录）', '已使用（本機未記錄）', 'Already used (not recorded locally)', '使用済み（ローカル記録なし）', '이미 사용됨 (로컬 기록 없음)'],
       ['skipped', '跳过', '略過', 'Skipped', 'スキップ', '건너뜀'],
       ['completed', '已完成', '已完成', 'Completed', '完了', '완료'],
       ['rewardDetail', '奖励将在稍后发送至礼物箱。', '獎勵將稍後發送至禮物箱。', 'Rewards will be delivered to the Presents Box later.', '報酬は後ほどプレゼントボックスに届きます。', '보상은 잠시 후 선물함으로 지급됩니다.'],
@@ -261,6 +262,25 @@
       return index;
     }
 
+    function isAlreadyUsedMessage(message) {
+      const normalized = String(message || '').toLowerCase().replace(/\s+/g, '');
+      return [
+        '已被使用',
+        '已经使用',
+        '已經使用',
+        'alreadyused',
+        'alreadybeenused',
+        '使用済み',
+        '既に使用',
+        'すでに使用',
+        '이미사용',
+      ].some(pattern => normalized.includes(pattern));
+    }
+
+    function shouldStopAccount(error) {
+      return Boolean(error?.isTimeout || error?.status === 0 || error?.status == null);
+    }
+
     return {
       LOCALES,
       API_TIMEOUT_MS,
@@ -280,6 +300,8 @@
       taskFingerprint,
       delayFor,
       nextAccountTaskIndex,
+      isAlreadyUsedMessage,
+      shouldStopAccount,
     };
   })();
 
@@ -1110,17 +1132,26 @@
           updateResult(confirmedAccount, task.code, 'success', t('rewardDetail'), 'success');
         } catch (error) {
           failed += 1;
-          consecutiveErrors += 1;
-          updateResult(account, task.code, 'failed', error.message, 'error');
-          const nextAccountIndex = Core.nextAccountTaskIndex(queue.tasks, index);
-          for (let skipIndex = index + 1; skipIndex < nextAccountIndex; skipIndex += 1) {
-            const skippedTask = queue.tasks[skipIndex];
-            skipped += 1;
-            updateResult(account, skippedTask.code, 'skipped', t('accountStopped'), 'error');
-          }
-          completedIndex = nextAccountIndex - 1;
+          const alreadyUsed = Core.isAlreadyUsedMessage(error.message);
           const fatal = error.status === 403 || error.status === 429 || error.status >= 500 || error.message === t('errorPlayerMismatch');
-          if (fatal || consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) state.paused = true;
+          const stopAccount = !alreadyUsed && !fatal && Core.shouldStopAccount(error);
+          if (alreadyUsed) {
+            consecutiveErrors = 0;
+            updateResult(account, task.code, 'alreadyUsed', error.message, 'pending');
+          } else {
+            consecutiveErrors += 1;
+            updateResult(account, task.code, 'failed', error.message, 'error');
+          }
+          if (fatal || stopAccount) {
+            const nextAccountIndex = Core.nextAccountTaskIndex(queue.tasks, index);
+            for (let skipIndex = index + 1; skipIndex < nextAccountIndex; skipIndex += 1) {
+              const skippedTask = queue.tasks[skipIndex];
+              skipped += 1;
+              updateResult(account, skippedTask.code, 'skipped', t('accountStopped'), 'error');
+            }
+            completedIndex = nextAccountIndex - 1;
+          }
+          if (fatal || (!alreadyUsed && consecutiveErrors >= MAX_CONSECUTIVE_ERRORS)) state.paused = true;
         }
         queue.nextTaskIndex = completedIndex + 1;
         saveQueue(queue, state.paused ? 'paused' : 'running');

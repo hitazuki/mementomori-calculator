@@ -110,3 +110,18 @@ test('an account failure advances past all remaining tasks for that account', ()
   assert.equal(core.nextAccountTaskIndex(tasks, 0), 3)
   assert.equal(core.nextAccountTaskIndex(tasks, 3), 4)
 })
+
+test('already-used responses remain code-specific across supported languages', () => {
+  assert.equal(core.isAlreadyUsedMessage('这组兑换码已被使用。'), true)
+  assert.equal(core.isAlreadyUsedMessage('This serial code has already been used.'), true)
+  assert.equal(core.isAlreadyUsedMessage('このシリアルコードは使用済みです。'), true)
+  assert.equal(core.isAlreadyUsedMessage('이미 사용한 시리얼 코드입니다.'), true)
+  assert.equal(core.isAlreadyUsedMessage('The serial code has expired.'), false)
+})
+
+test('only transport failures stop the remaining tasks for an account', () => {
+  assert.equal(core.shouldStopAccount({ isTimeout: true, status: 0 }), true)
+  assert.equal(core.shouldStopAccount({ status: 0 }), true)
+  assert.equal(core.shouldStopAccount({}), true)
+  assert.equal(core.shouldStopAccount({ status: 400 }), false)
+})
