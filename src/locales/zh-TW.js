@@ -1,4 +1,5 @@
 import { raidTranslations } from './raid.js'
+import { serialCodeTranslations } from './serialCode.js'
 
 export default {
   planRechargeMode: "規劃模式",
@@ -662,4 +663,5 @@ export default {
   planRemainingCount: "{n} 個機會",
   planRemainingRangeHint: "如果你還計畫繼續推進，可以擴大前瞻範圍，讓更後面的機會參與下一段決策。",
   ...raidTranslations['zh-TW'],
+  ...serialCodeTranslations['zh-TW'],
 };

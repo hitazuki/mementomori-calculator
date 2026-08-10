@@ -1,4 +1,5 @@
 import { raidTranslations } from './raid.js'
+import { serialCodeTranslations } from './serialCode.js'
 
 export default {
   planRechargeMode: "計画モード",
@@ -667,4 +668,5 @@ export default {
   planRemainingCount: "{n} 件",
   planRemainingRangeHint: "さらに進める予定がある場合は、前方参照範囲を広げると、より後ろの機会も次の判断に含められます。",
   ...raidTranslations.ja,
+  ...serialCodeTranslations.ja,
 };

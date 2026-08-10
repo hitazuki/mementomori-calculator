@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-10T00:00:00Z",
+  "codes": [
+    {
+      "code": "memento777",
+      "title": "Public serial code",
+      "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
+      "validFrom": null,
+      "expiresAt": null,
+      "source": null,
+      "enabled": true
+    },
+    {
+      "code": "F8WUGDAPSE",
+      "title": "Public serial code",
+      "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
+      "validFrom": null,
+      "expiresAt": null,
+      "source": null,
+      "enabled": true
+    }
+  ]
+}

@@ -155,6 +155,7 @@ const PackComparisonView = createAsyncView(() => import('./views/PackComparisonV
 const ShopExchangeView = createAsyncView(() => import('./views/ShopExchangeView.vue'))
 const GachaAnalysisView = createAsyncView(() => import('./views/GachaAnalysisView.vue'))
 const ForbiddenWeaponGachaView = createAsyncView(() => import('./views/ForbiddenWeaponGachaView.vue'))
+const SerialCodeToolView = createAsyncView(() => import('./views/SerialCodeToolView.vue'))
 
 const { locale, t } = useI18n()
 const currentLanguage = ref(locale.value)
@@ -192,7 +193,8 @@ const viewMap = {
   packCalc: PackCalculatorView,
   packCompare: PackComparisonView,
   gacha: GachaAnalysisView,
-  forbiddenWeaponGacha: ForbiddenWeaponGachaView
+  forbiddenWeaponGacha: ForbiddenWeaponGachaView,
+  serialCode: SerialCodeToolView,
 }
 
 const savedView = localStorage.getItem('mmt-calc-current-view')

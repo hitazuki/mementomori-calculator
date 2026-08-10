@@ -99,6 +99,14 @@ export const NAV_GROUPS = [
         viewId: 'mysterium',
         matchViews: ['mysterium'],
       },
+      {
+        id: 'serialCode',
+        icon: '🎁',
+        labelKey: 'navSerialCode',
+        descriptionKey: 'homeSerialCodeDesc',
+        viewId: 'serialCode',
+        matchViews: ['serialCode'],
+      },
     ],
   },
 ]

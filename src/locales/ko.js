@@ -1,4 +1,5 @@
 import { raidTranslations } from './raid.js'
+import { serialCodeTranslations } from './serialCode.js'
 
 export default {
   planRechargeMode: "계획 모드",
@@ -651,4 +652,5 @@ export default {
   planRemainingCount: "{n}개 기회",
   planRemainingRangeHint: "계속 진행할 계획이라면 전망 범위를 넓혀 더 뒤의 기회도 다음 판단에 포함할 수 있습니다.",
   ...raidTranslations.ko,
+  ...serialCodeTranslations.ko,
 };

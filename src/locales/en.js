@@ -1,4 +1,5 @@
 import { raidTranslations } from './raid.js'
+import { serialCodeTranslations } from './serialCode.js'
 
 export default {
   planRechargeMode: "Planning Mode",
@@ -664,4 +665,5 @@ export default {
   planRemainingCount: "{n} Opportunities",
   planRemainingRangeHint: "If you still plan to keep progressing, expand the lookahead range so later opportunities can participate in the next decision segment.",
   ...raidTranslations.en,
+  ...serialCodeTranslations.en,
 };
