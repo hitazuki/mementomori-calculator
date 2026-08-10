@@ -50,16 +50,26 @@
 
       <p v-if="loading" class="text-muted">{{ $t('serialCodeLoading') }}</p>
       <p v-else-if="loadError" class="text-danger">{{ $t('serialCodeLoadError') }}</p>
-      <div v-else class="serial-code-list">
-        <article v-for="item in activeCodes" :key="item.code" class="serial-code-row">
-          <div>
-            <code>{{ item.code }}</code>
-            <span>{{ expiryLabel(item) }}</span>
+      <div v-else class="serial-batch-list">
+        <section v-for="batch in activeBatches" :key="batch.key" class="serial-batch">
+          <div class="serial-batch-heading">
+            <h3>{{ batchLabel(batch) }}</h3>
+            <button type="button" class="btn btn-sm btn-ghost" @click="copyBatch(batch)">
+              {{ copiedCode === `__batch__:${batch.key}` ? $t('serialCodeCopied') : $t('serialCodeCopyBatch') }}
+            </button>
           </div>
-          <button type="button" class="btn btn-sm btn-ghost" @click="copyCode(item.code)">
-            {{ copiedCode === item.code ? $t('serialCodeCopied') : $t('serialCodeCopy') }}
-          </button>
-        </article>
+          <div class="serial-code-list">
+            <article v-for="item in batch.codes" :key="item.code" class="serial-code-row">
+              <div>
+                <code>{{ item.code }}</code>
+                <span>{{ item.title }}</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost" @click="copyCode(item.code)">
+                {{ copiedCode === item.code ? $t('serialCodeCopied') : $t('serialCodeCopy') }}
+              </button>
+            </article>
+          </div>
+        </section>
       </div>
     </section>
   </div>
@@ -68,6 +78,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { groupSerialCodesByExpiry } from '../utils/serialCodeBatches.js'
 
 const { locale, t } = useI18n()
 const registry = ref({ codes: [] })
@@ -80,15 +91,8 @@ const userscriptUrl = new URL(
   window.location.origin,
 ).href
 
-const activeCodes = computed(() => {
-  const now = Date.now()
-  return registry.value.codes.filter(item => {
-    if (!item.enabled) return false
-    if (item.validFrom && now < Date.parse(item.validFrom)) return false
-    if (item.expiresAt && now > Date.parse(item.expiresAt)) return false
-    return true
-  })
-})
+const activeBatches = computed(() => groupSerialCodesByExpiry(registry.value.codes))
+const activeCodes = computed(() => activeBatches.value.flatMap(batch => batch.codes))
 
 onMounted(async () => {
   try {
@@ -105,12 +109,12 @@ onMounted(async () => {
   }
 })
 
-function expiryLabel(item) {
-  if (!item.expiresAt) return t('serialCodeNoExpiry')
+function batchLabel(batch) {
+  if (!batch.expiresAt) return t('serialCodeNoExpiry')
   const date = new Intl.DateTimeFormat(locale.value, {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(new Date(item.expiresAt))
+  }).format(new Date(batch.expiresAt))
   return t('serialCodeExpires', { date })
 }
 
@@ -132,6 +136,10 @@ function copyCode(code) {
 
 function copyAll() {
   return copyText(activeCodes.value.map(item => item.code).join('\n'), '__all__')
+}
+
+function copyBatch(batch) {
+  return copyText(batch.codes.map(item => item.code).join('\n'), `__batch__:${batch.key}`)
 }
 </script>
 
@@ -203,9 +211,31 @@ function copyAll() {
   margin-bottom: 12px;
 }
 
+.serial-batch-list,
 .serial-code-list {
   display: grid;
   gap: 8px;
+}
+
+.serial-batch {
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  background: rgba(var(--color-invert-rgb), 0.018);
+}
+
+.serial-batch-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.serial-batch-heading h3 {
+  margin: 0;
+  color: var(--gold);
+  font-size: var(--fs-sm);
 }
 
 .serial-code-row {

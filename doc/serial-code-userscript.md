@@ -1,30 +1,73 @@
 # MementoMori 序列码批量兑换脚本
 
-本工具由项目页面、公开序列码数据和 Tampermonkey 用户脚本三部分组成。项目页面负责安装说明与公开码展示；用户脚本只在 MementoMori 官方兑换页运行，并调用官网原有的确认和兑换接口。
+本工具由项目安装页面、公开序列码数据和 Tampermonkey 用户脚本组成。用户脚本只在 MementoMori 官方兑换页运行，支持多账号持久化、按过期时间选择兑换码批次、串行兑换、断点恢复和本地备份。
 
 ## 安装
 
 1. 从浏览器扩展商店或 [Tampermonkey 官网](https://www.tampermonkey.net/)安装 Tampermonkey。
-2. 打开项目部署后的脚本地址：
+2. 打开脚本安装地址：
 
    ```text
    https://hitazuki.github.io/mementomori-calculator/userscripts/mememori-code-batch.user.js
    ```
 
-3. Tampermonkey 显示安装确认页后，检查脚本名称和权限，点击“安装”。
-4. 打开 [MementoMori 官方兑换页](https://mememori-game.com/code/)，页面上方出现“序列码批量兑换”面板即表示安装成功。
+3. 检查脚本名称、匹配域名和权限后点击“安装”。
+4. 打开 [MementoMori 官方兑换页](https://mememori-game.com/code/)，页面中出现批量兑换面板即表示安装成功。
 
-## 使用
+Tampermonkey 会根据 `@updateURL` 检查新版。官网右上角切换语言后页面会重新加载，脚本自动跟随日语、英语、繁中、简中或韩语。
 
-1. 在官方表单中选择与游戏标题画面一致的 Server。
-2. 输入玩家 ID。
-3. 点击“同步公开码”，或者在文本框中每行填写一个序列码。
-4. 点击“核对玩家”。脚本会使用第一个代码调用官网确认接口，并显示玩家名和世界。
-5. 确认玩家信息无误后，点击“开始兑换”。
-6. 脚本逐个执行 `Confirm` 和 `Register`，两次兑换之间至少等待 4 秒。
-7. 可随时点击“暂停”；当前请求完成后队列停止。
+## 账号管理
 
-脚本不会并发提交。遇到 HTTP 403、429、服务端错误、玩家信息不一致，或者连续两个代码失败时，会自动暂停。官方提示短时间内多次提交错误代码可能导致暂时无法输入，因此不要反复重试失败代码。
+1. 打开“管理账号”。
+2. 填写备注、Server 和玩家 ID 后保存；备注仅用于本机识别。
+3. 相同 `serverId + playerId` 只能保存一次，修改备注不会创建重复账号。
+4. 账号首次保存时可以处于“未核对”状态；运行“核对所选账号”后会保存官网返回的玩家名、世界和核对时间。
+5. 删除账号默认保留其成功兑换记录，重新添加同一 Server 和玩家 ID 后仍会自动跳过成功代码。
+6. “清除记录”会永久删除该账号的本地成功历史，执行前会再次确认。
+
+账号资料保存在 Tampermonkey 的 `mmt-serial-code-accounts-v1` 存储中，不会上传到项目服务器。
+
+## 多账号批量兑换
+
+1. 选择兑换码批次；具有完全相同 `expiresAt` 的代码自动归为一批，`expiresAt: null` 属于无期限批次。
+2. 勾选一个或多个账号。脚本默认只勾选最近使用的一个账号，多账号必须主动选择。
+3. 点击“核对所选账号”。脚本依次调用官网 `Confirm`，展示每个账号的玩家名、世界和待兑换数量。
+4. 检查全部账号信息后点击“开始兑换”。
+5. 队列按账号执行：账号 A 完成所选批次后等待 10 秒，再处理账号 B；同账号代码之间等待 4 秒，全局不会并发请求。
+6. 每次 `Register` 前都会再次执行 `Confirm` 并比对玩家信息。
+7. 本机已有成功记录的 `serverId:playerId:CODE` 组合自动跳过。
+8. 点击“暂停”后，当前请求完成即保存断点。刷新页面不会自动继续，必须点击“恢复未完成任务”、重新核对账号并再次确认继续。
+
+以下情况会暂停全部任务：
+
+- HTTP 403 或 429。
+- 服务端错误。
+- 官网返回的玩家信息与核对结果不一致。
+- 连续两个普通代码错误。
+
+官网提示短时间内多次提交错误代码可能导致暂时无法输入，不要反复重试失败代码。官网仅提示“已经使用”但本机没有成功记录时，脚本会保留为失败/警告，不会伪造成功记录。
+
+## 兑换记录与备份
+
+成功记录保存在 `mmt-serial-code-redemptions-v1`，键格式为：
+
+```text
+serverId:playerId:SERIALCODE
+```
+
+旧版 `mmt-serial-code-success-history` 会在首次运行 0.3.0 时合并迁移，旧键不会删除。
+
+账号管理中的“导出备份”会生成 JSON，包含：
+
+- `type: "mmt-serial-code-backup"`
+- `schemaVersion: 1`
+- 导出时间
+- 账号资料
+- 成功兑换记录
+
+备份不包含公开码缓存或暂停队列。导入时先校验并预览数量，然后按 `serverId + playerId` 合并账号、对成功记录取并集；不会删除本机已有成功历史。备份含有玩家 ID，请自行妥善保管，不要上传到公开 Issue。
+
+本地数据在关闭浏览器、重启电脑或更新脚本后通常仍会保留，但卸载 Tampermonkey、清除扩展数据、更换浏览器配置或设备时可能丢失，建议定期导出备份。
 
 ## 更新公开序列码
 
@@ -34,7 +77,7 @@
 public/data/serial-codes.json
 ```
 
-新增条目的格式：
+条目格式：
 
 ```json
 {
@@ -48,33 +91,21 @@ public/data/serial-codes.json
 }
 ```
 
-- 时间必须使用带时区的 ISO 8601 格式，推荐统一保存为 UTC。
-- 官方未公布期限时使用 `expiresAt: null`，不要填写虚构的远期日期。
-- `enabled: false` 可立即停止向用户脚本分发某个代码。
-- 修改数据后更新顶层 `updatedAt`，提交并等待 GitHub Pages 部署即可；无需升级脚本版本。
-- 新增前应检查 `code` 是否重复，并尽量填写官方来源链接。
+- 时间使用带时区的 ISO 8601 格式，推荐统一保存为 UTC。
+- 官方未公布期限时使用 `expiresAt: null`。
+- `enabled: false` 会立即停止分发该代码。
+- 批次不需要手动编号，由 `expiresAt` 自动分组。
+- 修改数据后更新顶层 `updatedAt` 并部署 GitHub Pages；数据变化不需要增加脚本版本。
 
-## 发布脚本更新
+## 发布与维护
 
-用户脚本源文件位于：
+用户脚本位于：
 
 ```text
 public/userscripts/mememori-code-batch.user.js
 ```
 
-每次修改执行逻辑后必须增加头部的 `@version`。GitHub Pages 部署完成后，Tampermonkey 会根据 `@updateURL` 检查更新。公开码数据变化不需要增加脚本版本。
-
-## 数据与隐私
-
-- 玩家 ID 和兑换结果只在官方页面及用户本机中处理。
-- 公开码列表从本项目 GitHub Pages 获取。
-- 脚本不会向本项目上传玩家 ID、玩家名、世界或兑换结果。
-- 成功历史通过 Tampermonkey 本地存储保存，用于避免用户自行重复处理。
-- 不要在公开 Issue 中粘贴个人用一次性序列码。
-
-## 维护注意事项
-
-官网表单结构或接口变化时，脚本可能停止工作。维护时应核对以下页面元素和接口，但不要使用真实个人码进行自动化测试：
+修改执行逻辑后必须增加 `@version`。维护时应核对以下页面元素和接口，但不要使用真实个人码运行自动化 `Register` 测试：
 
 ```text
 #cdkey_select_server
@@ -82,3 +113,5 @@ public/userscripts/mememori-code-batch.user.js
 POST https://code-input.mememori-boi.com/SerialCode/Confirm
 POST https://code-input.mememori-boi.com/SerialCode/Register
 ```
+
+脚本内置纯逻辑测试入口，用于验证语言映射、账号合并、旧历史迁移、备份校验、任务顺序和请求间隔，不会访问官网接口。

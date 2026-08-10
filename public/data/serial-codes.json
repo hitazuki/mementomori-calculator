@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-10T00:00:00Z",
+  "updatedAt": "2026-08-10T05:30:00Z",
   "codes": [
     {
       "code": "memento777",
@@ -17,6 +17,60 @@
       "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
       "validFrom": null,
       "expiresAt": null,
+      "source": null,
+      "enabled": true
+    },
+    {
+      "code": "memento752",
+      "title": "Public serial code",
+      "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
+      "validFrom": null,
+      "expiresAt": null,
+      "source": null,
+      "enabled": true
+    },
+    {
+      "code": "memento821",
+      "title": "Public serial code",
+      "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
+      "validFrom": null,
+      "expiresAt": null,
+      "source": null,
+      "enabled": true
+    },
+    {
+      "code": "Memento729",
+      "title": "Public serial code",
+      "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
+      "validFrom": null,
+      "expiresAt": null,
+      "source": null,
+      "enabled": true
+    },
+    {
+      "code": "2434mememori",
+      "title": "Lucky Chance",
+      "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
+      "validFrom": null,
+      "expiresAt": "2026-08-24T14:59:59Z",
+      "source": null,
+      "enabled": true
+    },
+    {
+      "code": "tokenekotoko",
+      "title": "Lucky Chance",
+      "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
+      "validFrom": null,
+      "expiresAt": "2026-08-24T14:59:59Z",
+      "source": null,
+      "enabled": true
+    },
+    {
+      "code": "lucky2434gacha",
+      "title": "Lucky Chance",
+      "regions": ["Japan", "Korea", "Asia", "America", "Europe", "Global"],
+      "validFrom": null,
+      "expiresAt": "2026-08-24T14:59:59Z",
       "source": null,
       "enabled": true
     }
