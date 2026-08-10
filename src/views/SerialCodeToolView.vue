@@ -37,6 +37,7 @@
         <li>{{ $t('serialCodeStep2') }}</li>
         <li>{{ $t('serialCodeStep3') }}</li>
         <li>{{ $t('serialCodeStep4') }}</li>
+        <li>{{ $t('serialCodeStep5') }}</li>
       </ol>
     </section>
 

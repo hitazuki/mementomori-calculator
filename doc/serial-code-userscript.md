@@ -5,14 +5,15 @@
 ## 安装
 
 1. 从浏览器扩展商店或 [Tampermonkey 官网](https://www.tampermonkey.net/)安装 Tampermonkey。
-2. 打开脚本安装地址：
+2. Chrome/Edge 用户打开 Tampermonkey 的扩展详情，开启“允许用户脚本”，并将“站点访问权限”设为“所有网站”。如果没有“允许用户脚本”开关，请在 `chrome://extensions/` 或 `edge://extensions/` 开启“开发者模式”。
+3. 打开脚本安装地址：
 
    ```text
    https://hitazuki.github.io/mementomori-calculator/userscripts/mememori-code-batch.user.js
    ```
 
-3. 检查脚本名称、匹配域名和权限后点击“安装”。
-4. 打开 [MementoMori 官方兑换页](https://mememori-game.com/code/)，页面中出现批量兑换面板即表示安装成功。
+4. 检查脚本名称、匹配域名和权限后点击“安装”。
+5. 打开或刷新 [MementoMori 官方兑换页](https://mememori-game.com/code/)，页面中出现批量兑换面板即表示安装成功。已经打开的页面不会自动加载刚安装或更新的脚本。
 
 Tampermonkey 会根据 `@updateURL` 检查新版。官网右上角切换语言后页面会重新加载，脚本自动跟随日语、英语、繁中、简中或韩语。
 
