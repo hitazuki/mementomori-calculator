@@ -60,18 +60,20 @@ test('legacy success history migrates and remains account-specific', () => {
   assert.equal(migrated['3:999:MEMENTO777'], undefined)
 })
 
-test('backup validation and merge keep local successes', () => {
+test('backup validation and merge preserve success and already-used terminal records', () => {
   const account = {
     id: 'a', alias: 'Main', serverId: '3', serverName: 'Asia', playerId: '123',
     createdAt: '2026-08-01T00:00:00Z', updatedAt: '2026-08-01T00:00:00Z',
   }
   const backup = core.createBackup([account], {
     '3:123:MEMENTO777': { status: 'success', redeemedAt: '2026-08-10T00:00:00Z', batchKey: 'no-expiry' },
+    '3:123:CODE2': { status: 'already-used', observedAt: '2026-08-10T00:05:00Z', batchKey: 'no-expiry' },
   }, '2026-08-10T01:00:00Z')
   const parsed = plain(core.parseBackup(JSON.stringify(backup)))
 
   assert.equal(parsed.type, 'mmt-serial-code-backup')
   assert.equal(parsed.accounts.length, 1)
+  assert.equal(parsed.redemptions['3:123:CODE2'].status, 'already-used')
   assert.throws(() => core.parseBackup('{"schemaVersion":1}'))
   assert.throws(() => core.parseBackup(JSON.stringify({
     ...backup,
@@ -80,8 +82,17 @@ test('backup validation and merge keep local successes', () => {
 
   const merged = plain(core.mergeRedemptions({
     '3:123:MEMENTO777': { status: 'success', redeemedAt: '2026-08-11T00:00:00Z', batchKey: 'no-expiry' },
+    '3:123:CODE2': { status: 'already-used', observedAt: '2026-08-11T00:00:00Z', batchKey: 'no-expiry' },
   }, parsed.redemptions))
   assert.equal(merged['3:123:MEMENTO777'].redeemedAt, '2026-08-11T00:00:00Z')
+  assert.equal(merged['3:123:CODE2'].observedAt, '2026-08-11T00:00:00Z')
+
+  const successWins = plain(core.mergeRedemptions({
+    '3:123:CODE2': { status: 'already-used', observedAt: '2026-08-11T00:00:00Z' },
+  }, {
+    '3:123:CODE2': { status: 'success', redeemedAt: '2026-08-10T00:00:00Z' },
+  }))
+  assert.equal(successWins['3:123:CODE2'].status, 'success')
 })
 
 test('multi-account tasks are account-major and use safe delays', () => {
@@ -91,13 +102,13 @@ test('multi-account tasks are account-major and use safe delays', () => {
   ]
   const history = {
     '3:123:CODE1': { status: 'success', redeemedAt: '2026-08-10T00:00:00Z' },
+    '1:999:CODE1': { status: 'already-used', observedAt: '2026-08-10T00:00:00Z' },
   }
   const tasks = plain(core.buildTasks(accounts, ['CODE1', 'CODE2'], history))
 
-  assert.deepEqual(tasks.map(task => `${task.accountId}:${task.code}`), ['a:CODE2', 'b:CODE1', 'b:CODE2'])
+  assert.deepEqual(tasks.map(task => `${task.accountId}:${task.code}`), ['a:CODE2', 'b:CODE2'])
   assert.equal(core.delayFor(tasks[0], tasks[1]), 2000)
-  assert.equal(core.delayFor(tasks[1], tasks[2]), 2000)
-  assert.equal(core.delayFor(tasks[2], null), 0)
+  assert.equal(core.delayFor(tasks[1], null), 0)
 })
 
 test('an account failure advances past all remaining tasks for that account', () => {

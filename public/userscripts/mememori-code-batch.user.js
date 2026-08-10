@@ -6,7 +6,7 @@
 // @name:ja      メメントモリ シリアルコード一括入力
 // @name:ko      메멘토모리 시리얼 코드 일괄 입력
 // @namespace    https://github.com/hitazuki/mementomori-calculator
-// @version      0.3.3
+// @version      0.3.4
 // @description  在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-CN 在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-TW 在 MementoMori 官方兌換頁為多個帳號依序填寫公開序號
@@ -81,11 +81,12 @@
       ['verified', '已核对', '已核對', 'Verified', '確認済み', '확인됨'],
       ['success', '成功', '成功', 'Success', '成功', '성공'],
       ['failed', '失败', '失敗', 'Failed', '失敗', '실패'],
-      ['alreadyUsed', '已使用（本机未记录）', '已使用（本機未記錄）', 'Already used (not recorded locally)', '使用済み（ローカル記録なし）', '이미 사용됨 (로컬 기록 없음)'],
+      ['alreadyUsed', '已使用', '已使用', 'Already used', '使用済み', '이미 사용됨'],
       ['skipped', '跳过', '略過', 'Skipped', 'スキップ', '건너뜀'],
       ['completed', '已完成', '已完成', 'Completed', '完了', '완료'],
       ['rewardDetail', '奖励将在稍后发送至礼物箱。', '獎勵將稍後發送至禮物箱。', 'Rewards will be delivered to the Presents Box later.', '報酬は後ほどプレゼントボックスに届きます。', '보상은 잠시 후 선물함으로 지급됩니다.'],
       ['historySkipped', '本机记录于 {date} 兑换成功。', '本機記錄於 {date} 兌換成功。', 'Recorded as successful on this device at {date}.', 'この端末で{date}に成功済みです。', '이 기기에서 {date}에 성공으로 기록되었습니다.'],
+      ['historyUsedSkipped', '官网已于 {date} 确认该代码使用过。', '官網已於 {date} 確認該序號使用過。', 'The official service confirmed this code was already used on {date}.', '公式サービスで{date}に使用済みと確認されました。', '공식 서비스에서 {date}에 이미 사용된 코드로 확인되었습니다.'],
       ['accountStopped', '该账号前一项失败，已跳过后续序列码。', '該帳號前一項失敗，已略過後續序號。', 'Skipped because an earlier task failed for this account.', 'このアカウントの前の処理が失敗したため、残りをスキップしました。', '이 계정의 이전 작업이 실패하여 남은 코드를 건너뛰었습니다.'],
       ['managerTitle', '账号管理', '帳號管理', 'Account management', 'アカウント管理', '계정 관리'],
       ['alias', '备注', '備註', 'Alias', 'メモ', '별칭'],
@@ -102,9 +103,9 @@
       ['reverify', '重新核对', '重新核對', 'Verify again', '再確認', '다시 확인'],
       ['unverified', '未核对', '未核對', 'Not verified', '未確認', '미확인'],
       ['unavailableServer', 'Server 当前不可用', 'Server 目前不可用', 'Server is currently unavailable', 'Serverは現在利用できません', '현재 Server를 사용할 수 없음'],
-      ['confirmDelete', '删除账号“{account}”？兑换成功记录会保留。', '刪除帳號「{account}」？兌換成功記錄會保留。', 'Delete account “{account}”? Successful redemption history will be kept.', 'アカウント「{account}」を削除しますか？成功履歴は保持されます。', '“{account}” 계정을 삭제할까요? 성공 기록은 유지됩니다.'],
-      ['confirmClearHistory', '清除账号“{account}”的全部本地兑换记录？此操作无法撤销。', '清除帳號「{account}」的全部本機兌換記錄？此操作無法復原。', 'Clear all local redemption history for “{account}”? This cannot be undone.', '「{account}」のローカル入力履歴をすべて消去しますか？元に戻せません。', '“{account}”의 모든 로컬 입력 기록을 삭제할까요? 되돌릴 수 없습니다.'],
-      ['confirmImport', '导入 {accounts} 个账号和 {records} 条成功记录？数据将与本机记录合并。', '匯入 {accounts} 個帳號與 {records} 筆成功記錄？資料將與本機記錄合併。', 'Import {accounts} accounts and {records} successful records? They will be merged with local data.', '{accounts}アカウントと成功履歴{records}件を読み込みますか？ローカルデータに統合されます。', '{accounts}개 계정과 성공 기록 {records}개를 가져올까요? 로컬 데이터와 병합됩니다.'],
+      ['confirmDelete', '删除账号“{account}”？兑换状态记录会保留。', '刪除帳號「{account}」？兌換狀態記錄會保留。', 'Delete account “{account}”? Redemption-status history will be kept.', 'アカウント「{account}」を削除しますか？入力状態の履歴は保持されます。', '“{account}” 계정을 삭제할까요? 교환 상태 기록은 유지됩니다.'],
+      ['confirmClearHistory', '清除账号“{account}”的全部本地兑换状态记录？此操作无法撤销。', '清除帳號「{account}」的全部本機兌換狀態記錄？此操作無法復原。', 'Clear all local redemption-status history for “{account}”? This cannot be undone.', '「{account}」のローカル入力状態履歴をすべて消去しますか？元に戻せません。', '“{account}”의 모든 로컬 교환 상태 기록을 삭제할까요? 되돌릴 수 없습니다.'],
+      ['confirmImport', '导入 {accounts} 个账号和 {records} 条兑换状态记录？数据将与本机记录合并。', '匯入 {accounts} 個帳號與 {records} 筆兌換狀態記錄？資料將與本機記錄合併。', 'Import {accounts} accounts and {records} redemption-status records? They will be merged with local data.', '{accounts}アカウントと入力状態{records}件を読み込みますか？ローカルデータに統合されます。', '{accounts}개 계정과 교환 상태 기록 {records}개를 가져올까요? 로컬 데이터와 병합됩니다.'],
       ['backupImported', '备份导入完成。', '備份匯入完成。', 'Backup imported.', 'バックアップを読み込みました。', '백업을 가져왔습니다.'],
       ['errorSelectServer', '请选择 Server。', '請選擇 Server。', 'Select a Server.', 'Serverを選択してください。', 'Server를 선택하세요.'],
       ['errorPlayerId', '玩家 ID 应为 1～12 位数字。', '玩家 ID 應為 1～12 位數字。', 'Player ID must contain 1–12 digits.', 'プレイヤーIDは1～12桁の数字で入力してください。', '플레이어 ID는 1~12자리 숫자여야 합니다.'],
@@ -206,13 +207,23 @@
             redeemedAt: String(value.redeemedAt),
             batchKey: value.batchKey || null,
           };
+        } else if (value?.status === 'already-used' && value.observedAt && !Number.isNaN(Date.parse(value.observedAt))) {
+          normalized[normalizedKey] = {
+            status: 'already-used',
+            observedAt: String(value.observedAt),
+            batchKey: value.batchKey || null,
+          };
         }
       }
       return normalized;
     }
 
     function mergeRedemptions(local, incoming) {
-      return { ...normalizeRedemptions(incoming), ...normalizeRedemptions(local) };
+      const merged = normalizeRedemptions(incoming);
+      for (const [key, record] of Object.entries(normalizeRedemptions(local))) {
+        if (record.status === 'success' || !merged[key] || merged[key].status !== 'success') merged[key] = record;
+      }
+      return merged;
     }
 
     function createBackup(accounts, redemptions, now = new Date().toISOString()) {
@@ -969,6 +980,17 @@
     saveAccounts();
   }
 
+  function recordAlreadyUsed(account, code, batchKey = batchSelect.value) {
+    const key = Core.redemptionKey(account.serverId, account.playerId, code);
+    if (state.redemptions[key]?.status === 'success') return;
+    state.redemptions[key] = {
+      status: 'already-used',
+      observedAt: new Date().toISOString(),
+      batchKey: batchKey || null,
+    };
+    saveRedemptions();
+  }
+
   function setControlsRunning(running) {
     syncButton.disabled = running;
     verifyButton.disabled = running;
@@ -1018,6 +1040,7 @@
         } catch (error) {
           failedCount += 1;
           const alreadyUsed = Core.isAlreadyUsedMessage(error.message);
+          if (alreadyUsed) recordAlreadyUsed(account, pending[0]);
           updateResult(account, pending[0], alreadyUsed ? 'alreadyUsed' : 'failed', error.message, alreadyUsed ? 'pending' : 'error');
         }
         if (index < accounts.length - 1) await sleep(Core.REQUEST_INTERVAL_MS);
@@ -1118,7 +1141,11 @@
         const existing = state.redemptions[historyKey];
         if (existing) {
           skipped += 1;
-          updateResult(account, task.code, 'skipped', t('historySkipped', { date: formatDate(existing.redeemedAt) }), 'success');
+          if (existing.status === 'already-used') {
+            updateResult(account, task.code, 'alreadyUsed', t('historyUsedSkipped', { date: formatDate(existing.observedAt) }), 'pending');
+          } else {
+            updateResult(account, task.code, 'skipped', t('historySkipped', { date: formatDate(existing.redeemedAt) }), 'success');
+          }
           queue.nextTaskIndex = index + 1;
           saveQueue(queue, 'running');
           continue;
@@ -1141,14 +1168,16 @@
           consecutiveErrors = 0;
           updateResult(confirmedAccount, task.code, 'success', t('rewardDetail'), 'success');
         } catch (error) {
-          failed += 1;
           const alreadyUsed = Core.isAlreadyUsedMessage(error.message);
           const fatal = Core.isFatalHttpError(error, alreadyUsed) || error.message === t('errorPlayerMismatch');
           const stopAccount = !alreadyUsed && !fatal && Core.shouldStopAccount(error);
           if (alreadyUsed) {
+            skipped += 1;
             consecutiveErrors = 0;
+            recordAlreadyUsed(account, task.code, queue.batchKey);
             updateResult(account, task.code, 'alreadyUsed', error.message, 'pending');
           } else {
+            failed += 1;
             consecutiveErrors += 1;
             updateResult(account, task.code, 'failed', error.message, 'error');
           }
