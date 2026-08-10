@@ -49,11 +49,12 @@ test('serial codes are grouped by identical expiry time', async () => {
   const batches = groupSerialCodesByExpiry(registry.codes, Date.parse('2026-08-10T00:00:00Z'))
 
   assert.equal(batches.length, 2)
-  assert.equal(batches[0].expiresAt, '2026-08-24T14:59:59Z')
+  assert.equal(batches[0].expiresAt, '2026-08-24T05:29:00Z')
   assert.deepEqual(batches[0].codes.map(item => item.code), [
     '2434mememori',
     'tokenekotoko',
     'lucky2434gacha',
+    'shiloh2434',
   ])
   assert.equal(batches[1].key, NO_EXPIRY_BATCH_KEY)
   assert.equal(batches[1].codes.length, 5)
