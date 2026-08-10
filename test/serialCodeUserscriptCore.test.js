@@ -12,6 +12,7 @@ const plain = value => JSON.parse(JSON.stringify(value))
 
 test('userscript selects all official page languages and has complete translations', () => {
   assert.equal(core.API_TIMEOUT_MS, 15000)
+  assert.equal(core.REQUEST_INTERVAL_MS, 2000)
   assert.equal(core.localeFromHtml('ja'), 'ja')
   assert.equal(core.localeFromHtml('en'), 'en')
   assert.equal(core.localeFromHtml('zh-cmn-Hant'), 'zh-TW')
@@ -94,8 +95,8 @@ test('multi-account tasks are account-major and use safe delays', () => {
   const tasks = plain(core.buildTasks(accounts, ['CODE1', 'CODE2'], history))
 
   assert.deepEqual(tasks.map(task => `${task.accountId}:${task.code}`), ['a:CODE2', 'b:CODE1', 'b:CODE2'])
-  assert.equal(core.delayFor(tasks[0], tasks[1]), 10000)
-  assert.equal(core.delayFor(tasks[1], tasks[2]), 4000)
+  assert.equal(core.delayFor(tasks[0], tasks[1]), 2000)
+  assert.equal(core.delayFor(tasks[1], tasks[2]), 2000)
   assert.equal(core.delayFor(tasks[2], null), 0)
 })
 
@@ -124,4 +125,11 @@ test('only transport failures stop the remaining tasks for an account', () => {
   assert.equal(core.shouldStopAccount({ status: 0 }), true)
   assert.equal(core.shouldStopAccount({}), true)
   assert.equal(core.shouldStopAccount({ status: 400 }), false)
+})
+
+test('an already-used response overrides a fatal-looking HTTP status', () => {
+  assert.equal(core.isFatalHttpError({ status: 403 }, true), false)
+  assert.equal(core.isFatalHttpError({ status: 429 }, true), false)
+  assert.equal(core.isFatalHttpError({ status: 403 }, false), true)
+  assert.equal(core.isFatalHttpError({ status: 500 }, false), true)
 })

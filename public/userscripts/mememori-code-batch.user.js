@@ -6,7 +6,7 @@
 // @name:ja      メメントモリ シリアルコード一括入力
 // @name:ko      메멘토모리 시리얼 코드 일괄 입력
 // @namespace    https://github.com/hitazuki/mementomori-calculator
-// @version      0.3.2
+// @version      0.3.3
 // @description  在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-CN 在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-TW 在 MementoMori 官方兌換頁為多個帳號依序填寫公開序號
@@ -34,6 +34,7 @@
   const Core = (() => {
     const LOCALES = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko'];
     const API_TIMEOUT_MS = 15000;
+    const REQUEST_INTERVAL_MS = 2000;
     const MESSAGE_ROWS = [
       ['title', '序列码批量兑换', '序號批次兌換', 'Serial Code Batch Redeemer', 'シリアルコード一括入力', '시리얼 코드 일괄 입력'],
       ['description', '选择批次和账号后按账号顺序逐个提交；核对账号为可选操作。', '選擇批次與帳號後依帳號順序逐一送出；核對帳號為選用操作。', 'Choose a batch and accounts, then submit sequentially. Account verification is optional.', 'グループとアカウントを選択して順番に送信します。事前確認は任意です。', '코드 묶음과 계정을 선택한 뒤 순차 제출합니다. 사전 계정 확인은 선택 사항입니다.'],
@@ -62,7 +63,7 @@
       ['statusNeedVerify', '账号或代码已变化，可直接兑换或重新核对。', '帳號或序號已變更，可直接兌換或重新核對。', 'Accounts or codes changed. Redeem directly or verify again.', 'アカウントまたはコードが変更されました。直接開始するか、再確認できます。', '계정 또는 코드가 변경되었습니다. 바로 입력하거나 다시 확인할 수 있습니다.'],
       ['statusVerifying', '正在核对 {current}/{total}：{account}', '正在核對 {current}/{total}：{account}', 'Verifying {current}/{total}: {account}', '確認中 {current}/{total}：{account}', '확인 중 {current}/{total}: {account}'],
       ['statusVerified', '已核对 {accounts} 个账号，待兑换 {tasks} 项。请确认玩家信息后开始。', '已核對 {accounts} 個帳號，待兌換 {tasks} 項。請確認玩家資訊後開始。', 'Verified {accounts} accounts with {tasks} pending tasks. Review players before starting.', '{accounts}アカウントを確認しました。未入力は{tasks}件です。内容を確認して開始してください。', '{accounts}개 계정을 확인했습니다. 대기 작업은 {tasks}개입니다. 플레이어 정보를 확인하고 시작하세요.'],
-      ['statusVerifyPartial', '核对完成：成功 {success} 个，失败 {failed} 个。失败账号仍可直接兑换，但首次请求失败会跳过该账号后续代码。', '核對完成：成功 {success} 個，失敗 {failed} 個。失敗帳號仍可直接兌換，但首次請求失敗會略過該帳號後續序號。', 'Verification finished: {success} succeeded, {failed} failed. Failed accounts can still be started, but their remaining codes will be skipped after the first request failure.', '確認完了：成功{success}件、失敗{failed}件。失敗したアカウントも開始できますが、最初のリクエスト失敗後は残りのコードをスキップします。', '확인 완료: 성공 {success}개, 실패 {failed}개. 실패한 계정도 시작할 수 있지만 첫 요청 실패 후 남은 코드는 건너뜁니다.'],
+      ['statusVerifyPartial', '核对完成：成功 {success} 个，未核对 {failed} 个。仍可开始兑换，正式处理时会逐项重新确认。', '核對完成：成功 {success} 個，未核對 {failed} 個。仍可開始兌換，正式處理時會逐項重新確認。', 'Verification finished: {success} succeeded, {failed} unverified. You can still start; every task is confirmed again during redemption.', '確認完了：成功{success}件、未確認{failed}件。開始は可能で、実行時に各項目を再確認します。', '확인 완료: 성공 {success}개, 미확인 {failed}개. 계속 시작할 수 있으며 실제 처리 시 각 작업을 다시 확인합니다.'],
       ['statusRunning', '正在处理 {current}/{total}：{account} / {code}', '正在處理 {current}/{total}：{account} / {code}', 'Processing {current}/{total}: {account} / {code}', '処理中 {current}/{total}：{account} / {code}', '처리 중 {current}/{total}: {account} / {code}'],
       ['statusPausePending', '将在当前请求结束后暂停。', '將在目前請求結束後暫停。', 'Pausing after the current request.', '現在のリクエスト完了後に停止します。', '현재 요청이 끝난 뒤 일시 정지합니다.'],
       ['statusPaused', '任务已暂停，可稍后恢复。', '工作已暫停，可稍後恢復。', 'Queue paused. It can be restored later.', 'キューを一時停止しました。後で復元できます。', '작업이 일시 정지되었습니다. 나중에 복원할 수 있습니다.'],
@@ -252,7 +253,7 @@
 
     function delayFor(currentTask, nextTask) {
       if (!nextTask) return 0;
-      return currentTask.accountId === nextTask.accountId ? 4000 : 10000;
+      return REQUEST_INTERVAL_MS;
     }
 
     function nextAccountTaskIndex(tasks, currentIndex) {
@@ -281,9 +282,16 @@
       return Boolean(error?.isTimeout || error?.status === 0 || error?.status == null);
     }
 
+    function isFatalHttpError(error, alreadyUsed = false) {
+      if (alreadyUsed) return false;
+      const status = Number(error?.status);
+      return status === 403 || status === 429 || status >= 500;
+    }
+
     return {
       LOCALES,
       API_TIMEOUT_MS,
+      REQUEST_INTERVAL_MS,
       messages,
       dateLocaleMap,
       localeFromHtml,
@@ -302,6 +310,7 @@
       nextAccountTaskIndex,
       isAlreadyUsedMessage,
       shouldStopAccount,
+      isFatalHttpError,
     };
   })();
 
@@ -1008,9 +1017,10 @@
           updateResult(verified, pending[0], 'verified', `${verified.userName} / ${verified.world}`, 'success');
         } catch (error) {
           failedCount += 1;
-          updateResult(account, pending[0], 'failed', error.message, 'error');
+          const alreadyUsed = Core.isAlreadyUsedMessage(error.message);
+          updateResult(account, pending[0], alreadyUsed ? 'alreadyUsed' : 'failed', error.message, alreadyUsed ? 'pending' : 'error');
         }
-        if (index < accounts.length - 1) await sleep(4000);
+        if (index < accounts.length - 1) await sleep(Core.REQUEST_INTERVAL_MS);
       }
       const tasks = Core.buildTasks(selectedAccounts(), codes, state.redemptions);
       startButton.disabled = tasks.length === 0;
@@ -1133,7 +1143,7 @@
         } catch (error) {
           failed += 1;
           const alreadyUsed = Core.isAlreadyUsedMessage(error.message);
-          const fatal = error.status === 403 || error.status === 429 || error.status >= 500 || error.message === t('errorPlayerMismatch');
+          const fatal = Core.isFatalHttpError(error, alreadyUsed) || error.message === t('errorPlayerMismatch');
           const stopAccount = !alreadyUsed && !fatal && Core.shouldStopAccount(error);
           if (alreadyUsed) {
             consecutiveErrors = 0;
