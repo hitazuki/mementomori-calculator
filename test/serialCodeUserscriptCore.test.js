@@ -141,7 +141,7 @@ test('only transport failures stop the remaining tasks for an account', () => {
   assert.equal(core.shouldStopAccount({ status: 400 }), false)
 })
 
-test('only an unrecognized 429 response pauses the whole queue', () => {
+test('only an unrecognized 429 response stops the current run', () => {
   assert.equal(core.isRateLimitError({ status: 429 }, true), false)
   assert.equal(core.isRateLimitError({ status: 429 }, false), true)
   assert.equal(core.isRateLimitError({ status: 403 }, false), false)

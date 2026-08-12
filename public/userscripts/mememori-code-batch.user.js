@@ -6,7 +6,7 @@
 // @name:ja      メメントモリ シリアルコード一括入力
 // @name:ko      메멘토모리 시리얼 코드 일괄 입력
 // @namespace    https://github.com/hitazuki/mementomori-calculator
-// @version      0.3.6
+// @version      0.3.7
 // @description  在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-CN 在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-TW 在 MementoMori 官方兌換頁為多個帳號依序填寫公開序號
@@ -45,11 +45,8 @@
       ['manageAccounts', '管理账号', '管理帳號', 'Manage accounts', 'アカウント管理', '계정 관리'],
       ['verifyAccounts', '核对所选账号', '核對所選帳號', 'Verify selected accounts', '選択アカウントを確認', '선택 계정 확인'],
       ['start', '开始兑换', '開始兌換', 'Start redemption', '入力開始', '입력 시작'],
-      ['continueRun', '继续兑换', '繼續兌換', 'Continue redemption', '入力を再開', '입력 계속'],
-      ['pause', '暂停', '暫停', 'Pause', '一時停止', '일시 정지'],
-      ['clearResults', '清空结果', '清除結果', 'Clear results', '結果を消去', '결과 지우기'],
-      ['resume', '恢复未完成任务', '恢復未完成工作', 'Restore unfinished queue', '未完了キューを復元', '미완료 작업 복원'],
-      ['discardQueue', '放弃旧任务', '放棄舊工作', 'Discard old queue', '古いキューを破棄', '이전 작업 삭제'],
+      ['stop', '停止本次兑换', '停止本次兌換', 'Stop this run', '今回の入力を停止', '이번 작업 중지'],
+      ['clearResults', '清空显示记录', '清除顯示記錄', 'Clear displayed results', '表示結果を消去', '표시 결과 지우기'],
       ['noAccounts', '尚未保存账号，请先管理账号。', '尚未儲存帳號，請先管理帳號。', 'No saved accounts. Open account management first.', '保存済みアカウントがありません。管理画面で追加してください。', '저장된 계정이 없습니다. 계정 관리에서 추가하세요.'],
       ['noExpiry', '期限未公布', '期限未公布', 'No announced expiry', '期限未発表', '만료일 미공개'],
       ['expires', '截止 {date}', '截止 {date}', 'Expires {date}', '{date}まで', '{date}까지'],
@@ -65,12 +62,9 @@
       ['statusVerified', '已核对 {accounts} 个账号，待兑换 {tasks} 项。请确认玩家信息后开始。', '已核對 {accounts} 個帳號，待兌換 {tasks} 項。請確認玩家資訊後開始。', 'Verified {accounts} accounts with {tasks} pending tasks. Review players before starting.', '{accounts}アカウントを確認しました。未入力は{tasks}件です。内容を確認して開始してください。', '{accounts}개 계정을 확인했습니다. 대기 작업은 {tasks}개입니다. 플레이어 정보를 확인하고 시작하세요.'],
       ['statusVerifyPartial', '核对完成：成功 {success} 个，未核对 {failed} 个。仍可开始兑换，正式处理时会逐项重新确认。', '核對完成：成功 {success} 個，未核對 {failed} 個。仍可開始兌換，正式處理時會逐項重新確認。', 'Verification finished: {success} succeeded, {failed} unverified. You can still start; every task is confirmed again during redemption.', '確認完了：成功{success}件、未確認{failed}件。開始は可能で、実行時に各項目を再確認します。', '확인 완료: 성공 {success}개, 미확인 {failed}개. 계속 시작할 수 있으며 실제 처리 시 각 작업을 다시 확인합니다.'],
       ['statusRunning', '正在处理 {current}/{total}：{account} / {code}', '正在處理 {current}/{total}：{account} / {code}', 'Processing {current}/{total}: {account} / {code}', '処理中 {current}/{total}：{account} / {code}', '처리 중 {current}/{total}: {account} / {code}'],
-      ['statusPausePending', '将在当前请求结束后暂停。', '將在目前請求結束後暫停。', 'Pausing after the current request.', '現在のリクエスト完了後に停止します。', '현재 요청이 끝난 뒤 일시 정지합니다.'],
-      ['statusPaused', '任务已暂停，可稍后恢复。', '工作已暫停，可稍後恢復。', 'Queue paused. It can be restored later.', 'キューを一時停止しました。後で復元できます。', '작업이 일시 정지되었습니다. 나중에 복원할 수 있습니다.'],
+      ['statusStopPending', '将在当前请求结束后停止本次兑换。', '將在目前請求結束後停止本次兌換。', 'This run will stop after the current request.', '現在のリクエスト完了後に今回の入力を停止します。', '현재 요청이 끝난 뒤 이번 작업을 중지합니다.'],
+      ['statusStopped', '本次兑换已停止；再次开始时会自动跳过已有记录。', '本次兌換已停止；再次開始時會自動略過已有記錄。', 'This run stopped. Starting again automatically skips recorded results.', '今回の入力を停止しました。再開始時は記録済みの結果を自動的にスキップします。', '이번 작업을 중지했습니다. 다시 시작하면 기록된 결과를 자동으로 건너뜁니다.'],
       ['statusCompleted', '处理完成：成功 {success} 项，失败 {failed} 项，跳过 {skipped} 项。', '處理完成：成功 {success} 項，失敗 {failed} 項，略過 {skipped} 項。', 'Completed: {success} succeeded, {failed} failed, {skipped} skipped.', '完了：成功{success}件、失敗{failed}件、スキップ{skipped}件。', '완료: 성공 {success}개, 실패 {failed}개, 건너뜀 {skipped}개.'],
-      ['statusResumeFound', '检测到未完成任务，可恢复后直接继续。', '偵測到未完成工作，可恢復後直接繼續。', 'An unfinished queue was found and can be restored directly.', '未完了のキューがあります。そのまま復元して再開できます。', '미완료 작업이 있습니다. 바로 복원해 계속할 수 있습니다.'],
-      ['statusResumeReady', '旧任务已恢复，可直接继续；每次兑换前仍会核对玩家。', '舊工作已恢復，可直接繼續；每次兌換前仍會核對玩家。', 'The old queue is restored. Continue directly; the player is still confirmed before each redemption.', '古いキューを復元しました。そのまま再開できます。各入力前のプレイヤー確認は引き続き行います。', '이전 작업을 복원했습니다. 바로 계속할 수 있으며 각 입력 전 플레이어 확인은 계속 수행됩니다.'],
-      ['statusQueueInvalid', '旧任务与当前账号或批次不兼容，请放弃后重新创建。', '舊工作與目前帳號或批次不相容，請放棄後重新建立。', 'The old queue no longer matches the accounts or active batch. Discard it and create a new one.', '古いキューは現在のアカウントまたはグループと一致しません。破棄して作り直してください。', '이전 작업이 현재 계정 또는 묶음과 맞지 않습니다. 삭제 후 다시 만드세요.'],
       ['statusSyncFailed', '公开码同步失败：{message}。仍可手动填写。', '公開序號同步失敗：{message}。仍可手動填寫。', 'Public-code sync failed: {message}. Codes can still be entered manually.', '公開コードの同期に失敗しました：{message}。手動入力は可能です。', '공개 코드 동기화 실패: {message}. 직접 입력할 수 있습니다.'],
       ['tableAccount', '账号', '帳號', 'Account', 'アカウント', '계정'],
       ['tableCode', '序列码', '序號', 'Code', 'コード', '코드'],
@@ -344,7 +338,7 @@
   const LEGACY_HISTORY_KEY = 'mmt-serial-code-success-history';
   const ACCOUNTS_KEY = 'mmt-serial-code-accounts-v1';
   const REDEMPTIONS_KEY = 'mmt-serial-code-redemptions-v1';
-  const QUEUE_KEY = 'mmt-serial-code-queue-v1';
+  const LEGACY_QUEUE_KEY = 'mmt-serial-code-queue-v1';
   const PREFERENCES_KEY = 'mmt-serial-code-preferences-v1';
   const SYNC_INTERVAL = 60 * 60 * 1000;
   const API_TIMEOUT_MS = Core.API_TIMEOUT_MS;
@@ -362,15 +356,13 @@
 
   const state = {
     running: false,
-    paused: false,
+    stopped: false,
     registry: null,
     batches: [],
     accounts: [],
     redemptions: {},
     preferences: { selectedAccountIds: [], lastAccountId: null },
     verifiedAccounts: new Map(),
-    queue: null,
-    resumeCandidate: null,
     rows: new Map(),
     editingAccountId: null,
   };
@@ -395,7 +387,7 @@
       lastAccountId: null,
       ...GM_getValue(PREFERENCES_KEY, {}),
     };
-    state.queue = GM_getValue(QUEUE_KEY, null);
+    GM_deleteValue(LEGACY_QUEUE_KEY);
   }
 
   function saveAccounts() {
@@ -446,7 +438,6 @@
     #mmt-batch-results { width:100%; margin-top:14px; border-collapse:collapse; font-size:12px; }
     #mmt-batch-results th,#mmt-batch-results td { padding:7px 6px; border-bottom:1px solid rgba(255,255,255,.14); text-align:left; overflow-wrap:anywhere; }
     #mmt-batch-results .success { color:#8ee0a8; } #mmt-batch-results .error { color:#ffaaa5; } #mmt-batch-results .pending { color:#d7c99f; }
-    .mmt-queue-actions { display:none; gap:8px; margin-top:8px; }
     .mmt-modal-backdrop { position:fixed; inset:0; z-index:100000; display:none; place-items:center; padding:18px; background:rgba(0,0,0,.78); }
     .mmt-modal-backdrop[data-open="true"] { display:grid; }
     .mmt-modal { width:min(760px,100%); max-height:90vh; overflow:auto; padding:18px; border:1px solid #777; border-radius:10px; background:#171719; color:#f5f1e8; font-family:sans-serif; }
@@ -475,14 +466,10 @@
       <button id="mmt-sync-codes" class="mmt-button" type="button">${t('sync')}</button>
       <button id="mmt-verify-accounts" class="mmt-button" type="button">${t('verifyAccounts')}</button>
       <button id="mmt-start-batch" class="mmt-button mmt-primary" type="button" disabled>${t('start')}</button>
-      <button id="mmt-pause-batch" class="mmt-button mmt-danger" type="button" disabled>${t('pause')}</button>
+      <button id="mmt-stop-batch" class="mmt-button mmt-danger" type="button" disabled>${t('stop')}</button>
       <button id="mmt-clear-results" class="mmt-button" type="button">${t('clearResults')}</button>
     </div>
     <div id="mmt-batch-status" role="status">${t('statusReady')}</div>
-    <div id="mmt-queue-actions" class="mmt-queue-actions">
-      <button id="mmt-resume-queue" class="mmt-button" type="button">${t('resume')}</button>
-      <button id="mmt-discard-queue" class="mmt-button mmt-danger" type="button">${t('discardQueue')}</button>
-    </div>
     <table id="mmt-batch-results" hidden><thead><tr><th>${t('tableAccount')}</th><th>${t('tableCode')}</th><th>${t('tableStatus')}</th><th>${t('tableDetail')}</th></tr></thead><tbody></tbody></table>
   `;
   officialForm.parentNode.insertBefore(panel, officialForm);
@@ -517,13 +504,10 @@
   const syncButton = panel.querySelector('#mmt-sync-codes');
   const verifyButton = panel.querySelector('#mmt-verify-accounts');
   const startButton = panel.querySelector('#mmt-start-batch');
-  const pauseButton = panel.querySelector('#mmt-pause-batch');
+  const stopButton = panel.querySelector('#mmt-stop-batch');
   const clearButton = panel.querySelector('#mmt-clear-results');
   const manageButton = panel.querySelector('#mmt-manage-accounts');
   const statusBox = panel.querySelector('#mmt-batch-status');
-  const queueActions = panel.querySelector('#mmt-queue-actions');
-  const resumeButton = panel.querySelector('#mmt-resume-queue');
-  const discardButton = panel.querySelector('#mmt-discard-queue');
   const resultTable = panel.querySelector('#mmt-batch-results');
   const resultBody = resultTable.querySelector('tbody');
   const aliasInput = modalBackdrop.querySelector('#mmt-account-alias');
@@ -541,12 +525,12 @@
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function waitWithPause(ms) {
+  async function waitWithStop(ms) {
     const deadline = Date.now() + ms;
-    while (!state.paused && Date.now() < deadline) {
+    while (!state.stopped && Date.now() < deadline) {
       await sleep(Math.min(250, deadline - Date.now()));
     }
-    return !state.paused;
+    return !state.stopped;
   }
 
   function availableServerIds() {
@@ -577,7 +561,6 @@
   function invalidateVerification(message = t('statusNeedVerify')) {
     if (state.running) return;
     state.verifiedAccounts.clear();
-    state.resumeCandidate = null;
     startButton.textContent = t('start');
     updateStartAvailability();
     setStatus(message);
@@ -585,10 +568,6 @@
 
   function updateStartAvailability() {
     if (state.running) {
-      startButton.disabled = true;
-      return;
-    }
-    if (state.queue && !state.resumeCandidate) {
       startButton.disabled = true;
       return;
     }
@@ -1003,7 +982,7 @@
     manageButton.disabled = running;
     batchSelect.disabled = running || state.batches.length === 0;
     codeInput.disabled = running;
-    pauseButton.disabled = !running;
+    stopButton.disabled = !running;
     renderAccounts();
   }
 
@@ -1020,10 +999,10 @@
       return false;
     }
     state.running = true;
-    state.paused = false;
+    state.stopped = false;
     state.verifiedAccounts.clear();
     setControlsRunning(true);
-    pauseButton.disabled = true;
+    stopButton.disabled = true;
     let verifiedCount = 0;
     let failedCount = 0;
     try {
@@ -1054,7 +1033,6 @@
       const tasks = Core.buildTasks(selectedAccounts(), codes, state.redemptions);
       startButton.disabled = tasks.length === 0;
       startButton.textContent = t('start');
-      state.resumeCandidate = null;
       if (failedCount) {
         setStatus(t('statusVerifyPartial', { success: verifiedCount, failed: failedCount }), 'error');
       } else {
@@ -1071,75 +1049,41 @@
     return failedCount === 0;
   }
 
-  function createQueue() {
+  function createRun() {
     const accounts = selectedAccounts();
     const codes = parseCodes();
     return {
       schemaVersion: 1,
-      status: 'paused',
       batchKey: batchSelect.value,
       accountIds: accounts.map(account => account.id),
       codes,
       tasks: Core.buildTasks(accounts, codes, state.redemptions),
-      nextTaskIndex: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
-  }
-
-  function queueIsCompatible(queue) {
-    if (!queue || queue.schemaVersion !== 1 || !Array.isArray(queue.accountIds) || !Array.isArray(queue.codes) || !Array.isArray(queue.tasks)) return false;
-    if (!queue.accountIds.every(id => state.accounts.some(account => account.id === id))) return false;
-    if (!queue.tasks.every(task => {
-      const account = state.accounts.find(item => item.id === task.accountId);
-      return account && task.accountKey === Core.accountKey(account);
-    })) return false;
-    const batch = state.batches.find(item => item.key === queue.batchKey);
-    if (!batch) return false;
-    const activeCodes = new Set(batch.codes.map(item => item.code.toUpperCase()));
-    return queue.codes.every(code => activeCodes.has(String(code).toUpperCase()));
-  }
-
-  function saveQueue(queue, status = queue.status) {
-    queue.status = status;
-    queue.updatedAt = new Date().toISOString();
-    state.queue = queue;
-    GM_setValue(QUEUE_KEY, queue);
-  }
-
-  function showQueuePrompt(show) {
-    queueActions.style.display = show ? 'flex' : 'none';
   }
 
   async function runQueue() {
     if (state.running) return;
     let queue;
     try {
-      queue = state.resumeCandidate || createQueue();
-      if (state.resumeCandidate && !queueIsCompatible(queue)) throw new Error(t('statusQueueInvalid'));
+      queue = createRun();
     } catch (error) {
       setStatus(error.message, 'error');
       return;
     }
-    state.resumeCandidate = null;
     state.running = true;
-    state.paused = false;
+    state.stopped = false;
     setControlsRunning(true);
     startButton.disabled = true;
-    showQueuePrompt(false);
-    saveQueue(queue, 'running');
     let succeeded = 0;
     let failed = 0;
     let skipped = 0;
     try {
-      for (let index = queue.nextTaskIndex; index < queue.tasks.length; index += 1) {
-        if (state.paused) break;
+      for (let index = 0; index < queue.tasks.length; index += 1) {
+        if (state.stopped) break;
         const task = queue.tasks[index];
         const account = state.accounts.find(item => item.id === task.accountId);
         if (!account) {
           failed += 1;
-          queue.nextTaskIndex = index + 1;
-          saveQueue(queue, 'running');
           continue;
         }
         const historyKey = Core.redemptionKey(account.serverId, account.playerId, task.code);
@@ -1151,8 +1095,6 @@
           } else {
             updateResult(account, task.code, 'skipped', t('historySkipped', { date: formatDate(existing.redeemedAt) }), 'success');
           }
-          queue.nextTaskIndex = index + 1;
-          saveQueue(queue, 'running');
           continue;
         }
         setStatus(t('statusRunning', { current: index + 1, total: queue.tasks.length, account: account.alias, code: task.code }));
@@ -1193,51 +1135,26 @@
             }
             completedIndex = nextAccountIndex - 1;
           }
-          if (rateLimited) state.paused = true;
+          if (rateLimited) state.stopped = true;
         }
-        queue.nextTaskIndex = completedIndex + 1;
-        saveQueue(queue, state.paused ? 'paused' : 'running');
         renderAccounts();
-        if (state.paused) break;
-        const nextTask = queue.tasks[queue.nextTaskIndex];
+        if (state.stopped) break;
+        const nextTask = queue.tasks[completedIndex + 1];
         const delay = Core.delayFor(task, nextTask);
-        if (delay && !await waitWithPause(delay)) break;
+        if (delay && !await waitWithStop(delay)) break;
         index = completedIndex;
       }
-      if (state.paused || queue.nextTaskIndex < queue.tasks.length) {
-        saveQueue(queue, 'paused');
-        showQueuePrompt(true);
-        setStatus(t('statusPaused'), 'error');
+      if (state.stopped) {
+        setStatus(t('statusStopped'), 'error');
       } else {
-        GM_deleteValue(QUEUE_KEY);
-        state.queue = null;
         setStatus(t('statusCompleted', { success: succeeded, failed, skipped }), failed ? 'error' : 'success');
       }
     } finally {
       state.running = false;
       setControlsRunning(false);
-      startButton.disabled = true;
       startButton.textContent = t('start');
+      updateStartAvailability();
     }
-  }
-
-  function restoreQueue() {
-    const queue = state.queue || GM_getValue(QUEUE_KEY, null);
-    if (!queueIsCompatible(queue)) {
-      setStatus(t('statusQueueInvalid'), 'error');
-      return;
-    }
-    batchSelect.value = queue.batchKey;
-    codeInput.value = queue.codes.join('\n');
-    state.preferences.selectedAccountIds = [...queue.accountIds];
-    state.preferences.lastAccountId = queue.accountIds[0] || null;
-    savePreferences();
-    renderAccounts();
-    state.resumeCandidate = queue;
-    startButton.textContent = t('continueRun');
-    startButton.disabled = queue.nextTaskIndex >= queue.tasks.length;
-    showQueuePrompt(false);
-    setStatus(t('statusResumeReady'), 'success');
   }
 
   syncButton.addEventListener('click', async () => {
@@ -1258,11 +1175,10 @@
   codeInput.addEventListener('input', () => { renderAccounts(); invalidateVerification(); });
   verifyButton.addEventListener('click', () => verifySelectedAccounts());
   startButton.addEventListener('click', runQueue);
-  pauseButton.addEventListener('click', () => {
-    state.paused = true;
-    pauseButton.disabled = true;
-    if (state.queue) saveQueue(state.queue, 'paused');
-    setStatus(t('statusPausePending'));
+  stopButton.addEventListener('click', () => {
+    state.stopped = true;
+    stopButton.disabled = true;
+    setStatus(t('statusStopPending'));
   });
   clearButton.addEventListener('click', () => {
     if (state.running) return;
@@ -1281,15 +1197,6 @@
   modalBackdrop.querySelector('#mmt-export-backup').addEventListener('click', exportBackup);
   modalBackdrop.querySelector('#mmt-import-backup').addEventListener('click', () => importFile.click());
   importFile.addEventListener('change', () => { if (importFile.files[0]) importBackup(importFile.files[0]); });
-  resumeButton.addEventListener('click', restoreQueue);
-  discardButton.addEventListener('click', () => {
-    GM_deleteValue(QUEUE_KEY);
-    state.queue = null;
-    state.resumeCandidate = null;
-    showQueuePrompt(false);
-    updateStartAvailability();
-    setStatus(t('statusReady'));
-  });
 
   const serverOptionsObserver = new MutationObserver(() => {
     renderAccounts();
@@ -1301,20 +1208,15 @@
   serverOptionsObserver.observe(serverSelect, { childList: true });
 
   renderAccounts();
-  if (state.queue) {
-    showQueuePrompt(true);
-    setStatus(t('statusResumeFound'));
-  }
   syncRegistry(false)
     .then(registry => {
       state.registry = registry;
-      renderBatchOptions(registry, state.queue?.batchKey);
+      renderBatchOptions(registry);
       const batch = state.batches.find(item => item.key === batchSelect.value);
       codeInput.value = batch ? batch.codes.map(item => item.code).join('\n') : '';
       renderAccounts();
       updateStartAvailability();
-      if (!state.queue) setStatus(t('statusLoaded', { batches: state.batches.length, codes: batch?.codes.length || 0 }));
-      else if (!queueIsCompatible(state.queue)) setStatus(t('statusQueueInvalid'), 'error');
+      setStatus(t('statusLoaded', { batches: state.batches.length, codes: batch?.codes.length || 0 }));
     })
     .catch(error => setStatus(t('statusSyncFailed', { message: error.message }), 'error'));
 })();
