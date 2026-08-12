@@ -23,8 +23,8 @@ export const serialCodeTranslations = {
     serialCodeCopyBatch: '复制该批次',
     serialCodeLoading: '正在加载序列码…',
     serialCodeLoadError: '序列码数据加载失败，请稍后重试。',
-    serialCodeSafetyTitle: '安全提示',
-    serialCodeSafetyDesc: '账号和兑换状态记录仅保存在 Tampermonkey 本地。脚本严格串行提交；临时任务不保存，重新开始时会自动跳过已有记录。',
+    serialCodeSafetyTitle: '本地持久化与备份',
+    serialCodeSafetyDesc: '账号和兑换状态记录保存在 Tampermonkey 本地，正常刷新页面、重启浏览器或更新脚本通常不会丢失。卸载 Tampermonkey、清除扩展数据、更换浏览器配置或设备时可能丢失，请定期在账号管理中导出备份并妥善保存。',
   },
   'zh-TW': {
     navSerialCode: '序號兌換工具', homeSerialCodeDesc: '安裝批次兌換使用者腳本，並查看目前公開序號。',
@@ -35,7 +35,7 @@ export const serialCodeTranslations = {
     serialCodeStep3: '安裝本專案提供的使用者腳本，然後重新整理已開啟的官方兌換頁。', serialCodeStep4: '開啟官方兌換頁，在帳號管理中儲存一個或多個 Server 與玩家 ID。', serialCodeStep5: '選擇序號批次與帳號，可直接開始或先核對玩家，再依序兌換。',
     serialCodeListTitle: '公開序號', serialCodeNoExpiry: '期限未公布', serialCodeExpires: '截止 {date}', serialCodeCopy: '複製', serialCodeCopied: '已複製',
     serialCodeCopyAll: '複製全部有效序號', serialCodeCopyBatch: '複製此批次', serialCodeLoading: '正在載入序號…', serialCodeLoadError: '序號資料載入失敗，請稍後重試。',
-    serialCodeSafetyTitle: '安全提示', serialCodeSafetyDesc: '帳號與兌換狀態記錄只保存在 Tampermonkey 本機。腳本依序提交；暫時工作不會保存，重新開始時會自動略過已有記錄。',
+    serialCodeSafetyTitle: '本機持久化與備份', serialCodeSafetyDesc: '帳號與兌換狀態記錄保存在 Tampermonkey 本機，正常重新整理頁面、重啟瀏覽器或更新腳本通常不會遺失。解除安裝 Tampermonkey、清除擴充功能資料、更換瀏覽器設定檔或裝置時可能遺失，請定期在帳號管理中匯出備份並妥善保存。',
   },
   en: {
     navSerialCode: 'Serial Code Tool', homeSerialCodeDesc: 'Install the batch redemption userscript and view current public codes.',
@@ -46,7 +46,7 @@ export const serialCodeTranslations = {
     serialCodeStep3: 'Install this project userscript, then refresh any official redemption page that is already open.', serialCodeStep4: 'Open the official page and save one or more Server and Player ID profiles in account management.', serialCodeStep5: 'Choose a code batch and accounts, start directly or verify players first, then redeem sequentially.',
     serialCodeListTitle: 'Public serial codes', serialCodeNoExpiry: 'No announced expiry', serialCodeExpires: 'Expires {date}', serialCodeCopy: 'Copy', serialCodeCopied: 'Copied',
     serialCodeCopyAll: 'Copy all active codes', serialCodeCopyBatch: 'Copy this batch', serialCodeLoading: 'Loading serial codes…', serialCodeLoadError: 'Failed to load serial-code data. Try again later.',
-    serialCodeSafetyTitle: 'Safety', serialCodeSafetyDesc: 'Accounts and redemption-status records stay in Tampermonkey local storage. Temporary runs are not saved; starting again skips recorded results automatically.',
+    serialCodeSafetyTitle: 'Local storage and backups', serialCodeSafetyDesc: 'Accounts and redemption-status records are stored locally by Tampermonkey and normally survive page reloads, browser restarts, and script updates. They may be lost if Tampermonkey is uninstalled, extension data is cleared, or you switch browser profiles or devices. Export backups regularly from account management and keep them safe.',
   },
   ja: {
     navSerialCode: 'シリアルコードツール', homeSerialCodeDesc: '一括入力ユーザースクリプトをインストールし、公開中のコードを確認します。',
@@ -57,7 +57,7 @@ export const serialCodeTranslations = {
     serialCodeStep3: '本プロジェクトのユーザースクリプトをインストールし、開いている公式入力ページを再読み込みします。', serialCodeStep4: '公式ページのアカウント管理で、1つ以上のServerとプレイヤーIDを保存します。', serialCodeStep5: 'コードグループとアカウントを選び、そのまま開始するか先に確認してから順番に送信します。',
     serialCodeListTitle: '公開シリアルコード', serialCodeNoExpiry: '期限未発表', serialCodeExpires: '{date}まで', serialCodeCopy: 'コピー', serialCodeCopied: 'コピー済み',
     serialCodeCopyAll: '有効なコードをすべてコピー', serialCodeCopyBatch: 'このグループをコピー', serialCodeLoading: 'コードを読み込み中…', serialCodeLoadError: 'コードデータを読み込めませんでした。後でもう一度お試しください。',
-    serialCodeSafetyTitle: '安全上の注意', serialCodeSafetyDesc: 'アカウントと入力状態の履歴はTampermonkeyのローカル領域だけに保存します。一時的な処理は保存せず、再開始時は記録済みの結果を自動的にスキップします。',
+    serialCodeSafetyTitle: 'ローカル保存とバックアップ', serialCodeSafetyDesc: 'アカウントと入力状態の履歴はTampermonkeyのローカル領域に保存され、通常はページの再読み込み、ブラウザの再起動、スクリプト更新では失われません。Tampermonkeyの削除、拡張機能データの消去、ブラウザプロファイルや端末の変更時には失われる可能性があります。アカウント管理から定期的にバックアップを書き出して保管してください。',
   },
   ko: {
     navSerialCode: '시리얼 코드 도구', homeSerialCodeDesc: '일괄 입력 유저스크립트를 설치하고 현재 공개 코드를 확인합니다.',
@@ -68,6 +68,6 @@ export const serialCodeTranslations = {
     serialCodeStep3: '이 프로젝트에서 제공하는 유저스크립트를 설치한 뒤 이미 열린 공식 입력 페이지를 새로고침합니다.', serialCodeStep4: '공식 페이지의 계정 관리에서 하나 이상의 Server와 플레이어 ID를 저장합니다.', serialCodeStep5: '코드 묶음과 계정을 선택하고 바로 시작하거나 먼저 플레이어를 확인한 뒤 순차 입력합니다.',
     serialCodeListTitle: '공개 시리얼 코드', serialCodeNoExpiry: '만료일 미공개', serialCodeExpires: '{date}까지', serialCodeCopy: '복사', serialCodeCopied: '복사됨',
     serialCodeCopyAll: '사용 가능한 코드 모두 복사', serialCodeCopyBatch: '이 묶음 복사', serialCodeLoading: '코드를 불러오는 중…', serialCodeLoadError: '시리얼 코드 데이터를 불러오지 못했습니다. 잠시 후 다시 시도하세요.',
-    serialCodeSafetyTitle: '안전 안내', serialCodeSafetyDesc: '계정과 교환 상태 기록은 Tampermonkey 로컬 저장소에만 보관됩니다. 임시 작업은 저장하지 않으며 다시 시작하면 기록된 결과를 자동으로 건너뜁니다.',
+    serialCodeSafetyTitle: '로컬 저장 및 백업', serialCodeSafetyDesc: '계정과 교환 상태 기록은 Tampermonkey 로컬 저장소에 보관되며 일반적인 페이지 새로고침, 브라우저 재시작, 스크립트 업데이트로는 보통 사라지지 않습니다. Tampermonkey 제거, 확장 데이터 삭제, 브라우저 프로필 또는 기기 변경 시에는 손실될 수 있습니다. 계정 관리에서 정기적으로 백업을 내보내 안전하게 보관하세요.',
   },
 }
