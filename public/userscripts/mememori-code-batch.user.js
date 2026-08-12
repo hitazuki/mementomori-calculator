@@ -6,7 +6,7 @@
 // @name:ja      メメントモリ シリアルコード一括入力
 // @name:ko      메멘토모리 시리얼 코드 일괄 입력
 // @namespace    https://github.com/hitazuki/mementomori-calculator
-// @version      0.3.4
+// @version      0.3.6
 // @description  在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-CN 在 MementoMori 官方兑换页为多个账号串行填写公开序列码
 // @description:zh-TW 在 MementoMori 官方兌換頁為多個帳號依序填寫公開序號
@@ -280,12 +280,20 @@
         '已被使用',
         '已经使用',
         '已經使用',
+        '兑换完毕',
+        '兌換完畢',
         'alreadyused',
         'alreadybeenused',
+        'alreadyredeemed',
+        'alreadybeenredeemed',
         '使用済み',
         '既に使用',
         'すでに使用',
+        '交換済み',
+        '受取済み',
         '이미사용',
+        '이미교환',
+        '이미수령',
       ].some(pattern => normalized.includes(pattern));
     }
 
@@ -293,10 +301,9 @@
       return Boolean(error?.isTimeout || error?.status === 0 || error?.status == null);
     }
 
-    function isFatalHttpError(error, alreadyUsed = false) {
+    function isRateLimitError(error, alreadyUsed = false) {
       if (alreadyUsed) return false;
-      const status = Number(error?.status);
-      return status === 403 || status === 429 || status >= 500;
+      return Number(error?.status) === 429;
     }
 
     return {
@@ -321,7 +328,7 @@
       nextAccountTaskIndex,
       isAlreadyUsedMessage,
       shouldStopAccount,
-      isFatalHttpError,
+      isRateLimitError,
     };
   })();
 
@@ -341,7 +348,6 @@
   const PREFERENCES_KEY = 'mmt-serial-code-preferences-v1';
   const SYNC_INTERVAL = 60 * 60 * 1000;
   const API_TIMEOUT_MS = Core.API_TIMEOUT_MS;
-  const MAX_CONSECUTIVE_ERRORS = 2;
   const locale = Core.localeFromHtml(document.documentElement.lang);
   const t = (key, params) => Core.translate(locale, key, params);
   const formatDate = value => new Intl.DateTimeFormat(Core.dateLocaleMap[locale], {
@@ -1122,7 +1128,6 @@
     startButton.disabled = true;
     showQueuePrompt(false);
     saveQueue(queue, 'running');
-    let consecutiveErrors = 0;
     let succeeded = 0;
     let failed = 0;
     let skipped = 0;
@@ -1165,23 +1170,21 @@
           saveRedemptions();
           persistVerifiedAccount(confirmedAccount);
           succeeded += 1;
-          consecutiveErrors = 0;
           updateResult(confirmedAccount, task.code, 'success', t('rewardDetail'), 'success');
         } catch (error) {
           const alreadyUsed = Core.isAlreadyUsedMessage(error.message);
-          const fatal = Core.isFatalHttpError(error, alreadyUsed) || error.message === t('errorPlayerMismatch');
-          const stopAccount = !alreadyUsed && !fatal && Core.shouldStopAccount(error);
+          const rateLimited = Core.isRateLimitError(error, alreadyUsed);
+          const playerMismatch = error.message === t('errorPlayerMismatch');
+          const stopAccount = !alreadyUsed && (Core.shouldStopAccount(error) || playerMismatch);
           if (alreadyUsed) {
             skipped += 1;
-            consecutiveErrors = 0;
             recordAlreadyUsed(account, task.code, queue.batchKey);
             updateResult(account, task.code, 'alreadyUsed', error.message, 'pending');
           } else {
             failed += 1;
-            consecutiveErrors += 1;
             updateResult(account, task.code, 'failed', error.message, 'error');
           }
-          if (fatal || stopAccount) {
+          if (stopAccount) {
             const nextAccountIndex = Core.nextAccountTaskIndex(queue.tasks, index);
             for (let skipIndex = index + 1; skipIndex < nextAccountIndex; skipIndex += 1) {
               const skippedTask = queue.tasks[skipIndex];
@@ -1190,7 +1193,7 @@
             }
             completedIndex = nextAccountIndex - 1;
           }
-          if (fatal || (!alreadyUsed && consecutiveErrors >= MAX_CONSECUTIVE_ERRORS)) state.paused = true;
+          if (rateLimited) state.paused = true;
         }
         queue.nextTaskIndex = completedIndex + 1;
         saveQueue(queue, state.paused ? 'paused' : 'running');

@@ -125,8 +125,11 @@ test('an account failure advances past all remaining tasks for that account', ()
 
 test('already-used responses remain code-specific across supported languages', () => {
   assert.equal(core.isAlreadyUsedMessage('这组兑换码已被使用。'), true)
+  assert.equal(core.isAlreadyUsedMessage('這組虛寶碼已兌換完畢。'), true)
   assert.equal(core.isAlreadyUsedMessage('This serial code has already been used.'), true)
+  assert.equal(core.isAlreadyUsedMessage('This reward code has already been redeemed.'), true)
   assert.equal(core.isAlreadyUsedMessage('このシリアルコードは使用済みです。'), true)
+  assert.equal(core.isAlreadyUsedMessage('このシリアルコードは交換済みです。'), true)
   assert.equal(core.isAlreadyUsedMessage('이미 사용한 시리얼 코드입니다.'), true)
   assert.equal(core.isAlreadyUsedMessage('The serial code has expired.'), false)
 })
@@ -138,9 +141,9 @@ test('only transport failures stop the remaining tasks for an account', () => {
   assert.equal(core.shouldStopAccount({ status: 400 }), false)
 })
 
-test('an already-used response overrides a fatal-looking HTTP status', () => {
-  assert.equal(core.isFatalHttpError({ status: 403 }, true), false)
-  assert.equal(core.isFatalHttpError({ status: 429 }, true), false)
-  assert.equal(core.isFatalHttpError({ status: 403 }, false), true)
-  assert.equal(core.isFatalHttpError({ status: 500 }, false), true)
+test('only an unrecognized 429 response pauses the whole queue', () => {
+  assert.equal(core.isRateLimitError({ status: 429 }, true), false)
+  assert.equal(core.isRateLimitError({ status: 429 }, false), true)
+  assert.equal(core.isRateLimitError({ status: 403 }, false), false)
+  assert.equal(core.isRateLimitError({ status: 500 }, false), false)
 })
