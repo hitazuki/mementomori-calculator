@@ -1785,12 +1785,12 @@ test('Twilight Florence stacks Sunset Bond from active healing and unlocks Eveni
   assert.equal(enhancedNormal.damageSteps.length, 1)
   assert.equal(enhancedNormal.damageSteps[0].percent, 390)
   assert.equal(enhancedNormal.damageSteps[0].originalTargetCount, 5)
-  assert.equal(enhancedNormal.runtimeAfter.counters.twilightBondStacks, 1)
-  assert.equal(enhancedNormal.effectsApplied.some(effect => effect.type === 'counter' && effect.id === 'twilight-florence-bond-stack'), false)
+  assert.equal(enhancedNormal.runtimeAfter.counters.twilightBondStacks, 2)
+  assert.equal(enhancedNormal.effectsApplied.some(effect => effect.type === 'counter' && effect.id === 'twilight-florence-bond-stack'), true)
 
   const lateS1 = action(result, 9, TWILIGHT_FLORENCE)
   assert.ok(lateS1.damageSteps.every(step => step.percent === 1960))
-  assert.equal(lateS1.runtimeAfter.counters.twilightBondStacks, 2)
+  assert.equal(lateS1.runtimeAfter.counters.twilightBondStacks, 8)
   assert.equal(lateS1.statusSnapshotAtDamage[TWILIGHT_FLORENCE].statuses.some(status => status.id === 'twilight-florence-vow'), false)
 
   const lineup = [MILLA, TWILIGHT_FLORENCE]

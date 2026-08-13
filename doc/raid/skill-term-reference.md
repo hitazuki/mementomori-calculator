@@ -554,7 +554,7 @@ eventHooks: [{
 
 | 类别 | 名称 | 含义 |
 | --- | --- | --- |
-| battle event | `activeSkillHeal` | 主动技能即时回复事件；`emitEvent.target` 保存本次回复目标，供接收者计数和全队监听被动使用。 |
+| battle event | `activeSkillHeal` | 主动行动即时回复事件，包含带回复效果的普通攻击；`emitEvent.target` 保存本次回复目标，供接收者计数和全队监听被动使用。 |
 | target selector | `selfAndTopAttackOther` | 先选择自身，再按固定攻击优先级选择其他友军；配合 `targetCount` 表达自身加攻击最高N人。 |
 | condition | `eventTargetsIncludeOwner` | 当前事件的目标列表包含监听者本人。 |
 | condition | `targetElementNot` | 候选目标不是指定属性，用于同一被动对翠/非翠使用不同EffectGroup。 |
