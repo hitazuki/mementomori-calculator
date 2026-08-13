@@ -792,3 +792,43 @@ const redLogCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(redLogCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const twilightFlorenceCharacterExtensions = {
+  'zh-CN': {
+    raidCharTwilightFlorence: '［黄昏之誓］佛罗伦斯', raidSkillTwilightFlorenceS1: '闪光瞬辉斩', raidSkillTwilightFlorenceS2: '夕照光闪',
+    raidBuffTwilightFlorenceBond: '夕阳色的情谊', raidBuffTwilightFlorenceVow: '夕阳色的情谊・黄昏之誓',
+    raidBuffTwilightFlorenceBondDefense: '夕阳色的情谊・防御力', raidBuffTwilightFlorenceBondPhysicalDefense: '夕阳色的情谊・物理防御力',
+    raidBuffTwilightFlorenceKnight: '黄昏的骑士・普通攻击强化', raidBuffTwilightFlorenceKnightDurability: '黄昏的骑士・耐久强化',
+    raidIgnoredActionControlRemoval: '行动阻碍解除',
+  },
+  'zh-TW': {
+    raidCharTwilightFlorence: '［黃昏之誓］佛羅倫斯', raidSkillTwilightFlorenceS1: '閃光瞬輝斬', raidSkillTwilightFlorenceS2: '夕照光閃',
+    raidBuffTwilightFlorenceBond: '夕陽色的情誼', raidBuffTwilightFlorenceVow: '夕陽色的情誼・黃昏之誓',
+    raidBuffTwilightFlorenceBondDefense: '夕陽色的情誼・防禦力', raidBuffTwilightFlorenceBondPhysicalDefense: '夕陽色的情誼・物理防禦力',
+    raidBuffTwilightFlorenceKnight: '黃昏的騎士・普通攻擊強化', raidBuffTwilightFlorenceKnightDurability: '黃昏的騎士・耐久強化',
+    raidIgnoredActionControlRemoval: '行動阻礙解除',
+  },
+  en: {
+    raidCharTwilightFlorence: '[Twilight’s Vow] Florence', raidSkillTwilightFlorenceS1: 'Rending Shimmer', raidSkillTwilightFlorenceS2: 'Evening’s Last Light',
+    raidBuffTwilightFlorenceBond: 'A Bond Bathed in Sunset', raidBuffTwilightFlorenceVow: 'A Bond Bathed in Sunset · Twilight’s Vow',
+    raidBuffTwilightFlorenceBondDefense: 'A Bond Bathed in Sunset · DEF', raidBuffTwilightFlorenceBondPhysicalDefense: 'A Bond Bathed in Sunset · P.DEF',
+    raidBuffTwilightFlorenceKnight: 'Knight of Twilight · Enhanced Normal', raidBuffTwilightFlorenceKnightDurability: 'Knight of Twilight · Durability',
+    raidIgnoredActionControlRemoval: 'Action-restriction removal',
+  },
+  ja: {
+    raidCharTwilightFlorence: '［黄昏の誓い］フローレンス', raidSkillTwilightFlorenceS1: '一閃光斬', raidSkillTwilightFlorenceS2: '夕空光散',
+    raidBuffTwilightFlorenceBond: '夕陽色の絆', raidBuffTwilightFlorenceVow: '夕陽色の絆・黄昏の誓い',
+    raidBuffTwilightFlorenceBondDefense: '夕陽色の絆・防御力', raidBuffTwilightFlorenceBondPhysicalDefense: '夕陽色の絆・物理防御力',
+    raidBuffTwilightFlorenceKnight: '黄昏の騎士・通常攻撃強化', raidBuffTwilightFlorenceKnightDurability: '黄昏の騎士・耐久強化',
+    raidIgnoredActionControlRemoval: '行動阻害解除',
+  },
+  ko: {
+    raidCharTwilightFlorence: '［황혼의 맹세］플로렌스', raidSkillTwilightFlorenceS1: '일섬광참', raidSkillTwilightFlorenceS2: '석양을 꿰뚫는 맹세',
+    raidBuffTwilightFlorenceBond: '석양빛 인연', raidBuffTwilightFlorenceVow: '석양빛 인연 · 황혼의 맹세',
+    raidBuffTwilightFlorenceBondDefense: '석양빛 인연 · 방어력', raidBuffTwilightFlorenceBondPhysicalDefense: '석양빛 인연 · 물리 방어력',
+    raidBuffTwilightFlorenceKnight: '황혼의 기사 · 일반 공격 강화', raidBuffTwilightFlorenceKnightDurability: '황혼의 기사 · 내구 강화',
+    raidIgnoredActionControlRemoval: '행동 제한 해제',
+  },
+}
+
+for (const [locale, entries] of Object.entries(twilightFlorenceCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
