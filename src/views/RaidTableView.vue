@@ -782,7 +782,7 @@ function openRaidExport() {
       title: t('raidMatrixTitle'), generatedAt: t('raidExportGeneratedAt'),
       previewTitle: t('raidExportPreviewTitle'), previewHint: t('raidExportPreviewHint'),
       close: t('raidExportClose'), copy: t('raidExportCopy'), download: t('raidExportDownload'),
-      generating: t('raidExportGenerating'), ready: t('raidExportReady'), copied: t('raidExportCopied'), downloaded: t('raidExportDownloaded'),
+      generating: t('raidExportGenerating'), loadingAssets: t('raidExportLoadingAssets'), rendering: t('raidExportRendering'), generatingHint: t('raidExportGeneratingHint'), ready: t('raidExportReady'), copied: t('raidExportCopied'), downloaded: t('raidExportDownloaded'),
       copyUnavailable: t('raidExportCopyUnavailable'), copyFailed: t('raidExportCopyFailed'), generateFailed: t('raidExportGenerateFailed'), previewAlt: t('raidExportPreviewAlt'),
       position: t('raidPositionOrder'), attackPriority: t('raidAttackPriority'), assumptions: t('raidExportAssumptions'),
       guaranteedCritical: t('raidGuaranteedCritical'), enabled: t('raidExportEnabled'), disabled: t('raidExportDisabled'), scenarios: t('raidExportScenarios'),

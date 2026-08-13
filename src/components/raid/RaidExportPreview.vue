@@ -18,14 +18,13 @@
             </div>
           </div>
           <div class="raid-export-preview-scroll">
-            <div v-if="generating" class="raid-export-loading">{{ model.labels.generating }}</div>
+            <div v-if="generating" class="raid-export-progress" role="status" aria-live="polite">
+              <span class="raid-export-spinner" aria-hidden="true"></span>
+              <span><strong>{{ generationStatus }}</strong><small>{{ model.labels.generatingHint }}</small></span>
+            </div>
             <img v-else-if="previewUrl" class="raid-export-preview-image" :src="previewUrl" :alt="model.labels.previewAlt">
-          </div>
-        </div>
-      </div>
-
-      <div ref="captureNode" class="raid-export-capture-host" aria-hidden="true">
-        <article class="raid-export-sheet" :class="`theme-${theme}`">
+            <div v-show="generating" ref="captureNode" class="raid-export-capture-host" aria-hidden="true">
+              <article class="raid-export-sheet" :class="`theme-${theme}`">
           <header class="raid-export-header">
             <div><h1>🪵 {{ model.title }}</h1><p>{{ model.boss.name }} · {{ model.boss.stats }}</p></div>
             <div class="raid-export-grand-total"><strong>{{ model.totals.attack }}</strong><span v-for="value in model.totals.conversion" :key="value">+ {{ value }}</span><span v-if="model.totals.symbolic !== '—'">+ {{ model.totals.symbolic }}</span></div>
@@ -57,7 +56,10 @@
           </section>
 
           <footer><p v-for="warning in model.warningLines" :key="warning">ℹ {{ warning }}</p><small>{{ model.generatedLabel }}：{{ model.generatedAt }}</small></footer>
-        </article>
+              </article>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </Teleport>
@@ -77,29 +79,67 @@ const captureNode = ref(null)
 const blob = ref(null)
 const previewUrl = ref('')
 const generating = ref(true)
+const generationPhase = ref('assets')
+const loadedIconCount = ref(0)
+const iconSources = ref(new Map())
 const messageKey = ref('')
 const messageType = ref('')
 const copySupported = canCopyPng()
-const statusText = computed(() => messageKey.value ? props.model.labels[messageKey.value] : (copySupported ? props.model.labels.ready : props.model.labels.copyUnavailable))
-const statusType = computed(() => messageType.value || (copySupported ? 'success' : 'warning'))
+const statusText = computed(() => {
+  if (generating.value) return props.model.labels.generating
+  return messageKey.value ? props.model.labels[messageKey.value] : (copySupported ? props.model.labels.ready : props.model.labels.copyUnavailable)
+})
+const statusType = computed(() => generating.value ? '' : (messageType.value || (copySupported ? 'success' : 'warning')))
+const generationStatus = computed(() => generationPhase.value === 'assets'
+  ? props.model.labels.loadingAssets.replace('{done}', loadedIconCount.value).replace('{total}', props.model.lineup.length)
+  : props.model.labels.rendering)
 
-const RaidExportCharacter = defineComponent({ props: { item: { type: Object, required: true } }, setup(p) { return () => h('span', { class: 'raid-export-character' }, [h('span', { class: 'avatar' }, [h('b', p.item.name.slice(0, 1)), h('img', { src: p.item.icon, alt: '', onError: event => { event.currentTarget.style.display = 'none' } })]), h('span', p.item.name)]) } })
+const RaidExportCharacter = defineComponent({ props: { item: { type: Object, required: true } }, setup(p) { return () => h('span', { class: 'raid-export-character' }, [h('span', { class: 'avatar' }, [h('b', p.item.name.slice(0, 1)), h('img', { src: iconSources.value.get(p.item.id) ?? p.item.icon, alt: '', onError: event => { event.currentTarget.style.display = 'none' } })]), h('span', p.item.name)]) } })
 const RaidExportSequence = defineComponent({ props: { items: { type: Array, required: true }, compact: Boolean }, setup(p) { return () => h('span', { class: ['raid-export-sequence', { compact: p.compact }] }, p.items.flatMap((item, index) => [index ? h('i', '→') : null, h(RaidExportCharacter, { item, key: item.id })])) } })
 
 function number(value) { return new Intl.NumberFormat(props.model.locale).format(value) }
 function releasePreview() { if (previewUrl.value) URL.revokeObjectURL(previewUrl.value); previewUrl.value = '' }
 
-async function waitForAssets(node) {
-  await document.fonts?.ready
-  await Promise.all([...node.querySelectorAll('img')].map(image => image.complete ? Promise.resolve() : new Promise(resolve => { image.addEventListener('load', resolve, { once: true }); image.addEventListener('error', resolve, { once: true }) })))
+function blobToDataUrl(value) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = reject
+    reader.onload = () => resolve(reader.result)
+    reader.readAsDataURL(value)
+  })
+}
+
+function afterNextPaint() {
+  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+}
+
+async function prepareIcons() {
+  loadedIconCount.value = 0
+  await Promise.all(props.model.lineup.map(async item => {
+    try {
+      const response = await fetch(item.icon)
+      if (!response.ok) throw new Error(`Icon request failed: ${response.status}`)
+      const source = await blobToDataUrl(await response.blob())
+      iconSources.value = new Map(iconSources.value).set(item.id, source)
+    } catch (error) {
+      console.warn(`Failed to preload raid export icon ${item.id}`, error)
+    } finally {
+      loadedIconCount.value += 1
+    }
+  }))
+  await nextTick()
+  await Promise.all([...captureNode.value.querySelectorAll('img')].map(image => image.decode?.().catch(() => {}) ?? Promise.resolve()))
 }
 
 async function generate() {
-  generating.value = true; messageKey.value = ''; messageType.value = ''
+  generating.value = true; generationPhase.value = 'assets'; messageKey.value = ''; messageType.value = ''
   await nextTick()
   try {
-    await waitForAssets(captureNode.value)
-    const output = await toBlob(captureNode.value.firstElementChild, { pixelRatio: 2, cacheBust: true, skipFonts: true, backgroundColor: props.theme === 'light' ? '#f4f3ee' : '#0d0b14' })
+    await prepareIcons()
+    generationPhase.value = 'rendering'
+    await nextTick()
+    await afterNextPaint()
+    const output = await toBlob(captureNode.value.firstElementChild, { pixelRatio: 2, cacheBust: false, skipFonts: true, backgroundColor: props.theme === 'light' ? '#f4f3ee' : '#0d0b14' })
     if (!output) throw new Error('Empty image blob')
     releasePreview(); blob.value = output; previewUrl.value = URL.createObjectURL(output)
   } catch (error) {
@@ -134,10 +174,13 @@ onBeforeUnmount(releasePreview)
 .raid-export-toolbar > div { display: flex; gap: 8px; }
 .raid-export-status { color: var(--text-muted); font-size: var(--fs-sm); }
 .raid-export-status.success { color: var(--success); }.raid-export-status.warning { color: var(--warning); }.raid-export-status.error { color: var(--danger); }
-.raid-export-preview-scroll { min-height: 260px; max-height: calc(95vh - 145px); overflow: auto; border: 1px solid var(--border-subtle); border-radius: var(--r-sm); background: var(--bg-base); }
-.raid-export-preview-image { display: block; width: auto; max-width: none; height: auto; }
-.raid-export-loading { display: grid; min-height: 260px; place-items: center; color: var(--text-muted); }
-.raid-export-capture-host { position: fixed; left: -20000px; top: 0; width: max-content; pointer-events: none; }
+.raid-export-preview-scroll { position: relative; min-height: 260px; max-height: calc(95vh - 145px); overflow: auto; border: 1px solid var(--border-subtle); border-radius: var(--r-sm); background: var(--bg-base); }
+.raid-export-preview-image { display: block; width: 1660px; max-width: none; height: auto; }
+.raid-export-progress { position: sticky; z-index: 2; top: 10px; left: 10px; display: inline-flex; align-items: center; gap: 10px; width: max-content; max-width: calc(100vw - 80px); margin: 10px; padding: 10px 14px; border: 1px solid var(--border-subtle); border-radius: var(--r-sm); background: var(--bg-elevated); box-shadow: var(--shadow-md); color: var(--text-primary); }
+.raid-export-progress span:last-child { display: grid; gap: 2px; }.raid-export-progress small { color: var(--text-muted); font-weight: 400; }
+.raid-export-spinner { width: 18px; height: 18px; flex: 0 0 auto; border: 2px solid var(--border-subtle); border-top-color: var(--accent); border-radius: 50%; animation: raid-export-spin .8s linear infinite; }
+.raid-export-capture-host { width: max-content; pointer-events: none; }
+@keyframes raid-export-spin { to { transform: rotate(360deg); } }
 .raid-export-sheet { width: 1660px; padding: 28px; background: #0d0b14; color: #f0e6c8; font: 500 13px/1.4 Inter, Arial, sans-serif; }
 .raid-export-sheet.theme-light { background: #f4f3ee; color: #1a1614; }
 .raid-export-sheet * { box-sizing: border-box; }
