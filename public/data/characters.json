@@ -657,6 +657,13 @@
     "elementType": 4,
     "isLimited": true
   },
+  "97": {
+    "id": 97,
+    "nameKey": "[CharacterName97]",
+    "name2Key": null,
+    "elementType": 1,
+    "isLimited": false
+  },
   "99": {
     "id": 99,
     "nameKey": "[CharacterName99]",
@@ -907,6 +914,13 @@
     "nameKey": "[CharacterName149]",
     "name2Key": "[CharacterSubName149]",
     "elementType": 1,
+    "isLimited": true
+  },
+  "150": {
+    "id": 150,
+    "nameKey": "[CharacterName150]",
+    "name2Key": "[CharacterSubName150]",
+    "elementType": 3,
     "isLimited": true
   },
   "153": {
