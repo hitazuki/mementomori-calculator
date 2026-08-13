@@ -2233,5 +2233,29 @@
       }
     ],
     "baseParams": []
+  },
+  {
+    "id": 99,
+    "nameKey": "[CharacterCollectionName99]",
+    "reqCids": [
+      150,
+      0
+    ],
+    "params": [
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 4,
+        "nameKey": "appBasicStm",
+        "ctype": 3,
+        "val": 30
+      }
+    ]
   }
 ]

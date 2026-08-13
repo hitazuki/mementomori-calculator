@@ -33,7 +33,7 @@ const {
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
   REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH,
-  MATILDA, WARM_MEMORY_SOLTINA, ARTIE,
+  MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -52,15 +52,15 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes forty-six characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 46)
+test('roster exposes forty-seven characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 47)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-15), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-16), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -97,6 +97,7 @@ test('default defense config uses Sonya and per-character Lv500 dual penetration
   assert.equal(defaults.speeds[MATILDA], 3181)
   assert.equal(defaults.speeds[WARM_MEMORY_SOLTINA], 3073)
   assert.equal(defaults.speeds[ARTIE], 2734)
+  assert.equal(defaults.speeds[TWILIGHT_FLORENCE], 3077)
 })
 
 test('lineups accept one to five unique supported characters', () => {
@@ -1764,4 +1765,65 @@ test('Artie applies one combined S1 debuff and guarantees S2 criticals against t
   const s2 = action(result, 2, ARTIE)
   assert.equal(s2.damageSteps.length, 7)
   assert.ok(s2.damageSteps.every(step => step.percent === 200 && step.critical))
+})
+
+test('Twilight Florence stacks Sunset Bond from active healing and unlocks Evening Last Light', () => {
+  const result = simulateRaidTable(singleConfig(TWILIGHT_FLORENCE, { turns: 10 }))
+  assert.deepEqual(actionsFor(result, TWILIGHT_FLORENCE), ['s1', 'normal', 'normal', 'normal', 's1', 'normal', 'normal', 'normal', 's1', 'normal'])
+
+  const first = action(result, 1, TWILIGHT_FLORENCE)
+  assert.equal(first.damageSteps.length, 3)
+  assert.ok(first.damageSteps.every(step => step.percent === 980))
+  closeTo(first.damageSteps[0].attackRate, 0.06)
+  assert.equal(first.runtimeAfter.counters.twilightBondStacks, 1)
+  assert.equal(first.removableBuffCountsAtDamage[TWILIGHT_FLORENCE], 3)
+  assert.ok(first.statusSnapshotAtDamage[TWILIGHT_FLORENCE].statuses.find(status => (
+    status.id === 'twilight-florence-bond'
+  )).statusClass === RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+
+  const enhancedNormal = action(result, 2, TWILIGHT_FLORENCE)
+  assert.equal(enhancedNormal.damageSteps.length, 1)
+  assert.equal(enhancedNormal.damageSteps[0].percent, 390)
+  assert.equal(enhancedNormal.damageSteps[0].originalTargetCount, 5)
+  assert.equal(enhancedNormal.runtimeAfter.counters.twilightBondStacks, 2)
+
+  const lateS1 = action(result, 9, TWILIGHT_FLORENCE)
+  assert.ok(lateS1.damageSteps.every(step => step.percent === 1960))
+  assert.equal(lateS1.runtimeAfter.counters.twilightBondStacks, 8)
+  assert.equal(lateS1.statusSnapshotAtDamage[TWILIGHT_FLORENCE].statuses.some(status => status.id === 'twilight-florence-vow'), false)
+
+  const lineup = [MILLA, TWILIGHT_FLORENCE]
+  const recipients = simulateRaidTable({ lineup, attackPriority: lineup, turns: 1 })
+  assert.equal(action(recipients, 1, MILLA).runtimeAfter.counters.activeHealingReceived, 1)
+  assert.equal(action(recipients, 1, TWILIGHT_FLORENCE).runtimeAfter.counters.twilightBondStacks, 2)
+})
+
+test('Twilight Florence applies the vow at round seven with ten healing events and uses S2', () => {
+  const result = simulateRaidTable(singleConfig(TWILIGHT_FLORENCE, { turns: 8 }))
+  const actor = result.config.lineup[0]
+
+  // Seed ten supported active-healing events through the generic listener before round seven.
+  const definition = RAID_TABLE_CHARACTERS[TWILIGHT_FLORENCE]
+  assert.equal(definition.eventHooks[0].event, 'activeSkillHeal')
+  const condition = DEFAULT_RAID_MECHANICS.conditionHandlers.counterAtLeast
+  assert.equal(condition({ counter: 'twilightBondStacks', count: 10 }, {
+    actor: { runtime: { counters: { twilightBondStacks: 10 } } },
+  }), true)
+  assert.equal(actor, TWILIGHT_FLORENCE)
+
+  const seeded = simulateRaidTable(singleConfig(TWILIGHT_FLORENCE, { turns: 8 }), {
+    ...DEFAULT_RAID_ENVIRONMENT,
+    characters: {
+      ...RAID_TABLE_CHARACTERS,
+      [TWILIGHT_FLORENCE]: {
+        ...definition,
+        runtime: { counters: { twilightBondStacks: 10 }, flags: {} },
+      },
+    },
+  })
+  const roundSeven = action(seeded, 7, TWILIGHT_FLORENCE)
+  assert.equal(roundSeven.statusSnapshotBeforeAction[TWILIGHT_FLORENCE].statuses.some(status => status.id === 'twilight-florence-vow'), true)
+  assert.equal(roundSeven.actionKey, 's2')
+  assert.equal(roundSeven.damageSteps.length, 10)
+  assert.ok(roundSeven.damageSteps.every(step => step.percent === 1050 && step.critical))
 })

@@ -1,0 +1,36 @@
+{
+  "formatVersion": 1,
+  "characterId": 150,
+  "slug": "twilight-florence",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [150001, 150002],
+    "passiveSkillIds": [150003, 150004],
+    "combatLogs": []
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 150001, "model": "implemented", "summary": "S1 heals before damage through round 6, deals 3×980%, and changes to 3×1960% from round 7." },
+    { "kind": "activeSkill", "sourceId": 150002, "model": "implemented", "summary": "S2 requires Twilight's Vow and deals 6×1050%, extended to 10 hits under the table's guaranteed-critical assumption." },
+    { "kind": "passiveSkill", "sourceId": 150003, "model": "implemented", "summary": "Each active-skill heal adds one permanent 6% ATK stack, capped at 10; round 7+ grants Twilight's Vow at 10 stacks." },
+    { "kind": "passiveSkill", "sourceId": 150004, "model": "implemented", "summary": "For 10 actions, normal attacks become single-dummy 390% attacks and emit an active-heal event." }
+  ],
+  "effectGroups": [
+    { "id": 15000320101, "model": "implemented", "summary": "Ten-stack unremovable ATK/critical-rate state; ATK is modeled and critical rate is explicitly ignored." },
+    { "id": 15000300201, "model": "implemented", "summary": "Unremovable Twilight's Vow that enables S2." },
+    { "id": 15000330301, "model": "implemented", "summary": "Ten-action removable DEF buff retained for Buff counting." },
+    { "id": 15000330302, "model": "implemented", "summary": "Ten-action removable physical-DEF buff retained for Buff counting." },
+    { "id": 15000430101, "model": "implemented", "summary": "Ten-action enhanced-normal state, including damage and heal event." },
+    { "id": 15000440102, "model": "implemented", "summary": "Unremovable incoming-damage and max-HP state retained without multiplier effects." }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHealing", "summary": "HP values and healing amounts are outside the raid-table model; only the healing event is emitted." },
+    { "key": "raidIgnoredCriticalRateUp", "summary": "Critical chance is not probabilistically resolved; the configured guaranteed-critical scenario controls criticals." },
+    { "key": "raidIgnoredDefenseBuff", "summary": "DEF buffs do not affect outgoing damage, but their removable EffectGroups are retained for Buff counting." },
+    { "key": "raidIgnoredMaxHpUp", "summary": "Maximum-HP changes are outside the raid-table damage model." },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "Incoming damage and max-HP durability are outside the permanent-dummy model." },
+    { "key": "raidIgnoredActionControlRemoval", "summary": "Action-control removal has no effect because allies remain active and free of debuffs." }
+  ],
+  "unresolved": [
+    { "summary": "No combat log is available yet to confirm SkillCategory, caster/target/granter, phase, or the tie-break target of healing at equal full HP." }
+  ]
+}
