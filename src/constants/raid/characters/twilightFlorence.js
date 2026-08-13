@@ -23,10 +23,7 @@ export default {
       },
       hits: 1, originalTargetCount: 5, damageType: 'phys',
     }],
-    hooks: [hook('afterDamage', [{
-      ...activeHeal, targetCount: 3,
-      condition: { type: 'actorHasStatus', statusId: 'twilight-florence-enhanced-normal' },
-    }])],
+    hooks: [],
     ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredActionControlRemoval'],
   },
   runtime: { counters: { twilightBondStacks: 0 }, flags: {} },

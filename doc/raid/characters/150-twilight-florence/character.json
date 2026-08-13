@@ -19,11 +19,11 @@
     { "id": 15000300201, "model": "implemented", "summary": "Unremovable Twilight's Vow that enables S2." },
     { "id": 15000330301, "model": "implemented", "summary": "Ten-action removable DEF buff retained for Buff counting." },
     { "id": 15000330302, "model": "implemented", "summary": "Ten-action removable physical-DEF buff retained for Buff counting." },
-    { "id": 15000430101, "model": "implemented", "summary": "Ten-action enhanced-normal state, including damage and heal event." },
+    { "id": 15000430101, "model": "implemented", "summary": "Ten-action enhanced-normal state; its 390% damage is modeled, while its normal-attack healing does not emit an active-skill-heal event." },
     { "id": 15000440102, "model": "implemented", "summary": "Unremovable incoming-damage and max-HP state retained without multiplier effects." }
   ],
   "ignored": [
-    { "key": "raidIgnoredHealing", "summary": "HP values and healing amounts are outside the raid-table model; only the healing event is emitted." },
+    { "key": "raidIgnoredHealing", "summary": "HP values and healing amounts are outside the raid-table model; S1 emits an active-skill-heal event, while enhanced-normal healing does not qualify." },
     { "key": "raidIgnoredCriticalRateUp", "summary": "Critical chance is not probabilistically resolved; the configured guaranteed-critical scenario controls criticals." },
     { "key": "raidIgnoredDefenseBuff", "summary": "DEF buffs do not affect outgoing damage, but their removable EffectGroups are retained for Buff counting." },
     { "key": "raidIgnoredMaxHpUp", "summary": "Maximum-HP changes are outside the raid-table damage model." },
