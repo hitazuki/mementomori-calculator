@@ -195,9 +195,12 @@
   <section class="card raid-matrix-card animate-fadeup">
     <div class="raid-section-head">
       <div><h2>{{ $t('raidMatrixTitle') }}</h2><p>{{ $t('raidSelectCellHint') }}</p></div>
-      <button type="button" class="btn btn-ghost btn-sm" @click="openActionOrderEditor()">
-        ↕ {{ $t('raidAdjustActionOrder') }}<template v-if="manualOrderCount"> · {{ $t('raidAdjustedRoundCount', { n: manualOrderCount }) }}</template>
-      </button>
+      <div class="raid-section-actions">
+        <button type="button" class="btn btn-ghost btn-sm" @click="openRaidExport">▣ {{ $t('raidExportImage') }}</button>
+        <button type="button" class="btn btn-ghost btn-sm" @click="openActionOrderEditor()">
+          ↕ {{ $t('raidAdjustActionOrder') }}<template v-if="manualOrderCount"> · {{ $t('raidAdjustedRoundCount', { n: manualOrderCount }) }}</template>
+        </button>
+      </div>
     </div>
     <div class="raid-table-scroll">
       <table class="raid-matrix-table">
@@ -367,6 +370,14 @@
 
   <section class="raid-warning-list animate-fadeup"><p v-for="warning in result.warnings" :key="warning">ℹ {{ $t(warning) }}</p></section>
 
+  <RaidExportPreview
+    v-if="raidExportSnapshot"
+    :model="raidExportSnapshot.model"
+    :theme="raidExportSnapshot.theme"
+    :filename="raidExportSnapshot.filename"
+    @close="raidExportSnapshot = null"
+  />
+
   <Teleport to="body">
     <div
       v-if="showActionOrderEditor"
@@ -434,6 +445,9 @@ import { computed, defineComponent, h, nextTick, reactive, ref, watch } from 'vu
 import { useI18n } from 'vue-i18n'
 import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
+import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
+import { buildRaidExportModel, raidExportFilename } from '../utils/raidExport.js'
+import { currentTheme } from '../utils/themeStore.js'
 
 const OrderList = defineComponent({
   props: { title: { type: String, required: true }, items: { type: Array, required: true }, nameOf: { type: Function, required: true }, upLabel: { type: String, required: true }, downLabel: { type: String, required: true } },
@@ -514,6 +528,7 @@ const siviDamageTiers = Object.freeze([
   { hits: 0, rate: 30 }, { hits: 1, rate: 54 }, { hits: 2, rate: 72 }, { hits: 3, rate: 84 }, { hits: 4, rate: 90 },
 ])
 const selectedEvent = ref(null)
+const raidExportSnapshot = ref(null)
 const showActionOrderEditor = ref(false)
 const editingOrderRound = ref(null)
 const orderDraft = ref([])
@@ -541,6 +556,23 @@ const result = computed(() => simulateRaidTable({
 }))
 const currentSpeedOrder = computed(() => result.value.rounds[0]?.speedOrder ?? [])
 const manualOrderCount = computed(() => result.value.rounds.filter(round => round.orderSource === 'manual').length)
+
+const probabilityScenarioDefinitions = Object.freeze([
+  [RAID_TABLE_CHARACTER_IDS.LIBERIA, 'liberiaSand', 'raidAssumeLiberiaSand'],
+  [RAID_TABLE_CHARACTER_IDS.SPRING_SHIZU, 'shizuSpeedDown', 'raidAssumeShizuSpeedDown'],
+  [RAID_TABLE_CHARACTER_IDS.GUINEVERE, 'guinevereDamageTaken', 'raidAssumeGuinevereDamageTaken'],
+  [RAID_TABLE_CHARACTER_IDS.CAROL, 'carolSilence', 'raidAssumeCarolSilence'],
+  [RAID_TABLE_CHARACTER_IDS.MORGANA, 'morganaHealingDown', 'raidAssumeMorganaHealingDown'],
+  [RAID_TABLE_CHARACTER_IDS.MOWANO, 'mowanoDelay', 'raidAssumeMowanoDelay'],
+  [RAID_TABLE_CHARACTER_IDS.MILLA, 'millaDelay', 'raidAssumeMillaDelay'],
+  [RAID_TABLE_CHARACTER_IDS.YILDIZ, 'yildizBuffBlock', 'raidAssumeYildizBuffBlock'],
+  [RAID_TABLE_CHARACTER_IDS.WINTER_STELLA, 'winterStellaSilence', 'raidAssumeWinterStellaSilence'],
+  [RAID_TABLE_CHARACTER_IDS.LILICOTTE, 'lilicotteSilence', 'raidAssumeLilicotteSilence'],
+  [RAID_TABLE_CHARACTER_IDS.LIEBES, 'liebesStun', 'raidAssumeLiebesStun'],
+  [RAID_TABLE_CHARACTER_IDS.ARTORIA, 'artoriaStun', 'raidAssumeArtoriaStun'],
+  [RAID_TABLE_CHARACTER_IDS.WITCH_PALADIA, 'paladiaCriticalResistDown', 'raidAssumeWitchPaladiaCriticalResistDown'],
+  [RAID_TABLE_CHARACTER_IDS.WARM_MEMORY_SOLTINA, 'warmMemorySoltinaStun', 'raidAssumeWarmMemorySoltinaStun'],
+])
 
 watch(() => result.value.config.actionOrderOverrides, normalized => {
   if (sameActionOrderOverrides(actionOrderOverrides.value, normalized)) return
@@ -598,6 +630,7 @@ function conversionStatEntries(totals) {
 }
 function conversionSourceEntries(totals, ownerId = null) { return conversionEntries(totals).filter(term => ownerId == null || term.sourceId !== ownerId) }
 function formatConversionTotal(term) { return `+ ${formatStat(term.value, term.stat)}` }
+function formatConversionExportTotals(totals) { return conversionStatEntries(totals).map(term => formatStat(term.value, term.stat)) }
 function formatConversionSources(terms) { return terms.map(term => `${formatStat(term.value, term.stat)}（${valueSourceText(term.sourceId, term.stat)}）`).join(' + ') }
 function valueSourceText(sourceId, stat = 'ATK') { return t(stat === 'DEF' ? 'raidValueSourceDefense' : 'raidValueSourceAttack', { source: characterName(sourceId) }) }
 function formatScalingTerm(term, ownerId = null) {
@@ -705,6 +738,67 @@ function toggleRosterElement(element) {
   selectedRosterElement.value = selectedRosterElement.value === element ? null : element
 }
 
+function activeRaidScenarioLines() {
+  const lines = probabilityScenarioDefinitions
+    .filter(([id, key]) => lineup.value.includes(id) && result.value.config.probabilityOverrides[key])
+    .map(([, , labelKey]) => t(labelKey))
+  if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA)) {
+    lines.push(`${t('raidWitchIllyaCurseUnleashedRound')}：${t('raidTurn', { n: result.value.config.activationRounds.witchIllyaCurseUnleashed })}`)
+  }
+  if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.CANDY_CERBERUS)) {
+    lines.push(`${t('raidCandyCerberusReviveRound')}：${t('raidTurn', { n: result.value.config.activationRounds.candyCerberusKindMagic })}`)
+  }
+  if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.SIVI)) {
+    const hits = result.value.config.scenarioTiers.siviReactiveBladeIncomingHits
+    const rate = siviDamageTiers.find(tier => tier.hits === hits)?.rate ?? 30
+    lines.push(`${t('raidSiviDamageTier')}：${t('raidSiviDamageTierOption', { hits, rate })}`)
+  }
+  return lines
+}
+
+function openRaidExport() {
+  const generatedAt = new Date()
+  const model = buildRaidExportModel({
+    result: result.value,
+    lineup: lineup.value,
+    attackPriority: attackPriority.value,
+    characters: RAID_TABLE_CHARACTERS,
+    bossName: t(selectedBossTemplate.value.nameKey),
+    bossStats: bossTemplateStats.value,
+    generatedAt,
+    locale: locale.value,
+    characterName,
+    skillName: key => t(key),
+    iconUrl: characterIconUrl,
+    turnLabel: turn => t('raidTurn', { n: turn }),
+    formatPercent,
+    formatSymbolic,
+    formatConversionTotals: formatConversionExportTotals,
+    bossStatusText: bossStatusLabel,
+    elementBonusLines: elementBonusLines.value,
+    scenarioLines: activeRaidScenarioLines(),
+    warningLines: result.value.warnings.map(key => t(key)),
+    labels: {
+      title: t('raidMatrixTitle'), generatedAt: t('raidExportGeneratedAt'),
+      previewTitle: t('raidExportPreviewTitle'), previewHint: t('raidExportPreviewHint'),
+      close: t('raidExportClose'), copy: t('raidExportCopy'), download: t('raidExportDownload'),
+      generating: t('raidExportGenerating'), ready: t('raidExportReady'), copied: t('raidExportCopied'), downloaded: t('raidExportDownloaded'),
+      copyUnavailable: t('raidExportCopyUnavailable'), copyFailed: t('raidExportCopyFailed'), generateFailed: t('raidExportGenerateFailed'), previewAlt: t('raidExportPreviewAlt'),
+      position: t('raidPositionOrder'), attackPriority: t('raidAttackPriority'), assumptions: t('raidExportAssumptions'),
+      guaranteedCritical: t('raidGuaranteedCritical'), enabled: t('raidExportEnabled'), disabled: t('raidExportDisabled'), scenarios: t('raidExportScenarios'),
+      panelStats: t('raidPenetrationSettings'), character: t('raidCharacter'), level: t('raidCharacterLevel'), speed: t('raidBaseSpeed'),
+      criticalDamage: t('raidBaseCriticalDamage'), defensePenetration: t('raidDefensePenetration'), pmDefensePenetration: t('raidPmDefensePenetration'),
+      matrix: t('raidMatrixTitle'), characterTotal: t('raidCharacterTotal'), manual: t('raidOrderManual'), automatic: t('raidOrderAutomatic'),
+      bossStatus: t('raidBossStatus'), afterRound: t('raidExportAfterRound'), roundTotal: t('raidRoundTotal'),
+    },
+  })
+  raidExportSnapshot.value = {
+    model,
+    filename: raidExportFilename(t(selectedBossTemplate.value.nameKey), generatedAt),
+    theme: currentTheme.value,
+  }
+}
+
 function moveItem(list, index, delta) {
   const next = index + delta
   if (next < 0 || next >= list.length) return
@@ -727,6 +821,7 @@ function resetConfig() {
   Object.assign(activationRounds, next.activationRounds)
   Object.assign(scenarioTiers, next.scenarioTiers)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
+  raidExportSnapshot.value = null
   closeActionOrderEditor()
 }
 

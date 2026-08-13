@@ -832,3 +832,38 @@ const twilightFlorenceCharacterExtensions = {
 }
 
 for (const [locale, entries] of Object.entries(twilightFlorenceCharacterExtensions)) Object.assign(raidTranslations[locale], entries)
+
+const raidExportExtensions = {
+  'zh-CN': {
+    raidExportImage: '导出图片', raidExportPreviewTitle: '讨伐矩阵图片预览', raidExportPreviewHint: '已按当前主题生成紧凑分享图，可横向滚动查看完整10回合。',
+    raidExportCopy: '复制图片', raidExportDownload: '下载 PNG', raidExportGenerating: '正在生成图片…', raidExportReady: '图片已生成。', raidExportCopied: '图片已复制到剪贴板。', raidExportDownloaded: 'PNG 已开始下载。',
+    raidExportCopyUnavailable: '当前浏览器或上下文不支持复制 PNG，请使用下载。', raidExportCopyFailed: '复制失败，请使用下载 PNG。', raidExportGenerateFailed: '图片生成失败，请关闭后重试。', raidExportClose: '关闭图片预览', raidExportPreviewAlt: '讨伐矩阵导出图片预览',
+    raidExportGeneratedAt: '生成时间', raidExportAssumptions: '计算设置', raidExportScenarios: '启用的概率与场景条件', raidExportEnabled: '启用', raidExportDisabled: '关闭', raidExportAfterRound: '每回合结束',
+  },
+  'zh-TW': {
+    raidExportImage: '匯出圖片', raidExportPreviewTitle: '討伐矩陣圖片預覽', raidExportPreviewHint: '已依目前主題產生緊湊分享圖，可橫向捲動查看完整10回合。',
+    raidExportCopy: '複製圖片', raidExportDownload: '下載 PNG', raidExportGenerating: '正在產生圖片…', raidExportReady: '圖片已產生。', raidExportCopied: '圖片已複製到剪貼簿。', raidExportDownloaded: 'PNG 已開始下載。',
+    raidExportCopyUnavailable: '目前瀏覽器或環境不支援複製 PNG，請使用下載。', raidExportCopyFailed: '複製失敗，請使用下載 PNG。', raidExportGenerateFailed: '圖片產生失敗，請關閉後重試。', raidExportClose: '關閉圖片預覽', raidExportPreviewAlt: '討伐矩陣匯出圖片預覽',
+    raidExportGeneratedAt: '產生時間', raidExportAssumptions: '計算設定', raidExportScenarios: '已啟用的機率與情境條件', raidExportEnabled: '啟用', raidExportDisabled: '關閉', raidExportAfterRound: '每回合結束',
+  },
+  en: {
+    raidExportImage: 'Export Image', raidExportPreviewTitle: 'Raid Matrix Image Preview', raidExportPreviewHint: 'A compact share image using the current theme. Scroll horizontally to inspect all 10 turns.',
+    raidExportCopy: 'Copy Image', raidExportDownload: 'Download PNG', raidExportGenerating: 'Generating image…', raidExportReady: 'Image is ready.', raidExportCopied: 'Image copied to the clipboard.', raidExportDownloaded: 'PNG download started.',
+    raidExportCopyUnavailable: 'PNG copying is unavailable in this browser or context. Use download instead.', raidExportCopyFailed: 'Copy failed. Use Download PNG instead.', raidExportGenerateFailed: 'Image generation failed. Close the preview and try again.', raidExportClose: 'Close image preview', raidExportPreviewAlt: 'Raid matrix export preview',
+    raidExportGeneratedAt: 'Generated', raidExportAssumptions: 'Calculation Settings', raidExportScenarios: 'Enabled Probability and Scenario Conditions', raidExportEnabled: 'Enabled', raidExportDisabled: 'Off', raidExportAfterRound: 'End of each turn',
+  },
+  ja: {
+    raidExportImage: '画像を書き出す', raidExportPreviewTitle: '討伐マトリクス画像プレビュー', raidExportPreviewHint: '現在のテーマでコンパクトな共有画像を生成しました。横スクロールで10ターン全体を確認できます。',
+    raidExportCopy: '画像をコピー', raidExportDownload: 'PNGをダウンロード', raidExportGenerating: '画像を生成中…', raidExportReady: '画像を生成しました。', raidExportCopied: '画像をクリップボードにコピーしました。', raidExportDownloaded: 'PNGのダウンロードを開始しました。',
+    raidExportCopyUnavailable: 'このブラウザーまたは環境ではPNGをコピーできません。ダウンロードをご利用ください。', raidExportCopyFailed: 'コピーに失敗しました。PNGをダウンロードしてください。', raidExportGenerateFailed: '画像の生成に失敗しました。プレビューを閉じて再試行してください。', raidExportClose: '画像プレビューを閉じる', raidExportPreviewAlt: '討伐マトリクス書き出し画像のプレビュー',
+    raidExportGeneratedAt: '生成日時', raidExportAssumptions: '計算設定', raidExportScenarios: '有効な確率・シナリオ条件', raidExportEnabled: '有効', raidExportDisabled: 'オフ', raidExportAfterRound: '各ターン終了時',
+  },
+  ko: {
+    raidExportImage: '이미지 내보내기', raidExportPreviewTitle: '토벌 매트릭스 이미지 미리보기', raidExportPreviewHint: '현재 테마로 간결한 공유 이미지를 생성했습니다. 가로로 스크롤하여 10턴 전체를 확인할 수 있습니다.',
+    raidExportCopy: '이미지 복사', raidExportDownload: 'PNG 다운로드', raidExportGenerating: '이미지 생성 중…', raidExportReady: '이미지가 준비되었습니다.', raidExportCopied: '이미지를 클립보드에 복사했습니다.', raidExportDownloaded: 'PNG 다운로드를 시작했습니다.',
+    raidExportCopyUnavailable: '현재 브라우저 또는 환경에서는 PNG 복사를 지원하지 않습니다. 다운로드를 이용해 주세요.', raidExportCopyFailed: '복사하지 못했습니다. PNG 다운로드를 이용해 주세요.', raidExportGenerateFailed: '이미지를 생성하지 못했습니다. 미리보기를 닫고 다시 시도해 주세요.', raidExportClose: '이미지 미리보기 닫기', raidExportPreviewAlt: '토벌 매트릭스 내보내기 이미지 미리보기',
+    raidExportGeneratedAt: '생성 시간', raidExportAssumptions: '계산 설정', raidExportScenarios: '활성화된 확률 및 시나리오 조건', raidExportEnabled: '사용', raidExportDisabled: '꺼짐', raidExportAfterRound: '각 턴 종료',
+  },
+}
+
+for (const [locale, entries] of Object.entries(raidExportExtensions)) Object.assign(raidTranslations[locale], entries)

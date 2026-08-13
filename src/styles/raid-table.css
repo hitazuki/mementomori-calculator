@@ -649,3 +649,9 @@
   .raid-round-order-actions > span { display: none; }
   .raid-round-order-actions .btn { width: 100%; }
 }
+.raid-section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
