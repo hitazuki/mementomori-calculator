@@ -57,6 +57,7 @@ test('serial codes are grouped by identical expiry time', async () => {
     'tokenekotoko',
     'lucky2434gacha',
     'shiloh2434',
+    'emeraldlament',
   ])
   assert.equal(batches[1].key, NO_EXPIRY_BATCH_KEY)
   assert.equal(batches[1].codes.length, 5)
