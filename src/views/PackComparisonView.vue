@@ -144,6 +144,9 @@
                     <strong style="color:var(--text-base); margin-right:8px;">{{ $t('packCompareFullSources') }}:</strong>
                     {{ getFullPackName(p) }}
                   </div>
+                  <div v-if="p.noteKeys?.length" class="pack-note-list">
+                    <div v-for="noteKey in p.noteKeys" :key="noteKey">※ {{ $t(noteKey) }}</div>
+                  </div>
                   <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:var(--fs-sm);align-items:flex-start;">
                     <div
                       v-for="(item, j) in p.items"
@@ -193,6 +196,9 @@
 
           <div v-if="expanded.has(i) && p.originKeys.length > 1" class="mobile-pack-source">
             {{ getFullPackName(p) }}
+          </div>
+          <div v-if="expanded.has(i) && p.noteKeys?.length" class="mobile-pack-source">
+            <div v-for="noteKey in p.noteKeys" :key="noteKey">※ {{ $t(noteKey) }}</div>
           </div>
 
           <div class="mobile-pack-items">
@@ -483,6 +489,17 @@ function toggleExpand(i) {
 .badge-other {
   background-color: #7f8c8d;
   color: white;
+}
+.pack-note-list {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  text-align: left;
 }
 
 </style>

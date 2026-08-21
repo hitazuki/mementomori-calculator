@@ -353,6 +353,9 @@ export default {
   origin_quest: "メインクエスト",
   origin_unknown: "不明",
   origin_monthly_card: "マンスリーカード",
+  origin_contract_privilege: "盟約特権",
+  packContractPrivilegeDominantServerNote: "ギルドコイン価値は優勢サーバーを想定：1日の基本13,800 × 10% ÷ 400コイン/ルーンチケット × 30日 = 103.5枚。",
+  packContractPrivilegeExcludedNote: "盟約特権はチャージイベントの対象外のためチャージ価値は0。時空の洞窟の見逃し補填など未算定の特権は含みません。",
 
   packCompareDesc: "異なる入手先や内容のパックを比較し、最もお得な購入プランを探します。",
   packCompareColName: "パックの種類",

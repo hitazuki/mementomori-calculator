@@ -188,7 +188,9 @@ export function calculatePackCE(packs, scores) {
     const diamondScore = getScore(scores, 2, 1) || 1
     const originalValue = Math.round(totalValue)
     const paidDiamonds = pack.price > 0 ? (pack.price / 2) : diamondCount
-    const rechargeValue = Math.round(paidDiamonds * diamondScore * 1.2)
+    const rechargeValue = pack.rechargeEligible === false
+      ? 0
+      : Math.round(paidDiamonds * diamondScore * 1.2)
     const finalValue = originalValue + rechargeValue
 
     return {

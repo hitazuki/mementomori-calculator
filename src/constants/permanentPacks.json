@@ -608,5 +608,31 @@
         "ItemCount": 30
       }
     ]
+  },
+  {
+    "name": "盟约特权",
+    "price": 360,
+    "rechargeEligible": false,
+    "noteKeys": [
+      "packContractPrivilegeDominantServerNote",
+      "packContractPrivilegeExcludedNote"
+    ],
+    "items": [
+      {
+        "ItemType": 99,
+        "ItemId": 2,
+        "ItemCount": 30
+      },
+      {
+        "ItemType": 13,
+        "ItemId": 4,
+        "ItemCount": 103.5
+      },
+      {
+        "ItemType": 99,
+        "ItemId": 3,
+        "ItemCount": 20000
+      }
+    ]
   }
 ]

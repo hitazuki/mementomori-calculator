@@ -850,5 +850,29 @@
     "nameJa": "毎日無料掃討",
     "nameKo": "매일 무료 소탕",
     "isBase": false
+  },
+  "[99,2]": {
+    "name": "Fountain Team Quest Bonus (Diamond Equivalent)",
+    "score": 26,
+    "batch": 1,
+    "iconId": 9,
+    "nameZh": "祈愿之泉联合任务增益（等效钻石）",
+    "nameTw": "祈願之泉聯合任務增益（等效鑽石）",
+    "nameEn": "Fountain Team Quest Bonus (Diamond Equivalent)",
+    "nameJa": "祈りの泉マルチクエスト増加（ダイヤ換算）",
+    "nameKo": "기원의 샘 멀티 퀘스트 증가 (다이아 환산)",
+    "isBase": false
+  },
+  "[99,3]": {
+    "name": "Space-Time Coin Bonus (Diamond Equivalent)",
+    "score": 0.022222222222222223,
+    "batch": 1,
+    "iconId": 48,
+    "nameZh": "时空币增益（等效钻石）",
+    "nameTw": "時空幣增益（等效鑽石）",
+    "nameEn": "Space-Time Coin Bonus (Diamond Equivalent)",
+    "nameJa": "時空コイン増加（ダイヤ換算）",
+    "nameKo": "시공 코인 증가 (다이아 환산)",
+    "isBase": false
   }
 }

@@ -117,6 +117,8 @@ for (const p of permanentPacksRaw) {
     _type: 'permanent',
     name: p.name,
     price: p.price,
+    rechargeEligible: p.rechargeEligible,
+    noteKeys: p.noteKeys,
     items: p.items
   })
 }
@@ -126,11 +128,12 @@ const dedupMap = new Map()
 
 for (const p of allRawPacks) {
   const sortedItems = [...p.items].sort((a, b) => a.ItemType - b.ItemType || a.ItemId - b.ItemId)
-  const key = `${p.price}|${JSON.stringify(sortedItems.map(i => [i.ItemType, i.ItemId, i.ItemCount]))}`
+  const key = `${p.price}|${p.rechargeEligible !== false}|${JSON.stringify(sortedItems.map(i => [i.ItemType, i.ItemId, i.ItemCount]))}`
   
   if (!dedupMap.has(key)) {
     dedupMap.set(key, {
       price: p.price,
+      rechargeEligible: p.rechargeEligible !== false,
       items: p.items,
       rawPacks: []
     })
@@ -168,16 +171,19 @@ const permPackNameMap = {
   "钻石组合包 3000 (首次双倍)": "origin_perm_diamond_3000_double",
   "钻石组合包 5900": "origin_perm_diamond_5900",
   "钻石组合包 5900 (首次双倍)": "origin_perm_diamond_5900_double",
-  "月卡": "origin_monthly_card"
+  "月卡": "origin_monthly_card",
+  "盟约特权": "origin_contract_privilege"
 }
 
 function synthesizeI18nKeys(rawPacks) {
   const keys = new Set()
+  const noteKeys = new Set()
   let hasUltra = false
   let hasWitch = false
   let hasPermanent = false
 
   for (const p of rawPacks) {
+    for (const noteKey of p.noteKeys || []) noteKeys.add(noteKey)
     if (p._type === 'witch') {
       hasWitch = true
       // Pass stage as a param for i18n
@@ -208,19 +214,23 @@ function synthesizeI18nKeys(rawPacks) {
 
   return {
     source: sourceBadge,
-    originKeys: Array.from(keys)
+    originKeys: Array.from(keys),
+    noteKeys: Array.from(noteKeys)
   }
 }
 
 const finalPacks = []
 for (const group of dedupMap.values()) {
   const info = synthesizeI18nKeys(group.rawPacks)
-  finalPacks.push({
+  const pack = {
     source: info.source,
     price: group.price,
     items: group.items,
     originKeys: info.originKeys
-  })
+  }
+  if (!group.rechargeEligible) pack.rechargeEligible = false
+  if (info.noteKeys.length > 0) pack.noteKeys = info.noteKeys
+  finalPacks.push(pack)
 }
 
 const outPath = path.join(root, 'public', 'data', 'allPacks.json')

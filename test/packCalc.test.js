@@ -74,6 +74,30 @@ test('monthly card includes 30 days of diamonds, sweeps, and recharge value', ()
   assert.equal(pack.value, 6_500)
 })
 
+test('contract privilege uses equivalent benefits without recharge value', () => {
+  const contractScores = normalizeScores({
+    ...scores,
+    '[13,4]': { name: 'Rune Ticket', score: 10, batch: 1, iconId: 39 },
+    '[99,2]': { name: 'Team Quest Bonus', score: 26, batch: 1, iconId: 9 },
+    '[99,3]': { name: 'Space-Time Coin Bonus', score: 4_000 / 180_000, batch: 1, iconId: 48 },
+  })
+  const [pack] = calculatePackCE([{
+    name: 'Contract Privilege',
+    price: 360,
+    rechargeEligible: false,
+    items: [
+      { ItemType: 99, ItemId: 2, ItemCount: 30 },
+      { ItemType: 13, ItemId: 4, ItemCount: 103.5 },
+      { ItemType: 99, ItemId: 3, ItemCount: 20_000 },
+    ],
+  }], contractScores)
+
+  assert.equal(pack.originalValue, 2_259)
+  assert.equal(pack.rechargeValue, 0)
+  assert.equal(pack.value, 2_259)
+  assert.equal(pack.paidDiamonds, 180)
+})
+
 test('getBaseItemKey maps homogeneous derived items to their editable bases', () => {
   assert.equal(getBaseItemKey(10, 4), '[10,1]')
   assert.equal(getBaseItemKey(10, 20), '[10,20]')
