@@ -119,6 +119,11 @@ test('witch secret gacha values the weekly 35-pull round with seven free pulls',
   assert.equal(analysis.selected.coreCounts.tenPullGuarantee, 35)
   assert.equal(analysis.selected.coreCounts.weeklyBonus, 10)
   assert.equal(analysis.selected.totalCoreCount, 49.2)
+  assert.equal(analysis.decisionBaselinePulls, 7)
+  assert.equal(analysis.decisionRows[0].pulls, 8)
+  assert.equal(analysis.decisionRows[0].freePulls, 0)
+  assert.equal(analysis.decisionRows[0].paidPulls, 1)
+  assert.ok(Math.abs(analysis.decisionRows[0].totalCoreCount - 1.12) < 1e-9)
 })
 
 test('witch secret weekly rewards cap after 35 pulls but ten-pull value continues', () => {
@@ -174,6 +179,11 @@ test('seraph oracle gacha repeats weekly milestone rounds without extra free pul
   assert.ok(Math.abs(fullAnalysis.noFreeCycleRows[24].coreCounts.relic - 0.6) < 1e-9)
   assert.equal(fullAnalysis.noFreeCycleRows[49].coreCounts.relic, 1.6)
   assert.equal(fullAnalysis.rows.length, 150)
+  assert.equal(fullAnalysis.decisionBaselinePulls, 7)
+  assert.equal(fullAnalysis.decisionRows[0].pulls, 8)
+  assert.equal(fullAnalysis.decisionRows[2].pulls, 10)
+  assert.equal(fullAnalysis.decisionRows[2].paidPulls, 3)
+  assert.equal(fullAnalysis.decisionRows[2].coreCounts.relic, 0.2)
 })
 
 test('seraph oracle can ignore the initial three-pull top-up and analyze from pull 11', () => {
@@ -184,6 +194,8 @@ test('seraph oracle can ignore the initial three-pull top-up and analyze from pu
   })
 
   assert.equal(analysis.baselinePulls, 10)
+  assert.equal(analysis.decisionBaselinePulls, 10)
+  assert.equal(analysis.decisionRows[0].pulls, 11)
   assert.equal(analysis.rows.length, 140)
   assert.equal(analysis.rows[0].pulls, 11)
   assert.equal(analysis.rows[0].freePulls, 0)

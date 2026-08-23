@@ -512,6 +512,7 @@ export default {
   weaponGachaEfficiencyChart: "回数と核心アイテムのコスパ",
   weaponGachaEfficiencyIndex: "コスパ指数",
   weaponGachaEfficiencyScale: "範囲内の最高 = 100",
+  weaponGachaFreeBaselineExcluded: "無料分を基準から除外",
   weaponGachaMilestoneIncluded: "回数報酬込み",
   weaponGachaQuantityChart: "回数と期待アイテム数",
   weaponGachaExpectedQty: "期待数量",

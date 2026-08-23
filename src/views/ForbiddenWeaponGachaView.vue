@@ -47,6 +47,7 @@
           <div class="chart-toolbar-main">
             <div class="card-title">{{ implicitChartTitle }}</div>
             <span class="tag tag-gold">{{ implicitChartTag }}</span>
+            <span v-if="analysis.decisionBaselinePulls" class="tag tag-purple">{{ t('weaponGachaFreeBaselineExcluded') }}</span>
           </div>
           <div class="segmented-control weapon-chart-mode">
             <button
@@ -575,15 +576,20 @@ const chartTooltip = (rows, title, fields) => (params) => {
 const implicitCostOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
-  const rows = analysis.value.rows
+  const rows = analysis.value.decisionRows
   const showEfficiency = implicitChartMode.value === 'efficiency'
-  const positiveCosts = rows.map(row => row.implicitCoreUnit).filter(cost => cost > 0)
-  const bestPositiveCost = positiveCosts.length ? Math.min(...positiveCosts) : 0
+  const comparableCosts = rows
+    .filter(row => row.totalCoreCount > 0)
+    .map(row => row.implicitCoreUnit)
+  const bestCost = comparableCosts.length ? Math.min(...comparableCosts) : 0
+  const worstCost = comparableCosts.length ? Math.max(...comparableCosts) : 0
   const metricValue = row => {
     if (row.totalCoreCount <= 0) return showEfficiency ? 0 : null
     if (!showEfficiency) return Math.round(row.implicitCoreUnit)
-    if (row.implicitCoreUnit <= 0 || bestPositiveCost <= 0) return 100
-    return +Math.min(100, bestPositiveCost / row.implicitCoreUnit * 100).toFixed(1)
+    if (worstCost <= bestCost) return 100
+    return +Math.max(0, Math.min(100,
+      (worstCost - row.implicitCoreUnit) / (worstCost - bestCost) * 100
+    )).toFixed(1)
   }
   const milestonePulls = analysis.value.config.weeklyMilestones?.length
     ? analysis.value.config.weeklyMilestones.map(reward => reward.pull)

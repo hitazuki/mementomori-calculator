@@ -463,6 +463,7 @@ export default {
   weaponGachaEfficiencyChart: "抽數與核心產物性價比",
   weaponGachaEfficiencyIndex: "性價比指數",
   weaponGachaEfficiencyScale: "範圍內最佳 = 100",
+  weaponGachaFreeBaselineExcluded: "免費抽已作為基線",
   weaponGachaMilestoneIncluded: "累抽獎勵已併入",
   weaponGachaQuantityChart: "抽數與預計產物數量",
   weaponGachaExpectedQty: "期望數量",

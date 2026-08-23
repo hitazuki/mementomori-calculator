@@ -469,6 +469,7 @@ export default {
   weaponGachaEfficiencyChart: "Pulls and Core-Item Efficiency",
   weaponGachaEfficiencyIndex: "Efficiency Index",
   weaponGachaEfficiencyScale: "Best in range = 100",
+  weaponGachaFreeBaselineExcluded: "Free pulls used as baseline",
   weaponGachaMilestoneIncluded: "Milestones included",
   weaponGachaQuantityChart: "Pulls and Expected Items",
   weaponGachaExpectedQty: "Expected Quantity",

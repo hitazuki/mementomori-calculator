@@ -496,6 +496,7 @@ export default {
   weaponGachaEfficiencyChart: "횟수와 핵심 아이템 가성비",
   weaponGachaEfficiencyIndex: "가성비 지수",
   weaponGachaEfficiencyScale: "범위 내 최고 = 100",
+  weaponGachaFreeBaselineExcluded: "무료 횟수는 기준선으로 제외",
   weaponGachaMilestoneIncluded: "횟수 보상 포함",
   weaponGachaQuantityChart: "횟수와 기대 아이템 수",
   weaponGachaExpectedQty: "기대 수량",
