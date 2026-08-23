@@ -175,3 +175,23 @@ test('seraph oracle gacha repeats weekly milestone rounds without extra free pul
   assert.equal(fullAnalysis.noFreeCycleRows[49].coreCounts.relic, 1.6)
   assert.equal(fullAnalysis.rows.length, 150)
 })
+
+test('seraph oracle can ignore the initial three-pull top-up and analyze from pull 11', () => {
+  const analysis = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'seraphOracle',
+    selectedPulls: 25,
+    ignoreFirstTopUp3: true,
+  })
+
+  assert.equal(analysis.baselinePulls, 10)
+  assert.equal(analysis.rows.length, 140)
+  assert.equal(analysis.rows[0].pulls, 11)
+  assert.equal(analysis.rows[0].freePulls, 0)
+  assert.equal(analysis.rows[0].paidPulls, 1)
+  assert.equal(analysis.selected.freePulls, 0)
+  assert.equal(analysis.selected.paidPulls, 15)
+  assert.equal(analysis.selected.totalCost, 15 * 300)
+  assert.ok(Math.abs(analysis.selected.coreCounts.relic - 0.4) < 1e-9)
+  assert.equal(analysis.selected.milestoneRewards.length, 3)
+  assert.equal(analysis.noFreeCycleNode.paidPulls, 50)
+})

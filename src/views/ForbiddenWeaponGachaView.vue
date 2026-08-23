@@ -152,7 +152,7 @@
           <input
             class="form-input weapon-pull-input"
             type="number"
-            min="1"
+            :min="selectedPullMin"
             step="1"
             v-model.number="selectedPulls"
             @change="normalizeSelectedPulls"
@@ -161,6 +161,16 @@
         <div class="weapon-preset-row">
           <button v-for="pull in presetPulls" :key="pull" class="btn btn-sm" :class="selectedPulls === pull ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = pull">{{ fmtPulls(pull) }}</button>
         </div>
+        <button
+          v-if="isSeraphOracle"
+          class="btn btn-sm weapon-baseline-toggle"
+          :class="ignoreFirstTopUp3 ? 'btn-primary' : 'btn-ghost'"
+          :aria-pressed="ignoreFirstTopUp3"
+          :title="t('weaponGachaIgnoreFirstTopUp3Hint')"
+          @click="ignoreFirstTopUp3 = !ignoreFirstTopUp3"
+        >
+          {{ t('weaponGachaIgnoreFirstTopUp3') }}
+        </button>
       </div>
 
       <div class="card">
@@ -288,6 +298,7 @@ const { t, locale } = useI18n()
 const selectedBanner = ref('forbidden')
 const selectedPulls = ref(20)
 const showFormula = ref(false)
+const ignoreFirstTopUp3 = ref(false)
 const implicitChartMode = ref('cost')
 const implicitChartModes = [
   { key: 'cost', labelKey: 'weaponGachaCostView' },
@@ -298,15 +309,16 @@ const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
 const isSeraphOracle = computed(() => selectedBanner.value === 'seraphOracle')
 const hasFreePulls = computed(() => Boolean(analysis.value.config.freePullsPerPeriod))
 const usesExpectedCoreSummary = computed(() => analysis.value.config.summaryMode === 'expectedCore' || isWitchSecret.value)
+const selectedPullMin = computed(() => isSeraphOracle.value && ignoreFirstTopUp3.value ? 11 : 1)
 const presetPulls = computed(() => {
   if (isWitchSecret.value) return [7, 15, 25, 35]
-  if (isSeraphOracle.value) return [7, 10, 25, 50, 100, 150]
+  if (isSeraphOracle.value) return ignoreFirstTopUp3.value ? [11, 25, 50, 100, 150] : [7, 10, 25, 50, 100, 150]
   return [10, 20, 50, 100]
 })
 
 const normalizeSelectedPulls = () => {
   const pulls = Math.trunc(Number(selectedPulls.value))
-  selectedPulls.value = Number.isFinite(pulls) ? Math.max(1, pulls) : 1
+  selectedPulls.value = Number.isFinite(pulls) ? Math.max(selectedPullMin.value, pulls) : selectedPullMin.value
 }
 
 const normalizedScores = computed(() => applyDerivedScores(normalizeScores(editableScores)))
@@ -314,6 +326,7 @@ const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScor
   bannerKey: selectedBanner.value,
   selectedPulls: selectedPulls.value,
   maxPulls: WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100,
+  ignoreFirstTopUp3: ignoreFirstTopUp3.value,
 }))
 const selected = computed(() => analysis.value.selected)
 const noFreeCycle = computed(() => analysis.value.noFreeCycleNode)
@@ -404,51 +417,64 @@ const zeroAnalysisRow = {
   implicitCoreUnit: 0,
 }
 
-const rowAtFrom = (rows, pulls) => pulls <= 0
-  ? zeroAnalysisRow
-  : rows[pulls - 1] || rows.at(-1) || zeroAnalysisRow
+const rowAtFrom = (rows, pulls) => {
+  if (pulls <= 0) return zeroAnalysisRow
+  return rows.find(row => row.pulls === pulls)
+    || rows.filter(row => row.pulls <= pulls).at(-1)
+    || zeroAnalysisRow
+}
 
 const rowAtPulls = pulls => rowAtFrom(analysis.value.rows, pulls)
 
-const seraphMilestonePulls = computed(() => {
+const allSeraphMilestonePulls = computed(() => {
   const rewards = analysis.value.config.milestone?.rewards || []
   return [...new Set(rewards.map(reward => reward.pull))]
     .filter(Boolean)
     .sort((a, b) => a - b)
 })
 
-const seraphRoundChance = pullInRound => {
-  if (pullInRound >= 50) return 1
-  if (pullInRound >= 25) return 1 - (1 - 0.2) * (1 - 0.4)
-  if (pullInRound >= 10) return 0.2
-  return 0
-}
+const seraphMilestonePulls = computed(() => allSeraphMilestonePulls.value
+  .filter(pull => pull > analysis.value.baselinePulls))
 
-const buildSeraphMilestoneRows = (rows, noteKey) => seraphMilestonePulls.value.map(pullInRound => ({
+const seraphRoundChance = (pullInRound, baselinePulls = 0) => 1 - (analysis.value.config.milestone?.rewards || [])
+  .filter(reward => reward.core && reward.pull > baselinePulls && reward.pull <= pullInRound)
+  .reduce((missChance, reward) => missChance * (1 - (reward.rate || 0)), 1)
+
+const buildSeraphMilestoneRows = (rows, noteKey, milestonePulls, baselinePulls = 0) => milestonePulls.map(pullInRound => ({
   ...rowAtFrom(rows, pullInRound),
   pullInRound,
-  roundChance: seraphRoundChance(pullInRound),
+  roundChance: seraphRoundChance(pullInRound, baselinePulls),
   note: t(noteKey),
 }))
 
 const seraphMilestoneGroups = computed(() => [
   {
     key: 'withFree',
-    titleKey: 'weaponGachaFirstCycleTitle',
-    rows: buildSeraphMilestoneRows(analysis.value.rows, 'weaponGachaFirstCycleNote'),
+    titleKey: ignoreFirstTopUp3.value ? 'weaponGachaIgnoredFirstCycleTitle' : 'weaponGachaFirstCycleTitle',
+    shortTitleKey: ignoreFirstTopUp3.value ? 'weaponGachaIgnoredFirstCycleShort' : 'weaponGachaFirstCycleShort',
+    rows: buildSeraphMilestoneRows(
+      analysis.value.rows,
+      ignoreFirstTopUp3.value ? 'weaponGachaIgnoredFirstCycleNote' : 'weaponGachaFirstCycleNote',
+      seraphMilestonePulls.value,
+      analysis.value.baselinePulls
+    ),
   },
   {
     key: 'noFree',
     titleKey: 'weaponGachaNoFreeCycleTitle',
-    rows: buildSeraphMilestoneRows(analysis.value.noFreeCycleRows, 'weaponGachaNoFreeCycleNote'),
+    shortTitleKey: 'weaponGachaNoFreeCycleShort',
+    rows: buildSeraphMilestoneRows(
+      analysis.value.noFreeCycleRows,
+      'weaponGachaNoFreeCycleNote',
+      allSeraphMilestonePulls.value
+    ),
   },
 ])
 
-const buildSeraphSegmentRows = rows => {
+const buildSeraphSegmentRows = (rows, milestonePulls, baselinePulls = 0) => {
   const cycle = analysis.value.config.milestone?.cycle || 50
-  const milestones = seraphMilestonePulls.value
-  const edges = [0]
-  milestones.forEach(pull => {
+  const edges = [baselinePulls]
+  milestonePulls.forEach(pull => {
     const edge = Math.min(pull, cycle)
     if (edge <= cycle) edges.push(edge)
   })
@@ -457,7 +483,7 @@ const buildSeraphSegmentRows = rows => {
     .sort((a, b) => a - b)
     .slice(1)
     .map((end, index, sortedEdges) => {
-      const start = index === 0 ? 0 : sortedEdges[index - 1]
+      const start = index === 0 ? baselinePulls : sortedEdges[index - 1]
       const before = rowAtFrom(rows, start)
       const after = rowAtFrom(rows, end)
       const expectedRelic = after.totalCoreCount - before.totalCoreCount
@@ -484,13 +510,17 @@ const buildSeraphSegmentRows = rows => {
 const seraphSegmentGroups = computed(() => [
   {
     key: 'withFree',
-    titleKey: 'weaponGachaFirstCycleShort',
-    rows: buildSeraphSegmentRows(analysis.value.rows),
+    titleKey: ignoreFirstTopUp3.value ? 'weaponGachaIgnoredFirstCycleShort' : 'weaponGachaFirstCycleShort',
+    rows: buildSeraphSegmentRows(
+      analysis.value.rows,
+      seraphMilestonePulls.value,
+      analysis.value.baselinePulls
+    ),
   },
   {
     key: 'noFree',
     titleKey: 'weaponGachaNoFreeCycleShort',
-    rows: buildSeraphSegmentRows(analysis.value.noFreeCycleRows),
+    rows: buildSeraphSegmentRows(analysis.value.noFreeCycleRows, allSeraphMilestonePulls.value),
   },
 ])
 
@@ -501,13 +531,16 @@ const seraphValueStructureRows = computed(() => seraphMilestoneGroups.value.flat
     ...row,
     groupKey: group.key,
     groupTitle: t(group.titleKey),
-    groupShortTitle: t(group.key === 'withFree' ? 'weaponGachaFirstCycleShort' : 'weaponGachaNoFreeCycleShort'),
-    label: `${t(group.key === 'withFree' ? 'weaponGachaFirstCycleShort' : 'weaponGachaNoFreeCycleShort')}\n${fmtPulls(row.pullInRound)}`,
+    label: `${t(group.shortTitleKey)}\n${fmtPulls(row.pullInRound)}`,
   }))
 ))
 
 watch(selectedBanner, banner => {
   selectedPulls.value = banner === 'witchSecret' ? 35 : banner === 'seraphOracle' ? 50 : 20
+})
+
+watch(ignoreFirstTopUp3, enabled => {
+  if (enabled && selectedPulls.value < 11) selectedPulls.value = 11
 })
 
 const fmtDiamonds = value => t('diamondValue', { value: Math.round(value).toLocaleString() })
@@ -547,6 +580,7 @@ const implicitCostOption = computed(() => {
   const positiveCosts = rows.map(row => row.implicitCoreUnit).filter(cost => cost > 0)
   const bestPositiveCost = positiveCosts.length ? Math.min(...positiveCosts) : 0
   const metricValue = row => {
+    if (row.totalCoreCount <= 0) return null
     if (!showEfficiency) return Math.round(row.implicitCoreUnit)
     if (row.implicitCoreUnit <= 0 || bestPositiveCost <= 0) return 100
     return +Math.min(100, bestPositiveCost / row.implicitCoreUnit * 100).toFixed(1)
@@ -563,6 +597,7 @@ const implicitCostOption = computed(() => {
       coord: [row.pulls, metricValue(row)],
       value: String(row.pulls),
     }))
+    .filter(point => point.coord[1] != null)
 
   return {
     ...baseChartOption('', '', isDark),
@@ -928,6 +963,11 @@ const sideContributionOption = computed(() => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.weapon-baseline-toggle {
+  width: 100%;
+  margin-top: 10px;
 }
 
 .weapon-result-list,

@@ -204,8 +204,9 @@ export function getForbiddenMilestoneRewards(pulls, config = FORBIDDEN_WEAPON_GA
 export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
   const config = WEAPON_GACHA_CONFIGS[options.bannerKey] || FORBIDDEN_WEAPON_GACHA
   const maxPulls = options.maxPulls || config.maxPulls
+  const baselinePulls = config.key === 'seraphOracle' && options.ignoreFirstTopUp3 ? 10 : 0
   const requestedPulls = Math.trunc(Number(options.selectedPulls))
-  const selectedPulls = Number.isFinite(requestedPulls) ? Math.max(1, requestedPulls) : 20
+  const selectedPulls = Number.isFinite(requestedPulls) ? Math.max(baselinePulls + 1, requestedPulls) : Math.max(baselinePulls + 1, 20)
   const ticketValue = getUnitScore(
     scores,
     config.costItem.itype,
@@ -297,8 +298,53 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     }
   }
 
-  const rows = Array.from({ length: maxPulls }, (_, index) => buildAtPulls(index + 1))
-  const selected = buildAtPulls(selectedPulls)
+  const subtractBaseline = (pulls, overrides = {}) => {
+    const current = buildAtPulls(pulls, overrides)
+    if (!baselinePulls) return current
+
+    const baseline = buildAtPulls(baselinePulls, overrides)
+    const coreCounts = Object.fromEntries(Object.keys(current.coreCounts).map(key => [
+      key,
+      (current.coreCounts[key] || 0) - (baseline.coreCounts[key] || 0),
+    ]))
+    const sideQuantities = Object.fromEntries(Object.keys(current.sideQuantities).map(key => [
+      key,
+      (current.sideQuantities[key] || 0) - (baseline.sideQuantities[key] || 0),
+    ]))
+    const sideValues = Object.fromEntries(Object.keys(current.sideValues).map(key => [
+      key,
+      (current.sideValues[key] || 0) - (baseline.sideValues[key] || 0),
+    ]))
+    const totalCost = current.totalCost - baseline.totalCost
+    const sideValue = current.sideValue - baseline.sideValue
+    const totalCoreCount = Object.values(coreCounts).reduce((sum, qty) => sum + qty, 0)
+    const rawCoreBudget = totalCost - sideValue
+    const coreBudget = Math.max(0, rawCoreBudget)
+
+    return {
+      ...current,
+      paidPulls: current.paidPulls - baseline.paidPulls,
+      freePulls: current.freePulls - baseline.freePulls,
+      totalCost,
+      originalDiamondCost: current.originalDiamondCost - baseline.originalDiamondCost,
+      sideValue,
+      sideRecoveryRate: totalCost > 0 ? sideValue / totalCost : 0,
+      coreBudget,
+      rawCoreBudget,
+      implicitCoreUnit: totalCoreCount > 0 ? coreBudget / totalCoreCount : 0,
+      coreCounts,
+      milestoneRewards: current.milestoneRewards.filter(reward => reward.pull > baselinePulls),
+      totalCoreCount,
+      sideQuantities,
+      sideValues,
+    }
+  }
+
+  const rows = Array.from(
+    { length: Math.max(0, maxPulls - baselinePulls) },
+    (_, index) => subtractBaseline(baselinePulls + index + 1)
+  )
+  const selected = subtractBaseline(selectedPulls)
   const bestNode = rows.reduce(
     (best, row) => row.implicitCoreUnit < best.implicitCoreUnit ? row : best,
     rows[0]
@@ -309,6 +355,7 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     ticketValue,
     sideDrops,
     sideValuePerPull,
+    baselinePulls,
     selectedPulls,
     selected,
     rows,
