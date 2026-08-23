@@ -580,7 +580,7 @@ const implicitCostOption = computed(() => {
   const positiveCosts = rows.map(row => row.implicitCoreUnit).filter(cost => cost > 0)
   const bestPositiveCost = positiveCosts.length ? Math.min(...positiveCosts) : 0
   const metricValue = row => {
-    if (row.totalCoreCount <= 0) return null
+    if (row.totalCoreCount <= 0) return showEfficiency ? 0 : null
     if (!showEfficiency) return Math.round(row.implicitCoreUnit)
     if (row.implicitCoreUnit <= 0 || bestPositiveCost <= 0) return 100
     return +Math.min(100, bestPositiveCost / row.implicitCoreUnit * 100).toFixed(1)
