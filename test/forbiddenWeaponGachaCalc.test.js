@@ -233,7 +233,7 @@ test('seraph oracle can ignore the initial three-pull top-up and analyze from pu
   assert.equal(analysis.noFreeCycleNode.paidPulls, 50)
 })
 
-test('seraph cross-week comparison uses equal paid pulls and exposes continuous-week loss', () => {
+test('seraph cross-week comparison uses equal paid pulls and exposes expected relic loss', () => {
   const analysis = buildForbiddenWeaponGachaAnalysis(scores, {
     bannerKey: 'seraphOracle',
     selectedPulls: 50,
@@ -246,9 +246,11 @@ test('seraph cross-week comparison uses equal paid pulls and exposes continuous-
   assert.deepEqual(rows.map(row => row.splitWeekStages), [5, 10, 15, 20, 25])
   assert.ok(rows.every(row => row.continuous.paidPulls === row.splitWeeks.paidPulls))
   assert.ok(rows.every(row => row.continuous.implicitCoreUnit > row.splitWeeks.implicitCoreUnit))
-  assert.ok(rows.every(row => row.cumulativeExtraLoss > 0))
+  assert.ok(rows.every(row => row.expectedRelicLoss > 0))
   assert.ok(rows.slice(1).every((row, index) =>
-    row.cumulativeExtraLoss > rows[index].cumulativeExtraLoss
+    row.expectedRelicLoss > rows[index].expectedRelicLoss
   ))
+  assert.ok(Math.abs(rows[0].expectedRelicLoss - 0.6) < 1e-9)
+  assert.ok(Math.abs(rows[4].expectedRelicLoss - 3) < 1e-9)
   assert.ok(rows.every(row => row.continuous.totalCost === row.splitWeeks.totalCost))
 })

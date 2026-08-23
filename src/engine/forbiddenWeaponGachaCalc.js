@@ -425,10 +425,7 @@ export function buildSeraphCrossWeekComparisonRows(analysis, pullCounts = [200, 
     const continuous = scale(full50, singleWeekStages)
     const splitWeeks = scale(stage23, splitWeekStages)
     const comparablePulls = Math.min(continuous.paidPulls, splitWeeks.paidPulls)
-    const cumulativeExtraLoss = Math.max(
-      0,
-      continuous.coreBudget - continuous.expectedRelic * splitWeeks.implicitCoreUnit
-    )
+    const expectedRelicLoss = Math.max(0, splitWeeks.expectedRelic - continuous.expectedRelic)
     return {
       requestedPulls,
       comparablePulls,
@@ -436,8 +433,10 @@ export function buildSeraphCrossWeekComparisonRows(analysis, pullCounts = [200, 
       splitWeekStages,
       continuous,
       splitWeeks,
-      cumulativeExtraLoss,
-      extraLossRate: continuous.totalCost > 0 ? cumulativeExtraLoss / continuous.totalCost : 0,
+      expectedRelicLoss,
+      expectedRelicLossRate: splitWeeks.expectedRelic > 0
+        ? expectedRelicLoss / splitWeeks.expectedRelic
+        : 0,
     }
   })
 }

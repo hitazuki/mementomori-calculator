@@ -70,7 +70,7 @@
       <section v-if="isSeraphOracle" class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
-            <div class="card-title">{{ t('weaponGachaCrossWeekStrategyTitle') }}</div>
+            <div class="card-title">{{ t('weaponGachaRelicExpectationLossTitle') }}</div>
             <span class="tag tag-gold">{{ t('weaponGachaSamePaidPulls') }}</span>
             <span class="tag tag-purple">{{ t('weaponGachaStage1CommonBaseline') }}</span>
             <span class="tag tag-purple">{{ t('weaponGachaFullStagesOnly') }}</span>
@@ -647,53 +647,45 @@ const seraphCrossWeekOption = computed(() => {
       formatter: params => {
         const list = Array.isArray(params) ? params : [params]
         const row = rows[list[0].dataIndex]
-        return `<b style="color:var(--gold)">${fmtPulls(row.requestedPulls)}</b><br>${t('weaponGachaContinuousSingleWeek')}: <b>${row.singleWeekStages} × 50</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.continuous.expectedRelic)}</b> · ${t('weaponGachaRelicValue')}: <b>${fmtUnitDiamonds(row.continuous.implicitCoreUnit)}</b><br>${t('weaponGachaSplitWeeksStage23')}: <b>${row.splitWeekStages} × 40</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.splitWeeks.expectedRelic)}</b> · ${t('weaponGachaRelicValue')}: <b>${fmtUnitDiamonds(row.splitWeeks.implicitCoreUnit)}</b><br>${t('weaponGachaCumulativeExtraLoss')}: <b>${fmtDiamonds(row.cumulativeExtraLoss)}</b> (${fmtPercent(row.extraLossRate)})`
+        return `<b style="color:var(--gold)">${fmtPulls(row.requestedPulls)}</b><br>${t('weaponGachaContinuousSingleWeek')}: <b>${row.singleWeekStages} × 50</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.continuous.expectedRelic)}</b><br>${t('weaponGachaSplitWeeksStage23')}: <b>${row.splitWeekStages} × 40</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.splitWeeks.expectedRelic)}</b><br>${t('weaponGachaExpectedRelicLoss')}: <b>${fmtQty(row.expectedRelicLoss)}</b> (${fmtPercent(row.expectedRelicLossRate)})`
       },
     },
     legend: { ...theme.legend, top: 8, right: 16 },
-    grid: { top: 54, right: 78, bottom: 52, left: 76 },
+    grid: { top: 54, right: 24, bottom: 52, left: 58 },
     xAxis: {
       type: 'category',
       data: rows.map(row => fmtPulls(row.requestedPulls)),
       axisLabel: { ...theme.axisLabel, interval: 0 },
       axisLine: theme.axisLine,
     },
-    yAxis: [
-      {
-        type: 'value',
-        axisLabel: theme.axisLabel,
-        splitLine: theme.splitLine,
-      },
-      {
-        type: 'value',
-        min: 0,
-        axisLabel: { ...theme.axisLabel, formatter: value => fmtDiamonds(value) },
-        splitLine: { show: false },
-      },
-    ],
+    yAxis: {
+      type: 'value',
+      min: 0,
+      axisLabel: theme.axisLabel,
+      splitLine: theme.splitLine,
+    },
     series: [
       {
-        name: t('weaponGachaContinuousSingleWeek'),
+        name: t('weaponGachaSingleWeekExpectedRelic'),
         type: 'bar',
-        barMaxWidth: 42,
+        stack: 'relicExpectation',
+        barMaxWidth: 62,
         itemStyle: { color: LINE_COLORS[1] },
         data: rows.map(row => +row.continuous.expectedRelic.toFixed(2)),
       },
       {
-        name: t('weaponGachaSplitWeeksStage23'),
+        name: t('weaponGachaExpectedRelicLoss'),
         type: 'bar',
-        barMaxWidth: 42,
-        itemStyle: { color: LINE_COLORS[0] },
-        data: rows.map(row => +row.splitWeeks.expectedRelic.toFixed(2)),
-      },
-      {
-        name: t('weaponGachaCumulativeExtraLoss'),
-        type: 'line',
-        yAxisIndex: 1,
-        symbolSize: 7,
-        lineStyle: { width: 3, color: LINE_COLORS[3] },
-        itemStyle: { color: LINE_COLORS[3] },
-        data: rows.map(row => +row.cumulativeExtraLoss.toFixed(2)),
+        stack: 'relicExpectation',
+        barMaxWidth: 62,
+        itemStyle: { color: LINE_COLORS[4] },
+        label: {
+          show: true,
+          position: 'top',
+          color: theme.axisLabel.color,
+          formatter: item => fmtQty(rows[item.dataIndex].splitWeeks.expectedRelic),
+        },
+        data: rows.map(row => +row.expectedRelicLoss.toFixed(2)),
       },
     ],
   }
