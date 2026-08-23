@@ -33,7 +33,7 @@
           <div class="stat-label">{{ hasFreePulls ? t('weaponGachaPaidPulls') : t('weaponGachaSideRecovery') }}</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">{{ fmtDiamonds(selected.implicitCoreUnit) }}</div>
+          <div class="stat-value">{{ fmtUnitDiamonds(selected.implicitCoreUnit) }}</div>
           <div class="stat-label">{{ implicitUnitLabel }}</div>
         </div>
         <div class="stat-box">
@@ -99,7 +99,7 @@
                     <td>{{ row.freePulls }} / {{ row.paidPulls }}</td>
                     <td>{{ fmtDiamonds(row.sideValue) }}</td>
                     <td>{{ fmtQty(row.totalCoreCount) }}</td>
-                    <td>{{ fmtDiamonds(row.implicitCoreUnit) }}</td>
+                    <td>{{ fmtUnitDiamonds(row.implicitCoreUnit) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -229,7 +229,7 @@
           </div>
           <div>
             <span>{{ t('weaponGachaRelicValue') }}</span>
-            <b>{{ fmtDiamonds(noFreeCycle.implicitCoreUnit) }}</b>
+            <b>{{ fmtUnitDiamonds(noFreeCycle.implicitCoreUnit) }}</b>
           </div>
         </div>
       </div>
@@ -545,6 +545,9 @@ watch(ignoreFirstTopUp3, enabled => {
 })
 
 const fmtDiamonds = value => t('diamondValue', { value: Math.round(value).toLocaleString() })
+const fmtUnitDiamonds = value => t('diamondValue', {
+  value: Number(value).toLocaleString(locale.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+})
 const fmtPulls = value => t('pullCount', { count: value })
 const fmtScoreValue = value => {
   if (Math.abs(value) > 0 && Math.abs(value) < 1) return value.toFixed(3)
@@ -585,7 +588,7 @@ const implicitCostOption = computed(() => {
   const worstCost = comparableCosts.length ? Math.max(...comparableCosts) : 0
   const metricValue = row => {
     if (row.totalCoreCount <= 0) return showEfficiency ? 0 : null
-    if (!showEfficiency) return Math.round(row.implicitCoreUnit)
+    if (!showEfficiency) return +row.implicitCoreUnit.toFixed(2)
     if (worstCost <= bestCost) return 100
     return +Math.max(0, Math.min(100,
       (worstCost - row.implicitCoreUnit) / (worstCost - bestCost) * 100
@@ -611,7 +614,7 @@ const implicitCostOption = computed(() => {
       ...theme.tooltip,
       trigger: 'axis',
       formatter: chartTooltip(rows, t('weaponGachaPullCount'), [
-        ...(showEfficiency ? [{ label: implicitUnitLabel.value, format: row => fmtDiamonds(row.implicitCoreUnit) }] : []),
+        ...(showEfficiency ? [{ label: implicitUnitLabel.value, format: row => fmtUnitDiamonds(row.implicitCoreUnit) }] : []),
         { label: t('weaponGachaSideRecovery'), format: row => fmtPercent(row.sideRecoveryRate) },
         { label: t('weaponGachaExpectedCore'), format: row => fmtQty(row.totalCoreCount) },
       ]),
@@ -670,7 +673,7 @@ const seraphSegmentOption = computed(() => {
         list.forEach(item => {
           const group = groups[item.seriesIndex]
           const row = group.rows[item.dataIndex]
-          html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${fmtDiamonds(row.implicitCoreUnit)}</b><br>${t('weaponGachaFreePaidPulls')}: <b>${row.freePulls} / ${row.paidPulls}</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.expectedRelic)}</b><br>`
+          html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${fmtUnitDiamonds(row.implicitCoreUnit)}</b><br>${t('weaponGachaFreePaidPulls')}: <b>${row.freePulls} / ${row.paidPulls}</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.expectedRelic)}</b><br>`
         })
         return html
       },
@@ -693,7 +696,7 @@ const seraphSegmentOption = computed(() => {
         type: 'bar',
         barMaxWidth: 42,
         itemStyle: { color: LINE_COLORS[index] },
-        data: group.rows.map(row => Math.round(row.implicitCoreUnit)),
+        data: group.rows.map(row => +row.implicitCoreUnit.toFixed(2)),
       })),
   }
 })
@@ -711,7 +714,7 @@ const seraphValueStructureOption = computed(() => {
       formatter: params => {
         const list = Array.isArray(params) ? params : [params]
         const row = rows[list[0].dataIndex]
-        let html = `<b style="color:var(--gold)">${row.groupTitle} · ${fmtPulls(row.pullInRound)}</b><br>${t('weaponGachaFreePaidPulls')}: <b>${row.freePulls} / ${row.paidPulls}</b><br>${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.totalCoreCount)}</b><br>${t('weaponGachaRelicValue')}: <b>${fmtDiamonds(row.implicitCoreUnit)}</b><br>`
+        let html = `<b style="color:var(--gold)">${row.groupTitle} · ${fmtPulls(row.pullInRound)}</b><br>${t('weaponGachaFreePaidPulls')}: <b>${row.freePulls} / ${row.paidPulls}</b><br>${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.totalCoreCount)}</b><br>${t('weaponGachaRelicValue')}: <b>${fmtUnitDiamonds(row.implicitCoreUnit)}</b><br>`
         list.forEach(item => {
           html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${fmtDiamonds(item.value)}</b><br>`
         })
