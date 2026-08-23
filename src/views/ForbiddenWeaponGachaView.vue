@@ -73,6 +73,19 @@
             <div class="card-title">{{ t('weaponGachaCoreDistributionTitle') }}</div>
             <span class="tag tag-gold">{{ coreDistributionTag }}</span>
             <span v-if="analysis.decisionBaselinePulls" class="tag tag-purple">{{ t('weaponGachaFreeBaselineExcluded') }}</span>
+            <span class="tag tag-purple">{{ t('weaponGachaStage1DistributionExcluded') }}</span>
+          </div>
+          <div class="segmented-control weapon-chart-mode">
+            <button
+              v-for="mode in coreDistributionPeriodModes"
+              :key="mode.key"
+              class="btn btn-sm"
+              :class="coreDistributionPeriodMode === mode.key ? 'btn-primary' : 'btn-ghost'"
+              :aria-pressed="coreDistributionPeriodMode === mode.key"
+              @click="coreDistributionPeriodMode = mode.key"
+            >
+              {{ t(mode.labelKey) }}
+            </button>
           </div>
         </div>
         <div class="chart-frame weapon-chart-frame">
@@ -123,6 +136,18 @@
           <div class="chart-toolbar-main">
             <div class="card-title">{{ quantityChartTitle }}</div>
             <span class="tag tag-purple">{{ quantityChartTag }}</span>
+          </div>
+          <div v-if="isWitchSecret" class="segmented-control weapon-chart-mode">
+            <button
+              v-for="mode in coreDistributionPeriodModes"
+              :key="mode.key"
+              class="btn btn-sm"
+              :class="coreDistributionPeriodMode === mode.key ? 'btn-primary' : 'btn-ghost'"
+              :aria-pressed="coreDistributionPeriodMode === mode.key"
+              @click="coreDistributionPeriodMode = mode.key"
+            >
+              {{ t(mode.labelKey) }}
+            </button>
           </div>
         </div>
         <div class="chart-frame weapon-chart-frame">
@@ -305,9 +330,14 @@ const showFormula = ref(false)
 const ignoreFirstTopUp3 = ref(false)
 const implicitChartMode = ref('cost')
 const seraphStrategyChartMode = ref('cost')
+const coreDistributionPeriodMode = ref('singleWeek')
 const implicitChartModes = [
   { key: 'cost', labelKey: 'weaponGachaCostView' },
   { key: 'efficiency', labelKey: 'weaponGachaEfficiencyView' },
+]
+const coreDistributionPeriodModes = [
+  { key: 'singleWeek', labelKey: 'weaponGachaDistributionSingleWeek' },
+  { key: 'weeklyRound', labelKey: 'weaponGachaDistributionWeeklyRound' },
 ]
 const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
 const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
@@ -334,7 +364,9 @@ const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScor
   ignoreFirstTopUp3: ignoreFirstTopUp3.value,
 }))
 const selected = computed(() => analysis.value.selected)
-const coreDistributions = computed(() => buildCoreProductProbabilityDistributions(analysis.value))
+const coreDistributions = computed(() => buildCoreProductProbabilityDistributions(analysis.value, {
+  periodMode: coreDistributionPeriodMode.value,
+}))
 const noFreeCycle = computed(() => analysis.value.noFreeCycleNode)
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
 const tr = (key, fallback, params = {}) => key ? t(key, params) : fallback
@@ -363,7 +395,7 @@ const quantityChartTag = computed(() => isSeraphOracle.value
   ? t('weaponGachaValueConverted')
   : coreDistributionTag.value)
 const coreDistributionTag = computed(() => t('weaponGachaDistributionPaidPulls', {
-  count: selected.value.paidPulls,
+  count: coreDistributions.value[0]?.decisionPulls || 0,
 }))
 
 function itemName(itype, iid, fallback = '') {

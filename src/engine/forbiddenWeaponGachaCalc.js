@@ -492,10 +492,39 @@ const shiftPmf = (pmf, quantity) => new Map(
   [...pmf].map(([currentQuantity, probability]) => [currentQuantity + quantity, probability])
 )
 
-export function buildCoreProductProbabilityDistributions(analysis) {
+export function buildCoreProductProbabilityDistributions(analysis, options = {}) {
   const config = analysis?.config
   if (!config) return []
   const isWitchSecret = config.key === 'witchSecret'
+  const isSeraphOracle = config.key === 'seraphOracle'
+  const periodMode = options.periodMode || 'singleWeek'
+  const decisionPulls = isSeraphOracle
+    ? Math.max(0, analysis.selectedPulls - 10)
+    : analysis.selected.paidPulls
+  const repeatMilestones = (pulls, cycleLength, milestones) => {
+    const rewards = []
+    for (let cycleStart = 0; cycleStart < pulls; cycleStart += cycleLength) {
+      milestones.forEach(milestone => {
+        if (cycleStart + milestone.offset <= pulls) rewards.push(milestone)
+      })
+    }
+    return rewards
+  }
+  const milestoneRewards = isWitchSecret && periodMode === 'weeklyRound'
+    ? repeatMilestones(decisionPulls, 28, [
+        { offset: 8, key: 'weeklyBonus', qty: 2, rate: 1 },
+        { offset: 18, key: 'weeklyBonus', qty: 3, rate: 1 },
+        { offset: 28, key: 'weeklyBonus', qty: 3, rate: 1 },
+      ])
+    : isSeraphOracle && periodMode === 'weeklyRound'
+      ? repeatMilestones(decisionPulls, 40, [
+          { offset: 15, key: 'relic', qty: 1, rate: 0.40 },
+          { offset: 40, key: 'relic', qty: 1, rate: 1 },
+        ])
+      : isSeraphOracle
+        ? (analysis.cumulativeSelected.milestoneRewards || [])
+            .filter(reward => reward.core && reward.pull > 10)
+        : (analysis.selected.milestoneRewards || [])
   const products = isWitchSecret
     ? [{
         key: 'magicCrystal',
@@ -517,14 +546,14 @@ export function buildCoreProductProbabilityDistributions(analysis) {
     sources.forEach(source => {
       if (source.rate > 0) {
         pmf = convolvePmfs(pmf, buildBinomialPmf(
-          analysis.selected.paidPulls,
+          decisionPulls,
           source.rate,
           source.qty || 1
         ))
       }
-      deterministicQuantity += analysis.selected.paidPulls * (source.perPullQty || 0)
+      deterministicQuantity += decisionPulls * (source.perPullQty || 0)
     })
-    ;(analysis.selected.milestoneRewards || [])
+    ;milestoneRewards
       .filter(reward => product.sourceKeys.has(reward.key))
       .forEach(reward => {
         const quantity = reward.qty || 0
@@ -545,6 +574,7 @@ export function buildCoreProductProbabilityDistributions(analysis) {
       points,
       expected,
       probabilityAtLeastOne,
+      decisionPulls,
     }
   })
 }
