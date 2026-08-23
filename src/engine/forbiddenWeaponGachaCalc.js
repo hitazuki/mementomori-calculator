@@ -204,7 +204,8 @@ export function getForbiddenMilestoneRewards(pulls, config = FORBIDDEN_WEAPON_GA
 export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
   const config = WEAPON_GACHA_CONFIGS[options.bannerKey] || FORBIDDEN_WEAPON_GACHA
   const maxPulls = options.maxPulls || config.maxPulls
-  const selectedPulls = Math.max(1, Math.min(maxPulls, Number(options.selectedPulls) || 20))
+  const requestedPulls = Math.trunc(Number(options.selectedPulls))
+  const selectedPulls = Number.isFinite(requestedPulls) ? Math.max(1, requestedPulls) : 20
   const ticketValue = getUnitScore(
     scores,
     config.costItem.itype,
@@ -303,14 +304,6 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     rows[0]
   )
 
-  const defaultComparePulls = config.key === 'witchSecret'
-    ? [config.freePullsPerPeriod, 15, 25, config.weeklyCap, selectedPulls, (config.weeklyCap || 35) + 10]
-    : config.milestone?.cycle
-      ? [7, 10, 25, config.milestone.cycle, selectedPulls, config.milestone.cycle * 2, config.milestone.cycle * 3]
-    : [10, 20, selectedPulls]
-  const comparePulls = [...new Set(defaultComparePulls.filter(pull => pull >= 1 && pull <= maxPulls))]
-    .sort((a, b) => a - b)
-
   return {
     config,
     ticketValue,
@@ -319,7 +312,6 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     selectedPulls,
     selected,
     rows,
-    compareRows: comparePulls.map(buildAtPulls),
     bestNode,
     weeklyFullNode: config.weeklyCap ? buildAtPulls(config.weeklyCap) : null,
     noFreeCycleNode: config.milestone?.cycle

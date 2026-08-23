@@ -51,6 +51,18 @@ test('milestone rewards alternate every 10 pulls and do not reset', () => {
   assert.equal(at50.milestoneRewards.length, 5)
 })
 
+test('selected pull count can exceed the chart range', () => {
+  const analysis = buildForbiddenWeaponGachaAnalysis(scores, {
+    selectedPulls: 250,
+    maxPulls: 100,
+  })
+
+  assert.equal(analysis.rows.length, 100)
+  assert.equal(analysis.selectedPulls, 250)
+  assert.equal(analysis.selected.pulls, 250)
+  assert.equal(analysis.selected.milestoneRewards.length, 25)
+})
+
 test('implicit core unit improves at milestone nodes', () => {
   const analysis = buildForbiddenWeaponGachaAnalysis(scores, { selectedPulls: 20 })
   const at9 = analysis.rows[8]
@@ -162,6 +174,4 @@ test('seraph oracle gacha repeats weekly milestone rounds without extra free pul
   assert.ok(Math.abs(fullAnalysis.noFreeCycleRows[24].coreCounts.relic - 0.6) < 1e-9)
   assert.equal(fullAnalysis.noFreeCycleRows[49].coreCounts.relic, 1.6)
   assert.equal(fullAnalysis.rows.length, 150)
-  assert.ok(fullAnalysis.compareRows.some(row => row.pulls === 100))
-  assert.ok(fullAnalysis.compareRows.some(row => row.pulls === 150))
 })

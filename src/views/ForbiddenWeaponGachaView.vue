@@ -119,23 +119,12 @@
         </div>
       </section>
 
-      <section class="weapon-charts-row">
-        <div class="card weapon-chart-card">
-          <div class="chart-toolbar">
-            <div class="card-title">{{ t('weaponGachaCostBreakdown') }}</div>
-          </div>
-          <div class="chart-frame weapon-chart-frame-sm">
-            <v-chart class="chart" :option="costBreakdownOption" autoresize />
-          </div>
+      <section class="card weapon-chart-card">
+        <div class="chart-toolbar">
+          <div class="card-title">{{ t('weaponGachaSideContribution') }}</div>
         </div>
-
-        <div class="card weapon-chart-card">
-          <div class="chart-toolbar">
-            <div class="card-title">{{ t('weaponGachaSideContribution') }}</div>
-          </div>
-          <div class="chart-frame weapon-chart-frame-sm">
-            <v-chart class="chart" :option="sideContributionOption" autoresize />
-          </div>
+        <div class="chart-frame weapon-chart-frame">
+          <v-chart class="chart" :option="sideContributionOption" autoresize />
         </div>
       </section>
     </div>
@@ -148,8 +137,14 @@
             <span>{{ t('weaponGachaForSummary') }}</span>
             <span class="value-display">{{ fmtPulls(selectedPulls) }}</span>
           </label>
-          <input class="form-range" type="range" min="1" :max="pullMax" step="1" v-model.number="selectedPulls">
-          <input class="form-input weapon-pull-input" type="number" min="1" :max="pullMax" v-model.number="selectedPulls">
+          <input
+            class="form-input weapon-pull-input"
+            type="number"
+            min="1"
+            step="1"
+            v-model.number="selectedPulls"
+            @change="normalizeSelectedPulls"
+          >
         </div>
         <div class="weapon-preset-row">
           <button v-for="pull in presetPulls" :key="pull" class="btn btn-sm" :class="selectedPulls === pull ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = pull">{{ fmtPulls(pull) }}</button>
@@ -286,12 +281,16 @@ const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
 const isSeraphOracle = computed(() => selectedBanner.value === 'seraphOracle')
 const hasFreePulls = computed(() => Boolean(analysis.value.config.freePullsPerPeriod))
 const usesExpectedCoreSummary = computed(() => analysis.value.config.summaryMode === 'expectedCore' || isWitchSecret.value)
-const pullMax = computed(() => WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100)
 const presetPulls = computed(() => {
   if (isWitchSecret.value) return [7, 15, 25, 35]
   if (isSeraphOracle.value) return [7, 10, 25, 50, 100, 150]
   return [10, 20, 50, 100]
 })
+
+const normalizeSelectedPulls = () => {
+  const pulls = Math.trunc(Number(selectedPulls.value))
+  selectedPulls.value = Number.isFinite(pulls) ? Math.max(1, pulls) : 1
+}
 
 const normalizedScores = computed(() => applyDerivedScores(normalizeScores(editableScores)))
 const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScores.value, {
@@ -734,45 +733,6 @@ const quantityOption = computed(() => {
   }
 })
 
-const costBreakdownOption = computed(() => {
-  const isDark = currentTheme.value === 'dark'
-  const theme = getMoriTheme(isDark)
-  const rows = analysis.value.compareRows
-
-  return {
-    ...baseChartOption('', '', isDark),
-    tooltip: { ...theme.tooltip, trigger: 'axis', formatter: chartTooltip(rows, t('weaponGachaCostBreakdown')) },
-    legend: { ...theme.legend, top: 8, right: 16 },
-    xAxis: {
-      type: 'category',
-      data: rows.map(row => fmtPulls(row.pulls)),
-      axisLabel: theme.axisLabel,
-      axisLine: theme.axisLine,
-    },
-    yAxis: {
-      type: 'value',
-      axisLabel: { ...theme.axisLabel, formatter: value => fmtDiamonds(value) },
-      splitLine: theme.splitLine,
-    },
-    series: [
-      {
-        name: t('weaponGachaSideDeduction'),
-        type: 'bar',
-        stack: 'cost',
-        itemStyle: { color: LINE_COLORS[2] },
-        data: rows.map(row => Math.round(row.sideValue)),
-      },
-      {
-        name: t('weaponGachaImplicitCost'),
-        type: 'bar',
-        stack: 'cost',
-        itemStyle: { color: LINE_COLORS[0] },
-        data: rows.map(row => Math.round(row.coreBudget)),
-      },
-    ],
-  }
-})
-
 const sideContributionOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
@@ -844,12 +804,6 @@ const sideContributionOption = computed(() => {
   gap: 14px;
 }
 
-.weapon-charts-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
 .weapon-chart-card {
   min-width: 0;
 }
@@ -857,11 +811,6 @@ const sideContributionOption = computed(() => {
 .weapon-chart-frame {
   height: 380px;
   min-height: 380px;
-}
-
-.weapon-chart-frame-sm {
-  height: 300px;
-  min-height: 300px;
 }
 
 .weapon-table-wrap {
@@ -927,7 +876,6 @@ const sideContributionOption = computed(() => {
 }
 
 .weapon-pull-input {
-  margin-top: 10px;
   text-align: center;
 }
 
@@ -991,8 +939,7 @@ const sideContributionOption = computed(() => {
 }
 
 @media (max-width: 1100px) {
-  .weapon-layout,
-  .weapon-charts-row {
+  .weapon-layout {
     grid-template-columns: 1fr;
   }
 
@@ -1005,7 +952,6 @@ const sideContributionOption = computed(() => {
   .weapon-layout,
   .weapon-main,
   .weapon-side,
-  .weapon-charts-row,
   .weapon-summary {
     gap: 12px;
   }
@@ -1014,8 +960,7 @@ const sideContributionOption = computed(() => {
     grid-template-columns: 1fr;
   }
 
-  .weapon-chart-frame,
-  .weapon-chart-frame-sm {
+  .weapon-chart-frame {
     height: 340px;
     min-height: 340px;
   }

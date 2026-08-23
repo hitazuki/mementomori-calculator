@@ -461,7 +461,6 @@ export default {
   weaponGachaMilestoneIncluded: "累抽獎勵已併入",
   weaponGachaQuantityChart: "抽數與預計產物數量",
   weaponGachaExpectedQty: "期望數量",
-  weaponGachaCostBreakdown: "成本拆解",
   weaponGachaSideContribution: "副產物貢獻",
   weaponGachaSeraphMilestoneTitle: "聖遺物里程碑階梯",
   weaponGachaDiscreteMilestone: "離散次數獎勵",

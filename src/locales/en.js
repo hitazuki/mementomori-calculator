@@ -467,7 +467,6 @@ export default {
   weaponGachaMilestoneIncluded: "Milestones included",
   weaponGachaQuantityChart: "Pulls and Expected Items",
   weaponGachaExpectedQty: "Expected Quantity",
-  weaponGachaCostBreakdown: "Cost Breakdown",
   weaponGachaSideContribution: "Side Contribution",
   weaponGachaSeraphMilestoneTitle: "Relic Milestone Ladder",
   weaponGachaDiscreteMilestone: "Discrete milestones",

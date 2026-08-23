@@ -510,7 +510,6 @@ export default {
   weaponGachaMilestoneIncluded: "回数報酬込み",
   weaponGachaQuantityChart: "回数と期待アイテム数",
   weaponGachaExpectedQty: "期待数量",
-  weaponGachaCostBreakdown: "コスト内訳",
   weaponGachaSideContribution: "副産物貢献",
   weaponGachaSeraphMilestoneTitle: "聖遺物マイルストーン階段",
   weaponGachaDiscreteMilestone: "離散回数報酬",

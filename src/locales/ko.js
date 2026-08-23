@@ -494,7 +494,6 @@ export default {
   weaponGachaMilestoneIncluded: "횟수 보상 포함",
   weaponGachaQuantityChart: "횟수와 기대 아이템 수",
   weaponGachaExpectedQty: "기대 수량",
-  weaponGachaCostBreakdown: "비용 분해",
   weaponGachaSideContribution: "부산물 기여",
   weaponGachaSeraphMilestoneTitle: "성유물 마일스톤 단계",
   weaponGachaDiscreteMilestone: "이산 횟수 보상",
