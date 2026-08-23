@@ -183,7 +183,7 @@
           </div>
           <div v-if="hasFreePulls">
             <span>{{ t('weaponGachaFreePaidPulls') }}</span>
-            <b>{{ selected.freePulls }} / {{ selected.paidPulls }}</b>
+            <b>{{ analysis.cumulativeSelected.freePulls }} / {{ analysis.cumulativeSelected.paidPulls }}</b>
           </div>
           <div>
             <span>{{ t('weaponGachaSideDeduction') }}</span>

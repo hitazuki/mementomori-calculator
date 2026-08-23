@@ -204,9 +204,12 @@ export function getForbiddenMilestoneRewards(pulls, config = FORBIDDEN_WEAPON_GA
 export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
   const config = WEAPON_GACHA_CONFIGS[options.bannerKey] || FORBIDDEN_WEAPON_GACHA
   const maxPulls = options.maxPulls || config.maxPulls
-  const baselinePulls = config.key === 'seraphOracle' && options.ignoreFirstTopUp3 ? 10 : 0
+  const baselinePulls = config.key === 'seraphOracle' && options.ignoreFirstTopUp3
+    ? 10
+    : (config.freePullsPerPeriod || 0)
+  const minimumSelectedPulls = config.key === 'seraphOracle' && options.ignoreFirstTopUp3 ? 11 : 1
   const requestedPulls = Math.trunc(Number(options.selectedPulls))
-  const selectedPulls = Number.isFinite(requestedPulls) ? Math.max(baselinePulls + 1, requestedPulls) : Math.max(baselinePulls + 1, 20)
+  const selectedPulls = Number.isFinite(requestedPulls) ? Math.max(minimumSelectedPulls, requestedPulls) : Math.max(minimumSelectedPulls, 20)
   const ticketValue = getUnitScore(
     scores,
     config.costItem.itype,
@@ -302,7 +305,8 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     const current = buildAtPulls(pulls, overrides)
     if (!comparisonBaselinePulls) return current
 
-    const baseline = buildAtPulls(comparisonBaselinePulls, overrides)
+    const effectiveBaselinePulls = Math.min(pulls, comparisonBaselinePulls)
+    const baseline = buildAtPulls(effectiveBaselinePulls, overrides)
     const coreCounts = Object.fromEntries(Object.keys(current.coreCounts).map(key => [
       key,
       (current.coreCounts[key] || 0) - (baseline.coreCounts[key] || 0),
@@ -333,7 +337,7 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
       rawCoreBudget,
       implicitCoreUnit: totalCoreCount > 0 ? coreBudget / totalCoreCount : 0,
       coreCounts,
-      milestoneRewards: current.milestoneRewards.filter(reward => reward.pull > comparisonBaselinePulls),
+      milestoneRewards: current.milestoneRewards.filter(reward => reward.pull > effectiveBaselinePulls),
       totalCoreCount,
       sideQuantities,
       sideValues,
@@ -345,11 +349,9 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     (_, index) => subtractFromBaseline(baselinePulls + index + 1, baselinePulls)
   )
   const selected = subtractFromBaseline(selectedPulls, baselinePulls)
-  const decisionBaselinePulls = baselinePulls || (config.freePullsPerPeriod || 0)
-  const decisionRows = Array.from(
-    { length: Math.max(0, maxPulls - decisionBaselinePulls) },
-    (_, index) => subtractFromBaseline(decisionBaselinePulls + index + 1, decisionBaselinePulls)
-  )
+  const cumulativeSelected = buildAtPulls(selectedPulls)
+  const decisionBaselinePulls = baselinePulls
+  const decisionRows = rows
   const bestNode = rows.reduce(
     (best, row) => row.implicitCoreUnit < best.implicitCoreUnit ? row : best,
     rows[0]
@@ -363,11 +365,12 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     baselinePulls,
     selectedPulls,
     selected,
+    cumulativeSelected,
     rows,
     decisionBaselinePulls,
     decisionRows,
     bestNode,
-    weeklyFullNode: config.weeklyCap ? buildAtPulls(config.weeklyCap) : null,
+    weeklyFullNode: config.weeklyCap ? subtractFromBaseline(config.weeklyCap, baselinePulls) : null,
     noFreeCycleNode: config.milestone?.cycle
       ? buildAtPulls(config.milestone.cycle, { freePullsPerPeriod: 0 })
       : null,

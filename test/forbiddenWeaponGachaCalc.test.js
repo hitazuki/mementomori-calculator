@@ -112,13 +112,16 @@ test('witch secret gacha values the weekly 35-pull round with seven free pulls',
 
   assert.equal(analysis.ticketValue, 300)
   assert.equal(analysis.sideValuePerPull, expectedSideValue)
-  assert.equal(analysis.selected.freePulls, 7)
+  assert.equal(analysis.selected.freePulls, 0)
   assert.equal(analysis.selected.paidPulls, 28)
+  assert.equal(analysis.cumulativeSelected.freePulls, 7)
+  assert.equal(analysis.cumulativeSelected.paidPulls, 28)
   assert.equal(analysis.selected.totalCost, 28 * 300)
-  assert.equal(analysis.selected.coreCounts.magicCrystal, 35 * 0.12)
-  assert.equal(analysis.selected.coreCounts.tenPullGuarantee, 35)
-  assert.equal(analysis.selected.coreCounts.weeklyBonus, 10)
-  assert.equal(analysis.selected.totalCoreCount, 49.2)
+  assert.ok(Math.abs(analysis.selected.sideValue - expectedSideValue * 28) < 1e-9)
+  assert.ok(Math.abs(analysis.selected.coreCounts.magicCrystal - 28 * 0.12) < 1e-9)
+  assert.equal(analysis.selected.coreCounts.tenPullGuarantee, 28)
+  assert.equal(analysis.selected.coreCounts.weeklyBonus, 8)
+  assert.ok(Math.abs(analysis.selected.totalCoreCount - 39.36) < 1e-9)
   assert.equal(analysis.decisionBaselinePulls, 7)
   assert.equal(analysis.decisionRows[0].pulls, 8)
   assert.equal(analysis.decisionRows[0].freePulls, 0)
@@ -137,10 +140,24 @@ test('witch secret weekly rewards cap after 35 pulls but ten-pull value continue
   }).selected
 
   assert.equal(freeOnly.totalCost, 0)
-  assert.equal(freeOnly.coreCounts.weeklyBonus, 2)
-  assert.equal(freeOnly.totalCoreCount, 7 * 1.12 + 2)
-  assert.equal(afterWeeklyCap.coreCounts.weeklyBonus, 10)
-  assert.ok(Math.abs(afterWeeklyCap.totalCoreCount - (45 * 1.12 + 10)) < 1e-9)
+  assert.equal(freeOnly.coreCounts.weeklyBonus, 0)
+  assert.equal(freeOnly.totalCoreCount, 0)
+  assert.equal(afterWeeklyCap.coreCounts.weeklyBonus, 8)
+  assert.ok(Math.abs(afterWeeklyCap.totalCoreCount - (38 * 1.12 + 8)) < 1e-9)
+})
+
+test('witch secret selected value matches the paid-stage chart row', () => {
+  const analysis = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'witchSecret',
+    selectedPulls: 15,
+  })
+  const chartRow = analysis.rows.find(row => row.pulls === 15)
+
+  assert.equal(analysis.selected.implicitCoreUnit, chartRow.implicitCoreUnit)
+  assert.equal(analysis.selected.sideValue, chartRow.sideValue)
+  assert.equal(analysis.selected.totalCoreCount, chartRow.totalCoreCount)
+  assert.equal(analysis.cumulativeSelected.freePulls, 7)
+  assert.equal(analysis.cumulativeSelected.paidPulls, 8)
 })
 
 test('seraph oracle gacha repeats weekly milestone rounds without extra free pulls', () => {
@@ -148,7 +165,7 @@ test('seraph oracle gacha repeats weekly milestone rounds without extra free pul
     bannerKey: 'seraphOracle',
     selectedPulls: 100,
   })
-  const at50 = fullAnalysis.rows[49]
+  const at50 = fullAnalysis.rows.find(row => row.pulls === 50)
   const at100 = fullAnalysis.selected
   const noFreeCycle = fullAnalysis.noFreeCycleNode
 
@@ -162,15 +179,17 @@ test('seraph oracle gacha repeats weekly milestone rounds without extra free pul
     (0.15 * 1 * 50)
   const milestoneSideValue = (1000 + 1500 + 2500) * 0.2 + (2 + 3 + 5) * 180
 
-  assert.equal(at50.freePulls, 7)
+  assert.equal(at50.freePulls, 0)
   assert.equal(at50.paidPulls, 43)
   assert.equal(at50.milestoneRewards.length, 9)
   assert.equal(at50.coreCounts.relic, 1.6)
-  assert.ok(Math.abs(at50.sideValue - (baseSideValue * 50 + milestoneSideValue)) < 1e-9)
-  assert.equal(at100.freePulls, 7)
+  assert.ok(Math.abs(at50.sideValue - (baseSideValue * 43 + milestoneSideValue)) < 1e-9)
+  assert.equal(at100.freePulls, 0)
   assert.equal(at100.paidPulls, 93)
   assert.equal(at100.milestoneRewards.length, 18)
   assert.equal(at100.coreCounts.relic, 3.2)
+  assert.equal(fullAnalysis.cumulativeSelected.freePulls, 7)
+  assert.equal(fullAnalysis.cumulativeSelected.paidPulls, 93)
   assert.equal(noFreeCycle.freePulls, 0)
   assert.equal(noFreeCycle.paidPulls, 50)
   assert.equal(noFreeCycle.coreCounts.relic, 1.6)
@@ -178,7 +197,7 @@ test('seraph oracle gacha repeats weekly milestone rounds without extra free pul
   assert.equal(fullAnalysis.noFreeCycleRows[9].paidPulls, 10)
   assert.ok(Math.abs(fullAnalysis.noFreeCycleRows[24].coreCounts.relic - 0.6) < 1e-9)
   assert.equal(fullAnalysis.noFreeCycleRows[49].coreCounts.relic, 1.6)
-  assert.equal(fullAnalysis.rows.length, 150)
+  assert.equal(fullAnalysis.rows.length, 143)
   assert.equal(fullAnalysis.decisionBaselinePulls, 7)
   assert.equal(fullAnalysis.decisionRows[0].pulls, 8)
   assert.equal(fullAnalysis.decisionRows[2].pulls, 10)
