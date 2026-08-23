@@ -440,3 +440,111 @@ export function buildSeraphCrossWeekComparisonRows(analysis, pullCounts = [200, 
     }
   })
 }
+
+const logGamma = value => {
+  const coefficients = [
+    676.5203681218851, -1259.1392167224028, 771.3234287776531,
+    -176.6150291621406, 12.507343278686905, -0.13857109526572012,
+    9.984369578019572e-6, 1.5056327351493116e-7,
+  ]
+  if (value < 0.5) return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * value)) - logGamma(1 - value)
+  let adjusted = value - 1
+  let sum = 0.9999999999998099
+  coefficients.forEach((coefficient, index) => {
+    sum += coefficient / (adjusted + index + 1)
+  })
+  const base = adjusted + coefficients.length - 0.5
+  return 0.5 * Math.log(2 * Math.PI) + (adjusted + 0.5) * Math.log(base) - base + Math.log(sum)
+}
+
+const buildBinomialPmf = (trials, probability, quantity = 1) => {
+  if (trials <= 0 || probability <= 0) return new Map([[0, 1]])
+  if (probability >= 1) return new Map([[trials * quantity, 1]])
+  const mean = trials * probability
+  const deviation = Math.sqrt(trials * probability * (1 - probability))
+  const lower = Math.max(0, Math.floor(mean - 8 * deviation - 2))
+  const upper = Math.min(trials, Math.ceil(mean + 8 * deviation + 2))
+  const result = new Map()
+  for (let successes = lower; successes <= upper; successes += 1) {
+    const logProbability = logGamma(trials + 1)
+      - logGamma(successes + 1)
+      - logGamma(trials - successes + 1)
+      + successes * Math.log(probability)
+      + (trials - successes) * Math.log(1 - probability)
+    const chance = Math.exp(logProbability)
+    if (chance >= 1e-12) result.set(successes * quantity, chance)
+  }
+  return result
+}
+
+const convolvePmfs = (left, right) => {
+  const result = new Map()
+  left.forEach((leftProbability, leftQuantity) => {
+    right.forEach((rightProbability, rightQuantity) => {
+      const quantity = leftQuantity + rightQuantity
+      result.set(quantity, (result.get(quantity) || 0) + leftProbability * rightProbability)
+    })
+  })
+  return result
+}
+
+const shiftPmf = (pmf, quantity) => new Map(
+  [...pmf].map(([currentQuantity, probability]) => [currentQuantity + quantity, probability])
+)
+
+export function buildCoreProductProbabilityDistributions(analysis) {
+  const config = analysis?.config
+  if (!config) return []
+  const isWitchSecret = config.key === 'witchSecret'
+  const products = isWitchSecret
+    ? [{
+        key: 'magicCrystal',
+        label: config.coreUnitLabel,
+        labelKey: config.coreUnitLabelKey,
+        sourceKeys: new Set(['magicCrystal', 'tenPullGuarantee', 'weeklyBonus']),
+      }]
+    : config.coreDrops.map(drop => ({
+        key: drop.key,
+        label: drop.label,
+        labelKey: drop.nameKey || drop.labelKey,
+        sourceKeys: new Set([drop.key]),
+      }))
+
+  return products.map(product => {
+    let pmf = new Map([[0, 1]])
+    let deterministicQuantity = 0
+    const sources = config.coreDrops.filter(drop => product.sourceKeys.has(drop.key))
+    sources.forEach(source => {
+      if (source.rate > 0) {
+        pmf = convolvePmfs(pmf, buildBinomialPmf(
+          analysis.selected.paidPulls,
+          source.rate,
+          source.qty || 1
+        ))
+      }
+      deterministicQuantity += analysis.selected.paidPulls * (source.perPullQty || 0)
+    })
+    ;(analysis.selected.milestoneRewards || [])
+      .filter(reward => product.sourceKeys.has(reward.key))
+      .forEach(reward => {
+        const quantity = reward.qty || 0
+        const probability = reward.rate ?? 1
+        if (probability >= 1) deterministicQuantity += quantity
+        else pmf = convolvePmfs(pmf, new Map([[0, 1 - probability], [quantity, probability]]))
+      })
+    pmf = shiftPmf(pmf, deterministicQuantity)
+    const points = [...pmf]
+      .map(([quantity, probability]) => ({ quantity, probability }))
+      .sort((left, right) => left.quantity - right.quantity)
+    const expected = points.reduce((sum, point) => sum + point.quantity * point.probability, 0)
+    const probabilityAtLeastOne = points
+      .filter(point => point.quantity > 0)
+      .reduce((sum, point) => sum + point.probability, 0)
+    return {
+      ...product,
+      points,
+      expected,
+      probabilityAtLeastOne,
+    }
+  })
+}

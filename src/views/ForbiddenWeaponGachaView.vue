@@ -70,6 +70,19 @@
       <section v-if="isSeraphOracle" class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
+            <div class="card-title">{{ t('weaponGachaCoreDistributionTitle') }}</div>
+            <span class="tag tag-gold">{{ coreDistributionTag }}</span>
+            <span v-if="analysis.decisionBaselinePulls" class="tag tag-purple">{{ t('weaponGachaFreeBaselineExcluded') }}</span>
+          </div>
+        </div>
+        <div class="chart-frame weapon-chart-frame">
+          <v-chart class="chart" :option="coreDistributionOption" autoresize />
+        </div>
+      </section>
+
+      <section v-if="isSeraphOracle" class="card weapon-chart-card">
+        <div class="chart-toolbar">
+          <div class="chart-toolbar-main">
             <div class="card-title">{{ t('weaponGachaRelicExpectationLossTitle') }}</div>
             <span class="tag tag-gold">{{ t('weaponGachaSamePaidPulls') }}</span>
             <span class="tag tag-purple">{{ t('weaponGachaStage1CommonBaseline') }}</span>
@@ -272,6 +285,7 @@ import VChart from 'vue-echarts'
 
 import {
   buildForbiddenWeaponGachaAnalysis,
+  buildCoreProductProbabilityDistributions,
   buildSeraphCrossWeekComparisonRows,
   WEAPON_GACHA_CONFIGS,
 } from '../engine/forbiddenWeaponGachaCalc.js'
@@ -320,6 +334,7 @@ const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScor
   ignoreFirstTopUp3: ignoreFirstTopUp3.value,
 }))
 const selected = computed(() => analysis.value.selected)
+const coreDistributions = computed(() => buildCoreProductProbabilityDistributions(analysis.value))
 const noFreeCycle = computed(() => analysis.value.noFreeCycleNode)
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
 const tr = (key, fallback, params = {}) => key ? t(key, params) : fallback
@@ -343,10 +358,13 @@ const expectedCoreSummaryLabel = computed(() => tr(
 ))
 const quantityChartTitle = computed(() => isSeraphOracle.value
   ? t('weaponGachaSeraphValueStructureTitle')
-  : t('weaponGachaQuantityChart'))
+  : t('weaponGachaCoreDistributionTitle'))
 const quantityChartTag = computed(() => isSeraphOracle.value
   ? t('weaponGachaValueConverted')
-  : t('weaponGachaExpectedQty'))
+  : coreDistributionTag.value)
+const coreDistributionTag = computed(() => t('weaponGachaDistributionPaidPulls', {
+  count: selected.value.paidPulls,
+}))
 
 function itemName(itype, iid, fallback = '') {
   const item = normalizedScores.value[`[${itype},${iid}]`]
@@ -805,64 +823,60 @@ const seraphValueStructureOption = computed(() => {
   }
 })
 
-const quantityOption = computed(() => {
-  if (isSeraphOracle.value) return seraphValueStructureOption.value
-
+const coreDistributionOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
-  const rows = analysis.value.rows
-  const coreSeries = analysis.value.config.coreDrops.map((drop, index) => ({
-    name: dropBaseName(drop),
-    type: 'line',
-    smooth: true,
-    lineStyle: { width: 3, color: LINE_COLORS[index % LINE_COLORS.length] },
-    itemStyle: { color: LINE_COLORS[index % LINE_COLORS.length] },
-    data: rows.map(row => +(row.coreCounts[drop.key] || 0).toFixed(2)),
-  }))
-  if (isWitchSecret.value) {
-    coreSeries.push({
-      name: t('weaponGachaWeeklyBonus'),
-      type: 'line',
-      smooth: true,
-      lineStyle: { width: 3, color: LINE_COLORS[2], type: 'dashed' },
-      itemStyle: { color: LINE_COLORS[2] },
-      data: rows.map(row => +(row.coreCounts.weeklyBonus || 0).toFixed(2)),
-    })
-  }
-  const sideSeries = analysis.value.sideDrops.slice(0, isWitchSecret.value ? 4 : 3).map((drop, index) => ({
-    name: dropBaseName(drop),
-    type: 'line',
-    smooth: true,
-    lineStyle: { width: 2, color: LINE_COLORS[(index + 3) % LINE_COLORS.length], type: 'dashed' },
-    itemStyle: { color: LINE_COLORS[(index + 3) % LINE_COLORS.length] },
-    data: rows.map(row => +(row.sideQuantities[drop.key] || 0).toFixed(2)),
-  }))
+  const distributions = coreDistributions.value
+  const quantities = [...new Set(distributions.flatMap(distribution =>
+    distribution.points.map(point => point.quantity)
+  ))].sort((left, right) => left - right)
 
   return {
     ...baseChartOption('', '', isDark),
     tooltip: {
       ...theme.tooltip,
       trigger: 'axis',
-      formatter: chartTooltip(rows, t('weaponGachaPullCount'), [
-        { label: t('weaponGachaSideDeduction'), format: row => fmtDiamonds(row.sideValue) },
-        { label: t('weaponGachaCoreTotal'), format: row => fmtQty(row.totalCoreCount) },
-      ]),
+      formatter: params => {
+        const list = Array.isArray(params) ? params : [params]
+        const quantity = quantities[list[0].dataIndex]
+        let html = `<b style="color:var(--gold)">${t('weaponGachaCoreQuantity', { count: quantity })}</b><br>`
+        list.forEach(item => {
+          const distribution = distributions[item.seriesIndex]
+          html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${Number(item.value).toFixed(2)}%</b><br>${t('weaponGachaDistributionExpected')}: <b>${fmtQty(distribution.expected)}</b><br>`
+        })
+        return html
+      },
     },
     legend: { ...theme.legend, top: 8, right: 16 },
+    grid: { top: 48, right: 18, bottom: 52, left: 58 },
     xAxis: {
       type: 'category',
-      data: rows.map(row => row.pulls),
+      data: quantities,
       axisLabel: theme.axisLabel,
       axisLine: theme.axisLine,
     },
     yAxis: {
       type: 'value',
-      axisLabel: { ...theme.axisLabel },
+      min: 0,
+      axisLabel: { ...theme.axisLabel, formatter: value => `${value}%` },
       splitLine: theme.splitLine,
     },
-    series: [...coreSeries, ...sideSeries],
+    series: distributions.map((distribution, index) => {
+      const probabilities = new Map(distribution.points.map(point => [point.quantity, point.probability]))
+      return {
+        name: tr(distribution.labelKey, distribution.label),
+        type: 'bar',
+        barMaxWidth: 42,
+        itemStyle: { color: LINE_COLORS[index % LINE_COLORS.length] },
+        data: quantities.map(quantity => +((probabilities.get(quantity) || 0) * 100).toFixed(4)),
+      }
+    }),
   }
 })
+
+const quantityOption = computed(() => isSeraphOracle.value
+  ? seraphValueStructureOption.value
+  : coreDistributionOption.value)
 
 const sideContributionOption = computed(() => {
   const isDark = currentTheme.value === 'dark'

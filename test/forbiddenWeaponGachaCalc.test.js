@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import {
   buildForbiddenWeaponGachaAnalysis,
+  buildCoreProductProbabilityDistributions,
   buildSeraphCrossWeekComparisonRows,
 } from '../src/engine/forbiddenWeaponGachaCalc.js'
 
@@ -253,4 +254,30 @@ test('seraph cross-week comparison uses equal paid pulls and exposes expected re
   assert.ok(Math.abs(rows[0].expectedRelicLoss - 0.6) < 1e-9)
   assert.ok(Math.abs(rows[4].expectedRelicLoss - 3) < 1e-9)
   assert.ok(rows.every(row => row.continuous.totalCost === row.splitWeeks.totalCost))
+})
+
+test('core product distributions match configured random drops and milestones', () => {
+  const forbidden = buildForbiddenWeaponGachaAnalysis(scores, { selectedPulls: 10 })
+  const forbiddenDistributions = buildCoreProductProbabilityDistributions(forbidden)
+  assert.equal(forbiddenDistributions.length, 2)
+  assert.ok(Math.abs(forbiddenDistributions[0].expected - 2.2) < 1e-9)
+  assert.ok(Math.abs(forbiddenDistributions[1].expected - 1.2) < 1e-9)
+
+  const witch = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'witchSecret',
+    selectedPulls: 15,
+  })
+  const [magicCrystal] = buildCoreProductProbabilityDistributions(witch)
+  assert.ok(Math.abs(magicCrystal.expected - witch.selected.totalCoreCount) < 1e-9)
+
+  const seraph = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'seraphOracle',
+    selectedPulls: 50,
+  })
+  const [relic] = buildCoreProductProbabilityDistributions(seraph)
+  assert.deepEqual(relic.points.map(point => point.quantity), [1, 2, 3])
+  assert.ok(Math.abs(relic.points[0].probability - 0.48) < 1e-9)
+  assert.ok(Math.abs(relic.points[1].probability - 0.44) < 1e-9)
+  assert.ok(Math.abs(relic.points[2].probability - 0.08) < 1e-9)
+  assert.ok(Math.abs(relic.expected - 1.6) < 1e-9)
 })
