@@ -348,6 +348,7 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     { length: Math.max(0, maxPulls - baselinePulls) },
     (_, index) => subtractFromBaseline(baselinePulls + index + 1, baselinePulls)
   )
+  const cumulativeRows = Array.from({ length: maxPulls }, (_, index) => buildAtPulls(index + 1))
   const selected = subtractFromBaseline(selectedPulls, baselinePulls)
   const cumulativeSelected = buildAtPulls(selectedPulls)
   const decisionBaselinePulls = baselinePulls
@@ -367,6 +368,7 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     selected,
     cumulativeSelected,
     rows,
+    cumulativeRows,
     decisionBaselinePulls,
     decisionRows,
     bestNode,
