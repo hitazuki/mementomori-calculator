@@ -381,3 +381,63 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
       : [],
   }
 }
+
+export function buildSeraphCrossWeekComparisonRows(analysis, pullCounts = [200, 400, 600, 800, 1000]) {
+  if (analysis?.config?.key !== 'seraphOracle') return []
+
+  const cycleRows = analysis.noFreeCycleRows || []
+  const zero = {
+    pulls: 0,
+    paidPulls: 0,
+    totalCost: 0,
+    sideValue: 0,
+    totalCoreCount: 0,
+  }
+  const rowAt = pulls => pulls <= 0
+    ? zero
+    : cycleRows.find(row => row.pulls === pulls) || zero
+  const diff = (before, after) => ({
+    paidPulls: after.paidPulls - before.paidPulls,
+    totalCost: after.totalCost - before.totalCost,
+    sideValue: after.sideValue - before.sideValue,
+    expectedRelic: after.totalCoreCount - before.totalCoreCount,
+  })
+  const finalize = metrics => {
+    const coreBudget = Math.max(0, metrics.totalCost - metrics.sideValue)
+    return {
+      ...metrics,
+      coreBudget,
+      implicitCoreUnit: metrics.expectedRelic > 0 ? coreBudget / metrics.expectedRelic : 0,
+    }
+  }
+  const scale = (stage, count) => finalize({
+    paidPulls: stage.paidPulls * count,
+    totalCost: stage.totalCost * count,
+    sideValue: stage.sideValue * count,
+    expectedRelic: stage.expectedRelic * count,
+  })
+  const full50 = diff(rowAt(0), rowAt(50))
+  const stage23 = diff(rowAt(10), rowAt(50))
+
+  return pullCounts.map(requestedPulls => {
+    const singleWeekStages = Math.floor(requestedPulls / 50)
+    const splitWeekStages = Math.floor(requestedPulls / 40)
+    const continuous = scale(full50, singleWeekStages)
+    const splitWeeks = scale(stage23, splitWeekStages)
+    const comparablePulls = Math.min(continuous.paidPulls, splitWeeks.paidPulls)
+    const cumulativeExtraLoss = Math.max(
+      0,
+      continuous.coreBudget - continuous.expectedRelic * splitWeeks.implicitCoreUnit
+    )
+    return {
+      requestedPulls,
+      comparablePulls,
+      singleWeekStages,
+      splitWeekStages,
+      continuous,
+      splitWeeks,
+      cumulativeExtraLoss,
+      extraLossRate: continuous.totalCost > 0 ? cumulativeExtraLoss / continuous.totalCost : 0,
+    }
+  })
+}

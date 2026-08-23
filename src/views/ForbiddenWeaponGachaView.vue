@@ -70,41 +70,14 @@
       <section v-if="isSeraphOracle" class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
-            <div class="card-title">{{ t('weaponGachaSeraphMilestoneTitle') }}</div>
-            <span class="tag tag-gold">{{ t('weaponGachaDiscreteMilestone') }}</span>
+            <div class="card-title">{{ t('weaponGachaCrossWeekStrategyTitle') }}</div>
+            <span class="tag tag-gold">{{ t('weaponGachaSamePaidPulls') }}</span>
+            <span class="tag tag-purple">{{ t('weaponGachaStage1CommonBaseline') }}</span>
+            <span class="tag tag-purple">{{ t('weaponGachaFullStagesOnly') }}</span>
           </div>
         </div>
-        <div class="weapon-table-grid">
-          <div v-for="group in seraphMilestoneGroups" :key="group.key" class="weapon-table-panel">
-            <div class="weapon-table-title">{{ t(group.titleKey) }}</div>
-            <div class="weapon-table-wrap">
-              <table class="weapon-value-table">
-                <thead>
-                  <tr>
-                    <th>{{ t('weaponGachaMilestone') }}</th>
-                    <th>{{ t('weaponGachaRoundChance') }}</th>
-                    <th>{{ t('weaponGachaFreePaidPulls') }}</th>
-                    <th>{{ t('weaponGachaSideDeduction') }}</th>
-                    <th>{{ t('weaponGachaExpectedRelic') }}</th>
-                    <th>{{ t('weaponGachaRelicValue') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="row in group.rows" :key="`${group.key}:${row.pullInRound}`">
-                    <td>
-                      <b>{{ fmtPulls(row.pullInRound) }}</b>
-                      <small>{{ row.note }}</small>
-                    </td>
-                    <td>{{ fmtPercent(row.roundChance) }}</td>
-                    <td>{{ row.freePulls }} / {{ row.paidPulls }}</td>
-                    <td>{{ fmtDiamonds(row.sideValue) }}</td>
-                    <td>{{ fmtQty(row.totalCoreCount) }}</td>
-                    <td>{{ fmtUnitDiamonds(row.implicitCoreUnit) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div class="chart-frame weapon-chart-frame">
+          <v-chart class="chart" :option="seraphCrossWeekOption" autoresize />
         </div>
       </section>
 
@@ -297,7 +270,11 @@ import { BarChart, LineChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 
-import { buildForbiddenWeaponGachaAnalysis, WEAPON_GACHA_CONFIGS } from '../engine/forbiddenWeaponGachaCalc.js'
+import {
+  buildForbiddenWeaponGachaAnalysis,
+  buildSeraphCrossWeekComparisonRows,
+  WEAPON_GACHA_CONFIGS,
+} from '../engine/forbiddenWeaponGachaCalc.js'
 import { normalizeScores } from '../engine/packCalc.js'
 import { applyDerivedScores } from '../engine/derivedScores.js'
 import { editableScores } from '../store/itemScores.js'
@@ -527,6 +504,8 @@ const seraphStrategyRows = computed(() => {
   ]
 })
 
+const seraphCrossWeekRows = computed(() => buildSeraphCrossWeekComparisonRows(analysis.value))
+
 const seraphValueStructureRows = computed(() => seraphMilestoneGroups.value.flatMap(group =>
   group.rows.map(row => ({
     ...row,
@@ -650,6 +629,71 @@ const implicitCostOption = computed(() => {
         lineStyle: { width: 3, color: LINE_COLORS[0] },
         itemStyle: { color: LINE_COLORS[0] },
         data: rows.map(metricValue),
+      },
+    ],
+  }
+})
+
+const seraphCrossWeekOption = computed(() => {
+  const isDark = currentTheme.value === 'dark'
+  const theme = getMoriTheme(isDark)
+  const rows = seraphCrossWeekRows.value
+
+  return {
+    ...baseChartOption('', '', isDark),
+    tooltip: {
+      ...theme.tooltip,
+      trigger: 'axis',
+      formatter: params => {
+        const list = Array.isArray(params) ? params : [params]
+        const row = rows[list[0].dataIndex]
+        return `<b style="color:var(--gold)">${fmtPulls(row.requestedPulls)}</b><br>${t('weaponGachaContinuousSingleWeek')}: <b>${row.singleWeekStages} × 50</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.continuous.expectedRelic)}</b> · ${t('weaponGachaRelicValue')}: <b>${fmtUnitDiamonds(row.continuous.implicitCoreUnit)}</b><br>${t('weaponGachaSplitWeeksStage23')}: <b>${row.splitWeekStages} × 40</b> · ${t('weaponGachaExpectedRelic')}: <b>${fmtQty(row.splitWeeks.expectedRelic)}</b> · ${t('weaponGachaRelicValue')}: <b>${fmtUnitDiamonds(row.splitWeeks.implicitCoreUnit)}</b><br>${t('weaponGachaCumulativeExtraLoss')}: <b>${fmtDiamonds(row.cumulativeExtraLoss)}</b> (${fmtPercent(row.extraLossRate)})`
+      },
+    },
+    legend: { ...theme.legend, top: 8, right: 16 },
+    grid: { top: 54, right: 78, bottom: 52, left: 76 },
+    xAxis: {
+      type: 'category',
+      data: rows.map(row => fmtPulls(row.requestedPulls)),
+      axisLabel: { ...theme.axisLabel, interval: 0 },
+      axisLine: theme.axisLine,
+    },
+    yAxis: [
+      {
+        type: 'value',
+        axisLabel: theme.axisLabel,
+        splitLine: theme.splitLine,
+      },
+      {
+        type: 'value',
+        min: 0,
+        axisLabel: { ...theme.axisLabel, formatter: value => fmtDiamonds(value) },
+        splitLine: { show: false },
+      },
+    ],
+    series: [
+      {
+        name: t('weaponGachaContinuousSingleWeek'),
+        type: 'bar',
+        barMaxWidth: 42,
+        itemStyle: { color: LINE_COLORS[1] },
+        data: rows.map(row => +row.continuous.expectedRelic.toFixed(2)),
+      },
+      {
+        name: t('weaponGachaSplitWeeksStage23'),
+        type: 'bar',
+        barMaxWidth: 42,
+        itemStyle: { color: LINE_COLORS[0] },
+        data: rows.map(row => +row.splitWeeks.expectedRelic.toFixed(2)),
+      },
+      {
+        name: t('weaponGachaCumulativeExtraLoss'),
+        type: 'line',
+        yAxisIndex: 1,
+        symbolSize: 7,
+        lineStyle: { width: 3, color: LINE_COLORS[3] },
+        itemStyle: { color: LINE_COLORS[3] },
+        data: rows.map(row => +row.cumulativeExtraLoss.toFixed(2)),
       },
     ],
   }
