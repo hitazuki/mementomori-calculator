@@ -42,11 +42,23 @@
         </div>
       </section>
 
-      <section v-if="!isSeraphOracle" class="card weapon-chart-card">
+      <section class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
-            <div class="card-title">{{ t('weaponGachaCoreCostChart') }}</div>
-            <span class="tag tag-gold">{{ t('weaponGachaMilestoneIncluded') }}</span>
+            <div class="card-title">{{ implicitChartTitle }}</div>
+            <span class="tag tag-gold">{{ implicitChartTag }}</span>
+          </div>
+          <div class="segmented-control weapon-chart-mode">
+            <button
+              v-for="mode in implicitChartModes"
+              :key="mode.key"
+              class="btn btn-sm"
+              :class="implicitChartMode === mode.key ? 'btn-primary' : 'btn-ghost'"
+              :aria-pressed="implicitChartMode === mode.key"
+              @click="implicitChartMode = mode.key"
+            >
+              {{ t(mode.labelKey) }}
+            </button>
           </div>
         </div>
         <div class="chart-frame weapon-chart-frame">
@@ -54,7 +66,7 @@
         </div>
       </section>
 
-      <section v-else class="card weapon-chart-card">
+      <section v-if="isSeraphOracle" class="card weapon-chart-card">
         <div class="chart-toolbar">
           <div class="chart-toolbar-main">
             <div class="card-title">{{ t('weaponGachaSeraphMilestoneTitle') }}</div>
@@ -276,6 +288,11 @@ const { t, locale } = useI18n()
 const selectedBanner = ref('forbidden')
 const selectedPulls = ref(20)
 const showFormula = ref(false)
+const implicitChartMode = ref('cost')
+const implicitChartModes = [
+  { key: 'cost', labelKey: 'weaponGachaCostView' },
+  { key: 'efficiency', labelKey: 'weaponGachaEfficiencyView' },
+]
 const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
 const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
 const isSeraphOracle = computed(() => selectedBanner.value === 'seraphOracle')
@@ -307,6 +324,12 @@ const implicitUnitLabel = computed(() => tr(
   analysis.value.config.implicitUnitLabelKey,
   analysis.value.config.implicitUnitLabel || t('weaponGachaCoreImplicitUnit')
 ))
+const implicitChartTitle = computed(() => implicitChartMode.value === 'efficiency'
+  ? t('weaponGachaEfficiencyChart')
+  : t('weaponGachaCoreCostChart'))
+const implicitChartTag = computed(() => implicitChartMode.value === 'efficiency'
+  ? t('weaponGachaEfficiencyScale')
+  : t('weaponGachaMilestoneIncluded'))
 const expectedCoreSummaryLabel = computed(() => tr(
   analysis.value.config.summaryCoreLabelKey,
   isWitchSecret.value ? t('weaponGachaExpectedMagicCrystal') : t('weaponGachaExpectedCore')
@@ -520,6 +543,14 @@ const implicitCostOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
   const rows = analysis.value.rows
+  const showEfficiency = implicitChartMode.value === 'efficiency'
+  const positiveCosts = rows.map(row => row.implicitCoreUnit).filter(cost => cost > 0)
+  const bestPositiveCost = positiveCosts.length ? Math.min(...positiveCosts) : 0
+  const metricValue = row => {
+    if (!showEfficiency) return Math.round(row.implicitCoreUnit)
+    if (row.implicitCoreUnit <= 0 || bestPositiveCost <= 0) return 100
+    return +Math.min(100, bestPositiveCost / row.implicitCoreUnit * 100).toFixed(1)
+  }
   const milestonePulls = analysis.value.config.weeklyMilestones?.length
     ? analysis.value.config.weeklyMilestones.map(reward => reward.pull)
     : analysis.value.config.milestone?.rewards?.length
@@ -529,7 +560,7 @@ const implicitCostOption = computed(() => {
     .filter(row => milestonePulls.includes(row.pulls))
     .map(row => ({
       name: fmtPulls(row.pulls),
-      coord: [row.pulls, Math.round(row.implicitCoreUnit)],
+      coord: [row.pulls, metricValue(row)],
       value: String(row.pulls),
     }))
 
@@ -539,6 +570,7 @@ const implicitCostOption = computed(() => {
       ...theme.tooltip,
       trigger: 'axis',
       formatter: chartTooltip(rows, t('weaponGachaPullCount'), [
+        ...(showEfficiency ? [{ label: implicitUnitLabel.value, format: row => fmtDiamonds(row.implicitCoreUnit) }] : []),
         { label: t('weaponGachaSideRecovery'), format: row => fmtPercent(row.sideRecoveryRate) },
         { label: t('weaponGachaExpectedCore'), format: row => fmtQty(row.totalCoreCount) },
       ]),
@@ -552,12 +584,17 @@ const implicitCostOption = computed(() => {
     },
     yAxis: {
       type: 'value',
-      axisLabel: { ...theme.axisLabel, formatter: value => fmtDiamonds(value) },
+      min: showEfficiency ? 0 : undefined,
+      max: showEfficiency ? 100 : undefined,
+      axisLabel: {
+        ...theme.axisLabel,
+        formatter: value => showEfficiency ? value : fmtDiamonds(value),
+      },
       splitLine: theme.splitLine,
     },
     series: [
       {
-        name: implicitUnitLabel.value,
+        name: showEfficiency ? t('weaponGachaEfficiencyIndex') : implicitUnitLabel.value,
         type: 'line',
         smooth: true,
         symbolSize: 4,
@@ -568,7 +605,7 @@ const implicitCostOption = computed(() => {
         },
         lineStyle: { width: 3, color: LINE_COLORS[0] },
         itemStyle: { color: LINE_COLORS[0] },
-        data: rows.map(row => Math.round(row.implicitCoreUnit)),
+        data: rows.map(metricValue),
       },
     ],
   }
@@ -806,6 +843,14 @@ const sideContributionOption = computed(() => {
 
 .weapon-chart-card {
   min-width: 0;
+}
+
+.weapon-chart-mode {
+  flex: 0 0 auto;
+}
+
+.weapon-chart-mode .btn {
+  min-width: 88px;
 }
 
 .weapon-chart-frame {
