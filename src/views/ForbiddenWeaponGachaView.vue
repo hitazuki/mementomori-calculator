@@ -19,6 +19,34 @@
         </button>
       </div>
     </div>
+
+    <div class="card gear-core-card">
+      <div class="gear-core-heading">
+        <div>
+          <div class="card-title">{{ t('gearCoreCalculatorTitle') }}</div>
+          <p>{{ t('gearCoreCalculatorHint') }}</p>
+        </div>
+        <label class="gear-level-field">
+          <span>{{ t('gearCoreTargetLevel') }}</span>
+          <input
+            v-model.number="gearTargetLevel"
+            class="form-input"
+            type="number"
+            :min="GEAR_CORE_MIN_LEVEL"
+            :max="GEAR_CORE_MAX_LEVEL"
+            step="1"
+            @change="normalizeGearTargetLevel"
+          >
+        </label>
+      </div>
+      <div class="gear-core-results">
+        <div v-for="row in gearCoreResults" :key="row.key" class="gear-core-result">
+          <span>{{ t(`gearCoreProduct${row.key[0].toUpperCase()}${row.key.slice(1)}`) }}</span>
+          <b>{{ row.products.toLocaleString() }}</b>
+          <small>{{ t('gearCorePartsRequired', { count: row.parts.toLocaleString() }) }}</small>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="weapon-layout animate-fadeup">
@@ -319,6 +347,12 @@ import { applyDerivedScores } from '../engine/derivedScores.js'
 import { editableScores } from '../store/itemScores.js'
 import { baseChartOption, getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
+import {
+  calculateGearCoreProducts,
+  GEAR_CORE_MAX_LEVEL,
+  GEAR_CORE_MIN_LEVEL,
+  normalizeGearLevel,
+} from '../engine/gearCoreProductCalc.js'
 
 use([CanvasRenderer, BarChart, LineChart, GridComponent, LegendComponent, TitleComponent, TooltipComponent])
 
@@ -326,6 +360,7 @@ const { t, locale } = useI18n()
 
 const selectedBanner = ref('forbidden')
 const selectedPulls = ref(20)
+const gearTargetLevel = ref(240)
 const showFormula = ref(false)
 const ignoreFirstTopUp3 = ref(false)
 const implicitChartMode = ref('cost')
@@ -339,6 +374,10 @@ const coreDistributionPeriodModes = [
   { key: 'singleWeek', labelKey: 'weaponGachaDistributionSingleWeek' },
   { key: 'weeklyRound', labelKey: 'weaponGachaDistributionWeeklyRound' },
 ]
+const gearCoreResults = computed(() => calculateGearCoreProducts(gearTargetLevel.value))
+const normalizeGearTargetLevel = () => {
+  gearTargetLevel.value = normalizeGearLevel(gearTargetLevel.value)
+}
 const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
 const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
 const isSeraphOracle = computed(() => selectedBanner.value === 'seraphOracle')
@@ -960,11 +999,81 @@ const sideContributionOption = computed(() => {
 }
 
 .weapon-banner-control {
+  display: grid;
+  grid-template-columns: minmax(360px, 420px) minmax(0, 1fr);
+  gap: 14px;
   margin-bottom: 14px;
 }
 
 .weapon-banner-card {
-  max-width: 420px;
+  min-width: 0;
+}
+
+.gear-core-card {
+  min-width: 0;
+}
+
+.gear-core-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gear-core-heading p {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.gear-level-field {
+  display: flex;
+  flex: 0 0 116px;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.gear-level-field .form-input {
+  height: 36px;
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.gear-core-results {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.gear-core-result {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: rgba(var(--color-invert-rgb), 0.035);
+}
+
+.gear-core-result span {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gear-core-result b {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: var(--fs-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.gear-core-result small {
+  color: var(--text-muted);
+  font-size: 10px;
 }
 
 .weapon-main,
@@ -1129,6 +1238,10 @@ const sideContributionOption = computed(() => {
 }
 
 @media (max-width: 1100px) {
+  .weapon-banner-control {
+    grid-template-columns: 1fr;
+  }
+
   .weapon-layout {
     grid-template-columns: 1fr;
   }
@@ -1148,6 +1261,19 @@ const sideContributionOption = computed(() => {
 
   .weapon-summary {
     grid-template-columns: 1fr;
+  }
+
+  .gear-core-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .gear-level-field {
+    flex-basis: auto;
+  }
+
+  .gear-core-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .weapon-chart-frame {
