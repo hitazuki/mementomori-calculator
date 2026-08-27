@@ -201,6 +201,61 @@ export function getForbiddenMilestoneRewards(pulls, config = FORBIDDEN_WEAPON_GA
   })
 }
 
+function getWeeklyRoundMilestoneRewards(pulls, config, options = {}) {
+  if (config.key === 'witchSecret') {
+    const rewards = []
+    const freeReward = config.weeklyMilestones.find(reward => reward.pull === 4)
+    if (freeReward && pulls >= freeReward.pull) rewards.push({ ...freeReward })
+    const paidRewards = config.weeklyMilestones
+      .filter(reward => reward.pull > 7)
+      .map(reward => ({ ...reward, offset: reward.pull - 7 }))
+    const decisionPulls = Math.max(0, pulls - 7)
+    for (let cycleStart = 0; cycleStart < decisionPulls; cycleStart += 28) {
+      paidRewards.forEach(reward => {
+        const pull = 7 + cycleStart + reward.offset
+        if (pull <= pulls) rewards.push({ ...reward, pull })
+      })
+    }
+    return rewards
+  }
+
+  if (config.key === 'seraphOracle') {
+    const rewards = []
+    const configuredRewards = config.milestone?.rewards || []
+    if (!options.ignoreFirstTopUp3 && pulls >= 10) {
+      configuredRewards
+        .filter(reward => reward.pull === 10)
+        .forEach(reward => rewards.push({
+          ...reward,
+          expectedQty: (reward.qty || 0) * (reward.rate ?? 1),
+        }))
+    }
+    const repeatedRewards = configuredRewards
+      .filter(reward => reward.pull > 10)
+      .map(reward => ({ ...reward, offset: reward.pull - 10 }))
+    const decisionPulls = Math.max(0, pulls - 10)
+    for (let cycleStart = 0; cycleStart < decisionPulls; cycleStart += 40) {
+      repeatedRewards.forEach(reward => {
+        const pull = 10 + cycleStart + reward.offset
+        if (pull <= pulls) rewards.push({
+          ...reward,
+          pull,
+          expectedQty: (reward.qty || 0) * (reward.rate ?? 1),
+        })
+      })
+    }
+    return rewards
+  }
+
+  return getForbiddenMilestoneRewards(pulls, config)
+}
+
+function getAnalysisMilestoneRewards(pulls, config, options = {}) {
+  return options.periodMode === 'weeklyRound'
+    ? getWeeklyRoundMilestoneRewards(pulls, config, options)
+    : getForbiddenMilestoneRewards(pulls, config)
+}
+
 export function calculateExpectedCoreProductsAtPulls(bannerKey, pulls, options = {}) {
   const config = WEAPON_GACHA_CONFIGS[bannerKey] || FORBIDDEN_WEAPON_GACHA
   const normalizedPulls = Math.max(0, Math.trunc(Number(pulls)) || 0)
@@ -305,7 +360,10 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     const milestoneSideQuantities = {}
     const milestoneSideValues = {}
 
-    const milestoneRewards = getForbiddenMilestoneRewards(pulls, config)
+    const milestoneRewards = getAnalysisMilestoneRewards(pulls, config, {
+      periodMode: overrides.periodMode ?? options.periodMode,
+      ignoreFirstTopUp3: options.ignoreFirstTopUp3,
+    })
     for (const reward of milestoneRewards) {
       const expectedQty = reward.expectedQty ?? ((reward.qty || 0) * (reward.rate ?? 1))
       if (reward.core || (!reward.itype && !reward.iid)) {
@@ -429,10 +487,10 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
     bestNode,
     weeklyFullNode: config.weeklyCap ? subtractFromBaseline(config.weeklyCap, baselinePulls) : null,
     noFreeCycleNode: config.milestone?.cycle
-      ? buildAtPulls(config.milestone.cycle, { freePullsPerPeriod: 0 })
+      ? buildAtPulls(config.milestone.cycle, { freePullsPerPeriod: 0, periodMode: 'singleWeek' })
       : null,
     noFreeCycleRows: config.milestone?.cycle
-      ? Array.from({ length: config.milestone.cycle }, (_, index) => buildAtPulls(index + 1, { freePullsPerPeriod: 0 }))
+      ? Array.from({ length: config.milestone.cycle }, (_, index) => buildAtPulls(index + 1, { freePullsPerPeriod: 0, periodMode: 'singleWeek' }))
       : [],
   }
 }
@@ -551,35 +609,8 @@ export function buildCoreProductProbabilityDistributions(analysis, options = {})
   const config = analysis?.config
   if (!config) return []
   const isWitchSecret = config.key === 'witchSecret'
-  const isSeraphOracle = config.key === 'seraphOracle'
-  const periodMode = options.periodMode || 'singleWeek'
-  const decisionPulls = isSeraphOracle
-    ? Math.max(0, analysis.selectedPulls - 10)
-    : analysis.selected.paidPulls
-  const repeatMilestones = (pulls, cycleLength, milestones) => {
-    const rewards = []
-    for (let cycleStart = 0; cycleStart < pulls; cycleStart += cycleLength) {
-      milestones.forEach(milestone => {
-        if (cycleStart + milestone.offset <= pulls) rewards.push(milestone)
-      })
-    }
-    return rewards
-  }
-  const milestoneRewards = isWitchSecret && periodMode === 'weeklyRound'
-    ? repeatMilestones(decisionPulls, 28, [
-        { offset: 8, key: 'weeklyBonus', qty: 2, rate: 1 },
-        { offset: 18, key: 'weeklyBonus', qty: 3, rate: 1 },
-        { offset: 28, key: 'weeklyBonus', qty: 3, rate: 1 },
-      ])
-    : isSeraphOracle && periodMode === 'weeklyRound'
-      ? repeatMilestones(decisionPulls, 40, [
-          { offset: 15, key: 'relic', qty: 1, rate: 0.40 },
-          { offset: 40, key: 'relic', qty: 1, rate: 1 },
-        ])
-      : isSeraphOracle
-        ? (analysis.cumulativeSelected.milestoneRewards || [])
-            .filter(reward => reward.core && reward.pull > 10)
-        : (analysis.selected.milestoneRewards || [])
+  const decisionPulls = analysis.selected.paidPulls
+  const milestoneRewards = analysis.selected.milestoneRewards || []
   const products = isWitchSecret
     ? [{
         key: 'magicCrystal',

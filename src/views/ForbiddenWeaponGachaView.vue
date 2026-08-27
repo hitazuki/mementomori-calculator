@@ -116,19 +116,7 @@
             <div class="card-title">{{ t('weaponGachaCoreDistributionTitle') }}</div>
             <span class="tag tag-gold">{{ coreDistributionTag }}</span>
             <span v-if="analysis.decisionBaselinePulls" class="tag tag-purple">{{ t('weaponGachaFreeBaselineExcluded') }}</span>
-            <span class="tag tag-purple">{{ t('weaponGachaStage1DistributionExcluded') }}</span>
-          </div>
-          <div class="segmented-control weapon-chart-mode">
-            <button
-              v-for="mode in coreDistributionPeriodModes"
-              :key="mode.key"
-              class="btn btn-sm"
-              :class="coreDistributionPeriodMode === mode.key ? 'btn-primary' : 'btn-ghost'"
-              :aria-pressed="coreDistributionPeriodMode === mode.key"
-              @click="coreDistributionPeriodMode = mode.key"
-            >
-              {{ t(mode.labelKey) }}
-            </button>
+            <span v-if="ignoreFirstTopUp3" class="tag tag-purple">{{ t('weaponGachaStage1DistributionExcluded') }}</span>
           </div>
         </div>
         <div class="chart-frame weapon-chart-frame">
@@ -180,18 +168,6 @@
             <div class="card-title">{{ quantityChartTitle }}</div>
             <span class="tag tag-purple">{{ quantityChartTag }}</span>
           </div>
-          <div v-if="isWitchSecret" class="segmented-control weapon-chart-mode">
-            <button
-              v-for="mode in coreDistributionPeriodModes"
-              :key="mode.key"
-              class="btn btn-sm"
-              :class="coreDistributionPeriodMode === mode.key ? 'btn-primary' : 'btn-ghost'"
-              :aria-pressed="coreDistributionPeriodMode === mode.key"
-              @click="coreDistributionPeriodMode = mode.key"
-            >
-              {{ t(mode.labelKey) }}
-            </button>
-          </div>
         </div>
         <div class="chart-frame weapon-chart-frame">
           <v-chart class="chart" :option="quantityOption" autoresize />
@@ -210,7 +186,7 @@
 
     <aside class="weapon-side">
       <div class="card">
-        <div class="card-title">{{ t('weaponGachaPullCount') }}</div>
+        <div class="card-title">{{ t('weaponGachaStrategyTitle') }}</div>
         <div class="form-group">
           <label class="form-label">
             <span>{{ t('weaponGachaForSummary') }}</span>
@@ -227,6 +203,18 @@
         </div>
         <div class="weapon-preset-row">
           <button v-for="pull in presetPulls" :key="pull" class="btn btn-sm" :class="selectedPulls === pull ? 'btn-primary' : 'btn-ghost'" @click="selectedPulls = pull">{{ fmtPulls(pull) }}</button>
+        </div>
+        <div v-if="hasPeriodStrategy" class="segmented-control weapon-strategy-mode">
+          <button
+            v-for="mode in pullStrategyModes"
+            :key="mode.key"
+            class="btn btn-sm"
+            :class="pullStrategyMode === mode.key ? 'btn-primary' : 'btn-ghost'"
+            :aria-pressed="pullStrategyMode === mode.key"
+            @click="pullStrategyMode = mode.key"
+          >
+            {{ t(mode.labelKey) }}
+          </button>
         </div>
         <button
           v-if="isSeraphOracle"
@@ -382,14 +370,14 @@ const showFormula = ref(false)
 const ignoreFirstTopUp3 = ref(false)
 const implicitChartMode = ref('cost')
 const seraphStrategyChartMode = ref('cost')
-const coreDistributionPeriodMode = ref('singleWeek')
+const pullStrategyMode = ref('weeklyRound')
 const implicitChartModes = [
   { key: 'cost', labelKey: 'weaponGachaCostView' },
   { key: 'efficiency', labelKey: 'weaponGachaEfficiencyView' },
 ]
-const coreDistributionPeriodModes = [
-  { key: 'singleWeek', labelKey: 'weaponGachaDistributionSingleWeek' },
+const pullStrategyModes = [
   { key: 'weeklyRound', labelKey: 'weaponGachaDistributionWeeklyRound' },
+  { key: 'singleWeek', labelKey: 'weaponGachaDistributionSingleWeek' },
 ]
 const gearKeyByBanner = {
   forbidden: 'forbidden',
@@ -407,7 +395,7 @@ const gearCoreExpectedPulls = computed(() => findExpectedPullsForCoreProducts(
   selectedBanner.value,
   gearCoreResult.value.products,
   {
-    periodMode: 'weeklyRound',
+    periodMode: pullStrategyMode.value,
     ignoreFirstTopUp3: ignoreFirstTopUp3.value,
   },
 ))
@@ -423,6 +411,7 @@ watch(selectedGearKey, normalizeGearLevels)
 const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
 const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
 const isSeraphOracle = computed(() => selectedBanner.value === 'seraphOracle')
+const hasPeriodStrategy = computed(() => isWitchSecret.value || isSeraphOracle.value)
 const hasFreePulls = computed(() => Boolean(analysis.value.config.freePullsPerPeriod))
 const usesExpectedCoreSummary = computed(() => analysis.value.config.summaryMode === 'expectedCore' || isWitchSecret.value)
 const selectedPullMin = computed(() => isSeraphOracle.value && ignoreFirstTopUp3.value ? 11 : 1)
@@ -456,17 +445,17 @@ const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScor
   selectedPulls: selectedPulls.value,
   maxPulls: WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100,
   ignoreFirstTopUp3: ignoreFirstTopUp3.value,
+  periodMode: pullStrategyMode.value,
 }))
 const implicitChartAnalysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScores.value, {
   bannerKey: selectedBanner.value,
   selectedPulls: selectedPulls.value,
   maxPulls: chartMaxPulls.value,
   ignoreFirstTopUp3: ignoreFirstTopUp3.value,
+  periodMode: pullStrategyMode.value,
 }))
 const selected = computed(() => analysis.value.selected)
-const coreDistributions = computed(() => buildCoreProductProbabilityDistributions(analysis.value, {
-  periodMode: coreDistributionPeriodMode.value,
-}))
+const coreDistributions = computed(() => buildCoreProductProbabilityDistributions(analysis.value))
 const noFreeCycle = computed(() => analysis.value.noFreeCycleNode)
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
 const tr = (key, fallback, params = {}) => key ? t(key, params) : fallback
@@ -651,7 +640,7 @@ const seraphStrategyRows = computed(() => {
     buildSeraphStrategy('stage2And3', 'weaponGachaStrategyStage2And3', noFree10, noFree50, 4),
     buildSeraphStrategy('topUp3Full', 'weaponGachaStrategyTopUp3Full', cumulative7, rowAtFrom(cumulative, 50), 5),
     buildSeraphStrategy('topUp10Full', 'weaponGachaStrategyTopUp10Full', zeroAnalysisRow, noFree50, 6),
-  ]
+  ].filter(row => !ignoreFirstTopUp3.value || !['stage1TopUp3', 'topUp3Full'].includes(row.key))
 })
 
 const seraphCrossWeekRows = computed(() => buildSeraphCrossWeekComparisonRows(analysis.value))
@@ -697,7 +686,8 @@ const chartTooltip = (rows, title, fields) => (params) => {
   const row = rows[list[0].dataIndex]
   let html = `<b style="color:var(--gold)">${title}: ${fmtPulls(row.pulls)}</b><br>`
   list.forEach(item => {
-    html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${item.value}</b><br>`
+    const value = item.value == null || item.value === undefined ? '—' : item.value
+    html += `<span style="color:${item.color}">● ${item.seriesName}</span>: <b>${value}</b><br>`
   })
   fields?.forEach(field => {
     html += `${field.label}: <b>${field.format(row)}</b><br>`
@@ -710,13 +700,15 @@ const implicitCostOption = computed(() => {
   const theme = getMoriTheme(isDark)
   const rows = implicitChartAnalysis.value.decisionRows
   const showEfficiency = implicitChartMode.value === 'efficiency'
+  const hasComparableCore = row => row.totalCoreCount > 0
+    && (!isSeraphOracle.value || row.totalCoreCount >= 1)
   const comparableCosts = rows
-    .filter(row => row.totalCoreCount > 0)
+    .filter(hasComparableCore)
     .map(row => row.implicitCoreUnit)
   const bestCost = comparableCosts.length ? Math.min(...comparableCosts) : 0
   const worstCost = comparableCosts.length ? Math.max(...comparableCosts) : 0
   const metricValue = row => {
-    if (row.totalCoreCount <= 0) return showEfficiency ? 0 : null
+    if (!hasComparableCore(row)) return null
     if (!showEfficiency) return +row.implicitCoreUnit.toFixed(2)
     if (worstCost <= bestCost) return 100
     return +Math.max(0, Math.min(100,
@@ -1252,6 +1244,17 @@ const sideContributionOption = computed(() => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.weapon-strategy-mode {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.weapon-strategy-mode .btn {
+  min-width: 0;
 }
 
 .weapon-baseline-toggle {

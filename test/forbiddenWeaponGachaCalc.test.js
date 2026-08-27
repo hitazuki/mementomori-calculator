@@ -277,30 +277,50 @@ test('core product distributions match configured random drops and milestones', 
     selectedPulls: 50,
   })
   const [relic] = buildCoreProductProbabilityDistributions(seraph)
-  assert.equal(relic.decisionPulls, 40)
-  assert.deepEqual(relic.points.map(point => point.quantity), [1, 2])
-  assert.ok(Math.abs(relic.points[0].probability - 0.60) < 1e-9)
-  assert.ok(Math.abs(relic.points[1].probability - 0.40) < 1e-9)
-  assert.ok(Math.abs(relic.expected - 1.4) < 1e-9)
+  assert.equal(relic.decisionPulls, 43)
+  assert.deepEqual(relic.points.map(point => point.quantity), [1, 2, 3])
+  assert.ok(Math.abs(relic.expected - 1.6) < 1e-9)
+
+  const ignoredSeraph = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'seraphOracle',
+    selectedPulls: 50,
+    ignoreFirstTopUp3: true,
+  })
+  const [ignoredRelic] = buildCoreProductProbabilityDistributions(ignoredSeraph)
+  assert.equal(ignoredRelic.decisionPulls, 40)
+  assert.deepEqual(ignoredRelic.points.map(point => point.quantity), [1, 2])
+  assert.ok(Math.abs(ignoredRelic.expected - 1.4) < 1e-9)
 })
 
 test('weekly-round distributions repeat weekly rewards and exclude free and stage-one pulls', () => {
-  const witch = buildForbiddenWeaponGachaAnalysis(scores, {
+  const witchSingle = buildForbiddenWeaponGachaAnalysis(scores, {
     bannerKey: 'witchSecret',
     selectedPulls: 63,
   })
-  const [witchSingleWeek] = buildCoreProductProbabilityDistributions(witch)
-  const [witchWeeklyRounds] = buildCoreProductProbabilityDistributions(witch, { periodMode: 'weeklyRound' })
+  const witchWeekly = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'witchSecret',
+    selectedPulls: 63,
+    periodMode: 'weeklyRound',
+  })
+  const [witchSingleWeek] = buildCoreProductProbabilityDistributions(witchSingle)
+  const [witchWeeklyRounds] = buildCoreProductProbabilityDistributions(witchWeekly)
   assert.equal(witchSingleWeek.decisionPulls, 56)
   assert.equal(witchWeeklyRounds.decisionPulls, 56)
   assert.ok(Math.abs(witchWeeklyRounds.expected - witchSingleWeek.expected - 8) < 1e-9)
 
-  const seraph = buildForbiddenWeaponGachaAnalysis(scores, {
+  const seraphSingle = buildForbiddenWeaponGachaAnalysis(scores, {
     bannerKey: 'seraphOracle',
     selectedPulls: 90,
+    ignoreFirstTopUp3: true,
   })
-  const [seraphSingleWeek] = buildCoreProductProbabilityDistributions(seraph)
-  const [seraphWeeklyRounds] = buildCoreProductProbabilityDistributions(seraph, { periodMode: 'weeklyRound' })
+  const seraphWeekly = buildForbiddenWeaponGachaAnalysis(scores, {
+    bannerKey: 'seraphOracle',
+    selectedPulls: 90,
+    ignoreFirstTopUp3: true,
+    periodMode: 'weeklyRound',
+  })
+  const [seraphSingleWeek] = buildCoreProductProbabilityDistributions(seraphSingle)
+  const [seraphWeeklyRounds] = buildCoreProductProbabilityDistributions(seraphWeekly)
   assert.equal(seraphSingleWeek.decisionPulls, 80)
   assert.equal(seraphWeeklyRounds.decisionPulls, 80)
   assert.ok(Math.abs(seraphSingleWeek.expected - 2) < 1e-9)

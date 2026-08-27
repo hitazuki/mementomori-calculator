@@ -481,6 +481,7 @@ export default {
   weaponGachaSeraphOracle: "성천사의 신탁 뽑기",
   weaponGachaSeraphOracleShort: "성천사 신탁",
   weaponGachaType: "무구 소환 종류",
+  weaponGachaStrategyTitle: "뽑기 전략",
   gearCoreCalculatorTitle: "장비 핵심 산물 계산",
   gearCoreCalculatorHint: "장비 1개의 레벨 구간에 필요한 핵심 산물을 계산하며, 레벨은 10의 배수로 올림합니다.",
   gearCoreCurrentLevel: "현재 레벨",

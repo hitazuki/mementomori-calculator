@@ -497,6 +497,7 @@ export default {
   weaponGachaSeraphOracle: "聖天使の神託ガチャ",
   weaponGachaSeraphOracleShort: "聖天使神託",
   weaponGachaType: "武具ガチャ種類",
+  weaponGachaStrategyTitle: "ガチャ戦略",
   gearCoreCalculatorTitle: "武具コア産物計算",
   gearCoreCalculatorHint: "武具1個のレベル区間に必要なコア産物を計算します。レベルは10の倍数に切り上げます。",
   gearCoreCurrentLevel: "現在レベル",

@@ -451,6 +451,7 @@ export default {
   weaponGachaSeraphOracle: "圣天使的神谕召唤",
   weaponGachaSeraphOracleShort: "圣天使神谕",
   weaponGachaType: "武具召唤类型",
+  weaponGachaStrategyTitle: "抽卡策略",
   gearCoreCalculatorTitle: "装备核心产物计算",
   gearCoreCalculatorHint: "计算一件装备在等级区间内所需的核心产物；等级向上取整到 10 的倍数。",
   gearCoreCurrentLevel: "当前等级",

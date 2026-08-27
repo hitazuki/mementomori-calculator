@@ -454,6 +454,7 @@ export default {
   weaponGachaSeraphOracle: "Invocation of The Seraph’s Prophecy",
   weaponGachaSeraphOracleShort: "Seraph Prophecy",
   weaponGachaType: "Gear Gacha Type",
+  weaponGachaStrategyTitle: "Pull Strategy",
   gearCoreCalculatorTitle: "Gear Core Product Calculator",
   gearCoreCalculatorHint: "Core products needed for one item across a level range; levels round up to a multiple of 10.",
   gearCoreCurrentLevel: "Current Level",
