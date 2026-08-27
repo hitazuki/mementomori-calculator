@@ -201,6 +201,40 @@ export function getForbiddenMilestoneRewards(pulls, config = FORBIDDEN_WEAPON_GA
   })
 }
 
+export function calculateExpectedCoreProductsAtPulls(bannerKey, pulls) {
+  const config = WEAPON_GACHA_CONFIGS[bannerKey] || FORBIDDEN_WEAPON_GACHA
+  const normalizedPulls = Math.max(0, Math.trunc(Number(pulls)) || 0)
+  const randomAndGuaranteed = config.coreDrops.reduce(
+    (sum, drop) => sum + normalizedPulls * (
+      (drop.rate || 0) * (drop.qty || 0) + (drop.perPullQty || 0)
+    ),
+    0,
+  )
+  const milestoneProducts = getForbiddenMilestoneRewards(normalizedPulls, config)
+    .filter(reward => reward.core || (!reward.itype && !reward.iid))
+    .reduce(
+      (sum, reward) => sum + (reward.expectedQty ?? ((reward.qty || 0) * (reward.rate ?? 1))),
+      0,
+    )
+  return randomAndGuaranteed + milestoneProducts
+}
+
+export function findExpectedPullsForCoreProducts(bannerKey, productCount) {
+  const target = Math.max(0, Number(productCount) || 0)
+  if (target === 0) return 0
+
+  let lower = 0
+  let upper = 1
+  while (calculateExpectedCoreProductsAtPulls(bannerKey, upper) < target) upper *= 2
+
+  while (lower + 1 < upper) {
+    const middle = Math.floor((lower + upper) / 2)
+    if (calculateExpectedCoreProductsAtPulls(bannerKey, middle) >= target) upper = middle
+    else lower = middle
+  }
+  return upper
+}
+
 export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
   const config = WEAPON_GACHA_CONFIGS[options.bannerKey] || FORBIDDEN_WEAPON_GACHA
   const maxPulls = options.maxPulls || config.maxPulls

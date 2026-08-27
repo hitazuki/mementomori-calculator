@@ -3,6 +3,8 @@ import assert from 'node:assert/strict'
 
 import {
   buildForbiddenWeaponGachaAnalysis,
+  calculateExpectedCoreProductsAtPulls,
+  findExpectedPullsForCoreProducts,
   buildCoreProductProbabilityDistributions,
   buildSeraphCrossWeekComparisonRows,
 } from '../src/engine/forbiddenWeaponGachaCalc.js'
@@ -303,4 +305,12 @@ test('weekly-round distributions repeat weekly rewards and exclude free and stag
   assert.equal(seraphWeeklyRounds.decisionPulls, 80)
   assert.ok(Math.abs(seraphSingleWeek.expected - 2) < 1e-9)
   assert.ok(Math.abs(seraphWeeklyRounds.expected - 2.8) < 1e-9)
+})
+
+test('expected pull lookup reaches the requested core-product expectation', () => {
+  assert.ok(Math.abs(calculateExpectedCoreProductsAtPulls('forbidden', 10) - 3.4) < 1e-9)
+  assert.equal(findExpectedPullsForCoreProducts('forbidden', 5), 17)
+  assert.equal(findExpectedPullsForCoreProducts('witchSecret', 10), 8)
+  assert.equal(findExpectedPullsForCoreProducts('seraphOracle', 2), 75)
+  assert.equal(findExpectedPullsForCoreProducts('light', 0), 0)
 })

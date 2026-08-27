@@ -21,43 +21,45 @@
     </div>
 
     <div class="card gear-core-card">
-      <div class="gear-core-heading">
-        <div>
-          <div class="card-title">{{ t('gearCoreCalculatorTitle') }}</div>
-          <p>{{ t('gearCoreCalculatorHint') }}</p>
-        </div>
-        <div class="gear-level-range">
-          <label class="gear-level-field">
-            <span>{{ t('gearCoreCurrentLevel') }}</span>
-            <input
-              v-model.number="gearCurrentLevel"
-              class="form-input"
-              type="number"
-              :min="GEAR_CORE_MIN_LEVEL"
-              :max="GEAR_CORE_MAX_LEVEL"
-              step="10"
-              @change="normalizeGearLevels"
-            >
-          </label>
-          <span class="gear-level-arrow">→</span>
-          <label class="gear-level-field">
-            <span>{{ t('gearCoreTargetLevel') }}</span>
-            <input
-              v-model.number="gearTargetLevel"
-              class="form-input"
-              type="number"
-              :min="GEAR_CORE_MIN_LEVEL"
-              :max="GEAR_CORE_MAX_LEVEL"
-              step="10"
-              @change="normalizeGearLevels"
-            >
-          </label>
-        </div>
+      <div class="card-title gear-core-title">{{ t('gearCoreCalculatorTitle') }}</div>
+      <div class="gear-level-range">
+        <label class="gear-level-field">
+          <span>{{ t('gearCoreCurrentLevel') }}</span>
+          <input
+            v-model.number="gearCurrentLevel"
+            class="form-input"
+            type="number"
+            :min="GEAR_CORE_MIN_LEVEL"
+            :max="GEAR_CORE_MAX_LEVEL"
+            step="10"
+            @change="normalizeGearLevels"
+          >
+        </label>
+        <span class="gear-level-arrow">→</span>
+        <label class="gear-level-field">
+          <span>{{ t('gearCoreTargetLevel') }}</span>
+          <input
+            v-model.number="gearTargetLevel"
+            class="form-input"
+            type="number"
+            :min="GEAR_CORE_MIN_LEVEL"
+            :max="GEAR_CORE_MAX_LEVEL"
+            step="10"
+            @change="normalizeGearLevels"
+          >
+        </label>
       </div>
       <div class="gear-core-result">
-        <span>{{ gearCoreProductLabel }}</span>
-        <b>{{ gearCoreResult.products.toLocaleString() }}</b>
-        <small>{{ t('gearCorePartsRequired', { count: gearCoreResult.parts.toLocaleString() }) }}</small>
+        <div class="gear-core-metric">
+          <span>{{ gearCoreProductLabel }}</span>
+          <b>{{ gearCoreResult.products.toLocaleString() }}</b>
+          <small>{{ t('gearCorePartsRequired', { count: gearCoreResult.parts.toLocaleString() }) }}</small>
+        </div>
+        <div class="gear-core-metric">
+          <span>{{ t('gearCoreExpectedPulls') }}</span>
+          <b>{{ t('gearCoreExpectedPullsValue', { count: gearCoreExpectedPulls.toLocaleString() }) }}</b>
+          <small>{{ t('gearCoreExpectedPullsTarget', { count: gearCoreResult.products.toLocaleString() }) }}</small>
+        </div>
       </div>
     </div>
   </section>
@@ -353,6 +355,7 @@ import {
   buildForbiddenWeaponGachaAnalysis,
   buildCoreProductProbabilityDistributions,
   buildSeraphCrossWeekComparisonRows,
+  findExpectedPullsForCoreProducts,
   WEAPON_GACHA_CONFIGS,
 } from '../engine/forbiddenWeaponGachaCalc.js'
 import { normalizeScores } from '../engine/packCalc.js'
@@ -399,6 +402,10 @@ const gearCoreResult = computed(() => calculateGearCoreProductRange(
   gearCurrentLevel.value,
   gearTargetLevel.value,
   selectedGearKey.value,
+))
+const gearCoreExpectedPulls = computed(() => findExpectedPullsForCoreProducts(
+  selectedBanner.value,
+  gearCoreResult.value.products,
 ))
 const gearCoreProductLabel = computed(() => {
   const key = selectedGearKey.value
@@ -1041,20 +1048,16 @@ const sideContributionOption = computed(() => {
 }
 
 .gear-core-card {
+  display: grid;
+  grid-template-columns: auto auto minmax(280px, 1fr);
+  gap: 18px;
+  align-items: center;
   min-width: 0;
 }
 
-.gear-core-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.gear-core-heading p {
-  margin-top: 4px;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
+.gear-core-title {
+  margin: 0;
+  white-space: nowrap;
 }
 
 .gear-level-range {
@@ -1087,16 +1090,22 @@ const sideContributionOption = computed(() => {
 
 .gear-core-result {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.gear-core-metric {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 2px;
+  gap: 2px 8px;
   align-items: center;
-  margin-top: 12px;
   padding: 8px 10px;
   border-radius: var(--r-sm);
   background: rgba(var(--color-invert-rgb), 0.035);
 }
 
-.gear-core-result span {
+.gear-core-metric span {
   overflow: hidden;
   color: var(--text-secondary);
   font-size: var(--fs-xs);
@@ -1104,7 +1113,7 @@ const sideContributionOption = computed(() => {
   white-space: nowrap;
 }
 
-.gear-core-result b {
+.gear-core-metric b {
   grid-row: span 2;
   color: var(--gold);
   font-family: var(--font-mono);
@@ -1112,7 +1121,7 @@ const sideContributionOption = computed(() => {
   font-variant-numeric: tabular-nums;
 }
 
-.gear-core-result small {
+.gear-core-metric small {
   grid-column: 1;
   color: var(--text-muted);
   font-size: 10px;
@@ -1291,6 +1300,10 @@ const sideContributionOption = computed(() => {
   .weapon-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .gear-core-card {
+    grid-template-columns: auto auto minmax(280px, 1fr);
+  }
 }
 
 @media (max-width: 560px) {
@@ -1305,9 +1318,8 @@ const sideContributionOption = computed(() => {
     grid-template-columns: 1fr;
   }
 
-  .gear-core-heading {
-    align-items: stretch;
-    flex-direction: column;
+  .gear-core-card {
+    grid-template-columns: 1fr;
   }
 
   .gear-level-field {
@@ -1316,6 +1328,10 @@ const sideContributionOption = computed(() => {
 
   .gear-level-range {
     width: 100%;
+  }
+
+  .gear-core-result {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .weapon-chart-frame {
