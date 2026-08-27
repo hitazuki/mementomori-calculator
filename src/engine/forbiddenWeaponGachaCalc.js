@@ -201,9 +201,29 @@ export function getForbiddenMilestoneRewards(pulls, config = FORBIDDEN_WEAPON_GA
   })
 }
 
-export function calculateExpectedCoreProductsAtPulls(bannerKey, pulls) {
+export function calculateExpectedCoreProductsAtPulls(bannerKey, pulls, options = {}) {
   const config = WEAPON_GACHA_CONFIGS[bannerKey] || FORBIDDEN_WEAPON_GACHA
   const normalizedPulls = Math.max(0, Math.trunc(Number(pulls)) || 0)
+  if (options.periodMode === 'weeklyRound' && config.key === 'witchSecret') {
+    const completedRounds = Math.floor(normalizedPulls / 28)
+    const pullsInRound = normalizedPulls % 28
+    const weeklyBonus = completedRounds * 8
+      + (pullsInRound >= 8 ? 2 : 0)
+      + (pullsInRound >= 18 ? 3 : 0)
+      + (pullsInRound >= 28 ? 3 : 0)
+    return normalizedPulls * 1.12 + weeklyBonus
+  }
+  if (options.periodMode === 'weeklyRound' && config.key === 'seraphOracle') {
+    const includeFirstTopUp3 = !options.ignoreFirstTopUp3
+    const initialPulls = includeFirstTopUp3 ? Math.min(3, normalizedPulls) : 0
+    const decisionPulls = normalizedPulls - initialPulls
+    const completedRounds = Math.floor(decisionPulls / 40)
+    const pullsInRound = decisionPulls % 40
+    return (includeFirstTopUp3 && initialPulls === 3 ? 0.20 : 0)
+      + completedRounds * 1.40
+      + (pullsInRound >= 15 ? 0.40 : 0)
+      + (pullsInRound >= 40 ? 1 : 0)
+  }
   const randomAndGuaranteed = config.coreDrops.reduce(
     (sum, drop) => sum + normalizedPulls * (
       (drop.rate || 0) * (drop.qty || 0) + (drop.perPullQty || 0)
@@ -219,17 +239,18 @@ export function calculateExpectedCoreProductsAtPulls(bannerKey, pulls) {
   return randomAndGuaranteed + milestoneProducts
 }
 
-export function findExpectedPullsForCoreProducts(bannerKey, productCount) {
+export function findExpectedPullsForCoreProducts(bannerKey, productCount, options = {}) {
   const target = Math.max(0, Number(productCount) || 0)
   if (target === 0) return 0
+  const reachesTarget = pulls => calculateExpectedCoreProductsAtPulls(bannerKey, pulls, options) >= target - 1e-9
 
   let lower = 0
   let upper = 1
-  while (calculateExpectedCoreProductsAtPulls(bannerKey, upper) < target) upper *= 2
+  while (!reachesTarget(upper)) upper *= 2
 
   while (lower + 1 < upper) {
     const middle = Math.floor((lower + upper) / 2)
-    if (calculateExpectedCoreProductsAtPulls(bannerKey, middle) >= target) upper = middle
+    if (reachesTarget(middle)) upper = middle
     else lower = middle
   }
   return upper

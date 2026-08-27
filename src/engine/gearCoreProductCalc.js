@@ -65,6 +65,13 @@ export function normalizeGearLevel(level) {
   return Math.min(GEAR_CORE_MAX_LEVEL, Math.max(GEAR_CORE_MIN_LEVEL, numericLevel))
 }
 
+export function normalizeGearLevelForGear(level, gearKey) {
+  const normalizedLevel = normalizeGearLevel(level)
+  if (normalizedLevel === 0) return 0
+  const minimumLevel = GEAR_PROGRESSIONS[gearKey]?.initialLevel || 180
+  return Math.max(minimumLevel, normalizedLevel)
+}
+
 function countStageSteps(level, [start, end, step]) {
   if (level < start) return 0
   return Math.floor((Math.min(level, end) - start) / step) + 1
@@ -97,8 +104,8 @@ export function calculateGearCoreProducts(level) {
 }
 
 export function calculateGearCoreProductRange(currentLevel, targetLevel, gearKey) {
-  const normalizedCurrentLevel = normalizeGearLevel(currentLevel)
-  const normalizedTargetLevel = normalizeGearLevel(targetLevel)
+  const normalizedCurrentLevel = normalizeGearLevelForGear(currentLevel, gearKey)
+  const normalizedTargetLevel = normalizeGearLevelForGear(targetLevel, gearKey)
   const progression = GEAR_PROGRESSIONS[gearKey]
 
   if (!progression || normalizedTargetLevel <= normalizedCurrentLevel) {

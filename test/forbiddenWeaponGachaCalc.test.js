@@ -314,3 +314,18 @@ test('expected pull lookup reaches the requested core-product expectation', () =
   assert.equal(findExpectedPullsForCoreProducts('seraphOracle', 2), 75)
   assert.equal(findExpectedPullsForCoreProducts('light', 0), 0)
 })
+
+test('weekly expected pull lookup repeats weekly stages and respects the first seraph top-up', () => {
+  const weekly = { periodMode: 'weeklyRound' }
+  assert.equal(findExpectedPullsForCoreProducts('witchSecret', 20, weekly), 17)
+  assert.equal(findExpectedPullsForCoreProducts('seraphOracle', 2, weekly), 58)
+  assert.equal(findExpectedPullsForCoreProducts('seraphOracle', 2, {
+    ...weekly,
+    ignoreFirstTopUp3: true,
+  }), 80)
+  assert.equal(findExpectedPullsForCoreProducts('seraphOracle', 32, weekly), 923)
+  assert.equal(findExpectedPullsForCoreProducts('seraphOracle', 32, {
+    ...weekly,
+    ignoreFirstTopUp3: true,
+  }), 920)
+})

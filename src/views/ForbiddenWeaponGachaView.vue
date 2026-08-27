@@ -367,7 +367,7 @@ import {
   calculateGearCoreProductRange,
   GEAR_CORE_MAX_LEVEL,
   GEAR_CORE_MIN_LEVEL,
-  normalizeGearLevel,
+  normalizeGearLevelForGear,
 } from '../engine/gearCoreProductCalc.js'
 
 use([CanvasRenderer, BarChart, LineChart, GridComponent, LegendComponent, TitleComponent, TooltipComponent])
@@ -375,8 +375,8 @@ use([CanvasRenderer, BarChart, LineChart, GridComponent, LegendComponent, TitleC
 const { t, locale } = useI18n()
 
 const selectedBanner = ref('forbidden')
-const selectedPulls = ref(20)
-const gearCurrentLevel = ref(180)
+const selectedPulls = ref(100)
+const gearCurrentLevel = ref(0)
 const gearTargetLevel = ref(240)
 const showFormula = ref(false)
 const ignoreFirstTopUp3 = ref(false)
@@ -406,15 +406,20 @@ const gearCoreResult = computed(() => calculateGearCoreProductRange(
 const gearCoreExpectedPulls = computed(() => findExpectedPullsForCoreProducts(
   selectedBanner.value,
   gearCoreResult.value.products,
+  {
+    periodMode: 'weeklyRound',
+    ignoreFirstTopUp3: ignoreFirstTopUp3.value,
+  },
 ))
 const gearCoreProductLabel = computed(() => {
   const key = selectedGearKey.value
   return t(`gearCoreProduct${key[0].toUpperCase()}${key.slice(1)}`)
 })
 const normalizeGearLevels = () => {
-  gearCurrentLevel.value = normalizeGearLevel(gearCurrentLevel.value)
-  gearTargetLevel.value = normalizeGearLevel(gearTargetLevel.value)
+  gearCurrentLevel.value = normalizeGearLevelForGear(gearCurrentLevel.value, selectedGearKey.value)
+  gearTargetLevel.value = normalizeGearLevelForGear(gearTargetLevel.value, selectedGearKey.value)
 }
+watch(selectedGearKey, normalizeGearLevels)
 const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
 const isWitchSecret = computed(() => selectedBanner.value === 'witchSecret')
 const isSeraphOracle = computed(() => selectedBanner.value === 'seraphOracle')
@@ -422,9 +427,22 @@ const hasFreePulls = computed(() => Boolean(analysis.value.config.freePullsPerPe
 const usesExpectedCoreSummary = computed(() => analysis.value.config.summaryMode === 'expectedCore' || isWitchSecret.value)
 const selectedPullMin = computed(() => isSeraphOracle.value && ignoreFirstTopUp3.value ? 11 : 1)
 const presetPulls = computed(() => {
-  if (isWitchSecret.value) return [7, 15, 25, 35]
+  if (isWitchSecret.value) return [7, 15, 25, 35, 70]
   if (isSeraphOracle.value) return ignoreFirstTopUp3.value ? [11, 25, 50, 100, 150] : [7, 10, 25, 50, 100, 150]
   return [10, 20, 50, 100]
+})
+const maxPresetPulls = computed(() => Math.max(...presetPulls.value))
+const chartMaxPulls = computed(() => {
+  const requestedPulls = Math.trunc(Number(selectedPulls.value))
+  const selectedChartPulls = Number.isFinite(requestedPulls) ? requestedPulls : maxPresetPulls.value
+  const config = WEAPON_GACHA_CONFIGS[selectedBanner.value]
+  const decisionBaseline = isSeraphOracle.value && ignoreFirstTopUp3.value
+    ? 10
+    : (config?.freePullsPerPeriod || 0)
+  return Math.max(
+    decisionBaseline + 1,
+    Math.min(selectedChartPulls, maxPresetPulls.value * 2),
+  )
 })
 
 const normalizeSelectedPulls = () => {
@@ -437,6 +455,12 @@ const analysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScor
   bannerKey: selectedBanner.value,
   selectedPulls: selectedPulls.value,
   maxPulls: WEAPON_GACHA_CONFIGS[selectedBanner.value]?.maxPulls || 100,
+  ignoreFirstTopUp3: ignoreFirstTopUp3.value,
+}))
+const implicitChartAnalysis = computed(() => buildForbiddenWeaponGachaAnalysis(normalizedScores.value, {
+  bannerKey: selectedBanner.value,
+  selectedPulls: selectedPulls.value,
+  maxPulls: chartMaxPulls.value,
   ignoreFirstTopUp3: ignoreFirstTopUp3.value,
 }))
 const selected = computed(() => analysis.value.selected)
@@ -641,8 +665,8 @@ const seraphValueStructureRows = computed(() => seraphMilestoneGroups.value.flat
   }))
 ))
 
-watch(selectedBanner, banner => {
-  selectedPulls.value = banner === 'witchSecret' ? 35 : banner === 'seraphOracle' ? 50 : 20
+watch(selectedBanner, () => {
+  selectedPulls.value = maxPresetPulls.value
 })
 
 watch(ignoreFirstTopUp3, enabled => {
@@ -684,7 +708,7 @@ const chartTooltip = (rows, title, fields) => (params) => {
 const implicitCostOption = computed(() => {
   const isDark = currentTheme.value === 'dark'
   const theme = getMoriTheme(isDark)
-  const rows = analysis.value.decisionRows
+  const rows = implicitChartAnalysis.value.decisionRows
   const showEfficiency = implicitChartMode.value === 'efficiency'
   const comparableCosts = rows
     .filter(row => row.totalCoreCount > 0)

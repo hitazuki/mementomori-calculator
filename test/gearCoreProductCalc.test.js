@@ -6,6 +6,7 @@ import {
   calculateGearCoreProducts,
   calculateGearParts,
   normalizeGearLevel,
+  normalizeGearLevelForGear,
 } from '../src/engine/gearCoreProductCalc.js'
 
 test('calculates cumulative parts at the reference progression breakpoints', () => {
@@ -33,6 +34,15 @@ test('normalizes manual levels to the supported range', () => {
   assert.equal(normalizeGearLevel(250), 250)
   assert.equal(normalizeGearLevel(1200), 1000)
   assert.equal(normalizeGearLevel('invalid'), 0)
+})
+
+test('normalizes positive levels to each gear type minimum', () => {
+  assert.equal(normalizeGearLevelForGear(0, 'light'), 0)
+  assert.equal(normalizeGearLevelForGear(1, 'light'), 180)
+  assert.equal(normalizeGearLevelForGear(179, 'unique'), 180)
+  assert.equal(normalizeGearLevelForGear(1, 'seraph'), 240)
+  assert.equal(normalizeGearLevelForGear(239, 'seraph'), 240)
+  assert.equal(normalizeGearLevelForGear(241, 'seraph'), 250)
 })
 
 test('calculates only the parts needed between two rounded-up levels', () => {
