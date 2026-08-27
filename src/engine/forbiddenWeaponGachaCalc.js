@@ -495,20 +495,27 @@ export function buildForbiddenWeaponGachaAnalysis(scores, options = {}) {
   }
 }
 
-export function buildSeraphCrossWeekComparisonRows(analysis, pullCounts = [200, 400, 600, 800, 1000]) {
+export function buildSeraphCrossWeekComparisonRows(
+  analysis,
+  pullCounts = [200, 400, 600, 800, 1000],
+  options = {},
+) {
   if (analysis?.config?.key !== 'seraphOracle') return []
 
   const cycleRows = analysis.noFreeCycleRows || []
+  const cumulativeRows = analysis.cumulativeRows || []
+  const selectedMode = options.periodMode === 'singleWeek' ? 'singleWeek' : 'weeklyRound'
   const zero = {
     pulls: 0,
     paidPulls: 0,
     totalCost: 0,
     sideValue: 0,
     totalCoreCount: 0,
+    expectedRelic: 0,
   }
-  const rowAt = pulls => pulls <= 0
+  const rowAt = (rows, pulls) => pulls <= 0
     ? zero
-    : cycleRows.find(row => row.pulls === pulls) || zero
+    : rows.find(row => row.pulls === pulls) || zero
   const diff = (before, after) => ({
     paidPulls: after.paidPulls - before.paidPulls,
     totalCost: after.totalCost - before.totalCost,
@@ -529,16 +536,28 @@ export function buildSeraphCrossWeekComparisonRows(analysis, pullCounts = [200, 
     sideValue: stage.sideValue * count,
     expectedRelic: stage.expectedRelic * count,
   })
-  const full50 = diff(rowAt(0), rowAt(50))
-  const stage23 = diff(rowAt(10), rowAt(50))
+  const add = (...parts) => finalize(parts.reduce((sum, part) => ({
+    paidPulls: sum.paidPulls + part.paidPulls,
+    totalCost: sum.totalCost + part.totalCost,
+    sideValue: sum.sideValue + part.sideValue,
+    expectedRelic: sum.expectedRelic + part.expectedRelic,
+  }), { ...zero }))
+  const full50 = diff(rowAt(cycleRows, 0), rowAt(cycleRows, 50))
+  const stage23 = diff(rowAt(cycleRows, 10), rowAt(cycleRows, 50))
+  const firstTopUp3 = options.ignoreFirstTopUp3
+    ? finalize(zero)
+    : finalize(diff(rowAt(cumulativeRows, 7), rowAt(cumulativeRows, 10)))
 
   return pullCounts.map(requestedPulls => {
     const singleWeekStages = Math.floor(requestedPulls / 50)
     const splitWeekStages = Math.floor(requestedPulls / 40)
-    const continuous = scale(full50, singleWeekStages)
-    const splitWeeks = scale(stage23, splitWeekStages)
+    const continuous = add(firstTopUp3, scale(full50, singleWeekStages))
+    const splitWeeks = add(firstTopUp3, scale(stage23, splitWeekStages))
     const comparablePulls = Math.min(continuous.paidPulls, splitWeeks.paidPulls)
     const expectedRelicLoss = Math.max(0, splitWeeks.expectedRelic - continuous.expectedRelic)
+    const selected = selectedMode === 'weeklyRound' ? splitWeeks : continuous
+    const alternative = selectedMode === 'weeklyRound' ? continuous : splitWeeks
+    const strategyDifference = Math.abs(selected.expectedRelic - alternative.expectedRelic)
     return {
       requestedPulls,
       comparablePulls,
@@ -546,6 +565,13 @@ export function buildSeraphCrossWeekComparisonRows(analysis, pullCounts = [200, 
       splitWeekStages,
       continuous,
       splitWeeks,
+      selectedMode,
+      selected,
+      alternative,
+      strategyDifference,
+      strategyDifferenceRate: alternative.expectedRelic > 0
+        ? strategyDifference / alternative.expectedRelic
+        : 0,
       expectedRelicLoss,
       expectedRelicLossRate: splitWeeks.expectedRelic > 0
         ? expectedRelicLoss / splitWeeks.expectedRelic

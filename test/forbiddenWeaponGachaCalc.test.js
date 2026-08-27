@@ -248,6 +248,9 @@ test('seraph cross-week comparison uses equal paid pulls and exposes expected re
   assert.deepEqual(rows.map(row => row.singleWeekStages), [4, 8, 12, 16, 20])
   assert.deepEqual(rows.map(row => row.splitWeekStages), [5, 10, 15, 20, 25])
   assert.ok(rows.every(row => row.continuous.paidPulls === row.splitWeeks.paidPulls))
+  assert.deepEqual(rows.map(row => row.comparablePulls), [203, 403, 603, 803, 1003])
+  assert.ok(rows.every(row => row.selected === row.splitWeeks))
+  assert.ok(rows.every(row => row.alternative === row.continuous))
   assert.ok(rows.every(row => row.continuous.implicitCoreUnit > row.splitWeeks.implicitCoreUnit))
   assert.ok(rows.every(row => row.expectedRelicLoss > 0))
   assert.ok(rows.slice(1).every((row, index) =>
@@ -256,6 +259,19 @@ test('seraph cross-week comparison uses equal paid pulls and exposes expected re
   assert.ok(Math.abs(rows[0].expectedRelicLoss - 0.6) < 1e-9)
   assert.ok(Math.abs(rows[4].expectedRelicLoss - 3) < 1e-9)
   assert.ok(rows.every(row => row.continuous.totalCost === row.splitWeeks.totalCost))
+
+  const singleWeekRows = buildSeraphCrossWeekComparisonRows(analysis, undefined, {
+    periodMode: 'singleWeek',
+  })
+  assert.ok(singleWeekRows.every(row => row.selected === row.continuous))
+  assert.ok(singleWeekRows.every(row => row.alternative === row.splitWeeks))
+
+  const ignoredRows = buildSeraphCrossWeekComparisonRows(analysis, undefined, {
+    periodMode: 'weeklyRound',
+    ignoreFirstTopUp3: true,
+  })
+  assert.deepEqual(ignoredRows.map(row => row.comparablePulls), [200, 400, 600, 800, 1000])
+  assert.ok(Math.abs(rows[0].selected.expectedRelic - ignoredRows[0].selected.expectedRelic - 0.2) < 1e-9)
 })
 
 test('core product distributions match configured random drops and milestones', () => {
