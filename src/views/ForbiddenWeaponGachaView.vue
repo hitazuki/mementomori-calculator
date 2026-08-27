@@ -76,7 +76,7 @@
           <div class="stat-label">{{ hasFreePulls ? t('weaponGachaPaidPulls') : t('weaponGachaSideRecovery') }}</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">{{ fmtUnitDiamonds(selected.implicitCoreUnit) }}</div>
+          <div class="stat-value">{{ selected.totalCoreCount > 0 ? fmtUnitDiamonds(selected.implicitCoreUnit) : '—' }}</div>
           <div class="stat-label">{{ implicitUnitLabel }}</div>
         </div>
         <div class="stat-box">
@@ -701,7 +701,6 @@ const implicitCostOption = computed(() => {
   const rows = implicitChartAnalysis.value.decisionRows
   const showEfficiency = implicitChartMode.value === 'efficiency'
   const hasComparableCore = row => row.totalCoreCount > 0
-    && (!isSeraphOracle.value || row.totalCoreCount >= 1)
   const comparableCosts = rows
     .filter(hasComparableCore)
     .map(row => row.implicitCoreUnit)
