@@ -26,25 +26,38 @@
           <div class="card-title">{{ t('gearCoreCalculatorTitle') }}</div>
           <p>{{ t('gearCoreCalculatorHint') }}</p>
         </div>
-        <label class="gear-level-field">
-          <span>{{ t('gearCoreTargetLevel') }}</span>
-          <input
-            v-model.number="gearTargetLevel"
-            class="form-input"
-            type="number"
-            :min="GEAR_CORE_MIN_LEVEL"
-            :max="GEAR_CORE_MAX_LEVEL"
-            step="1"
-            @change="normalizeGearTargetLevel"
-          >
-        </label>
-      </div>
-      <div class="gear-core-results">
-        <div v-for="row in gearCoreResults" :key="row.key" class="gear-core-result">
-          <span>{{ t(`gearCoreProduct${row.key[0].toUpperCase()}${row.key.slice(1)}`) }}</span>
-          <b>{{ row.products.toLocaleString() }}</b>
-          <small>{{ t('gearCorePartsRequired', { count: row.parts.toLocaleString() }) }}</small>
+        <div class="gear-level-range">
+          <label class="gear-level-field">
+            <span>{{ t('gearCoreCurrentLevel') }}</span>
+            <input
+              v-model.number="gearCurrentLevel"
+              class="form-input"
+              type="number"
+              :min="GEAR_CORE_MIN_LEVEL"
+              :max="GEAR_CORE_MAX_LEVEL"
+              step="10"
+              @change="normalizeGearLevels"
+            >
+          </label>
+          <span class="gear-level-arrow">→</span>
+          <label class="gear-level-field">
+            <span>{{ t('gearCoreTargetLevel') }}</span>
+            <input
+              v-model.number="gearTargetLevel"
+              class="form-input"
+              type="number"
+              :min="GEAR_CORE_MIN_LEVEL"
+              :max="GEAR_CORE_MAX_LEVEL"
+              step="10"
+              @change="normalizeGearLevels"
+            >
+          </label>
         </div>
+      </div>
+      <div class="gear-core-result">
+        <span>{{ gearCoreProductLabel }}</span>
+        <b>{{ gearCoreResult.products.toLocaleString() }}</b>
+        <small>{{ t('gearCorePartsRequired', { count: gearCoreResult.parts.toLocaleString() }) }}</small>
       </div>
     </div>
   </section>
@@ -348,7 +361,7 @@ import { editableScores } from '../store/itemScores.js'
 import { baseChartOption, getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 import {
-  calculateGearCoreProducts,
+  calculateGearCoreProductRange,
   GEAR_CORE_MAX_LEVEL,
   GEAR_CORE_MIN_LEVEL,
   normalizeGearLevel,
@@ -360,6 +373,7 @@ const { t, locale } = useI18n()
 
 const selectedBanner = ref('forbidden')
 const selectedPulls = ref(20)
+const gearCurrentLevel = ref(180)
 const gearTargetLevel = ref(240)
 const showFormula = ref(false)
 const ignoreFirstTopUp3 = ref(false)
@@ -374,8 +388,24 @@ const coreDistributionPeriodModes = [
   { key: 'singleWeek', labelKey: 'weaponGachaDistributionSingleWeek' },
   { key: 'weeklyRound', labelKey: 'weaponGachaDistributionWeeklyRound' },
 ]
-const gearCoreResults = computed(() => calculateGearCoreProducts(gearTargetLevel.value))
-const normalizeGearTargetLevel = () => {
+const gearKeyByBanner = {
+  forbidden: 'forbidden',
+  light: 'light',
+  witchSecret: 'unique',
+  seraphOracle: 'seraph',
+}
+const selectedGearKey = computed(() => gearKeyByBanner[selectedBanner.value])
+const gearCoreResult = computed(() => calculateGearCoreProductRange(
+  gearCurrentLevel.value,
+  gearTargetLevel.value,
+  selectedGearKey.value,
+))
+const gearCoreProductLabel = computed(() => {
+  const key = selectedGearKey.value
+  return t(`gearCoreProduct${key[0].toUpperCase()}${key.slice(1)}`)
+})
+const normalizeGearLevels = () => {
+  gearCurrentLevel.value = normalizeGearLevel(gearCurrentLevel.value)
   gearTargetLevel.value = normalizeGearLevel(gearTargetLevel.value)
 }
 const bannerOptions = Object.values(WEAPON_GACHA_CONFIGS)
@@ -1002,6 +1032,7 @@ const sideContributionOption = computed(() => {
   display: grid;
   grid-template-columns: minmax(360px, 420px) minmax(0, 1fr);
   gap: 14px;
+  align-items: start;
   margin-bottom: 14px;
 }
 
@@ -1026,13 +1057,26 @@ const sideContributionOption = computed(() => {
   font-size: var(--fs-xs);
 }
 
+.gear-level-range {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+  gap: 8px;
+}
+
 .gear-level-field {
   display: flex;
-  flex: 0 0 116px;
+  width: 106px;
   flex-direction: column;
   gap: 5px;
   color: var(--text-secondary);
   font-size: var(--fs-xs);
+}
+
+.gear-level-arrow {
+  padding-bottom: 8px;
+  color: var(--gold);
+  font-weight: 700;
 }
 
 .gear-level-field .form-input {
@@ -1041,16 +1085,12 @@ const sideContributionOption = computed(() => {
   text-align: center;
 }
 
-.gear-core-results {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 12px;
-}
-
 .gear-core-result {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 2px;
+  align-items: center;
+  margin-top: 12px;
   padding: 8px 10px;
   border-radius: var(--r-sm);
   background: rgba(var(--color-invert-rgb), 0.035);
@@ -1065,6 +1105,7 @@ const sideContributionOption = computed(() => {
 }
 
 .gear-core-result b {
+  grid-row: span 2;
   color: var(--gold);
   font-family: var(--font-mono);
   font-size: var(--fs-lg);
@@ -1072,6 +1113,7 @@ const sideContributionOption = computed(() => {
 }
 
 .gear-core-result small {
+  grid-column: 1;
   color: var(--text-muted);
   font-size: 10px;
 }
@@ -1269,11 +1311,11 @@ const sideContributionOption = computed(() => {
   }
 
   .gear-level-field {
-    flex-basis: auto;
+    width: 100%;
   }
 
-  .gear-core-results {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .gear-level-range {
+    width: 100%;
   }
 
   .weapon-chart-frame {

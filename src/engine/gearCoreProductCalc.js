@@ -60,7 +60,7 @@ export const GEAR_CORE_MIN_LEVEL = 0
 export const GEAR_CORE_MAX_LEVEL = 1000
 
 export function normalizeGearLevel(level) {
-  const numericLevel = Math.trunc(Number(level))
+  const numericLevel = Math.ceil(Number(level) / 10) * 10
   if (!Number.isFinite(numericLevel)) return GEAR_CORE_MIN_LEVEL
   return Math.min(GEAR_CORE_MAX_LEVEL, Math.max(GEAR_CORE_MIN_LEVEL, numericLevel))
 }
@@ -94,4 +94,36 @@ export function calculateGearCoreProducts(level) {
       exchangeProducts: progression.exchangeProducts,
     }
   })
+}
+
+export function calculateGearCoreProductRange(currentLevel, targetLevel, gearKey) {
+  const normalizedCurrentLevel = normalizeGearLevel(currentLevel)
+  const normalizedTargetLevel = normalizeGearLevel(targetLevel)
+  const progression = GEAR_PROGRESSIONS[gearKey]
+
+  if (!progression || normalizedTargetLevel <= normalizedCurrentLevel) {
+    return {
+      key: gearKey,
+      parts: 0,
+      products: 0,
+      currentLevel: normalizedCurrentLevel,
+      targetLevel: normalizedTargetLevel,
+    }
+  }
+
+  const parts = Math.max(
+    0,
+    calculateGearParts(normalizedTargetLevel, gearKey) - calculateGearParts(normalizedCurrentLevel, gearKey),
+  )
+  const exchanges = parts > 0 ? Math.ceil(parts / progression.exchangeParts) : 0
+
+  return {
+    key: gearKey,
+    parts,
+    products: exchanges * progression.exchangeProducts,
+    exchangeParts: progression.exchangeParts,
+    exchangeProducts: progression.exchangeProducts,
+    currentLevel: normalizedCurrentLevel,
+    targetLevel: normalizedTargetLevel,
+  }
 }
