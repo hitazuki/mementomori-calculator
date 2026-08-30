@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS } from '../src/constants/raidTableCharacters.js'
 import { loadRaidCharacterMbTexts } from '../src/constants/raid/characterMbTexts.js'
+import { raidTranslations } from '../src/locales/raid.js'
 import { buildRaidCharacterDetail } from '../src/utils/raidCharacterDetails.js'
 
 test('raid character detail collects modeled skills, effects, and ignored mechanics', () => {
@@ -63,6 +64,30 @@ test('raid character details preserve targets, timing, and conditions for every 
       }
     }
   }
+})
+
+test('raid character damage summaries distinguish damage groups from actual hit counts', () => {
+  let skillCount = 0
+  let damageGroupCount = 0
+
+  for (const character of Object.values(RAID_TABLE_CHARACTERS)) {
+    const detail = buildRaidCharacterDetail(character)
+    skillCount += detail.skills.length
+    for (const skill of detail.skills) {
+      damageGroupCount += skill.damageSteps.length
+      for (const step of skill.damageSteps) {
+        assert.ok(Number.isFinite(step.hits.min))
+        assert.ok(Number.isFinite(step.hits.max))
+        assert.ok(step.hits.min <= step.hits.max)
+      }
+    }
+  }
+
+  assert.equal(skillCount, 94)
+  assert.equal(damageGroupCount, 97)
+  assert.equal(raidTranslations['zh-CN'].raidCharacterDamageStep, '伤害组 {n}')
+  assert.equal(raidTranslations['zh-CN'].raidCharacterDamageFormula, '{hits}段 · 每段{percent} {stat}')
+  assert.equal(raidTranslations.en.raidCharacterDamageStep, 'Damage Group {n}')
 })
 
 test('Luke critical resistance entries identify their different recipients and durations', () => {
