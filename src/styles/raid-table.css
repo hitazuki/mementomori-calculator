@@ -694,7 +694,6 @@
 }
 .raid-character-mb-card header > div { display: grid; min-width: 0; gap: 2px; }
 .raid-character-mb-card header strong { color: var(--text-primary); font-size: var(--fs-sm); }
-.raid-character-mb-card code { color: var(--text-muted); font-size: var(--fs-xs); }
 .raid-character-mb-levels { display: grid; margin: 0; padding: 0; list-style: none; }
 .raid-character-mb-levels li {
   display: grid;

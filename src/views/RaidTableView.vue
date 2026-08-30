@@ -485,7 +485,7 @@
               <article v-for="skill in selectedCharacterMbTexts" :key="`${skill.source}-${skill.id}`" class="raid-character-mb-card">
                 <header>
                   <span class="raid-character-skill-slot">{{ skill.slot }}</span>
-                  <div><strong>{{ skill.name }}</strong><code>{{ skill.source }} #{{ skill.id }}</code></div>
+                  <div><strong>{{ skill.name }}</strong></div>
                 </header>
                 <ul class="raid-character-mb-levels">
                   <li v-for="level in skill.levels" :key="`${level.type}-${level.level}`">
