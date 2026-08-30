@@ -471,18 +471,24 @@
             </article>
           </div>
 
-          <section v-if="selectedCharacterDetail.mbTexts.length" class="raid-character-mb-section">
+          <section class="raid-character-mb-section">
             <div class="raid-character-mb-heading">
               <h3>{{ $t('raidCharacterMbOriginalText') }}</h3>
               <p>{{ $t('raidCharacterMbOriginalTextHint') }}</p>
             </div>
-            <div class="raid-character-mb-list">
-              <article v-for="skill in selectedCharacterDetail.mbTexts" :key="`${skill.source}-${skill.id}`" class="raid-character-mb-card">
+            <p v-if="characterMbTextsLoading" class="raid-muted">{{ $t('raidCharacterMbLoading') }}</p>
+            <div v-else class="raid-character-mb-list">
+              <article v-for="skill in selectedCharacterMbTexts" :key="`${skill.source}-${skill.id}`" class="raid-character-mb-card">
                 <header>
                   <span class="raid-character-skill-slot">{{ skill.slot }}</span>
-                  <code>{{ skill.source }} #{{ skill.id }}</code>
+                  <div><strong>{{ skill.name }}</strong><code>{{ skill.source }} #{{ skill.id }}</code></div>
                 </header>
-                <p>{{ skill.memo }}</p>
+                <ul class="raid-character-mb-levels">
+                  <li v-for="level in skill.levels" :key="`${level.type}-${level.level}`">
+                    <span>{{ mbLevelLabel(level) }}</span>
+                    <p>{{ level.text }}</p>
+                  </li>
+                </ul>
               </article>
             </div>
           </section>
@@ -557,6 +563,7 @@
 import { computed, defineComponent, h, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
+import { loadRaidCharacterMbTexts } from '../constants/raid/characterMbTexts.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
 import { buildRaidCharacterDetail } from '../utils/raidCharacterDetails.js'
@@ -656,6 +663,25 @@ const filteredRoster = computed(() => selectedRosterElement.value == null
 const selectedCharacterDetail = computed(() => selectedCharacterId.value == null
   ? null
   : buildRaidCharacterDetail(RAID_TABLE_CHARACTERS[selectedCharacterId.value]))
+const characterMbTextsByLocale = reactive({})
+const characterMbTextsLoading = ref(false)
+let characterMbTextRequest = 0
+const selectedCharacterMbTexts = computed(() => characterMbTextsByLocale[locale.value]?.[selectedCharacterId.value] ?? [])
+
+watch([selectedCharacterId, locale], async ([id, currentLocale]) => {
+  const request = ++characterMbTextRequest
+  if (id == null || characterMbTextsByLocale[currentLocale]) {
+    characterMbTextsLoading.value = false
+    return
+  }
+  characterMbTextsLoading.value = true
+  try {
+    const texts = await loadRaidCharacterMbTexts(currentLocale)
+    characterMbTextsByLocale[currentLocale] = texts
+  } finally {
+    if (request === characterMbTextRequest) characterMbTextsLoading.value = false
+  }
+})
 
 const result = computed(() => simulateRaidTable({
   lineup: lineup.value,
@@ -809,6 +835,9 @@ function characterEffectDetailText(effect) {
   if (effect.durationRounds != null) parts.push(t('raidCharacterEffectDurationRounds', { n: effect.durationRounds }))
   if (effect.maxStacks > 1) parts.push(t('raidCharacterMaxStacks', { n: effect.maxStacks }))
   return parts.join(' · ')
+}
+function mbLevelLabel(level) {
+  return t(level.type === 'exclusive' ? 'raidCharacterMbExclusiveLevel' : 'raidCharacterMbSkillLevel', { n: level.level })
 }
 function eventFor(round, id) { return round.actions.find(action => action.actorId === id) }
 

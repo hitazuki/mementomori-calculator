@@ -691,13 +691,24 @@
   padding: 8px 10px;
   border-bottom: 1px solid rgba(var(--color-invert-rgb), 0.07);
 }
+.raid-character-mb-card header > div { display: grid; min-width: 0; gap: 2px; }
+.raid-character-mb-card header strong { color: var(--text-primary); font-size: var(--fs-sm); }
 .raid-character-mb-card code { color: var(--text-muted); font-size: var(--fs-xs); }
-.raid-character-mb-card p {
-  margin: 0;
+.raid-character-mb-levels { display: grid; margin: 0; padding: 0; list-style: none; }
+.raid-character-mb-levels li {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
   padding: 10px;
+  border-top: 1px solid rgba(var(--color-invert-rgb), 0.055);
+}
+.raid-character-mb-levels li:first-child { border-top: 0; }
+.raid-character-mb-levels li > span { color: var(--gold-light); font-size: var(--fs-xs); font-weight: 700; }
+.raid-character-mb-levels p {
+  margin: 0;
   color: var(--text-secondary);
   font-size: var(--fs-sm);
-  line-height: 1.75;
+  line-height: 1.65;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }

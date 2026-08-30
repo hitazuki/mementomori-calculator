@@ -13,33 +13,91 @@ function loadMaster(filename) {
 const characters = new Map(loadMaster('CharacterMB.json').map(character => [character.Id, character]))
 const activeSkills = new Map(loadMaster('ActiveSkillMB.json').map(skill => [skill.Id, skill]))
 const passiveSkills = new Map(loadMaster('PassiveSkillMB.json').map(skill => [skill.Id, skill]))
+const exclusiveEffects = loadMaster('EquipmentExclusiveEffectMB.json')
+const equipment = loadMaster('EquipmentMB.json')
+const exclusiveDescriptions = new Map(loadMaster('EquipmentExclusiveSkillDescriptionMB.json').map(description => [description.Id, description]))
 
-const output = {}
-for (const characterId of RAID_TABLE_ROSTER) {
-  const character = characters.get(characterId)
-  if (!character) throw new Error(`CharacterMB is missing raid character ${characterId}`)
-
-  output[characterId] = [
-    ...(character.ActiveSkillIds ?? []).map((skillId, index) => ({
-      slot: `S${index + 1}`,
-      source: 'ActiveSkillMB',
-      id: skillId,
-      memo: activeSkills.get(skillId)?.Memo,
-    })),
-    ...(character.PassiveSkillIds ?? []).map((skillId, index) => ({
-      slot: `P${index + 1}`,
-      source: 'PassiveSkillMB',
-      id: skillId,
-      memo: passiveSkills.get(skillId)?.Memo,
-    })),
-  ]
-
-  const missing = output[characterId].filter(skill => typeof skill.memo !== 'string' || !skill.memo.trim())
-  if (missing.length) throw new Error(`Missing MB Memo for character ${characterId}: ${missing.map(skill => skill.id).join(', ')}`)
+const localeFiles = {
+  'zh-CN': 'TextResourceZhCnMB.json',
+  'zh-TW': 'TextResourceZhTwMB.json',
+  en: 'TextResourceEnUsMB.json',
+  ja: 'TextResourceJaJpMB.json',
+  ko: 'TextResourceKoKrMB.json',
 }
 
-const destination = path.join(projectRoot, 'src', 'constants', 'raid', 'characterMbTexts.js')
+const textResources = Object.fromEntries(Object.entries(localeFiles).map(([locale, filename]) => [
+  locale,
+  new Map(loadMaster(filename).map(resource => [resource.StringKey, resource.Text])),
+]))
+
+function exclusiveDescriptionKeys(characterId) {
+  const effectIds = new Set(exclusiveEffects.filter(effect => effect.CharacterId === characterId).map(effect => effect.Id))
+  const descriptionId = equipment.find(item => effectIds.has(item.ExclusiveEffectId) && item.EquipmentExclusiveSkillDescriptionId)?.EquipmentExclusiveSkillDescriptionId
+  const description = exclusiveDescriptions.get(descriptionId)
+  return description ? {
+    128: description.Description1Key,
+    256: description.Description2Key,
+    512: description.Description3Key,
+  } : {}
+}
+
+function localizedText(resources, key, context) {
+  const value = resources.get(key)
+  if (typeof value !== 'string' || !value.trim() || value === key) throw new Error(`Missing localized MB text for ${context}: ${key}`)
+  return value.replaceAll('<br>', '\n')
+}
+
+function buildSkill(resources, skill, slot, source, infoKey, exclusiveKeys) {
+  if (!skill || skill.NameKey === '*') return null
+  const levels = skill[infoKey].map(info => {
+    const exclusiveLevel = ({ 128: 1, 256: 2, 512: 3 })[info.EquipmentRarityFlags] ?? null
+    const descriptionKey = exclusiveLevel == null ? info.DescriptionKey : exclusiveKeys[info.EquipmentRarityFlags]
+    return {
+      type: exclusiveLevel == null ? 'level' : 'exclusive',
+      level: exclusiveLevel ?? info.OrderNumber,
+      unlockLevel: info.CharacterLevel,
+      text: localizedText(resources, descriptionKey, `${source} #${skill.Id}`),
+    }
+  })
+  return {
+    slot,
+    source,
+    id: skill.Id,
+    name: localizedText(resources, skill.NameKey, `${source} #${skill.Id} name`),
+    levels,
+  }
+}
+
+const output = Object.fromEntries(Object.entries(textResources).map(([locale, resources]) => {
+  const localizedCharacters = {}
+  for (const characterId of RAID_TABLE_ROSTER) {
+    const character = characters.get(characterId)
+    if (!character) throw new Error(`CharacterMB is missing raid character ${characterId}`)
+    const exclusiveKeys = exclusiveDescriptionKeys(characterId)
+    localizedCharacters[characterId] = [
+      ...(character.ActiveSkillIds ?? []).map((skillId, index) => buildSkill(resources, activeSkills.get(skillId), `S${index + 1}`, 'ActiveSkillMB', 'ActiveSkillInfos', exclusiveKeys)),
+      ...(character.PassiveSkillIds ?? []).map((skillId, index) => buildSkill(resources, passiveSkills.get(skillId), `P${index + 1}`, 'PassiveSkillMB', 'PassiveSkillInfos', exclusiveKeys)),
+    ].filter(Boolean)
+  }
+  return [locale, localizedCharacters]
+}))
+
+for (const [locale, localizedCharacters] of Object.entries(output)) {
+  if (Object.keys(localizedCharacters).length !== RAID_TABLE_ROSTER.length) {
+    throw new Error(`Generated ${Object.keys(localizedCharacters).length} characters for ${locale}; expected ${RAID_TABLE_ROSTER.length}`)
+  }
+}
+
+const outputDir = path.join(projectRoot, 'src', 'constants', 'raid', 'characterMbTexts')
+fs.mkdirSync(outputDir, { recursive: true })
 const banner = '// Generated by scripts/generate_raid_character_mb_texts.mjs. Do not edit manually.\n'
-const source = `${banner}export const RAID_CHARACTER_MB_TEXTS = Object.freeze(${JSON.stringify(output, null, 2)})\n`
-fs.writeFileSync(destination, source, 'utf8')
-console.log(`Generated ${destination} for ${RAID_TABLE_ROSTER.length} raid characters.`)
+for (const [locale, localizedCharacters] of Object.entries(output)) {
+  const source = `${banner}export const RAID_CHARACTER_MB_TEXTS = Object.freeze(${JSON.stringify(localizedCharacters, null, 2)})\n`
+  fs.writeFileSync(path.join(outputDir, `${locale}.js`), source, 'utf8')
+}
+
+const indexDestination = path.join(projectRoot, 'src', 'constants', 'raid', 'characterMbTexts.js')
+const loaderEntries = Object.keys(localeFiles).map(locale => `  '${locale}': () => import('./characterMbTexts/${locale}.js'),`).join('\n')
+const indexSource = `${banner}const loaders = Object.freeze({\n${loaderEntries}\n})\nconst cache = new Map()\n\nexport function loadRaidCharacterMbTexts(locale) {\n  const resolvedLocale = loaders[locale] ? locale : 'zh-CN'\n  if (!cache.has(resolvedLocale)) {\n    cache.set(resolvedLocale, loaders[resolvedLocale]().then(module => module.RAID_CHARACTER_MB_TEXTS))\n  }\n  return cache.get(resolvedLocale)\n}\n`
+fs.writeFileSync(indexDestination, indexSource, 'utf8')
+console.log(`Generated localized raid MB text chunks for ${RAID_TABLE_ROSTER.length} characters in ${Object.keys(localeFiles).length} locales.`)
