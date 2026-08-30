@@ -426,6 +426,8 @@
             <ul class="raid-character-effect-list">
               <li v-for="(effect, index) in selectedCharacterDetail.passiveItems" :key="`${effect.nameKey}-${index}`">
                 <span>{{ $t(effect.nameKey) }}</span>
+                <small class="raid-character-effect-scope">{{ characterEffectScopeText(effect) }}</small>
+                <small v-if="characterEffectConditionText(effect)">{{ characterEffectConditionText(effect) }}</small>
                 <small v-if="characterEffectDetailText(effect)">{{ characterEffectDetailText(effect) }}</small>
               </li>
             </ul>
@@ -456,6 +458,8 @@
                 <ul v-if="skill.effectItems.length" class="raid-character-effect-list">
                   <li v-for="(effect, index) in skill.effectItems" :key="`${effect.nameKey}-${index}`">
                     <span>{{ $t(effect.nameKey) }}</span>
+                    <small class="raid-character-effect-scope">{{ characterEffectScopeText(effect) }}</small>
+                    <small v-if="characterEffectConditionText(effect)">{{ characterEffectConditionText(effect) }}</small>
                     <small v-if="characterEffectDetailText(effect)">{{ characterEffectDetailText(effect) }}</small>
                   </li>
                 </ul>
@@ -827,9 +831,85 @@ function formatCharacterEffectRate({ channel, rate }) {
   const signed = value => `${value > 0 ? '+' : ''}${formatter().format(value)}%`
   return `${t(characterEffectChannelKeys[channel] ?? channel)} ${signed(min)}${max !== min ? `～${signed(max)}` : ''}`
 }
+const characterEffectTargetKeys = {
+  self: 'raidCharacterTargetSelf', boss: 'raidCharacterTargetBoss', eventSource: 'raidCharacterTargetEventSource',
+  all: 'raidCharacterTargetAllAllies', allOther: 'raidCharacterTargetAllOtherAllies', adjacent: 'raidCharacterTargetAdjacentAllies',
+  topAttack: 'raidCharacterTargetTopAttack', topAttackOther: 'raidCharacterTargetTopAttackOther', selfAndTopAttackOther: 'raidCharacterTargetSelfAndTopAttackOther',
+  lowestSpeedOther: 'raidCharacterTargetLowestSpeedOther', lowestSpeedOthers: 'raidCharacterTargetLowestSpeedOthers', selfAndLowestSpeedOthers: 'raidCharacterTargetSelfAndLowestSpeedOthers',
+  highestSpeedOther: 'raidCharacterTargetHighestSpeedOther', highestBuffCount: 'raidCharacterTargetHighestBuffCount', highestBuffCountOther: 'raidCharacterTargetHighestBuffCountOther',
+  internal: 'raidCharacterTargetInternal', event: 'raidCharacterTargetEvent',
+}
+const characterEffectTimingKeys = {
+  permanent: 'raidCharacterTimingPermanent', battleStart: 'raidCharacterTimingBattleStart', roundStart: 'raidCharacterTimingRoundStart',
+  actionStart: 'raidCharacterTimingActionStart', beforeDamage: 'raidCharacterTimingBeforeDamage', afterHit: 'raidCharacterTimingAfterHit',
+  afterCriticalHit: 'raidCharacterTimingAfterCriticalHit', afterDamage: 'raidCharacterTimingAfterDamage', actionEnd: 'raidCharacterTimingActionEnd',
+  afterDamageStep: 'raidCharacterTimingAfterDamageStep',
+}
+const characterEffectEventKeys = {
+  activeSkillHeal: 'raidCharacterEventActiveSkillHeal', criticalHit: 'raidCharacterEventCriticalHit',
+  normalAttack: 'raidCharacterEventNormalAttack', selfDamage: 'raidCharacterEventSelfDamage',
+}
+function characterEffectTargetText(target, count = null, element = null) {
+  let text = t(characterEffectTargetKeys[target] ?? 'raidCharacterTargetUnknown')
+  if (count != null) text += t('raidCharacterTargetCountSuffix', { n: count })
+  if (element != null) text += t('raidCharacterTargetElementSuffix', { element: t(elementNameKey(element)) })
+  return text
+}
+function characterEffectTimingText(effect) {
+  const parts = []
+  if (effect.trigger === 'event') parts.push(t(characterEffectEventKeys[effect.event] ?? 'raidCharacterEventUnknown'))
+  else if (effect.trigger) parts.push(t(characterEffectTimingKeys[effect.trigger] ?? 'raidCharacterTimingUnknown'))
+  if (effect.everyRounds != null) {
+    const start = effect.roundOffset ?? effect.everyRounds
+    parts.push(effect.everyRounds === 1
+      ? t('raidCharacterScheduleFromRound', { n: start })
+      : t('raidCharacterScheduleEveryRounds', { n: effect.everyRounds, start }))
+  }
+  if (effect.every != null) {
+    const start = effect.offset ?? effect.every
+    parts.push(effect.every === 1
+      ? t('raidCharacterScheduleFromAction', { n: start })
+      : t('raidCharacterScheduleEveryActions', { n: effect.every, start }))
+  }
+  if (effect.once) parts.push(t('raidCharacterScheduleOnce'))
+  return parts.join(' · ')
+}
+function characterEffectScopeText(effect) {
+  const parts = [t('raidCharacterEffectTarget', { target: characterEffectTargetText(effect.target, effect.targetCount, effect.targetElement) })]
+  if (effect.sourceTarget) parts.push(t('raidCharacterEffectSource', { target: characterEffectTargetText(effect.sourceTarget) }))
+  const timing = characterEffectTimingText(effect)
+  if (timing) parts.push(t('raidCharacterEffectTiming', { timing }))
+  return parts.join(' · ')
+}
+function characterConditionText(condition) {
+  const element = value => t(elementNameKey(value))
+  const args = { n: condition.count, round: condition.round, skill: condition.skillKey?.toUpperCase(), element: condition.element == null ? '' : element(condition.element), elements: (condition.elements ?? []).map(element).join('/') }
+  const keys = {
+    actorHasStatus: 'raidCharacterConditionActorHasStatus', actorRemovableBuffCountAtLeast: 'raidCharacterConditionActorBuffCountAtLeast',
+    anyRemovableBuffCountAtLeast: 'raidCharacterConditionAnyBuffCountAtLeast', bossElementIs: 'raidCharacterConditionBossElementIs',
+    bossStacksAtLeast: 'raidCharacterConditionBossStacksAtLeast', bossStatusCountAtLeast: 'raidCharacterConditionBossStatusCountAtLeast',
+    configuredActivationRoundReached: 'raidCharacterConditionConfiguredRound', counterAtLeast: 'raidCharacterConditionCounterAtLeast',
+    counterAtMost: 'raidCharacterConditionCounterAtMost', counterBeforeActionAtLeast: 'raidCharacterConditionCounterBeforeActionAtLeast',
+    eventSourceHasStatus: 'raidCharacterConditionEventSourceHasStatus', eventSourceIsOwner: 'raidCharacterConditionEventSourceIsOwner',
+    eventTargetsIncludeOwner: 'raidCharacterConditionEventTargetsIncludeOwner', guaranteedCritical: 'raidCharacterConditionGuaranteedCritical',
+    otherLineupElementCountAtLeast: 'raidCharacterConditionOtherElementCountAtLeast', probabilityEnabled: 'raidCharacterConditionProbabilityEnabled',
+    roundAtLeast: 'raidCharacterConditionRoundAtLeast', roundAtMost: 'raidCharacterConditionRoundAtMost',
+    skillUsesAtLeast: 'raidCharacterConditionSkillUsesAtLeast', skillUsesAtMost: 'raidCharacterConditionSkillUsesAtMost',
+    targetElementIn: 'raidCharacterConditionTargetElementIn', targetElementNot: 'raidCharacterConditionTargetElementNot',
+    targetElementNotIn: 'raidCharacterConditionTargetElementNotIn', targetHasStatus: 'raidCharacterConditionTargetHasStatus',
+    targetLacksStatus: 'raidCharacterConditionTargetLacksStatus', targetRemovableDebuffCountAtMost: 'raidCharacterConditionTargetDebuffCountAtMost',
+  }
+  return t(keys[condition.type] ?? 'raidCharacterConditionUnknown', args)
+}
+function characterEffectConditionText(effect) {
+  const conditions = (effect.conditions ?? []).map(characterConditionText)
+  conditions.push(...(effect.targetConditions ?? []).map(condition => t('raidCharacterTargetCondition', { condition: characterConditionText(condition) })))
+  return conditions.length ? t('raidCharacterEffectCondition', { condition: conditions.join(' · ') }) : ''
+}
 function characterEffectDetailText(effect) {
   const parts = [...effect.modifiers, ...effect.bossRates].map(formatCharacterEffectRate)
-  if (effect.amount != null) parts.push(t('raidCharacterCooldownReductionAmount', { n: effect.amount }))
+  if (effect.type === 'cooldownReduction' && effect.amount != null) parts.push(t('raidCharacterCooldownReductionAmount', { n: effect.amount }))
+  if (effect.type === 'changeCounter' && effect.amount != null) parts.push(t('raidCharacterCounterChangeAmount', { n: `${effect.amount > 0 ? '+' : ''}${effect.amount}` }))
   if (effect.type === 'setCooldown' && effect.value != null) parts.push(t('raidCharacterCooldownSetValue', { n: effect.value }))
   if (effect.duration != null) parts.push(t('raidCharacterEffectDurationActions', { n: effect.duration }))
   if (effect.durationRounds != null) parts.push(t('raidCharacterEffectDurationRounds', { n: effect.durationRounds }))

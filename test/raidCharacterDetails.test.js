@@ -31,6 +31,50 @@ test('raid character detail preserves support skills without damage steps', () =
   assert.deepEqual(skill.effectItems[0].modifiers[0].rate, { min: 0.4, max: 0.4, dynamic: false })
 })
 
+test('raid character details preserve targets, timing, and conditions for every included character', () => {
+  const supportedTargets = new Set([
+    'adjacent', 'all', 'allOther', 'boss', 'event', 'eventSource', 'highestBuffCount', 'highestBuffCountOther',
+    'highestSpeedOther', 'internal', 'lowestSpeedOther', 'lowestSpeedOthers', 'self', 'selfAndLowestSpeedOthers',
+    'selfAndTopAttackOther', 'topAttack', 'topAttackOther',
+  ])
+  const supportedTriggers = new Set([
+    'actionEnd', 'actionStart', 'afterCriticalHit', 'afterDamage', 'afterDamageStep', 'afterHit', 'battleStart',
+    'beforeDamage', 'event', 'permanent', 'roundStart',
+  ])
+  const supportedConditions = new Set([
+    'actorHasStatus', 'actorRemovableBuffCountAtLeast', 'anyRemovableBuffCountAtLeast', 'bossElementIs',
+    'bossStacksAtLeast', 'bossStatusCountAtLeast', 'configuredActivationRoundReached', 'counterAtLeast',
+    'counterAtMost', 'counterBeforeActionAtLeast', 'eventSourceHasStatus', 'eventSourceIsOwner',
+    'eventTargetsIncludeOwner', 'guaranteedCritical', 'otherLineupElementCountAtLeast', 'probabilityEnabled',
+    'roundAtLeast', 'roundAtMost', 'skillUsesAtLeast', 'skillUsesAtMost', 'targetElementIn',
+    'targetElementNot', 'targetElementNotIn', 'targetHasStatus', 'targetLacksStatus',
+    'targetRemovableDebuffCountAtMost',
+  ])
+
+  assert.equal(Object.keys(RAID_TABLE_CHARACTERS).length, 47)
+  for (const character of Object.values(RAID_TABLE_CHARACTERS)) {
+    const detail = buildRaidCharacterDetail(character)
+    const effects = [...detail.passiveItems, ...detail.skills.flatMap(skill => skill.effectItems)]
+    for (const effect of effects) {
+      assert.ok(supportedTargets.has(effect.target), `unsupported detail target ${effect.target} on ${character.id}:${effect.nameKey}`)
+      assert.ok(supportedTriggers.has(effect.trigger), `unsupported detail trigger ${effect.trigger} on ${character.id}:${effect.nameKey}`)
+      for (const condition of [...effect.conditions, ...effect.targetConditions]) {
+        assert.ok(supportedConditions.has(condition.type), `unsupported detail condition ${condition.type} on ${character.id}:${effect.nameKey}`)
+      }
+    }
+  }
+})
+
+test('Luke critical resistance entries identify their different recipients and durations', () => {
+  const detail = buildRaidCharacterDetail(RAID_TABLE_CHARACTERS[RAID_TABLE_CHARACTER_IDS.LUKE])
+  const criticalResist = detail.passiveItems.filter(item => item.nameKey === 'raidBuffLukeCriticalResist')
+
+  assert.deepEqual(criticalResist.map(item => ({ target: item.target, targetCount: item.targetCount, duration: item.duration, trigger: item.trigger })), [
+    { target: 'self', targetCount: null, duration: 4, trigger: 'battleStart' },
+    { target: 'adjacent', targetCount: 1, duration: 3, trigger: 'battleStart' },
+  ])
+})
+
 test('raid character detail data exposes localized active, passive, and exclusive MB text', async () => {
   const zhCn = await loadRaidCharacterMbTexts('zh-CN')
   const en = await loadRaidCharacterMbTexts('en')

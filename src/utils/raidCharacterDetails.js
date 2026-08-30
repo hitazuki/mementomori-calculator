@@ -42,15 +42,47 @@ function effectFallbackKey(effect) {
   return null
 }
 
-function collectEffectItems(effects = []) {
+function compactConditions(conditions = []) {
+  return conditions.flat(Infinity).filter(condition => condition && typeof condition === 'object' && !Array.isArray(condition))
+}
+
+function effectTarget(effect) {
+  if (effect.target) return effect.target
+  if (effect.type === 'bossStatus') return 'boss'
+  if (effect.type === 'changeCounter') return 'internal'
+  if (effect.type === 'emitEvent') return 'event'
+  return null
+}
+
+function effectContext(context = {}, effect = {}) {
+  return {
+    trigger: context.trigger ?? null,
+    event: context.event ?? null,
+    every: context.every ?? null,
+    offset: context.offset ?? null,
+    everyRounds: context.everyRounds ?? null,
+    roundOffset: context.roundOffset ?? null,
+    once: Boolean(context.onceKey),
+    conditions: compactConditions([...(context.conditions ?? []), effect.condition]),
+  }
+}
+
+function collectEffectItems(effects = [], context = {}) {
   const items = []
   for (const effect of effects) {
     if (!effect || typeof effect !== 'object') continue
     const nameKey = effect.nameKey ?? effectFallbackKey(effect)
+    const resolvedContext = effectContext(context, effect)
     if (nameKey) {
       items.push({
         nameKey,
         type: effect.type,
+        target: effectTarget(effect),
+        targetCount: effect.targetCount ?? null,
+        targetElement: effect.targetElement ?? null,
+        sourceTarget: effect.sourceTarget ?? null,
+        targetConditions: compactConditions([effect.targetCondition]),
+        ...resolvedContext,
         duration: effect.duration ?? null,
         durationRounds: effect.durationRounds ?? null,
         maxStacks: effect.maxStacks ?? null,
@@ -65,7 +97,7 @@ function collectEffectItems(effects = []) {
         ].filter(([, rate]) => rate != null && rate !== 0).map(([channel, rate]) => ({ channel, rate: valueRange(rate) })),
       })
     }
-    items.push(...collectEffectItems(effect.effects))
+    items.push(...collectEffectItems(effect.effects, resolvedContext))
   }
   return items
 }
@@ -75,7 +107,15 @@ function collectHookNameKeys(hooks = []) {
 }
 
 function collectHookEffectItems(hooks = []) {
-  return hooks.flatMap(hook => collectEffectItems(hook.effects))
+  return hooks.flatMap(hook => collectEffectItems(hook.effects, {
+    trigger: hook.trigger,
+    every: hook.every,
+    offset: hook.offset,
+    everyRounds: hook.everyRounds,
+    roundOffset: hook.roundOffset,
+    onceKey: hook.onceKey,
+    conditions: compactConditions([hook.condition]),
+  }))
 }
 
 function buildDamageStep(step) {
@@ -92,7 +132,10 @@ function buildDamageStep(step) {
 function buildSkillDetail(skillKey, skill) {
   const damageSteps = (skill.damageSteps ?? []).map(buildDamageStep)
   const afterStepEffectKeys = (skill.damageSteps ?? []).flatMap(step => collectEffectNameKeys(step.afterEffects))
-  const afterStepEffectItems = (skill.damageSteps ?? []).flatMap(step => collectEffectItems(step.afterEffects))
+  const afterStepEffectItems = (skill.damageSteps ?? []).flatMap(step => collectEffectItems(step.afterEffects, {
+    trigger: 'afterDamageStep',
+    conditions: compactConditions([skill.condition, step.condition]),
+  }))
   return {
     key: skillKey,
     nameKey: skill.nameKey,
@@ -100,7 +143,14 @@ function buildSkillDetail(skillKey, skill) {
     damageType: skill.damageType,
     damageSteps,
     effectNameKeys: unique([...collectHookNameKeys(skill.hooks), ...afterStepEffectKeys]),
-    effectItems: [...collectHookEffectItems(skill.hooks), ...afterStepEffectItems],
+    effectItems: [
+      ...collectHookEffectItems((skill.hooks ?? []).map(hook => ({
+        ...hook,
+        condition: compactConditions([skill.condition, hook.condition]),
+      }))),
+      ...afterStepEffectItems,
+    ],
+    conditions: compactConditions([skill.condition]),
     conditionKeys: unique(damageSteps.map(step => step.conditionKey)),
     ignoredKeys: unique(skill.ignoredKeys ?? []),
   }
@@ -115,15 +165,21 @@ export function buildRaidCharacterDetail(character) {
   ])
   const passiveItems = [
     ...(character.permanentModifiers ?? []).filter(modifier => modifier.nameKey).map(modifier => ({
-      nameKey: modifier.nameKey, type: 'modifier', duration: null, durationRounds: null, maxStacks: null, amount: null, value: null,
+      nameKey: modifier.nameKey, type: 'modifier', target: 'self', targetCount: null, targetElement: null, sourceTarget: null,
+      targetConditions: [], trigger: 'permanent', event: null, every: null, offset: null, everyRounds: null, roundOffset: null, once: false, conditions: [],
+      duration: null, durationRounds: null, maxStacks: null, amount: null, value: null,
       modifiers: [{ channel: modifier.channel, rate: valueRange(modifier.rate) }], bossRates: [],
     })),
     ...(character.derivedModifiers ?? []).filter(modifier => modifier.nameKey).map(modifier => ({
-      nameKey: modifier.nameKey, type: 'modifier', duration: null, durationRounds: null, maxStacks: null, amount: null, value: null,
+      nameKey: modifier.nameKey, type: 'modifier', target: 'self', targetCount: null, targetElement: null, sourceTarget: null,
+      targetConditions: [], trigger: 'permanent', event: null, every: null, offset: null, everyRounds: null, roundOffset: null, once: false, conditions: [],
+      duration: null, durationRounds: null, maxStacks: null, amount: null, value: null,
       modifiers: [{ channel: modifier.channel, rate: valueRange(modifier.rate) }], bossRates: [],
     })),
     ...collectHookEffectItems(character.hooks),
-    ...(character.eventHooks ?? []).flatMap(hook => collectEffectItems(hook.effects)),
+    ...(character.eventHooks ?? []).flatMap(hook => collectEffectItems(hook.effects, {
+      trigger: 'event', event: hook.event, conditions: compactConditions([hook.condition]),
+    })),
   ]
 
   return {
