@@ -53,17 +53,31 @@
     </div>
 
     <div v-if="filteredRoster.length" class="raid-roster-grid">
-      <button
+      <article
         v-for="id in filteredRoster"
         :key="id"
-        type="button"
         class="raid-roster-item"
         :class="{ selected: lineup.includes(id) }"
-        :disabled="(!lineup.includes(id) && lineup.length >= 5) || (lineup.includes(id) && lineup.length <= 1)"
-        @click="toggleCharacter(id)"
       >
-        <CharacterLabel :id="id" strong /><small>#{{ id }} · {{ $t('raidBaseSpeed') }} {{ speeds[id] }}</small>
-      </button>
+        <button
+          type="button"
+          class="raid-roster-select"
+          :disabled="(!lineup.includes(id) && lineup.length >= 5) || (lineup.includes(id) && lineup.length <= 1)"
+          :aria-pressed="lineup.includes(id)"
+          @click="toggleCharacter(id)"
+        >
+          <CharacterLabel :id="id" strong /><small>#{{ id }} · {{ $t('raidBaseSpeed') }} {{ speeds[id] }}</small>
+        </button>
+        <button
+          type="button"
+          class="raid-roster-detail-button"
+          :aria-label="$t('raidViewCharacterDetailsFor', { name: characterName(id) })"
+          :title="$t('raidViewCharacterDetails')"
+          @click="openCharacterDetails(id)"
+        >
+          <span aria-hidden="true">i</span>
+        </button>
+      </article>
     </div>
     <p v-else class="raid-roster-empty">{{ $t('raidNoCharactersForElement') }}</p>
 
@@ -380,6 +394,89 @@
 
   <Teleport to="body">
     <div
+      v-if="selectedCharacterDetail"
+      ref="characterDetailDialog"
+      class="modal-overlay active"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="raid-character-detail-title"
+      tabindex="-1"
+      @keydown.esc.stop="closeCharacterDetails"
+      @mousedown.self="closeCharacterDetails"
+    >
+      <div class="modal-content raid-character-detail-modal">
+        <div class="modal-header raid-character-detail-header">
+          <div>
+            <span class="raid-character-detail-kicker">{{ $t('raidCharacterDetails') }}</span>
+            <h2 id="raid-character-detail-title" class="modal-title"><CharacterLabel :id="selectedCharacterDetail.id" strong /></h2>
+          </div>
+          <button type="button" class="modal-close" :aria-label="$t('raidCloseCharacterDetails')" @click="closeCharacterDetails">&times;</button>
+        </div>
+        <div class="modal-body raid-character-detail-body">
+          <div class="raid-character-detail-meta">
+            <span><img :src="elementIconUrl(selectedCharacterDetail.element)" alt="">{{ $t(elementNameKey(selectedCharacterDetail.element)) }}</span>
+            <span>{{ $t(jobNameKey(selectedCharacterDetail.jobFlags)) }}</span>
+            <span>#{{ selectedCharacterDetail.id }}</span>
+            <span>{{ $t('raidBaseSpeed') }} {{ selectedCharacterDetail.speed }}</span>
+          </div>
+          <p class="raid-character-detail-scope">{{ $t('raidCharacterDetailScopeHint') }}</p>
+
+          <section v-if="selectedCharacterDetail.passiveItems.length" class="raid-character-passive-section">
+            <h3>{{ $t('raidCharacterModeledPassives') }}</h3>
+            <ul class="raid-character-effect-list">
+              <li v-for="(effect, index) in selectedCharacterDetail.passiveItems" :key="`${effect.nameKey}-${index}`">
+                <span>{{ $t(effect.nameKey) }}</span>
+                <small v-if="characterEffectDetailText(effect)">{{ characterEffectDetailText(effect) }}</small>
+              </li>
+            </ul>
+          </section>
+
+          <div class="raid-character-skill-grid">
+            <article v-for="skill in selectedCharacterDetail.skills" :key="skill.key" class="raid-character-skill-card">
+              <header>
+                <span class="raid-character-skill-slot">{{ skill.key.toUpperCase() }}</span>
+                <div><h3>{{ $t(skill.nameKey) }}</h3><p>{{ skillMetaText(skill) }}</p></div>
+              </header>
+
+              <section>
+                <h4>{{ $t('raidCharacterDamageSummary') }}</h4>
+                <ul v-if="skill.damageSteps.length" class="raid-character-damage-list">
+                  <li v-for="(step, index) in skill.damageSteps" :key="`${skill.key}-step-${index}`">
+                    <strong>{{ $t('raidCharacterDamageStep', { n: index + 1 }) }}</strong>
+                    <span>{{ characterDamageStepText(step) }}</span>
+                    <small v-if="step.conditionKey">{{ $t(step.conditionKey) }}</small>
+                    <small v-if="step.originalTargetCount">{{ $t('raidCharacterOriginalTargetCount', { n: step.originalTargetCount }) }}</small>
+                  </li>
+                </ul>
+                <p v-else class="raid-muted">{{ $t('raidNoDamageSteps') }}</p>
+              </section>
+
+              <section>
+                <h4>{{ $t('raidCharacterModeledEffects') }}</h4>
+                <ul v-if="skill.effectItems.length" class="raid-character-effect-list">
+                  <li v-for="(effect, index) in skill.effectItems" :key="`${effect.nameKey}-${index}`">
+                    <span>{{ $t(effect.nameKey) }}</span>
+                    <small v-if="characterEffectDetailText(effect)">{{ characterEffectDetailText(effect) }}</small>
+                  </li>
+                </ul>
+                <p v-else class="raid-muted">{{ $t('raidCharacterNoModeledEffects') }}</p>
+              </section>
+
+              <section v-if="skill.ignoredKeys.length" class="raid-character-ignored-section">
+                <h4>{{ $t('raidIgnoredEffects') }}</h4>
+                <ul class="raid-character-effect-list ignored">
+                  <li v-for="key in skill.ignoredKeys" :key="key">{{ $t(key) }}</li>
+                </ul>
+              </section>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
+
+  <Teleport to="body">
+    <div
       v-if="showActionOrderEditor"
       ref="actionOrderDialog"
       class="modal-overlay active"
@@ -443,9 +540,10 @@
 <script setup>
 import { computed, defineComponent, h, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
+import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
+import { buildRaidCharacterDetail } from '../utils/raidCharacterDetails.js'
 import { buildRaidExportModel, raidExportFilename } from '../utils/raidExport.js'
 import { currentTheme } from '../utils/themeStore.js'
 
@@ -528,15 +626,20 @@ const siviDamageTiers = Object.freeze([
   { hits: 0, rate: 30 }, { hits: 1, rate: 54 }, { hits: 2, rate: 72 }, { hits: 3, rate: 84 }, { hits: 4, rate: 90 },
 ])
 const selectedEvent = ref(null)
+const selectedCharacterId = ref(null)
 const raidExportSnapshot = ref(null)
 const showActionOrderEditor = ref(false)
 const editingOrderRound = ref(null)
 const orderDraft = ref([])
 const actionOrderDialog = ref(null)
+const characterDetailDialog = ref(null)
 const roundOrderCardRefs = new Map()
 const filteredRoster = computed(() => selectedRosterElement.value == null
   ? roster
   : roster.filter(id => RAID_TABLE_CHARACTERS[id].element === selectedRosterElement.value))
+const selectedCharacterDetail = computed(() => selectedCharacterId.value == null
+  ? null
+  : buildRaidCharacterDetail(RAID_TABLE_CHARACTERS[selectedCharacterId.value]))
 
 const result = computed(() => simulateRaidTable({
   lineup: lineup.value,
@@ -609,6 +712,13 @@ const bossTemplateStats = computed(() => t('raidBossTemplateStats', {
 function characterName(id) { return t(RAID_TABLE_CHARACTERS[id].nameKey) }
 function characterIconUrl(id) { return `${import.meta.env.BASE_URL}images/characters/${id}.png` }
 function elementIconUrl(element) { return `${import.meta.env.BASE_URL}images/elements/icon_element_${element}.png` }
+function elementNameKey(element) { return elementFilters.find(option => option.element === element)?.nameKey ?? 'raidCharacterUnknown' }
+function jobNameKey(jobFlags) {
+  if (jobFlags === RAID_JOB_FLAGS.WARRIOR) return 'raidJobWarrior'
+  if (jobFlags === RAID_JOB_FLAGS.SNIPER) return 'raidJobSniper'
+  if (jobFlags === RAID_JOB_FLAGS.MAGE) return 'raidJobMage'
+  return 'raidCharacterUnknown'
+}
 function counterLabel(id, key) { return t(RAID_TABLE_CHARACTERS[id].counterLabels?.[key] ?? key) }
 function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(locale.value, { maximumFractionDigits, minimumFractionDigits: 0 }) }
 function roundCriticalDamagePercent(value) { return Number((Number(value) || 0).toFixed(1)) }
@@ -646,6 +756,44 @@ function visibleScalingTerms(step) { return step.scalingTerms.filter(term => (
 function includedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind === 'sourceAttackOverTargetAttack')) }
 function unresolvedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind !== 'sourceAttackOverTargetAttack')) }
 function formatStep(step) { return `${formatter().format(step.effectivePercent)}% ${step.stat}` }
+function formatCharacterValueRange(range, suffix = '') {
+  if (range.min == null) return t('raidCharacterDynamicValue')
+  const min = formatter().format(range.min)
+  const max = formatter().format(range.max)
+  return `${min}${range.max !== range.min ? `–${max}` : ''}${suffix}`
+}
+function characterDamageStepText(step) {
+  return t('raidCharacterDamageFormula', {
+    hits: formatCharacterValueRange(step.hits),
+    percent: formatCharacterValueRange(step.percent, '%'),
+    stat: step.stat,
+  })
+}
+function skillMetaText(skill) {
+  const type = t({ phys: 'raidDamageTypePhysical', mag: 'raidDamageTypeMagic', direct: 'raidDamageTypeDirect', support: 'raidDamageTypeSupport' }[skill.damageType] ?? 'raidCharacterUnknown')
+  return `${type} · ${t('raidCharacterCooldownValue', { n: skill.cooldown })}`
+}
+const characterEffectChannelKeys = {
+  attackRate: 'raidAttackRate', damageRate: 'raidDamageRate', criticalDamageBonus: 'raidCriticalDamage',
+  speedRate: 'raidCharacterSpeedRate', cooldownRecoveryBonus: 'raidCharacterCooldownRecovery', defensePenetrationRate: 'raidDefensePenetration',
+  defenseRate: 'raidDefenseRate', physicalDefenseRate: 'raidPhysicalDefenseRate', magicDefenseRate: 'raidMagicDefenseRate',
+}
+function formatCharacterEffectRate({ channel, rate }) {
+  if (rate.min == null) return `${t(characterEffectChannelKeys[channel] ?? channel)} ${t('raidCharacterDynamicValue')}`
+  const min = rate.min * 100
+  const max = rate.max * 100
+  const signed = value => `${value > 0 ? '+' : ''}${formatter().format(value)}%`
+  return `${t(characterEffectChannelKeys[channel] ?? channel)} ${signed(min)}${max !== min ? `～${signed(max)}` : ''}`
+}
+function characterEffectDetailText(effect) {
+  const parts = [...effect.modifiers, ...effect.bossRates].map(formatCharacterEffectRate)
+  if (effect.amount != null) parts.push(t('raidCharacterCooldownReductionAmount', { n: effect.amount }))
+  if (effect.type === 'setCooldown' && effect.value != null) parts.push(t('raidCharacterCooldownSetValue', { n: effect.value }))
+  if (effect.duration != null) parts.push(t('raidCharacterEffectDurationActions', { n: effect.duration }))
+  if (effect.durationRounds != null) parts.push(t('raidCharacterEffectDurationRounds', { n: effect.durationRounds }))
+  if (effect.maxStacks > 1) parts.push(t('raidCharacterMaxStacks', { n: effect.maxStacks }))
+  return parts.join(' · ')
+}
 function eventFor(round, id) { return round.actions.find(action => action.actorId === id) }
 
 function cloneActionOrderOverrides(overrides) {
@@ -732,6 +880,15 @@ function toggleCharacter(id) {
   }
   actionOrderOverrides.value = {}
   selectedEvent.value = null
+}
+
+function openCharacterDetails(id) {
+  selectedCharacterId.value = id
+  nextTick(() => characterDetailDialog.value?.focus())
+}
+
+function closeCharacterDetails() {
+  selectedCharacterId.value = null
 }
 
 function toggleRosterElement(element) {
@@ -822,6 +979,7 @@ function resetConfig() {
   Object.assign(scenarioTiers, next.scenarioTiers)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
   raidExportSnapshot.value = null
+  closeCharacterDetails()
   closeActionOrderEditor()
 }
 
