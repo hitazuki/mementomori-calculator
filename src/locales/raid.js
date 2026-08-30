@@ -872,6 +872,7 @@ const raidCharacterDetailExtensions = {
   'zh-CN': {
     raidViewCharacterDetails: '查看角色详情', raidViewCharacterDetailsFor: '查看{name}的角色详情', raidCharacterDetails: '角色详情', raidCloseCharacterDetails: '关闭角色详情',
     raidCharacterDetailScopeHint: '以下内容来自讨伐拉表当前使用的结构化角色数据，展示本模型实际采用的技能、效果与未模拟部分。',
+    raidCharacterMbOriginalText: 'MB 原文本', raidCharacterMbOriginalTextHint: '以下内容逐字取自 ActiveSkillMB / PassiveSkillMB 的 Memo 字段，保留原始日文与等级、专武标记。',
     raidCharacterModeledPassives: '常驻与被动效果', raidCharacterDamageSummary: '伤害结构', raidCharacterModeledEffects: '已建模效果', raidCharacterNoModeledEffects: '没有额外的已建模效果。',
     raidCharacterDamageStep: '第{n}段', raidCharacterDamageFormula: '{hits} × {percent} {stat}', raidCharacterOriginalTargetCount: '原技能目标数：{n}；单体木桩只结算1个目标。', raidCharacterCooldownValue: '冷却 {n}', raidCharacterDynamicValue: '动态', raidCharacterUnknown: '未知',
     raidCharacterCooldownReductionEffect: '主动技能冷却减少', raidCharacterCooldownResetEffect: '主动技能冷却重置', raidCharacterCounterChangeEffect: '内部层数变化', raidCharacterSelfDamageEffect: '自身生命消耗事件', raidCharacterHealingEffect: '主动技能回复事件', raidCharacterSpeedRate: '速度', raidCharacterCooldownRecovery: '冷却恢复速度', raidCharacterCooldownReductionAmount: '冷却 -{n}', raidCharacterCooldownSetValue: '冷却设为 {n}', raidCharacterEffectDurationActions: '持续{n}次行动', raidCharacterEffectDurationRounds: '持续{n}回合', raidCharacterMaxStacks: '最多{n}层',
@@ -880,6 +881,7 @@ const raidCharacterDetailExtensions = {
   'zh-TW': {
     raidViewCharacterDetails: '查看角色詳情', raidViewCharacterDetailsFor: '查看{name}的角色詳情', raidCharacterDetails: '角色詳情', raidCloseCharacterDetails: '關閉角色詳情',
     raidCharacterDetailScopeHint: '以下內容來自討伐拉表目前使用的結構化角色資料，顯示本模型實際採用的技能、效果與未模擬部分。',
+    raidCharacterMbOriginalText: 'MB 原始文本', raidCharacterMbOriginalTextHint: '以下內容逐字取自 ActiveSkillMB / PassiveSkillMB 的 Memo 欄位，保留原始日文與等級、專武標記。',
     raidCharacterModeledPassives: '常駐與被動效果', raidCharacterDamageSummary: '傷害結構', raidCharacterModeledEffects: '已建模效果', raidCharacterNoModeledEffects: '沒有額外的已建模效果。',
     raidCharacterDamageStep: '第{n}段', raidCharacterDamageFormula: '{hits} × {percent} {stat}', raidCharacterOriginalTargetCount: '原技能目標數：{n}；單體木樁只計算1個目標。', raidCharacterCooldownValue: '冷卻 {n}', raidCharacterDynamicValue: '動態', raidCharacterUnknown: '未知',
     raidCharacterCooldownReductionEffect: '主動技能冷卻減少', raidCharacterCooldownResetEffect: '主動技能冷卻重設', raidCharacterCounterChangeEffect: '內部層數變化', raidCharacterSelfDamageEffect: '自身生命消耗事件', raidCharacterHealingEffect: '主動技能回復事件', raidCharacterSpeedRate: '速度', raidCharacterCooldownRecovery: '冷卻恢復速度', raidCharacterCooldownReductionAmount: '冷卻 -{n}', raidCharacterCooldownSetValue: '冷卻設為 {n}', raidCharacterEffectDurationActions: '持續{n}次行動', raidCharacterEffectDurationRounds: '持續{n}回合', raidCharacterMaxStacks: '最多{n}層',
@@ -888,6 +890,7 @@ const raidCharacterDetailExtensions = {
   en: {
     raidViewCharacterDetails: 'View character details', raidViewCharacterDetailsFor: 'View details for {name}', raidCharacterDetails: 'Character Details', raidCloseCharacterDetails: 'Close character details',
     raidCharacterDetailScopeHint: 'This view is generated from the structured character data used by the raid model. It shows the skills and effects the model applies, plus mechanics it does not simulate.',
+    raidCharacterMbOriginalText: 'Original MB Text', raidCharacterMbOriginalTextHint: 'Copied verbatim from the Memo fields in ActiveSkillMB / PassiveSkillMB, preserving the original Japanese level and exclusive-weapon markers.',
     raidCharacterModeledPassives: 'Permanent & Passive Effects', raidCharacterDamageSummary: 'Damage Structure', raidCharacterModeledEffects: 'Modeled Effects', raidCharacterNoModeledEffects: 'No additional modeled effects.',
     raidCharacterDamageStep: 'Step {n}', raidCharacterDamageFormula: '{hits} × {percent} {stat}', raidCharacterOriginalTargetCount: 'Original targets: {n}; the single-target dummy resolves one target.', raidCharacterCooldownValue: 'Cooldown {n}', raidCharacterDynamicValue: 'Dynamic', raidCharacterUnknown: 'Unknown',
     raidCharacterCooldownReductionEffect: 'Active Skill Cooldown Reduction', raidCharacterCooldownResetEffect: 'Active Skill Cooldown Reset', raidCharacterCounterChangeEffect: 'Internal Stack Change', raidCharacterSelfDamageEffect: 'Self-HP Cost Event', raidCharacterHealingEffect: 'Active Skill Healing Event', raidCharacterSpeedRate: 'Speed', raidCharacterCooldownRecovery: 'Cooldown Recovery Speed', raidCharacterCooldownReductionAmount: 'Cooldown -{n}', raidCharacterCooldownSetValue: 'Set cooldown to {n}', raidCharacterEffectDurationActions: 'Lasts {n} actions', raidCharacterEffectDurationRounds: 'Lasts {n} turns', raidCharacterMaxStacks: 'Up to {n} stacks',
@@ -896,6 +899,7 @@ const raidCharacterDetailExtensions = {
   ja: {
     raidViewCharacterDetails: 'キャラ詳細を見る', raidViewCharacterDetailsFor: '{name}のキャラ詳細を見る', raidCharacterDetails: 'キャラ詳細', raidCloseCharacterDetails: 'キャラ詳細を閉じる',
     raidCharacterDetailScopeHint: '討伐表で使用中の構造化キャラデータから、モデルが実際に適用するスキル・効果と計算対象外の要素を表示します。',
+    raidCharacterMbOriginalText: 'MB原文', raidCharacterMbOriginalTextHint: 'ActiveSkillMB / PassiveSkillMB の Memo フィールドをそのまま表示し、原文のレベル・専用武器表記を保持しています。',
     raidCharacterModeledPassives: '常時・パッシブ効果', raidCharacterDamageSummary: 'ダメージ構成', raidCharacterModeledEffects: '計算中の効果', raidCharacterNoModeledEffects: '追加の計算対象効果はありません。',
     raidCharacterDamageStep: '第{n}段', raidCharacterDamageFormula: '{hits} × {percent} {stat}', raidCharacterOriginalTargetCount: '本来の対象数：{n}。単体ダミーでは1体として計算します。', raidCharacterCooldownValue: 'クールタイム {n}', raidCharacterDynamicValue: '可変', raidCharacterUnknown: '不明',
     raidCharacterCooldownReductionEffect: 'アクティブスキルのクールタイム減少', raidCharacterCooldownResetEffect: 'アクティブスキルのクールタイムリセット', raidCharacterCounterChangeEffect: '内部スタック変化', raidCharacterSelfDamageEffect: '自身HP消費イベント', raidCharacterHealingEffect: 'アクティブスキル回復イベント', raidCharacterSpeedRate: 'スピード', raidCharacterCooldownRecovery: 'クールタイム回復速度', raidCharacterCooldownReductionAmount: 'クールタイム -{n}', raidCharacterCooldownSetValue: 'クールタイムを{n}に設定', raidCharacterEffectDurationActions: '{n}回行動の間', raidCharacterEffectDurationRounds: '{n}ターン', raidCharacterMaxStacks: '最大{n}スタック',
@@ -904,6 +908,7 @@ const raidCharacterDetailExtensions = {
   ko: {
     raidViewCharacterDetails: '캐릭터 상세 보기', raidViewCharacterDetailsFor: '{name} 상세 보기', raidCharacterDetails: '캐릭터 상세', raidCloseCharacterDetails: '캐릭터 상세 닫기',
     raidCharacterDetailScopeHint: '토벌표에서 사용하는 구조화 캐릭터 데이터를 바탕으로 모델에 적용되는 스킬과 효과, 계산하지 않는 요소를 표시합니다.',
+    raidCharacterMbOriginalText: 'MB 원문', raidCharacterMbOriginalTextHint: 'ActiveSkillMB / PassiveSkillMB의 Memo 필드를 그대로 표시하며 일본어 원문과 레벨·전용 무기 표기를 유지합니다.',
     raidCharacterModeledPassives: '상시 및 패시브 효과', raidCharacterDamageSummary: '피해 구조', raidCharacterModeledEffects: '모델 적용 효과', raidCharacterNoModeledEffects: '추가로 모델에 적용되는 효과가 없습니다.',
     raidCharacterDamageStep: '{n}단계', raidCharacterDamageFormula: '{hits} × {percent} {stat}', raidCharacterOriginalTargetCount: '원래 대상 수: {n}. 단일 더미에서는 대상 1명만 계산합니다.', raidCharacterCooldownValue: '쿨타임 {n}', raidCharacterDynamicValue: '가변', raidCharacterUnknown: '알 수 없음',
     raidCharacterCooldownReductionEffect: '액티브 스킬 쿨타임 감소', raidCharacterCooldownResetEffect: '액티브 스킬 쿨타임 초기화', raidCharacterCounterChangeEffect: '내부 스택 변화', raidCharacterSelfDamageEffect: '자신 HP 소모 이벤트', raidCharacterHealingEffect: '액티브 스킬 회복 이벤트', raidCharacterSpeedRate: '속도', raidCharacterCooldownRecovery: '쿨타임 회복 속도', raidCharacterCooldownReductionAmount: '쿨타임 -{n}', raidCharacterCooldownSetValue: '쿨타임을 {n}으로 설정', raidCharacterEffectDurationActions: '{n}회 행동 동안', raidCharacterEffectDurationRounds: '{n}턴 동안', raidCharacterMaxStacks: '최대 {n}스택',

@@ -1,3 +1,5 @@
+import { RAID_CHARACTER_MB_TEXTS } from '../constants/raid/characterMbTexts.js'
+
 function unique(values) {
   return [...new Set(values.filter(Boolean))]
 }
@@ -135,5 +137,6 @@ export function buildRaidCharacterDetail(character) {
     skills: Object.entries(character.skills ?? {}).map(([key, skill]) => buildSkillDetail(key, skill)),
     passiveNameKeys,
     passiveItems,
+    mbTexts: RAID_CHARACTER_MB_TEXTS[character.id] ?? [],
   }
 }

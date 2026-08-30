@@ -470,6 +470,22 @@
               </section>
             </article>
           </div>
+
+          <section v-if="selectedCharacterDetail.mbTexts.length" class="raid-character-mb-section">
+            <div class="raid-character-mb-heading">
+              <h3>{{ $t('raidCharacterMbOriginalText') }}</h3>
+              <p>{{ $t('raidCharacterMbOriginalTextHint') }}</p>
+            </div>
+            <div class="raid-character-mb-list">
+              <article v-for="skill in selectedCharacterDetail.mbTexts" :key="`${skill.source}-${skill.id}`" class="raid-character-mb-card">
+                <header>
+                  <span class="raid-character-skill-slot">{{ skill.slot }}</span>
+                  <code>{{ skill.source }} #{{ skill.id }}</code>
+                </header>
+                <p>{{ skill.memo }}</p>
+              </article>
+            </div>
+          </section>
         </div>
       </div>
     </div>
