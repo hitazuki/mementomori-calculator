@@ -923,6 +923,13 @@
     "elementType": 3,
     "isLimited": true
   },
+  "151": {
+    "id": 151,
+    "nameKey": "[CharacterName151]",
+    "name2Key": "[CharacterSubName151]",
+    "elementType": 5,
+    "isLimited": true
+  },
   "153": {
     "id": 153,
     "nameKey": "[CharacterName153]",
