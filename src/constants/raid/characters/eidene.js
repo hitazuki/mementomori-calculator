@@ -2,12 +2,14 @@ import { RAID_ELEMENTS, RAID_STATUS_CLASSES, hook, normalMagic, statusEffect } f
 
 const activeHealSelf = { type: 'emitEvent', event: 'activeSkillHeal', target: 'self', condition: { type: 'roundAtMost', round: 6 } }
 const vigorousBloomOther = statusEffect({
+  detailKey: 'raidDetailEideneOther',
   id: 'eidene-vigorous-bloom-other', effectGroupId: 9200320101, nameKey: 'raidBuffEideneVigorousBloom',
   target: 'selfAndTopAttackOther', targetCount: 3, duration: null, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE,
   modifiers: [{ id: 'eidene-vigorous-bloom', channel: 'attackRate', rate: { type: 'counterLinear', counter: 'vigorousBloom', base: 0, perStack: 0.05, max: 0.75 } }],
   targetCondition: { type: 'targetElementNot', element: RAID_ELEMENTS.GREEN },
 })
 const vigorousBloomGreen = statusEffect({
+  detailKey: 'raidDetailEideneGreen',
   id: 'eidene-vigorous-bloom-green', effectGroupId: 9200320102, nameKey: 'raidBuffEideneVigorousBloom',
   target: 'selfAndTopAttackOther', targetCount: 3, targetElement: RAID_ELEMENTS.GREEN, duration: null,
   statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE,

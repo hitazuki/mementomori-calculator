@@ -12,7 +12,7 @@
   ],
   "effectGroups": [
     { "id": 9200320101, "model": "implemented", "summary": "非翠目标旺花，SkillCategory 4。" },
-    { "id": 9200320102, "model": "implemented", "summary": "翠目标旺花，攻击同为每层5%，反击每层2%忽略。" },
+    { "id": 9200320102, "model": "implemented", "summary": "翠目标旺花，攻击同为每层5%，伤害反弹每层2%忽略。" },
     { "id": 9200150101, "model": "outOfScope", "summary": "全队最大HP增加。" },
     { "id": 9200100102, "model": "outOfScope", "summary": "全队不可解除再生。" },
     { "id": 9200430201, "model": "outOfScope", "summary": "自身最大HP增加。" }
@@ -22,5 +22,5 @@
     { "key": "raidIgnoredRegeneration", "summary": "再生回复不进入主动技能回复事件。" },
     { "key": "raidIgnoredHealing", "summary": "即时回复量不结算。" }
   ],
-  "unresolved": []
+  "unresolved": ["苍翠分支的targetElement在截取人数前筛选，非苍翠targetCondition在截取后判断；与统一选定自身及两名其他友军的文字口径存在差异，待受控日志确认。"]
 }

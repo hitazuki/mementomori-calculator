@@ -15,7 +15,7 @@ function numericCandidates(value) {
 }
 
 function valueRange(value) {
-  const values = unique(numericCandidates(value)).sort((left, right) => left - right)
+  const values = [...new Set(numericCandidates(value))].sort((left, right) => left - right)
   if (!values.length) return { min: null, max: null, dynamic: true }
   return { min: values[0], max: values.at(-1), dynamic: typeof value !== 'number' }
 }
@@ -34,6 +34,7 @@ function collectEffectNameKeys(effects = []) {
 }
 
 function effectFallbackKey(effect) {
+  if (effect.type === 'removeStatus') return 'raidStatusSnapshot'
   if (effect.type === 'cooldownReduction') return 'raidCharacterCooldownReductionEffect'
   if (effect.type === 'setCooldown') return 'raidCharacterCooldownResetEffect'
   if (effect.type === 'changeCounter') return 'raidCharacterCounterChangeEffect'
@@ -76,6 +77,7 @@ function collectEffectItems(effects = [], context = {}) {
     if (nameKey) {
       items.push({
         nameKey,
+        definition: effect,
         type: effect.type,
         target: effectTarget(effect),
         targetCount: effect.targetCount ?? null,
@@ -88,13 +90,13 @@ function collectEffectItems(effects = [], context = {}) {
         maxStacks: effect.maxStacks ?? null,
         amount: effect.amount ?? null,
         value: effect.value ?? null,
-        modifiers: (effect.modifiers ?? []).map(modifier => ({ channel: modifier.channel, rate: valueRange(modifier.rate) })),
+        modifiers: (effect.modifiers ?? []).map(modifier => ({ channel: modifier.channel, rate: valueRange(modifier.rate), valueSpec: modifier.rate })),
         bossRates: [
           ['damageRate', effect.damageRatePerStack],
           ['defenseRate', effect.defenseRatePerStack],
           ['physicalDefenseRate', effect.physicalDefenseRatePerStack],
           ['magicDefenseRate', effect.magicDefenseRatePerStack],
-        ].filter(([, rate]) => rate != null && rate !== 0).map(([channel, rate]) => ({ channel, rate: valueRange(rate) })),
+        ].filter(([, rate]) => rate != null && rate !== 0).map(([channel, rate]) => ({ channel, rate: valueRange(rate), valueSpec: rate })),
       })
     }
     items.push(...collectEffectItems(effect.effects, resolvedContext))
@@ -121,6 +123,7 @@ function collectHookEffectItems(hooks = []) {
 function buildDamageStep(step) {
   return {
     stat: step.stat,
+    definition: step,
     damageType: step.damageType,
     percent: valueRange(step.percent),
     hits: valueRange(step.hits),
@@ -168,13 +171,13 @@ export function buildRaidCharacterDetail(character) {
       nameKey: modifier.nameKey, type: 'modifier', target: 'self', targetCount: null, targetElement: null, sourceTarget: null,
       targetConditions: [], trigger: 'permanent', event: null, every: null, offset: null, everyRounds: null, roundOffset: null, once: false, conditions: [],
       duration: null, durationRounds: null, maxStacks: null, amount: null, value: null,
-      modifiers: [{ channel: modifier.channel, rate: valueRange(modifier.rate) }], bossRates: [],
+      modifiers: [{ channel: modifier.channel, rate: valueRange(modifier.rate), valueSpec: modifier.rate }], bossRates: [],
     })),
     ...(character.derivedModifiers ?? []).filter(modifier => modifier.nameKey).map(modifier => ({
       nameKey: modifier.nameKey, type: 'modifier', target: 'self', targetCount: null, targetElement: null, sourceTarget: null,
       targetConditions: [], trigger: 'permanent', event: null, every: null, offset: null, everyRounds: null, roundOffset: null, once: false, conditions: [],
       duration: null, durationRounds: null, maxStacks: null, amount: null, value: null,
-      modifiers: [{ channel: modifier.channel, rate: valueRange(modifier.rate) }], bossRates: [],
+      modifiers: [{ channel: modifier.channel, rate: valueRange(modifier.rate), valueSpec: modifier.rate }], bossRates: [],
     })),
     ...collectHookEffectItems(character.hooks),
     ...(character.eventHooks ?? []).flatMap(hook => collectEffectItems(hook.effects, {
@@ -189,6 +192,7 @@ export function buildRaidCharacterDetail(character) {
     element: character.element,
     jobFlags: character.jobFlags,
     skills: Object.entries(character.skills ?? {}).map(([key, skill]) => buildSkillDetail(key, skill)),
+    normal: character.normal ? buildSkillDetail('normal', character.normal) : null,
     passiveNameKeys,
     passiveItems,
   }

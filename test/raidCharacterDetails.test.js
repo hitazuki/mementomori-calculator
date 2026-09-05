@@ -4,6 +4,62 @@ import { RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS } from '../src/constant
 import { loadRaidCharacterMbTexts } from '../src/constants/raid/characterMbTexts.js'
 import { raidTranslations } from '../src/locales/raid.js'
 import { buildRaidCharacterDetail } from '../src/utils/raidCharacterDetails.js'
+import { raidDetailValueText } from '../src/utils/raidDetailValueText.js'
+
+const valueTextContext = locale => ({
+  t: (key, args = {}) => {
+    assert.ok(raidTranslations[locale][key], `missing ${locale}:${key}`)
+    return raidTranslations[locale][key].replace(/\{(\w+)\}/g, (_, name) => args[name] ?? '')
+  },
+  conditionText: condition => `${condition.type} ${condition.round ?? ''}`,
+  counterText: key => key,
+  elementText: element => String(element ?? ''),
+})
+
+test('Eidene details retain zero, per-stack growth, cap and the unmodeled element difference', () => {
+  const detail = buildRaidCharacterDetail(RAID_TABLE_CHARACTERS[92])
+  const blooms = detail.passiveItems.filter(item => item.type === 'status')
+  assert.deepEqual(blooms.map(item => item.modifiers[0].rate), [
+    { min: 0, max: 0.75, dynamic: true }, { min: 0, max: 0.75, dynamic: true },
+  ])
+  assert.equal(raidDetailValueText(blooms[0].modifiers[0].valueSpec, valueTextContext('zh-CN'), 100, '%'), '0% + 5% × vigorousBloom（上限75%）')
+  assert.match(raidTranslations['zh-CN'][blooms[0].definition.detailKey], /伤害反弹每层\+1%/)
+  assert.match(raidTranslations['zh-CN'][blooms[1].definition.detailKey], /伤害反弹每层\+2%/)
+  assert.equal(detail.passiveItems[0].definition.max, 15)
+})
+
+test('every included resolver has a localized rule description, including normal attacks and symbolic effects', () => {
+  let count = 0
+  for (const character of Object.values(RAID_TABLE_CHARACTERS)) {
+    const detail = buildRaidCharacterDetail(character)
+    assert.ok(detail.normal)
+    const skills = [...detail.skills, detail.normal]
+    const values = skills.flatMap(skill => skill.damageSteps.flatMap(step => [step.definition.percent, step.definition.hits]))
+    for (const effect of [...detail.passiveItems, ...skills.flatMap(skill => skill.effectItems)]) {
+      values.push(...effect.modifiers.map(modifier => modifier.valueSpec))
+      values.push(...(effect.definition?.symbolicModifiers ?? []).map(modifier => modifier.coefficient))
+    }
+    for (const value of values.filter(value => value && typeof value === 'object')) {
+      count++
+      for (const locale of Object.keys(raidTranslations)) {
+        const text = raidDetailValueText(value, valueTextContext(locale))
+        assert.ok(!text.includes(raidTranslations[locale].raidCharacterDynamicValue), `${character.id}: ${JSON.stringify(value)}`)
+        assert.ok(!/undefined|NaN|\{\w+\}/.test(text), text)
+      }
+    }
+  }
+  assert.ok(count > 50)
+})
+
+test('conditional, threshold and skill-history rules preserve branch meaning and zero hits', () => {
+  const florence = buildRaidCharacterDetail(RAID_TABLE_CHARACTERS[8])
+  const step = florence.skills[0].damageSteps[0]
+  assert.match(raidDetailValueText(step.definition.hits, valueTextContext('zh-CN')), /10；否则：6/)
+  const rustica = buildRaidCharacterDetail(RAID_TABLE_CHARACTERS[113])
+  assert.equal(raidDetailValueText(rustica.skills[1].damageSteps[0].definition.hits, valueTextContext('zh-CN')), '4 + 1 × S2此前发动次数（上限6）')
+  const sivi = buildRaidCharacterDetail(RAID_TABLE_CHARACTERS[52])
+  assert.match(raidDetailValueText(sivi.skills[0].effectItems[0].modifiers[0].valueSpec, valueTextContext('zh-CN'), 100, '%'), /0: 30%; 1: 54%; 2: 72%; 3: 84%; ≥4: 90%/)
+})
 
 test('raid character detail collects modeled skills, effects, and ignored mechanics', () => {
   const detail = buildRaidCharacterDetail(RAID_TABLE_CHARACTERS[RAID_TABLE_CHARACTER_IDS.FLORENCE])

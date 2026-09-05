@@ -434,7 +434,7 @@
           </section>
 
           <div class="raid-character-skill-grid">
-            <article v-for="skill in selectedCharacterDetail.skills" :key="skill.key" class="raid-character-skill-card">
+            <article v-for="skill in [...selectedCharacterDetail.skills, selectedCharacterDetail.normal].filter(Boolean)" :key="skill.key" class="raid-character-skill-card">
               <header>
                 <span class="raid-character-skill-slot">{{ skill.key.toUpperCase() }}</span>
                 <div><h3>{{ $t(skill.nameKey) }}</h3><p>{{ skillMetaText(skill) }}</p></div>
@@ -446,6 +446,7 @@
                   <li v-for="(step, index) in skill.damageSteps" :key="`${skill.key}-step-${index}`">
                     <strong>{{ $t('raidCharacterDamageStep', { n: index + 1 }) }}</strong>
                     <span>{{ characterDamageStepText(step) }}</span>
+                    <small v-if="step.definition.condition">{{ characterConditionText(step.definition.condition) }}</small>
                     <small v-if="step.conditionKey">{{ $t(step.conditionKey) }}</small>
                     <small v-if="step.originalTargetCount">{{ $t('raidCharacterOriginalTargetCount', { n: step.originalTargetCount }) }}</small>
                   </li>
@@ -570,6 +571,7 @@ import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTE
 import { loadRaidCharacterMbTexts } from '../constants/raid/characterMbTexts.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
+import { raidDetailValueText } from '../utils/raidDetailValueText.js'
 import { buildRaidCharacterDetail } from '../utils/raidCharacterDetails.js'
 import { buildRaidExportModel, raidExportFilename } from '../utils/raidExport.js'
 import { currentTheme } from '../utils/themeStore.js'
@@ -802,29 +804,40 @@ function visibleScalingTerms(step) { return step.scalingTerms.filter(term => (
 function includedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind === 'sourceAttackOverTargetAttack')) }
 function unresolvedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind !== 'sourceAttackOverTargetAttack')) }
 function formatStep(step) { return `${formatter().format(step.effectivePercent)}% ${step.stat}` }
-function formatCharacterValueRange(range, suffix = '') {
-  if (range.min == null) return t('raidCharacterDynamicValue')
-  const min = formatter().format(range.min)
-  const max = formatter().format(range.max)
-  return `${min}${range.max !== range.min ? `–${max}` : ''}${suffix}`
-}
 function characterDamageStepText(step) {
   return t('raidCharacterDamageFormula', {
-    hits: formatCharacterValueRange(step.hits),
-    percent: formatCharacterValueRange(step.percent, '%'),
+    hits: detailValueText(step.definition.hits),
+    percent: detailValueText(step.definition.percent, 1, '%'),
     stat: step.stat,
   })
 }
 function skillMetaText(skill) {
   const type = t({ phys: 'raidDamageTypePhysical', mag: 'raidDamageTypeMagic', direct: 'raidDamageTypeDirect', support: 'raidDamageTypeSupport' }[skill.damageType] ?? 'raidCharacterUnknown')
-  return `${type} · ${t('raidCharacterCooldownValue', { n: skill.cooldown })}`
+  return skill.cooldown == null ? type : `${type} · ${t('raidCharacterCooldownValue', { n: skill.cooldown })}`
 }
 const characterEffectChannelKeys = {
   attackRate: 'raidAttackRate', damageRate: 'raidDamageRate', criticalDamageBonus: 'raidCriticalDamage',
   speedRate: 'raidCharacterSpeedRate', cooldownRecoveryBonus: 'raidCharacterCooldownRecovery', defensePenetrationRate: 'raidDefensePenetration',
   defenseRate: 'raidDefenseRate', physicalDefenseRate: 'raidPhysicalDefenseRate', magicDefenseRate: 'raidMagicDefenseRate',
 }
-function formatCharacterEffectRate({ channel, rate }) {
+function detailValueText(spec, scale = 1, suffix = '') {
+  return raidDetailValueText(spec, { t, conditionText: characterConditionText,
+    counterText: key => counterLabel(selectedCharacterDetail.value.id, key),
+    elementText: value => value == null ? '' : t(elementNameKey(value)),
+  }, scale, suffix)
+}
+function detailStatusName(id) {
+  const names = new Map()
+  const walk = value => {
+    if (!value || typeof value !== 'object') return
+    if (value.id && value.nameKey) names.set(value.id, value.nameKey)
+    Object.values(value).forEach(walk)
+  }
+  walk(RAID_TABLE_CHARACTERS[selectedCharacterDetail.value.id])
+  return t(names.get(id) ?? id)
+}
+function formatCharacterEffectRate({ channel, rate, valueSpec }) {
+  if (valueSpec && typeof valueSpec === 'object') return `${t(characterEffectChannelKeys[channel] ?? channel)} ${detailValueText(valueSpec, 100, '%')}`
   if (rate.min == null) return `${t(characterEffectChannelKeys[channel] ?? channel)} ${t('raidCharacterDynamicValue')}`
   const min = rate.min * 100
   const max = rate.max * 100
@@ -851,7 +864,7 @@ const characterEffectEventKeys = {
 }
 function characterEffectTargetText(target, count = null, element = null) {
   let text = t(characterEffectTargetKeys[target] ?? 'raidCharacterTargetUnknown')
-  if (count != null) text += t('raidCharacterTargetCountSuffix', { n: count })
+  if (count != null) text += t(target.startsWith('selfAnd') ? 'raidDetailTotalCount' : 'raidCharacterTargetCountSuffix', { n: count })
   if (element != null) text += t('raidCharacterTargetElementSuffix', { element: t(elementNameKey(element)) })
   return text
 }
@@ -882,6 +895,7 @@ function characterEffectScopeText(effect) {
   return parts.join(' · ')
 }
 function characterConditionText(condition) {
+  if (Array.isArray(condition)) return condition.map(characterConditionText).join(' · ')
   const element = value => t(elementNameKey(value))
   const args = { n: condition.count, round: condition.round, skill: condition.skillKey?.toUpperCase(), element: condition.element == null ? '' : element(condition.element), elements: (condition.elements ?? []).map(element).join('/') }
   const keys = {
@@ -899,7 +913,11 @@ function characterConditionText(condition) {
     targetElementNotIn: 'raidCharacterConditionTargetElementNotIn', targetHasStatus: 'raidCharacterConditionTargetHasStatus',
     targetLacksStatus: 'raidCharacterConditionTargetLacksStatus', targetRemovableDebuffCountAtMost: 'raidCharacterConditionTargetDebuffCountAtMost',
   }
-  return t(keys[condition.type] ?? 'raidCharacterConditionUnknown', args)
+  const text = t(keys[condition.type] ?? 'raidCharacterConditionUnknown', args)
+  const reference = condition.statusId ? detailStatusName(condition.statusId)
+    : condition.counter ? counterLabel(selectedCharacterDetail.value.id, condition.counter)
+    : condition.key ? t(probabilityScenarioDefinitions.find(([, key]) => key === condition.key)?.[2] ?? { witchIllyaCurseUnleashed: 'raidWitchIllyaCurseUnleashedRound', candyCerberusKindMagic: 'raidCandyCerberusReviveRound' }[condition.key] ?? condition.key) : ''
+  return reference ? `${text} (${reference})` : text
 }
 function characterEffectConditionText(effect) {
   const conditions = (effect.conditions ?? []).map(characterConditionText)
@@ -907,11 +925,28 @@ function characterEffectConditionText(effect) {
   return conditions.length ? t('raidCharacterEffectCondition', { condition: conditions.join(' · ') }) : ''
 }
 function characterEffectDetailText(effect) {
-  const parts = [...effect.modifiers, ...effect.bossRates].map(formatCharacterEffectRate)
+  const parts = [...effect.modifiers.map(formatCharacterEffectRate), ...effect.bossRates.map(rate => t('raidDetailPerStack', { value: formatCharacterEffectRate(rate) }))]
+  const definition = effect.definition ?? {}
+  if (definition.detailKey) parts.push(t(definition.detailKey))
+  for (const modifier of definition.symbolicModifiers ?? []) parts.push(t(modifier.kind === 'sourceAttackOverTargetAttack' ? 'raidDetailSymbolicAttack' : 'raidDetailSymbolicDefense', {
+    value: detailValueText(modifier.coefficient), source: characterName(modifier.sourceId ?? selectedCharacterDetail.value.id),
+  }))
+  if (effect.targetElement != null) parts.push(t('raidDetailFilterBefore'))
+  if (effect.targetConditions.length) parts.push(t('raidDetailFilterAfter'))
+  if (effect.type === 'status') {
+    parts.push(t(definition.statusClass === 'removableBuff' ? 'raidStatusRemovable' : 'raidStatusUnremovable'))
+    if (effect.duration == null) parts.push(t('raidDetailUnlimited'))
+    parts.push(t('raidDetailRefresh'))
+  }
+  if (effect.type === 'bossStatus' && effect.durationRounds == null) parts.push(t('raidDetailUnlimited'))
+  if (effect.type === 'changeCounter' && definition.counter) parts.push(counterLabel(selectedCharacterDetail.value.id, definition.counter))
+  if (effect.type === 'changeCounter' && definition.max != null) parts.push(t('raidCharacterMaxStacks', { n: definition.max }))
+  if (effect.type === 'removeStatus' || effect.type === 'removeStatuses') parts.push(t('raidDetailRemove', { name: definition.statusId ? detailStatusName(definition.statusId) : t(effect.nameKey), n: definition.count ?? 1 }))
+  if (effect.type === 'copyStatuses') parts.push(t('raidDetailCopy'))
   if (effect.type === 'cooldownReduction' && effect.amount != null) parts.push(t('raidCharacterCooldownReductionAmount', { n: effect.amount }))
   if (effect.type === 'changeCounter' && effect.amount != null) parts.push(t('raidCharacterCounterChangeAmount', { n: `${effect.amount > 0 ? '+' : ''}${effect.amount}` }))
   if (effect.type === 'setCooldown' && effect.value != null) parts.push(t('raidCharacterCooldownSetValue', { n: effect.value }))
-  if (effect.duration != null) parts.push(t('raidCharacterEffectDurationActions', { n: effect.duration }))
+  if (effect.duration != null) parts.push(t('raidDetailTargetActions', { n: effect.duration }))
   if (effect.durationRounds != null) parts.push(t('raidCharacterEffectDurationRounds', { n: effect.durationRounds }))
   if (effect.maxStacks > 1) parts.push(t('raidCharacterMaxStacks', { n: effect.maxStacks }))
   return parts.join(' · ')
