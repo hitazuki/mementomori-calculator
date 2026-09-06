@@ -10,6 +10,9 @@ export const DAMAGE_TABS = [
 export const DAMAGE_VIEW_IDS = DAMAGE_TABS.map((item) => item.id)
 
 export const NAV_GROUPS = [
+  { id: 'characters', icon: '📖', labelKey: 'catalogGroup', items: [
+    { id: 'characters', viewId: 'characters', matchViews: ['characters'], icon: '📖', labelKey: 'catalogTitle', descriptionKey: 'catalogDescription' },
+  ] },
   {
     id: 'damage',
     icon: '🎯',

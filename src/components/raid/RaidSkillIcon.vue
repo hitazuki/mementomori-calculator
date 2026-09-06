@@ -1,7 +1,7 @@
 <template>
   <span class="raid-character-skill-slot" :class="{ 'raid-skill-icon': iconId && !failed }">
     <img v-if="iconId && !failed" :src="`${baseUrl}images/skills/${iconId}.png`" alt="" width="48" height="48" loading="lazy" decoding="async" @error="failed = true">
-    <span :class="{ 'raid-skill-icon-label': iconId && !failed }">{{ slot }}</span>
+    <span :class="{ 'raid-skill-icon-label': iconId && !failed }">{{ slot === 'NORMAL' ? 'N' : slot }}</span>
   </span>
 </template>
 

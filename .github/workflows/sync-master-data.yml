@@ -44,6 +44,7 @@ jobs:
           # 复用项目中的抽取逻辑
           # 由于脚本支持通过参数传入 Master 目录，直接将刚才定位到的路径传给脚本
           node scripts/extract_master_data.js ../${{ steps.locate.outputs.dir }}
+          node scripts/generate_character_catalog.mjs ../${{ steps.locate.outputs.dir }}
 
       - name: Check for changes
         id: git-check

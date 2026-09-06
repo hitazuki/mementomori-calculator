@@ -141,6 +141,7 @@ const createAsyncView = (loader) => defineAsyncComponent({
   delay: 0
 })
 
+const CharacterCatalogView = createAsyncView(() => import('./views/CharacterCatalogView.vue'))
 const HomeView = createAsyncView(() => import('./views/HomeView.vue'))
 const CalculatorView = createAsyncView(() => import('./views/CalculatorView.vue'))
 const SweepChartView = createAsyncView(() => import('./views/SweepChartView.vue'))
@@ -180,6 +181,7 @@ onMounted(() => {
 })
 
 const viewMap = {
+  characters: CharacterCatalogView,
   home: HomeView,
   calculator: CalculatorView,
   sweep: SweepChartView,
@@ -197,8 +199,9 @@ const viewMap = {
   serialCode: SerialCodeToolView,
 }
 
-const savedView = localStorage.getItem('mmt-calc-current-view')
+const savedView = location.hash.startsWith('#characters') ? 'characters' : localStorage.getItem('mmt-calc-current-view')
 const currentView = ref(Object.hasOwn(viewMap, savedView) ? savedView : 'home')
+window.addEventListener('hashchange', () => { if (location.hash.startsWith('#characters')) currentView.value = 'characters' })
 const sidebarCollapsed = ref(localStorage.getItem('mmt-calc-sidebar-collapsed') === 'true')
 const initialGroup = findSidebarGroupByView(currentView.value)?.id
 const validGroupIds = new Set(SIDEBAR_GROUPS.map((group) => group.id))
@@ -242,6 +245,7 @@ function toggleGroup(groupId) {
 }
 
 watch(currentView, (viewId) => {
+  if (viewId !== 'characters' && location.hash.startsWith('#characters')) history.replaceState(null, '', location.pathname + location.search)
   localStorage.setItem('mmt-calc-current-view', viewId)
   const group = findSidebarGroupByView(viewId)
   if (group && !openGroups.value.includes(group.id)) {

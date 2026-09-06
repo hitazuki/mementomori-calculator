@@ -1,7 +1,9 @@
+import { characterCatalogTranslations } from './characterCatalog.js'
 import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  ...characterCatalogTranslations['zh-CN'],
   planRechargeMode: "规划模式",
   planRechargeModeLongTerm: "长期规划",
   planRechargeModeRush: "赶进度",

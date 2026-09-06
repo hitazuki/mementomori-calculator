@@ -1,7 +1,9 @@
+import { characterCatalogTranslations } from './characterCatalog.js'
 import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  ...characterCatalogTranslations['ja'],
   planRechargeMode: "計画モード",
   planRechargeModeLongTerm: "長期計画",
   planRechargeModeRush: "急ぎ",
