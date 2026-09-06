@@ -29,7 +29,7 @@ const { t } = useI18n()
 const weaponId = ref(null), levels = ref({})
 watch(() => props.character.id, () => { weaponId.value = props.character.exclusivePassives?.at(-1)?.id; levels.value = {} }, { immediate: true })
 const weapon = computed(() => props.character.exclusivePassives?.find(item => item.id === weaponId.value))
-const collectionLevel = collection => collection.levels.find(level => level.level === levels.value[collection.id]) ?? collection.levels.at(-1)
+const collectionLevel = collection => collection.levels.find(level => level.level === levels.value[collection.id]) ?? collection.levels.find(level => level.rarity === 'LR') ?? collection.levels.at(-1)
 </script>
 <style scoped>
 .profile-section { border-top:1px solid var(--border-subtle); margin-top:20px; padding-top:8px; }.profile-section h3 { font-size:var(--fs-base); }.profile-section p,.profile-section label { font-size:var(--fs-sm); }.collection + .collection { border-top:1px solid var(--border-subtle); margin-top:18px; }.collection h4 { margin-bottom:10px; }.members { display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:14px; }.members .catalog-image { width:48px; height:48px; border-radius:8px; }.members a:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }.members a { color:var(--gold); font-size:var(--fs-sm); }.form-select { width:100%; margin-top:6px; }
