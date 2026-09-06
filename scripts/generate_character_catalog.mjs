@@ -26,10 +26,8 @@ for (const [locale, file] of Object.entries({ 'zh-CN': 'ZhCn', 'zh-TW': 'ZhTw', 
     const buildSkill = (id, slot, source) => {
       const skill = (source === 'active' ? active : passive).get(id)
       if (!skill || !text(skill.NameKey) || skill.NameKey === '*') return null
-      const levels = (skill.ActiveSkillInfos ?? skill.PassiveSkillInfos ?? []).map(info => {
-        const exclusiveLevel = ({ 128: 1, 256: 2, 512: 3 })[info.EquipmentRarityFlags]
-        const key = exclusiveLevel ? exclusive?.[`Description${exclusiveLevel}Key`] ?? info.DescriptionKey : info.DescriptionKey
-        return { type: exclusiveLevel ? 'exclusive' : 'level', level: exclusiveLevel ?? info.OrderNumber, unlockLevel: info.CharacterLevel, text: text(key) }
+      const levels = (skill.ActiveSkillInfos ?? skill.PassiveSkillInfos ?? []).filter(info => !info.EquipmentRarityFlags).map(info => {
+        return { type: 'level', level: info.OrderNumber, unlockLevel: info.CharacterLevel, text: text(info.DescriptionKey) }
       }).filter(level => level.text)
       return { id, slot, name: text(skill.NameKey), cooldown: skill.SkillMaxCoolTime ?? null, levels }
     }
@@ -39,6 +37,13 @@ for (const [locale, file] of Object.entries({ 'zh-CN': 'ZhCn', 'zh-TW': 'ZhTw', 
       id: character.Id, name, title: text(character.Name2Key), element: character.ElementType,
       job: character.JobFlags, rarity: ({ 1: 'N', 2: 'R', 8: 'SR' })[character.RarityFlags] ?? String(character.RarityFlags),
       speed: character.InitialBattleParameter?.Speed ?? null,
+      exclusiveEffects: [1, 2, 3].flatMap(level => {
+        const key = exclusive?.[`Description${level}Key`]
+        if (!key || key === '*') return []
+        const description = text(key)
+        if (!description) throw new Error(`Missing ${locale} exclusive description: ${character.Id}/${level}`)
+        return [{ level, text: description }]
+      }),
       skills: [
         ...(character.ActiveSkillIds ?? []).map((id, index) => buildSkill(id, `S${index + 1}`, 'active')),
         ...(character.PassiveSkillIds ?? []).map((id, index) => buildSkill(id, `P${index + 1}`, 'passive')),
