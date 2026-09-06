@@ -19,7 +19,14 @@ export const characterCatalogTranslations = {
     "catalogEmpty": "没有匹配的角色。",
     "catalogSource": "资料来源：游戏 MB · 图标：Moonheart 资源镜像；每日自动同步。",
     "catalogLatest": "最高技能等级",
-    "catalogUnlock": "解锁等级 {n}"
+    "catalogUnlock": "解锁等级 {n}",
+    "catalogPassives": "专武被动属性",
+    "catalogCollections": "相关秘仪",
+    "catalogNoCollections": "暂无相关秘仪",
+    "catalogRequirement": "成员所需稀有度 / 阶段",
+    "catalogRarityBonus": "秘仪角色进化上限提升",
+    "catalogLevelBonus": "等级上限提升",
+    "catalogLevelNote": "满级效果由基础描述与后续变更共同构成；后续同项变更覆盖前值。"
   },
   "zh-TW": {
     "catalogGroup": "角色圖鑑",
@@ -41,7 +48,14 @@ export const characterCatalogTranslations = {
     "catalogEmpty": "沒有符合的角色。",
     "catalogSource": "資料來源：遊戲 MB · 圖示：Moonheart 資源鏡像；每日自動同步。",
     "catalogLatest": "最高技能等級",
-    "catalogUnlock": "解鎖等級 {n}"
+    "catalogUnlock": "解鎖等級 {n}",
+    "catalogPassives": "專武被動屬性",
+    "catalogCollections": "相關秘儀",
+    "catalogNoCollections": "暫無相關秘儀",
+    "catalogRequirement": "成員所需稀有度 / 階段",
+    "catalogRarityBonus": "秘儀角色進化上限提升",
+    "catalogLevelBonus": "等級上限提升",
+    "catalogLevelNote": "滿級效果由基礎描述與後續變更共同構成；後續同項變更覆蓋前值。"
   },
   "en": {
     "catalogGroup": "Character Codex",
@@ -63,7 +77,14 @@ export const characterCatalogTranslations = {
     "catalogEmpty": "No matching characters.",
     "catalogSource": "Source: game MB · Icons: Moonheart asset mirror; synced daily.",
     "catalogLatest": "Highest skill level",
-    "catalogUnlock": "Unlocks at level {n}"
+    "catalogUnlock": "Unlocks at level {n}",
+    "catalogPassives": "Exclusive weapon stats",
+    "catalogCollections": "Related Arcana",
+    "catalogNoCollections": "No related Arcana",
+    "catalogRequirement": "Required member rarity / tier",
+    "catalogRarityBonus": "Arcana character rarity cap increase",
+    "catalogLevelBonus": "Level cap increase",
+    "catalogLevelNote": "Read the base effect together with all upgrades for the maximum-level effect. Later changes replace earlier values."
   },
   "ja": {
     "catalogGroup": "キャラ図鑑",
@@ -85,7 +106,14 @@ export const characterCatalogTranslations = {
     "catalogEmpty": "該当するキャラはいません。",
     "catalogSource": "出典：ゲームMB · アイコン：Moonheart。毎日自動更新。",
     "catalogLatest": "最高スキルレベル",
-    "catalogUnlock": "解放レベル {n}"
+    "catalogUnlock": "解放レベル {n}",
+    "catalogPassives": "専用武器のパッシブ効果",
+    "catalogCollections": "関連するアルカナ",
+    "catalogNoCollections": "関連するアルカナはありません",
+    "catalogRequirement": "必要なキャラレアリティ / 段階",
+    "catalogRarityBonus": "アルカナキャラのレアリティ上限上昇",
+    "catalogLevelBonus": "レベル上限上昇",
+    "catalogLevelNote": "最大レベルの効果は基本説明と各強化を合わせて確認してください。同じ項目は後の変更が優先されます。"
   },
   "ko": {
     "catalogGroup": "캐릭터 도감",
@@ -107,6 +135,13 @@ export const characterCatalogTranslations = {
     "catalogEmpty": "일치하는 캐릭터가 없습니다.",
     "catalogSource": "출처: 게임 MB · 아이콘: Moonheart. 매일 자동 동기화.",
     "catalogLatest": "최고 스킬 레벨",
-    "catalogUnlock": "해제 레벨 {n}"
+    "catalogUnlock": "해제 레벨 {n}",
+    "catalogPassives": "전용 무기 패시브 능력치",
+    "catalogCollections": "관련 아르카나",
+    "catalogNoCollections": "관련 아르카나 없음",
+    "catalogRequirement": "필요 캐릭터 희귀도 / 단계",
+    "catalogRarityBonus": "아르카나 캐릭터 희귀도 상한 증가",
+    "catalogLevelBonus": "레벨 상한 증가",
+    "catalogLevelNote": "최대 레벨 효과는 기본 설명과 모든 강화 내용을 함께 확인하세요. 같은 항목은 이후 변경 값이 적용됩니다."
   }
 }

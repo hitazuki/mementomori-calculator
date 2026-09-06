@@ -2,7 +2,7 @@
 
 侧栏：角色图鉴 → 角色概览。展示CharacterMB中未标记IsIgnore的角色，不受讨伐名单限制。
 
-数据由 `scripts/generate_character_catalog.mjs <Master目录> [输出目录]` 生成，默认保存到 `public/data/character-catalog/`，五语言分别加载。包括官方名称、称号、属性、职业、初始稀有度、基础速度，以及主动/被动技能各级原文和专武强化原文。技能等级文本可能是增量说明，首屏保留基础说明，其余等级展开阅读，不将最后一级的局部修改误当完整技能文本。
+数据由 `scripts/generate_character_catalog.mjs <Master目录> [输出目录]` 生成，默认保存到 `public/data/character-catalog/`，五语言分别加载。包括官方名称、称号、属性、职业、初始稀有度、基础速度，以及主动/被动技能各级原文和专武强化原文。技能等级文本可能是增量说明，基础说明与所有等级变更默认完整展开，突出最高等级，不将最后一级的局部修改误当完整技能文本。
 
 自动更新沿用现有链路：每日Sync Master Data从 `moonheart/mementomori-masterbook` 拉取MB，生成并提交资料；Sync Image Assets从Moonheart资源镜像补齐角色头像和全图鉴技能图标；成功后部署。已有图片跳过，远程未提供的图片下次重试，页面暂以文字占位。
 
@@ -12,3 +12,5 @@
 
 专武效果直接按装备关联的 EquipmentExclusiveSkillDescriptionMB 读取三个阶段，在独立区域展示；不依赖技能是否有名称或是否包含专武等级记录，避免隐藏被动中的效果遗漏。缺失已关联的专武译文会中止生成。
 
+
+角色资料栏展示 EquipmentExclusiveEffectMB 的专武被动属性，按装备关联去重为稀有度/等级阶段，默认最高阶段。秘仪来自 CharacterCollectionMB 与 CharacterCollectionLevelMB，展示成员、阶段条件及该阶段参数，区分固定值、百分比与成长值。装备稀有度与角色稀有度使用不同枚举。

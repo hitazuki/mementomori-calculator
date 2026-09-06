@@ -16,19 +16,26 @@ test('catalog preserves all weapon tiers independently of hidden or repeated ski
       { EquipmentRarityFlags: 512, DescriptionKey: 'base' },
     ] }])
     write('PassiveSkill', [{ Id: 2, NameKey: '*', PassiveSkillInfos: [{ EquipmentRarityFlags: 256, DescriptionKey: '*' }] }])
-    write('EquipmentExclusiveEffect', [{ Id: 7, CharacterId: 123 }])
-    write('Equipment', [{ ExclusiveEffectId: 7, EquipmentExclusiveSkillDescriptionId: 9 }])
+    write('CharacterCollection', [{ Id: 1, NameKey: 'arcana', RequiredCharacterIds: [123] }])
+    write('CharacterCollectionLevel', [{ CollectionId: 1, CollectionLevel: 1, CharacterRarityFlags: 8, BaseParameterChangeInfos: [{ BaseParameterType: 1, ChangeParameterType: 3, Value: 30 }] }])
+    write('EquipmentExclusiveEffect', [{ Id: 7, CharacterId: 123, BattleParameterChangeInfoList: [{ BattleParameterType: 2, ChangeParameterType: 2, Value: 1800 }, { BattleParameterType: 9, ChangeParameterType: 1, Value: 3500 }] }])
+    write('Equipment', [{ ExclusiveEffectId: 7, EquipmentExclusiveSkillDescriptionId: 9, RarityFlags: 128, EquipmentLv: 180, NameKey: 'weapon' }])
     write('EquipmentExclusiveSkillDescription', [{ Id: 9, Description1Key: 'e1', Description2Key: 'e2', Description3Key: 'e3' }])
     for (const locale of ['ZhCn', 'ZhTw', 'EnUs', 'JaJp', 'KoKr']) {
-      write('TextResource' + locale, ['name', 'skill', 'base', 'e1', 'e2', 'e3'].map(key => ({ StringKey: key, Text: key })))
+      write('TextResource' + locale, ['name', 'skill', 'base', 'e1', 'e2', 'e3', 'arcana', 'weapon', '[BattleParameterTypeAttackPower]', '[BattleParameterTypeCriticalDamageEnhance]', '[BaseParameterTypeMuscle]'].map(key => ({ StringKey: key, Text: key })))
     }
     execFileSync(process.execPath, ['scripts/generate_character_catalog.mjs', temp, path.join(temp, 'out')])
     const character = JSON.parse(fs.readFileSync(path.join(temp, 'out/zh-CN.json'))).characters[0]
     assert.deepEqual(character.exclusiveEffects, [1, 2, 3].map(level => ({ level, text: 'e' + level })))
+    assert.equal(character.exclusivePassives[0].rarity, 'SSR')
+    assert.deepEqual(character.exclusivePassives[0].parameters.map(p => [p.value, p.percent]), [[18, true], [35, true]])
+    assert.equal(character.collections[0].members[0].id, 123)
+    assert.equal(character.collections[0].levels[0].rarity, 'SR')
+    assert.equal(character.collections[0].levels[0].parameters[0].growth, true)
     assert.equal(character.skills.length, 1)
     assert.deepEqual(character.skills[0].levels.map(level => level.type), ['level'])
     write('TextResourceZhCn', [{ StringKey: 'name', Text: 'name' }])
-    assert.throws(() => execFileSync(process.execPath, ['scripts/generate_character_catalog.mjs', temp, path.join(temp, 'out')], { stdio: 'pipe' }), /Missing zh-CN exclusive description/)
+    assert.throws(() => execFileSync(process.execPath, ['scripts/generate_character_catalog.mjs', temp, path.join(temp, 'out')], { stdio: 'pipe' }), /Missing parameter name|Missing zh-CN exclusive description/)
   } finally {
     fs.rmSync(temp, { recursive: true, force: true })
   }

@@ -17,10 +17,44 @@ const exclusiveByCharacter = new Map(characters.map(character => {
   const item = equipment.find(item => ids.has(item.ExclusiveEffectId) && item.EquipmentExclusiveSkillDescriptionId)
   return [character.Id, descriptions.get(item?.EquipmentExclusiveSkillDescriptionId)]
 }))
+const battleNames = {
+  1: '[BattleParameterTypeHp]',
+  2: '[BattleParameterTypeAttackPower]',
+  3: '[BattleParameterTypePhysicalDamageRelax]',
+  4: '[BattleParameterTypeMagicDamageRelax]',
+  5: '[BattleParameterTypeHit]',
+  6: '[BattleParameterTypeAvoidance]',
+  7: '[BattleParameterTypeCritical]',
+  8: '[BattleParameterTypeCriticalResist]',
+  9: '[BattleParameterTypeCriticalDamageEnhance]',
+  10: '[BattleParameterTypePhysicalCriticalDamageRelax]',
+  11: '[BattleParameterTypeMagicCriticalDamageRelax]',
+  12: '[BattleParameterTypeDefensePenetration]',
+  13: '[BattleParameterTypeDefense]',
+  14: '[BattleParameterTypeDamageEnhance]',
+  15: '[BattleParameterTypeDebuffHit]',
+  16: '[BattleParameterTypeDebuffResist]',
+  17: '[BattleParameterTypeDamageReflect]',
+  18: '[BattleParameterTypeHpDrain]',
+  19: '[BattleParameterTypeSpeed]'
+}
+const baseNames = { 1: '[BaseParameterTypeMuscle]', 2: '[BaseParameterTypeEnergy]', 3: '[BaseParameterTypeIntelligence]', 4: '[BaseParameterTypeHealth]' }
+const rarityName = flags => ({ 1: 'N', 2: 'R', 4: 'R+', 8: 'SR', 16: 'SR+', 32: 'SSR', 64: 'SSR+', 128: 'UR', 256: 'UR+', 512: 'LR' })[flags] ?? (flags >= 1024 ? `LR+${Math.log2(flags / 512)}` : String(flags))
+const collections = read('CharacterCollection').filter(item => !item.IsIgnore)
+const collectionLevels = read('CharacterCollectionLevel').filter(item => !item.IsIgnore)
 fs.mkdirSync(output, { recursive: true })
 for (const [locale, file] of Object.entries({ 'zh-CN': 'ZhCn', 'zh-TW': 'ZhTw', en: 'EnUs', ja: 'JaJp', ko: 'KoKr' })) {
   const texts = new Map(read(`TextResource${file}`).map(item => [item.StringKey, item.Text]))
   const text = key => (texts.get(key) ?? '').replace(/<br\s*\/?\s*>/gi, '\n')
+  const parameters = (battle = [], base = []) => [
+    ...(battle ?? []).map(info => ({ ...info, nameKey: battleNames[info.BattleParameterType], percent: info.ChangeParameterType === 2 || [9, 10, 11, 17, 18].includes(info.BattleParameterType) })),
+    ...(base ?? []).map(info => ({ ...info, nameKey: baseNames[info.BaseParameterType], percent: info.ChangeParameterType === 2 })),
+  ].map(info => {
+    const name = text(info.nameKey)
+    if (!name) throw new Error(`Missing parameter name: ${info.nameKey}`)
+    if (![1, 2, 3].includes(info.ChangeParameterType)) throw new Error(`Unsupported parameter change: ${info.ChangeParameterType}`)
+    return { name, growth: info.ChangeParameterType === 3, value: info.percent ? info.Value / 100 : info.Value, percent: info.percent }
+  })
   const records = characters.map(character => {
     const exclusive = exclusiveByCharacter.get(character.Id)
     const buildSkill = (id, slot, source) => {
@@ -38,6 +72,24 @@ for (const [locale, file] of Object.entries({ 'zh-CN': 'ZhCn', 'zh-TW': 'ZhTw', 
       id: character.Id, name, title: text(character.Name2Key), element: character.ElementType,
       job: character.JobFlags, rarity: ({ 1: 'N', 2: 'R', 8: 'SR' })[character.RarityFlags] ?? String(character.RarityFlags),
       speed: character.InitialBattleParameter?.Speed ?? null,
+      exclusivePassives: effects.filter(effect => effect.CharacterId === character.Id && !effect.IsIgnore).flatMap(effect => {
+        const items = equipment.filter(item => item.ExclusiveEffectId === effect.Id && !item.IsIgnore).sort((a, b) => a.RarityFlags - b.RarityFlags || a.EquipmentLv - b.EquipmentLv)
+        if (!items.length) return []
+        const item = items[0]
+        return [{ id: effect.Id, name: text(item.NameKey), rarity: ({ 128: 'SSR', 256: 'UR', 512: 'LR' })[item.RarityFlags] ?? String(item.RarityFlags), rarityFlags: item.RarityFlags, level: item.EquipmentLv, parameters: parameters(effect.BattleParameterChangeInfoList, effect.BaseParameterChangeInfoList) }]
+      }).sort((a, b) => a.rarityFlags - b.rarityFlags || a.level - b.level),
+      collections: collections.filter(item => item.RequiredCharacterIds?.includes(character.Id)).map(item => ({
+        id: item.Id, name: text(item.NameKey),
+        members: item.RequiredCharacterIds.map(id => {
+          const member = characters.find(candidate => candidate.Id === id)
+          return { id, name: member ? [text(member.Name2Key), text(member.NameKey)].filter(Boolean).join(' · ') : `#${id}` }
+        }),
+        levels: collectionLevels.filter(level => level.CollectionId === item.Id).sort((a, b) => a.CollectionLevel - b.CollectionLevel).map(level => ({
+          level: level.CollectionLevel, rarity: rarityName(level.CharacterRarityFlags),
+          parameters: parameters(level.BattleParameterChangeInfos, level.BaseParameterChangeInfos),
+          rarityBonus: level.CharacterRarityBonus, maxLevelIncrease: level.MaxLevelIncreaseValue,
+        })),
+      })),
       exclusiveEffects: [1, 2, 3].flatMap(level => {
         const key = exclusive?.[`Description${level}Key`]
         if (!key || key === '*') return []
