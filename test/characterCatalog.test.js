@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 import { filterCharacters } from '../src/utils/characterCatalog.js'
 import { NAV_GROUPS, findModuleByView } from '../src/constants/navigation.js'
 
@@ -18,4 +19,27 @@ test('catalog combines element and case-insensitive search without mutating sour
 test('catalog has its own navigation group, outside raid analysis', () => {
   assert.equal(NAV_GROUPS[0].id, 'characters')
   assert.equal(findModuleByView('characters').labelKey, 'catalogTitle')
+})
+
+test('Actions-generated catalog has matching complete records in every language', () => {
+  let expected
+  for (const locale of ['zh-CN', 'zh-TW', 'en', 'ja', 'ko']) {
+    const data = JSON.parse(fs.readFileSync(new URL(`../public/data/character-catalog/${locale}.json`, import.meta.url)))
+    assert.equal(data.schemaVersion, 1)
+    assert.ok(data.characters.length > 100)
+    const ids = data.characters.map(character => character.id)
+    assert.equal(new Set(ids).size, ids.length)
+    const signature = data.characters.map(character => [character.id, character.skills.map(skill => [skill.id, skill.slot, skill.levels.map(level => [level.type, level.level])])])
+    if (expected) assert.deepEqual(signature, expected)
+    expected = signature
+    for (const character of data.characters) {
+      assert.ok(character.name && [1, 2, 3, 4, 5, 6].includes(character.element))
+      assert.ok([1, 2, 4].includes(character.job) && character.speed > 0)
+      assert.ok(character.skills.length)
+      for (const skill of character.skills) {
+        assert.ok(skill.name && skill.levels.length)
+        assert.ok(skill.levels.every(level => level.text && level.level > 0))
+      }
+    }
+  }
 })
