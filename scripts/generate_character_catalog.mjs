@@ -29,6 +29,7 @@ for (const [locale, file] of Object.entries({ 'zh-CN': 'ZhCn', 'zh-TW': 'ZhTw', 
       const levels = (skill.ActiveSkillInfos ?? skill.PassiveSkillInfos ?? []).filter(info => !info.EquipmentRarityFlags).map(info => {
         return { type: 'level', level: info.OrderNumber, unlockLevel: info.CharacterLevel, text: text(info.DescriptionKey) }
       }).filter(level => level.text)
+      if (!levels.length) return null
       return { id, slot, name: text(skill.NameKey), cooldown: skill.SkillMaxCoolTime ?? null, levels }
     }
     const name = text(character.NameKey)

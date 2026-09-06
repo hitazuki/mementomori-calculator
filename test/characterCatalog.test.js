@@ -29,13 +29,16 @@ test('Actions-generated catalog has matching complete records in every language'
     assert.ok(data.characters.length > 100)
     const ids = data.characters.map(character => character.id)
     assert.equal(new Set(ids).size, ids.length)
-    const signature = data.characters.map(character => [character.id, character.skills.map(skill => [skill.id, skill.slot, skill.levels.map(level => [level.type, level.level])])])
+    const signature = data.characters.map(character => [character.id, character.exclusiveEffects.map(effect => effect.level), character.skills.map(skill => [skill.id, skill.slot, skill.levels.map(level => [level.type, level.level])])])
     if (expected) assert.deepEqual(signature, expected)
     expected = signature
+    assert.deepEqual(data.characters.find(character => character.id === 123).exclusiveEffects.map(effect => effect.level), [1, 2, 3])
     for (const character of data.characters) {
       assert.ok(character.name && [1, 2, 3, 4, 5, 6].includes(character.element))
       assert.ok([1, 2, 4].includes(character.job) && character.speed > 0)
       assert.ok(character.skills.length)
+      assert.ok(character.exclusiveEffects.every(effect => effect.text && [1, 2, 3].includes(effect.level)))
+      assert.equal(new Set(character.exclusiveEffects.map(effect => effect.level)).size, character.exclusiveEffects.length)
       for (const skill of character.skills) {
         assert.ok(skill.name && skill.levels.length)
         assert.ok(skill.levels.every(level => level.text && level.level > 0))
