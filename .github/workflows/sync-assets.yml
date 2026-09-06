@@ -30,11 +30,15 @@ jobs:
         working-directory: mmt-calculator
         run: npm run sync:assets
 
+      - name: Sync raid skill icons
+        working-directory: mmt-calculator
+        run: npm run sync:raid-icons
+
       - name: Check for changes
         id: git-check
         working-directory: mmt-calculator
         run: |
-          git add public/images/characters/
+          git add public/images/characters/ public/images/skills/ src/constants/raid/skillIcons.js
           if git diff --staged --quiet; then
             echo "changes=false" >> $GITHUB_OUTPUT
             echo "No image asset changes detected."

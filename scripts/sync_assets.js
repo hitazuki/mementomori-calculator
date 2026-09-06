@@ -379,14 +379,21 @@ async function fetchWithAbort(fetchImpl, url, timeoutMs) {
   }
 }
 
-export async function downloadMoonheartCharacterIcon(id, {
+export function downloadMoonheartCharacterIcon(id, {
   destDir = CHARACTER_DEST_DIR,
   baseUrl = MOONHEART_CHARACTER_BASE_URL,
+  ...options
+} = {}) {
+  return downloadMoonheartIcon(id, { ...options, destDir, url: moonheartCharacterUrl(id, baseUrl) });
+}
+
+export async function downloadMoonheartIcon(id, {
+  destDir,
+  url,
   fetchImpl = fetch,
   retries = 2,
   timeoutMs = HTTP_TIMEOUT_MS,
 } = {}) {
-  const url = moonheartCharacterUrl(id, baseUrl);
   const destPath = path.join(destDir, `${id}.png`);
   if (fs.existsSync(destPath)) return { status: 'existing', id, destPath, url };
 
@@ -400,17 +407,17 @@ export async function downloadMoonheartCharacterIcon(id, {
         if (isMoonheartObjectMissing(response.status, responseText)) {
           return { status: 'unavailable', id, destPath, url };
         }
-        throw new Error(`Moonheart character ${id} returned HTTP ${response.status}`);
+        throw new Error(`Moonheart icon ${id} returned HTTP ${response.status}`);
       }
 
       const contentType = response.headers?.get?.('content-type') || '';
       if (!contentType.toLowerCase().includes('image/png')) {
-        throw new Error(`Moonheart character ${id} returned unexpected content-type: ${contentType || 'missing'}`);
+        throw new Error(`Moonheart icon ${id} returned unexpected content-type: ${contentType || 'missing'}`);
       }
 
       const buffer = Buffer.from(await response.arrayBuffer());
       if (!isValidPng(buffer)) {
-        throw new Error(`Moonheart character ${id} returned an invalid or truncated PNG`);
+        throw new Error(`Moonheart icon ${id} returned an invalid or truncated PNG`);
       }
 
       ensureDir(destDir);
@@ -422,7 +429,7 @@ export async function downloadMoonheartCharacterIcon(id, {
       lastError = error;
       if (tempPath) fs.rmSync(tempPath, { force: true });
       if (attempt <= retries) {
-        warn(`Moonheart character ${id} failed on attempt ${attempt}: ${error.message}`);
+        warn(`Moonheart icon ${id} failed on attempt ${attempt}: ${error.message}`);
       }
     }
   }

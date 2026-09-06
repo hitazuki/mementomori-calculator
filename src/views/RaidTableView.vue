@@ -436,7 +436,7 @@
           <div class="raid-character-skill-grid">
             <article v-for="skill in [...selectedCharacterDetail.skills, selectedCharacterDetail.normal].filter(Boolean)" :key="skill.key" class="raid-character-skill-card">
               <header>
-                <span class="raid-character-skill-slot">{{ skill.key.toUpperCase() }}</span>
+                <RaidSkillIcon :character-id="selectedCharacterDetail.id" :slot="skill.key.toUpperCase()" />
                 <div><h3>{{ $t(skill.nameKey) }}</h3><p>{{ skillMetaText(skill) }}</p></div>
               </header>
 
@@ -485,7 +485,7 @@
             <div v-else class="raid-character-mb-list">
               <article v-for="skill in selectedCharacterMbTexts" :key="`${skill.source}-${skill.id}`" class="raid-character-mb-card">
                 <header>
-                  <span class="raid-character-skill-slot">{{ skill.slot }}</span>
+                  <RaidSkillIcon :character-id="selectedCharacterDetail.id" :slot="skill.slot" />
                   <div><strong>{{ skill.name }}</strong></div>
                 </header>
                 <ul class="raid-character-mb-levels">
@@ -571,6 +571,7 @@ import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTE
 import { loadRaidCharacterMbTexts } from '../constants/raid/characterMbTexts.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
+import RaidSkillIcon from '../components/raid/RaidSkillIcon.vue'
 import { raidDetailValueText } from '../utils/raidDetailValueText.js'
 import { buildRaidCharacterDetail } from '../utils/raidCharacterDetails.js'
 import { buildRaidExportModel, raidExportFilename } from '../utils/raidExport.js'
