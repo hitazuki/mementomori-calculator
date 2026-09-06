@@ -10,13 +10,13 @@
           <div class="catalog-elements" role="group" :aria-label="t('raidElementFilter')"><button v-for="value in [0,1,2,3,4,5,6]" :key="value" class="btn" :class="element === value ? 'btn-primary' : 'btn-ghost'" :aria-pressed="element === value" @click="element = value"><img v-if="value" :src="`${base}images/elements/icon_element_${value}.png`" alt="">{{ value ? elementName(value) : t('catalogAll') }}</button></div>
           <p aria-live="polite">{{ t('catalogCount', { n: filtered.length }) }}</p>
         </section>
-        <div v-if="filtered.length" class="catalog-grid"><button v-for="character in filtered" :key="character.id" class="card catalog-card" @click="open(character.id)"><CharacterCatalogImage :path="`images/characters/${character.id}.png`" :fallback="character.name.slice(0,1)"/><span><small>{{ character.title }}</small><strong>{{ character.name }}</strong><span>{{ elementName(character.element) }} · {{ jobName(character.job) }}</span><small>{{ character.rarity }} · {{ t('catalogSpeed') }} {{ character.speed ?? '—' }} · #{{ character.id }}</small></span></button></div>
+        <div v-if="filtered.length" class="catalog-grid"><button v-for="character in filtered" :key="character.id" class="card catalog-card" @click="open(character.id)"><CharacterCatalogImage :path="`images/characters/${character.id}.png`" :fallback="character.name.slice(0,1)"/><span><small>{{ character.title }}</small><strong>{{ character.name }}</strong><span><CharacterCatalogTraits :element="character.element" :job="character.job"/></span><small>{{ character.rarity }} · {{ t('catalogSpeed') }} {{ character.speed ?? '—' }} · #{{ character.id }}</small></span></button></div>
         <p v-else>{{ t('catalogEmpty') }}</p>
       </template>
       <template v-else>
         <button class="btn btn-ghost catalog-back" @click="open(null)">← {{ t('catalogBack') }}</button>
         <div class="catalog-detail">
-          <aside class="card catalog-profile"><CharacterCatalogImage :path="`images/characters/${selected.id}.png`" :fallback="selected.name.slice(0,1)"/><p>{{ selected.title }}</p><h2>{{ selected.name }}</h2><p>{{ elementName(selected.element) }} · {{ jobName(selected.job) }}</p><dl><dt>{{ t('catalogRarity') }}</dt><dd>{{ selected.rarity }}</dd><dt>{{ t('catalogSpeed') }}</dt><dd>{{ selected.speed ?? '—' }}</dd><dt>{{ t('catalogId') }}</dt><dd>{{ selected.id }}</dd></dl><CharacterCatalogProfile :character="selected"/></aside>
+          <aside class="card catalog-profile"><CharacterCatalogImage :path="`images/characters/${selected.id}.png`" :fallback="selected.name.slice(0,1)"/><p>{{ selected.title }}</p><h2>{{ selected.name }}</h2><p><CharacterCatalogTraits :element="selected.element" :job="selected.job"/></p><dl><dt>{{ t('catalogRarity') }}</dt><dd>{{ selected.rarity }}</dd><dt>{{ t('catalogSpeed') }}</dt><dd>{{ selected.speed ?? '—' }}</dd><dt>{{ t('catalogId') }}</dt><dd>{{ selected.id }}</dd></dl><CharacterCatalogProfile :character="selected"/></aside>
           <section class="catalog-skills"><h2>{{ t('catalogSkills') }}</h2><article v-for="skill in selected.skills" :key="skill.id" class="card catalog-skill"><header><CharacterCatalogImage :path="`images/skills/${skill.id}.png`" :fallback="skill.slot"/><div><small>{{ skill.slot }}<template v-if="skill.cooldown != null"> · {{ t('raidCharacterCooldownValue', { n: skill.cooldown }) }}</template></small><h3>{{ skill.name }}</h3></div></header><p class="catalog-level-note">{{ t('catalogLevelNote') }}</p><div v-for="(level, index) in skill.levels" :key="level.level" class="catalog-level" :class="{ 'catalog-max-level': index === skill.levels.length - 1 }"><strong>{{ t('raidCharacterMbSkillLevel', { n: level.level }) }}<span v-if="index === skill.levels.length - 1"> · {{ t('catalogLatest') }}</span></strong><small> · {{ t('catalogUnlock', { n: level.unlockLevel }) }}</small><p class="catalog-skill-text">{{ level.text }}</p></div></article><article v-if="selected.exclusiveEffects?.length" class="card catalog-skill"><h3>{{ t('catalogExclusive') }}</h3><div v-for="effect in selected.exclusiveEffects" :key="effect.level" class="catalog-level"><strong>{{ t('raidCharacterMbExclusiveLevel', { n: effect.level }) }}</strong><p class="catalog-skill-text">{{ effect.text }}</p></div></article></section>
         </div>
       </template>
@@ -28,6 +28,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import CharacterCatalogTraits from '../components/CharacterCatalogTraits.vue'
 import CharacterCatalogProfile from '../components/CharacterCatalogProfile.vue'
 import CharacterCatalogImage from '../components/CharacterCatalogImage.vue'
 import { filterCharacters } from '../utils/characterCatalog.js'
@@ -56,7 +57,6 @@ watch(locale, load, { immediate: true })
 const filtered = computed(() => filterCharacters(characters.value, { search: search.value, element: element.value, sort: sort.value }))
 const selected = computed(() => characters.value.find(character => character.id === selectedId.value))
 const elementName = value => t(['catalogAll','raidElementBlue','raidElementRed','raidElementGreen','raidElementYellow','raidElementLight','raidElementDark'][value] ?? 'raidCharacterUnknown')
-const jobName = value => t(({ 1: 'raidJobWarrior', 2: 'raidJobSniper', 4: 'raidJobMage' })[value] ?? 'raidCharacterUnknown')
 function readHash() { selectedId.value = Number(location.hash.match(/^#characters\/(\d+)$/)?.[1]) || null }
 function open(id) { selectedId.value = id; location.hash = id ? `characters/${id}` : 'characters' }
 onMounted(() => { readHash(); window.addEventListener('hashchange', readHash) })

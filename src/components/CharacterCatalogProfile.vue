@@ -9,7 +9,7 @@
     <p v-if="!character.collections?.length">{{ t('catalogNoCollections') }}</p>
     <article v-for="collection in character.collections" :key="collection.id" class="collection">
       <h4>{{ collection.name }}</h4>
-      <div class="members"><a v-for="member in collection.members" :key="member.id" :href="`#characters/${member.id}`">{{ member.name }}</a></div>
+      <div class="members"><a v-for="member in collection.members" :key="member.id" :href="`#characters/${member.id}`" :title="member.name" :aria-label="member.name"><CharacterCatalogImage :path="`images/characters/${member.id}.png`" :fallback="member.name.slice(0, 1)"/></a></div>
       <label>{{ t('catalogRequirement') }}<select class="form-select" :value="collectionLevel(collection)?.level" @change="levels[collection.id] = Number($event.target.value)"><option v-for="level in collection.levels" :key="level.level" :value="level.level">Lv{{ level.level }} · {{ level.rarity }}</option></select></label>
       <template v-if="collectionLevel(collection)">
         <CharacterCatalogParameters :parameters="collectionLevel(collection).parameters"/>
@@ -22,6 +22,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import CharacterCatalogImage from './CharacterCatalogImage.vue'
 import CharacterCatalogParameters from './CharacterCatalogParameters.vue'
 const props = defineProps({ character: { type: Object, required: true } })
 const { t } = useI18n()
@@ -31,5 +32,5 @@ const weapon = computed(() => props.character.exclusivePassives?.find(item => it
 const collectionLevel = collection => collection.levels.find(level => level.level === levels.value[collection.id]) ?? collection.levels.at(-1)
 </script>
 <style scoped>
-.profile-section { border-top:1px solid var(--border-subtle); margin-top:20px; padding-top:8px; }.profile-section h3 { font-size:var(--fs-base); }.profile-section p,.profile-section label { font-size:var(--fs-sm); }.collection + .collection { border-top:1px solid var(--border-subtle); margin-top:18px; }.collection h4 { margin-bottom:10px; }.members { display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:14px; }.members a { color:var(--gold); font-size:var(--fs-sm); }.form-select { width:100%; margin-top:6px; }
+.profile-section { border-top:1px solid var(--border-subtle); margin-top:20px; padding-top:8px; }.profile-section h3 { font-size:var(--fs-base); }.profile-section p,.profile-section label { font-size:var(--fs-sm); }.collection + .collection { border-top:1px solid var(--border-subtle); margin-top:18px; }.collection h4 { margin-bottom:10px; }.members { display:flex; flex-wrap:wrap; gap:6px 12px; margin-bottom:14px; }.members .catalog-image { width:48px; height:48px; border-radius:8px; }.members a:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }.members a { color:var(--gold); font-size:var(--fs-sm); }.form-select { width:100%; margin-top:6px; }
 </style>

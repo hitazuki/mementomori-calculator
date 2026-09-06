@@ -1515,6 +1515,17 @@ export async function syncAssets(options) {
   return syncMoonheartCharacterIcons(options);
 }
 
+async function syncJobIcons() {
+  for (const job of ['warrior', 'sniper', 'sorcerer']) {
+    const id = `icon_job_${job}`;
+    const icon = await downloadMoonheartIcon(id, {
+      destDir: path.join(CHARACTER_DEST_DIR, '..', 'jobs'),
+      url: `https://list.moonheart.dev/p/public/mmtm/AddressableLocalAssets/Atlas/${id}.png`,
+    });
+    if (icon.status === 'unavailable') warn(`Job icon unavailable: ${job}`);
+  }
+}
+
 async function main() {
   const useLegacySource = process.argv.includes('--legacy');
 
@@ -1524,6 +1535,7 @@ async function main() {
       await syncLegacyAssets();
     } else {
       await syncAssets();
+      await syncJobIcons();
     }
   } catch (error) {
     const message = error?.stack || error?.message || String(error);

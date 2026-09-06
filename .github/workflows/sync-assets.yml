@@ -38,7 +38,7 @@ jobs:
         id: git-check
         working-directory: mmt-calculator
         run: |
-          git add public/images/characters/ public/images/skills/ src/constants/raid/skillIcons.js
+          git add public/images/jobs/ public/images/characters/ public/images/skills/ src/constants/raid/skillIcons.js
           if git diff --staged --quiet; then
             echo "changes=false" >> $GITHUB_OUTPUT
             echo "No image asset changes detected."
