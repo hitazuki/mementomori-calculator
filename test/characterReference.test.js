@@ -40,7 +40,7 @@ test('unbounded mitigation and invalid inputs are rejected', () => {
   assert.throws(() => offenseGain({ attackTypo: .3 }))
 })
 test('published reference states preserve reviewed inputs, sources and score decisions', () => {
-  for (const kind of ['survival', 'offense']) {
+  for (const kind of ['survival']) {
     const source = JSON.parse(fs.readFileSync(new URL(`../doc/character-ratings/${kind}-profiles.json`, import.meta.url)))
     for (const profile of source.profiles) {
       const rating = JSON.parse(fs.readFileSync(new URL(`../public/data/character-ratings/${profile.id}.json`, import.meta.url)))

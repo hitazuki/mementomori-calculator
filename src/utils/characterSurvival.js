@@ -6,7 +6,7 @@ export const SURVIVAL_SCENARIOS = [
 ]
 
 export function survivalCapacity(effects = {}, scenario = SURVIVAL_SCENARIOS[1], damageType = 'physical') {
-  const allowed = ['hp', 'hpFromAttack', 'defense', 'physicalDefense', 'magicDefense', 'reduction', 'block', 'shieldAttack', 'shieldHp', 'attack']
+  const allowed = ['hp', 'hpFromAttack', 'defense', 'physicalDefense', 'magicDefense', 'reduction', 'block', 'shieldAttack', 'shieldHp', 'shieldFixedHp', 'attack']
   if (Object.keys(effects).some(key => !allowed.includes(key))) throw new Error('Unknown survival effect')
   if (!['physical', 'magic'].includes(damageType)) throw new Error('Invalid damage type')
   const value = key => effects[key] ?? 0
@@ -19,7 +19,7 @@ export function survivalCapacity(effects = {}, scenario = SURVIVAL_SCENARIOS[1],
   const specificDefense = (1 + scenario.defenseRatio * (1 + value(damageType === 'physical' ? 'physicalDefense' : 'magicDefense'))) / (1 + scenario.defenseRatio)
   const damage = (1 + scenario.damageBonus) / (1 + scenario.damageBonus - value('reduction'))
   const block = 1 / (1 - value('block'))
-  const shield = value('shieldAttack') * scenario.attackToHp * (1 + value('attack')) + value('shieldHp') * hp
+  const shield = value('shieldAttack') * scenario.attackToHp * (1 + value('attack')) + value('shieldHp') * hp + value('shieldFixedHp')
   const multiplier = defense * specificDefense * damage * block
   return { factors: { hp, defense, specificDefense, damage, block, shield }, withoutShield: hp * multiplier, withShield: (hp + shield) * multiplier }
 }

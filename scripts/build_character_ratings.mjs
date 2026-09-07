@@ -3,7 +3,6 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { RATING_AXES, RATING_VERSION, RATING_MAX, ratingSource, validRating } from '../src/utils/characterRatings.js'
 import { compareSurvival, SURVIVAL_SCENARIOS } from '../src/utils/characterSurvival.js'
-import { compareOffense, OFFENSE_SCENARIOS } from '../src/utils/characterOffense.js'
 
 const root = path.resolve(import.meta.dirname, '..')
 const output = path.join(root, 'public/data/character-ratings')
@@ -14,8 +13,10 @@ const reviews = fs.readFileSync(path.join(root, 'doc/character-ratings/reviews.t
 const explicitlyReviewed = new Set((process.argv.find(arg => arg.startsWith('--reviewed=')) ?? '').split('=')[1]?.split(',').map(Number) ?? [])
 const digest = source => createHash('sha256').update(JSON.stringify(source)).digest('hex')
 const seen = new Set()
+const assessmentFile = readJson(path.join(root, 'doc/character-ratings/v5/review.json'))
+const assessments = new Map(assessmentFile.records.map(record => [record.id, record]))
 const profiles = {}
-for (const kind of ['survival', 'offense']) {
+for (const kind of ['survival']) {
   const data = readJson(path.join(root, 'doc/character-ratings', kind + '-profiles.json'))
   profiles[kind] = new Map()
   for (const profile of data.profiles) {
@@ -59,19 +60,27 @@ const records = reviews.map(line => {
       return { key, evidence: refs?.split('+') ?? [] }
     }),
   }
-  const quantitative = {}
-  for (const kind of ['survival', 'offense']) {
+  const assessment = assessments.get(id)
+  if (!assessment || assessment.sourceHash !== digest(source) || assessment.rubricVersion !== RATING_VERSION ||
+      assessment.axes.some((axis, index) => axis.score !== scores[index] || axis.reason !== notes[index])) throw new Error('Full v5 assessment needs review: ' + id)
+  record.assessment = {
+    axes: assessment.axes.map(({oldScore,...axis})=>axis),
+    growth: assessment.output.growth, lifecycle: assessment.output.lifecycle,
+    shortTermProtection: assessment.survival.shortTermProtection,
+    effectiveSustain: assessment.survival.effectiveSustain,
+  }
+  const quantitative = { finalOutput: assessment.output }
+  for (const kind of ['survival']) {
     const profile = profiles[kind].get(id)
     if (!profile) continue
     for (const state of profile.states) {
       if (!state.label || !state.evidence.length || state.evidence.some(key => !sources.some(source => source.key === key))) throw new Error('Invalid reference evidence: ' + id)
     }
     if (kind === 'survival' && profile.score !== scores[2]) throw new Error('Survival score disagrees with authored review: ' + id)
-    if (kind === 'offense' && (profile.scores.single !== scores[0] || profile.scores.area !== scores[1])) throw new Error('Offense score disagrees with authored review: ' + id)
     quantitative[kind] = {
       version: profile.version, reviewedAt: profile.reviewedAt, note: profile.note,
-      assumptions: kind === 'survival' ? SURVIVAL_SCENARIOS : OFFENSE_SCENARIOS,
-      states: kind === 'survival' ? compareSurvival(profile.states) : compareOffense(profile.states),
+      assumptions: SURVIVAL_SCENARIOS,
+      states: compareSurvival(profile.states),
     }
   }
   if (Object.keys(quantitative).length) {

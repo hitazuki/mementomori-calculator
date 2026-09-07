@@ -1,5 +1,5 @@
 export const RATING_AXES = ['single', 'area', 'survival', 'protection', 'support', 'control']
-export const RATING_VERSION = 'ai-capability-v4'
+export const RATING_VERSION = 'ai-capability-v5'
 export const RATING_MAX = 10
 // Editorial mechanism labels, independent of the raid engine's effect types.
 export const RATING_TAGS = {
@@ -75,6 +75,12 @@ export function validRating(rating, id) {
     && rating.tags.every(tag => Object.hasOwn(RATING_TAGS, tag.key) && Array.isArray(tag.evidence) && tag.evidence.length > 0
       && tag.evidence.every(key => rating.sources?.some(source => source.key === key)))
     && typeof rating.conditions === 'string' && rating.conditions.length > 0
+    && rating.assessment?.axes?.length === RATING_AXES.length
+    && rating.assessment.axes.every((axis,index) => axis.key === RATING_AXES[index]
+      && axis.score === rating.axes[index].score && Number.isInteger(axis.baseBand)
+      && axis.baseBand >= 0 && axis.baseBand <= RATING_MAX && axis.reviewBasis
+      && Array.isArray(axis.adjustments) && axis.adjustments.every(a=>Number.isInteger(a.points)&&a.reason))
+    && rating.assessment.lifecycle?.activeWindow && rating.assessment.lifecycle?.replenishment && rating.assessment.lifecycle?.afterExpiry
     && rating.sources?.length > 0 && rating.sourceHashes && rating.assessedAt
 }
 export function radarPoint(index, score, radius = 88) {
