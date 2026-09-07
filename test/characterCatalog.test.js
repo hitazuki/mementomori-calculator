@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import { filterCharacters } from '../src/utils/characterCatalog.js'
+import { filterCharacters, ratingIndex } from '../src/utils/characterCatalog.js'
 import { NAV_GROUPS, findModuleByView } from '../src/constants/navigation.js'
 
 const characters = [
@@ -19,6 +19,32 @@ test('catalog combines element and case-insensitive search without mutating sour
 test('catalog has its own navigation group, outside raid analysis', () => {
   assert.equal(NAV_GROUPS[0].id, 'characters')
   assert.equal(findModuleByView('characters').labelKey, 'catalogTitle')
+})
+
+test('rating sorting respects dimension, filters, ties and missing versus zero', () => {
+  const ratings = { 1: { scores: { single: 0, survival: 9 } }, 3: { scores: { single: 8, survival: 0 } } }
+  assert.deepEqual(filterCharacters(characters, { sort: 'rating', ratings }).map(c => c.id), [3, 1, 2])
+  assert.deepEqual(filterCharacters(characters, { sort: 'rating', ratingAxis: 'survival', ratings }).map(c => c.id), [1, 3, 2])
+  assert.deepEqual(filterCharacters(characters, { sort: 'rating', ratings, element: 1, search: 'Winter' }).map(c => c.id), [3])
+  assert.deepEqual(filterCharacters(characters, { sort: 'rating' }).map(c => c.id), [1, 2, 3])
+  assert.deepEqual(characters.map(c => c.id), [3, 2, 1])
+})
+
+test('published lightweight rating index agrees with full records and audit states', () => {
+  const root = new URL('../public/data/character-ratings/', import.meta.url)
+  const data = JSON.parse(fs.readFileSync(new URL('index.json', root)))
+  const status = JSON.parse(fs.readFileSync(new URL('status.json', root)))
+  const index = ratingIndex(data)
+  assert.equal(Object.keys(index).length, status.current.length + status.stale.length + status.pending.length)
+  for (const entry of data.characters) {
+    assert.ok(status[entry.status].includes(entry.id))
+    if (entry.status === 'pending') { assert.equal(entry.scores, null); continue }
+    const full = JSON.parse(fs.readFileSync(new URL(entry.id + '.json', root)))
+    assert.deepEqual(entry.scores, Object.fromEntries(full.axes.map(axis => [axis.key, axis.score])))
+  }
+  assert.throws(() => ratingIndex({ ...data, rubricVersion: 'old' }))
+  assert.throws(() => ratingIndex({ ...data, characters: [data.characters[0], data.characters[0]] }))
+  assert.throws(() => ratingIndex({ ...data, characters: [{ ...data.characters[0], scores: { single: 11 } }] }))
 })
 
 test('Actions-generated catalog has matching complete records in every language', () => {

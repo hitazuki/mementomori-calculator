@@ -63,7 +63,14 @@ export const characterCatalogTranslations = {
     "ratingReference_physical": "物理",
     "ratingReference_magic": "魔法",
     "ratingReferenceGain": "自增益收益",
-    "ratingReferenceSource": "查看状态原文"
+    "ratingReferenceSource": "查看状态原文",
+    "catalogSort": "排序方式",
+    "catalogSortRating": "评分",
+    "catalogRatingAxis": "评分维度",
+    "catalogRatingLoading": "正在加载评分…",
+    "catalogRatingError": "评分加载失败，暂无法按评分排序。",
+    "catalogRatingPending": "待评分",
+    "catalogRatingStale": "待复核"
   },
   "zh-TW": {
     "catalogGroup": "角色圖鑑",
@@ -129,7 +136,14 @@ export const characterCatalogTranslations = {
     "ratingReference_physical": "物理",
     "ratingReference_magic": "魔法",
     "ratingReferenceGain": "自增益收益",
-    "ratingReferenceSource": "查看狀態原文"
+    "ratingReferenceSource": "查看狀態原文",
+    "catalogSort": "排序方式",
+    "catalogSortRating": "評分",
+    "catalogRatingAxis": "評分維度",
+    "catalogRatingLoading": "正在載入評分…",
+    "catalogRatingError": "評分載入失敗，暫無法按評分排序。",
+    "catalogRatingPending": "待評分",
+    "catalogRatingStale": "待複核"
   },
   "en": {
     "catalogGroup": "Character Codex",
@@ -195,7 +209,14 @@ export const characterCatalogTranslations = {
     "ratingReference_physical": "Physical",
     "ratingReference_magic": "Magic",
     "ratingReferenceGain": "Self-buff gain",
-    "ratingReferenceSource": "View source"
+    "ratingReferenceSource": "View source",
+    "catalogSort": "Sort by",
+    "catalogSortRating": "Rating",
+    "catalogRatingAxis": "Rating dimension",
+    "catalogRatingLoading": "Loading ratings…",
+    "catalogRatingError": "Ratings failed to load; rating order is unavailable.",
+    "catalogRatingPending": "Not rated",
+    "catalogRatingStale": "Needs review"
   },
   "ja": {
     "catalogGroup": "キャラ図鑑",
@@ -261,7 +282,14 @@ export const characterCatalogTranslations = {
     "ratingReference_physical": "物理",
     "ratingReference_magic": "魔法",
     "ratingReferenceGain": "自己強化の効果",
-    "ratingReferenceSource": "原文を見る"
+    "ratingReferenceSource": "原文を見る",
+    "catalogSort": "並び順",
+    "catalogSortRating": "評価",
+    "catalogRatingAxis": "評価の軸",
+    "catalogRatingLoading": "評価を読み込み中…",
+    "catalogRatingError": "評価の読み込みに失敗しました。評価順は利用できません。",
+    "catalogRatingPending": "未評価",
+    "catalogRatingStale": "要再確認"
   },
   "ko": {
     "catalogGroup": "캐릭터 도감",
@@ -327,6 +355,13 @@ export const characterCatalogTranslations = {
     "ratingReference_physical": "물리",
     "ratingReference_magic": "마법",
     "ratingReferenceGain": "자기 강화 효과",
-    "ratingReferenceSource": "원문 보기"
+    "ratingReferenceSource": "원문 보기",
+    "catalogSort": "정렬 기준",
+    "catalogSortRating": "평가",
+    "catalogRatingAxis": "평가 항목",
+    "catalogRatingLoading": "평가 불러오는 중…",
+    "catalogRatingError": "평가를 불러오지 못해 평가순 정렬을 사용할 수 없습니다.",
+    "catalogRatingPending": "미평가",
+    "catalogRatingStale": "재검토 필요"
   }
 }
