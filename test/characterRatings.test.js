@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { createHash } from 'node:crypto'
-import { ratingSource, radarPoint, validRating, RATING_AXES } from '../src/utils/characterRatings.js'
+import { ratingSource, radarPoint, validRating, RATING_AXES, RATING_TAGS } from '../src/utils/characterRatings.js'
 const dir = new URL('../public/data/character-ratings/', import.meta.url)
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'))
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex')
@@ -19,6 +19,8 @@ test('AI review set has unique IDs, six explained scores and preserved evidence'
     assert.deepEqual(rating.axes.map(axis => axis.score), row[1].split(',').map(Number))
     assert.deepEqual(rating.axes.map(axis => axis.reason), row.slice(2, 8))
     assert.equal(rating.conditions, row[8])
+    assert.deepEqual(rating.tags, row[9].split(',').map(tag => { const [key, refs] = tag.split('@'); return { key, evidence: refs.split('+') } }))
+    assert.equal(rating.scaleMax, 10)
     assert.equal(rating.verification, 'text-review-only')
     assert.ok(rating.sources.every(source => source.title && source.text))
     assert.deepEqual(Object.keys(rating.sourceHashes), ['zh-CN', 'zh-TW', 'en', 'ja', 'ko'])
@@ -59,18 +61,48 @@ test('invalid scores and dangling evidence cannot pass rating validation', () =>
   assert.ok(validRating(rating, 27))
   assert.ok(!validRating(rating, 28))
   const invalid = structuredClone(rating)
-  invalid.axes[0].score = 6
+  invalid.axes[0].score = 11
   assert.ok(!validRating(invalid, 27))
   invalid.axes[0].score = 4
   invalid.axes[0].evidence = ['missing-skill']
   assert.ok(!validRating(invalid, 27))
 })
 
-test('radar uses a fixed 0–5 scale and zero collapses to center', () => {
+test('radar uses a fixed 0–10 scale and zero collapses to center', () => {
   assert.equal(RATING_AXES.length, 6)
   for (let i = 0; i < 6; i++) {
     assert.deepEqual(radarPoint(i, 0), [160, 145])
-    const [x,y] = radarPoint(i, 5)
+    const [x,y] = radarPoint(i, 10)
     assert.ok(Math.abs(Math.hypot(x - 160, y - 145) - 88) < 1e-8)
+    const [halfX, halfY] = radarPoint(i, 5)
+    assert.ok(Math.abs(Math.hypot(halfX - 160, halfY - 145) - 44) < 1e-8)
   }
+})
+
+test('output suppression, weakness and attack reduction retain distinct layers and defensive roles', () => {
+  assert.equal(RATING_TAGS.outputDown.layer, 'damage')
+  assert.equal(RATING_TAGS.weakness.layer, 'weakness')
+  assert.equal(RATING_TAGS.attackDown.layer, 'attack')
+  for (const [id, key] of [[44, 'outputDown'], [106, 'outputDown'], [100, 'weakness'], [11, 'attackDown']]) {
+    const rating = read(new URL(id + '.json', dir))
+    assert.ok(rating.tags.some(tag => tag.key === key))
+    assert.ok(rating.axes.find(axis => axis.key === 'protection').score > 0)
+  }
+  const rusalka = read(new URL('44.json', dir))
+  assert.equal(rusalka.axes.find(axis => axis.key === 'support').score, 0)
+  assert.equal(rusalka.axes.find(axis => axis.key === 'control').score, 0)
+  for (const id of [10, 17, 68, 97, 122, 124]) {
+    const rating = read(new URL(id + '.json', dir))
+    assert.equal(rating.axes.find(axis => axis.key === 'control').score, 0, 'Recovery/buff inhibition is not action control: ' + id)
+  }
+})
+
+test('legacy scales, unknown tags and missing tag evidence are rejected', () => {
+  const rating = read(new URL('44.json', dir))
+  for (const patch of [
+    { schemaVersion: 1 }, { scaleMax: 5 }, { rubricVersion: 'ai-capability-v1' },
+    { tags: [{ key: 'invented', evidence: ['S1'] }] },
+    { tags: [{ key: 'outputDown', evidence: ['missing'] }] },
+    { tags: [{ key: 'outputDown', evidence: [] }] },
+  ]) assert.ok(!validRating({ ...rating, ...patch }, 44))
 })

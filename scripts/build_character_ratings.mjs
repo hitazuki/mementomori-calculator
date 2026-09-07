@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
-import { RATING_AXES, RATING_VERSION, ratingSource, validRating } from '../src/utils/characterRatings.js'
+import { RATING_AXES, RATING_VERSION, RATING_MAX, ratingSource, validRating } from '../src/utils/characterRatings.js'
 
 const root = path.resolve(import.meta.dirname, '..')
 const output = path.join(root, 'public/data/character-ratings')
@@ -14,7 +14,7 @@ const digest = source => createHash('sha256').update(JSON.stringify(source)).dig
 const seen = new Set()
 const records = reviews.map(line => {
   const parts = line.split('|')
-  if (parts.length !== 9) throw new Error('Expected ID, six scores, six reasons and conditions: ' + line.slice(0, 30))
+  if (parts.length !== 10) throw new Error('Expected ID, six scores, six reasons, conditions and authored tags: ' + line.slice(0, 30))
   const [rawId, rawScores, ...notes] = parts
   const id = Number(rawId)
   if (seen.has(id)) throw new Error('Duplicate review: ' + id)
@@ -35,14 +35,18 @@ const records = reviews.map(line => {
     return [locale, digest(ratingSource(record))]
   }))
   const record = {
-    schemaVersion: 1, id, rubricVersion: RATING_VERSION, assessmentType: 'ai-editorial',
-    author: 'GPT-6 / Codex', assessedAt: '2026-09-06', rationaleLocale: 'zh-CN',
+    schemaVersion: 2, id, rubricVersion: RATING_VERSION, scaleMax: RATING_MAX, assessmentType: 'ai-editorial',
+    author: 'GPT-6 / Codex', assessedAt: '2026-09-07', rationaleLocale: 'zh-CN',
     verification: 'text-review-only', sourceHashes,
     axes: RATING_AXES.map((key, index) => ({
       key, score: scores[index], reason: notes[index],
       evidence: [...new Set([...(notes[index].match(/\b(?:S\d|P\d|W)\b/g) ?? sources.map(source => source.key)), 'stats'])],
     })),
     conditions: notes[6], sources,
+    tags: notes[7].split(',').map(tag => {
+      const [key, refs] = tag.split('@')
+      return { key, evidence: refs?.split('+') ?? [] }
+    }),
   }
   if (!validRating(record, id)) throw new Error('Invalid rating or evidence reference: ' + id)
   const file = path.join(output, id + '.json')
@@ -52,7 +56,7 @@ const records = reviews.map(line => {
       throw new Error('Source changed; review the character before using --reviewed=' + id)
     }
     if (explicitlyReviewed.has(id)) record.assessedAt = new Date().toISOString().slice(0, 10)
-    else record.assessedAt = previous.assessedAt
+    else if (previous.rubricVersion === RATING_VERSION) record.assessedAt = previous.assessedAt
   }
   return record
 })
