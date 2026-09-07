@@ -1,0 +1,1914 @@
+{
+  "schemaVersion": 1,
+  "version": "offense-reference-v1",
+  "reviewedAt": "2026-09-07",
+  "profiles": [
+    {
+      "id": 2,
+      "scores": {
+        "single": 3,
+        "area": 0
+      },
+      "note": "加攻只放大攻击基准伤害，不套用力量直接伤害；技能覆盖仍有限。",
+      "states": [
+        {
+          "label": "P1常驻",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "scores": {
+        "single": 3,
+        "area": 0
+      },
+      "note": "暴率只改变暴击期望，不能当等量增伤。",
+      "states": [
+        {
+          "label": "常驻暴率",
+          "effects": {
+            "critRate": 0.1
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "scores": {
+        "single": 5,
+        "area": 5
+      },
+      "note": "屏障暴率与净化暴率按共存条件分别看，不能当全程必暴。",
+      "states": [
+        {
+          "label": "只有屏障",
+          "effects": {
+            "critRate": 0.3
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "屏障仍在且净化增益生效",
+          "effects": {
+            "critRate": 0.5
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "残血加攻上限不是开局；S1承伤上升的命中和作用顺序未并入自增益。",
+      "states": [
+        {
+          "label": "未获残血加攻",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "残血加攻达到上限",
+          "effects": {
+            "attack": 0.8
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "scores": {
+        "single": 9,
+        "area": 7
+      },
+      "note": "加攻30%与输出增伤30%跨区相乘；暴率成长另列，连击次数不再重复乘进自增益系数。",
+      "states": [
+        {
+          "label": "未叠暴率",
+          "effects": {
+            "attack": 0.3,
+            "damage": 0.3
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "暴率15层",
+          "effects": {
+            "attack": 0.3,
+            "damage": 0.3,
+            "critRate": 0.3
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "scores": {
+        "single": 5,
+        "area": 2
+      },
+      "note": "自身和全队攻击增益在攻击区比较；条件必暴仅对应技能，不套用直接伤害。",
+      "states": [
+        {
+          "label": "五人队普通攻击基准",
+          "effects": {
+            "attack": 0.45
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        },
+        {
+          "label": "对应技能满足生命比较",
+          "effects": {
+            "attack": 0.45,
+            "guaranteedCrit": true
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "S1",
+            "S2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "scores": {
+        "single": 5,
+        "area": 6
+      },
+      "note": "攻击和暴率按伤害期望乘算；中毒生命伤害另评，不套攻击系数。",
+      "states": [
+        {
+          "label": "常驻",
+          "effects": {
+            "attack": 0.3,
+            "critRate": 0.3
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "scores": {
+        "single": 3,
+        "area": 0
+      },
+      "note": "S2加攻与生命比例有关，自损后不能默认满生命增益。",
+      "states": [
+        {
+          "label": "获得10%攻击的参照状态",
+          "effects": {
+            "attack": 0.1
+          },
+          "evidence": [
+            "S2"
+          ]
+        },
+        {
+          "label": "接近增幅上限，仅作边界",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "S2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "scores": {
+        "single": 7,
+        "area": 7
+      },
+      "note": "加攻需先暴击，低血暴率与存活条件分开，不能增强触发前一击。",
+      "states": [
+        {
+          "label": "尚未触发",
+          "effects": {},
+          "evidence": [
+            "S1",
+            "P2"
+          ]
+        },
+        {
+          "label": "暴击加攻后且低血",
+          "effects": {
+            "attack": 0.5,
+            "critRate": 0.3
+          },
+          "evidence": [
+            "S1",
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "scores": {
+        "single": 7,
+        "area": 1
+      },
+      "note": "普攻暴击叠攻满级三层30%，只能增强后续攻击；定点收割另评。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "普攻暴击三层",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "攻击高上限依赖四名友军死亡，不能作为常态队伍伤害。",
+      "states": [
+        {
+          "label": "开局",
+          "effects": {
+            "attack": 0.5
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "一名友军死亡",
+          "effects": {
+            "attack": 1
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "四名友军死亡上限",
+          "effects": {
+            "attack": 2.5
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "scores": {
+        "single": 2,
+        "area": 3
+      },
+      "note": "仅自身稳定获得的P1暴率纳入；S1按最高攻击选人，不默认回给自己。",
+      "states": [
+        {
+          "label": "至少三名友军存活",
+          "effects": {
+            "critRate": 0.4
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "scores": {
+        "single": 9,
+        "area": 7
+      },
+      "note": "攻击与贯通跨区；80%减防按非线性防御路计算，仅命中生效目标享受。击杀加攻与S2必暴另列。",
+      "states": [
+        {
+          "label": "常驻，不计敌方减防",
+          "effects": {
+            "attack": 0.4,
+            "penetration": 0.4
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "S1减防生效目标",
+          "effects": {
+            "attack": 0.4,
+            "penetration": 0.4,
+            "defenseDown": 0.8
+          },
+          "evidence": [
+            "P1",
+            "W"
+          ]
+        },
+        {
+          "label": "击杀后S2命中弱化目标，不预设仍有减防",
+          "effects": {
+            "attack": 0.9,
+            "penetration": 0.4,
+            "guaranteedCrit": true
+          },
+          "evidence": [
+            "P1",
+            "S1",
+            "S2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "scores": {
+        "single": 4,
+        "area": 3
+      },
+      "note": "暴击后叠攻只增强后续攻击，不能将满层加成回填首击。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "S1"
+          ]
+        },
+        {
+          "label": "五次暴击后",
+          "effects": {
+            "attack": 0.5
+          },
+          "evidence": [
+            "S1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "scores": {
+        "single": 6,
+        "area": 8
+      },
+      "note": "两回合未受伤才有80%加攻；共鸣扩散另计，不重复放大自增益系数。",
+      "states": [
+        {
+          "label": "条件不成立",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "第3回合后且未受伤",
+          "effects": {
+            "attack": 0.8
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "scores": {
+        "single": 5,
+        "area": 6
+      },
+      "note": "80%加攻需两回合未受伤，前期不能用满额攻击。",
+      "states": [
+        {
+          "label": "条件不成立",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "第3回合后且未受伤",
+          "effects": {
+            "attack": 0.8
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "scores": {
+        "single": 5,
+        "area": 3
+      },
+      "note": "来源面板加攻以施加前面板为快照，不作无限自我放大；护盾与直接输出分别评。",
+      "states": [
+        {
+          "label": "S1来源等于本参照攻击，一次施加",
+          "effects": {
+            "attack": 0.5
+          },
+          "evidence": [
+            "S1",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "scores": {
+        "single": 5,
+        "area": 3
+      },
+      "note": "P2以发动时攻击为来源；此处只比较35%自加攻，不假定全队加攻的应用顺序。",
+      "states": [
+        {
+          "label": "仅P2自增益",
+          "effects": {
+            "attack": 0.35
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "攻击与暴伤跨区，暴伤收益受实际暴率约束。",
+      "states": [
+        {
+          "label": "常驻",
+          "effects": {
+            "attack": 0.4,
+            "critDamage": 0.4
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "scores": {
+        "single": 9,
+        "area": 5
+      },
+      "note": "常驻攻击和暴率乘算；击杀暴伤只增强后续攻击。物防降低需力量比较并另评。",
+      "states": [
+        {
+          "label": "常驻",
+          "effects": {
+            "attack": 0.4,
+            "critRate": 0.2
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "击杀暴伤生效",
+          "effects": {
+            "attack": 0.4,
+            "critRate": 0.2,
+            "critDamage": 0.6
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "scores": {
+        "single": 7,
+        "area": 7
+      },
+      "note": "复活加攻与低血物魔贯通跨区；复活仅一次，回血改变血量分支。S2弱化翻倍留在技能倍率层。",
+      "states": [
+        {
+          "label": "高血且未复活",
+          "effects": {},
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        },
+        {
+          "label": "低血未复活",
+          "effects": {
+            "specificPenetration": 0.5
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "复活短期且仍低血",
+          "effects": {
+            "attack": 0.7,
+            "specificPenetration": 0.5
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "scores": {
+        "single": 3,
+        "area": 7
+      },
+      "note": "专武暴率仅用于S1相关攻击和控制；中毒不乘暴击期望。",
+      "states": [
+        {
+          "label": "S1专武暴率生效",
+          "effects": {
+            "critRate": 0.4
+          },
+          "evidence": [
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "scores": {
+        "single": 9,
+        "area": 5
+      },
+      "note": "高血加攻与低血再生不能同时按满额；伤害倍率和击杀条件仍另评。",
+      "states": [
+        {
+          "label": "无高血加攻",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "高血加攻上限",
+          "effects": {
+            "attack": 0.7
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "攻击成长伴随阻绝下降；暴伤、周期暴率和攻击分别乘算。",
+      "states": [
+        {
+          "label": "周期暴率未生效",
+          "effects": {
+            "critDamage": 0.2
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "周期暴率生效且攻击满层",
+          "effects": {
+            "attack": 0.4,
+            "critRate": 0.2,
+            "critDamage": 0.2
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "S1先加攻再攻击，30%加攻按已有加攻稀释；不扩大成全程。",
+      "states": [
+        {
+          "label": "S1攻击阶段",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "S1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "scores": {
+        "single": 6,
+        "area": 5
+      },
+      "note": "输出增伤与已有增伤同区；90%要求本回合受击四次，不能当额外90%独立乘算。",
+      "states": [
+        {
+          "label": "S1未受击加成",
+          "effects": {
+            "damage": 0.3
+          },
+          "evidence": [
+            "S1",
+            "W"
+          ]
+        },
+        {
+          "label": "本回合受击四次后S1",
+          "effects": {
+            "damage": 0.9
+          },
+          "evidence": [
+            "S1",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "scores": {
+        "single": 1,
+        "area": 1
+      },
+      "note": "全体攻击可覆盖自身，但随机暴伤不默认；低倍率仍限制输出。",
+      "states": [
+        {
+          "label": "S1增益生效",
+          "effects": {
+            "attack": 0.2
+          },
+          "evidence": [
+            "S1",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "scores": {
+        "single": 8,
+        "area": 0
+      },
+      "note": "攻击和暴伤跨区，但非必暴；晕厥成功与额外重放不能同时取上限。",
+      "states": [
+        {
+          "label": "常驻",
+          "effects": {
+            "attack": 0.35,
+            "critDamage": 0.35
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "scores": {
+        "single": 7,
+        "area": 2
+      },
+      "note": "决死攻击80%有持续与自损成本，不将自损计为无代价输出。",
+      "states": [
+        {
+          "label": "决死存在",
+          "effects": {
+            "attack": 0.8
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "决死结束",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "scores": {
+        "single": 6,
+        "area": 5
+      },
+      "note": "S2弱化必暴只对该条件目标；回血量及其他直接伤害不套用必暴。",
+      "states": [
+        {
+          "label": "S2无弱化目标",
+          "effects": {},
+          "evidence": [
+            "S2"
+          ]
+        },
+        {
+          "label": "S2弱化目标",
+          "effects": {
+            "guaranteedCrit": true
+          },
+          "evidence": [
+            "S2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "scores": {
+        "single": 5,
+        "area": 5
+      },
+      "note": "敌方受控时才加攻，需配合且控制会被攻击解除。",
+      "states": [
+        {
+          "label": "无受控敌人",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "有受控敌人",
+          "effects": {
+            "attack": 0.6
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "scores": {
+        "single": 8,
+        "area": 5
+      },
+      "note": "幽冥配队贯通为非线性增益；第三次S1的三倍伤害独立计入技能层。",
+      "states": [
+        {
+          "label": "配队条件不成立",
+          "effects": {},
+          "evidence": [
+            "W"
+          ]
+        },
+        {
+          "label": "其他幽冥至少两人",
+          "effects": {
+            "penetration": 0.4
+          },
+          "evidence": [
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "scores": {
+        "single": 1,
+        "area": 2
+      },
+      "note": "自身暴率有收益，但两主动倍率很低，不能因暴击词条大幅抬分。",
+      "states": [
+        {
+          "label": "常驻暴率",
+          "effects": {
+            "critRate": 0.2
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "scores": {
+        "single": 9,
+        "area": 7
+      },
+      "note": "暴率叠层与强化必暴分开；必暴时不能再次叠加暴率收益。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "20层普通攻击",
+          "effects": {
+            "critRate": 0.2
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "强化S2必暴",
+          "effects": {
+            "guaranteedCrit": true
+          },
+          "evidence": [
+            "S2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "消除恶魔层数提供30%加攻；解除后的技能三倍另在技能层，不重复计入。",
+      "states": [
+        {
+          "label": "未消层",
+          "effects": {},
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "全部消层",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "scores": {
+        "single": 5,
+        "area": 7
+      },
+      "note": "S1自身也获得暴率与暴伤，跨区以暴击期望计算；反伤不套攻击期望。",
+      "states": [
+        {
+          "label": "S1增益期间",
+          "effects": {
+            "critRate": 0.2,
+            "critDamage": 0.2
+          },
+          "evidence": [
+            "S1",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 71,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "叠攻最高100%，中毒数量决定成长；吸攻来源取决于敌方面板，未硬设为30%自身攻击。",
+      "states": [
+        {
+          "label": "初始一层",
+          "effects": {
+            "attack": 0.05
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "20层",
+          "effects": {
+            "attack": 1
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 73,
+      "scores": {
+        "single": 5,
+        "area": 3
+      },
+      "note": "自身S1暴率30%可计；复活加攻按选人，不默认选中自身。",
+      "states": [
+        {
+          "label": "S1暴率生效",
+          "effects": {
+            "critRate": 0.3
+          },
+          "evidence": [
+            "S1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "同区攻击叠加，红队与自损层数分别标明，不能把两种加攻相乘。",
+      "states": [
+        {
+          "label": "无其他业红且未自损",
+          "effects": {
+            "attack": 0.1
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "四层自损且四名其他业红",
+          "effects": {
+            "attack": 0.9
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 77,
+      "scores": {
+        "single": 5,
+        "area": 5
+      },
+      "note": "死亡加攻最多100%但有失去队友的成本，未按常驻。",
+      "states": [
+        {
+          "label": "无人死亡",
+          "effects": {},
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "两名友军死亡",
+          "effects": {
+            "attack": 1
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 78,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "叠攻与暴率跨区，但满15层需多次行动，前期开局不计满层。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "15层且S1暴率生效",
+          "effects": {
+            "attack": 0.75,
+            "critRate": 0.1
+          },
+          "evidence": [
+            "P1",
+            "S1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 79,
+      "scores": {
+        "single": 5,
+        "area": 5
+      },
+      "note": "解除限制加攻依赖敌方驱散；技能成长条件仍单独评估。",
+      "states": [
+        {
+          "label": "未解除限制",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "解除限制",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 82,
+      "scores": {
+        "single": 5,
+        "area": 3
+      },
+      "note": "第7回合才启动承伤转攻，100%只是上限，不作初始攻击。",
+      "states": [
+        {
+          "label": "第7回合前",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "第7回合承伤足够时的上限",
+          "effects": {
+            "attack": 1
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "scores": {
+        "single": 7,
+        "area": 7
+      },
+      "note": "50%攻击依赖暴率状态，不能把未提供的外援暴率同时计入自身能力。",
+      "states": [
+        {
+          "label": "无外部暴率状态",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "外部暴率状态成立，仅计自加攻",
+          "effects": {
+            "attack": 0.5
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 85,
+      "scores": {
+        "single": 4,
+        "area": 3
+      },
+      "note": "S1攻击和暴率50%跨区；会替换P1较低增益，不将两套相加。",
+      "states": [
+        {
+          "label": "P1低档增益",
+          "effects": {
+            "attack": 0.1,
+            "critRate": 0.1
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "S1替换后",
+          "effects": {
+            "attack": 0.5,
+            "critRate": 0.5
+          },
+          "evidence": [
+            "S1",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 88,
+      "scores": {
+        "single": 5,
+        "area": 3
+      },
+      "note": "生命来源加攻用HP/ATK参照换算，记忆15层只触发一次；真实面板未纳入。",
+      "states": [
+        {
+          "label": "记忆未满",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "记忆15层",
+          "effects": {
+            "attackFromHp": 0.1
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 89,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "全体来源攻击包含自身，按一次来源快照增量计算，不循环放大。",
+      "states": [
+        {
+          "label": "自身来源增益一次施加",
+          "effects": {
+            "attack": 0.25
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 90,
+      "scores": {
+        "single": 8,
+        "area": 5
+      },
+      "note": "同一个加攻随S1次数替换，不把20%、40%、80%相加。",
+      "states": [
+        {
+          "label": "第一次S1",
+          "effects": {
+            "attack": 0.2
+          },
+          "evidence": [
+            "S1"
+          ]
+        },
+        {
+          "label": "第二次S1",
+          "effects": {
+            "attack": 0.4
+          },
+          "evidence": [
+            "S1"
+          ]
+        },
+        {
+          "label": "第三次S1起",
+          "effects": {
+            "attack": 0.8
+          },
+          "evidence": [
+            "S1",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 92,
+      "scores": {
+        "single": 5,
+        "area": 5
+      },
+      "note": "恢复触发攻击叠到75%，需要15次事件；第7回合技能倍率变化另计。",
+      "states": [
+        {
+          "label": "未触发恢复",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "恢复15层",
+          "effects": {
+            "attack": 0.75
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 93,
+      "scores": {
+        "single": 8,
+        "area": 5
+      },
+      "note": "自损攻击40%与技能层数倍率联动，但有启动和生存代价；不重复乘技能倍率。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "四层自损",
+          "effects": {
+            "attack": 0.4
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 95,
+      "scores": {
+        "single": 3,
+        "area": 5
+      },
+      "note": "初始攻击5%与受控后加攻分开；不默认长控制、友军死亡同时满额。",
+      "states": [
+        {
+          "label": "首回合未受控",
+          "effects": {
+            "attack": 0.05
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "受控净化最大加攻且无人死亡",
+          "effects": {
+            "attack": 0.45
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 99,
+      "scores": {
+        "single": 7,
+        "area": 7
+      },
+      "note": "自身业红的来源加攻需成功驱散，首击触发前不吃此增益。",
+      "states": [
+        {
+          "label": "未驱散",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "成功驱散后一次来源加成",
+          "effects": {
+            "attack": 0.5
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "来源加攻与自损同区的叠加顺序尚需校验；只给各自单独收益，不把未知来源快照强行合并。",
+      "states": [
+        {
+          "label": "仅P1，无弱化敌人",
+          "effects": {
+            "attack": 0.1
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "仅P1，五名弱化敌人",
+          "effects": {
+            "attack": 0.6
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "仅P2，五层自损",
+          "effects": {
+            "attack": 0.25
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "scores": {
+        "single": 8,
+        "area": 9
+      },
+      "note": "攻击10%与贯通叠层跨区；持续伤害恶化的收益不套攻击伤害乘式。",
+      "states": [
+        {
+          "label": "未受击叠层",
+          "effects": {
+            "attack": 0.1
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "受击10层",
+          "effects": {
+            "attack": 0.1,
+            "penetration": 0.3
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "防御转攻200%对面板极敏感；按不同防攻比展示，不当固定200%加攻。",
+      "states": [
+        {
+          "label": "开局防御转攻",
+          "effects": {
+            "attackFromDefense": 2
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 113,
+      "scores": {
+        "single": 8,
+        "area": 5
+      },
+      "note": "增益队条件自加攻30%可计；S2选增益最多友军，不默认再次叠给自己。",
+      "states": [
+        {
+          "label": "未满足增益条件",
+          "effects": {},
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "增益条件满足",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 114,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "自身苍翠可获恢复叠攻；75%是15次上限，不是开局攻击。",
+      "states": [
+        {
+          "label": "未触发恢复",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "恢复15层",
+          "effects": {
+            "attack": 0.75
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 121,
+      "scores": {
+        "single": 9,
+        "area": 2
+      },
+      "note": "开局加攻只两回合，击杀后加攻一回合；只展示各阶段，不默认循环全程叠满。",
+      "states": [
+        {
+          "label": "开局",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "开局结束且未击杀",
+          "effects": {},
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        },
+        {
+          "label": "后期击杀后",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 122,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "来源自加攻30%只短期，天赋续期与弱化人数另评。",
+      "states": [
+        {
+          "label": "初行动增益有效",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "增益消失",
+          "effects": {},
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 123,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "最多50%攻击需弱化或控制触发，不将自身净化误当直接伤害增益。",
+      "states": [
+        {
+          "label": "无弱化层数",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "五层喝彩",
+          "effects": {
+            "attack": 0.5
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 124,
+      "scores": {
+        "single": 8,
+        "area": 5
+      },
+      "note": "攻击80%和命中提升需主动恢复10次；命中不硬换算成固定伤害倍率。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "恢复10层",
+          "effects": {
+            "attack": 0.8
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 126,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "攻击75%为15层，技能第三次变更和层数成长分别评，不能算成开局。",
+      "states": [
+        {
+          "label": "首次行动一层",
+          "effects": {
+            "attack": 0.05
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "15层",
+          "effects": {
+            "attack": 0.75
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 130,
+      "scores": {
+        "single": 8,
+        "area": 5
+      },
+      "note": "自损攻击60%与解析重放有启动成本；技能重放不再重复计入自增益倍数。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "六层解析",
+          "effects": {
+            "attack": 0.6
+          },
+          "evidence": [
+            "P1",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 132,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "攻击100%依赖恢复10次；同区加攻有外援时相对收益下降。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "恢复10层",
+          "effects": {
+            "attack": 1
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 134,
+      "scores": {
+        "single": 3,
+        "area": 5
+      },
+      "note": "S2自加攻30%仅一回合，并伴随自降防御，按施放窗口比较。",
+      "states": [
+        {
+          "label": "S2增益期间",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "S2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 135,
+      "scores": {
+        "single": 8,
+        "area": 3
+      },
+      "note": "攻击90%需妖精30层，普通队启动慢；物防成长不直接增加攻击。",
+      "states": [
+        {
+          "label": "首回合一层",
+          "effects": {
+            "attack": 0.03
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "30层",
+          "effects": {
+            "attack": 0.9
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 137,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "身影暴率随消耗下降，耗尽后不再算30%；队友加攻不默认覆盖自己。",
+      "states": [
+        {
+          "label": "身影10层的上界",
+          "effects": {
+            "critRate": 0.3
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "身影耗尽",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 141,
+      "scores": {
+        "single": 5,
+        "area": 3
+      },
+      "note": "攻击40%依赖弱化事件20层，条件技能双倍不重复放进攻击加成。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "残香20层",
+          "effects": {
+            "attack": 0.4
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 148,
+      "scores": {
+        "single": 7,
+        "area": 5
+      },
+      "note": "攻击48%与技能叠层倍率各在一层计，双自损成本限制稳定输出。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "八层自损",
+          "effects": {
+            "attack": 0.48
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 149,
+      "scores": {
+        "single": 8,
+        "area": 5
+      },
+      "note": "攻击50%需弱化10层，净化与层数成长不代表开局满额。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "旋律10层",
+          "effects": {
+            "attack": 0.5
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 150,
+      "scores": {
+        "single": 8,
+        "area": 7
+      },
+      "note": "攻击与暴率各60%跨区；第7回合且满恢复层数才能开启核心技能，暴率封顶不继续增长收益。",
+      "states": [
+        {
+          "label": "未叠层",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "恢复10层",
+          "effects": {
+            "attack": 0.6,
+            "critRate": 0.6
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 151,
+      "scores": {
+        "single": 5,
+        "area": 5
+      },
+      "note": "来源攻击30%在第2回合起三回合生效，按一次来源快照比较。",
+      "states": [
+        {
+          "label": "第1回合",
+          "effects": {},
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "第2回合起增益期间",
+          "effects": {
+            "attack": 0.3
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    }
+  ]
+}

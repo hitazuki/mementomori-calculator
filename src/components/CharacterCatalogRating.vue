@@ -43,6 +43,7 @@
         </div>
       </section>
       <p class="rating-conditions"><strong>{{ t('ratingConditions') }}</strong><span lang="zh-CN">{{ rating.conditions }}</span></p>
+      <CharacterRatingReference v-if="rating.quantitative" :key="rating.id" :assessment="rating"/>
       <details class="rating-evidence">
         <summary>{{ t('ratingEvidence') }} · {{ evidenceTitle }}</summary>
         <div v-for="source in evidence" :key="source.key" lang="zh-CN"><h4>{{ source.title }}<small v-if="source.cooldown != null"> · {{ t('raidCharacterCooldownValue', { n: source.cooldown }) }}</small></h4><p>{{ source.text }}</p></div>
@@ -56,6 +57,7 @@
 <script setup>
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import CharacterRatingReference from './CharacterRatingReference.vue'
 import { RATING_AXES, RATING_MAX, RATING_TAGS, radarPoint, ratingSource, validRating } from '../utils/characterRatings.js'
 const props = defineProps({ character: { type: Object, required: true } })
 const { t, locale } = useI18n()

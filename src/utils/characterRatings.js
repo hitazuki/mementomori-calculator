@@ -1,5 +1,5 @@
 export const RATING_AXES = ['single', 'area', 'survival', 'protection', 'support', 'control']
-export const RATING_VERSION = 'ai-capability-v2'
+export const RATING_VERSION = 'ai-capability-v3'
 export const RATING_MAX = 10
 // Editorial mechanism labels, independent of the raid engine's effect types.
 export const RATING_TAGS = {

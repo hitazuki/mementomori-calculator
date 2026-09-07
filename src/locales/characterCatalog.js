@@ -52,7 +52,18 @@ export const characterCatalogTranslations = {
     "ratingGroup_utility": "其他机制",
     "ratingLayer_attack": "加攻减攻乘区",
     "ratingLayer_weakness": "脱力独立乘区",
-    "ratingLayer_damage": "增伤减伤乘区"
+    "ratingLayer_damage": "增伤减伤乘区",
+    "ratingReferenceHelp": "乘区参照只比较所列状态的组合收益，采用假设面板，不代表实战伤害或完整角色模型；回血和吸血另评续航。",
+    "ratingReference_survival": "生存乘区依据",
+    "ratingReference_offense": "自增益乘区依据",
+    "ratingReferenceScenario": "参照场景",
+    "ratingReferencePath": "来伤类型",
+    "ratingReferenceNoShield": "无盾容量",
+    "ratingReferenceShield": "当前盾完整时",
+    "ratingReference_physical": "物理",
+    "ratingReference_magic": "魔法",
+    "ratingReferenceGain": "自增益收益",
+    "ratingReferenceSource": "查看状态原文"
   },
   "zh-TW": {
     "catalogGroup": "角色圖鑑",
@@ -107,7 +118,18 @@ export const characterCatalogTranslations = {
     "ratingGroup_utility": "其他機制",
     "ratingLayer_attack": "加攻減攻乘區",
     "ratingLayer_weakness": "脫力獨立乘區",
-    "ratingLayer_damage": "增傷減傷乘區"
+    "ratingLayer_damage": "增傷減傷乘區",
+    "ratingReferenceHelp": "乘區參照僅比較所列狀態的組合收益，採用假設面板，不代表實戰傷害或完整角色模型；回血與吸血另評續航。",
+    "ratingReference_survival": "生存乘區依據",
+    "ratingReference_offense": "自增益乘區依據",
+    "ratingReferenceScenario": "參照場景",
+    "ratingReferencePath": "來傷類型",
+    "ratingReferenceNoShield": "無盾容量",
+    "ratingReferenceShield": "目前護盾完整時",
+    "ratingReference_physical": "物理",
+    "ratingReference_magic": "魔法",
+    "ratingReferenceGain": "自增益收益",
+    "ratingReferenceSource": "查看狀態原文"
   },
   "en": {
     "catalogGroup": "Character Codex",
@@ -162,7 +184,18 @@ export const characterCatalogTranslations = {
     "ratingGroup_utility": "Other",
     "ratingLayer_attack": "Attack modifier",
     "ratingLayer_weakness": "Independent weakness factor",
-    "ratingLayer_damage": "Damage modifier"
+    "ratingLayer_damage": "Damage modifier",
+    "ratingReferenceHelp": "Reference calculations compare listed effects on hypothetical panels, not full character stats or battle damage. Healing and life steal are assessed separately as sustain.",
+    "ratingReference_survival": "Survival factor evidence",
+    "ratingReference_offense": "Self-buff factor evidence",
+    "ratingReferenceScenario": "Reference scenario",
+    "ratingReferencePath": "Damage type",
+    "ratingReferenceNoShield": "Without shield",
+    "ratingReferenceShield": "Full current shield",
+    "ratingReference_physical": "Physical",
+    "ratingReference_magic": "Magic",
+    "ratingReferenceGain": "Self-buff gain",
+    "ratingReferenceSource": "View source"
   },
   "ja": {
     "catalogGroup": "キャラ図鑑",
@@ -217,7 +250,18 @@ export const characterCatalogTranslations = {
     "ratingGroup_utility": "その他",
     "ratingLayer_attack": "攻撃力補正枠",
     "ratingLayer_weakness": "脱力の独立補正枠",
-    "ratingLayer_damage": "ダメージ補正枠"
+    "ratingLayer_damage": "ダメージ補正枠",
+    "ratingReferenceHelp": "仮定したステータスで記載効果の組み合わせを比較します。実戦ダメージや完全なキャラ性能ではありません。回復とHPドレインは継戦能力として別評価です。",
+    "ratingReference_survival": "生存補正の根拠",
+    "ratingReference_offense": "自己強化の根拠",
+    "ratingReferenceScenario": "参照条件",
+    "ratingReferencePath": "被ダメージ種別",
+    "ratingReferenceNoShield": "シールドなし",
+    "ratingReferenceShield": "現在のシールドが満量",
+    "ratingReference_physical": "物理",
+    "ratingReference_magic": "魔法",
+    "ratingReferenceGain": "自己強化の効果",
+    "ratingReferenceSource": "原文を見る"
   },
   "ko": {
     "catalogGroup": "캐릭터 도감",
@@ -272,6 +316,17 @@ export const characterCatalogTranslations = {
     "ratingGroup_utility": "기타",
     "ratingLayer_attack": "공격력 보정",
     "ratingLayer_weakness": "독립 탈력 보정",
-    "ratingLayer_damage": "피해 보정"
+    "ratingLayer_damage": "피해 보정",
+    "ratingReferenceHelp": "가정한 능력치로 명시된 효과 조합을 비교하며 실제 전투 피해나 완전한 캐릭터 성능은 아닙니다. 회복과 흡혈은 유지력으로 별도 평가합니다.",
+    "ratingReference_survival": "생존 보정 근거",
+    "ratingReference_offense": "자기 강화 근거",
+    "ratingReferenceScenario": "참조 조건",
+    "ratingReferencePath": "받는 피해 유형",
+    "ratingReferenceNoShield": "보호막 없음",
+    "ratingReferenceShield": "현재 보호막 최대치",
+    "ratingReference_physical": "물리",
+    "ratingReference_magic": "마법",
+    "ratingReferenceGain": "자기 강화 효과",
+    "ratingReferenceSource": "원문 보기"
   }
 }

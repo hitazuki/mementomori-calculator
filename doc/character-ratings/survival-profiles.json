@@ -1,0 +1,899 @@
+{
+  "schemaVersion": 1,
+  "version": "survival-reference-v1",
+  "reviewedAt": "2026-09-07",
+  "profiles": [
+    {
+      "id": 70,
+      "score": 6,
+      "note": "生命与防御乘算提供中等抗爆发，缺少保命与续航；防御价值随贯通变化。",
+      "states": [
+        {
+          "label": "常驻",
+          "effects": {
+            "hp": 0.4,
+            "defense": 1
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 83,
+      "score": 7,
+      "note": "60%独立阻绝是主体；首回合抗暴、前6回合治疗和15%吸血只补充续航，不折成独立减伤。",
+      "states": [
+        {
+          "label": "常驻",
+          "effects": {
+            "block": 0.6
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 135,
+      "score": 9,
+      "note": "周期1000%攻击盾与防御、减伤乘算；盾耗尽及第13回合后显著回落，叠攻物防未默认满层。",
+      "states": [
+        {
+          "label": "前12回合补盾后，未叠妖精",
+          "effects": {
+            "defense": 1.5,
+            "reduction": 0.3,
+            "shieldAttack": 10
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "第13回合后，仍未计成长",
+          "effects": {
+            "defense": 1.5,
+            "reduction": 0.3
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "score": 5,
+      "note": "40%承伤降低与物防乘算；吸血仅补续航，魔法来伤不受物防保护。",
+      "states": [
+        {
+          "label": "常驻",
+          "effects": {
+            "physicalDefense": 0.2,
+            "reduction": 0.4
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "score": 9,
+      "note": "前4回合85%阻绝强于常态60%；伤害回复不增加抗单次致命容量。",
+      "states": [
+        {
+          "label": "前4回合",
+          "effects": {
+            "block": 0.85
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "第5回合起",
+          "effects": {
+            "block": 0.6
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "score": 7,
+      "note": "防御与物防分路乘算；30%减伤必须先触发弱化净化，不能当开局常驻。",
+      "states": [
+        {
+          "label": "未触发净化",
+          "effects": {
+            "defense": 1,
+            "physicalDefense": 1
+          },
+          "evidence": [
+            "P1"
+          ]
+        },
+        {
+          "label": "触发净化后3回合",
+          "effects": {
+            "defense": 1,
+            "physicalDefense": 1,
+            "reduction": 0.3
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "score": 8,
+      "note": "专武1000%攻击护盾与40%减伤组合提供抗爆发；反伤不当减伤，护盾非周期补发。",
+      "states": [
+        {
+          "label": "首回合护盾生效后",
+          "effects": {
+            "reduction": 0.4,
+            "shieldAttack": 10
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "护盾消失后",
+          "effects": {
+            "reduction": 0.4
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 78,
+      "score": 8,
+      "note": "流金队双防与护盾构成主要生存，缺配队或第11回合后明显下降。",
+      "states": [
+        {
+          "label": "无其他流金，前10回合",
+          "effects": {
+            "reduction": 0.3
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "至少两名其他流金，首回合护盾后",
+          "effects": {
+            "reduction": 0.3,
+            "defense": 1.5,
+            "physicalDefense": 1,
+            "shieldAttack": 8
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "第11回合起，不计其他外援",
+          "effects": {},
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 80,
+      "score": 7,
+      "note": "来源攻击500%的生命增加提供容量；普通治疗与再生另作续航，不作独立阻绝。",
+      "states": [
+        {
+          "label": "仅计自身来源攻击生命增加",
+          "effects": {
+            "hpFromAttack": 5
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 87,
+      "score": 7,
+      "note": "75%承伤降低会受已有增伤影响；后期50%为替换阶段，不与前期75%相加。",
+      "states": [
+        {
+          "label": "前6回合",
+          "effects": {
+            "reduction": 0.75
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "第7回合起",
+          "effects": {
+            "reduction": 0.5
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 90,
+      "score": 9,
+      "note": "生命盾200%、防御150%与减伤60%乘算，周期补发强；盾耗尽窗口仍单独展示。",
+      "states": [
+        {
+          "label": "周期护盾生效后",
+          "effects": {
+            "shieldHp": 2,
+            "defense": 1.5,
+            "reduction": 0.6
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 92,
+      "score": 7,
+      "note": "生命100%是抗爆发基础；受击回复60%不能救致命伤，主动生命增益按施放阶段另列。",
+      "states": [
+        {
+          "label": "主动增益前",
+          "effects": {
+            "hp": 1
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "S1生命增益生效，未计重复叠层",
+          "effects": {
+            "hp": 1.4
+          },
+          "evidence": [
+            "P2",
+            "S1",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 97,
+      "score": 6,
+      "note": "自身忧蓝获得200%攻击盾，叠加40%承伤降低；净化及回复受限时不能抬高抗爆发。",
+      "states": [
+        {
+          "label": "首回合自身忧蓝护盾生效后",
+          "effects": {
+            "reduction": 0.4,
+            "shieldAttack": 2
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "护盾消失后",
+          "effects": {
+            "reduction": 0.4
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "score": 9,
+      "note": "自身忧蓝的80%生命盾与600%攻击盾，加60%减伤，开局保护强；护盾只发一次。",
+      "states": [
+        {
+          "label": "首回合自身忧蓝护盾后",
+          "effects": {
+            "reduction": 0.6,
+            "shieldHp": 0.8,
+            "shieldAttack": 6
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "护盾消失后",
+          "effects": {
+            "reduction": 0.6
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "score": 6,
+      "note": "40%减伤与来源生命20%组合；受击40%回复和主动治疗主要续航，不能等同额外40%独立减伤。",
+      "states": [
+        {
+          "label": "仅计一次全体生命效果，来源为施加前自身生命",
+          "effects": {
+            "reduction": 0.4,
+            "hp": 0.2
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "score": 9,
+      "note": "生命10%与80%独立阻绝相乘；三层屏障另作次数保护，持续伤害恶化是风险。",
+      "states": [
+        {
+          "label": "不含屏障及持续伤害恶化",
+          "effects": {
+            "hp": 0.1,
+            "block": 0.8
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "score": 6,
+      "note": "60%承伤降低是基础；80%吸血只在前6回合续航，不能当抗爆发。最快目标屏障不默认选中自身。",
+      "states": [
+        {
+          "label": "未获得最快目标屏障",
+          "effects": {
+            "reduction": 0.6
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "score": 8,
+      "note": "70%独立阻绝是稳定主体；普攻净化与吸血补续航，不等同额外阻绝。",
+      "states": [
+        {
+          "label": "常驻，不计回复",
+          "effects": {
+            "block": 0.7
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 111,
+      "score": 6,
+      "note": "生命80%提供1.8倍容量；60%受击回复必须存活，敌人减少还会失去抗暴保护。",
+      "states": [
+        {
+          "label": "不计条件抗暴与受击回复",
+          "effects": {
+            "hp": 0.8
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 113,
+      "score": 8,
+      "note": "75%减伤需增益队续期；专武自身流金800%攻击盾提供容量，断续期与盾耗尽分开看。",
+      "states": [
+        {
+          "label": "减伤续期成立，不计叠攻",
+          "effects": {
+            "reduction": 0.75,
+            "shieldAttack": 8
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "减伤未续期，护盾仍在",
+          "effects": {
+            "shieldAttack": 8
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 114,
+      "score": 8,
+      "note": "生命100%与减伤65%组合，优于单独减伤；普通治疗不作为独立防护乘区。",
+      "states": [
+        {
+          "label": "常驻，不计治疗",
+          "effects": {
+            "hp": 1,
+            "reduction": 0.65
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 115,
+      "score": 8,
+      "note": "防御和物防100%再与减伤60%组合；物理更强，抗暴及护罩作功能补充。",
+      "states": [
+        {
+          "label": "周期增益生效",
+          "effects": {
+            "defense": 1,
+            "physicalDefense": 1,
+            "reduction": 0.6
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 116,
+      "score": 9,
+      "note": "生命100%与独立阻绝50%提供4倍容量；敌速更低或反伤来源时70%阻绝更强。",
+      "states": [
+        {
+          "label": "普通攻击来源",
+          "effects": {
+            "hp": 1,
+            "block": 0.5
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "低速攻击方或反伤",
+          "effects": {
+            "hp": 1,
+            "block": 0.7
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 117,
+      "score": 9,
+      "note": "前4回合80%独立阻绝，之后60%；主攻手护盾不默认覆盖自身。",
+      "states": [
+        {
+          "label": "前4回合",
+          "effects": {
+            "block": 0.8
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "第5回合起",
+          "effects": {
+            "block": 0.6
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 123,
+      "score": 9,
+      "note": "500%攻击盾与60%减伤相乘；自身忧蓝另有两层条件屏障，独立保留次数价值。",
+      "states": [
+        {
+          "label": "首回合护盾后，不计屏障",
+          "effects": {
+            "shieldAttack": 5,
+            "reduction": 0.6
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "护盾耗尽，不计屏障",
+          "effects": {
+            "reduction": 0.6
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 125,
+      "score": 7,
+      "note": "75%承伤降低不能在高增伤场景下等同75%独立阻绝；敌方脱力覆盖不默认恒定。",
+      "states": [
+        {
+          "label": "仅计自身常驻防护",
+          "effects": {
+            "reduction": 0.75
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 126,
+      "score": 8,
+      "note": "75%减伤与前两次流金护盾组合；第三次S1起停止补盾，物理暴伤降低未按普适减伤计算。",
+      "states": [
+        {
+          "label": "前两次S1护盾后，未叠攻",
+          "effects": {
+            "reduction": 0.75,
+            "shieldHp": 0.3,
+            "shieldAttack": 4
+          },
+          "evidence": [
+            "S1",
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "护盾消失后",
+          "effects": {
+            "reduction": 0.75
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 131,
+      "score": 7,
+      "note": "70%减伤及前6回合物防，对物理更强；净化是功能保护，S1自降防御另作风险。",
+      "states": [
+        {
+          "label": "前6回合，不计S1自降防御",
+          "effects": {
+            "reduction": 0.7,
+            "physicalDefense": 1
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "第7回合起",
+          "effects": {
+            "reduction": 0.7
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 132,
+      "score": 9,
+      "note": "生命100%、防御150%与减伤40%组合；成长物防另列，不将普通回血叠作减伤。",
+      "states": [
+        {
+          "label": "尚未恢复叠层",
+          "effects": {
+            "hp": 1,
+            "defense": 1.5,
+            "reduction": 0.4
+          },
+          "evidence": [
+            "P1",
+            "W"
+          ]
+        },
+        {
+          "label": "主动恢复10层后",
+          "effects": {
+            "hp": 1,
+            "defense": 1.5,
+            "physicalDefense": 0.6,
+            "reduction": 0.4
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 134,
+      "score": 8,
+      "note": "70%承伤降低与50%独立阻绝可相乘，但结界仅第1、5回合起各2回合，不能全程叠满。",
+      "states": [
+        {
+          "label": "结界存在",
+          "effects": {
+            "reduction": 0.7,
+            "block": 0.5
+          },
+          "evidence": [
+            "P1",
+            "W"
+          ]
+        },
+        {
+          "label": "结界不存在",
+          "effects": {
+            "reduction": 0.7
+          },
+          "evidence": [
+            "P1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 137,
+      "score": 8,
+      "note": "身影存在时75%独立阻绝，耗尽后60%；主攻手生命增益不默认给自己。",
+      "states": [
+        {
+          "label": "有身影",
+          "effects": {
+            "block": 0.75
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        },
+        {
+          "label": "身影耗尽",
+          "effects": {
+            "block": 0.6
+          },
+          "evidence": [
+            "P1",
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 139,
+      "score": 8,
+      "note": "自身流金500%攻击盾、100%防御与70%减伤组合强；盾消失后回落，条件吸血仅续航。",
+      "states": [
+        {
+          "label": "自身护盾及行动防御生效后",
+          "effects": {
+            "reduction": 0.7,
+            "defense": 1,
+            "shieldAttack": 5
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "护盾耗尽",
+          "effects": {
+            "reduction": 0.7,
+            "defense": 1
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 140,
+      "score": 7,
+      "note": "60%减伤与前6回合防魔保护组合；低血回血先要求存活，不作为抗致命机制。",
+      "states": [
+        {
+          "label": "前6回合",
+          "effects": {
+            "reduction": 0.6,
+            "defense": 0.8,
+            "magicDefense": 0.4
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "第7回合起",
+          "effects": {
+            "reduction": 0.6
+          },
+          "evidence": [
+            "P2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 149,
+      "score": 7,
+      "note": "70%减伤与前6回合防御相乘；配队增强有条件，之后防御到期，净化不等于生命容量。",
+      "states": [
+        {
+          "label": "前6回合普通队",
+          "effects": {
+            "reduction": 0.7,
+            "defense": 0.9
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "前6回合同色天光条件满足",
+          "effects": {
+            "reduction": 0.7,
+            "defense": 1.5
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "第7回合起",
+          "effects": {
+            "reduction": 0.7
+          },
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 150,
+      "score": 9,
+      "note": "生命100%、减伤40%及前10回合双防乘算；后期双防到期，普攻治疗仅补续航。",
+      "states": [
+        {
+          "label": "前10回合",
+          "effects": {
+            "hp": 1,
+            "reduction": 0.4,
+            "defense": 1,
+            "physicalDefense": 1
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        },
+        {
+          "label": "第11回合起",
+          "effects": {
+            "hp": 1,
+            "reduction": 0.4
+          },
+          "evidence": [
+            "P1",
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 151,
+      "score": 6,
+      "note": "献身期间65%阻绝但同时代承队友伤害；两层屏障是额外次数保护，献身前后不可按常驻阻绝。",
+      "states": [
+        {
+          "label": "献身期间，仅自身来伤，不含代承伤",
+          "effects": {
+            "block": 0.65
+          },
+          "evidence": [
+            "P2"
+          ]
+        },
+        {
+          "label": "献身不存在，不计屏障",
+          "effects": {},
+          "evidence": [
+            "P2",
+            "W"
+          ]
+        }
+      ]
+    }
+  ]
+}

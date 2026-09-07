@@ -1,5 +1,5 @@
 <template>
-  <div class="catalog-view">
+  <div ref="catalogRoot" class="catalog-view" @click="followCharacterLink">
     <header class="view-header"><h1 class="view-title">📖 {{ t('catalogTitle') }}</h1><p class="view-desc">{{ t('catalogDescription') }}</p></header>
     <p v-if="loading" role="status">{{ t('catalogLoading') }}</p>
     <div v-else-if="error" class="card" role="alert">{{ t('catalogError') }} <button class="btn btn-secondary" @click="load">{{ t('catalogRetry') }}</button></div>
@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, nextTick, onMounted, onActivated, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CharacterCatalogRating from '../components/CharacterCatalogRating.vue'
 import CharacterCatalogTraits from '../components/CharacterCatalogTraits.vue'
@@ -38,6 +38,7 @@ const base = import.meta.env.BASE_URL
 const search = ref(''), element = ref(0), sort = ref('id'), selectedId = ref(null)
 const characters = ref([]), loading = ref(false), error = ref(false)
 const cache = new Map()
+const catalogRoot = ref(null)
 let request = 0
 async function load() {
   const version = ++request, language = locale.value
@@ -58,9 +59,23 @@ watch(locale, load, { immediate: true })
 const filtered = computed(() => filterCharacters(characters.value, { search: search.value, element: element.value, sort: sort.value }))
 const selected = computed(() => characters.value.find(character => character.id === selectedId.value))
 const elementName = value => t(['catalogAll','raidElementBlue','raidElementRed','raidElementGreen','raidElementYellow','raidElementLight','raidElementDark'][value] ?? 'raidCharacterUnknown')
-function readHash() { selectedId.value = Number(location.hash.match(/^#characters\/(\d+)$/)?.[1]) || null }
-function open(id) { selectedId.value = id; location.hash = id ? `characters/${id}` : 'characters' }
+async function scrollToStart() {
+  await nextTick()
+  // The app scrolls its shared view container, not the window.
+  catalogRoot.value?.closest('.view')?.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+}
+function readHash() { selectedId.value = Number(location.hash.match(/^#characters\/(\d+)$/)?.[1]) || null; scrollToStart() }
+function open(id) { selectedId.value = id; location.hash = id ? `characters/${id}` : 'characters'; scrollToStart() }
+function followCharacterLink(event) {
+  if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+  const href = event.target.closest?.('a')?.getAttribute('href')
+  const id = href?.match(/^#characters\/(\d+)$/)?.[1]
+  if (!id) return
+  event.preventDefault()
+  open(Number(id))
+}
 onMounted(() => { readHash(); window.addEventListener('hashchange', readHash) })
+onActivated(scrollToStart)
 onUnmounted(() => { request++; window.removeEventListener('hashchange', readHash) })
 </script>
 

@@ -21,7 +21,7 @@ test('AI review set has unique IDs, six explained scores and preserved evidence'
     assert.equal(rating.conditions, row[8])
     assert.deepEqual(rating.tags, row[9].split(',').map(tag => { const [key, refs] = tag.split('@'); return { key, evidence: refs.split('+') } }))
     assert.equal(rating.scaleMax, 10)
-    assert.equal(rating.verification, 'text-review-only')
+    assert.equal(rating.verification, rating.quantitative ? 'text-review-with-reference-calculation' : 'text-review-only')
     assert.ok(rating.sources.every(source => source.title && source.text))
     assert.deepEqual(Object.keys(rating.sourceHashes), ['zh-CN', 'zh-TW', 'en', 'ja', 'ko'])
     assert.ok(Object.values(rating.sourceHashes).every(hash => /^[a-f0-9]{64}$/.test(hash)))
