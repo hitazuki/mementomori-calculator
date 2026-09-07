@@ -1,8 +1,8 @@
 // Reference comparisons, not character panels or a battle simulation.
 export const SURVIVAL_SCENARIOS = [
-  { key: 'pressure', label: '高增伤／低防御参照', defenseRatio: 0.25, damageBonus: 1, attackToHp: 0.25 },
-  { key: 'reference', label: '中性参照', defenseRatio: 1, damageBonus: 0.5, attackToHp: 1 / 3 },
-  { key: 'favorable', label: '低增伤／高防御参照', defenseRatio: 4, damageBonus: 0, attackToHp: 0.5 },
+  { key: 'neutral', label: '无克制／无额外增伤', defenseRatio: 1, damageBonus: 0, attackToHp: 1 / 3 },
+  { key: 'reference', label: '属性克制25%增伤', defenseRatio: 1, damageBonus: 0.25, attackToHp: 1 / 3 },
+  { key: 'pressure', label: '高增伤压力测试（不作为常规评分基准）', defenseRatio: 1, damageBonus: 1, attackToHp: 1 / 3 },
 ]
 
 export function survivalCapacity(effects = {}, scenario = SURVIVAL_SCENARIOS[1], damageType = 'physical') {

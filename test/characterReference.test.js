@@ -7,7 +7,7 @@ const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9,
 test('HP and independent block multiply; damage-bucket reduction is diluted by damage bonuses', () => {
   near(survivalCapacity({ hp: 1, block: .5 }).withoutShield, 4)
   near(survivalCapacity({ reduction: .5 }, { ...SURVIVAL_SCENARIOS[1], damageBonus: 0 }).withoutShield, 2)
-  near(survivalCapacity({ reduction: .5 }).withoutShield, 1.5)
+  near(survivalCapacity({ reduction: .5 }).withoutShield, 1.25 / .75)
   near(survivalCapacity({ hp: .4, defense: 1 }).withoutShield, 2.1)
 })
 test('attack shields use attack to HP ratio; defense routes stay separate', () => {
@@ -33,7 +33,7 @@ test('critical expectation caps chance and penetration remains nonlinear', () =>
 })
 test('unbounded mitigation and invalid inputs are rejected', () => {
   assert.throws(() => survivalCapacity({ block: 1 }))
-  assert.throws(() => survivalCapacity({ reduction: 1 }, SURVIVAL_SCENARIOS[2]))
+  assert.throws(() => survivalCapacity({ reduction: 1 }, SURVIVAL_SCENARIOS[0]))
   assert.throws(() => survivalCapacity({ hp: NaN }))
   assert.throws(() => offenseGain({ defenseDown: 2 }))
   assert.throws(() => survivalCapacity({ healingAsMitigation: .6 }))
@@ -63,4 +63,19 @@ test('published reference states preserve reviewed inputs, sources and score dec
       }
     }
   }
+})
+
+
+test('ordinary damage scenarios preserve combined mitigation and conditional block comparisons', () => {
+  const [neutral, advantage, pressure] = SURVIVAL_SCENARIOS
+  assert.deepEqual(SURVIVAL_SCENARIOS.map(s => s.damageBonus), [0, .25, 1])
+  near(survivalCapacity({ hp: 1, reduction: .65 }, neutral).withoutShield, 2 / .35)
+  near(survivalCapacity({ hp: 1, reduction: .65 }, advantage).withoutShield, 2 * 1.25 / .6)
+  near(survivalCapacity({ reduction: .7, block: .5 }, advantage).withoutShield, 2 * 1.25 / .55)
+  for (const scenario of [neutral, advantage, pressure]) {
+    near(survivalCapacity({ block: .75 }, scenario).withoutShield, 4)
+    near(survivalCapacity({ block: .5 }, scenario).withoutShield, 2)
+  }
+  assert.ok(survivalCapacity({ reduction: .7, block: .5 }, advantage).withoutShield > survivalCapacity({ block: .75 }, advantage).withoutShield)
+  assert.ok(survivalCapacity({ reduction: .7 }, advantage).withoutShield < survivalCapacity({ block: .75 }, advantage).withoutShield)
 })
