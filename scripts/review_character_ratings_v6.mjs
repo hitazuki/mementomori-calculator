@@ -4,6 +4,7 @@ import { stageReference } from './lib/characterRatingV6.mjs'
 import { defenseInitiative } from './lib/characterInitiative.mjs'
 import { fourEvents } from '../doc/character-ratings/v6/four-events.mjs'
 import { characterOutputRole } from './lib/characterOutputRole.mjs'
+import { outputCopy, cleanRatingCopy } from '../doc/character-ratings/v6/copy.mjs'
 import { RATING_AXES, RATING_VERSION, ratingSource } from '../src/utils/characterRatings.js'
 import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { lower, opening, upper, quick, defenseScores, lateCost, reviewNotes } from '../doc/character-ratings/v6/stages.mjs'
@@ -26,7 +27,7 @@ function capacityText(states,withShield=true) {
     return Math.abs(max-min)<1e-9?equivalent(min):`${equivalent(min)}–${equivalent(max)}`
   }
   const physical=range('physical'),magic=range('magic')
-  return physical===magic?`${physical}（各条件状态）`:`物理${physical}／魔法${magic}（各条件状态）`
+  return physical===magic?physical:`物理${physical}／魔法${magic}`
 }
 // Five-target total is compared with a separate 3x benchmark, never with one target's total.
 const roleValues=snapshots=>snapshots.map((s,i)=>s.perAction/(i?3:1))
@@ -64,16 +65,18 @@ const records=catalog.map(c=>{
   const evidence=c.skills.map(s=>s.slot).concat('W','stats')
   const values=[burst,late,...defense,...old.axes.slice(3).map(a=>a.key==='protection'&&c.id===97?7:a.score)]
   const peak=Math.max(...finite.map(s=>Math.min(s.comparisons[0].physical.withShield,s.comparisons[0].magic.withShield)))
+  const hasShield=finite.some(s=>s.comparisons[0].physical.factors.shield>0)
+  const outputDetail=outputCopy[c.id]??old.output.growth?.detail??note
   const reasons=[
-    `等效技能倍率（前两行动合计）：单敌${equivalent(stages.opening.openingDamage[0])}、五敌总计${equivalent(stages.opening.openingDamage[1])}。${readiness?`短期技能合计（单敌/五敌）：${equivalent(stages.quick.openingDamage[0])}/${equivalent(stages.quick.openingDamage[1])}${stages.quickUpper?`，上界${equivalent(stages.quickUpper.openingDamage[0])}/${equivalent(stages.quickUpper.openingDamage[1])}`:''}；${readiness.reason}`:c.id===8?'S1先降抗暴，首轮96%暴率、期望近10段，成长仅补强。':old.output.growth?.detail??'无另列计数成长；条件与目标分布见技能。'}`,
-    `等效技能倍率（每行动，基础→后期）：单敌${equivalent(stages.lower.snapshots[0].perAction)}→${equivalent(stages.mature.snapshots[0].perAction)}；五敌总计${equivalent(stages.lower.snapshots[1].perAction)}→${equivalent(stages.mature.snapshots[1].perAction)}。${lateCost[c.id]?note:old.output.growth?.detail??note}`,
-    `${c.id===71?'等效生命：常驻200%，中毒来源/反伤400%，不能当作全来源常驻。':`等效生命：${capacityText(finite)}。`}${life.activeWindow}；盾按完整时计，不死/屏障另评。${initiative.note}`,
-    `无盾等效生命：${capacityText(finite,false)}。${life.replenishment}；${life.afterExpiry}。`,
+    `等效技能倍率（前两行动合计）：单敌${equivalent(stages.opening.openingDamage[0])}、五敌总计${equivalent(stages.opening.openingDamage[1])}。${readiness?`短期技能合计（单敌/五敌）：${equivalent(stages.quick.openingDamage[0])}/${equivalent(stages.quick.openingDamage[1])}${stages.quickUpper?`，上界${equivalent(stages.quickUpper.openingDamage[0])}/${equivalent(stages.quickUpper.openingDamage[1])}`:''}；${readiness.reason}`:c.id===8?'S1先降抗暴，首轮96%暴率、期望近10段，成长仅补强。':outputDetail}`,
+    `等效技能倍率（每行动，基础→后期）：单敌${equivalent(stages.lower.snapshots[0].perAction)}→${equivalent(stages.mature.snapshots[0].perAction)}；五敌总计${equivalent(stages.lower.snapshots[1].perAction)}→${equivalent(stages.mature.snapshots[1].perAction)}。${lateCost[c.id]?note:outputDetail}`,
+    `${c.id===71?'等效生命：常驻200%，中毒来源/反伤400%，不能当作全来源常驻。':`等效生命${hasShield?'（完整护盾）':''}：${capacityText(finite)}。`}${life.activeWindow}。${initiative.note}`,
+    `等效生命${hasShield?'（护盾耗尽后）':''}：${capacityText(finite,false)}。${life.replenishment==='无补充渠道'?'':life.replenishment+'；'}${life.afterExpiry}。`,
     ...old.axes.slice(3).map(a=>a.key==='protection'&&c.id===97?'P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化，不当作稳定群疗。':a.reason),
   ]
   const axes=RATING_AXES.map((key,i)=>{
     const base=i===0?Math.max(openingBand,quickBand):i===1?Math.max(...bases):i===2?defenseBase[0]:values[i]
-    return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:reasons[i],evidence,
+    return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:cleanRatingCopy(key,reasons[i]),evidence,
       reviewBasis:i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`}
   })
   return {...old,sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；专武三档技能已补齐，源库暂无专武被动属性。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:'2026-09-08',axes,output:{...old.output,lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
