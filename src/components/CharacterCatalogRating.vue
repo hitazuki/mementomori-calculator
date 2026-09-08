@@ -16,8 +16,8 @@
             <polygon v-for="step in [2,4,6,8,10]" :key="step" :points="ring(step)" class="radar-grid"/>
             <line v-for="(_, index) in RATING_AXES" :key="index" x1="160" y1="145" :x2="point(index, RATING_MAX)[0]" :y2="point(index, RATING_MAX)[1]" class="radar-grid"/>
             <polygon :points="shape" class="radar-shape"/>
-            <circle v-for="(axis, index) in rating.axes" :key="axis.key" :cx="point(index, axis.score)[0]" :cy="point(index, axis.score)[1]" r="3" class="radar-dot"/>
-            <text v-for="(axis, index) in rating.axes" :key="axis.key" :x="labelPoint(index)[0]" :y="labelPoint(index)[1]" text-anchor="middle" dominant-baseline="middle" class="radar-label">
+            <circle v-for="(axis, index) in displayAxes" :key="axis.key" :cx="point(index, axis.score)[0]" :cy="point(index, axis.score)[1]" r="3" class="radar-dot"/>
+            <text v-for="(axis, index) in displayAxes" :key="axis.key" :x="labelPoint(index)[0]" :y="labelPoint(index)[1]" text-anchor="middle" dominant-baseline="middle" class="radar-label">
               <tspan :x="labelPoint(index)[0]" dy="-5">{{ t('ratingAxis_' + axis.key) }}</tspan>
               <tspan :x="labelPoint(index)[0]" dy="17">{{ axis.score }} / {{ RATING_MAX }}</tspan>
             </text>
@@ -25,7 +25,7 @@
           <p class="rating-caption">{{ t('ratingScale') }}</p>
         </div>
         <ol class="rating-reasons">
-          <li v-for="axis in rating.axes" :key="axis.key">
+          <li v-for="axis in displayAxes" :key="axis.key">
             <div class="rating-axis">
               <span><strong>{{ t('ratingAxis_' + axis.key) }}</strong><b>{{ axis.score }} / {{ RATING_MAX }}</b></span>
               <span lang="zh-CN">{{ axis.reason }}</span>
@@ -92,9 +92,11 @@ onUnmounted(() => { version++; controller?.abort() })
 const point = radarPoint
 const labelPoint = index => radarPoint(index, RATING_MAX, 118)
 const ring = score => RATING_AXES.map((_, index) => point(index, score).join(',')).join(' ')
-const shape = computed(() => rating.value?.axes.map((axis, index) => point(index, axis.score).join(',')).join(' '))
+const displayOrder = ['burst', 'late', 'toughness', 'survival', 'protection', 'control', 'support']
+const displayAxes = computed(() => displayOrder.map(key => rating.value?.axes.find(axis => axis.key === key)).filter(Boolean))
+const shape = computed(() => displayAxes.value.map((axis, index) => point(index, axis.score).join(',')).join(' '))
 const tagGroups = computed(() => ['buff', 'debuff', 'recovery', 'utility'].map(key => ({ key, tags: rating.value?.tags.filter(tag => RATING_TAGS[tag.key].group === key) ?? [] })).filter(group => group.tags.length))
-const chartDescription = computed(() => t('ratingTitle') + ': ' + (rating.value?.axes.map(axis => t('ratingAxis_' + axis.key) + ' ' + axis.score + '/' + RATING_MAX).join(', ') ?? ''))
+const chartDescription = computed(() => t('ratingTitle') + ': ' + (displayAxes.value.map(axis => t('ratingAxis_' + axis.key) + ' ' + axis.score + '/' + RATING_MAX).join(', ') ?? ''))
 </script>
 
 <style scoped>
