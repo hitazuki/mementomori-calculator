@@ -22,7 +22,7 @@ test('catalog has its own navigation group, outside raid analysis', () => {
 })
 
 test('rating sorting respects dimension, filters, ties and missing versus zero', () => {
-  const ratings = { 1: { scores: { single: 0, survival: 9 } }, 3: { scores: { single: 8, survival: 0 } } }
+  const ratings = { 1: { scores: { burst: 0, survival: 9 } }, 3: { scores: { burst: 8, survival: 0 } } }
   assert.deepEqual(filterCharacters(characters, { sort: 'rating', ratings }).map(c => c.id), [3, 1, 2])
   assert.deepEqual(filterCharacters(characters, { sort: 'rating', ratingAxis: 'survival', ratings }).map(c => c.id), [1, 3, 2])
   assert.deepEqual(filterCharacters(characters, { sort: 'rating', ratings, element: 1, search: 'Winter' }).map(c => c.id), [3])
@@ -44,7 +44,7 @@ test('published lightweight rating index agrees with full records and audit stat
   }
   assert.throws(() => ratingIndex({ ...data, rubricVersion: 'old' }))
   assert.throws(() => ratingIndex({ ...data, characters: [data.characters[0], data.characters[0]] }))
-  assert.throws(() => ratingIndex({ ...data, characters: [{ ...data.characters[0], scores: { single: 11 } }] }))
+  assert.throws(() => ratingIndex({ ...data, characters: [{ ...data.characters[0], scores: { burst: 11 } }] }))
 })
 
 test('Actions-generated catalog has matching complete records in every language', () => {

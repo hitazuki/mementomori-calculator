@@ -5,7 +5,7 @@ export const SURVIVAL_SCENARIOS = [
   { key: 'pressure', label: '高增伤压力测试（不作为常规评分基准）', defenseRatio: 1, damageBonus: 1, attackToHp: 1 / 3 },
 ]
 
-export function survivalCapacity(effects = {}, scenario = SURVIVAL_SCENARIOS[1], damageType = 'physical') {
+export function survivalCapacity(effects = {}, scenario = SURVIVAL_SCENARIOS[0], damageType = 'physical') {
   const allowed = ['hp', 'hpFromAttack', 'defense', 'physicalDefense', 'magicDefense', 'reduction', 'block', 'shieldAttack', 'shieldHp', 'shieldFixedHp', 'attack']
   if (Object.keys(effects).some(key => !allowed.includes(key))) throw new Error('Unknown survival effect')
   if (!['physical', 'magic'].includes(damageType)) throw new Error('Invalid damage type')

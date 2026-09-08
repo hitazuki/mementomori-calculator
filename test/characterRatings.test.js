@@ -7,7 +7,7 @@ const dir = new URL('../public/data/character-ratings/', import.meta.url)
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'))
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 
-test('AI review set has unique IDs, six explained scores and preserved evidence', () => {
+test('AI review set has unique IDs, seven explained scores and preserved evidence', () => {
   const reviews = fs.readFileSync(new URL('../doc/character-ratings/reviews.txt', import.meta.url), 'utf8').trim().split(/\r?\n/).map(line => line.split('|'))
   assert.ok(reviews.length >= 134)
   assert.equal(new Set(reviews.map(row => row[0])).size, reviews.length)
@@ -17,9 +17,9 @@ test('AI review set has unique IDs, six explained scores and preserved evidence'
     const rating = read(new URL(row[0] + '.json', dir))
     assert.ok(validRating(rating, Number(row[0])))
     assert.deepEqual(rating.axes.map(axis => axis.score), row[1].split(',').map(Number))
-    assert.deepEqual(rating.axes.map(axis => axis.reason), row.slice(2, 8))
-    assert.equal(rating.conditions, row[8])
-    assert.deepEqual(rating.tags, row[9].split(',').map(tag => { const [key, refs] = tag.split('@'); return { key, evidence: refs.split('+') } }))
+    assert.deepEqual(rating.axes.map(axis => axis.reason), row.slice(2, 2+RATING_AXES.length))
+    assert.equal(rating.conditions, row[2+RATING_AXES.length])
+    assert.deepEqual(rating.tags, row[3+RATING_AXES.length].split(',').map(tag => { const [key, refs] = tag.split('@'); return { key, evidence: refs.split('+') } }))
     assert.equal(rating.scaleMax, 10)
     assert.equal(rating.verification, rating.quantitative ? 'text-review-with-reference-calculation' : 'text-review-only')
     assert.ok(rating.sources.every(source => source.title && source.text))
@@ -69,8 +69,8 @@ test('invalid scores and dangling evidence cannot pass rating validation', () =>
 })
 
 test('radar uses a fixed 0–10 scale and zero collapses to center', () => {
-  assert.equal(RATING_AXES.length, 6)
-  for (let i = 0; i < 6; i++) {
+  assert.equal(RATING_AXES.length, 7)
+  for (let i = 0; i < RATING_AXES.length; i++) {
     assert.deepEqual(radarPoint(i, 0), [160, 145])
     const [x,y] = radarPoint(i, 10)
     assert.ok(Math.abs(Math.hypot(x - 160, y - 145) - 88) < 1e-8)

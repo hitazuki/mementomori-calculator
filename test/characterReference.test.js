@@ -7,7 +7,7 @@ const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9,
 test('HP and independent block multiply; damage-bucket reduction is diluted by damage bonuses', () => {
   near(survivalCapacity({ hp: 1, block: .5 }).withoutShield, 4)
   near(survivalCapacity({ reduction: .5 }, { ...SURVIVAL_SCENARIOS[1], damageBonus: 0 }).withoutShield, 2)
-  near(survivalCapacity({ reduction: .5 }).withoutShield, 1.25 / .75)
+  near(survivalCapacity({ reduction: .5 }, SURVIVAL_SCENARIOS[1]).withoutShield, 1.25 / .75)
   near(survivalCapacity({ hp: .4, defense: 1 }).withoutShield, 2.1)
 })
 test('attack shields use attack to HP ratio; defense routes stay separate', () => {
@@ -40,28 +40,26 @@ test('unbounded mitigation and invalid inputs are rejected', () => {
   assert.throws(() => offenseGain({ attackTypo: .3 }))
 })
 test('published reference states preserve reviewed inputs, sources and score decisions', () => {
-  for (const kind of ['survival']) {
-    const source = JSON.parse(fs.readFileSync(new URL(`../doc/character-ratings/${kind}-profiles.json`, import.meta.url)))
-    for (const profile of source.profiles) {
+  const source = JSON.parse(fs.readFileSync(new URL('../doc/character-ratings/v6/review.json', import.meta.url)))
+  for (const profile of source.records) {
       const rating = JSON.parse(fs.readFileSync(new URL(`../public/data/character-ratings/${profile.id}.json`, import.meta.url)))
-      const published = rating.quantitative[kind]
-      assert.equal(published.version, source.version)
-      assert.deepEqual(published.states.map(({ comparisons, ...state }) => state), profile.states)
-      assert.equal(published.note, profile.note)
-      if (kind === 'survival') assert.equal(rating.axes[2].score, profile.score)
-      else { assert.equal(rating.axes[0].score, profile.scores.single); assert.equal(rating.axes[1].score, profile.scores.area) }
+      const published = rating.quantitative.survival
+      assert.equal(published.version, 'survival-reference-v6')
+      assert.equal(published.scoringScenario, 'neutral')
+      assert.deepEqual(published.states, profile.survival.states)
+      assert.equal(rating.axes.find(a=>a.key==='toughness').score, profile.survival.burstScore)
+      assert.equal(rating.axes.find(a=>a.key==='survival').score, profile.survival.sustainScore)
       for (const state of published.states) {
         assert.ok(state.evidence.every(key => rating.sources.some(s => s.key === key)))
         for (const result of state.comparisons) {
-          const expected = kind === 'survival' ? {
+          const expected = {
             physical: survivalCapacity(state.effects, SURVIVAL_SCENARIOS.find(s => s.key === result.scenario), 'physical'),
             magic: survivalCapacity(state.effects, SURVIVAL_SCENARIOS.find(s => s.key === result.scenario), 'magic'),
-          } : offenseGain(state.effects, OFFENSE_SCENARIOS.find(s => s.key === result.scenario))
+          }
           const { scenario, ...actual } = result
           assert.deepEqual(actual, expected)
         }
       }
-    }
   }
 })
 

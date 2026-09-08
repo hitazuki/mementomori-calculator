@@ -11,7 +11,7 @@ export function ratingIndex(data) {
   return result
 }
 
-export function filterCharacters(characters, { element = 0, search = '', sort = 'id', ratingAxis = 'single', ratings = {} } = {}) {
+export function filterCharacters(characters, { element = 0, search = '', sort = 'id', ratingAxis = 'burst', ratings = {} } = {}) {
   const query = search.trim().toLocaleLowerCase()
   return characters.filter(character => (!element || character.element === element)
     && `${character.id} ${character.name} ${character.title}`.toLocaleLowerCase().includes(query))

@@ -40,7 +40,7 @@ const { t, locale } = useI18n()
 const base = import.meta.env.BASE_URL
 const search = ref(''), element = ref(0), sort = ref('id'), selectedId = ref(null)
 const characters = ref([]), loading = ref(false), error = ref(false)
-const ratings = ref(null), ratingAxis = ref('single'), ratingLoading = ref(false), ratingError = ref(false)
+const ratings = ref(null), ratingAxis = ref('burst'), ratingLoading = ref(false), ratingError = ref(false)
 async function loadRatings() {
   if (ratingLoading.value) return
   ratingLoading.value = true; ratingError.value = false

@@ -7,9 +7,11 @@
     <p v-else-if="error" role="alert">{{ t('catalogError') }} <button class="btn btn-ghost" @click="load">{{ t('catalogRetry') }}</button></p>
     <template v-else-if="rating">
       <p v-if="freshness !== 'current'" class="rating-warning" role="status">{{ t(freshness === 'stale' ? 'ratingStale' : 'ratingUnverified') }}</p>
+      <p class="rating-output-role" lang="zh-CN"><span>{{ rating.outputRole }}</span></p>
+      <p class="rating-caption">{{ t('ratingEquivalentHelp') }}</p>
       <div class="rating-content">
         <div class="rating-visual">
-          <svg viewBox="0 0 320 285" role="img" :aria-label="chartDescription">
+          <svg viewBox="0 0 320 285" :class="{ 'radar-compact': locale === 'en' }" role="img" :aria-label="chartDescription">
             <title>{{ chartDescription }}</title>
             <polygon v-for="step in [2,4,6,8,10]" :key="step" :points="ring(step)" class="radar-grid"/>
             <line v-for="(_, index) in RATING_AXES" :key="index" x1="160" y1="145" :x2="point(index, RATING_MAX)[0]" :y2="point(index, RATING_MAX)[1]" class="radar-grid"/>
@@ -23,7 +25,7 @@
           <p class="rating-caption">{{ t('ratingScale') }}</p>
         </div>
         <ol class="rating-reasons">
-          <li v-for="(axis, index) in rating.axes" :key="axis.key">
+          <li v-for="axis in rating.axes" :key="axis.key">
             <div class="rating-axis">
               <span><strong>{{ t('ratingAxis_' + axis.key) }}</strong><b>{{ axis.score }} / {{ RATING_MAX }}</b></span>
               <span lang="zh-CN">{{ axis.reason }}</span>
@@ -97,12 +99,15 @@ const chartDescription = computed(() => t('ratingTitle') + ': ' + (rating.value?
 
 <style scoped>
 .rating-tags { border-top:1px solid var(--border-subtle); padding-top:12px; }
+.rating-output-role { margin:8px 0; font-size:var(--fs-xs); }
+.rating-output-role span { display:inline-block; padding:4px 10px; border:1px solid var(--border-subtle); border-radius:20px; color:var(--text-secondary); }
 .rating-tags h3 { font-size:var(--fs-sm); margin:0; }
 .rating-tag-group { display:grid; grid-template-columns:70px minmax(0,1fr); gap:10px; margin:10px 0; font-size:var(--fs-xs); align-items:baseline; }
 .rating-tag-group > div { display:flex; flex-wrap:wrap; gap:6px; }
 .rating-tag { border:1px solid var(--border-subtle); background:transparent; color:var(--text-primary); border-radius:8px; padding:5px 8px; text-align:left; font:inherit; }
 .rating-tag small { color:var(--text-secondary); }
 
-.rating-card { margin-bottom:20px; }.rating-header { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }.rating-header h2 { margin:0; font-size:var(--fs-lg); }.rating-badge { border:1px solid var(--gold); border-radius:20px; padding:3px 10px; color:var(--gold); font-size:var(--fs-xs); }.rating-caption { font-size:var(--fs-xs); color:var(--text-secondary); line-height:1.6; }.rating-content { display:grid; grid-template-columns:minmax(240px, 0.9fr) minmax(0,1.1fr); gap:18px; align-items:center; }.rating-visual svg { width:100%; max-height:310px; }.radar-grid { fill:none; stroke:var(--border-subtle); stroke-width:1; }.radar-shape { fill:var(--gold-dim); stroke:var(--gold); stroke-width:2; }.radar-dot { fill:var(--gold); }.radar-label { fill:var(--text-primary); font-size:11px; }.rating-reasons { padding:0; margin:0; list-style:none; display:grid; gap:6px; }.rating-axis { width:100%; text-align:left; border:1px solid transparent; border-radius:8px; background:transparent; color:var(--text-primary); padding:9px 10px; font:inherit; }.rating-axis > span:first-child { display:flex; justify-content:space-between; gap:12px; font-size:var(--fs-sm); }.rating-axis b { color:var(--gold); white-space:nowrap; }.rating-axis > span:last-child { display:block; margin-top:4px; font-size:var(--fs-xs); line-height:1.6; color:var(--text-secondary); }.rating-conditions { border-top:1px solid var(--border-subtle); padding-top:14px; line-height:1.7; font-size:var(--fs-sm); }.rating-conditions strong { display:block; margin-bottom:4px; }.rating-warning { color:var(--gold); border:1px solid var(--gold); border-radius:8px; padding:10px; }
+.rating-card { margin-bottom:20px; }.rating-header { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }.rating-header h2 { margin:0; font-size:var(--fs-lg); }.rating-badge { border:1px solid var(--gold); border-radius:20px; padding:3px 10px; color:var(--gold); font-size:var(--fs-xs); }.rating-caption { font-size:var(--fs-xs); color:var(--text-secondary); line-height:1.6; }.rating-content { display:grid; grid-template-columns:minmax(240px, 0.9fr) minmax(0,1.1fr); gap:18px; align-items:start; }.rating-visual svg { width:100%; max-height:310px; }.radar-grid { fill:none; stroke:var(--border-subtle); stroke-width:1; }.radar-shape { fill:var(--gold-dim); stroke:var(--gold); stroke-width:2; }.radar-dot { fill:var(--gold); }.radar-label { fill:var(--text-primary); font-size:11px; }.rating-reasons { padding:0; margin:0; list-style:none; display:grid; gap:6px; }.rating-axis { width:100%; text-align:left; border:1px solid transparent; border-radius:8px; background:transparent; color:var(--text-primary); padding:9px 10px; font:inherit; }.rating-axis > span:first-child { display:flex; justify-content:space-between; gap:12px; font-size:var(--fs-sm); }.rating-axis b { color:var(--gold); white-space:nowrap; }.rating-axis > span:last-child { display:block; margin-top:4px; font-size:var(--fs-xs); line-height:1.6; color:var(--text-secondary); }.rating-conditions { border-top:1px solid var(--border-subtle); padding-top:14px; line-height:1.7; font-size:var(--fs-sm); }.rating-conditions strong { display:block; margin-bottom:4px; }.rating-warning { color:var(--gold); border:1px solid var(--gold); border-radius:8px; padding:10px; }
 @media(max-width:1100px) { .rating-content { grid-template-columns:1fr; }.rating-visual { max-width:340px; width:100%; margin:auto; } }
+.radar-compact .radar-label { font-size:10px; }
 </style>

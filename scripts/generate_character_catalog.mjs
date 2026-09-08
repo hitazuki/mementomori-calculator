@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { characterExclusiveEffects } from './lib/characterExclusive.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const master = path.resolve(process.argv[2] || path.join(root, 'data/Master'))
@@ -90,13 +91,7 @@ for (const [locale, file] of Object.entries({ 'zh-CN': 'ZhCn', 'zh-TW': 'ZhTw', 
           rarityBonus: level.CharacterRarityBonus, maxLevelIncrease: level.MaxLevelIncreaseValue,
         })),
       })),
-      exclusiveEffects: [1, 2, 3].flatMap(level => {
-        const key = exclusive?.[`Description${level}Key`]
-        if (!key || key === '*') return []
-        const description = text(key)
-        if (!description) throw new Error(`Missing ${locale} exclusive description: ${character.Id}/${level}`)
-        return [{ level, text: description }]
-      }),
+      exclusiveEffects: characterExclusiveEffects(character, active, passive, exclusive, text),
       skills: [
         ...(character.ActiveSkillIds ?? []).map((id, index) => buildSkill(id, `S${index + 1}`, 'active')),
         ...(character.PassiveSkillIds ?? []).map((id, index) => buildSkill(id, `P${index + 1}`, 'passive')),

@@ -29,21 +29,21 @@ function criticalChain(coefficient, hits, chance, weapon, additions = {}) {
   return Array.from({length:hits},(_,i) => damageReference({coefficient}, {...additions,critRate:1-(1-chance)**(i+1)-.5,critDamage:weapon.critDamage},1,0,weapon.attack))
 }
 
-export function referenceFor(character) {
+export function referenceFor(character, stage = {}) {
   const id = character.id, input = inputs.get(id)
   if (!input || !outputNotes[id]) throw new Error('Missing authored attack review '+id)
   const weapon = weaponReference(character)
-  const base = {...effects[id]}
+  const base = {...effects[id],...stage.effects}
   if(id===38||id===89) base.attack*=1+weapon.attack
   for (const k of ['primary','critDamage','penetration','specificPenetration']) base[k] = (base[k]??0)+weapon[k]
-  const components = {...input,...componentOverrides[id]}
-  const active = character.skills.filter(s=>/^S[12]$/.test(s.slot)).map(s=>({slot:s.slot,cooldown:s.cooldown}))
+  const components = {...input,...componentOverrides[id],...stage.components}
+  const active = character.skills.filter(s=>/^S[12]$/.test(s.slot) && !stage.disabled?.includes(s.slot)).map(s=>({slot:s.slot,cooldown:s.cooldown}))
   // These changes recur in the mature form. Finite transformations are kept out.
-  if (id===83) active.find(s=>s.slot==='S2').selfReduction=5
+  if (id===83 && !stage.early) active.find(s=>s.slot==='S2').selfReduction=5
   if (id===126) active.find(s=>s.slot==='S2').selfReduction=1
   const cycle = ratingCycle(active, id===109 ? {normalReduction:1,normalEvery:3}: {})
   const snapshots = [1,5].map(enemies => {
-    const variants = {...components,...(enemies===1?singleOverrides[id]:{})}
+    const variants = {...components,...(enemies===1?singleOverrides[id]:{}),...stage.components,...stage.scenarios?.[enemies]?.components}
     const mode = enemies===1?'single':'area'
     const skills = Object.fromEntries(['S1','S2','N'].map(slot => {
       const components = parse(variants[slot])
@@ -52,6 +52,7 @@ export function referenceFor(character) {
       if (id===27 && enemies===1 && slot==='S2') state.defenseDown=.8
       if (id===58 && slot==='S2') Object.assign(state,{specificDefenseDown:.4,damage:.2})
       if (id===132 && slot==='S2') Object.assign(state,{specificDefenseDown:.4,damage:.2})
+      Object.assign(state,stage.scenarios?.[enemies]?.effects,stage.slots?.[slot],stage.scenarios?.[enemies]?.slots?.[slot])
       // Weapon contributions are additional to skill increments, including slot overrides.
       for (const k of ['critDamage','penetration','specificPenetration']) if (skillEffects[id]?.[slot]?.[k]!==undefined) state[k]+=weapon[k]
       let results = components.map(component=>damageReference(component,state,enemies,0,weapon.attack))
@@ -64,13 +65,14 @@ export function referenceFor(character) {
       if (id===18 && slot==='S1') {
         results=Array.from({length:6},(_,i)=>{
           // Expected attack at hit i, based on at least one earlier critical.
-          return damageReference({coefficient:5.15},{...state,attack:.5*(1-(1-.8)**i)},1,0,weapon.attack)
+          const chance=stage.early ? Math.min(1,.5+(state.critRate??0)) : .8
+          return damageReference({coefficient:5.15},{...state,attack:.5*(1-(1-chance)**i)},1,0,weapon.attack)
         })
       }
       if (id===33 && slot==='S1') results=Array.from({length:5},(_,i)=>damageReference({coefficient:2.3},{...state,attack:.1*i*.5},1,0,weapon.attack))
-      if (id===65 && slot==='S2') results=Array.from({length:3},(_,i)=>damageReference({coefficient:11.4,hits:1,targets:2},{...state,defenseDown:.15*i},enemies,0,weapon.attack))
+      if (id===65 && slot==='S2') results=Array.from({length:3},(_,i)=>damageReference({coefficient:components[0].coefficient,hits:1,targets:2},{...state,defenseDown:.15*i},enemies,0,weapon.attack))
       if (id===20 && slot==='S2') results=[damageReference({coefficient:3*(1+weapon.hp)*.35,targets:3,basis:'fixed-direct'},{},enemies)]
-      if (id===60 && slot==='S2') results=[damageReference({coefficient:3*(2.2+weapon.hp)*2*.2,targets:3,basis:'fixed-direct'},{},enemies)]
+      if (id===60 && slot==='S2') results=[damageReference({coefficient:3*(2.2+weapon.hp)*(stage.pastDamageHp??2)*.2,targets:3,basis:'fixed-direct'},{},enemies)]
       if (id===74 && slot==='S1') results=[damageReference({coefficient:Math.min(3*.2,5*(1+weapon.attack)),basis:'fixed-direct'},{},enemies)]
       const damage=results.reduce((n,r)=>n+r.damage,0)
       const dot=dots[id]?.slot===slot?dots[id]:null

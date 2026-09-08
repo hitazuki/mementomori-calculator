@@ -1,12 +1,13 @@
 import fs from 'node:fs'
 import { createHash } from 'node:crypto'
 import { referenceFor } from './lib/characterRatingV5.mjs'
-import { RATING_AXES, ratingSource } from '../src/utils/characterRatings.js'
+import { ratingSource } from '../src/utils/characterRatings.js'
 import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { outputAdjustment, outputNotes, utilityScores } from '../doc/character-ratings/v5/decisions.mjs'
 import { survivalInputs } from '../doc/character-ratings/v5/survival-inputs.mjs'
 import { auxiliaryNotes } from '../doc/character-ratings/v5/auxiliary-notes.mjs'
 
+const RATING_AXES = ['single','area','survival','protection','support','control']
 const dir = new URL('../doc/character-ratings/',import.meta.url)
 const catalog = JSON.parse(fs.readFileSync(new URL('../public/data/character-catalog/zh-CN.json',import.meta.url))).characters
 const old = new Map(fs.readFileSync(new URL('v5/v4-reviews.txt',dir),'utf8').trim().split(/\r?\n/).map(line=>{const p=line.split('|');return [+p[0],p]}))

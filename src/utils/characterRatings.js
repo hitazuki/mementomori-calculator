@@ -1,5 +1,5 @@
-export const RATING_AXES = ['single', 'area', 'survival', 'protection', 'support', 'control']
-export const RATING_VERSION = 'ai-capability-v5'
+export const RATING_AXES = ['burst', 'late', 'toughness', 'survival', 'protection', 'support', 'control']
+export const RATING_VERSION = 'ai-capability-v6'
 export const RATING_MAX = 10
 // Editorial mechanism labels, independent of the raid engine's effect types.
 export const RATING_TAGS = {
@@ -84,6 +84,6 @@ export function validRating(rating, id) {
     && rating.sources?.length > 0 && rating.sourceHashes && rating.assessedAt
 }
 export function radarPoint(index, score, radius = 88) {
-  const angle = -Math.PI / 2 + index * Math.PI / 3
+  const angle = -Math.PI / 2 + index * Math.PI * 2 / RATING_AXES.length
   return [160 + Math.cos(angle) * radius * score / RATING_MAX, 145 + Math.sin(angle) * radius * score / RATING_MAX]
 }
