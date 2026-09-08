@@ -5,6 +5,12 @@ export function stageReference(c,config) {
   // Petra's passive replaces normals; Rosalie's post-S2 source attack is for nearby allies.
   const applied={...config,effects:{...(c.id===88?{attackFromHp:0}:{}),...config.effects},components:{...(c.id===14?{N:'2.2,2,0'}:{}),...(c.id===97?{S1:'4.2,1,5'}:{}),...config.components}}
   const ref=referenceFor(c,applied)
+  // These special attacks already calculate the correct target count; expose
+  // their real components instead of the v5 zero-coefficient dispatch placeholder.
+  if([20,60,74].includes(c.id)) for(const snapshot of ref.snapshots) {
+    const slot=c.id===74?'S1':'S2',skill=snapshot.skills[slot]
+    skill.components=[{coefficient:skill.segments[0].factors.coefficient,hits:1,targets:c.id===74?1:3,basis:'fixed-direct'}]
+  }
   if(c.id===130&&config.fourEventReplay) for(const snapshot of ref.snapshots) {
     const skill=snapshot.skills.S1
     const segments=[.3,.4].map(attack=>damageReference({coefficient:6.7,hits:4,targets:0},{...skill.effects,attack},snapshot.enemies,0,ref.weapon.attack))

@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import { stageReference } from './lib/characterRatingV6.mjs'
 import { defenseInitiative } from './lib/characterInitiative.mjs'
 import { fourEvents } from '../doc/character-ratings/v6/four-events.mjs'
+import { characterOutputRole } from './lib/characterOutputRole.mjs'
 import { RATING_AXES, RATING_VERSION, ratingSource } from '../src/utils/characterRatings.js'
 import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { lower, opening, upper, quick, defenseScores, lateCost, reviewNotes } from '../doc/character-ratings/v6/stages.mjs'
@@ -53,12 +54,12 @@ const records=catalog.map(c=>{
   const openingBand=Math.max(...openingValues.map(n=>band(n,burstAnchors)))
   const quickBand=quickValues?Math.max(...quickValues.map(n=>band(n,burstAnchors))):0
   const burst=Math.max(openingBand,quickBand-(readiness?.penalty??0))
-  const burstValues=burst>openingBand?quickValues:openingValues
   const defenseBase=defenseScores[c.id]
   if(!defenseBase) throw new Error('Missing independent defensive assessments '+c.id)
   const initiative=defenseInitiative(c,defenseBase[0])
   const defense=[initiative.score,defenseBase[1]]
-  const outputRole=burstValues[0]>burstValues[1]*1.15?'对单集中':burstValues[1]>burstValues[0]*1.15?'群体压血':'单群兼顾'
+  const targeting=characterOutputRole(stages,c.id)
+  const outputRole=targeting.label
   const rawRanges=[0,1].map(i=>({enemies:i?5:1,minimum:Math.min(...Object.values(stages).map(s=>s.snapshots[i].perAction)),maximum:Math.max(...Object.values(stages).map(s=>s.snapshots[i].perAction))}))
   const evidence=c.skills.map(s=>s.slot).concat('W','stats')
   const values=[burst,late,...defense,...old.axes.slice(3).map(a=>a.key==='protection'&&c.id===97?7:a.score)]
@@ -75,7 +76,7 @@ const records=catalog.map(c=>{
     return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:reasons[i],evidence,
       reviewBasis:i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`}
   })
-  return {...old,sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；专武三档技能已补齐，源库暂无专武被动属性。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:'2026-09-08',axes,output:{...old.output,lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,
+  return {...old,sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；专武三档技能已补齐，源库暂无专武被动属性。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:'2026-09-08',axes,output:{...old.output,lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
     assumptions:'范围为已审核的有限条件样本，不是所有外部队伍的理论极值；开局按前两次自身行动，短计数/短回合另列条件爆发，均仅计直接伤害；后期按成熟循环，无依据的事件频率不换算回合。延迟伤害仅在完整持续期样本计入。',
     equivalentSkillUnit:'100% = 固定基准面板下无角色自增益的100%攻击普攻；含适用乘区，特殊伤害仅按最终伤害折合，不改变其原始伤害类型。',
     comparison:{groupBenchmark:3,burstAnchors,lateAnchors,lowerBands:floors,matureBands:bases,openingBand,quickBand,penalties}},
@@ -97,3 +98,5 @@ fs.writeFileSync(new URL('doc/character-ratings/reviews.txt',root),records.map(r
 fs.writeFileSync(new URL('changes.md',folder),'# 七维评分 v6\n\n旧维度不能逐项相减。保留旧六维，并列新七维；范围仅为已审核的有限样本。134名角色、938项评分。\n\n|角色|旧：单/群/生存/防护/辅助/干扰|新：爆发/后期/爆防/生存/防护/辅助/干扰|基础→后期 单敌每行动等效技能倍率|\n|---|---|---|---|\n'+records.map(r=>`|${r.id} ${r.name}|${previous.find(p=>p.id===r.id).axes.map(a=>a.score).join('/')}|${r.axes.map(a=>a.score).join('/')}|${equivalent(r.output.stages.lower.snapshots[0].perAction)}→${equivalent(r.output.stages.mature.snapshots[0].perAction)}|`).join('\n')+'\n')
 console.log(`Reviewed ${records.length} characters / ${records.length*RATING_AXES.length} axes`)
 fs.writeFileSync(new URL('initiative-changes.md',folder),'# 行动防护速度修订\n\n仅调整爆发防御，爆发输出及其余维度不变。全池134名已检查；下表列出行动依赖项，含分数不变者。速度是同养成、无外援的编辑参照，不是实战先手保证。\n\n|角色|基础→有效开启速度|爆发防御原分→新分|开启条件与保底|\n|---|---|---|---|\n'+records.filter(r=>r.survival.initiative.gate).map(r=>{const a=r.survival.initiative;return `|${r.id} ${r.name}|${a.baseSpeed}→${Math.round(a.effectiveSpeed)}|${a.baseScore}→${a.score}|${a.note}|`}).join('\n')+'\n')
+
+fs.writeFileSync(new URL('targeting-review.md',folder),'# 全角色输出目标结构审阅\n\n134名角色。按主动技能选敌、重复单位及条件分支判定；不按倍率大小、单群伤害比或评分判定。普通攻击不用于改变定位。条件分支列在技能依据中，不代表必定触发。此标签不衡量伤害强弱。\n\n|ID|角色|输出特点|技能分布|\n|---|---|---|---|\n'+records.map(r=>`|${r.id}|${r.name}|${r.output.role}|${r.output.targeting.detail}|`).join('\n')+'\n')

@@ -62,6 +62,7 @@ const records = reviews.map(line => {
     defenseInitiative: assessment.survival.initiative,
   }
   record.outputRole = assessment.output.role
+  record.outputRoleDetail = assessment.output.targeting.detail
   const quantitative = { finalOutput: assessment.output, survival: {
     version:'survival-reference-v6',reviewedAt:assessment.reviewedAt,scoringScenario:'neutral',
     assumptions:SURVIVAL_SCENARIOS,states:assessment.survival.states,

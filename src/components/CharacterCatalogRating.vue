@@ -7,7 +7,7 @@
     <p v-else-if="error" role="alert">{{ t('catalogError') }} <button class="btn btn-ghost" @click="load">{{ t('catalogRetry') }}</button></p>
     <template v-else-if="rating">
       <p v-if="freshness !== 'current'" class="rating-warning" role="status">{{ t(freshness === 'stale' ? 'ratingStale' : 'ratingUnverified') }}</p>
-      <p class="rating-output-role" lang="zh-CN"><span>{{ rating.outputRole }}</span></p>
+      <p class="rating-output-role" lang="zh-CN"><span>{{ rating.outputRole }}</span><small>{{ rating.outputRoleDetail }}</small></p>
       <p class="rating-caption">{{ t('ratingEquivalentHelp') }}</p>
       <div class="rating-content">
         <div class="rating-visual">
@@ -99,7 +99,8 @@ const chartDescription = computed(() => t('ratingTitle') + ': ' + (rating.value?
 
 <style scoped>
 .rating-tags { border-top:1px solid var(--border-subtle); padding-top:12px; }
-.rating-output-role { margin:8px 0; font-size:var(--fs-xs); }
+.rating-output-role { margin:8px 0; font-size:var(--fs-xs); display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.rating-output-role small { color:var(--text-secondary); font-size:inherit; }
 .rating-output-role span { display:inline-block; padding:4px 10px; border:1px solid var(--border-subtle); border-radius:20px; color:var(--text-secondary); }
 .rating-tags h3 { font-size:var(--fs-sm); margin:0; }
 .rating-tag-group { display:grid; grid-template-columns:70px minmax(0,1fr); gap:10px; margin:10px 0; font-size:var(--fs-xs); align-items:baseline; }
