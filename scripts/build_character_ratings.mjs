@@ -59,6 +59,7 @@ const records = reviews.map(line => {
     growth: assessment.output.growth, lifecycle: assessment.output.lifecycle,
     shortTermProtection: assessment.survival.shortTermProtection,
     effectiveSustain: assessment.survival.effectiveSustain,
+    defenseInitiative: assessment.survival.initiative,
   }
   record.outputRole = assessment.output.role
   const quantitative = { finalOutput: assessment.output, survival: {
