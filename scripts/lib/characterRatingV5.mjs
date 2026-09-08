@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import { damageReference, ratingCycle, growthRequirement, RATING_PANEL } from '../../src/utils/characterRatingModel.js'
+import { damageReference, ratingCycle, growthRequirement, criticalExtension, RATING_PANEL } from '../../src/utils/characterRatingModel.js'
 import { effects, skillEffects, componentOverrides, singleOverrides, scenarioEffects, outputNotes } from '../../doc/character-ratings/v5/decisions.mjs'
 import { dots, external } from '../../doc/character-ratings/v5/secondary-inputs.mjs'
 
@@ -84,10 +84,21 @@ export function referenceFor(character) {
       twoActiveTotal:skills.S1.equivalentBasicHits+skills.S2.equivalentBasicHits}
   })
   const g = growth.get(id)
+  const burst = id===8 ? {
+    assumptions:'标准有效基础暴率50%；S1攻击前40%抗暴率下降成功生效，所有段命中。专武暴击评级不直接换算暴率；敌方额外抗暴、弱化抵抗及目标差异未模拟。',
+    samples:[0,1,2,9,15].map(round=>{
+      const passiveCrit=Math.min(15,round)*.06
+      const chance=Math.min(1,RATING_PANEL.critRate+passiveCrit+.4)
+      const chain=criticalExtension(6,10,chance)
+      const result=damageReference({coefficient:5.25,hits:chain.expectedHits,targets:0},{...base,critRate:passiveCrit+.4},1,0,weapon.attack)
+      return {round,critChance:chance,...chain,...result}
+    }),
+    limitation:'0回合样本为不计被动成长的对照；S1的减抗暴仅用于该技能，不延续到下一回合S2。S2击杀追击不计单个存活敌人的常态。',
+  } : undefined
   const coverage = Math.max(...['S1','S2'].flatMap(slot=>parse(components[slot]).filter(c=>c.coefficient>0).map(c=>c.targets===0?5*(1-.8**c.hits):Math.min(5,c.targets))), ...([20,60].includes(id)?[3]:[1]))
   const phase = id===61 ? {label:'神咒解放8回合窗口；不是永久循环',duration:8,afterExpiryCycle:ratingCycle(active.filter(s=>s.slot!=='S2')).cycle,
     afterExpiryPerAction:snapshots.map(s=>(s.skills.S1.equivalentBasicHits+3*s.skills.N.equivalentBasicHits)/4)} : null
-  return {panel:RATING_PANEL,weapon,cycle,snapshots,coverage,phase,growth:g?{...g,totalEvents: id===36||id===137?null:growthRequirement(g)}:null,
+  return {panel:RATING_PANEL,weapon,cycle,snapshots,coverage,phase,...(burst?{burst}:{}),growth:g?{...g,totalEvents: id===36||id===137?null:growthRequirement(g)}:null,
     lifecycle:lifecycle.get(id)??{activeWindow:'无可确认自身防护',replenishment:'无补充渠道',afterExpiry:'无额外长期生存机制'},
     note:outputNotes[id],external:external[id]??null,
     externalSamples:id===60?[0,1,2,4].map(hp=>({past20RoundsDamageInMaxHp:hp,perTargetDirectDamage:3*(2.2+weapon.hp)*hp*.2})):id===74?[3,30,300].map(hp=>({enemyCurrentHp:hp,perTargetDirectDamage:Math.min(hp*.2,5*(1+weapon.attack))})):null,

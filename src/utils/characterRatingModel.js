@@ -1,6 +1,24 @@
 // Fixed-panel editorial references. Never used by the raid simulator.
 export const RATING_PANEL = Object.freeze({ attack: 1, hp: 3, primary: .25, defenseToAttack: .5, critRate: .5, critDamage: .5, defenseRatio: 1, penetrationRatio: 1 })
 
+// Each critical adds one pending attack. Added attacks can also extend the chain.
+export function criticalExtension(initial, cap, chance) {
+  if (!Number.isInteger(initial) || !Number.isInteger(cap) || initial < 1 || cap < initial || !Number.isFinite(chance) || chance < 0 || chance > 1) throw new Error('Invalid critical extension')
+  let pending = new Map([[initial, 1]]), expectedHits = 0, capProbability = 0
+  for (let hit = 1; hit <= cap; hit++) {
+    const active = [...pending.values()].reduce((a, b) => a + b, 0)
+    expectedHits += active
+    if (hit === cap) capProbability = active
+    const next = new Map()
+    for (const [left, probability] of pending) {
+      next.set(left, (next.get(left) ?? 0) + probability * chance)
+      if (left > 1) next.set(left - 1, (next.get(left - 1) ?? 0) + probability * (1 - chance))
+    }
+    pending = next
+  }
+  return { expectedHits, capProbability }
+}
+
 export function damageReference(component, effects = {}, enemies = 1, damageBonus = 0, gearAttack = 0) {
   if (![1, 5].includes(enemies)) throw new Error('Expected one or five enemies')
   const { coefficient, hits = 1, targets = 1, basis = 'attack' } = component

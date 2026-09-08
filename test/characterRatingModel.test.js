@@ -2,13 +2,28 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { createHash } from 'node:crypto'
-import { damageReference, ratingCycle, orderedDamage, growthRequirement, effectiveRecovery, protectionTrace } from '../src/utils/characterRatingModel.js'
+import { damageReference, ratingCycle, orderedDamage, growthRequirement, criticalExtension, effectiveRecovery, protectionTrace } from '../src/utils/characterRatingModel.js'
 import { referenceFor } from '../scripts/lib/characterRatingV5.mjs'
 import { ratingSource, RATING_AXES } from '../src/utils/characterRatings.js'
 const read = p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'))
 const catalog=read('../public/data/character-catalog/zh-CN.json').characters
 const character=id=>catalog.find(c=>c.id===id)
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`)
+
+test('critical extensions include added-hit criticals and opening pre-attack anti-critical decrease',()=>{
+  near(criticalExtension(6,10,0).expectedHits,6)
+  near(criticalExtension(6,10,1).expectedHits,10)
+  near(criticalExtension(1,3,.5).expectedHits,1.75)
+  near(criticalExtension(1,3,.5).capProbability,.25)
+  assert.throws(()=>criticalExtension(6,10,1.1))
+  const samples=referenceFor(character(8)).burst.samples
+  const [ungrown,opening,mature]=samples
+  near(opening.critChance,.96)
+  assert.ok(opening.expectedHits>9.99)
+  assert.ok(opening.damage/mature.damage>.986)
+  assert.ok(ungrown.damage/mature.damage>.96)
+  near(mature.critChance,1)
+})
 
 test('final damage combines coefficient, distribution and applicable multipliers',()=>{
   const a=damageReference({coefficient:6,hits:4,targets:0},{attack:.5,damage:.3})
