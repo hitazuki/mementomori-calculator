@@ -5,6 +5,12 @@ export function stageReference(c,config) {
   // Petra's passive replaces normals; Rosalie's post-S2 source attack is for nearby allies.
   const applied={...config,effects:{...(c.id===88?{attackFromHp:0}:{}),...config.effects},components:{...(c.id===14?{N:'2.2,2,0'}:{}),...(c.id===97?{S1:'4.2,1,5'}:{}),...config.components}}
   const ref=referenceFor(c,applied)
+  if(c.id===130&&config.fourEventReplay) for(const snapshot of ref.snapshots) {
+    const skill=snapshot.skills.S1
+    const segments=[.3,.4].map(attack=>damageReference({coefficient:6.7,hits:4,targets:0},{...skill.effects,attack},snapshot.enemies,0,ref.weapon.attack))
+    Object.assign(skill,{segments,damage:segments.reduce((n,s)=>n+s.damage,0),equivalentBasicHits:segments.reduce((n,s)=>n+s.equivalentBasicHits,0),eventCounts:[3,4]})
+    snapshot.perAction=ref.cycle.cycle.reduce((n,key)=>n+snapshot.skills[key].equivalentBasicHits,0)/ref.cycle.cycle.length
+  }
   if(c.id===8) for(const snapshot of ref.snapshots) {
     const chance=Math.min(1,.5+(config.effects?.critRate??.9)+.4)
     const chain=criticalExtension(6,10,chance), skill=snapshot.skills.S1

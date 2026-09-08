@@ -42,7 +42,7 @@ test('short event routes contribute to burst while long growth is rated by late 
   assert.equal(song.output.stages.quick.snapshots[0].skills.S2.components[0].hits,3)
   for(const id of [92,103,114,148,150]) {
     const r=reviews.find(r=>r.id===id)
-    assert.equal(r.output.readiness,null)
+    assert.equal(r.output.readiness.events,4)
     assert.equal(score(id,'late'),Math.max(...r.output.comparison.matureBands,...r.output.comparison.lowerBands))
   }
   const cusie=reviews.find(r=>r.id===97)

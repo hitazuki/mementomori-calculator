@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import { createHash } from 'node:crypto'
 import { stageReference } from './lib/characterRatingV6.mjs'
 import { defenseInitiative } from './lib/characterInitiative.mjs'
+import { fourEvents } from '../doc/character-ratings/v6/four-events.mjs'
 import { RATING_AXES, RATING_VERSION, ratingSource } from '../src/utils/characterRatings.js'
 import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { lower, opening, upper, quick, defenseScores, lateCost, reviewNotes } from '../doc/character-ratings/v6/stages.mjs'
@@ -40,14 +41,15 @@ const records=catalog.map(c=>{
   const note=reviewNotes[c.id]??old.output.note
   const config=lower[c.id]??{}
   const stages={lower:stageReference(c,config),opening:stageReference(c,merge(config,opening[c.id])),mature:stageReference(c,{}),upper:stageReference(c,upper[c.id]??{})}
-  const readiness=quick[c.id]
+  const readiness=fourEvents[c.id]??quick[c.id]
   if(readiness) stages.quick=stageReference(c,readiness.mature?{}:merge(config,readiness.config))
+  if(readiness?.upperConfig) stages.quickUpper=stageReference(c,merge(merge(config,readiness.config),readiness.upperConfig))
   const floors=roleValues(stages.lower.snapshots).map(n=>band(n,lateAnchors))
   const bases=roleValues(stages.mature.snapshots).map(n=>band(n,lateAnchors))
   const penalties=bases.map((base,i)=>Math.min(Math.max(0,base-floors[i]),lateCost[c.id]??0))
   const late=Math.max(...bases.map((base,i)=>Math.max(floors[i],base-penalties[i])))
   const openingValues=stages.opening.openingDamage.map((n,i)=>n/2/(i?3:1))
-  const quickValues=stages.quick?.openingDamage.map((n,i)=>n/2/(i?3:1))
+  const quickValues=(stages.quickUpper??stages.quick)?.openingDamage.map((n,i)=>n/2/(i?3:1))
   const openingBand=Math.max(...openingValues.map(n=>band(n,burstAnchors)))
   const quickBand=quickValues?Math.max(...quickValues.map(n=>band(n,burstAnchors))):0
   const burst=Math.max(openingBand,quickBand-(readiness?.penalty??0))
@@ -62,7 +64,7 @@ const records=catalog.map(c=>{
   const values=[burst,late,...defense,...old.axes.slice(3).map(a=>a.key==='protection'&&c.id===97?7:a.score)]
   const peak=Math.max(...finite.map(s=>Math.min(s.comparisons[0].physical.withShield,s.comparisons[0].magic.withShield)))
   const reasons=[
-    `等效技能倍率（前两行动合计）：单敌${equivalent(stages.opening.openingDamage[0])}、五敌总计${equivalent(stages.opening.openingDamage[1])}。${readiness?`短期强化：${equivalent(stages.quick.openingDamage[0])}/${equivalent(stages.quick.openingDamage[1])}；${readiness.reason}`:c.id===8?'S1先降抗暴，首轮96%暴率、期望近10段，成长仅补强。':old.output.growth?.detail??'无另列计数成长；条件与目标分布见技能。'}`,
+    `等效技能倍率（前两行动合计）：单敌${equivalent(stages.opening.openingDamage[0])}、五敌总计${equivalent(stages.opening.openingDamage[1])}。${readiness?`短期技能合计（单敌/五敌）：${equivalent(stages.quick.openingDamage[0])}/${equivalent(stages.quick.openingDamage[1])}${stages.quickUpper?`，上界${equivalent(stages.quickUpper.openingDamage[0])}/${equivalent(stages.quickUpper.openingDamage[1])}`:''}；${readiness.reason}`:c.id===8?'S1先降抗暴，首轮96%暴率、期望近10段，成长仅补强。':old.output.growth?.detail??'无另列计数成长；条件与目标分布见技能。'}`,
     `等效技能倍率（每行动，基础→后期）：单敌${equivalent(stages.lower.snapshots[0].perAction)}→${equivalent(stages.mature.snapshots[0].perAction)}；五敌总计${equivalent(stages.lower.snapshots[1].perAction)}→${equivalent(stages.mature.snapshots[1].perAction)}。${lateCost[c.id]?note:old.output.growth?.detail??note}`,
     `${c.id===71?'等效生命：常驻200%，中毒来源/反伤400%，不能当作全来源常驻。':`等效生命：${capacityText(finite)}。`}${life.activeWindow}；盾按完整时计，不死/屏障另评。${initiative.note}`,
     `无盾等效生命：${capacityText(finite,false)}。${life.replenishment}；${life.afterExpiry}。`,
@@ -85,7 +87,7 @@ fs.writeFileSync(new URL('review.json',folder),collection({rubricVersion:RATING_
 const inversions=[]
 for(const key of ['burst','late','toughness','survival']) for(const a of records) for(const b of records) {
   const metric=r=>key==='late'?Math.max(...roleValues(r.output.stages.mature.snapshots)):key==='burst'?
-    Math.max(...[r.output.stages.opening,r.output.stages.quick].filter(Boolean).flatMap(s=>s.openingDamage.map((n,i)=>n/2/(i?3:1)))):r.survival.peakOrdinaryCapacity
+    Math.max(...[r.output.stages.opening,r.output.stages.quick,r.output.stages.quickUpper].filter(Boolean).flatMap(s=>s.openingDamage.map((n,i)=>n/2/(i?3:1)))):r.survival.peakOrdinaryCapacity
   const av=metric(a),bv=metric(b),aa=a.axes.find(axis=>axis.key===key),ba=b.axes.find(axis=>axis.key===key)
   if(av>bv+1e-9 && aa.score<ba.score) inversions.push({axis:key,higherMultiplier:a.id,lowerMultiplier:b.id,
     values:[av,bv],scores:[aa.score,ba.score],reason:`${aa.reason} 对照：${ba.reason}`})

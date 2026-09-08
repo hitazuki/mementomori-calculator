@@ -74,11 +74,8 @@ export const opening = {
 // never imply rounds without a known trigger route. Unlisted growth stays late.
 export const quick = {
   50:{mature:true,events:10,actions:2,reason:'前两次多段主动可产生10次暴击，下一回合转攻；依赖暴击，按短期窗口参考。'},
-  75:{mature:true,events:4,reason:'累计4次自损即可满层；自身前两主动提供2次，其余由自损队友提供，归短计数爆发。'},
-  93:{mature:true,events:4,reason:'累计4次自损即达40%加攻和1140%×7；自身前两主动2次，另需队友2次，不要求长期叠层。'},
   97:{mature:true,events:5,penalty:1,reason:'累计净化5种可由一次多种净化完成；但需先有足够弱化，条件爆发降1档，仍保留开局下限。'},
   123:{mature:true,events:1,penalty:1,reason:'1次控制即可满5层，净化后可爆发；依赖被控制，条件窗口降1档，非必然开局。'},
-  130:{config:{effects:{attack:.3},components:{S1:'6.7,8,0',S2:'7.6,5,0'}},events:3,reason:'3次自损已解锁S1重放；保守以30%加攻与最低血量比较分支计算，不预支6次满层。'},
   131:{mature:true,events:5,actions:2,penalty:1,reason:'S1净化2种、P1一次3种可合计5种；先要满足全队弱化条件，条件爆发降1档。'},
   134:{mature:true,events:4,penalty:1,reason:'目标有暴率上升时4次弱化事件即可满懈怠，否则需6次；层仅2回合，条件爆发降1档。'},
   149:{config:{effects:{attack:.5},components:{S2:'9.4,3,0'}},events:2,reason:'2次控制即可满50%加攻；S2五段另需累计净化10种，此短期窗口仍只算三段。'},
