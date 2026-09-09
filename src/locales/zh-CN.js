@@ -3,6 +3,21 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  reinforcementTitle: "装备强化计算",
+  reinforcementDescription: "按强化等级计算材料需求；强化等级并非装备等级。",
+  reinforcementInitial: "初始强化等级",
+  reinforcementTarget: "目标强化等级",
+  reinforcementWeapons: "武器件数",
+  reinforcementOthers: "其他部位件数",
+  reinforcementInvalid: "请输入 0–1000 的整数等级及非负整数件数，目标等级不得低于初始等级，数量不得超出安全计算范围。",
+  reinforcement_gold: "金币",
+  reinforcement_water: "强化水",
+  reinforcement_potion: "强化秘药",
+  reinforcement_tickets: "无穷之塔挑战券",
+  reinforcementTicketNote: "挑战券按每张平均获得 4.5 个强化秘药估算，总需求向上取整；实际产出可能不同。",
+  reinforcementChartTitle: "等级与累计材料需求",
+  reinforcementChartNote: "曲线显示从 0 级累计至各级的消耗，按当前部位件数计算；阴影标示所选升级区间。",
+  reinforcementLevel: "强化等级",
   ...characterCatalogTranslations['zh-CN'],
   planRechargeMode: "规划模式",
   planRechargeModeLongTerm: "长期规划",

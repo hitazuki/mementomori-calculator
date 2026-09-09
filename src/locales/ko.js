@@ -3,6 +3,21 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  reinforcementTitle: "장비 강화 계산",
+  reinforcementDescription: "강화 레벨에 따른 재료 소모량을 계산합니다. 강화 레벨은 장비 레벨과 다릅니다.",
+  reinforcementInitial: "시작 강화 레벨",
+  reinforcementTarget: "목표 강화 레벨",
+  reinforcementWeapons: "무기 수량",
+  reinforcementOthers: "기타 부위 수량",
+  reinforcementInvalid: "레벨은 0~1000의 정수, 수량은 0 이상의 정수를 입력하세요. 목표 레벨은 시작 레벨 이상이어야 하며, 수량은 안전한 계산 범위 이내여야 합니다.",
+  reinforcement_gold: "골드",
+  reinforcement_water: "강화수",
+  reinforcement_potion: "강화의 비약",
+  reinforcement_tickets: "무한의 탑 티켓",
+  reinforcementTicketNote: "티켓 1장당 강화의 비약 평균 4.5개를 기준으로 계산하며, 총 필요량을 올림합니다. 실제 획득량은 다를 수 있습니다.",
+  reinforcementChartTitle: "레벨별 누적 재료 소모량",
+  reinforcementChartNote: "입력한 장비 수량에 대해 0레벨부터 각 레벨까지의 누적 소모량을 표시합니다. 음영은 선택한 강화 구간입니다.",
+  reinforcementLevel: "강화 레벨",
   ...characterCatalogTranslations['ko'],
   planRechargeMode: "계획 모드",
   planRechargeModeLongTerm: "장기 계획",

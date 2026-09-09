@@ -3,6 +3,21 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  reinforcementTitle: "Equipment Upgrade Calculator",
+  reinforcementDescription: "Calculate material costs by upgrade level, which is separate from equipment level.",
+  reinforcementInitial: "Starting upgrade level",
+  reinforcementTarget: "Target upgrade level",
+  reinforcementWeapons: "Weapons",
+  reinforcementOthers: "Other equipment pieces",
+  reinforcementInvalid: "Enter integer levels from 0–1000 and non-negative integer quantities. Target level must be at least the starting level; quantities must stay within the safe calculation range.",
+  reinforcement_gold: "Gold",
+  reinforcement_water: "Upgrade Water",
+  reinforcement_potion: "Upgrade Panacea",
+  reinforcement_tickets: "Ticket of Infinity",
+  reinforcementTicketNote: "Tickets assume an average of 4.5 Upgrade Panacea each, with the total rounded up. Actual drops may vary.",
+  reinforcementChartTitle: "Level and cumulative material cost",
+  reinforcementChartNote: "Costs accumulate from level 0 for the selected equipment quantities. The shaded area marks your upgrade interval.",
+  reinforcementLevel: "Upgrade level",
   ...characterCatalogTranslations['en'],
   planRechargeMode: "Planning Mode",
   planRechargeModeLongTerm: "Long Term",

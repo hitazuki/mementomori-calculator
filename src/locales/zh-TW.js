@@ -3,6 +3,21 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  reinforcementTitle: "裝備強化計算",
+  reinforcementDescription: "依強化等級計算材料需求；強化等級並非裝備等級。",
+  reinforcementInitial: "初始強化等級",
+  reinforcementTarget: "目標強化等級",
+  reinforcementWeapons: "武器件數",
+  reinforcementOthers: "其他部位件數",
+  reinforcementInvalid: "請輸入 0–1000 的整數等級及非負整數件數，目標等級不得低於初始等級，數量不得超出安全計算範圍。",
+  reinforcement_gold: "金幣",
+  reinforcement_water: "強化水",
+  reinforcement_potion: "強化秘藥",
+  reinforcement_tickets: "無窮之塔挑戰券",
+  reinforcementTicketNote: "挑戰券按每張平均獲得 4.5 個強化秘藥估算，總需求無條件進位；實際產出可能不同。",
+  reinforcementChartTitle: "等級與累計材料需求",
+  reinforcementChartNote: "曲線顯示從 0 級累計至各級的消耗，依目前部位件數計算；陰影標示所選升級區間。",
+  reinforcementLevel: "強化等級",
   ...characterCatalogTranslations['zh-TW'],
   planRechargeMode: "規劃模式",
   planRechargeModeLongTerm: "長期規劃",

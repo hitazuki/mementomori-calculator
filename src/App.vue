@@ -156,6 +156,7 @@ const PackComparisonView = createAsyncView(() => import('./views/PackComparisonV
 const ShopExchangeView = createAsyncView(() => import('./views/ShopExchangeView.vue'))
 const GachaAnalysisView = createAsyncView(() => import('./views/GachaAnalysisView.vue'))
 const ForbiddenWeaponGachaView = createAsyncView(() => import('./views/ForbiddenWeaponGachaView.vue'))
+const EquipmentReinforcementView = createAsyncView(() => import('./views/EquipmentReinforcementView.vue'))
 const SerialCodeToolView = createAsyncView(() => import('./views/SerialCodeToolView.vue'))
 
 const { locale, t } = useI18n()
@@ -196,6 +197,7 @@ const viewMap = {
   packCompare: PackComparisonView,
   gacha: GachaAnalysisView,
   forbiddenWeaponGacha: ForbiddenWeaponGachaView,
+  equipmentReinforcement: EquipmentReinforcementView,
   serialCode: SerialCodeToolView,
 }
 

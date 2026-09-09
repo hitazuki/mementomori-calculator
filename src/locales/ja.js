@@ -3,6 +3,21 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  reinforcementTitle: "装備強化計算",
+  reinforcementDescription: "強化レベルに応じた必要素材を計算します。強化レベルは装備レベルとは異なります。",
+  reinforcementInitial: "現在の強化レベル",
+  reinforcementTarget: "目標の強化レベル",
+  reinforcementWeapons: "武器の個数",
+  reinforcementOthers: "その他の部位の個数",
+  reinforcementInvalid: "レベルは 0～1000 の整数、個数は 0 以上の整数を入力してください。目標は現在のレベル以上とし、個数は安全に計算できる範囲内にしてください。",
+  reinforcement_gold: "ゴールド",
+  reinforcement_water: "強化水",
+  reinforcement_potion: "強化秘薬",
+  reinforcement_tickets: "無窮の塔チケット",
+  reinforcementTicketNote: "チケット1枚あたり強化秘薬4.5個の平均獲得量で計算し、合計を切り上げます。実際の獲得量は変動します。",
+  reinforcementChartTitle: "レベルと累計必要素材",
+  reinforcementChartNote: "指定した装備個数について、レベル0から各レベルまでの累計消費量を表示します。色付きの範囲は選択した強化区間です。",
+  reinforcementLevel: "強化レベル",
   ...characterCatalogTranslations['ja'],
   planRechargeMode: "計画モード",
   planRechargeModeLongTerm: "長期計画",

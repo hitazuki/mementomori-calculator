@@ -87,6 +87,14 @@ export const NAV_GROUPS = [
         viewId: 'forbiddenWeaponGacha',
         matchViews: ['forbiddenWeaponGacha'],
       },
+      {
+        id: 'equipmentReinforcement',
+        viewId: 'equipmentReinforcement',
+        matchViews: ['equipmentReinforcement'],
+        icon: '⚒',
+        labelKey: 'reinforcementTitle',
+        descriptionKey: 'reinforcementDescription',
+      },
     ],
   },
   {
