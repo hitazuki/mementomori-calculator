@@ -11,7 +11,7 @@
     "test": "npm run test:i18n && npm run test:unit",
     "predev": "node scripts/gen_all_packs.js",
     "dev": "vite",
-    "prebuild": "npm run test && node scripts/gen_all_packs.js",
+    "prebuild": "node scripts/build_character_rating_locales.mjs && npm run test && node scripts/gen_all_packs.js",
     "build": "vite build",
     "preview": "vite preview",
     "fetch-packs": "node scripts/fetch_ultra_sale.js",

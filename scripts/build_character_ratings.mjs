@@ -90,3 +90,4 @@ for (const character of catalogs['zh-CN']) {
 fs.mkdirSync(output, { recursive: true })
 for (const record of records) fs.writeFileSync(path.join(output, record.id + '.json'), JSON.stringify(record) + '\n')
 console.log('Packed ' + records.length + ' AI reviews, ' + records.length * RATING_AXES.length + ' axis explanations.')
+await import('./build_character_rating_locales.mjs')

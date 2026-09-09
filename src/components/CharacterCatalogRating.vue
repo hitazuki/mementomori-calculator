@@ -7,7 +7,7 @@
     <p v-else-if="error" role="alert">{{ t('catalogError') }} <button class="btn btn-ghost" @click="load">{{ t('catalogRetry') }}</button></p>
     <template v-else-if="rating">
       <p v-if="freshness !== 'current'" class="rating-warning" role="status">{{ t(freshness === 'stale' ? 'ratingStale' : 'ratingUnverified') }}</p>
-      <p class="rating-output-role" lang="zh-CN"><span>{{ rating.outputRole }}</span><small>{{ rating.outputRoleDetail }}</small></p>
+      <p class="rating-output-role" :lang="rationaleLocale"><span>{{ ratingText(rating.outputRole) }}</span><small>{{ ratingText(rating.outputRoleDetail) }}</small></p>
       <p class="rating-caption">{{ t('ratingEquivalentHelp') }}</p>
       <div class="rating-content">
         <div class="rating-visual">
@@ -28,7 +28,7 @@
           <li v-for="axis in displayAxes" :key="axis.key">
             <div class="rating-axis">
               <span><strong>{{ t('ratingAxis_' + axis.key) }}</strong><b>{{ axis.score }} / {{ RATING_MAX }}</b></span>
-              <span lang="zh-CN">{{ axis.reason }}</span>
+              <span :lang="rationaleLocale">{{ ratingText(axis.reason) }}</span>
             </div>
           </li>
         </ol>
@@ -39,13 +39,13 @@
         <div v-for="group in tagGroups" :key="group.key" class="rating-tag-group">
           <strong>{{ t('ratingGroup_' + group.key) }}</strong>
           <div><span v-for="tag in group.tags" :key="tag.key" class="rating-tag">
-            <span lang="zh-CN">{{ RATING_TAGS[tag.key].label }}</span>
+            <span :lang="rationaleLocale">{{ ratingText(RATING_TAGS[tag.key].label) }}</span>
             <small v-if="RATING_TAGS[tag.key].layer"> · {{ t('ratingLayer_' + RATING_TAGS[tag.key].layer) }}</small>
           </span></div>
         </div>
       </section>
-      <p class="rating-conditions"><strong>{{ t('ratingConditions') }}</strong><span lang="zh-CN">{{ rating.conditions }}</span></p>
-      <p v-if="locale !== 'zh-CN'" class="rating-caption">{{ t('ratingLanguage') }}</p>
+      <p class="rating-conditions"><strong>{{ t('ratingConditions') }}</strong><span :lang="rationaleLocale">{{ ratingText(rating.conditions) }}</span></p>
+      <p v-if="translationError" class="rating-warning" role="status">{{ t('ratingLanguage') }} <button class="btn btn-ghost" @click="load">{{ t('catalogRetry') }}</button></p>
     </template>
   </article>
 </template>
@@ -54,16 +54,22 @@
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RATING_AXES, RATING_MAX, RATING_TAGS, radarPoint, ratingSource, validRating } from '../utils/characterRatings.js'
+import { completeRatingTranslation, loadRatingTranslations } from '../utils/characterRatingLocale.js'
 const props = defineProps({ character: { type: Object, required: true } })
 const { t, locale } = useI18n()
 const rating = ref(null), loading = ref(false), error = ref(false), missing = ref(false)
 const freshness = ref('unknown')
+const translations = ref({}), rationaleLocale = ref('zh-CN'), translationError = ref(false)
+const ratingText = text => translations.value[text] ?? text
 const cache = new Map()
 let version = 0, controller
 async function load() {
   const request = ++version, character = props.character, language = locale.value
   controller?.abort()
   controller = new AbortController()
+  const retryTranslation = translationError.value
+  translations.value = {}; rationaleLocale.value = 'zh-CN'; translationError.value = false
+  const localized = language === 'zh-CN' ? Promise.resolve({}) : loadRatingTranslations(language, { reload: retryTranslation }).catch(() => null)
   loading.value = true; error.value = false; missing.value = false; rating.value = null; freshness.value = 'unknown'
   try {
     let data = cache.get(character.id)
@@ -83,6 +89,12 @@ async function load() {
       state = hash === data.sourceHashes[language] ? 'current' : 'stale'
     }
     if (request !== version) return
+    const dictionary = await localized
+    if (request !== version) return
+    if (language !== 'zh-CN') {
+      if (completeRatingTranslation(data, dictionary)) { translations.value = dictionary; rationaleLocale.value = language }
+      else translationError.value = true
+    }
     rating.value = data; freshness.value = state
   } catch (cause) { if (request === version && cause.name !== 'AbortError') error.value = true }
   finally { if (request === version) loading.value = false }
