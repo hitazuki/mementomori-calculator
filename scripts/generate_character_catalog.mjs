@@ -44,6 +44,9 @@ const baseNames = { 1: '[BaseParameterTypeMuscle]', 2: '[BaseParameterTypeEnergy
 const rarityName = flags => ({ 1: 'N', 2: 'R', 4: 'R+', 8: 'SR', 16: 'SR+', 32: 'SSR', 64: 'SSR+', 128: 'UR', 256: 'UR+', 512: 'LR' })[flags] ?? (flags >= 1024 ? `LR+${Math.log2(flags / 512)}` : String(flags))
 const collections = read('CharacterCollection').filter(item => !item.IsIgnore)
 const collectionLevels = read('CharacterCollectionLevel').filter(item => !item.IsIgnore)
+const DETAIL_SHARD_SIZE = 20
+const summaryFields = ['id', 'name', 'title', 'element', 'job', 'rarity', 'speed']
+const characterSummary = character => Object.fromEntries(summaryFields.map(key => [key, character[key]]))
 fs.mkdirSync(output, { recursive: true })
 for (const [locale, file] of Object.entries({ 'zh-CN': 'ZhCn', 'zh-TW': 'ZhTw', en: 'EnUs', ja: 'JaJp', ko: 'KoKr' })) {
   const texts = new Map(read(`TextResource${file}`).map(item => [item.StringKey, item.Text]))
@@ -99,6 +102,25 @@ for (const [locale, file] of Object.entries({ 'zh-CN': 'ZhCn', 'zh-TW': 'ZhTw', 
       ].filter(Boolean),
     }
   })
-  fs.writeFileSync(path.join(output, `${locale}.json`), JSON.stringify({ schemaVersion: 1, source: 'moonheart/mementomori-masterbook', characters: records }) + '\n')
+  const localeOutput = path.join(output, locale)
+  const detailOutput = path.join(localeOutput, 'details')
+  fs.rmSync(localeOutput, { recursive: true, force: true })
+  fs.mkdirSync(detailOutput, { recursive: true })
+  const shards = new Map()
+  for (const record of records) {
+    const shard = Math.floor((record.id - 1) / DETAIL_SHARD_SIZE)
+    if (!shards.has(shard)) shards.set(shard, [])
+    shards.get(shard).push(record)
+  }
+  fs.writeFileSync(path.join(localeOutput, 'index.json'), JSON.stringify({
+    schemaVersion: 2,
+    source: 'moonheart/mementomori-masterbook',
+    shardSize: DETAIL_SHARD_SIZE,
+    characters: records.map(characterSummary),
+  }) + '\n')
+  for (const [shard, characters] of shards) {
+    fs.writeFileSync(path.join(detailOutput, `${shard}.json`), JSON.stringify({ schemaVersion: 2, characters }) + '\n')
+  }
 }
-console.log(`Generated character catalog: ${characters.length} characters, 5 locales.`)
+for (const locale of ['zh-CN', 'zh-TW', 'en', 'ja', 'ko']) fs.rmSync(path.join(output, `${locale}.json`), { force: true })
+console.log(`Generated sharded character catalog: ${characters.length} characters, 5 locales.`)

@@ -2,9 +2,10 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { ratingDisplayTexts, completeRatingTranslation, loadRatingTranslations } from '../src/utils/characterRatingLocale.js'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 
 const read=path=>JSON.parse(fs.readFileSync(new URL(path,import.meta.url)))
-const records=read('../public/data/character-catalog/zh-CN.json').characters.map(c=>read(`../public/data/character-ratings/${c.id}.json`))
+const records=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters.map(c=>read(`../public/data/character-ratings/${c.id}.json`))
 const percentages=text=>(text.match(/\d+(?:\.\d+)?%/g)??[]).sort()
 
 test('all 134 characters have complete localized rating copy, with original percentages retained',()=>{

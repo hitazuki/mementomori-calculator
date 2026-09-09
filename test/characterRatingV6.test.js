@@ -7,8 +7,9 @@ import { filterCharacters, ratingIndex } from '../src/utils/characterCatalog.js'
 import { survivalCapacity } from '../src/utils/characterSurvival.js'
 import { createHash } from 'node:crypto'
 import { ratingSource } from '../src/utils/characterRatings.js'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'))
-const catalog=read('../public/data/character-catalog/zh-CN.json').characters
+const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
 const reviews=read('../doc/character-ratings/v6/review.json').records
 const score=(id,key)=>reviews.find(r=>r.id===id).axes.find(a=>a.key===key).score
 

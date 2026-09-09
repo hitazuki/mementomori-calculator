@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { filterCharacters, ratingIndex } from '../src/utils/characterCatalog.js'
 import { NAV_GROUPS, findModuleByView } from '../src/constants/navigation.js'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 
 const characters = [
   { id: 3, name: 'B', title: 'Winter', element: 1, speed: 3000 },
@@ -50,8 +51,9 @@ test('published lightweight rating index agrees with full records and audit stat
 test('Actions-generated catalog has matching complete records in every language', () => {
   let expected
   for (const locale of ['zh-CN', 'zh-TW', 'en', 'ja', 'ko']) {
-    const data = JSON.parse(fs.readFileSync(new URL(`../public/data/character-catalog/${locale}.json`, import.meta.url)))
-    assert.equal(data.schemaVersion, 1)
+    const data = readCharacterCatalog(new URL('../public/data/character-catalog/', import.meta.url), locale)
+    assert.equal(data.schemaVersion, 2)
+    assert.equal(data.shardSize, 20)
     assert.ok(data.characters.length > 100)
     const ids = data.characters.map(character => character.id)
     assert.equal(new Set(ids).size, ids.length)

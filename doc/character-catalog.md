@@ -2,9 +2,9 @@
 
 侧栏：角色图鉴 → 角色概览。展示CharacterMB中未标记IsIgnore的角色，不受讨伐名单限制。
 
-数据由 `scripts/generate_character_catalog.mjs <Master目录> [输出目录]` 生成，默认保存到 `public/data/character-catalog/`，五语言分别加载。包括官方名称、称号、属性、职业、初始稀有度、基础速度，以及主动/被动技能各级原文和专武强化原文。技能等级文本可能是增量说明，基础说明与所有等级变更默认完整展开，突出最高等级，不将最后一级的局部修改误当完整技能文本。
+数据由 `scripts/generate_character_catalog.mjs <Master目录> [输出目录]` 生成，默认保存到 `public/data/character-catalog/<语言>/`。`index.json` 只包含列表所需的基础字段，详情按角色 ID 每 20 个一组写入 `details/`；它们共同构成唯一的数据源，不再另存完整整包。Node 脚本统一通过 `scripts/lib/characterCatalog.mjs` 聚合读取。资料包括官方名称、称号、属性、职业、初始稀有度、基础速度，以及主动/被动技能各级原文和专武强化原文。技能等级文本可能是增量说明，基础说明与所有等级变更默认完整展开，突出最高等级，不将最后一级的局部修改误当完整技能文本。
 
-自动更新沿用现有链路：每日Sync Master Data从 `moonheart/mementomori-masterbook` 拉取MB，生成并提交资料；Sync Image Assets从Moonheart资源镜像补齐角色头像和全图鉴技能图标；成功后部署。已有图片跳过，远程未提供的图片下次重试，页面暂以文字占位。
+自动更新沿用现有链路：每日Sync Master Data从 `moonheart/mementomori-masterbook` 拉取MB，生成并提交资料；Sync Image Assets从Moonheart资源镜像补齐角色头像和全图鉴技能图标，并生成 `public/images/character-thumbnails/` 下供所有模块复用的 96px WebP 缩略图；成功后部署。已有图片跳过，远程未提供的图片下次重试，页面暂以文字占位。
 
 初版由GitHub Actions生成正式JSON和新增图片，不上传本地导出资源。数据生成不依赖npm安装或本地解包目录。
 

@@ -9,9 +9,10 @@ import { outputCopy, cleanRatingCopy } from '../doc/character-ratings/v6/copy.mj
 import { RATING_AXES, RATING_VERSION, ratingSource } from '../src/utils/characterRatings.js'
 import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { lower, opening, upper, quick, defenseScores, lateCost, reviewNotes } from '../doc/character-ratings/v6/stages.mjs'
+import { readCharacterCatalog } from './lib/characterCatalog.mjs'
 
 const root=new URL('../',import.meta.url), read=p=>JSON.parse(fs.readFileSync(new URL(p,root),'utf8'))
-const catalog=read('public/data/character-catalog/zh-CN.json').characters
+const catalog=readCharacterCatalog(new URL('public/data/character-catalog/',root)).characters
 const previous=read('doc/character-ratings/v5/review.json').records
 const folder=new URL('doc/character-ratings/v6/',root)
 const band=(n,anchors)=>anchors.filter(v=>n>=v).length

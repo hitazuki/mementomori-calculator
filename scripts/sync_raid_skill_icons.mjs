@@ -3,13 +3,14 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadRaidCharacterMbTexts } from '../src/constants/raid/characterMbTexts.js'
 import { downloadMoonheartIcon } from './sync_assets.js'
+import { readCharacterCatalog } from './lib/characterCatalog.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const destDir = path.join(root, 'public/images/skills')
 const base = 'https://list.moonheart.dev/p/public/mmtm/AddressableConvertAssets/Icon/Skill'
 const characters = await loadRaidCharacterMbTexts('zh-CN')
-const catalogPath = path.join(root, 'public/data/character-catalog/zh-CN.json')
-const catalogCharacters = fs.existsSync(catalogPath) ? JSON.parse(fs.readFileSync(catalogPath, 'utf8')).characters : []
+const catalogRoot = path.join(root, 'public/data/character-catalog')
+const catalogCharacters = fs.existsSync(path.join(catalogRoot, 'zh-CN/index.json')) ? readCharacterCatalog(catalogRoot).characters : []
 const available = new Set()
 let downloaded = 0
 for (const id of new Set([...Object.values(characters).flat(), ...catalogCharacters.flatMap(character => character.skills)].map(skill => skill.id))) {

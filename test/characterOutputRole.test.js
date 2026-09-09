@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { characterOutputRole } from '../scripts/lib/characterOutputRole.mjs'
 import { damageReference } from '../src/utils/characterRatingModel.js'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 const records=JSON.parse(fs.readFileSync(new URL('../doc/character-ratings/v6/review.json',import.meta.url))).records
 const get=id=>records.find(r=>r.id===id)
 test('fixed multi-target attacks and random single-target chains count different damage units',()=>{
@@ -33,7 +34,7 @@ test('text-reviewed branches include kill follow-ups and mixed ally/enemy select
   assert.match(get(47).output.targeting.detail,/击杀后追加5目标群攻/)
   assert.equal(get(54).output.role,'群体输出')
   assert.match(get(54).output.targeting.detail,/敌我混选5目标/)
-  const catalog=JSON.parse(fs.readFileSync(new URL('../public/data/character-catalog/zh-CN.json',import.meta.url))).characters
+  const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
   for(const r of records) for(const skill of r.output.targeting.skills) {
     if(!skill.review) continue
     const source=catalog.find(c=>c.id===r.id).skills.find(s=>s.slot===skill.slot)

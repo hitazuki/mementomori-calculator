@@ -9,7 +9,7 @@
     <p v-if="!character.collections?.length">{{ t('catalogNoCollections') }}</p>
     <article v-for="collection in character.collections" :key="collection.id" class="collection">
       <h4>{{ collection.name }}</h4>
-      <div class="members"><a v-for="member in collection.members" :key="member.id" :href="`#characters/${member.id}`" :title="member.name" :aria-label="member.name"><CharacterCatalogImage :path="`images/characters/${member.id}.png`" :fallback="member.name.slice(0, 1)"/></a></div>
+      <div class="members"><a v-for="member in collection.members" :key="member.id" :href="`#characters/${member.id}`" :title="member.name" :aria-label="member.name"><CharacterCatalogImage :path="characterThumbnailPath(member.id)" :fallback="member.name.slice(0, 1)"/></a></div>
       <label>{{ t('catalogRequirement') }}<select class="form-select" :value="collectionLevel(collection)?.level" @change="levels[collection.id] = Number($event.target.value)"><option v-for="level in collection.levels" :key="level.level" :value="level.level">Lv{{ level.level }} · {{ level.rarity }}</option></select></label>
       <template v-if="collectionLevel(collection)">
         <CharacterCatalogParameters :parameters="collectionLevel(collection).parameters"/>
@@ -24,6 +24,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CharacterCatalogImage from './CharacterCatalogImage.vue'
 import CharacterCatalogParameters from './CharacterCatalogParameters.vue'
+import { characterThumbnailPath } from '../utils/imageAssets.js'
 const props = defineProps({ character: { type: Object, required: true } })
 const { t } = useI18n()
 const weaponId = ref(null), levels = ref({})

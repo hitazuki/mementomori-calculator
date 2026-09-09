@@ -4,6 +4,7 @@ import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 
 test('catalog preserves all weapon tiers independently of hidden or repeated skill associations', () => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'catalog-exclusive-'))
@@ -25,7 +26,9 @@ test('catalog preserves all weapon tiers independently of hidden or repeated ski
       write('TextResource' + locale, ['name', 'skill', 'base', 'e1', 'e2', 'e3', 'arcana', 'weapon', '[BattleParameterTypeAttackPower]', '[BattleParameterTypeCriticalDamageEnhance]', '[BaseParameterTypeMuscle]'].map(key => ({ StringKey: key, Text: key })))
     }
     execFileSync(process.execPath, ['scripts/generate_character_catalog.mjs', temp, path.join(temp, 'out')])
-    const character = JSON.parse(fs.readFileSync(path.join(temp, 'out/zh-CN.json'))).characters[0]
+    assert.equal(fs.existsSync(path.join(temp, 'out/zh-CN.json')), false)
+    assert.equal(fs.existsSync(path.join(temp, 'out/zh-CN/index.json')), true)
+    const character = readCharacterCatalog(path.join(temp, 'out')).characters[0]
     assert.deepEqual(character.exclusiveEffects, [1, 2, 3].map(level => ({ level, text: 'e' + level })))
     assert.equal(character.exclusivePassives[0].rarity, 'SSR')
     assert.deepEqual(character.exclusivePassives[0].parameters.map(p => [p.value, p.percent]), [[18, true], [35, true]])

@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { characterExclusiveEffects } from '../scripts/lib/characterExclusive.mjs'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 
 test('missing equipment links recover all rarity upgrades from active and passive skill MB',()=>{
   const character={Id:97,ActiveSkillIds:[97001],PassiveSkillIds:[97004]}
@@ -18,7 +19,7 @@ test('missing equipment links recover all rarity upgrades from active and passiv
 
 test('Cusie publishes three weapon upgrades in all five locales without inventing passive stats',()=>{
   for(const locale of ['zh-CN','zh-TW','en','ja','ko']) {
-    const catalog=JSON.parse(fs.readFileSync(new URL(`../public/data/character-catalog/${locale}.json`,import.meta.url)))
+    const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url), locale)
     const c=catalog.characters.find(c=>c.id===97)
     assert.deepEqual(c.exclusiveEffects.map(e=>e.level),[1,2,3])
     assert.ok(c.exclusiveEffects.every(e=>e.text.length>10))

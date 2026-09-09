@@ -3,12 +3,13 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { RATING_AXES, RATING_VERSION, RATING_MAX, ratingSource, validRating } from '../src/utils/characterRatings.js'
 import { SURVIVAL_SCENARIOS } from '../src/utils/characterSurvival.js'
+import { readCharacterCatalog } from './lib/characterCatalog.mjs'
 
 const root = path.resolve(import.meta.dirname, '..')
 const output = path.join(root, 'public/data/character-ratings')
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'))
 const locales = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko']
-const catalogs = Object.fromEntries(locales.map(locale => [locale, readJson(path.join(root, 'public/data/character-catalog', locale + '.json')).characters]))
+const catalogs = Object.fromEntries(locales.map(locale => [locale, readCharacterCatalog(path.join(root, 'public/data/character-catalog'), locale).characters]))
 const reviews = fs.readFileSync(path.join(root, 'doc/character-ratings/reviews.txt'), 'utf8').trim().split(/\r?\n/)
 const explicitlyReviewed = new Set((process.argv.find(arg => arg.startsWith('--reviewed=')) ?? '').split('=')[1]?.split(',').map(Number) ?? [])
 const digest = source => createHash('sha256').update(JSON.stringify(source)).digest('hex')

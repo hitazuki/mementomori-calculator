@@ -5,8 +5,9 @@ import { createHash } from 'node:crypto'
 import { damageReference, ratingCycle, orderedDamage, growthRequirement, criticalExtension, effectiveRecovery, protectionTrace } from '../src/utils/characterRatingModel.js'
 import { referenceFor } from '../scripts/lib/characterRatingV5.mjs'
 import { ratingSource, RATING_AXES } from '../src/utils/characterRatings.js'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 const read = p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'))
-const catalog=read('../public/data/character-catalog/zh-CN.json').characters
+const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
 const character=id=>catalog.find(c=>c.id===id)
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`)
 

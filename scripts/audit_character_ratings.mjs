@@ -2,9 +2,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { ratingSource, validRating, RATING_VERSION, RATING_MAX } from '../src/utils/characterRatings.js'
+import { readCharacterCatalog } from './lib/characterCatalog.mjs'
 const root = path.resolve(import.meta.dirname, '..')
 const dir = path.join(root, 'public/data/character-ratings')
-const catalog = JSON.parse(fs.readFileSync(path.join(root, 'public/data/character-catalog/zh-CN.json'), 'utf8'))
+const catalog = readCharacterCatalog(path.join(root, 'public/data/character-catalog'))
 const status = { schemaVersion: 1, current: [], stale: [], pending: [] }
 const characters = []
 for (const character of catalog.characters) {

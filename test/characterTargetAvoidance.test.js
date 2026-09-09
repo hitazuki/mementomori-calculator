@@ -2,9 +2,10 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { targetAvoidance } from '../doc/character-ratings/v6/target-avoidance.mjs'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'))
-const catalog=read('../public/data/character-catalog/zh-CN.json').characters
+const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
 const records=read('../doc/character-ratings/v6/review.json').records
 const evidence=read('../doc/character-ratings/v6/target-avoidance-evidence.json')
 const score=(id,key)=>records.find(r=>r.id===id).axes.find(a=>a.key===key).score

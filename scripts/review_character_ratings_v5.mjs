@@ -6,10 +6,11 @@ import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { outputAdjustment, outputNotes, utilityScores } from '../doc/character-ratings/v5/decisions.mjs'
 import { survivalInputs } from '../doc/character-ratings/v5/survival-inputs.mjs'
 import { auxiliaryNotes } from '../doc/character-ratings/v5/auxiliary-notes.mjs'
+import { readCharacterCatalog } from './lib/characterCatalog.mjs'
 
 const RATING_AXES = ['single','area','survival','protection','support','control']
 const dir = new URL('../doc/character-ratings/',import.meta.url)
-const catalog = JSON.parse(fs.readFileSync(new URL('../public/data/character-catalog/zh-CN.json',import.meta.url))).characters
+const catalog = readCharacterCatalog(new URL('../public/data/character-catalog/', import.meta.url)).characters
 const old = new Map(fs.readFileSync(new URL('v5/v4-reviews.txt',dir),'utf8').trim().split(/\r?\n/).map(line=>{const p=line.split('|');return [+p[0],p]}))
 const band = (value,anchors) => anchors.filter(n=>value>=n).length
 const outputAnchors = [.1,1.5,3,5,8,12,18,26,38,55]

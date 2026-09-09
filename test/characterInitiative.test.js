@@ -4,8 +4,9 @@ import fs from 'node:fs'
 import { defenseInitiative } from '../scripts/lib/characterInitiative.mjs'
 import { stageReference } from '../scripts/lib/characterRatingV6.mjs'
 import { defenseScores } from '../doc/character-ratings/v6/stages.mjs'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'))
-const catalog=read('../public/data/character-catalog/zh-CN.json').characters
+const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
 const character=id=>catalog.find(c=>c.id===id)
 
 test('opening acceleration helps action defenses but not S2 first-round gaps',()=>{

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { createHash } from 'node:crypto'
 import { ratingSource, radarPoint, validRating, RATING_AXES, RATING_TAGS } from '../src/utils/characterRatings.js'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 const dir = new URL('../public/data/character-ratings/', import.meta.url)
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'))
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex')
@@ -31,7 +32,7 @@ test('AI review set has unique IDs, seven explained scores and preserved evidenc
 })
 
 test('rating source tracks skill and weapon changes but excludes account Arcana', () => {
-  const character = read(new URL('../public/data/character-catalog/zh-CN.json', import.meta.url)).characters.find(c => c.id === 27)
+  const character = readCharacterCatalog(new URL('../public/data/character-catalog/', import.meta.url)).characters.find(c => c.id === 27)
   const changed = structuredClone(character)
   changed.collections = []
   assert.equal(digest(ratingSource(changed)), digest(ratingSource(character)))
@@ -43,7 +44,7 @@ test('rating source tracks skill and weapon changes but excludes account Arcana'
 })
 
 test('sync audit distinguishes current, stale and pending without inventing zero ratings', () => {
-  const catalog = read(new URL('../public/data/character-catalog/zh-CN.json', import.meta.url))
+  const catalog = readCharacterCatalog(new URL('../public/data/character-catalog/', import.meta.url))
   const status = read(new URL('status.json', dir))
   assert.deepEqual([...status.current, ...status.stale, ...status.pending].sort((a,b) => a-b), catalog.characters.map(c => c.id).sort((a,b) => a-b))
   for (const character of catalog.characters) {

@@ -1,10 +1,10 @@
 <template>
-  <span class="catalog-image"><img v-if="!failed" :src="`${base}${path}`" alt="" loading="lazy" decoding="async" @error="failed = true"><span v-else>{{ fallback }}</span></span>
+  <span class="catalog-image"><img v-if="!failed" :src="assetUrl(path)" alt="" :loading="priority ? 'eager' : 'lazy'" decoding="async" :fetchpriority="priority ? 'high' : 'auto'" @error="failed = true"><span v-else>{{ fallback }}</span></span>
 </template>
 <script setup>
 import { ref, watch } from 'vue'
-const props = defineProps({ path: String, fallback: String })
-const base = import.meta.env.BASE_URL
+import { assetUrl } from '../utils/imageAssets.js'
+const props = defineProps({ path: String, fallback: String, priority: Boolean })
 const failed = ref(false)
 watch(() => props.path, () => { failed.value = false })
 </script>
