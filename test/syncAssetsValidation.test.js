@@ -48,6 +48,16 @@ test('readExpectedItemIconIds reads unique item icon IDs from master data', () =
   }
 });
 
+test('item icon validation has no implicit raw data input', () => {
+  assert.deepEqual([...readExpectedItemIconIds(null)], []);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mmt-item-input-'));
+  try {
+    assert.throws(() => readExpectedItemIconIds(path.join(dir, 'missing.json')), /ENOENT/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('missingIds reports expected character icons absent from exported results', () => {
   assert.deepEqual(missingIds(new Set([1, 2, 148]), new Set([1, 2])), [148]);
 });

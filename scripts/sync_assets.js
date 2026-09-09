@@ -22,7 +22,9 @@ const FALLBACK_ASSETSTUDIO_ASSET = {
 };
 
 const CHARACTERS_DATA_FILE = path.join(PROJECT_ROOT, 'public/data/characters.json');
-const ITEM_MASTER_FILE = path.join(PROJECT_ROOT, 'data/Master/ItemMB.json');
+const ITEM_MASTER_FILE = process.env.SYNC_ASSETS_ITEM_MASTER_FILE
+  ? path.resolve(process.env.SYNC_ASSETS_ITEM_MASTER_FILE)
+  : null;
 const CHARACTER_DEST_DIR = path.join(PROJECT_ROOT, 'public/images/characters');
 const ITEM_DEST_DIR = path.join(PROJECT_ROOT, 'public/images/items');
 const WORK_DIR = process.env.SYNC_ASSETS_WORK_DIR
@@ -300,7 +302,7 @@ export function readExpectedCharacterIds(filePath = CHARACTERS_DATA_FILE) {
 }
 
 export function readExpectedItemIconIds(filePath = ITEM_MASTER_FILE) {
-  if (!fs.existsSync(filePath)) return new Set();
+  if (!filePath) return new Set();
 
   const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
   const entries = Array.isArray(data) ? data : Object.values(data);

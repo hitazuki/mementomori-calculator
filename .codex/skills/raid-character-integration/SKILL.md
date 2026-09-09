@@ -21,7 +21,7 @@ Route by change:
 - Character data or roster: inspect `src/constants/raid/characters/index.js`, the target character module, and `src/constants/raid/shared.js`. Keep `src/constants/raidTableCharacters.js` as the public compatibility facade.
 - Mechanic semantics: inspect `src/engine/raid/mechanics.js`, then `compiler.js` for validation/compilation and `runtime.js` for execution.
 - Display/config: inspect `src/views/RaidTableView.vue` and `src/locales/raid.js`.
-- Official names or MB evidence: query exact IDs/keys in `data/Master/*MB.json`; never read large master files wholesale.
+- Official names or MB evidence: query exact IDs/keys in `*MB.json` files under an explicitly supplied external Master directory; never read large master files wholesale.
 - Combat logs: verify `AttackUnitGuid`, `TargetUnitGuid`, `GranterGuid`, and action phase. Do not infer the caster from nested `SubSkillResult` alone.
 
 Use `git log`/`git show` when recent refactors may invalidate a requested layout. Preserve the current module boundaries instead of recreating an older proposed architecture.

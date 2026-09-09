@@ -2,7 +2,7 @@
 
 > 来源：用户截图识别，活动页「公会讨伐战」- 商城兑换列表。  
 > 兑换货币：活动代币。此活动每次代币名称可能不同；当兑换物品相同或等价时，不区分代币名称，统一视为等价公会讨伐战活动代币。  
-> 名称校对：优先使用 `doc/items/items.md`、`src/constants/itemScores.json` 与 `data/Master/TextResourceZhCnMB.json` 中已有官方中文。
+> 名称校对：优先使用 `doc/items/items.md`、`src/constants/itemScores.json` 与 显式提供的外部 Master 目录中的 `TextResourceZhCnMB.json` 中已有官方中文。
 
 ## 数据口径
 

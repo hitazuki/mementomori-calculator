@@ -2,9 +2,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { characterExclusiveEffects } from './lib/characterExclusive.mjs'
+import { requireMasterDirectory } from './lib/masterDirectory.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const master = path.resolve(process.argv[2] || path.join(root, 'data/Master'))
+const master = requireMasterDirectory(process.argv[2], 'npm run generate:catalog -- <master-directory> [output-directory]')
 const output = path.resolve(process.argv[3] || path.join(root, 'public/data/character-catalog'))
 const read = name => JSON.parse(fs.readFileSync(path.join(master, `${name}MB.json`), 'utf8'))
 const characters = read('Character').filter(character => !character.IsIgnore).sort((a, b) => a.Id - b.Id)

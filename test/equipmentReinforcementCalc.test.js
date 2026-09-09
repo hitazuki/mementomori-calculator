@@ -5,19 +5,31 @@ import { calculateEquipmentReinforcement as calculate, MATERIAL_KEYS } from '../
 
 const calc = (overrides = {}) => calculate({ initialLevel: 0, targetLevel: 240, weaponCount: 1, otherCount: 0, ...overrides })
 
-test('reinforcement data matches all master levels and both equipment categories', () => {
-  const master = JSON.parse(fs.readFileSync(new URL('../data/Master/EquipmentReinforcementMaterialMB.json', import.meta.url), 'utf8'))
-  assert.equal(master.length, 1000)
-  for (const [weaponCount, otherCount, field] of [[1, 0, 'WeaponRequiredItemList'], [0, 1, 'OthersRequiredItemList']]) {
-    const result = calc({ weaponCount, otherCount })
-    master.forEach((row, index) => {
-      assert.equal(row.ReinforcementLevel, index + 1)
-      for (const [i, identity] of [[0, [3, 1]], [1, [12, 1]], [2, [12, 2]]]) {
-        const expected = row[field].filter(item => item.ItemType === identity[0] && item.ItemId === identity[1]).reduce((sum, item) => sum + item.ItemCount, 0)
-        const key = MATERIAL_KEYS[i]
-        assert.equal(result.cumulative[index + 1][key] - result.cumulative[index][key], expected)
-      }
-    })
+// CI has only committed files. Compare against local Master data separately with
+// node scripts/generate_equipment_reinforcement.mjs <master-directory> --check.
+test('reinforcement published data covers all levels and both equipment categories', () => {
+  const data = JSON.parse(fs.readFileSync(new URL('../src/constants/equipmentReinforcement.json', import.meta.url), 'utf8'))
+  assert.equal(data.length, 1000)
+  for (const row of data) {
+    assert.equal(row.length, 2)
+    for (const category of row) {
+      assert.equal(category.length, 3)
+      assert.ok(category.every(value => Number.isSafeInteger(value) && value >= 0))
+      assert.ok(category[0] > 0)
+    }
+    row[0].forEach((value, index) => assert.equal(value, row[1][index] * 2))
+  }
+  const weapon = calc({ targetLevel: 1000 }).cumulative
+  const other = calc({ targetLevel: 1000, weaponCount: 0, otherCount: 1 }).cumulative
+  assert.equal(weapon.length, 1001)
+  assert.equal(other.length, 1001)
+  for (let level = 0; level <= 1000; level++) {
+    assert.equal(weapon[level].level, level)
+    assert.equal(other[level].level, level)
+    for (const key of MATERIAL_KEYS) {
+      assert.equal(weapon[level][key], other[level][key] * 2)
+      if (level > 0) assert.ok(weapon[level][key] >= weapon[level - 1][key])
+    }
   }
 })
 

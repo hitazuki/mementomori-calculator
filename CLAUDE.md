@@ -5,7 +5,7 @@
 - Run dev server: `npm run dev`
 - Build app: `npm run build`
 - Preview production: `npm run preview`
-- Sync master data: `npm run sync:master`
+- Sync master data: `npm run sync:master -- <master-directory>`
 
 ## Dev Server Coordination
 
@@ -34,7 +34,8 @@
 
 - Load only the files required by the current task.
 - Prefer `rg`/targeted scripts over reading large docs or JSON files in full.
-- Do not read `data/Master/*.json` wholesale. Query the specific id/name/key instead.
+- Raw Master data is external, temporary input. Never hard-code a local directory or require it for build/test/runtime. Generator commands must receive an explicit source directory.
+- Do not read large raw Master JSON files wholesale. Query the specific id/name/key instead.
 - For large generated constants such as `src/constants/ultraSalePacks.json` or `src/constants/allPacks.json`, inspect targeted slices only.
 
 ## Encoding / Chinese Text
@@ -65,4 +66,4 @@
 - Localization/proper noun tasks:
   - Do not create secondary translations for in-game proper nouns.
   - Search local docs first for official names.
-  - If not found, query `data/Master/TextResource*MB.json` for the exact official game text.
+  - If not found, query `TextResource*MB.json` in an explicitly supplied external Master directory for the exact official game text.

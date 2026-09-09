@@ -4,13 +4,13 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { requireMasterDirectory } from './lib/masterDirectory.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
-// Default Master data directory
-const MASTER_DIR = process.argv[2] || path.resolve(PROJECT_ROOT, 'data/Master');
+const MASTER_DIR = requireMasterDirectory(process.argv[2], 'npm run sync:master -- <master-directory>');
 
 console.log(`Reading Master data from: ${MASTER_DIR}`);
 

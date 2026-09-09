@@ -1,23 +1,30 @@
-import json, sys, io, os
+import json, sys, io, os, argparse
+from pathlib import Path
+
+parser = argparse.ArgumentParser(description="Generate pack documentation from an external Master directory")
+parser.add_argument("master_directory", type=Path)
+master_dir = parser.parse_args().master_directory.resolve()
+if not master_dir.is_dir():
+    parser.error(f"Master directory does not exist: {master_dir}")
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Ensure we run from project root
 os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-with open('data/Master/TreasureChestMB.json', encoding='utf-8') as f: tc_list = json.load(f)
-with open('data/Master/TreasureChestItemMB.json', encoding='utf-8') as f: tci_list = json.load(f)
-with open('data/Master/ItemMB.json', encoding='utf-8') as f: item_list = json.load(f)
-with open('data/Master/VipMB.json', encoding='utf-8') as f: vip_list = json.load(f)
-with open('data/Master/MonthlyLoginBonusMB.json', encoding='utf-8') as f: mlb_list = json.load(f)
-with open('data/Master/MonthlyLoginBonusRewardListMB.json', encoding='utf-8') as f: mlb_rw = json.load(f)
-with open('data/Master/LimitedLoginBonusMB.json', encoding='utf-8') as f: llb_list = json.load(f)
-with open('data/Master/LimitedLoginBonusRewardListMB.json', encoding='utf-8') as f: llb_rw = json.load(f)
-with open('data/Master/LuckyChanceMB.json', encoding='utf-8') as f: lc_list = json.load(f)
-with open('data/Master/BookSortAssistanceMB.json', encoding='utf-8') as f: bsa_list = json.load(f)
-with open('data/Master/PanelMB.json', encoding='utf-8') as f: panel_list = json.load(f)
-with open('data/Master/PanelMissionMB.json', encoding='utf-8') as f: pm_list = json.load(f)
-with open('data/Master/EquipmentSetMaterialBoxMB.json', encoding='utf-8') as f: esmb_list = json.load(f)
-with open('data/Master/EquipmentMB.json', encoding='utf-8') as f: eq_list = json.load(f)
+with open(master_dir / 'TreasureChestMB.json', encoding='utf-8') as f: tc_list = json.load(f)
+with open(master_dir / 'TreasureChestItemMB.json', encoding='utf-8') as f: tci_list = json.load(f)
+with open(master_dir / 'ItemMB.json', encoding='utf-8') as f: item_list = json.load(f)
+with open(master_dir / 'VipMB.json', encoding='utf-8') as f: vip_list = json.load(f)
+with open(master_dir / 'MonthlyLoginBonusMB.json', encoding='utf-8') as f: mlb_list = json.load(f)
+with open(master_dir / 'MonthlyLoginBonusRewardListMB.json', encoding='utf-8') as f: mlb_rw = json.load(f)
+with open(master_dir / 'LimitedLoginBonusMB.json', encoding='utf-8') as f: llb_list = json.load(f)
+with open(master_dir / 'LimitedLoginBonusRewardListMB.json', encoding='utf-8') as f: llb_rw = json.load(f)
+with open(master_dir / 'LuckyChanceMB.json', encoding='utf-8') as f: lc_list = json.load(f)
+with open(master_dir / 'BookSortAssistanceMB.json', encoding='utf-8') as f: bsa_list = json.load(f)
+with open(master_dir / 'PanelMB.json', encoding='utf-8') as f: panel_list = json.load(f)
+with open(master_dir / 'PanelMissionMB.json', encoding='utf-8') as f: pm_list = json.load(f)
+with open(master_dir / 'EquipmentSetMaterialBoxMB.json', encoding='utf-8') as f: esmb_list = json.load(f)
+with open(master_dir / 'EquipmentMB.json', encoding='utf-8') as f: eq_list = json.load(f)
 
 item_by_key = {}
 for i in item_list:
@@ -30,7 +37,7 @@ llb_rw_by_id = {x['Id']: x for x in llb_rw}
 eq_by_id = {e['Id']: e for e in eq_list}
 
 # Load Chinese text resources for item names
-with open('data/Master/TextResourceZhCnMB.json', encoding='utf-8') as f:
+with open(master_dir / 'TextResourceZhCnMB.json', encoding='utf-8') as f:
     zh_texts = json.load(f)
 zh_by_key = {t['StringKey']: t['Text'] for t in zh_texts}
 
@@ -62,7 +69,7 @@ def item_icon(itype, iid):
 out = []
 out.append('# 组合包 (Pack) 数据汇总')
 out.append('')
-out.append(f'> 数据来源：客户端 Master 数据 (`data/Master/`)，APK v4.15.0')
+out.append(f'> 数据来源：显式传入的客户端 Master 数据，APK v4.15.0')
 out.append(f'> 共 {len(item_list)} 种道具，{len(tc_list)} 种宝箱，{len(vip_list)} 个VIP等级')
 out.append('')
 

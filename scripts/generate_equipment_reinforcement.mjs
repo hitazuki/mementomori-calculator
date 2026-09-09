@@ -1,6 +1,9 @@
 import fs from 'node:fs'
+import path from 'node:path'
+import { requireMasterDirectory } from './lib/masterDirectory.mjs'
 
-const source = new URL('../data/Master/EquipmentReinforcementMaterialMB.json', import.meta.url)
+const master = requireMasterDirectory(process.argv[2], 'node scripts/generate_equipment_reinforcement.mjs <master-directory> [--check]')
+const source = path.join(master, 'EquipmentReinforcementMaterialMB.json')
 const destination = new URL('../src/constants/equipmentReinforcement.json', import.meta.url)
 const rows = JSON.parse(fs.readFileSync(source, 'utf8')).sort((a, b) => a.ReinforcementLevel - b.ReinforcementLevel)
 const keys = ['3:1', '12:1', '12:2']

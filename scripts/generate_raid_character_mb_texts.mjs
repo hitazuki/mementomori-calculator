@@ -2,9 +2,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { RAID_TABLE_ROSTER } from '../src/constants/raid/characters/index.js'
+import { requireMasterDirectory } from './lib/masterDirectory.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const masterDir = path.join(projectRoot, 'data', 'Master')
+const masterDir = requireMasterDirectory(process.argv[2], 'node scripts/generate_raid_character_mb_texts.mjs <master-directory>')
 
 function loadMaster(filename) {
   return JSON.parse(fs.readFileSync(path.join(masterDir, filename), 'utf8'))

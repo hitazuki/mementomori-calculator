@@ -2,7 +2,7 @@
 
 > 来源：用户截图识别，活动页「魔女的书库大扫除」- 商城兑换列表。  
 > 兑换货币：树影书签（Master: `ItemType=44`, `ItemId=1`）。  
-> 名称校对：优先使用 `doc/items/items.md`、`src/constants/itemScores.json` 与 `data/Master/TextResourceZhCnMB.json` 中已有官方中文。
+> 名称校对：优先使用 `doc/items/items.md`、`src/constants/itemScores.json` 与 显式提供的外部 Master 目录中的 `TextResourceZhCnMB.json` 中已有官方中文。
 
 ## 数据口径
 
