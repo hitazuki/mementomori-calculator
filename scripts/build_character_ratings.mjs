@@ -60,6 +60,7 @@ const records = reviews.map(line => {
     shortTermProtection: assessment.survival.shortTermProtection,
     effectiveSustain: assessment.survival.effectiveSustain,
     defenseInitiative: assessment.survival.initiative,
+    ...(assessment.survival.targetAvoidance ? {targetAvoidance:assessment.survival.targetAvoidance} : {}),
   }
   record.outputRole = assessment.output.role
   record.outputRoleDetail = assessment.output.targeting.detail

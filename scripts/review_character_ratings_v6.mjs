@@ -4,6 +4,7 @@ import { stageReference } from './lib/characterRatingV6.mjs'
 import { defenseInitiative } from './lib/characterInitiative.mjs'
 import { fourEvents } from '../doc/character-ratings/v6/four-events.mjs'
 import { characterOutputRole } from './lib/characterOutputRole.mjs'
+import { targetAvoidance } from '../doc/character-ratings/v6/target-avoidance.mjs'
 import { outputCopy, cleanRatingCopy } from '../doc/character-ratings/v6/copy.mjs'
 import { RATING_AXES, RATING_VERSION, ratingSource } from '../src/utils/characterRatings.js'
 import { compareSurvival } from '../src/utils/characterSurvival.js'
@@ -38,8 +39,8 @@ const records=catalog.map(c=>{
   const hash=createHash('sha256').update(JSON.stringify(ratingSource(c))).digest('hex')
   if(!old||(old.sourceHash!==hash && hash!==reviewedSources[c.id])) throw new Error('Source changed; review stage inputs first: '+c.id)
   const finite=compareSurvival(old.survival.states.map(({comparisons,...s})=>c.id===97&&s.effects.shieldAttack?{...s,effects:{...s.effects,shieldAttack:5}}:s))
-  const life=c.id===97?{...old.output.lifecycle,activeWindow:'首回合忧蓝500%攻击盾6回合，仅一次；40%减伤常驻'}:c.id===93?
-    {activeWindow:'P1开局一层屏障，抵消一次超过最大生命10%的伤害',replenishment:'屏障仅一次，不补发',afterExpiry:'屏障消耗后无抗伤或回血；主动自损持续消耗生命'}:old.output.lifecycle
+  const life=targetAvoidance[c.id]??(c.id===97?{...old.output.lifecycle,activeWindow:'首回合忧蓝500%攻击盾6回合，仅一次；40%减伤常驻'}:c.id===93?
+    {activeWindow:'P1开局一层屏障，抵消一次超过最大生命10%的伤害',replenishment:'屏障仅一次，不补发',afterExpiry:'屏障消耗后无抗伤或回血；主动自损持续消耗生命'}:old.output.lifecycle)
   const note=reviewNotes[c.id]??old.output.note
   const config=lower[c.id]??{}
   const stages={lower:stageReference(c,config),opening:stageReference(c,merge(config,opening[c.id])),mature:stageReference(c,{}),upper:stageReference(c,upper[c.id]??{})}
@@ -72,18 +73,18 @@ const records=catalog.map(c=>{
     `等效技能倍率（每行动，基础→后期）：单敌${equivalent(stages.lower.snapshots[0].perAction)}→${equivalent(stages.mature.snapshots[0].perAction)}；五敌总计${equivalent(stages.lower.snapshots[1].perAction)}→${equivalent(stages.mature.snapshots[1].perAction)}。${lateCost[c.id]?note:outputDetail}`,
     `${c.id===71?'等效生命：常驻200%，中毒来源/反伤400%，不能当作全来源常驻。':`等效生命${hasShield?'（完整护盾）':''}：${capacityText(finite)}。`}${life.activeWindow}。${initiative.note}`,
     `等效生命${hasShield?'（护盾耗尽后）':''}：${capacityText(finite,false)}。${life.replenishment==='无补充渠道'?'':life.replenishment+'；'}${life.afterExpiry}。`,
-    ...old.axes.slice(3).map(a=>a.key==='protection'&&c.id===97?'P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化，不当作稳定群疗。':a.reason),
+    ...old.axes.slice(3).map(a=>a.key==='protection'&&targetAvoidance[c.id]?.protection?targetAvoidance[c.id].protection:a.key==='protection'&&c.id===97?'P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化，不当作稳定群疗。':a.reason),
   ]
   const axes=RATING_AXES.map((key,i)=>{
     const base=i===0?Math.max(openingBand,quickBand):i===1?Math.max(...bases):i===2?defenseBase[0]:values[i]
     return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:cleanRatingCopy(key,reasons[i]),evidence,
       reviewBasis:i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`}
   })
-  return {...old,sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；专武三档技能已补齐，源库暂无专武被动属性。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:'2026-09-08',axes,output:{...old.output,lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
+  return {...old,sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；专武三档技能已补齐，源库暂无专武被动属性。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:targetAvoidance[c.id]?'2026-09-09':'2026-09-08',axes,output:{...old.output,lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
     assumptions:'范围为已审核的有限条件样本，不是所有外部队伍的理论极值；开局按前两次自身行动，短计数/短回合另列条件爆发，均仅计直接伤害；后期按成熟循环，无依据的事件频率不换算回合。延迟伤害仅在完整持续期样本计入。',
     equivalentSkillUnit:'100% = 固定基准面板下无角色自增益的100%攻击普攻；含适用乘区，特殊伤害仅按最终伤害折合，不改变其原始伤害类型。',
     comparison:{groupBenchmark:3,burstAnchors,lateAnchors,lowerBands:floors,matureBands:bases,openingBand,quickBand,penalties}},
-    survival:{...old.survival,initiative,shortTermProtection:life.activeWindow,states:finite,scoringScenario:'neutral',peakOrdinaryCapacity:peak,burstScore:defense[0],sustainScore:defense[1]}}
+    survival:{...old.survival,...(targetAvoidance[c.id]?{targetAvoidance:targetAvoidance[c.id],effectiveSustain:life.replenishment+'；'+life.afterExpiry}:{}),initiative,shortTermProtection:life.activeWindow,states:finite,scoringScenario:'neutral',peakOrdinaryCapacity:peak,burstScore:defense[0],sustainScore:defense[1]}}
 })
 if(records.length!==134) throw new Error('Expected all 134 characters')
 const collection=(metadata,key,rows)=>JSON.stringify(metadata,null,2).slice(0,-2)+`,\n  "${key}": [\n`+rows.map(r=>'    '+JSON.stringify(r)).join(',\n')+'\n  ]\n}\n'
