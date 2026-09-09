@@ -65,6 +65,7 @@ test('roster exposes forty-seven characters and the original five remain the def
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
   const defaults = createDefaultRaidTableConfig()
+  assert.equal(DEFAULT_RAID_CRITICAL_DAMAGE_BONUS, 0.6)
   assert.equal(defaults.bossTemplateId, RAID_BOSS_TEMPLATE_IDS.SONYA)
   assert.equal(defaults.levels[FLORENCE], DEFAULT_RAID_CHARACTER_LEVEL)
   assert.equal(defaults.defensePenetrations[FLORENCE], DEFAULT_RAID_DEFENSE_PENETRATION)
@@ -320,7 +321,12 @@ test('critical damage panel values are per character and remain separate from te
     lineup: [CORDIE], attackPriority: [CORDIE], turns: 1,
     criticalDamageBonuses: { [CORDIE]: 0.8 },
   })
-  assert.equal(action(edited, 1, CORDIE).damageSteps[0].criticalMultiplier, 1.8)
+  assert.equal(action(edited, 1, CORDIE).damageSteps[0].criticalMultiplier, 2.3)
+})
+
+test('zero additional critical damage retains the innate fifty percent', () => {
+  const result = simulateRaidTable(singleConfig(FLORENCE, { turns: 1, criticalDamageBonuses: { [FLORENCE]: 0 } }))
+  assert.ok(action(result, 1, FLORENCE).damageSteps.every(step => step.criticalMultiplier === 1.5))
 })
 
 test('disabling guaranteed criticals removes critical multipliers, Florence follow-ups, and Luke stacks', () => {

@@ -1,4 +1,4 @@
-import { RAID_JOB_FLAGS, RAID_MODIFIER_CHANNELS, RAID_STATUS_CLASSES } from '../../constants/raidTableCharacters.js'
+import { RAID_BASE_CRITICAL_DAMAGE_BONUS, RAID_JOB_FLAGS, RAID_MODIFIER_CHANNELS, RAID_STATUS_CLASSES } from '../../constants/raidTableCharacters.js'
 import { getCoeffByLevel } from '../../constants/levelTable.js'
 import { calcDamageRate } from '../damageCalc.js'
 
@@ -567,7 +567,7 @@ export function runRaidProgram(program) {
           })
         ))
         const preStatusCriticalDamageBonus = config.criticalDamageBonuses[actor.id] + config.elementBonus.dark.criticalDamageBonus
-        const criticalMultiplier = critical ? 1 + preStatusCriticalDamageBonus + modifiers.totals.criticalDamageBonus : 1
+        const criticalMultiplier = critical ? 1 + RAID_BASE_CRITICAL_DAMAGE_BONUS + preStatusCriticalDamageBonus + modifiers.totals.criticalDamageBonus : 1
         const preStatusAttackScale = rawStep.stat === 'ATK' ? 1 + config.elementBonus.normal.attackRate : 1
         const combatAttackScale = rawStep.stat === 'ATK' ? 1 + modifiers.totals.attackRate : 1
         const attackScale = preStatusAttackScale * combatAttackScale

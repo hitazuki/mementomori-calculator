@@ -158,7 +158,7 @@
 | --- | --- | --- | --- |
 | `attackRate` | 百分比攻击增幅 | 同渠道相加，进入 `1 + attackRate + 面板引用项` | 佛罗伦斯、芬里尔、梅琳、茉缇、鹭丝堤卡、阿尔托莉亚 |
 | `damageRate` | 输出增伤及承伤增减 | 角色与 Boss 来源相加后形成一个乘区 | 佛罗伦斯；Boss 状态另见下文 |
-| `criticalDamageBonus` | 暴击伤害加成 | 加到全局基础暴伤加成；不暴击时不使用 | 梅琳 |
+| `criticalDamageBonus` | 暴击伤害加成 | 与初始50%、角色配置的额外暴伤及组队加成相加；不暴击时不使用 | 梅琳 |
 | `speedRate` | 百分比速度变化 | `基础速度 × (1 + speedRate)` | 阿尔托莉亚 |
 | `defensePenetrationRate` | 防御贯通百分比变化 | `页面配置防御贯通 × (1 + defensePenetrationRate)` | 科迪 |
 
