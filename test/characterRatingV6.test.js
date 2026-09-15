@@ -13,6 +13,19 @@ const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',i
 const reviews=read('../doc/character-ratings/v6/review.json').records
 const score=(id,key)=>reviews.find(r=>r.id===id).axes.find(a=>a.key===key).score
 
+test('Cusie reviewed weapon stats affect output and finite shields without treating CRIT RES as mitigation',()=>{
+  const r=reviews.find(r=>r.id===97)
+  assert.deepEqual(r.axes.map(a=>a.score),[4,3,8,5,7,4,0])
+  assert.equal(r.output.weapon.attack,.18)
+  assert.equal(r.output.weapon.defense,.05)
+  assert.equal(r.output.weapon.excluded.find(p=>p.name==='暴击抗性').value,10)
+  assert.ok(Math.abs(r.output.stages.opening.openingDamage[1]-45.312)<1e-9)
+  const full=r.survival.states.find(s=>s.effects.shieldAttack)
+  const empty=r.survival.states.find(s=>!s.effects.shieldAttack)
+  assert.ok(Math.abs(full.comparisons[0].physical.withShield-(1+5/3*1.18)*1.025/.6)<1e-9)
+  assert.ok(Math.abs(empty.comparisons[0].physical.withoutShield-1.025/.6)<1e-9)
+})
+
 test('all seven-axis ratings retain reproducible lower, opening, mature and upper samples',()=>{
   assert.equal(reviews.length,134)
   assert.equal(RATING_AXES.length,7)
@@ -50,7 +63,7 @@ test('short event routes contribute to burst while long growth is rated by late 
   assert.equal(cusie.output.stages.opening.snapshots[1].skills.S1.components[0].coefficient,4.2)
   assert.equal(cusie.output.stages.opening.snapshots[1].skills.S1.components[0].targets,5)
   assert.equal(cusie.survival.states[0].effects.shieldAttack,5)
-  assert.ok(Math.abs(cusie.survival.peakOrdinaryCapacity-(1+5/3)/.6)<1e-9)
+  assert.ok(Math.abs(cusie.survival.peakOrdinaryCapacity-(1+5/3*1.18)*1.025/.6)<1e-9)
   for(const r of reviews) {
     assert.match(r.axes[0].reason,/等效技能倍率/)
     assert.match(r.axes[1].reason,/等效技能倍率/)

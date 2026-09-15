@@ -17,12 +17,16 @@ test('missing equipment links recover all rarity upgrades from active and passiv
   assert.deepEqual(characterExclusiveEffects({Id:1},new Map(),new Map(),undefined,text),[])
 })
 
-test('Cusie publishes three weapon upgrades in all five locales without inventing passive stats',()=>{
+test('Cusie publishes three weapon upgrades and the confirmed equipment tiers in all five locales',()=>{
   for(const locale of ['zh-CN','zh-TW','en','ja','ko']) {
     const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url), locale)
     const c=catalog.characters.find(c=>c.id===97)
     assert.deepEqual(c.exclusiveEffects.map(e=>e.level),[1,2,3])
     assert.ok(c.exclusiveEffects.every(e=>e.text.length>10))
-    assert.equal(c.exclusivePassives.length,0)
+    assert.deepEqual(c.exclusivePassives.map(p=>p.id),[709,710,711,712,713,714])
+    const highest=c.exclusivePassives.at(-1)
+    assert.equal(highest.rarity,'LR')
+    assert.equal(highest.level,240)
+    assert.deepEqual(highest.parameters.map(p=>[p.value,p.percent]),[[18,true],[5,true],[10,true]])
   }
 })

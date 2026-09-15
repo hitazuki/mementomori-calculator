@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import { createHash } from 'node:crypto'
 import { stageReference } from './lib/characterRatingV6.mjs'
+import { weaponReference } from './lib/characterRatingV5.mjs'
 import { defenseInitiative } from './lib/characterInitiative.mjs'
 import { fourEvents } from '../doc/character-ratings/v6/four-events.mjs'
 import { characterOutputRole } from './lib/characterOutputRole.mjs'
@@ -19,9 +20,9 @@ const band=(n,anchors)=>anchors.filter(v=>n>=v).length
 const lateAnchors=[.1,1.5,3,5,8,12,18,26,38,55]
 const burstAnchors=[.1,2,4,7,11,17,25,37.5,55,80]
 const equivalent = n => `${Math.round(n*100)}%`
-// Re-read all three official weapon upgrades on 2026-09-08, confirmed against
-// moonheart's text MB and skill rarity flags. Passive equipment rows remain absent.
-const reviewedSources={97:'cea803c4d259ef7b0b7aefe07bfe846bd5b94021c553efb82ee57b485726df4e'}
+// Reviewed all skill levels and weapon upgrades on 2026-09-15 after MB added
+// Cusie's equipment rows: LR attack +18%, defense +5%; CRIT RES is not damage reduction.
+const reviewedSources={97:'428f278d7ea7a11f2c572aeee668d12ce7466e2137364f1050e510490245035b'}
 function capacityText(states,withShield=true) {
   const range=type=>{
     const values=states.map(s=>s.comparisons[0][type][withShield?'withShield':'withoutShield'])
@@ -39,7 +40,8 @@ const records=catalog.map(c=>{
   const old=previous.find(r=>r.id===c.id)
   const hash=createHash('sha256').update(JSON.stringify(ratingSource(c))).digest('hex')
   if(!old||(old.sourceHash!==hash && hash!==reviewedSources[c.id])) throw new Error('Source changed; review stage inputs first: '+c.id)
-  const finite=compareSurvival(old.survival.states.map(({comparisons,...s})=>c.id===97&&s.effects.shieldAttack?{...s,effects:{...s.effects,shieldAttack:5}}:s))
+  const weapon=weaponReference(c)
+  const finite=compareSurvival(old.survival.states.map(({comparisons,...s})=>c.id===97?{...s,effects:{...s.effects,attack:weapon.attack,defense:weapon.defense,...(s.effects.shieldAttack?{shieldAttack:5}:{})}}:s))
   const life=targetAvoidance[c.id]??(c.id===97?{...old.output.lifecycle,activeWindow:'首回合忧蓝500%攻击盾6回合，仅一次；40%减伤常驻'}:c.id===93?
     {activeWindow:'P1开局一层屏障，抵消一次超过最大生命10%的伤害',replenishment:'屏障仅一次，不补发',afterExpiry:'屏障消耗后无抗伤或回血；主动自损持续消耗生命'}:old.output.lifecycle)
   const note=reviewNotes[c.id]??old.output.note
@@ -81,7 +83,7 @@ const records=catalog.map(c=>{
     return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:cleanRatingCopy(key,reasons[i]),evidence,
       reviewBasis:i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`}
   })
-  return {...old,sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；专武三档技能已补齐，源库暂无专武被动属性。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:targetAvoidance[c.id]?'2026-09-09':'2026-09-08',axes,output:{...old.output,lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
+  return {...old,sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；最高专武攻击力+18%、防御力+5%已计入，暴击抗性+10%不折算为固定减伤。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:c.id===97?'2026-09-15':targetAvoidance[c.id]?'2026-09-09':'2026-09-08',axes,output:{...old.output,...(c.id===97?{weapon}:{}),lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
     assumptions:'范围为已审核的有限条件样本，不是所有外部队伍的理论极值；开局按前两次自身行动，短计数/短回合另列条件爆发，均仅计直接伤害；后期按成熟循环，无依据的事件频率不换算回合。延迟伤害仅在完整持续期样本计入。',
     equivalentSkillUnit:'100% = 固定基准面板下无角色自增益的100%攻击普攻；含适用乘区，特殊伤害仅按最终伤害折合，不改变其原始伤害类型。',
     comparison:{groupBenchmark:3,burstAnchors,lateAnchors,lowerBands:floors,matureBands:bases,openingBand,quickBand,penalties}},

@@ -11,12 +11,17 @@ const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'))
 const locales = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko']
 const catalogs = Object.fromEntries(locales.map(locale => [locale, readCharacterCatalog(path.join(root, 'public/data/character-catalog'), locale).characters]))
 const reviews = fs.readFileSync(path.join(root, 'doc/character-ratings/reviews.txt'), 'utf8').trim().split(/\r?\n/)
+const onlyArgument = process.argv.find(arg => arg.startsWith('--only='))
+const onlyIds = onlyArgument ? new Set(onlyArgument.slice('--only='.length).split(',').map(Number)) : null
+if (onlyIds && [...onlyIds].some(id => !Number.isInteger(id) || id <= 0 || !catalogs['zh-CN'].some(c => c.id === id))) {
+  throw new Error('Unknown character in --only')
+}
 const explicitlyReviewed = new Set((process.argv.find(arg => arg.startsWith('--reviewed=')) ?? '').split('=')[1]?.split(',').map(Number) ?? [])
 const digest = source => createHash('sha256').update(JSON.stringify(source)).digest('hex')
 const seen = new Set()
 const assessmentFile = readJson(path.join(root, 'doc/character-ratings/v6/review.json'))
 const assessments = new Map(assessmentFile.records.map(record => [record.id, record]))
-const records = reviews.map(line => {
+const records = reviews.filter(line => !onlyIds || onlyIds.has(Number(line.split('|')[0]))).map(line => {
   const parts = line.split('|')
   if (parts.length !== RATING_AXES.length + 4) throw new Error('Expected ID, seven scores, seven reasons, conditions and authored tags: ' + line.slice(0, 30))
   const [rawId, rawScores, ...notes] = parts
@@ -86,6 +91,7 @@ const records = reviews.map(line => {
   return record
 })
 for (const character of catalogs['zh-CN']) {
+  if (onlyIds && !onlyIds.has(character.id)) continue
   if (!seen.has(character.id)) throw new Error('Missing AI review: ' + character.id)
 }
 // Validate everything before writing any files. This packs authored AI reviews; it does not infer scores.

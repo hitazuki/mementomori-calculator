@@ -136,9 +136,10 @@ test('all 134 v5 assessments retain six decisions, reproducible final references
   for(const r of review.records){
     assert.deepEqual(r.axes.map(a=>a.key),['single','area','survival','protection','support','control'])
     if(current.has(r.id)) {
-      assert.deepEqual(r.output,referenceFor(character(r.id)))
-      // v5 predates the recovery of Cusie's weapon text from skill MB.
-      const historical=r.id===97?{...character(r.id),exclusiveEffects:[]}:character(r.id)
+      // v5 predates both Cusie's recovered weapon text and the equipment rows
+      // added on 2026-09-15. Reproduce that historical input, not the v6 review.
+      const historical=r.id===97?{...character(r.id),exclusiveEffects:[],exclusivePassives:[]}:character(r.id)
+      assert.deepEqual(r.output,referenceFor(historical))
       assert.equal(r.sourceHash,createHash('sha256').update(JSON.stringify(ratingSource(historical))).digest('hex'))
     }
     assert.ok(r.axes.every(a=>Number.isInteger(a.baseBand)&&a.reviewBasis&&a.evidence.length))
