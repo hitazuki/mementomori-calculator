@@ -2257,5 +2257,28 @@
         "val": 30
       }
     ]
+  },
+  {
+    "id": 100,
+    "nameKey": "[CharacterCollectionName100]",
+    "reqCids": [
+      97,
+      103
+    ],
+    "params": [
+      {
+        "ptype": 13,
+        "nameKey": "[BattleParameterTypeDefense]",
+        "ctype": 2,
+        "val": 200
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 3,
+        "val": 70
+      }
+    ],
+    "baseParams": []
   }
 ]

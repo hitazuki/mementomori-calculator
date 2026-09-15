@@ -662,7 +662,7 @@
     "nameKey": "[CharacterName97]",
     "name2Key": null,
     "elementType": 1,
-    "isLimited": false
+    "isLimited": true
   },
   "99": {
     "id": 99,
