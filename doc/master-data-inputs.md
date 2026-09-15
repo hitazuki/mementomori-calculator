@@ -9,6 +9,8 @@ npm run sync:master -- <master-directory>
 npm run generate:catalog -- <master-directory> [output-directory]
 node scripts/generate_equipment_reinforcement.mjs <master-directory>
 node scripts/generate_equipment_reinforcement.mjs <master-directory> --check
+node scripts/generate_equipment_upgrade.mjs <master-directory>
+node scripts/generate_equipment_upgrade.mjs <master-directory> --check
 node scripts/generate_raid_character_mb_texts.mjs <master-directory>
 python scripts/gen_pack_doc.py <master-directory>
 ```

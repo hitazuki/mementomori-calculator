@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process'
 import { requireMasterDirectory } from '../scripts/lib/masterDirectory.mjs'
 
 test('Master generators require an explicit directory instead of a local fallback', () => {
-  for (const script of ['extract_master_data.js', 'generate_character_catalog.mjs', 'generate_equipment_reinforcement.mjs', 'generate_raid_character_mb_texts.mjs']) {
+  for (const script of ['extract_master_data.js', 'generate_character_catalog.mjs', 'generate_equipment_reinforcement.mjs', 'generate_equipment_upgrade.mjs', 'generate_raid_character_mb_texts.mjs']) {
     const result = spawnSync(process.execPath, [path.resolve('scripts', script)], { encoding: 'utf8' })
     assert.equal(result.status, 1, script)
     assert.match(result.stderr, /Usage: .*<master-directory>/, script)

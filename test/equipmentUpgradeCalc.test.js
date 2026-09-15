@@ -1,0 +1,68 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { DEFAULT_UPGRADE_PANEL as defaults, EQUIPMENT_UPGRADE_DATA as data, upgradeLevels, buildEquipmentUpgrade as build, upgradeMaterials } from '../src/engine/equipmentUpgradeCalc.js'
+const plan = { stat: 'def', seriesId: 12, start: 0, bonus: 0 }
+const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.00001, `${actual} != ${expected}`)
+
+test('upgrade default excludes first equip from next upgrade comparison', () => {
+  const result = build(defaults, plan)
+  assert.equal(result.valid, true)
+  assert.equal(result.firstEquip.from, 0)
+  assert.equal(result.firstEquip.level, 240) // Lower SSR sets are different series, not Satan.
+  assert.equal(result.next.from, 240)
+  assert.equal(result.next.level, 250)
+  assert.equal(result.points.at(-1).level, 1000)
+  assert.ok(!upgradeLevels(12, 'def').includes(180))
+  assert.equal(result.firstEquip.increment, data.series.find(s => s.id === 12).stats.def[0][1] * data.coefficients[240])
+})
+
+test('upgrade reproduces level 470 head and hand comparison', () => {
+  const panel = { ...defaults, level: 470, enemyLevel: 470, def: 3286996, pdef: 4477977, mdef: 5218753 }
+  const head = build(panel, { ...plan, stat: 'pdef', start: 380 }).next
+  const hands = build(panel, { ...plan, start: 420 }).next
+  near(head.increment, 73165.6608)
+  near(hands.increment, 85893.4266)
+  near(head.adjacent.ehp, 0.6881476914)
+  near(hands.adjacent.ehp, 0.9402097956)
+  near(hands.adjacent.reduction, 0.9314521909)
+  assert.equal(build(panel, { ...plan, stat: 'pdef', start: 380 }, 'mag').next.adjacent.ehp, 0)
+  assert.equal(build(panel, { ...plan, stat: 'mdef', start: 380 }, 'phys').next.adjacent.ehp, 0)
+  near(build(panel, { ...plan, start: 420 }, 'mag').next.adjacent.ehp, hands.adjacent.ehp)
+})
+
+test('upgrade cumulative and adjacent factors agree without double counting baseline', () => {
+  const result = build(defaults, { ...plan, start: 380, bonus: 20 })
+  near(result.next.increment, (data.series.find(s => s.id === 12).stats.def.find(r => r[0] === 390)[1] * data.coefficients[390] - data.series.find(s => s.id === 12).stats.def.find(r => r[0] === 380)[1] * data.coefficients[380]) * 1.2)
+  let factor = 1
+  let sum = 0
+  for (const point of result.points) {
+    factor *= 1 + point.adjacent.ehp / 100
+    sum += point.increment
+    near((factor - 1) * 100, point.cumulative.ehp)
+    near(sum, point.totalIncrement)
+  }
+  const extra = build({ ...defaults, enemyLevel: 100 }, plan)
+  assert.notEqual(extra.next.adjacent.ehp, build(defaults, plan).next.adjacent.ehp)
+})
+
+test('upgrade follows actual links including 20-level gaps and never invents nodes', () => {
+  const fixture = { coefficients: data.coefficients, series: [{ id: 12, stats: { def: [[180, 10000, 200], [200, 12000, 220], [220, 14000, 240], [240, 16000, 250], [250, 17000, null]] } }] }
+  const result = build(defaults, plan, 'phys', fixture)
+  assert.equal(result.next.span, 20)
+  assert.deepEqual(result.points.map(p => p.level), [180, 200, 220, 240, 250])
+  assert.equal(build(defaults, { ...plan, start: 190 }, 'phys', fixture).valid, false)
+  fixture.series[0].stats.def[0][2] = 190
+  assert.equal(build(defaults, plan, 'phys', fixture).error, 'data')
+})
+
+test('upgrade validates input, missing coefficients and maximum level', () => {
+  for (const start of ['', -1, 10, 1001, 240.5]) assert.equal(build(defaults, { ...plan, start }).valid, false)
+  for (const value of ['', null, NaN, -1, Infinity]) assert.equal(build({ ...defaults, def: value }, plan).valid, false)
+  assert.equal(build({ ...defaults, level: 0 }, plan).valid, false)
+  assert.equal(build(defaults, { ...plan, seriesId: 999 }).error, 'data')
+  const missing = structuredClone(data)
+  missing.coefficients[240] = null
+  assert.equal(build(defaults, plan, 'phys', missing).error, 'data')
+  assert.deepEqual(build(defaults, { ...plan, start: 1000 }).points, [])
+  assert.equal(upgradeMaterials(60, 61).tickets, 5)
+})

@@ -4,6 +4,12 @@
       <h1 class="view-title">⚒ {{ t('reinforcementTitle') }}</h1>
       <p class="view-desc">{{ t('reinforcementDescription') }}</p>
     </header>
+    <div class="reinforcement-tabs" role="group" :aria-label="t('reinforcementTitle')">
+      <button type="button" class="btn" :class="activeTab === 'materials' ? 'btn-primary' : 'btn-secondary'" :aria-pressed="activeTab === 'materials'" @click="activeTab = 'materials'">{{ t('upgradeMaterialsTab') }}</button>
+      <button type="button" class="btn" :class="activeTab === 'benefits' ? 'btn-primary' : 'btn-secondary'" :aria-pressed="activeTab === 'benefits'" @click="activeTab = 'benefits'">{{ t('upgradeBenefitsTab') }}</button>
+    </div>
+    <EquipmentUpgradePanel v-show="activeTab === 'benefits'" />
+    <div v-show="activeTab === 'materials'">
     <section class="card reinforcement-inputs">
       <label v-for="field in fields" :key="field.key" :for="field.key">
         <span>{{ t(field.label) }}</span>
@@ -32,11 +38,13 @@
         <VChart class="reinforcement-chart" :option="chartOption" :theme="chartTheme" autoresize @datazoom="onZoom" />
       </section>
     </template>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
+import EquipmentUpgradePanel from '../components/EquipmentUpgradePanel.vue'
 import { useI18n } from 'vue-i18n'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -49,6 +57,7 @@ import { calculateEquipmentReinforcement, MAX_REINFORCEMENT_LEVEL, MATERIAL_KEYS
 
 use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, DataZoomComponent, MarkLineComponent, MarkAreaComponent])
 const { t, locale } = useI18n()
+const activeTab = ref('materials')
 const inputs = reactive({ initialLevel: 0, targetLevel: 240, weaponCount: 1, otherCount: 0 })
 const fields = [
   { key: 'initialLevel', label: 'reinforcementInitial', max: MAX_REINFORCEMENT_LEVEL },
