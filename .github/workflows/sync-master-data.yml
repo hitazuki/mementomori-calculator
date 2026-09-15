@@ -2,7 +2,9 @@ name: Sync Master Data
 
 on:
   schedule:
-    - cron: '0 8 * * *' # 每天 UTC 8:00 (北京时间 16:00) 运行
+    - cron: '30 6 * * *' # 每天北京时间 14:30 (UTC 06:30)
+    - cron: '0,30 7 * * *' # 每天北京时间 15:00、15:30 (UTC 07:00、07:30)
+    - cron: '0 8 * * *' # 每天北京时间 16:00 (UTC 08:00)
   workflow_dispatch: # 允许手动触发
 
 jobs:
