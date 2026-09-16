@@ -21,12 +21,12 @@
         <label>{{ t('upgradeSeries') }}<select v-model.number="plan.seriesId" class="form-input"><option v-for="series in EQUIPMENT_UPGRADE_DATA.series" :key="series.id" :value="series.id">{{ series.names[locale] || series.names.en }}</option></select></label>
         <button v-if="plans.length > 1" type="button" class="btn btn-secondary" @click="plans.splice(index, 1)">{{ t('upgradeRemove') }}</button>
       </div>
-      <details><summary>{{ t('upgradeAdvanced') }}</summary><label>{{ t('upgradeBonus') }}<input v-model.number="plan.bonus" class="form-input" type="number" min="0" step="0.1"></label></details>
+      <details><summary>{{ t('upgradeAdvanced') }}</summary><div class="upgrade-fields"><label>{{ t('upgradeOutsideBonus') }}<input v-model.number="plan.outsideBonus" class="form-input" type="number" min="0" step="0.1"><small class="view-desc">{{ t('upgradeOutsideHint') }}</small></label><label>{{ t('upgradeInsideBonus') }}<input v-model.number="plan.insideBonus" class="form-input" type="number" min="0" step="0.1"></label></div><p class="view-desc">{{ t('upgradeBonusFormula') }}</p></details>
     </div>
     </div>
       </div>
     </details>
-    <div class="upgrade-plan-summary"><span v-for="(plan, index) in plans" :key="plan.id" :style="{ borderColor: LINE_COLORS[index % LINE_COLORS.length] }">{{ planName(plan, index) }} · {{ EQUIPMENT_UPGRADE_DATA.series.find(series => series.id === plan.seriesId)?.names[locale] }}<template v-if="plan.bonus"> · +{{ plan.bonus }}%</template></span></div>
+    <div class="upgrade-plan-summary"><span v-for="(plan, index) in plans" :key="plan.id" :style="{ borderColor: LINE_COLORS[index % LINE_COLORS.length] }">{{ planName(plan, index) }} · {{ EQUIPMENT_UPGRADE_DATA.series.find(series => series.id === plan.seriesId)?.names[locale] }}<template> · {{ t('upgradeOutsideBonus') }} {{ plan.outsideBonus }} / {{ t('upgradeInsideBonus') }} {{ plan.insideBonus }}</template></span></div>
     <div class="upgrade-actions">
       <button v-for="value in ['adjacent', 'cumulative']" :key="value" type="button" class="btn" :class="mode === value ? 'btn-primary' : 'btn-secondary'" :aria-pressed="mode === value" @click="mode = value">{{ t(value === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulativeEhp') }}</button>
     </div>
@@ -63,7 +63,7 @@ import { GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, Ma
 import VChart from 'vue-echarts'
 import { getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
-import { DEFAULT_UPGRADE_PANEL, EQUIPMENT_UPGRADE_DATA, UPGRADE_STATS, CHARACTER_LEVEL_RANGE, buildEquipmentUpgrade, upgradeMaterials, equivalentUpgradeLevels } from '../engine/equipmentUpgradeCalc.js'
+import { DEFAULT_UPGRADE_PANEL, DEFAULT_UPGRADE_BONUSES, EQUIPMENT_UPGRADE_DATA, UPGRADE_STATS, CHARACTER_LEVEL_RANGE, buildEquipmentUpgrade, upgradeMaterials, equivalentUpgradeLevels } from '../engine/equipmentUpgradeCalc.js'
 
 use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, MarkLineComponent, MarkPointComponent])
 const { t, locale } = useI18n()
@@ -71,7 +71,7 @@ const panel = reactive({ ...DEFAULT_UPGRADE_PANEL })
 const sameLevel = ref(true)
 const enemyLevel = ref(500)
 let nextId = 3
-const plans = ref(UPGRADE_STATS.map((stat, id) => ({ id, stat, seriesId: 12, bonus: 0 })))
+const plans = ref(UPGRADE_STATS.map((stat, id) => ({ id, stat, seriesId: 12, ...DEFAULT_UPGRADE_BONUSES })))
 const hoverTarget = ref(null)
 const equipmentCap = computed(() => Number.isInteger(panel.level) ? Math.max(0, Math.min(1000, panel.level)) : 0)
 const mode = ref('adjacent')
@@ -94,7 +94,7 @@ function equivalentText(entry, target) {
   const crossing = match.intersections.length ? match.intersections.map(level => '≈' + number(level)).join(' / ') : t('upgradeNoCrossing')
   return planName(entry.plan, entry.index) + ': ' + crossing + ' · ' + t('upgradeFirstReached') + ': ' + (match.firstReached ?? t('upgradeUnreached'))
 }
-function addPlan() { plans.value.push({ id: nextId++, stat: 'def', seriesId: 12, bonus: 0 }) }
+function addPlan() { plans.value.push({ id: nextId++, stat: 'def', seriesId: 12, ...DEFAULT_UPGRADE_BONUSES }) }
 function onZoom(event) { const v = event.batch?.[0] ?? event; if (Number.isFinite(v.start) && Number.isFinite(v.end)) zoom.value = { start: v.start, end: v.end } }
 function materialsText(from, to) {
   const result = upgradeMaterials(from, to)

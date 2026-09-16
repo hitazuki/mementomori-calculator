@@ -1,8 +1,31 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { DEFAULT_UPGRADE_PANEL as defaults, EQUIPMENT_UPGRADE_DATA as data, upgradeLevels, buildEquipmentUpgrade as build, upgradeMaterials, equivalentUpgradeLevels } from '../src/engine/equipmentUpgradeCalc.js'
-const plan = { stat: 'def', seriesId: 12, start: 0, bonus: 0 }
+const plan = { stat: 'def', seriesId: 12, start: 0, outsideBonus: 0 }
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.00001, `${actual} != ${expected}`)
+
+test('bonuses default to 1% outside and 0% inside', () => {
+  const { outsideBonus, ...withoutBonus } = plan
+  assert.deepEqual(build(defaults, withoutBonus), build(defaults, { ...plan, outsideBonus: 1, insideBonus: 0 }))
+})
+
+test('in-battle bonus multiplies both unequipped and equipment stats at all tiers', () => {
+  for (const stat of ['def', 'pdef', 'mdef']) {
+    const baseline = { ...defaults, def: 2000000 }
+    const actual = build(baseline, { ...plan, stat, outsideBonus: 10, insideBonus: 20 })
+    // (B + E * 1.1) * 1.2 = B * 1.2 + E * 1.32, including the no-gear baseline.
+    const expected = build({ ...baseline, [stat]: baseline[stat] * 1.2 }, { ...plan, stat, outsideBonus: 32, insideBonus: 0 })
+    actual.points.forEach((point, index) => {
+      near(point.totalIncrement, expected.points[index].totalIncrement)
+      near(point.adjacent.ehp, expected.points[index].adjacent.ehp)
+      near(point.cumulative.ehp, expected.points[index].cumulative.ehp)
+      near(point.cumulative.reduction, expected.points[index].cumulative.reduction)
+    })
+  }
+  for (const key of ['outsideBonus', 'insideBonus']) {
+    for (const value of ['', null, -1, NaN, Infinity]) assert.equal(build(defaults, { ...plan, [key]: value }).valid, false)
+  }
+})
 
 test('automatic damage routing gives both defense types meaningful benefits', () => {
   for (const [stat, type] of [['pdef', 'phys'], ['mdef', 'mag'], ['def', 'phys']]) {
@@ -58,9 +81,9 @@ test('upgrade reproduces level 470 head and hand comparison', () => {
 })
 
 test('upgrade cumulative and adjacent factors agree without double counting baseline', () => {
-  const result = build(defaults, { ...plan, start: 380, bonus: 20 })
+  const result = build(defaults, { ...plan, start: 380, outsideBonus: 20 })
   near(result.next.increment, (data.series.find(s => s.id === 12).stats.def.find(r => r[0] === 390)[1] * data.coefficients[390] - data.series.find(s => s.id === 12).stats.def.find(r => r[0] === 380)[1] * data.coefficients[380]) * 1.2)
-  const origin = build(defaults, { ...plan, bonus: 20 }).points.find(p => p.level === 380)
+  const origin = build(defaults, { ...plan, outsideBonus: 20 }).points.find(p => p.level === 380)
   let factor = 1 + origin.cumulative.ehp / 100
   let sum = origin.totalIncrement
   for (const point of result.points) {
@@ -97,8 +120,8 @@ test('upgrade validates input, missing coefficients and maximum level', () => {
 
  test('nonzero starts include full equipment at every intermediate node', () => {
   for (const stat of ['def', 'pdef', 'mdef']) {
-    const full = build(defaults, { ...plan, stat, bonus: 20 })
-    const partial = build(defaults, { ...plan, stat, start: 380, bonus: 20 })
+    const full = build(defaults, { ...plan, stat, outsideBonus: 20 })
+    const partial = build(defaults, { ...plan, stat, start: 380, outsideBonus: 20 })
     const origin = full.points.find(p => p.level === 380)
     for (const point of partial.points) {
       const same = full.points.find(p => p.level === point.level)
