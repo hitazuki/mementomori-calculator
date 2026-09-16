@@ -70,7 +70,7 @@ const records = reviews.filter(line => !onlyIds || onlyIds.has(Number(line.split
   }
   record.outputRole = assessment.output.role
   record.outputRoleDetail = assessment.output.targeting.detail
-  const quantitative = { finalOutput: assessment.output, survival: {
+  const quantitative = { ...(assessment.teamCare?{teamCare:assessment.teamCare}:{}), finalOutput: assessment.output, survival: {
     version:'survival-reference-v6',reviewedAt:assessment.reviewedAt,scoringScenario:'neutral',
     assumptions:SURVIVAL_SCENARIOS,states:assessment.survival.states,
   } }

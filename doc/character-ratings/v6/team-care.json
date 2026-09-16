@@ -1,0 +1,754 @@
+{
+  "1": {
+    "heals": [
+      {
+        "slot": "S1",
+        "amount": 0.2,
+        "targets": 3,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 0.26666666666666666,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [],
+    "window": "S1/S2 CD4；S1随机3人，S2最低当前生命1人；加防20%仅2回合",
+    "reason": "S1随机3人各回20%基准生命；S2单人约27%并加防20%两回合，均CD4。",
+    "sourceHash": "68e877144ea566a89bc49efb1813d847d6962d29e845528f7c9cfeb23910ad3d",
+    "previousScore": 3,
+    "previousReason": "S1群体小额回复及S2低血治疗、加防",
+    "score": 2,
+    "reviewedAt": "2026-09-16"
+  },
+  "7": {
+    "heals": [
+      {
+        "slot": "P1",
+        "amount": 0.2,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [
+      {
+        "slot": "S2",
+        "targets": 2,
+        "count": 2,
+        "probability": 1
+      }
+    ],
+    "window": "P1低于50%生命且存活，需1行动再触发；共享/逐目标冷却未确认，不推算每轮全队回血；S2 CD4，自身不计其他友军",
+    "reason": "P1低血存活后回20%最大生命，需1行动再触发；S2为附近2名友军净化2种，CD4。",
+    "sourceHash": "e81afbff4b81dabfbc34d16e669f7d306b21ff05b1ac1eb2fc50dfbb4d17176a",
+    "previousScore": 8,
+    "previousReason": "P1低血且存活后回复20%最大生命，每1行动可再触发；S2邻位净化。治疗溢出与致命伤无法回复。",
+    "score": 6,
+    "reviewedAt": "2026-09-16"
+  },
+  "16": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.225,
+        "targets": 3,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S2-low",
+        "amount": 0.3375,
+        "targets": 3,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "P2",
+        "amount": 0.07866666666666666,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [],
+    "window": "S2 CD4；魔力按基础0.25，目标生命15%以下增至1.5倍；普攻回血30%概率；常驻全体减伤15%及闪避15%",
+    "reason": "全体常驻减伤15%与闪避15%为主；S2三人治疗按魔力270%，低于15%生命增至1.5倍，CD4。",
+    "sourceHash": "e15c6afccb3f02fecb6e22484ab8645d3ec52037d74e6f163ead43ed906dca3a",
+    "previousScore": 7,
+    "previousReason": "S2三人低血治疗，P1全体减伤闪避，W条件降低敌方暴伤15%",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "26": {
+    "heals": [
+      {
+        "slot": "S1",
+        "amount": 1.3766666666666667,
+        "targets": 2,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "P2",
+        "amount": 0.05,
+        "targets": 2,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 0.08127249999999998,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.15",
+        "enemies": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 0.2438175,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.15",
+        "enemies": 5
+      }
+    ],
+    "cleanses": [
+      {
+        "slot": "S1",
+        "targets": 2,
+        "count": 2,
+        "probability": 1
+      }
+    ],
+    "window": "S1 CD4，仅两名主攻手低于50%生命治疗；S2按实际伤害15%；再生需自身低血；残阵防御40%",
+    "reason": "S1两名主攻手低血时各回约138%基准生命并净化2种，CD4，溢出不加分；另有条件再生。",
+    "sourceHash": "a2a2c4eb676e68ff8bde54aed7ae84315f76ea96c9a265ff073ff15159910191",
+    "previousScore": 7,
+    "previousReason": "S1专武净化治疗，S2治疗，P2邻位再生",
+    "score": 6,
+    "reviewedAt": "2026-09-16"
+  },
+  "29": {
+    "heals": [],
+    "cleanses": [
+      {
+        "slot": "S2",
+        "targets": 1,
+        "count": null,
+        "probability": 1
+      }
+    ],
+    "window": "S2 CD4；最高攻击可能选到自身；65%防御持续3回合；自身隐身再生不计团队",
+    "reason": "S2单名主攻手全净化，CD4；专武加防65%持续3回合，自身再生不计团队回复。",
+    "sourceHash": "a4a8f0fe70ddb2a2627b9b203cd11c724bd07277190d91f440d3d11b2910cfb3",
+    "previousScore": 5,
+    "previousReason": "S2为最高攻击友军全净化并加防",
+    "score": 5,
+    "reviewedAt": "2026-09-16"
+  },
+  "32": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.19166666666666665,
+        "targets": 3,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [],
+    "window": "S2 CD4；当前生命最低而非百分比最低；魔力基准0.25；S1单敌减攻20%仅2回合",
+    "reason": "S2三人各回约19%基准生命，CD4；S1单敌减攻20%仅2回合，保护量有限。",
+    "sourceHash": "e3c4a5f3eee1ea3a8487dfca5327662d8ca6d054540083394a493c0c23ca0b17",
+    "previousScore": 5,
+    "previousReason": "S2三名低血友军治疗，S1单体减攻20%",
+    "score": 3,
+    "reviewedAt": "2026-09-16"
+  },
+  "42": {
+    "heals": [
+      {
+        "slot": "S1-tick",
+        "amount": 0.07,
+        "targets": 4,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 1.3710000000000002,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 1.2",
+        "enemies": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 1.3710000000000002,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 1.2",
+        "enemies": 5
+      }
+    ],
+    "cleanses": [],
+    "window": "全体440%攻击盾3回合/CD4，约173%基准生命盾；自身前两次660%不计友军；P1友军免控2回合每4行动，非净化；S2伤害回复另计",
+    "reason": "全体440%攻击盾持续3回合、CD4，配合再生；主攻手免控2回合有空窗，治疗作补充。",
+    "sourceHash": "daa005faf3473b208456f7d03ffa3bf0ccae53f2c7115188fe363cfc0651f7a6",
+    "previousScore": 10,
+    "previousReason": "S1全体护盾再生，S2低血治疗，P1保护主攻手免控",
+    "score": 10,
+    "reviewedAt": "2026-09-16"
+  },
+  "51": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 1.239,
+        "targets": 4,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.35",
+        "enemies": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 1.239,
+        "targets": 4,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.35",
+        "enemies": 5
+      }
+    ],
+    "cleanses": [],
+    "window": "S2仅自身低于60%生命触发全体治疗，CD4；敌方减攻40%及弱化命中下降需自身受弱化触发且仅1回合",
+    "reason": "S2自身低于60%生命时群疗，每人参照约124%基准生命，CD4；溢出与触发不足限制收益。",
+    "sourceHash": "9b280b48f677a3949d5956dee1b3e2de1cd6ad5e372e6f649f098e00b571288a",
+    "previousScore": 6,
+    "previousReason": "S2低血群体治疗；P1降低弱化命中，W反减攻40%，依赖受弱化触发",
+    "score": 5,
+    "reviewedAt": "2026-09-16"
+  },
+  "52": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.09771874999999998,
+        "targets": 3,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.15",
+        "enemies": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 0.3908749999999999,
+        "targets": 3,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.15",
+        "enemies": 5
+      }
+    ],
+    "cleanses": [
+      {
+        "slot": "S2",
+        "targets": 3,
+        "count": null,
+        "probability": 1
+      }
+    ],
+    "window": "S2最低速3人/CD4，未必受伤或受控；邻位25%防御及物防常驻，100%仅自身",
+    "reason": "S2低速3人全净化、伤害比例治疗，CD4；邻位防御与物防各25%常驻，100%只属自身。",
+    "sourceHash": "575cc4a08eac2fdc1544b69a34b7e1fc945b746f7ff0de4bd3e9c053e9bcc94e",
+    "previousScore": 7,
+    "previousReason": "S2低速三人治疗净化，P1邻位双防",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "54": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.45999999999999996,
+        "targets": 4,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1,
+        "targetRange": [
+          0,
+          4
+        ]
+      }
+    ],
+    "cleanses": [],
+    "window": "S2敌我混选5单位，实际命中其他友军人数0–4，不假设均匀抽样；S1全体70%防御4回合/CD4，100%攻击盾2回合；200%盾仅开局主攻手",
+    "reason": "S1全体防御70%持续4回合、护盾2回合，CD4；S2敌我混选，随机治疗仅作补充。",
+    "sourceHash": "348e516873954f8b1b178fa572c214d29883d54314a04e10990d70ac63b5e8e2",
+    "previousScore": 7,
+    "previousReason": "S1全队防御护盾，P1保护主攻手，S2随机治疗",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "57": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.7374999999999999,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.5",
+        "enemies": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 0.7374999999999999,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.5",
+        "enemies": 5
+      }
+    ],
+    "cleanses": [],
+    "window": "S2单人/CD4；依赖实际伤害；无友军净化或致命容量提升",
+    "reason": "S2最低生命友军治疗，参照约74%基准生命，CD4；无群体覆盖或额外致命保护。",
+    "sourceHash": "327bb7d4c5dd550f6922b920b319fd755bbc297df1cfa2710ea5425b80c9cc63",
+    "previousScore": 5,
+    "previousReason": "S2为最低生命友军治疗",
+    "score": 3,
+    "reviewedAt": "2026-09-16"
+  },
+  "62": {
+    "heals": [
+      {
+        "slot": "S1",
+        "amount": 0.19666666666666666,
+        "targets": 3,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 0.3933333333333333,
+        "targets": 3,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S2-tick",
+        "amount": 0.05,
+        "targets": 3,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "P2",
+        "amount": 0.19666666666666666,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [
+      {
+        "slot": "S1",
+        "targets": 3,
+        "count": 2,
+        "probability": 1
+      },
+      {
+        "slot": "S1-crit",
+        "targets": 3,
+        "count": 3,
+        "probability": 1
+      }
+    ],
+    "window": "S1/S2 CD4；S1抵抗80%两回合仅确认原文2人，专武三人明确仅治疗净化；再生1/3/4/5回合取决暴击；P2消耗开局5回合防御",
+    "reason": "S1三人约20%治疗及2–3种净化；S2三人约39%治疗加再生，均CD4；80%抵抗仅2回合，人数待核。",
+    "sourceHash": "c429b49a7d4b5aa19aa96b5f176489b176b767dbca5ac5953ece6aae6f8af971",
+    "previousScore": 9,
+    "previousReason": "W使S1三人净化抗性80%，S2治疗再生",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "72": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.1659375,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.3",
+        "enemies": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 0.8296874999999999,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline recipient HP",
+        "basis": "reviewed lower S2 actual damage × 0.3",
+        "enemies": 5
+      }
+    ],
+    "cleanses": [],
+    "window": "S2单名最低生命/CD4；按单敌和5敌区别，需自身有增益；不给全敌数最高值常驻分",
+    "reason": "S2单人治疗，单敌至五敌参照约17%–83%基准生命，CD4；敌人数影响回复，不按最高值常驻。",
+    "sourceHash": "da2a4c37b5e4951b8bea42f7203d88bd89ef069c7f687cc10166c9480887a817",
+    "previousScore": 3,
+    "previousReason": "S2治疗最低生命友军",
+    "score": 3,
+    "reviewedAt": "2026-09-16"
+  },
+  "76": {
+    "heals": [
+      {
+        "slot": "S1",
+        "amount": 0.15,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S2",
+        "amount": 0.0488,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 4
+      }
+    ],
+    "cleanses": [
+      {
+        "slot": "S1",
+        "targets": 1,
+        "count": 2,
+        "probability": 1
+      },
+      {
+        "slot": "S2",
+        "targets": 1,
+        "count": 1,
+        "probability": 1
+      }
+    ],
+    "window": "S2连续4次逐次重选最低血且每次净化1种，CD4；P1主攻手开局增加来源HP50%，第2–10回合每回合选1人加来源HP10%，全队共9次非每人9层",
+    "reason": "P1主攻手开局增加来源生命50%，第2–10回合另分配9次10%；S2四次低血治疗净化，CD4。",
+    "sourceHash": "6a7ddf416a6099875a0492c950b0df633537a696ae48cfae75e21b9da0b7e01d",
+    "previousScore": 9,
+    "previousReason": "S1净化治疗主攻手，S2多次低血治疗，P1长期增加友军生命",
+    "score": 8,
+    "reviewedAt": "2026-09-16"
+  },
+  "80": {
+    "heals": [
+      {
+        "slot": "P2-tick",
+        "amount": 0.1,
+        "targets": 4,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [],
+    "window": "合理苍翠队；其他友军25%最大生命+来源攻击200%，基准约204%生命；500%来源攻击仅自身；再生每4行动补4回合",
+    "reason": "其他友军增加生命25%，苍翠再加来源攻击200%；每4行动补4回合再生、每次10%最大生命。",
+    "sourceHash": "88f0578fdc4057497cc6c6190ad1f1737b081235ab9d4ad9b6ed781da42aec09",
+    "previousScore": 8,
+    "previousReason": "P1全体来源攻击500%生命，P2合理苍翠队强化再生；4回合再生可重复，实际回复扣除溢出。",
+    "score": 8,
+    "reviewedAt": "2026-09-16"
+  },
+  "83": {
+    "heals": [
+      {
+        "slot": "P2",
+        "amount": 0.19666666666666666,
+        "targets": 4,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [],
+    "window": "P2仅第1–6回合末；P1邻位结界只对超过最大生命10%的部分阻绝50%，4回合每4行动；60%抗暴仅开局1回合",
+    "reason": "邻位结界阻绝超过10%生命的伤害部分50%，可周期补发；全体治疗仅前6回合，首回合抗暴不常驻。",
+    "sourceHash": "9b0f4b497e423bde67a4b29397f03370aaff53eb882ed1a971b76a26e51c9df2",
+    "previousScore": 7,
+    "previousReason": "P1邻位50%结界常驻为主；P2治疗只前6回合，首回合抗暴不能当全程保护。",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "85": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.19666666666666666,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S2-first",
+        "amount": 0.3933333333333333,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [],
+    "window": "S2自身低于50%生命才给其他主攻手治疗，CD4；首次提升为100%攻击，自己不计团队人数",
+    "reason": "S2自身低血才治疗主攻手，平时约20%、首次约39%基准生命，CD4；不能稳定救急。",
+    "sourceHash": "3a9bfa6377cfbc81b477d9bb6d5fc6eb272750389f75c5afa8b3e80e9cfdbd06",
+    "previousScore": 3,
+    "previousReason": "S2低血治疗自己与主攻手",
+    "score": 2,
+    "reviewedAt": "2026-09-16"
+  },
+  "90": {
+    "heals": [],
+    "cleanses": [
+      {
+        "slot": "P1",
+        "targets": 1,
+        "count": 2,
+        "probability": 1
+      }
+    ],
+    "window": "合理流金配队，第4/8/12回合结束净化；其他时间和第12回合后无事件",
+    "reason": "合理配队仅第4、8、12回合末为主攻手净化2种；开局无保护，不能当连续解控。",
+    "sourceHash": "df875139585f10bf98a5e65cc865b5dba1cc65f7e2af5672a8082147d3842c34",
+    "previousScore": 1,
+    "previousReason": "P1指定回合为主攻手净化",
+    "score": 1,
+    "reviewedAt": "2026-09-16"
+  },
+  "92": {
+    "heals": [
+      {
+        "slot": "S1-tick",
+        "amount": 0.1,
+        "targets": 4,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [],
+    "window": "S1全体40%HP两层，4回合再生/CD4；满层80%生命不预支；10%再生按提升后的目标生命计算",
+    "reason": "S1全体生命每次加40%、最多80%，CD4；4回合再生每次10%最大生命，生命上限是高分主因。",
+    "sourceHash": "fd67638a5168631a31d836d779ffece52c8017357f274158f02ef2dbd386588a",
+    "previousScore": 9,
+    "previousReason": "W两次S1给全体叠80%生命并维持4回合再生；生命与回复分开计，首次行动前未叠满。",
+    "score": 9,
+    "reviewedAt": "2026-09-16"
+  },
+  "95": {
+    "heals": [],
+    "cleanses": [
+      {
+        "slot": "S2",
+        "targets": 3,
+        "count": 1,
+        "probability": 1
+      },
+      {
+        "slot": "P1",
+        "targets": 2,
+        "count": 2,
+        "probability": 1
+      }
+    ],
+    "window": "S2随机/CD4；P1自身受主动控制触发，未明示冷却；P2开局或队友死亡补盾，非固定CD，40%阻绝只自身",
+    "reason": "全体防御及主攻手盾为主；S2随机3人净化1种、CD4，P1自身受控才为主攻手净化。",
+    "sourceHash": "8edfaeeb996caecec1d1055ed3a4da8e847172704e0d7605d81af47d5fa86225",
+    "previousScore": 7,
+    "previousReason": "S1全体防御，S2净化，P1主攻手净化，P2护盾",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "97": {
+    "heals": [],
+    "cleanses": [
+      {
+        "slot": "P1",
+        "targets": 1,
+        "count": 1,
+        "probability": 0.3
+      }
+    ],
+    "window": "开局全体盾6回合仅一次，蓝500%攻击；P1敌攻击后存活30%净化1种；S1降低友军吸血50%会损害续航",
+    "reason": "开局忧蓝500%攻击盾持续6回合、仅一次；受击后30%净化1种作补充，S1降低友军吸血。",
+    "sourceHash": "428f278d7ea7a11f2c572aeee668d12ce7466e2137364f1050e510490245035b",
+    "previousScore": 7,
+    "previousReason": "P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化。",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "103": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.118,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 3
+      }
+    ],
+    "cleanses": [],
+    "window": "S2连续3次/CD4；全体来源生命20%约24.4%基准HP；回血量10%仅6回合且自身死亡解除；脱力40%对3主攻手70%概率4回合",
+    "reason": "全体来源生命20%及三主攻手70%概率脱力40%为主；S2三次小额治疗，CD4；回血量加成仅6回合。",
+    "sourceHash": "ca03458f20b9be08e216f2ed4783dd225d3606f2292f7f557ba01a31815b14c7",
+    "previousScore": 9,
+    "previousReason": "W全体来源生命与回血量提升，S2多次治疗；S1三主攻手70%脱力40%持续4回合",
+    "score": 8,
+    "reviewedAt": "2026-09-16"
+  },
+  "106": {
+    "heals": [],
+    "cleanses": [
+      {
+        "slot": "P1",
+        "targets": 2,
+        "count": 1,
+        "probability": 1
+      }
+    ],
+    "window": "P1自身受主动弱化触发，净化分支概率是否继承70%未确认；身后单人盾不预支；S1三人输出下降10%概率70%",
+    "reason": "自身受主动弱化时为两名主攻手净化1种；死亡后单人盾、概率降输出为主，不能视为常驻群净化。",
+    "sourceHash": "6cedc07e1974fd2ef560621fc314051610ea1c81f0bb48864ac6c9a8934dbeb9",
+    "previousScore": 6,
+    "previousReason": "P1主攻手净化，P2死亡护盾；S1概率输出伤害下降10%属增伤减伤乘区",
+    "score": 6,
+    "reviewedAt": "2026-09-16"
+  },
+  "109": {
+    "heals": [],
+    "cleanses": [
+      {
+        "slot": "P1",
+        "targets": 1,
+        "count": 2,
+        "probability": 1
+      }
+    ],
+    "window": "P1低速友军强化普攻后解除强化，每3行动补，不能每次普攻都算；P2单人45%结界4回合每4行动",
+    "reason": "低速友军45%结界可周期维持；强化普攻净化2种后消耗，每3行动再赋予，非持续免控。",
+    "sourceHash": "d548f714f6f71b8b98debafdf82d98c79ae643abfe30f2a4ed1f8b3e471dd292",
+    "previousScore": 7,
+    "previousReason": "P2低速友军45%结界，P1普攻净化",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "131": {
+    "heals": [],
+    "cleanses": [
+      {
+        "slot": "S1",
+        "targets": 1,
+        "count": 2,
+        "probability": 1
+      }
+    ],
+    "window": "S1攻击后/CD4；P1净化只自身，不算团队",
+    "reason": "S1攻击后为最高攻击友军净化2种，CD4；其余自净化不计团队保护。",
+    "sourceHash": "c90b8d28da9a013af5702ce911810ba4921660661393f6e36a7cfee79d912081",
+    "previousScore": 3,
+    "previousReason": "S1净化最高攻击友军",
+    "score": 3,
+    "reviewedAt": "2026-09-16"
+  },
+  "132": {
+    "heals": [
+      {
+        "slot": "S2",
+        "amount": 0.14,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [],
+    "window": "S2 CD4，第7回合起停止；源HP含自身100%提升，7%×2=14%基准HP",
+    "reason": "S2仅前6回合为主攻手回复来源生命7%，参照约14%基准生命，CD4；第7回合停止。",
+    "sourceHash": "e279fa9d91d45868996d1ddd201ae4ef9e43126a2281e4317dba89b1875e76d8",
+    "previousScore": 3,
+    "previousReason": "S2第7回合前治疗主攻手",
+    "score": 2,
+    "reviewedAt": "2026-09-16"
+  },
+  "140": {
+    "heals": [
+      {
+        "slot": "P1",
+        "amount": 1.5733333333333333,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [
+      {
+        "slot": "P1",
+        "targets": 1,
+        "count": 2,
+        "probability": 1
+      },
+      {
+        "slot": "P1-magic",
+        "targets": 4,
+        "count": 1,
+        "probability": 1
+      }
+    ],
+    "window": "每个目标低于30%且存活后仅一次；魔攻全净化仅已标记友军且前6回合；友军80%防御40%魔防20%魔暴降低6回合",
+    "reason": "各目标低血存活后仅一次400%攻击治疗与2种净化；主攻手防护、受魔攻群净化仅前6回合。",
+    "sourceHash": "109825e315b645ed472ae8ab15cf15eb4ae4b62eaf310f034938f26ccea8edfe",
+    "previousScore": 7,
+    "previousReason": "P1各目标低血存活时仅一次400%攻击治疗/净化；前6回合主攻手防魔保护，魔攻群净化第7回合停止。",
+    "score": 7,
+    "reviewedAt": "2026-09-16"
+  },
+  "150": {
+    "heals": [
+      {
+        "slot": "N",
+        "amount": 0.1,
+        "targets": 3,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      },
+      {
+        "slot": "S1",
+        "amount": 0.059,
+        "targets": 1,
+        "unit": "baseline recipient HP; no conditional source ATK growth",
+        "repeats": 1
+      }
+    ],
+    "cleanses": [
+      {
+        "slot": "N",
+        "targets": 3,
+        "count": null,
+        "probability": 1
+      }
+    ],
+    "window": "N仅开局10回合强化；治疗目标原生命50%以上且被控才解控，仅控制不去普通弱化；S1第7回合停疗；N次数依赖实际行动循环",
+    "reason": "强化普攻三人各回10%最大生命，仅10回合；原生命至少50%才解控，S1第7回合停止治疗。",
+    "sourceHash": "4081c29f9e19980b71494291944c71defc4f4b3e09c2d2b3ac8a71fe4136c1ea",
+    "previousScore": 5,
+    "previousReason": "P2普攻三人治疗及条件解控，S1前期治疗",
+    "score": 4,
+    "reviewedAt": "2026-09-16"
+  }
+}
