@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "有效生命提升",
   upgradeEnd: "目前角色等級內無可升級檔位",
   upgradeFirst: "首次裝備（不參與升級排名）",
-  upgradeChartNote: "橫軸為真實目標等級。相鄰模式不繪製首次裝備；累計模式相對填寫的起始面板計算。",
+  upgradeChartNote: "橫軸自動涵蓋目前曲線的實際等級範圍，可縮放檢視。起始等級決定已有裝備貢獻與累計收益基準，不用於裁剪視圖。相鄰模式不繪製首次裝備；累計模式相對填寫的起始面板計算。",
   upgradeTable: "展開數值與強化材料表",
   upgradePlan: "方案",
   upgradeInterval: "等級區間（跨度）",

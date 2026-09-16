@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "Effective HP gain",
   upgradeEnd: "No upgrade within the character level cap",
   upgradeFirst: "First equip (excluded from ranking)",
-  upgradeChartNote: "X-axis shows actual target levels. Adjacent mode excludes first equip; cumulative mode compares with the entered starting stats.",
+  upgradeChartNote: "The axis fits the actual levels on the curves; zoom to inspect a range. Starting level sets existing gear contribution and the cumulative baseline, not the view range. Adjacent mode excludes first equip; cumulative mode compares with the entered starting stats.",
   upgradeTable: "Values and upgrade materials",
   upgradePlan: "Plan",
   upgradeInterval: "Level interval (span)",

@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "実効HP上昇",
   upgradeEnd: "キャラレベル内に強化先がありません",
   upgradeFirst: "初回装備（順位対象外）",
-  upgradeChartNote: "横軸は実在する目標レベルです。隣接モードは初回装備を除き、累計モードは入力した開始能力と比較します。",
+  upgradeChartNote: "横軸は曲線の実際のレベル範囲に自動調整され、ズームできます。開始レベルは既存装備の寄与と累計効果の基準を決め、表示範囲の指定ではありません。隣接モードは初回装備を除き、累計モードは入力した開始能力と比較します。",
   upgradeTable: "数値と強化素材の表",
   upgradePlan: "案",
   upgradeInterval: "レベル区間（幅）",

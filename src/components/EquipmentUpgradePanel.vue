@@ -30,20 +30,6 @@
     </div>
     <p v-if="invalid" role="alert" class="upgrade-error">{{ t(invalid === 'data' ? 'upgradeDataError' : 'upgradeInputError') }}</p>
     <template v-else>
-      <section class="card upgrade-results">
-        <h3>{{ t('upgradeNext') }}</h3>
-        <p class="view-desc">{{ t('upgradeSpans') }}</p>
-        <div v-for="entry in ranked" :key="entry.plan.id" class="upgrade-result-row">
-          <strong>{{ planName(entry.plan, entry.index) }}</strong>
-          <span v-if="entry.result.next">{{ interval(entry.result.next.from, entry.result.next.level) }} · {{ t('upgradeEhp') }} +{{ pct(entry.result.next.adjacent.ehp) }}</span>
-          <span v-else>{{ t('upgradeEnd') }}</span>
-        </div>
-        <details v-if="analyses.some(entry => entry.result.firstEquip)"><summary>{{ t('upgradeFirst') }}</summary>
-          <div v-for="entry in analyses.filter(entry => entry.result.firstEquip)" :key="entry.plan.id" class="upgrade-result-row">
-            <strong>{{ planName(entry.plan, entry.index) }}</strong><span>0 → {{ entry.result.firstEquip.level }} · +{{ pct(entry.result.firstEquip.adjacent.ehp) }}</span>
-          </div>
-        </details>
-      </section>
       <section class="card upgrade-chart-card">
         <h3>{{ t(mode === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulativeEhp') }}</h3>
         <p class="view-desc">{{ t('upgradeChartNote') }}</p>
@@ -95,7 +81,6 @@ const panelFields = [
 ]
 const analyses = computed(() => plans.value.map((plan, index) => ({ plan, index, result: buildEquipmentUpgrade({ ...panel, enemyLevel: sameLevel.value ? panel.level : enemyLevel.value }, plan) })))
 const invalid = computed(() => analyses.value.find(entry => !entry.result.valid)?.result.error)
-const ranked = computed(() => [...analyses.value].sort((a, b) => (b.result.next?.adjacent.ehp ?? -1) - (a.result.next?.adjacent.ehp ?? -1)))
 const levels = plan => upgradeLevels(plan.seriesId, plan.stat).filter(level => level <= equipmentCap.value)
 const number = value => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }).format(value)
 const pct = value => `${new Intl.NumberFormat(locale.value, { maximumFractionDigits: 3, minimumFractionDigits: 3 }).format(value)}%`
@@ -131,6 +116,11 @@ const chartOption = computed(() => {
     markPoint: hoverTarget.value === null ? { data: [] } : { silent: true, symbol: 'circle', symbolSize: 7, label: { show: true, formatter: param => '≈' + number(param.value), position: entry.index % 2 ? 'bottom' : 'top', color: LINE_COLORS[entry.index % LINE_COLORS.length] }, data: equivalentUpgradeLevels(entry.result.points, mode.value, hoverTarget.value).intersections.map(level => ({ coord: [level, hoverTarget.value], value: level })) },
     data: entry.result.points.filter(point => mode.value === 'cumulative' || !point.firstEquip).map(point => ({ value: [point.level, point[mode.value].ehp], point, start: entry.plan.start })),
   }))
+  const plottedLevels = series.flatMap(line => line.data.map(point => point.value[0]))
+  const firstLevel = plottedLevels.length ? Math.min(...plottedLevels) : 0
+  const lastLevel = plottedLevels.length ? Math.max(...plottedLevels) : Math.max(1, equipmentCap.value)
+  // Keep a single available node visible without adding nonexistent equipment nodes.
+  const axisMin = firstLevel === lastLevel ? Math.max(0, firstLevel - 10) : firstLevel
   return {
     animation: false,
     legend: { type: 'scroll', top: 4, textStyle: theme.textStyle },
@@ -140,7 +130,7 @@ const chartOption = computed(() => {
       const from = mode.value === 'adjacent' ? point.from : start
       return `${param.marker}${param.seriesName}<br/>${interval(from, point.level)}${point.firstEquip ? ` · ${t('upgradeFirst')}` : ''}<br/>${t('upgradeIncrement')}: ${number(mode.value === 'adjacent' ? point.increment : point.totalIncrement)}<br/>${t('upgradeEhp')}: ${pct(point[mode.value].ehp)}<br/>${t('upgradeReduction')}: ${pct(point[mode.value].reduction)}<br/><br/>${t('upgradeSameEhp')}: ${pct(point[mode.value].ehp)}<br/>${analyses.value.map(entry => equivalentText(entry, point[mode.value].ehp)).join('<br/>')}`
     } },
-    xAxis: { type: 'value', min: 0, max: Math.max(1, equipmentCap.value), name: t('upgradeTarget'), nameLocation: 'middle', nameGap: 30, nameTextStyle: theme.textStyle, axisLabel: theme.axisLabel, axisLine: theme.axisLine, splitLine: theme.splitLine },
+    xAxis: { type: 'value', min: axisMin, max: lastLevel, minInterval: 1, name: t('upgradeTarget'), nameLocation: 'middle', nameGap: 30, nameTextStyle: theme.textStyle, axisLabel: theme.axisLabel, axisLine: theme.axisLine, splitLine: theme.splitLine },
     yAxis: { type: 'value', name: t('upgradeEhp'), nameTextStyle: theme.textStyle, axisLabel: { ...theme.axisLabel, formatter: value => `${number(value)}%` }, axisLine: theme.axisLine, splitLine: theme.splitLine },
     dataZoom: [{ id: 'upgrade-slider', type: 'slider', bottom: 4, ...zoom.value }, { id: 'upgrade-inside', type: 'inside', ...zoom.value }],
     series,
@@ -151,7 +141,7 @@ const chartOption = computed(() => {
 <style scoped>
 .upgrade-panel { display: grid; gap: 18px; }
 .upgrade-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
-.card.upgrade-fields, .upgrade-plan, .upgrade-results, .upgrade-chart-card { padding: 20px; }
+.card.upgrade-fields, .upgrade-plan, .upgrade-chart-card { padding: 20px; }
 label { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .upgrade-check { flex-direction: row; align-items: center; }
 .upgrade-actions { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -160,11 +150,10 @@ h3 { margin: 0 0 14px; font-size: 1.05rem; }
 .upgrade-slider { width: 100%; margin: 18px 0; accent-color: var(--gold); }
 summary { cursor: pointer; color: var(--gold); padding: 8px 0; }
 details label { max-width: 280px; }
-.upgrade-result-row { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid rgba(150,150,150,.18); }
 .upgrade-chart { height: 440px; width: 100%; }
 .upgrade-error { color: var(--danger, #d45c5c); }
 .upgrade-table-scroll { overflow-x: auto; max-height: 500px; }
 table { width: 100%; border-collapse: collapse; font-size: .85rem; }
 th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(150,150,150,.2); min-width: 95px; }
-@media(max-width: 600px) { .upgrade-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .card.upgrade-fields, .upgrade-plan, .upgrade-results, .upgrade-chart-card { padding: 12px; } .upgrade-chart { height: 380px; } }
+@media(max-width: 600px) { .upgrade-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .card.upgrade-fields, .upgrade-plan, .upgrade-chart-card { padding: 12px; } .upgrade-chart { height: 380px; } }
 </style>

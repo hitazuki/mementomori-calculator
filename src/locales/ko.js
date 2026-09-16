@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "유효 HP 증가",
   upgradeEnd: "캐릭터 레벨 내 강화 단계 없음",
   upgradeFirst: "최초 장착 (순위 제외)",
-  upgradeChartNote: "가로축은 실제 목표 레벨입니다. 인접 모드는 최초 장착을 제외하며 누적 모드는 입력한 시작 능력치와 비교합니다.",
+  upgradeChartNote: "가로축은 곡선의 실제 레벨 범위에 맞춰지며 확대할 수 있습니다. 시작 레벨은 기존 장비 기여와 누적 효과의 기준이며 표시 범위가 아닙니다. 인접 모드는 최초 장착을 제외하고 누적 모드는 입력한 시작 능력치와 비교합니다.",
   upgradeTable: "수치 및 강화 재료 표",
   upgradePlan: "비교안",
   upgradeInterval: "레벨 구간 (간격)",

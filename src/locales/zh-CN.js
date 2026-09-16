@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "有效生命提升",
   upgradeEnd: "当前角色等级内无可升级档位",
   upgradeFirst: "首次装备（不参与升级排名）",
-  upgradeChartNote: "横轴为真实目标等级。相邻模式不绘制首次装备；累计模式相对填写的起始面板计算。",
+  upgradeChartNote: "横轴自动覆盖当前曲线的实际等级范围，可缩放查看。起始等级决定已有装备贡献与累计收益基准，不用于裁剪视图。相邻模式不绘制首次装备；累计模式相对填写的起始面板计算。",
   upgradeTable: "展开数值与强化材料表",
   upgradePlan: "方案",
   upgradeInterval: "等级区间（跨度）",
