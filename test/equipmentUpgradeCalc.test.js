@@ -1,8 +1,31 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { DEFAULT_UPGRADE_PANEL as defaults, EQUIPMENT_UPGRADE_DATA as data, upgradeLevels, buildEquipmentUpgrade as build, upgradeMaterials } from '../src/engine/equipmentUpgradeCalc.js'
+import { DEFAULT_UPGRADE_PANEL as defaults, EQUIPMENT_UPGRADE_DATA as data, upgradeLevels, buildEquipmentUpgrade as build, upgradeMaterials, equivalentUpgradeLevels } from '../src/engine/equipmentUpgradeCalc.js'
 const plan = { stat: 'def', seriesId: 12, start: 0, bonus: 0 }
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.00001, `${actual} != ${expected}`)
+
+test('automatic damage routing gives both defense types meaningful benefits', () => {
+  for (const [stat, type] of [['pdef', 'phys'], ['mdef', 'mag'], ['def', 'phys']]) {
+    const auto = build(defaults, { ...plan, stat })
+    assert.ok(auto.next.adjacent.ehp > 0)
+    assert.deepEqual(auto.points, build(defaults, { ...plan, stat }, type).points)
+  }
+})
+
+test('character level caps actual equipment nodes and starting level', () => {
+  assert.equal(build({ ...defaults, level: 475 }, plan).points.at(-1).level, 470)
+  assert.deepEqual(build({ ...defaults, level: 200 }, plan).points, [])
+  assert.equal(build(defaults, { ...plan, start: 510 }).valid, false)
+  assert.equal(build({ ...defaults, level: 900 }, plan).points.at(-1).level, 900)
+})
+
+test('equal gain comparison keeps estimated crossings separate from legal tiers', () => {
+  const points = [240, 250, 260, 270].map((level, i) => ({ level, firstEquip: i === 0, adjacent: { ehp: [8, 1, 3, 1][i] }, cumulative: { ehp: [8, 9, 12, 13][i] } }))
+  assert.deepEqual(equivalentUpgradeLevels(points, 'adjacent', 2), { intersections: [255, 265], firstReached: 260 })
+  assert.deepEqual(equivalentUpgradeLevels(points, 'cumulative', 8), { intersections: [240], firstReached: 240 })
+  assert.deepEqual(equivalentUpgradeLevels(points, 'adjacent', 8), { intersections: [], firstReached: null })
+  assert.deepEqual(equivalentUpgradeLevels([], 'adjacent', 1), { intersections: [], firstReached: null })
+})
 
 test('upgrade default excludes first equip from next upgrade comparison', () => {
   const result = build(defaults, plan)
@@ -11,7 +34,7 @@ test('upgrade default excludes first equip from next upgrade comparison', () => 
   assert.equal(result.firstEquip.level, 240) // Lower SSR sets are different series, not Satan.
   assert.equal(result.next.from, 240)
   assert.equal(result.next.level, 250)
-  assert.equal(result.points.at(-1).level, 1000)
+  assert.equal(result.points.at(-1).level, 500)
   assert.ok(!upgradeLevels(12, 'def').includes(180))
   assert.equal(result.firstEquip.increment, data.series.find(s => s.id === 12).stats.def[0][1] * data.coefficients[240])
 })
@@ -63,6 +86,6 @@ test('upgrade validates input, missing coefficients and maximum level', () => {
   const missing = structuredClone(data)
   missing.coefficients[240] = null
   assert.equal(build(defaults, plan, 'phys', missing).error, 'data')
-  assert.deepEqual(build(defaults, { ...plan, start: 1000 }).points, [])
+  assert.deepEqual(build({ ...defaults, level: 900 }, { ...plan, start: 900 }).points, [])
   assert.equal(upgradeMaterials(60, 61).tickets, 5)
 })

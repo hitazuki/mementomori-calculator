@@ -17,7 +17,7 @@
       <div class="upgrade-fields">
         <label>{{ t('upgradeStat') }}<select v-model="plan.stat" class="form-input" @change="normalizeStart(plan)"><option v-for="stat in UPGRADE_STATS" :key="stat" :value="stat">{{ t(`upgrade_${stat}`) }}</option></select></label>
         <label>{{ t('upgradeSeries') }}<select v-model.number="plan.seriesId" class="form-input" @change="normalizeStart(plan)"><option v-for="series in EQUIPMENT_UPGRADE_DATA.series" :key="series.id" :value="series.id">{{ series.names[locale] || series.names.en }}</option></select></label>
-        <label>{{ t('upgradeStart') }}<input v-model.number="plan.start" class="form-input" type="number" min="0" max="1000" step="10" :aria-invalid="!levels(plan).includes(plan.start)"></label>
+        <label>{{ t('upgradeStart') }}<input v-model.number="plan.start" class="form-input" type="number" min="0" :max="equipmentCap" step="10" :aria-invalid="!levels(plan).includes(plan.start)"></label>
         <button v-if="plans.length > 1" type="button" class="btn btn-secondary" @click="plans.splice(index, 1)">{{ t('upgradeRemove') }}</button>
       </div>
       <input class="upgrade-slider" type="range" min="0" :max="levels(plan).length - 1" step="1" :value="Math.max(0, levels(plan).indexOf(plan.start))" :aria-label="`${planName(plan, index)} · ${t('upgradeStart')}`" :aria-valuetext="String(plan.start)" @input="plan.start = levels(plan)[Number($event.target.value)]">
@@ -26,8 +26,7 @@
     </div>
     <p class="view-desc">{{ t('upgradeScope') }}</p>
     <div class="upgrade-actions">
-      <label>{{ t('upgradeDamage') }}<select v-model="damageType" class="form-input"><option value="phys">{{ t('upgradePhys') }}</option><option value="mag">{{ t('upgradeMag') }}</option></select></label>
-      <label>{{ t('upgradeMode') }}<select v-model="mode" class="form-input"><option value="adjacent">{{ t('upgradeAdjacent') }}</option><option value="cumulative">{{ t('upgradeCumulative') }}</option></select></label>
+      <button v-for="value in ['adjacent', 'cumulative']" :key="value" type="button" class="btn" :class="mode === value ? 'btn-primary' : 'btn-secondary'" :aria-pressed="mode === value" @click="mode = value">{{ t(value === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulativeEhp') }}</button>
     </div>
     <p v-if="invalid" role="alert" class="upgrade-error">{{ t(invalid === 'data' ? 'upgradeDataError' : 'upgradeInputError') }}</p>
     <template v-else>
@@ -46,9 +45,10 @@
         </details>
       </section>
       <section class="card upgrade-chart-card">
-        <h3>{{ t(mode === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulative') }}</h3>
+        <h3>{{ t(mode === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulativeEhp') }}</h3>
         <p class="view-desc">{{ t('upgradeChartNote') }}</p>
-        <VChart class="upgrade-chart" :option="chartOption" autoresize @datazoom="onZoom" />
+        <p class="view-desc">{{ t('upgradeCompareHint') }}</p>
+        <VChart class="upgrade-chart" :option="chartOption" :update-options="{ replaceMerge: ['series'] }" autoresize @datazoom="onZoom" @mouseover="onHover" @zr:globalout="hoverTarget = null" />
         <details><summary>{{ t('upgradeTable') }}</summary>
           <div class="upgrade-table-scroll"><table>
             <thead><tr><th>{{ t('upgradePlan') }}</th><th>{{ t('upgradeInterval') }}</th><th>{{ t('upgradeIncrement') }}</th><th>{{ t('upgradeEhp') }}</th><th>{{ t('upgradeReduction') }}</th><th>{{ t('upgradeMaterials') }}</th></tr></thead>
@@ -66,25 +66,26 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent, LegendComponent, DataZoomComponent } from 'echarts/components'
+import { GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, MarkLineComponent, MarkPointComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
-import { DEFAULT_UPGRADE_PANEL, EQUIPMENT_UPGRADE_DATA, UPGRADE_STATS, CHARACTER_LEVEL_RANGE, upgradeLevels, buildEquipmentUpgrade, upgradeMaterials } from '../engine/equipmentUpgradeCalc.js'
+import { DEFAULT_UPGRADE_PANEL, EQUIPMENT_UPGRADE_DATA, UPGRADE_STATS, CHARACTER_LEVEL_RANGE, upgradeLevels, buildEquipmentUpgrade, upgradeMaterials, equivalentUpgradeLevels } from '../engine/equipmentUpgradeCalc.js'
 
-use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent])
+use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, MarkLineComponent, MarkPointComponent])
 const { t, locale } = useI18n()
 const panel = reactive({ ...DEFAULT_UPGRADE_PANEL })
 const sameLevel = ref(true)
 const enemyLevel = ref(500)
 let nextId = 3
 const plans = ref(UPGRADE_STATS.map((stat, id) => ({ id, stat, seriesId: 12, start: 0, bonus: 0, reset: false })))
-const damageType = ref('phys')
+const hoverTarget = ref(null)
+const equipmentCap = computed(() => Number.isInteger(panel.level) ? Math.max(0, Math.min(1000, panel.level)) : 0)
 const mode = ref('adjacent')
 const zoom = ref({ start: 0, end: 100 })
 const panelFields = [
@@ -92,20 +93,27 @@ const panelFields = [
   ...UPGRADE_STATS.map(key => ({ key, label: `upgradePanel_${key}` })),
   { key: 'pen', label: 'upgradePen' }, { key: 'pmPen', label: 'upgradePmPen' },
 ]
-const analyses = computed(() => plans.value.map((plan, index) => ({ plan, index, result: buildEquipmentUpgrade({ ...panel, enemyLevel: sameLevel.value ? panel.level : enemyLevel.value }, plan, damageType.value) })))
+const analyses = computed(() => plans.value.map((plan, index) => ({ plan, index, result: buildEquipmentUpgrade({ ...panel, enemyLevel: sameLevel.value ? panel.level : enemyLevel.value }, plan) })))
 const invalid = computed(() => analyses.value.find(entry => !entry.result.valid)?.result.error)
 const ranked = computed(() => [...analyses.value].sort((a, b) => (b.result.next?.adjacent.ehp ?? -1) - (a.result.next?.adjacent.ehp ?? -1)))
-const levels = plan => upgradeLevels(plan.seriesId, plan.stat)
+const levels = plan => upgradeLevels(plan.seriesId, plan.stat).filter(level => level <= equipmentCap.value)
 const number = value => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }).format(value)
 const pct = value => `${new Intl.NumberFormat(locale.value, { maximumFractionDigits: 3, minimumFractionDigits: 3 }).format(value)}%`
 const planName = (plan, index) => `${index + 1}. ${t(`upgrade_${plan.stat}`)}`
 const interval = (from, to) => `${from} → ${to} (+${to - from})`
 function normalizeStart(plan) { plan.reset = !levels(plan).includes(plan.start); if (plan.reset) plan.start = 0 }
+watch(() => panel.level, () => { for (const plan of plans.value) if (Number.isFinite(plan.start) && plan.start > equipmentCap.value) { plan.start = levels(plan).at(-1) ?? 0; plan.reset = true } })
+watch([analyses, mode], () => { hoverTarget.value = null })
+function onHover(event) { if (event.componentType === 'series' && event.data?.point) hoverTarget.value = event.data.point[mode.value].ehp }
+function equivalentText(entry, target) {
+  const match = equivalentUpgradeLevels(entry.result.points, mode.value, target)
+  const crossing = match.intersections.length ? match.intersections.map(level => '≈' + number(level)).join(' / ') : t('upgradeNoCrossing')
+  return planName(entry.plan, entry.index) + ': ' + crossing + ' · ' + t('upgradeFirstReached') + ': ' + (match.firstReached ?? t('upgradeUnreached'))
+}
 function addPlan() { plans.value.push({ id: nextId++, stat: 'def', seriesId: 12, start: 0, bonus: 0, reset: false }) }
 function loadExample() {
   Object.assign(panel, DEFAULT_UPGRADE_PANEL, { level: 470, def: 3286996, pdef: 4477977, mdef: 5218753 })
   sameLevel.value = true
-  damageType.value = 'phys'
   plans.value = [{ id: nextId++, stat: 'pdef', seriesId: 12, start: 380, bonus: 0 }, { id: nextId++, stat: 'def', seriesId: 12, start: 420, bonus: 0 }]
 }
 function onZoom(event) { const v = event.batch?.[0] ?? event; if (Number.isFinite(v.start) && Number.isFinite(v.end)) zoom.value = { start: v.start, end: v.end } }
@@ -119,18 +127,20 @@ const chartOption = computed(() => {
   const series = analyses.value.map(entry => ({
     id: String(entry.plan.id), name: planName(entry.plan, entry.index), type: 'line', smooth: false, showSymbol: true, symbolSize: 4,
     itemStyle: { color: LINE_COLORS[entry.index % LINE_COLORS.length] },
+    markLine: hoverTarget.value === null ? { data: [] } : { silent: true, symbol: 'none', lineStyle: { type: 'dashed', color: theme.textStyle.color }, label: { formatter: pct(hoverTarget.value), position: 'insideStartTop' }, data: entry.index === 0 ? [{ yAxis: hoverTarget.value }] : [] },
+    markPoint: hoverTarget.value === null ? { data: [] } : { silent: true, symbol: 'circle', symbolSize: 7, label: { show: true, formatter: param => '≈' + number(param.value), position: entry.index % 2 ? 'bottom' : 'top', color: LINE_COLORS[entry.index % LINE_COLORS.length] }, data: equivalentUpgradeLevels(entry.result.points, mode.value, hoverTarget.value).intersections.map(level => ({ coord: [level, hoverTarget.value], value: level })) },
     data: entry.result.points.filter(point => mode.value === 'cumulative' || !point.firstEquip).map(point => ({ value: [point.level, point[mode.value].ehp], point, start: entry.plan.start })),
   }))
   return {
     animation: false,
     legend: { type: 'scroll', top: 4, textStyle: theme.textStyle },
     grid: { left: 12, right: 20, top: 72, bottom: 75, containLabel: true },
-    tooltip: { ...theme.tooltip, trigger: 'axis', confine: true, formatter: params => params.map(param => {
+    tooltip: { ...theme.tooltip, trigger: 'item', confine: true, formatter: param => {
       const { point, start } = param.data
       const from = mode.value === 'adjacent' ? point.from : start
-      return `${param.marker}${param.seriesName}<br/>${interval(from, point.level)}${point.firstEquip ? ` · ${t('upgradeFirst')}` : ''}<br/>${t('upgradeIncrement')}: ${number(mode.value === 'adjacent' ? point.increment : point.totalIncrement)}<br/>${t('upgradeEhp')}: ${pct(point[mode.value].ehp)}<br/>${t('upgradeReduction')}: ${pct(point[mode.value].reduction)}`
-    }).join('<br/><br/>') },
-    xAxis: { type: 'value', min: 0, max: 1000, name: t('upgradeTarget'), nameLocation: 'middle', nameGap: 30, nameTextStyle: theme.textStyle, axisLabel: theme.axisLabel, axisLine: theme.axisLine, splitLine: theme.splitLine },
+      return `${param.marker}${param.seriesName}<br/>${interval(from, point.level)}${point.firstEquip ? ` · ${t('upgradeFirst')}` : ''}<br/>${t('upgradeIncrement')}: ${number(mode.value === 'adjacent' ? point.increment : point.totalIncrement)}<br/>${t('upgradeEhp')}: ${pct(point[mode.value].ehp)}<br/>${t('upgradeReduction')}: ${pct(point[mode.value].reduction)}<br/><br/>${t('upgradeSameEhp')}: ${pct(point[mode.value].ehp)}<br/>${analyses.value.map(entry => equivalentText(entry, point[mode.value].ehp)).join('<br/>')}`
+    } },
+    xAxis: { type: 'value', min: 0, max: Math.max(1, equipmentCap.value), name: t('upgradeTarget'), nameLocation: 'middle', nameGap: 30, nameTextStyle: theme.textStyle, axisLabel: theme.axisLabel, axisLine: theme.axisLine, splitLine: theme.splitLine },
     yAxis: { type: 'value', name: t('upgradeEhp'), nameTextStyle: theme.textStyle, axisLabel: { ...theme.axisLabel, formatter: value => `${number(value)}%` }, axisLine: theme.axisLine, splitLine: theme.splitLine },
     dataZoom: [{ id: 'upgrade-slider', type: 'slider', bottom: 4, ...zoom.value }, { id: 'upgrade-inside', type: 'inside', ...zoom.value }],
     series,

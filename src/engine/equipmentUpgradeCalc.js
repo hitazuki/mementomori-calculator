@@ -13,14 +13,15 @@ export function upgradeLevels(seriesId, stat, data = EQUIPMENT_UPGRADE_DATA) {
   return [0, ...(data.series.find(series => series.id === seriesId)?.stats[stat] ?? []).map(row => row[0])]
 }
 
-export function buildEquipmentUpgrade(panel, plan, damageType = 'phys', data = EQUIPMENT_UPGRADE_DATA) {
+export function buildEquipmentUpgrade(panel, plan, damageType = 'auto', data = EQUIPMENT_UPGRADE_DATA) {
+  if (damageType === 'auto') damageType = plan.stat === 'mdef' ? 'mag' : 'phys'
   if (![panel.def, panel.pdef, panel.mdef, panel.pen, panel.pmPen, plan.bonus].every(nonnegative)
     || ![panel.level, panel.enemyLevel].every(level => Number.isInteger(level) && level >= CHARACTER_LEVEL_RANGE[0] && level <= CHARACTER_LEVEL_RANGE[1])
     || !UPGRADE_STATS.includes(plan.stat) || !['phys', 'mag'].includes(damageType)) return { valid: false, error: 'input' }
   const rows = data.series.find(series => series.id === plan.seriesId)?.stats[plan.stat]
   if (!rows?.length) return { valid: false, error: 'data' }
   const levels = upgradeLevels(plan.seriesId, plan.stat, data)
-  if (!levels.includes(plan.start)) return { valid: false, error: 'input' }
+  if (!levels.includes(plan.start) || plan.start > panel.level) return { valid: false, error: 'input' }
   const byLevel = new Map(rows.map(row => [row[0], row]))
   const valueAt = level => {
     if (level === 0) return 0
@@ -49,6 +50,7 @@ export function buildEquipmentUpgrade(panel, plan, damageType = 'phys', data = E
     let next = previous === 0 ? rows[0][0] : byLevel.get(previous)[2]
     while (next !== null) {
       if (!Number.isInteger(next) || next <= previous || next > 1000 || visited.has(next)) throw new Error('data')
+      if (next > panel.level) break
       visited.add(next)
       const delta = (valueAt(next) - origin) * (1 + plan.bonus / 100)
       const nextRate = rate(delta)
@@ -67,4 +69,20 @@ export function buildEquipmentUpgrade(panel, plan, damageType = 'phys', data = E
 
 export function upgradeMaterials(initialLevel, targetLevel) {
   return calculateEquipmentReinforcement({ initialLevel, targetLevel, weaponCount: 0, otherCount: 1 })
+}
+
+// Intersections describe the drawn polyline, not additional legal equipment levels.
+export function equivalentUpgradeLevels(points, mode, target) {
+  const rows = points.filter(point => mode === 'cumulative' || !point.firstEquip)
+  const intersections = []
+  const add = level => { if (!intersections.some(value => Math.abs(value - level) < 1e-7)) intersections.push(level) }
+  rows.forEach((point, index) => {
+    const y = point[mode].ehp
+    if (Math.abs(y - target) < 1e-9) add(point.level)
+    const previous = rows[index - 1]
+    if (previous && (previous[mode].ehp - target) * (y - target) < 0) {
+      add(previous.level + (point.level - previous.level) * (target - previous[mode].ehp) / (y - previous[mode].ehp))
+    }
+  })
+  return { intersections, firstReached: rows.find(point => point[mode].ehp >= target - 1e-9)?.level ?? null }
 }
