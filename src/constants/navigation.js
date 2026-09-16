@@ -67,6 +67,15 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    id: 'equipment',
+    icon: '⚒',
+    labelKey: 'navGroupEquipmentAnalysis',
+    items: [
+      { id: 'equipmentUpgrade', viewId: 'equipmentUpgrade', matchViews: ['equipmentUpgrade'], icon: '📈', labelKey: 'equipmentUpgradeTitle', descriptionKey: 'equipmentUpgradeDescription' },
+      { id: 'equipmentReinforcement', viewId: 'equipmentReinforcement', matchViews: ['equipmentReinforcement'], icon: '⚒', labelKey: 'reinforcementTitle', descriptionKey: 'reinforcementDescription' },
+    ],
+  },
+  {
     id: 'gacha',
     icon: '🎲',
     labelKey: 'navGroupGachaAnalysis',
@@ -86,14 +95,6 @@ export const NAV_GROUPS = [
         descriptionKey: 'homeForbiddenWeaponDesc',
         viewId: 'forbiddenWeaponGacha',
         matchViews: ['forbiddenWeaponGacha'],
-      },
-      {
-        id: 'equipmentReinforcement',
-        viewId: 'equipmentReinforcement',
-        matchViews: ['equipmentReinforcement'],
-        icon: '⚒',
-        labelKey: 'reinforcementTitle',
-        descriptionKey: 'reinforcementDescription',
       },
     ],
   },
