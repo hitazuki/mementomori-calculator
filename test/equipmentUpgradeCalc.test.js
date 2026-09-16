@@ -41,6 +41,10 @@ test('upgrade default excludes first equip from next upgrade comparison', () => 
 
 test('upgrade reproduces level 470 head and hand comparison', () => {
   const panel = { ...defaults, level: 470, enemyLevel: 470, def: 3286996, pdef: 4477977, mdef: 5218753 }
+  // Convert equipped screenshot stats to the baseline for each independently tested slot.
+  const contribution = (stat, level) => data.series.find(s => s.id === 12).stats[stat].find(r => r[0] === level)[1] * data.coefficients[level]
+  panel.pdef -= contribution('pdef', 380)
+  panel.def -= contribution('def', 420)
   const head = build(panel, { ...plan, stat: 'pdef', start: 380 }).next
   const hands = build(panel, { ...plan, start: 420 }).next
   near(head.increment, 73165.6608)
@@ -88,4 +92,17 @@ test('upgrade validates input, missing coefficients and maximum level', () => {
   assert.equal(build(defaults, plan, 'phys', missing).error, 'data')
   assert.deepEqual(build({ ...defaults, level: 900 }, { ...plan, start: 900 }).points, [])
   assert.equal(upgradeMaterials(60, 61).tickets, 5)
+})
+
+ test('nonzero starts include full equipment at every intermediate node', () => {
+  for (const stat of ['def', 'pdef', 'mdef']) {
+    const full = build(defaults, { ...plan, stat, bonus: 20 })
+    const partial = build(defaults, { ...plan, stat, start: 380, bonus: 20 })
+    const origin = full.points.find(p => p.level === 380)
+    for (const point of partial.points) {
+      const same = full.points.find(p => p.level === point.level)
+      near(point.adjacent.ehp, same.adjacent.ehp)
+      near(point.cumulative.ehp, ((1 + same.cumulative.ehp / 100) / (1 + origin.cumulative.ehp / 100) - 1) * 100)
+    }
+  }
 })

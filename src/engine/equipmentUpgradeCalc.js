@@ -32,16 +32,17 @@ export function buildEquipmentUpgrade(panel, plan, damageType = 'auto', data = E
   }
   const attacker = getCoeffByLevel(panel.enemyLevel)
   const defender = getCoeffByLevel(panel.level)
-  const rate = increment => {
+  const rate = equipmentValue => {
     const adjusted = { def: panel.def, pdef: panel.pdef, mdef: panel.mdef }
-    adjusted[plan.stat] += increment
+    adjusted[plan.stat] += equipmentValue
     return calcDamageRate(adjusted.def, panel.pen, defender.cDef, attacker.cPen)
       * calcDamageRate(adjusted[damageType === 'phys' ? 'pdef' : 'mdef'], panel.pmPen, damageType === 'phys' ? defender.cPdef : defender.cMdef, attacker.cPmPen)
   }
   const measure = (before, after) => ({ ehp: (before / after - 1) * 100, reduction: (1 - after / before) * 100 })
   try {
-    const origin = valueAt(plan.start)
-    const baseRate = rate(0)
+    const multiplier = 1 + plan.bonus / 100
+    const origin = valueAt(plan.start) * multiplier
+    const baseRate = rate(origin)
     const points = []
     const visited = new Set()
     let previous = plan.start
@@ -52,8 +53,9 @@ export function buildEquipmentUpgrade(panel, plan, damageType = 'auto', data = E
       if (!Number.isInteger(next) || next <= previous || next > 1000 || visited.has(next)) throw new Error('data')
       if (next > panel.level) break
       visited.add(next)
-      const delta = (valueAt(next) - origin) * (1 + plan.bonus / 100)
-      const nextRate = rate(delta)
+      const equipmentValue = valueAt(next) * multiplier
+      const delta = equipmentValue - origin
+      const nextRate = rate(equipmentValue)
       if (!nonnegative(delta) || !(nextRate > 0) || !(baseRate > 0)) throw new Error('data')
       points.push({ level: next, from: previous, span: next - previous, firstEquip: previous === 0,
         increment: delta - previousDelta, totalIncrement: delta,

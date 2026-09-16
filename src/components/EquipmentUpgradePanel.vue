@@ -10,7 +10,6 @@
     </div>
     <div class="upgrade-actions">
       <button type="button" class="btn btn-secondary" @click="addPlan">{{ t('upgradeAdd') }}</button>
-      <button type="button" class="btn btn-secondary" @click="loadExample">{{ t('upgradeExample') }}</button>
     </div>
     <div v-for="(plan, index) in plans" :key="plan.id" class="card upgrade-plan">
       <h3 :style="{ color: LINE_COLORS[index % LINE_COLORS.length] }">{{ planName(plan, index) }}</h3>
@@ -96,11 +95,6 @@ function equivalentText(entry, target) {
   return planName(entry.plan, entry.index) + ': ' + crossing + ' · ' + t('upgradeFirstReached') + ': ' + (match.firstReached ?? t('upgradeUnreached'))
 }
 function addPlan() { plans.value.push({ id: nextId++, stat: 'def', seriesId: 12, start: 0, bonus: 0, reset: false }) }
-function loadExample() {
-  Object.assign(panel, DEFAULT_UPGRADE_PANEL, { level: 470, def: 3286996, pdef: 4477977, mdef: 5218753 })
-  sameLevel.value = true
-  plans.value = [{ id: nextId++, stat: 'pdef', seriesId: 12, start: 380, bonus: 0 }, { id: nextId++, stat: 'def', seriesId: 12, start: 420, bonus: 0 }]
-}
 function onZoom(event) { const v = event.batch?.[0] ?? event; if (Number.isFinite(v.start) && Number.isFinite(v.end)) zoom.value = { start: v.start, end: v.end } }
 function materialsText(from, to) {
   const result = upgradeMaterials(from, to)
