@@ -5,6 +5,8 @@ import { serialCodeTranslations } from './serialCode.js'
 export default {
   upgradeMaterialsTab: "材料需求",
   upgradeBenefitsTab: "升級收益",
+  upgradeConfig: "調整參數與方案",
+  upgradeHelp: "計算說明",
   upgradeIntro: "輸入無裝備時的防禦屬性，各方案獨立疊加完整裝備屬性（含強化與加成），統一以無裝備狀態比較累計收益。",
   upgradeSameLevel: "敵方同等級",
   upgradeEnemyLevel: "敵方等級",

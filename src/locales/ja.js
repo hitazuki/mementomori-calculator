@@ -5,6 +5,8 @@ import { serialCodeTranslations } from './serialCode.js'
 export default {
   upgradeMaterialsTab: "必要素材",
   upgradeBenefitsTab: "強化効果比較",
+  upgradeConfig: "条件と比較案を編集",
+  upgradeHelp: "計算について",
   upgradeIntro: "未装備の防御能力を入力してください。各案に強化とボーナスを含む装備能力全体を加算し、累計効果は共通の未装備状態を基準にします。",
   upgradeSameLevel: "敵も同レベル",
   upgradeEnemyLevel: "敵のレベル",

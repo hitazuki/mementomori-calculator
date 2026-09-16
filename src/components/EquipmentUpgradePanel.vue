@@ -1,6 +1,8 @@
 <template>
   <section class="upgrade-panel">
-    <p class="view-desc">{{ t('upgradeIntro') }}</p>
+    <details class="card upgrade-config">
+      <summary><strong>{{ t('upgradeConfig') }}</strong><span class="upgrade-config-summary">{{ t('upgradeLevel') }} {{ panel.level }} · {{ t('upgradePanel_def') }} {{ number(panel.def) }} · {{ t('upgradePanel_pdef') }} {{ number(panel.pdef) }} · {{ t('upgradePanel_mdef') }} {{ number(panel.mdef) }}</span></summary>
+      <div class="upgrade-config-body">
     <div class="card upgrade-fields">
       <label v-for="field in panelFields" :key="field.key">{{ t(field.label) }}
         <input v-model.number="panel[field.key]" class="form-input" type="number" :min="field.level ? CHARACTER_LEVEL_RANGE[0] : 0" :max="field.level ? CHARACTER_LEVEL_RANGE[1] : undefined" step="1">
@@ -11,6 +13,7 @@
     <div class="upgrade-actions">
       <button type="button" class="btn btn-secondary" @click="addPlan">{{ t('upgradeAdd') }}</button>
     </div>
+    <div class="upgrade-plan-grid">
     <div v-for="(plan, index) in plans" :key="plan.id" class="card upgrade-plan">
       <h3 :style="{ color: LINE_COLORS[index % LINE_COLORS.length] }">{{ planName(plan, index) }}</h3>
       <div class="upgrade-fields">
@@ -20,7 +23,10 @@
       </div>
       <details><summary>{{ t('upgradeAdvanced') }}</summary><label>{{ t('upgradeBonus') }}<input v-model.number="plan.bonus" class="form-input" type="number" min="0" step="0.1"></label></details>
     </div>
-    <p class="view-desc">{{ t('upgradeScope') }}</p>
+    </div>
+      </div>
+    </details>
+    <div class="upgrade-plan-summary"><span v-for="(plan, index) in plans" :key="plan.id" :style="{ borderColor: LINE_COLORS[index % LINE_COLORS.length] }">{{ planName(plan, index) }} · {{ EQUIPMENT_UPGRADE_DATA.series.find(series => series.id === plan.seriesId)?.names[locale] }}<template v-if="plan.bonus"> · +{{ plan.bonus }}%</template></span></div>
     <div class="upgrade-actions">
       <button v-for="value in ['adjacent', 'cumulative']" :key="value" type="button" class="btn" :class="mode === value ? 'btn-primary' : 'btn-secondary'" :aria-pressed="mode === value" @click="mode = value">{{ t(value === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulativeEhp') }}</button>
     </div>
@@ -28,9 +34,9 @@
     <template v-else>
       <section class="card upgrade-chart-card">
         <h3>{{ t(mode === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulativeEhp') }}</h3>
-        <p class="view-desc">{{ t('upgradeChartNote') }}</p>
-        <p class="view-desc">{{ t('upgradeCompareHint') }}</p>
+
         <VChart class="upgrade-chart" :option="chartOption" :update-options="{ replaceMerge: ['series'] }" autoresize @datazoom="onZoom" @mouseover="onHover" @zr:globalout="hoverTarget = null" />
+        <details class="upgrade-help"><summary>{{ t('upgradeHelp') }}</summary><p class="view-desc">{{ t('upgradeIntro') }}</p><p class="view-desc">{{ t('upgradeChartNote') }}</p><p class="view-desc">{{ t('upgradeCompareHint') }}</p><p class="view-desc">{{ t('upgradeScope') }}</p></details>
         <details><summary>{{ t('upgradeTable') }}</summary>
           <div class="upgrade-table-scroll"><table>
             <thead><tr><th>{{ t('upgradePlan') }}</th><th>{{ t('upgradeInterval') }}</th><th>{{ t('upgradeIncrement') }}</th><th>{{ t('upgradeEhp') }}</th><th>{{ t('upgradeReduction') }}</th><th>{{ t('upgradeMaterials') }}</th></tr></thead>
@@ -137,10 +143,23 @@ label { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 h3 { margin: 0 0 14px; font-size: 1.05rem; }
 summary { cursor: pointer; color: var(--gold); padding: 8px 0; }
 details label { max-width: 280px; }
-.upgrade-chart { height: 440px; width: 100%; }
+.upgrade-chart { height: clamp(380px, 58vh, 640px); width: 100%; }
 .upgrade-error { color: var(--danger, #d45c5c); }
 .upgrade-table-scroll { overflow-x: auto; max-height: 500px; }
 table { width: 100%; border-collapse: collapse; font-size: .85rem; }
 th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(150,150,150,.2); min-width: 95px; }
 @media(max-width: 600px) { .upgrade-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .card.upgrade-fields, .upgrade-plan, .upgrade-chart-card { padding: 12px; } .upgrade-chart { height: 380px; } }
+.upgrade-config { padding: 12px 16px; }
+.upgrade-config > summary { color: var(--gold); }
+.upgrade-config-summary { margin-left: 16px; color: var(--text-muted); font-size: .8rem; font-weight: normal; line-height: 1.6; }
+.upgrade-config-body { display: grid; gap: 12px; margin-top: 12px; }
+.upgrade-config .card { box-shadow: none; padding: 12px; }
+.upgrade-config .upgrade-fields { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.upgrade-config label { font-size: .8rem; gap: 4px; }
+.upgrade-plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.upgrade-plan .btn { align-self: end; }
+.upgrade-plan-summary { display: flex; flex-wrap: wrap; gap: 8px; }
+.upgrade-plan-summary > span { border-left: 3px solid; padding: 3px 10px; font-size: .8rem; }
+.upgrade-help { margin-top: 8px; }
+@media(max-width: 600px) { .upgrade-config-summary { display: block; margin: 6px 0 0; } .upgrade-plan-grid { grid-template-columns: 1fr; } }
 </style>

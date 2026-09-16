@@ -5,6 +5,8 @@ import { serialCodeTranslations } from './serialCode.js'
 export default {
   upgradeMaterialsTab: "필요 재료",
   upgradeBenefitsTab: "강화 효과 비교",
+  upgradeConfig: "매개변수 및 방안 수정",
+  upgradeHelp: "계산 안내",
   upgradeIntro: "미장착 방어 능력치를 입력하세요. 각 방안은 강화와 보너스를 포함한 장비 능력치 전체를 더하며 누적 효과는 공통 미장착 상태를 기준으로 합니다.",
   upgradeSameLevel: "적과 같은 레벨",
   upgradeEnemyLevel: "적 레벨",

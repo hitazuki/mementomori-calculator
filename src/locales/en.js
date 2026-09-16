@@ -5,6 +5,8 @@ import { serialCodeTranslations } from './serialCode.js'
 export default {
   upgradeMaterialsTab: "Material costs",
   upgradeBenefitsTab: "Upgrade benefits",
+  upgradeConfig: "Edit parameters and plans",
+  upgradeHelp: "Calculation notes",
   upgradeIntro: "Enter unequipped defense stats. Each plan adds full equipment stats including reinforcement and bonuses. All cumulative gains share the unequipped baseline.",
   upgradeSameLevel: "Same enemy level",
   upgradeEnemyLevel: "Enemy level",
