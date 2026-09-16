@@ -3,11 +3,27 @@ name: Sync Master Data
 on:
   schedule:
     - cron: '0 * * * *' # 每小时整点检查一次（UTC / 北京时间均为整点）
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Force regeneration and publication even when unchanged
+        type: boolean
+        default: false
+
+concurrency:
+  group: master-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   sync-and-commit:
     runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.publication.outputs.cache-hit != 'true' || inputs.force == true }}
     permissions:
       contents: write
     steps:
@@ -15,19 +31,41 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: 'mmt-calculator'
+          ref: ${{ github.ref_name }}
+
+      - name: Read upstream revision
+        id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(gh api repos/moonheart/mementomori-masterbook/commits/master --jq .sha)
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Check successful processing marker
+        id: processed
+        uses: actions/cache/restore@v4
+        with:
+          path: .master-processed
+          key: master-v1-${{ steps.upstream.outputs.sha }}-${{ hashFiles('mmt-calculator/scripts/**', 'mmt-calculator/src/utils/**', 'mmt-calculator/src/constants/**', 'mmt-calculator/doc/character-ratings/**', 'mmt-calculator/.github/workflows/**', 'mmt-calculator/package*.json') }}
+          lookup-only: true
 
       - name: Checkout masterbook repository
+        if: steps.processed.outputs.cache-hit != 'true' || inputs.force == true
         uses: actions/checkout@v4
         with:
           repository: 'moonheart/mementomori-masterbook'
+          ref: ${{ steps.upstream.outputs.sha }}
           path: 'masterbook'
 
       - name: Setup Node.js
+        if: steps.processed.outputs.cache-hit != 'true' || inputs.force == true
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Locate Master Data directory
+        if: steps.processed.outputs.cache-hit != 'true' || inputs.force == true
         id: locate
         run: |
           # 自动查找包含 CharacterMB.json 的目录
@@ -39,6 +77,7 @@ jobs:
           echo "dir=$MASTER_DIR" >> $GITHUB_OUTPUT
 
       - name: Extract Master Data
+        if: steps.processed.outputs.cache-hit != 'true' || inputs.force == true
         working-directory: mmt-calculator
         run: |
           # 复用项目中的抽取逻辑
@@ -48,6 +87,7 @@ jobs:
           node scripts/audit_character_ratings.mjs
 
       - name: Check for changes
+        if: steps.processed.outputs.cache-hit != 'true' || inputs.force == true
         id: git-check
         working-directory: mmt-calculator
         run: |
@@ -69,3 +109,45 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore(data): auto sync master data"
           git push
+
+      - name: Write successful processing marker
+        if: steps.processed.outputs.cache-hit != 'true'
+        run: echo processed > .master-processed
+
+      - name: Save successful processing marker
+        if: steps.processed.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .master-processed
+          key: ${{ steps.processed.outputs.cache-primary-key }}
+
+      # This marker is independent of extraction, so a failed deployment retries
+      # even if its data commit was already pushed successfully.
+      - name: Check successful publication marker
+        id: publication
+        uses: actions/cache/restore@v4
+        with:
+          path: .master-published
+          key: published-v1-${{ github.ref_name }}-${{ hashFiles('mmt-calculator/public/data/**', 'mmt-calculator/public/images/**', 'mmt-calculator/src/constants/raid/skillIcons.js') }}
+          lookup-only: true
+
+      - name: Summarize check
+        env:
+          UPSTREAM: ${{ steps.upstream.outputs.sha }}
+          PROCESSED: ${{ steps.processed.outputs.cache-hit }}
+          PUBLISHED: ${{ steps.publication.outputs.cache-hit }}
+          FORCE: ${{ inputs.force == true }}
+        run: |
+          echo "Upstream: $UPSTREAM; processed cache hit: $PROCESSED; published cache hit: $PUBLISHED; force: $FORCE" >> "$GITHUB_STEP_SUMMARY"
+
+  assets:
+    needs: sync-and-commit
+    if: needs.sync-and-commit.outputs.publish == 'true'
+    uses: ./.github/workflows/sync-assets.yml
+    with:
+      skip_deploy: true
+
+  deploy:
+    needs: assets
+    uses: ./.github/workflows/deploy.yml
+

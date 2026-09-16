@@ -1,14 +1,27 @@
 name: Sync Image Assets
 
 on:
-  workflow_run:
-    workflows: ["Sync Master Data"]
-    types: [completed]
+  schedule:
+    - cron: '20 8 * * *' # 北京时间每天 16:20，补查延迟上线的图片
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      skip_deploy:
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   sync-assets:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      changes: ${{ steps.git-check.outputs.changes }}
+    concurrency:
+      group: image-sync-${{ github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
@@ -19,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: 'mmt-calculator'
-          ref: ${{ github.event.workflow_run.head_branch || github.ref_name }}
+          ref: ${{ github.ref_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -57,3 +70,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore(assets): auto sync image assets"
           git push
+
+  deploy:
+    needs: sync-assets
+    if: needs.sync-assets.outputs.changes == 'true' && inputs.skip_deploy != true
+    uses: ./.github/workflows/deploy.yml

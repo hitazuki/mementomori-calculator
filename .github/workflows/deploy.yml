@@ -3,10 +3,7 @@ name: Deploy static content to Pages
 on:
   push:
     branches: ['main']
-  workflow_run:
-    workflows: ['Sync Image Assets']
-    types: [completed]
-    branches: ['main']
+  workflow_call:
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
@@ -22,7 +19,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -30,6 +26,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Record publication source
+        id: source
+        env:
+          PUBLICATION_KEY: published-v1-${{ github.ref_name }}-${{ hashFiles('public/data/**', 'public/images/**', 'src/constants/raid/skillIcons.js') }}
+        run: echo "publication-key=$PUBLICATION_KEY" >> "$GITHUB_OUTPUT"
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -52,3 +55,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Write successful publication marker
+        run: echo published > .master-published
+      - name: Save successful publication marker
+        uses: actions/cache/save@v4
+        with:
+          path: .master-published
+          key: ${{ steps.source.outputs.publication-key }}
