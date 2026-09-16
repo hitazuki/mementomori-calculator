@@ -1,3 +1,5 @@
+// Reference: https://tamamo.dev/GearParts?display=0 (EquipmentEvolution data).
+// Stage levels are TARGET levels: seraph 510→520 costs 30, 520→530 costs 40.
 const GEAR_PROGRESSIONS = {
   light: {
     initialLevel: 180,

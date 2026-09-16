@@ -9,6 +9,12 @@ import {
   normalizeGearLevelForGear,
 } from '../src/engine/gearCoreProductCalc.js'
 
+test('seraph evolution cost rises at target level 530, matching the game screenshot', () => {
+  assert.equal(calculateGearCoreProductRange(510, 520, 'seraph').parts, 30)
+  assert.equal(calculateGearCoreProductRange(520, 530, 'seraph').parts, 40)
+  assert.equal(calculateGearCoreProductRange(510, 530, 'seraph').parts, 70)
+})
+
 test('calculates cumulative parts at the reference progression breakpoints', () => {
   assert.equal(calculateGearParts(170, 'light'), 0)
   assert.equal(calculateGearParts(179, 'light'), 45)

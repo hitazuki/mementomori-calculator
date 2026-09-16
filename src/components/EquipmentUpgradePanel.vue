@@ -28,22 +28,23 @@
     </details>
     <div class="upgrade-plan-summary"><span v-for="(plan, index) in plans" :key="plan.id" :style="{ borderColor: LINE_COLORS[index % LINE_COLORS.length] }">{{ planName(plan, index) }} · {{ EQUIPMENT_UPGRADE_DATA.series.find(series => series.id === plan.seriesId)?.names[locale] }}<template> · {{ t('upgradeOutsideBonus') }} {{ plan.outsideBonus }} / {{ t('upgradeInsideBonus') }} {{ plan.insideBonus }}</template></span></div>
     <div class="upgrade-actions">
-      <button v-for="value in ['adjacent', 'cumulative']" :key="value" type="button" class="btn" :class="mode === value ? 'btn-primary' : 'btn-secondary'" :aria-pressed="mode === value" @click="mode = value">{{ t(value === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulativeEhp') }}</button>
+      <button v-for="value in ['adjacent', 'cumulative', 'efficiency']" :key="value" type="button" class="btn" :class="mode === value ? 'btn-primary' : 'btn-secondary'" :aria-pressed="mode === value" @click="mode = value">{{ t(modeLabels[value]) }}</button>
     </div>
     <p v-if="invalid" role="alert" class="upgrade-error">{{ t(invalid === 'data' ? 'upgradeDataError' : 'upgradeInputError') }}</p>
     <template v-else>
       <section class="card upgrade-chart-card">
-        <h3>{{ t(mode === 'adjacent' ? 'upgradeAdjacent' : 'upgradeCumulativeEhp') }}</h3>
+        <h3>{{ t(modeLabels[mode]) }}</h3>
 
+        <p v-if="mode === 'efficiency'" class="view-desc">{{ t('upgradeEfficiencyNote') }}</p>
         <VChart class="upgrade-chart" :option="chartOption" :update-options="{ replaceMerge: ['series'] }" autoresize @datazoom="onZoom" @mouseover="onHover" @zr:globalout="hoverTarget = null" />
         <details class="upgrade-help"><summary>{{ t('upgradeHelp') }}</summary><p class="view-desc">{{ t('upgradeIntro') }}</p><p class="view-desc">{{ t('upgradeChartNote') }}</p><p class="view-desc">{{ t('upgradeCompareHint') }}</p><p class="view-desc">{{ t('upgradeScope') }}</p></details>
         <details><summary>{{ t('upgradeTable') }}</summary>
           <div class="upgrade-table-scroll"><table>
-            <thead><tr><th>{{ t('upgradePlan') }}</th><th>{{ t('upgradeInterval') }}</th><th>{{ t('upgradeIncrement') }}</th><th>{{ t('upgradeEhp') }}</th><th>{{ t('upgradeReduction') }}</th><th>{{ t('upgradeMaterials') }}</th></tr></thead>
+            <thead><tr><th>{{ t('upgradePlan') }}</th><th>{{ t('upgradeInterval') }}</th><th>{{ t('upgradeIncrement') }}</th><th>{{ t('upgradeEhp') }}</th><th>{{ t('upgradeReduction') }}</th><th>{{ t('upgradeFragments') }}</th><th>{{ t('upgradeEfficiency') }}</th><th>{{ t('upgradeMaterials') }}</th></tr></thead>
             <tbody><template v-for="entry in analyses" :key="entry.plan.id"><tr v-for="point in entry.result.points" :key="point.level">
-              <td>{{ planName(entry.plan, entry.index) }}</td><td>{{ interval(mode === 'adjacent' ? point.from : 0, point.level) }}<small v-if="point.firstEquip"> · {{ t('upgradeFirst') }}</small></td>
-              <td>{{ number(mode === 'adjacent' ? point.increment : point.totalIncrement) }}</td><td>{{ pct(point[mode].ehp) }}</td><td>{{ pct(point[mode].reduction) }}</td>
-              <td>{{ materialsText(mode === 'adjacent' ? point.from : 0, point.level) }}</td>
+              <td>{{ planName(entry.plan, entry.index) }}</td><td>{{ interval(mode !== 'cumulative' ? point.from : 0, point.level) }}<small v-if="point.firstEquip"> · {{ t('upgradeFirst') }}</small></td>
+              <td>{{ number(mode !== 'cumulative' ? point.increment : point.totalIncrement) }}</td><td>{{ pct(point[mode === 'cumulative' ? 'cumulative' : 'adjacent'].ehp) }}</td><td>{{ pct(point[mode === 'cumulative' ? 'cumulative' : 'adjacent'].reduction) }}</td>
+              <td>{{ point.fragmentCost ?? '—' }}</td><td>{{ point.efficiency.ehp === null ? '—' : efficiencyText(point.efficiency.ehp) }}</td><td>{{ materialsText(mode !== 'cumulative' ? point.from : 0, point.level) }}</td>
             </tr></template></tbody>
           </table></div>
           <p class="view-desc">{{ t('upgradeMaterialNote') }}</p>
@@ -75,6 +76,9 @@ const plans = ref(UPGRADE_STATS.map((stat, id) => ({ id, stat, seriesId: 12, ...
 const hoverTarget = ref(null)
 const equipmentCap = computed(() => Number.isInteger(panel.level) ? Math.max(0, Math.min(1000, panel.level)) : 0)
 const mode = ref('adjacent')
+const modeLabels = { adjacent: 'upgradeAdjacent', cumulative: 'upgradeCumulativeEhp', efficiency: 'upgradeEfficiency' }
+const efficiencyText = value => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 5 }).format(value) + ' ' + t('upgradeEfficiencyUnit')
+const chartValue = value => mode.value === 'efficiency' ? efficiencyText(value) : pct(value)
 const zoom = ref({ start: 0, end: 100 })
 const panelFields = [
   { key: 'level', label: 'upgradeLevel', level: true },
@@ -106,9 +110,9 @@ const chartOption = computed(() => {
   const series = analyses.value.map(entry => ({
     id: String(entry.plan.id), name: planName(entry.plan, entry.index), type: 'line', smooth: false, showSymbol: true, symbolSize: 4,
     itemStyle: { color: LINE_COLORS[entry.index % LINE_COLORS.length] },
-    markLine: hoverTarget.value === null ? { data: [] } : { silent: true, symbol: 'none', lineStyle: { type: 'dashed', color: theme.textStyle.color }, label: { formatter: pct(hoverTarget.value), position: 'insideStartTop' }, data: entry.index === 0 ? [{ yAxis: hoverTarget.value }] : [] },
+    markLine: hoverTarget.value === null ? { data: [] } : { silent: true, symbol: 'none', lineStyle: { type: 'dashed', color: theme.textStyle.color }, label: { formatter: chartValue(hoverTarget.value), position: 'insideStartTop' }, data: entry.index === 0 ? [{ yAxis: hoverTarget.value }] : [] },
     markPoint: hoverTarget.value === null ? { data: [] } : { silent: true, symbol: 'circle', symbolSize: 7, label: { show: true, formatter: param => '≈' + number(param.value), position: entry.index % 2 ? 'bottom' : 'top', color: LINE_COLORS[entry.index % LINE_COLORS.length] }, data: equivalentUpgradeLevels(entry.result.points, mode.value, hoverTarget.value).intersections.map(level => ({ coord: [level, hoverTarget.value], value: level })) },
-    data: entry.result.points.filter(point => mode.value === 'cumulative' || !point.firstEquip).map(point => ({ value: [point.level, point[mode.value].ehp], point, start: 0 })),
+    data: entry.result.points.filter(point => (mode.value === 'cumulative' || !point.firstEquip) && Number.isFinite(point[mode.value].ehp)).map(point => ({ value: [point.level, point[mode.value].ehp], point, start: 0 })),
   }))
   const plottedLevels = series.flatMap(line => line.data.map(point => point.value[0]))
   const firstLevel = plottedLevels.length ? Math.min(...plottedLevels) : 0
@@ -121,11 +125,12 @@ const chartOption = computed(() => {
     grid: { left: 12, right: 20, top: 72, bottom: 75, containLabel: true },
     tooltip: { ...theme.tooltip, trigger: 'item', confine: true, formatter: param => {
       const { point, start } = param.data
-      const from = mode.value === 'adjacent' ? point.from : start
-      return `${param.marker}${param.seriesName}<br/>${interval(from, point.level)}${point.firstEquip ? ` · ${t('upgradeFirst')}` : ''}<br/>${t('upgradeIncrement')}: ${number(mode.value === 'adjacent' ? point.increment : point.totalIncrement)}<br/>${t('upgradeEhp')}: ${pct(point[mode.value].ehp)}<br/>${t('upgradeReduction')}: ${pct(point[mode.value].reduction)}<br/><br/>${t('upgradeSameEhp')}: ${pct(point[mode.value].ehp)}<br/>${analyses.value.map(entry => equivalentText(entry, point[mode.value].ehp)).join('<br/>')}`
+      const from = mode.value !== 'cumulative' ? point.from : start
+      const gainMode = mode.value === 'cumulative' ? 'cumulative' : 'adjacent'
+      return `${param.marker}${param.seriesName}<br/>${interval(from, point.level)}${point.firstEquip ? ` · ${t('upgradeFirst')}` : ''}<br/>${t('upgradeIncrement')}: ${number(mode.value !== 'cumulative' ? point.increment : point.totalIncrement)}<br/>${t('upgradeEhp')}: ${pct(point[gainMode].ehp)}<br/>${t('upgradeReduction')}: ${pct(point[gainMode].reduction)}<br/>${t('upgradeFragments')}: ${point.fragmentCost ?? '—'}<br/>${t('upgradeEfficiency')}: ${point.efficiency.ehp === null ? '—' : efficiencyText(point.efficiency.ehp)}<br/><br/>${t(mode.value === 'efficiency' ? 'upgradeSameEfficiency' : 'upgradeSameEhp')}: ${chartValue(point[mode.value].ehp)}<br/>${analyses.value.map(entry => equivalentText(entry, point[mode.value].ehp)).join('<br/>')}`
     } },
     xAxis: { type: 'value', min: axisMin, max: lastLevel, minInterval: 1, name: t('upgradeTarget'), nameLocation: 'middle', nameGap: 30, nameTextStyle: theme.textStyle, axisLabel: theme.axisLabel, axisLine: theme.axisLine, splitLine: theme.splitLine },
-    yAxis: { type: 'value', name: t('upgradeEhp'), nameTextStyle: theme.textStyle, axisLabel: { ...theme.axisLabel, formatter: value => `${number(value)}%` }, axisLine: theme.axisLine, splitLine: theme.splitLine },
+    yAxis: { type: 'value', name: t(mode.value === 'efficiency' ? 'upgradeEfficiencyUnit' : 'upgradeEhp'), nameTextStyle: theme.textStyle, axisLabel: { ...theme.axisLabel, formatter: value => mode.value === 'efficiency' ? new Intl.NumberFormat(locale.value, { maximumFractionDigits: 4 }).format(value) : `${number(value)}%` }, axisLine: theme.axisLine, splitLine: theme.splitLine },
     dataZoom: [{ id: 'upgrade-slider', type: 'slider', bottom: 4, ...zoom.value }, { id: 'upgrade-inside', type: 'inside', ...zoom.value }],
     series,
   }

@@ -59,9 +59,12 @@ export function buildEquipmentUpgrade(panel, plan, damageType = 'auto', data = E
       const delta = equipmentValue - origin
       const nextRate = rate(equipmentValue)
       if (!nonnegative(delta) || !(nextRate > 0) || !(baseRate > 0)) throw new Error('data')
+      const fragmentCost = data.series.find(series => series.id === plan.seriesId)?.costs?.[plan.stat]?.find(row => row[0] === previous && row[1] === next)?.[2] ?? null
+      const adjacent = measure(previousRate, nextRate)
       points.push({ level: next, from: previous, span: next - previous, firstEquip: previous === 0,
         increment: delta - previousDelta, totalIncrement: equipmentValue,
-        adjacent: measure(previousRate, nextRate), cumulative: measure(baseRate, nextRate) })
+        fragmentCost, efficiency: { ehp: fragmentCost > 0 ? adjacent.ehp / fragmentCost : null },
+        adjacent, cumulative: measure(baseRate, nextRate) })
       previous = next
       previousDelta = delta
       previousRate = nextRate
@@ -77,7 +80,7 @@ export function upgradeMaterials(initialLevel, targetLevel) {
 
 // Intersections describe the drawn polyline, not additional legal equipment levels.
 export function equivalentUpgradeLevels(points, mode, target) {
-  const rows = points.filter(point => mode === 'cumulative' || !point.firstEquip)
+  const rows = points.filter(point => (mode === 'cumulative' || !point.firstEquip) && Number.isFinite(point[mode]?.ehp))
   const intersections = []
   const add = level => { if (!intersections.some(value => Math.abs(value - level) < 1e-7)) intersections.push(level) }
   rows.forEach((point, index) => {

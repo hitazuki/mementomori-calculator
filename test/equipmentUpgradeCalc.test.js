@@ -4,6 +4,25 @@ import { DEFAULT_UPGRADE_PANEL as defaults, EQUIPMENT_UPGRADE_DATA as data, upgr
 const plan = { stat: 'def', seriesId: 12, start: 0, outsideBonus: 0 }
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.00001, `${actual} != ${expected}`)
 
+test('fragment efficiency uses each real tier cost and excludes first equip', () => {
+  for (const series of data.series) {
+    for (const stat of ['def', 'pdef', 'mdef']) {
+      const result = build({ ...defaults, level: 900, enemyLevel: 900 }, { ...plan, seriesId: series.id, stat })
+      assert.equal(result.firstEquip.efficiency.ehp, null)
+      for (const point of result.points.filter(p => !p.firstEquip)) {
+        assert.ok(point.fragmentCost > 0)
+        near(point.efficiency.ehp, point.adjacent.ehp / point.fragmentCost)
+      }
+      assert.equal(series.costs[stat].length, series.stats[stat].length - 1)
+      if ([12, 13, 14].includes(series.id)) {
+        assert.equal(result.points.find(p => p.level === 520).fragmentCost, 30)
+        assert.equal(result.points.find(p => p.level === 530).fragmentCost, 40)
+        assert.ok(result.points.find(p => p.level === 530).efficiency.ehp < result.points.find(p => p.level === 520).efficiency.ehp)
+      }
+    }
+  }
+})
+
 test('bonuses default to 1% outside and 0% inside', () => {
   const { outsideBonus, ...withoutBonus } = plan
   assert.deepEqual(build(defaults, withoutBonus), build(defaults, { ...plan, outsideBonus: 1, insideBonus: 0 }))
