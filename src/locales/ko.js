@@ -5,7 +5,7 @@ import { serialCodeTranslations } from './serialCode.js'
 export default {
   upgradeMaterialsTab: "필요 재료",
   upgradeBenefitsTab: "강화 효과 비교",
-  upgradeIntro: "미장착 방어 능력치를 입력하세요. 각 방안은 강화와 보너스를 포함한 장비 주 능력치 전체를 독립적으로 더합니다. 인접 효과는 전후 단계, 누적 효과는 시작과 목표 단계를 비교합니다. 0은 미장착입니다.",
+  upgradeIntro: "미장착 방어 능력치를 입력하세요. 각 방안은 강화와 보너스를 포함한 장비 능력치 전체를 더하며 누적 효과는 공통 미장착 상태를 기준으로 합니다.",
   upgradeSameLevel: "적과 같은 레벨",
   upgradeEnemyLevel: "적 레벨",
   upgradeLevel: "캐릭터 레벨",
@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "유효 HP 증가",
   upgradeEnd: "캐릭터 레벨 내 강화 단계 없음",
   upgradeFirst: "최초 장착 (순위 제외)",
-  upgradeChartNote: "가로축은 실제 곡선 범위에 맞춰지며 확대할 수 있습니다. 각 점에는 해당 레벨 장비 능력치 전체가 포함됩니다. 누적 기준은 미장착 능력치와 시작 장비의 합계입니다. 인접 모드는 최초 장착을 제외합니다.",
+  upgradeChartNote: "누적 효과는 미장착과 목표 장비 상태를 비교합니다. 인접 효과는 최초 장착을 제외한 실제 전후 단계를 비교합니다. 가로축은 실제 단계에 맞춰지며 확대하여 범위를 볼 수 있습니다.",
   upgradeTable: "수치 및 강화 재료 표",
   upgradePlan: "비교안",
   upgradeInterval: "레벨 구간 (간격)",

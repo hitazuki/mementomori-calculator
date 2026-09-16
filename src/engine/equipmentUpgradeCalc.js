@@ -42,12 +42,12 @@ export function buildEquipmentUpgrade(panel, plan, damageType = 'auto', data = E
   try {
     const multiplier = 1 + plan.bonus / 100
     const origin = valueAt(plan.start) * multiplier
-    const baseRate = rate(origin)
+    const baseRate = rate(0)
     const points = []
     const visited = new Set()
     let previous = plan.start
     let previousDelta = 0
-    let previousRate = baseRate
+    let previousRate = rate(origin)
     let next = previous === 0 ? rows[0][0] : byLevel.get(previous)[2]
     while (next !== null) {
       if (!Number.isInteger(next) || next <= previous || next > 1000 || visited.has(next)) throw new Error('data')
@@ -58,7 +58,7 @@ export function buildEquipmentUpgrade(panel, plan, damageType = 'auto', data = E
       const nextRate = rate(equipmentValue)
       if (!nonnegative(delta) || !(nextRate > 0) || !(baseRate > 0)) throw new Error('data')
       points.push({ level: next, from: previous, span: next - previous, firstEquip: previous === 0,
-        increment: delta - previousDelta, totalIncrement: delta,
+        increment: delta - previousDelta, totalIncrement: equipmentValue,
         adjacent: measure(previousRate, nextRate), cumulative: measure(baseRate, nextRate) })
       previous = next
       previousDelta = delta

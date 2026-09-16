@@ -5,7 +5,7 @@ import { serialCodeTranslations } from './serialCode.js'
 export default {
   upgradeMaterialsTab: "Material costs",
   upgradeBenefitsTab: "Upgrade benefits",
-  upgradeIntro: "Enter unequipped defense stats. Each plan independently adds the full equipment stat, including reinforcement and bonuses. Adjacent gains compare consecutive tiers; cumulative gains compare the starting and target tiers. Level 0 means no equipment.",
+  upgradeIntro: "Enter unequipped defense stats. Each plan adds full equipment stats including reinforcement and bonuses. All cumulative gains share the unequipped baseline.",
   upgradeSameLevel: "Same enemy level",
   upgradeEnemyLevel: "Enemy level",
   upgradeLevel: "Character level",
@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "Effective HP gain",
   upgradeEnd: "No upgrade within the character level cap",
   upgradeFirst: "First equip (excluded from ranking)",
-  upgradeChartNote: "The axis fits actual curve levels and supports zoom. Each node includes the full stat of its equipment level. Cumulative gains use unequipped stats plus starting equipment as the baseline. Adjacent mode excludes first equip.",
+  upgradeChartNote: "Cumulative gains compare unequipped and target equipment states. Adjacent gains compare consecutive real tiers, excluding first equip. The axis fits actual nodes; zoom to inspect a range.",
   upgradeTable: "Values and upgrade materials",
   upgradePlan: "Plan",
   upgradeInterval: "Level interval (span)",

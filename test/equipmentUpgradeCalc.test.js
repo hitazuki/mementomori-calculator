@@ -60,8 +60,9 @@ test('upgrade reproduces level 470 head and hand comparison', () => {
 test('upgrade cumulative and adjacent factors agree without double counting baseline', () => {
   const result = build(defaults, { ...plan, start: 380, bonus: 20 })
   near(result.next.increment, (data.series.find(s => s.id === 12).stats.def.find(r => r[0] === 390)[1] * data.coefficients[390] - data.series.find(s => s.id === 12).stats.def.find(r => r[0] === 380)[1] * data.coefficients[380]) * 1.2)
-  let factor = 1
-  let sum = 0
+  const origin = build(defaults, { ...plan, bonus: 20 }).points.find(p => p.level === 380)
+  let factor = 1 + origin.cumulative.ehp / 100
+  let sum = origin.totalIncrement
   for (const point of result.points) {
     factor *= 1 + point.adjacent.ehp / 100
     sum += point.increment
@@ -102,7 +103,8 @@ test('upgrade validates input, missing coefficients and maximum level', () => {
     for (const point of partial.points) {
       const same = full.points.find(p => p.level === point.level)
       near(point.adjacent.ehp, same.adjacent.ehp)
-      near(point.cumulative.ehp, ((1 + same.cumulative.ehp / 100) / (1 + origin.cumulative.ehp / 100) - 1) * 100)
+      near(point.cumulative.ehp, same.cumulative.ehp)
+      near(point.totalIncrement, same.totalIncrement)
     }
   }
 })

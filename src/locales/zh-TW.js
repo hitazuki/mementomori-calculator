@@ -5,7 +5,7 @@ import { serialCodeTranslations } from './serialCode.js'
 export default {
   upgradeMaterialsTab: "材料需求",
   upgradeBenefitsTab: "升級收益",
-  upgradeIntro: "輸入無裝備時的防禦屬性，各方案獨立疊加所選裝備的完整主屬性（含強化和屬性加成）。相鄰收益比較前後檔位，累計收益比較起始檔位與目標檔位；0級表示無裝備。",
+  upgradeIntro: "輸入無裝備時的防禦屬性，各方案獨立疊加完整裝備屬性（含強化與加成），統一以無裝備狀態比較累計收益。",
   upgradeSameLevel: "敵方同等級",
   upgradeEnemyLevel: "敵方等級",
   upgradeLevel: "角色等級",
@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "有效生命提升",
   upgradeEnd: "目前角色等級內無可升級檔位",
   upgradeFirst: "首次裝備（不參與升級排名）",
-  upgradeChartNote: "橫軸自動涵蓋實際曲線等級，可縮放檢視。每個節點均計入該等級裝備的完整屬性；累計收益以無裝備屬性加上起始裝備屬性為基準。相鄰模式不繪製首次裝備。",
+  upgradeChartNote: "累計收益比較無裝備狀態與目標等級裝備狀態；相鄰收益比較前後兩個真實裝備檔位，不含首次裝備。橫軸自動涵蓋實際節點，使用縮放檢視局部範圍。",
   upgradeTable: "展開數值與強化材料表",
   upgradePlan: "方案",
   upgradeInterval: "等級區間（跨度）",

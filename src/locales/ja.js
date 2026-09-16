@@ -5,7 +5,7 @@ import { serialCodeTranslations } from './serialCode.js'
 export default {
   upgradeMaterialsTab: "必要素材",
   upgradeBenefitsTab: "強化効果比較",
-  upgradeIntro: "装備なしの防御能力を入力してください。各案は強化とボーナスを含む装備の主能力を独立して加算します。隣接効果は前後の段階、累計効果は開始と目標の段階を比較します。0は未装備です。",
+  upgradeIntro: "未装備の防御能力を入力してください。各案に強化とボーナスを含む装備能力全体を加算し、累計効果は共通の未装備状態を基準にします。",
   upgradeSameLevel: "敵も同レベル",
   upgradeEnemyLevel: "敵のレベル",
   upgradeLevel: "キャラクターレベル",
@@ -46,7 +46,7 @@ export default {
   upgradeEhp: "実効HP上昇",
   upgradeEnd: "キャラレベル内に強化先がありません",
   upgradeFirst: "初回装備（順位対象外）",
-  upgradeChartNote: "横軸は実際の曲線範囲に合わせてズームできます。各点にそのレベルの装備能力全体を加算します。累計の基準は未装備能力と開始装備の合計です。隣接モードは初回装備を除きます。",
+  upgradeChartNote: "累計は未装備と目標装備を、隣接効果は実在する前後の段階を比較します。隣接では初回装備を除きます。横軸は実際の点に合わせ、ズームで表示範囲を調整できます。",
   upgradeTable: "数値と強化素材の表",
   upgradePlan: "案",
   upgradeInterval: "レベル区間（幅）",
