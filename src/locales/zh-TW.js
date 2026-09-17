@@ -32,7 +32,7 @@ export default {
   upgradeRemove: "移除方案",
   upgradeReset: "起始等級已調整至目前角色／裝備允許的等級。",
   upgradeAdvanced: "進階選項",
-  upgradeOutsideHint: "包含秘儀與裝備詞條提供的屬性加成，填寫合計百分比。",
+  upgradeOutsideHint: "包含秘儀與裝備詞條，填寫合計百分比。預設按全常駐角色秘儀 LR5：防禦1%，物防/魔防0%；切換屬性會恢復對應場外預設值。",
   upgradeOutsideBonus: "場外屬性加成（%）",
   upgradeInsideBonus: "場內屬性加成（%）",
   upgradeBonusFormula: "最終屬性 =（無裝備數值 + 裝備屬性 ×（1 + 場外加成））×（1 + 場內加成）。無裝備基準同樣計入場內加成。",

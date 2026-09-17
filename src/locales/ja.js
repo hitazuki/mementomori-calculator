@@ -32,7 +32,7 @@ export default {
   upgradeRemove: "案を削除",
   upgradeReset: "開始レベルをキャラと装備で許可されるレベルに調整しました。",
   upgradeAdvanced: "詳細設定",
-  upgradeOutsideHint: "アルカナと装備の追加効果による能力ボーナスの合計割合を入力してください。",
+  upgradeOutsideHint: "アルカナと装備追加効果の合計割合です。常設キャラのみのLR+5アルカナを基準に、防御力1%、物理・魔法防御力0%を設定します。能力の切替で戦闘外の初期値に戻ります。",
   upgradeOutsideBonus: "戦闘外の能力ボーナス（%）",
   upgradeInsideBonus: "戦闘中の能力ボーナス（%）",
   upgradeBonusFormula: "最終能力 =（未装備能力 + 装備能力 ×（1 + 戦闘外ボーナス））×（1 + 戦闘中ボーナス）。未装備基準にも戦闘中ボーナスを適用します。",

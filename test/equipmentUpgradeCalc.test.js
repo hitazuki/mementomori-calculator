@@ -23,9 +23,11 @@ test('fragment efficiency uses each real tier cost and excludes first equip', ()
   }
 })
 
-test('bonuses default to 1% outside and 0% inside', () => {
+test('LR5 permanent Arcana defaults are DEF 1%, P.DEF and M.DEF 0%, inside 0%', () => {
   const { outsideBonus, ...withoutBonus } = plan
-  assert.deepEqual(build(defaults, withoutBonus), build(defaults, { ...plan, outsideBonus: 1, insideBonus: 0 }))
+  for (const [stat, bonus] of [['def', 1], ['pdef', 0], ['mdef', 0]]) {
+    assert.deepEqual(build(defaults, { ...withoutBonus, stat }), build(defaults, { ...plan, stat, outsideBonus: bonus, insideBonus: 0 }))
+  }
 })
 
 test('in-battle bonus multiplies both unequipped and equipment stats at all tiers', () => {

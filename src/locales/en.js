@@ -32,7 +32,7 @@ export default {
   upgradeRemove: "Remove plan",
   upgradeReset: "Starting level adjusted to the levels allowed by this character and gear.",
   upgradeAdvanced: "Advanced options",
-  upgradeOutsideHint: "Includes stat bonuses from Arcana and equipment affixes. Enter the combined percentage.",
+  upgradeOutsideHint: "Enter the combined Arcana and equipment-affix percentage. Defaults use LR+5 Arcana with only permanent characters: DEF 1%, P.DEF/M.DEF 0%. Changing the stat restores its out-of-battle default.",
   upgradeOutsideBonus: "Out-of-battle stat bonus (%)",
   upgradeInsideBonus: "In-battle stat bonus (%)",
   upgradeBonusFormula: "Final stat = (unequipped stat + equipment stat × (1 + out-of-battle bonus)) × (1 + in-battle bonus). The unequipped baseline also includes the in-battle bonus.",

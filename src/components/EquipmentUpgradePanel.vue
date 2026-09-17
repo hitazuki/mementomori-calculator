@@ -17,7 +17,7 @@
     <div v-for="(plan, index) in plans" :key="plan.id" class="card upgrade-plan">
       <h3 :style="{ color: LINE_COLORS[index % LINE_COLORS.length] }">{{ planName(plan, index) }}</h3>
       <div class="upgrade-fields">
-        <label>{{ t('upgradeStat') }}<select v-model="plan.stat" class="form-input"><option v-for="stat in UPGRADE_STATS" :key="stat" :value="stat">{{ t(`upgrade_${stat}`) }}</option></select></label>
+        <label>{{ t('upgradeStat') }}<select v-model="plan.stat" class="form-input" @change="plan.outsideBonus = DEFAULT_UPGRADE_BONUSES[plan.stat].outsideBonus"><option v-for="stat in UPGRADE_STATS" :key="stat" :value="stat">{{ t(`upgrade_${stat}`) }}</option></select></label>
         <label>{{ t('upgradeSeries') }}<select v-model.number="plan.seriesId" class="form-input"><option v-for="series in EQUIPMENT_UPGRADE_DATA.series" :key="series.id" :value="series.id">{{ series.names[locale] || series.names.en }}</option></select></label>
         <button v-if="plans.length > 1" type="button" class="btn btn-secondary" @click="plans.splice(index, 1)">{{ t('upgradeRemove') }}</button>
       </div>
@@ -72,7 +72,7 @@ const panel = reactive({ ...DEFAULT_UPGRADE_PANEL })
 const sameLevel = ref(true)
 const enemyLevel = ref(500)
 let nextId = 3
-const plans = ref(UPGRADE_STATS.map((stat, id) => ({ id, stat, seriesId: 12, ...DEFAULT_UPGRADE_BONUSES })))
+const plans = ref(UPGRADE_STATS.map((stat, id) => ({ id, stat, seriesId: 12, ...DEFAULT_UPGRADE_BONUSES[stat] })))
 const hoverTarget = ref(null)
 const equipmentCap = computed(() => Number.isInteger(panel.level) ? Math.max(0, Math.min(1000, panel.level)) : 0)
 const mode = ref('adjacent')

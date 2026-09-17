@@ -32,7 +32,7 @@ export default {
   upgradeRemove: "비교안 삭제",
   upgradeReset: "캐릭터와 장비에 허용된 레벨로 시작 레벨을 조정했습니다.",
   upgradeAdvanced: "고급 설정",
-  upgradeOutsideHint: "아르카나와 장비 옵션의 능력치 보너스를 포함한 합계 비율을 입력하세요.",
+  upgradeOutsideHint: "아르카나와 장비 옵션의 합계 비율입니다. 상시 캐릭터만 포함하는 LR+5 아르카나 기준 기본값은 방어력 1%, 물리/마법 방어력 0%입니다. 능력치 변경 시 해당 전투 외 기본값으로 돌아갑니다.",
   upgradeOutsideBonus: "전투 외 능력치 보너스 (%)",
   upgradeInsideBonus: "전투 중 능력치 보너스 (%)",
   upgradeBonusFormula: "최종 능력치 = (미장착 능력치 + 장비 능력치 × (1 + 전투 외 보너스)) × (1 + 전투 중 보너스). 미장착 기준에도 전투 중 보너스를 적용합니다.",
