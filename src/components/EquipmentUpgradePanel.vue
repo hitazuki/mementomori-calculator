@@ -110,7 +110,8 @@ const chartOption = computed(() => {
   const series = analyses.value.map(entry => ({
     id: String(entry.plan.id), name: planName(entry.plan, entry.index), type: 'line', smooth: false, showSymbol: true, symbolSize: 4,
     itemStyle: { color: LINE_COLORS[entry.index % LINE_COLORS.length] },
-    markLine: hoverTarget.value === null ? { data: [] } : { silent: true, symbol: 'none', lineStyle: { type: 'dashed', color: theme.textStyle.color }, label: { formatter: chartValue(hoverTarget.value), position: 'insideStartTop' }, data: entry.index === 0 ? [{ yAxis: hoverTarget.value }] : [] },
+    // ECharts defaults to rounding axis mark lines to 2 decimals; preserve the hovered coordinate.
+    markLine: hoverTarget.value === null ? { data: [] } : { precision: -1, silent: true, symbol: 'none', lineStyle: { type: 'dashed', color: theme.textStyle.color }, label: { formatter: chartValue(hoverTarget.value), position: 'insideStartTop' }, data: entry.index === 0 ? [{ yAxis: hoverTarget.value }] : [] },
     markPoint: hoverTarget.value === null ? { data: [] } : { silent: true, symbol: 'circle', symbolSize: 7, label: { show: true, formatter: param => '≈' + number(param.value), position: entry.index % 2 ? 'bottom' : 'top', color: LINE_COLORS[entry.index % LINE_COLORS.length] }, data: equivalentUpgradeLevels(entry.result.points, mode.value, hoverTarget.value).intersections.map(level => ({ coord: [level, hoverTarget.value], value: level })) },
     data: entry.result.points.filter(point => (mode.value === 'cumulative' || !point.firstEquip) && Number.isFinite(point[mode.value].ehp)).map(point => ({ value: [point.level, point[mode.value].ehp], point, start: 0 })),
   }))
