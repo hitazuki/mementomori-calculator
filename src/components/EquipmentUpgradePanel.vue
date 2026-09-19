@@ -17,8 +17,8 @@
     <div v-for="(plan, index) in plans" :key="plan.id" class="card upgrade-plan">
       <h3 :style="{ color: LINE_COLORS[index % LINE_COLORS.length] }">{{ planName(plan, index) }}</h3>
       <div class="upgrade-fields">
-        <label>{{ t('upgradeStat') }}<select v-model="plan.stat" class="form-input" @change="plan.outsideBonus = DEFAULT_UPGRADE_BONUSES[plan.stat].outsideBonus"><option v-for="stat in UPGRADE_STATS" :key="stat" :value="stat">{{ t(`upgrade_${stat}`) }}</option></select></label>
-        <label>{{ t('upgradeSeries') }}<select v-model.number="plan.seriesId" class="form-input"><option v-for="series in EQUIPMENT_UPGRADE_DATA.series" :key="series.id" :value="series.id">{{ series.names[locale] || series.names.en }}</option></select></label>
+        <label>{{ t('upgradeStat') }}<select v-model="plan.stat" class="form-select" @change="plan.outsideBonus = DEFAULT_UPGRADE_BONUSES[plan.stat].outsideBonus"><option v-for="stat in UPGRADE_STATS" :key="stat" :value="stat">{{ t(`upgrade_${stat}`) }}</option></select></label>
+        <label>{{ t('upgradeSeries') }}<select v-model.number="plan.seriesId" class="form-select"><option v-for="series in EQUIPMENT_UPGRADE_DATA.series" :key="series.id" :value="series.id">{{ series.names[locale] || series.names.en }}</option></select></label>
         <button v-if="plans.length > 1" type="button" class="btn btn-secondary" @click="plans.splice(index, 1)">{{ t('upgradeRemove') }}</button>
       </div>
       <details><summary>{{ t('upgradeAdvanced') }}</summary><div class="upgrade-fields"><label>{{ t('upgradeOutsideBonus') }}<input v-model.number="plan.outsideBonus" class="form-input" type="number" min="0" step="0.1"><small class="view-desc">{{ t('upgradeOutsideHint') }}</small></label><label>{{ t('upgradeInsideBonus') }}<input v-model.number="plan.insideBonus" class="form-input" type="number" min="0" step="0.1"></label></div><p class="view-desc">{{ t('upgradeBonusFormula') }}</p></details>

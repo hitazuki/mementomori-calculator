@@ -684,7 +684,8 @@ const implicitCostOption = computed(() => {
     .filter(row => milestonePulls.includes(row.pulls))
     .map(row => ({
       name: fmtPulls(row.pulls),
-      coord: [row.pulls, metricValue(row)],
+      // Numeric coordinates on a category axis are indices, not pull labels.
+      coord: [String(row.pulls), metricValue(row)],
       value: String(row.pulls),
     }))
     .filter(point => point.coord[1] != null)
@@ -703,7 +704,7 @@ const implicitCostOption = computed(() => {
     legend: { ...theme.legend, top: 8, right: 16 },
     xAxis: {
       type: 'category',
-      data: rows.map(row => row.pulls),
+      data: rows.map(row => String(row.pulls)),
       axisLabel: theme.axisLabel,
       axisLine: theme.axisLine,
     },
