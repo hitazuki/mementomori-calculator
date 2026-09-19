@@ -23,14 +23,15 @@
         </div>
       </section>
       <p class="view-desc reinforcement-note">{{ t('reinforcementTicketNote') }}</p>
-      <section class="card reinforcement-chart-panel">
-        <h2>{{ t('reinforcementChartTitle') }}</h2>
+      <ReinforcementBenefitsChart :initial-level="inputs.initialLevel" :target-level="inputs.targetLevel" />
+      <details class="card reinforcement-chart-panel" @toggle="overviewOpen = $event.target.open">
+        <summary>{{ t('reinforcementChartTitle') }}</summary>
         <p class="view-desc">{{ t('reinforcementChartNote') }}</p>
         <div class="reinforcement-tabs" role="group" :aria-label="t('reinforcementChartTitle')">
           <button v-for="key in MATERIAL_KEYS" :key="key" type="button" class="btn" :class="material === key ? 'btn-primary' : 'btn-secondary'" :aria-pressed="material === key" @click="material = key">{{ t(`reinforcement_${key}`) }}</button>
         </div>
-        <VChart class="reinforcement-chart" :option="chartOption" :theme="chartTheme" autoresize @datazoom="onZoom" />
-      </section>
+        <VChart v-if="overviewOpen" class="reinforcement-chart" :option="chartOption" :theme="chartTheme" autoresize @datazoom="onZoom" />
+      </details>
     </template>
   </div>
 </template>
@@ -41,13 +42,14 @@ import { useI18n } from 'vue-i18n'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent, DataZoomComponent, MarkLineComponent, MarkAreaComponent } from 'echarts/components'
+import { TitleComponent, GridComponent, TooltipComponent, DataZoomComponent, MarkLineComponent, MarkAreaComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { baseChartOption, getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
+import ReinforcementBenefitsChart from '../components/ReinforcementBenefitsChart.vue'
 import { calculateEquipmentReinforcement, MAX_REINFORCEMENT_LEVEL, MATERIAL_KEYS } from '../engine/equipmentReinforcementCalc.js'
 
-use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, DataZoomComponent, MarkLineComponent, MarkAreaComponent])
+use([CanvasRenderer, LineChart, TitleComponent, GridComponent, TooltipComponent, DataZoomComponent, MarkLineComponent, MarkAreaComponent])
 const { t, locale } = useI18n()
 const inputs = reactive({ initialLevel: 0, targetLevel: 240, weaponCount: 1, otherCount: 0 })
 const fields = [
@@ -58,6 +60,7 @@ const fields = [
 ]
 const result = computed(() => calculateEquipmentReinforcement(inputs))
 const material = ref('potion')
+const overviewOpen = ref(false)
 const chartTheme = computed(() => getMoriTheme(currentTheme.value === 'dark'))
 const zoom = ref({ start: 0, end: 100 })
 const format = value => new Intl.NumberFormat(locale.value).format(value)
