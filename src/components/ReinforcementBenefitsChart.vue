@@ -40,7 +40,8 @@ const material = ref('potion')
 const hoverTarget = ref(null)
 const zoom = ref(null)
 const number = value => new Intl.NumberFormat(locale.value, { maximumSignificantDigits: 7 }).format(value)
-const unit = computed(() => mode.value === 'efficiency' ? t('reinforcementEfficiencyUnit', { material: t(`reinforcement_${material.value}`) }) : t('reinforcementGainUnit'))
+const unit = computed(() => mode.value === 'efficiency' ? t('reinforcementEfficiencyUnit', { material: t(`reinforcement_${material.value}`) }) : mode.value === 'cumulative' ? '%' : t('reinforcementGainUnit'))
+const gainLabel = computed(() => t(mode.value === 'cumulative' ? 'reinforcementCumulativeGain' : 'reinforcementStatGain'))
 const lines = computed(() => {
   const kinds = mode.value === 'efficiency' ? ['weapon', 'other'] : ['gain']
   return kinds.map((kind, index) => {
@@ -48,7 +49,7 @@ const lines = computed(() => {
       point, value: [point.level, kind === 'gain' ? point[mode.value] : point.efficiency[kind][material.value]],
     }))
     if (mode.value === 'cumulative') rows.unshift({ point: { from: 0, level: 0, before: 1, after: 1, cumulative: 0 }, value: [0, 0] })
-    return { kind, index, name: t(kind === 'gain' ? 'reinforcementStatGain' : `reinforcementSingle_${kind}`), rows }
+    return { kind, index, name: kind === 'gain' ? gainLabel.value : t(`reinforcementSingle_${kind}`), rows }
   })
 })
 const extent = computed(() => {
@@ -95,13 +96,13 @@ const chartOption = computed(() => {
       const before = mode.value === 'cumulative' ? 1 : point.before
       const gain = mode.value === 'cumulative' ? point.cumulative : point.adjacent
       const value = param.value[1]
-      let text = `${param.marker}${param.seriesName}<br/>${t('reinforcementLevel')}: ${from} → ${point.level} (+${point.level - from})<br/>${t('reinforcementCoefficient')}: ${number(before)} → ${number(point.after)}<br/>${t('reinforcementStatGain')}: ${number(gain)} ${t('reinforcementGainUnit')}`
+      let text = `${param.marker}${param.seriesName}<br/>${t('reinforcementLevel')}: ${from} → ${point.level} (+${point.level - from})<br/>${t('reinforcementCoefficient')}: ${number(before)} → ${number(point.after)}<br/>${gainLabel.value}: ${number(gain)} ${mode.value === 'cumulative' ? '%' : t('reinforcementGainUnit')}`
       if (mode.value === 'efficiency') text += `<br/>${t('reinforcementTierCost')}: ${number(point.costs[line.kind][material.value])} ${t(`reinforcement_${material.value}`)}<br/>${t('reinforcementEfficiency')}: ${number(value)} ${unit.value}`
       return text + `<br/><br/>${t('reinforcementSameGain')}: ${number(value)} ${unit.value}<br/>${matchesText(value)}`
     } },
     xAxis: { type: 'value', min: extent.value[0], max: extent.value[1], name: t('reinforcementLevel'), nameLocation: 'middle', nameGap: 30,
       nameTextStyle: theme.textStyle, axisLabel: theme.axisLabel, axisLine: theme.axisLine, splitLine: theme.splitLine },
-    yAxis: { type: 'value', name: unit.value, nameTextStyle: { ...theme.textStyle, align: 'left', fontSize: 11, width: 240, overflow: 'break' }, axisLabel: { ...theme.axisLabel, formatter: number }, axisLine: theme.axisLine, splitLine: theme.splitLine },
+    yAxis: { type: 'value', name: mode.value === 'efficiency' ? unit.value : `${gainLabel.value} (${unit.value})`, nameTextStyle: { ...theme.textStyle, align: 'left', fontSize: 11, width: 240, overflow: 'break' }, axisLabel: { ...theme.axisLabel, formatter: number }, axisLine: theme.axisLine, splitLine: theme.splitLine },
     dataZoom: [{ id: 'benefit-slider', type: 'slider', bottom: 4, ...(zoom.value ?? { start: 0, end: 100 }) }, { id: 'benefit-inside', type: 'inside', ...(zoom.value ?? { start: 0, end: 100 }) }],
     series: lines.value.map(line => ({
       id: line.kind, name: line.name, type: 'line', smooth: false, connectNulls: false, showSymbol: true, symbolSize: 5,

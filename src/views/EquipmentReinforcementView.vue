@@ -23,8 +23,7 @@
         </div>
       </section>
       <p class="view-desc reinforcement-note">{{ t('reinforcementTicketNote') }}</p>
-      <ReinforcementBenefitsChart :initial-level="inputs.initialLevel" :target-level="inputs.targetLevel" />
-      <details class="card reinforcement-chart-panel" @toggle="overviewOpen = $event.target.open">
+      <details open class="card reinforcement-chart-panel" @toggle="overviewOpen = $event.target.open">
         <summary>{{ t('reinforcementChartTitle') }}</summary>
         <p class="view-desc">{{ t('reinforcementChartNote') }}</p>
         <div class="reinforcement-tabs" role="group" :aria-label="t('reinforcementChartTitle')">
@@ -32,6 +31,7 @@
         </div>
         <VChart v-if="overviewOpen" class="reinforcement-chart" :option="chartOption" :theme="chartTheme" autoresize @datazoom="onZoom" />
       </details>
+      <ReinforcementBenefitsChart :initial-level="inputs.initialLevel" :target-level="inputs.targetLevel" />
     </template>
   </div>
 </template>
@@ -60,7 +60,7 @@ const fields = [
 ]
 const result = computed(() => calculateEquipmentReinforcement(inputs))
 const material = ref('potion')
-const overviewOpen = ref(false)
+const overviewOpen = ref(true)
 const chartTheme = computed(() => getMoriTheme(currentTheme.value === 'dark'))
 const zoom = ref({ start: 0, end: 100 })
 const format = value => new Intl.NumberFormat(locale.value).format(value)
@@ -105,7 +105,7 @@ const chartOption = computed(() => {
 .reinforcement-stat { padding: 20px; display: flex; flex-direction: column; gap: 10px; overflow-wrap: anywhere; }
 .reinforcement-stat strong { color: var(--gold); font-size: 1.5rem; }
 .reinforcement-note { margin: 14px 0 24px; }
-.reinforcement-chart-panel { padding: 20px; }
+.reinforcement-chart-panel { padding: 20px; margin-bottom: 20px; }
 .reinforcement-chart-panel h2 { font-size: 1.1rem; margin-bottom: 8px; }
 .reinforcement-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
 .reinforcement-chart { height: 430px; width: 100%; }
