@@ -3,6 +3,9 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  dataLoading: '데이터를 불러오는 중…',
+  dataLoadError: '데이터를 불러오지 못했습니다. 다시 시도해 주세요.',
+  dataRetry: '다시 시도',
   reinforcementBenefitsTitle: "강화 레벨 상승량 및 효율",
   reinforcementBenefitsScope: "강화 계수만 사용하여 10레벨 단위로 계산하며 장비 레벨이나 실제 능력치는 참조하지 않습니다. 강화 0레벨의 배율은 1, 누적 증가율은 0%입니다. 수량과 입력한 시작 레벨은 곡선에 영향을 주지 않습니다.",
   reinforcementBenefitsUnavailable: "강화 데이터를 사용할 수 없습니다. 계수 또는 재료 데이터가 누락되었습니다.",
@@ -437,8 +440,6 @@ export default {
   packContractPrivilegeExcludedNote: "맹약 특권은 충전 이벤트 대상이 아니므로 충전 가치는 0입니다. 시공의 동굴 미탐색 보상 등 미산정 특권은 제외됩니다.",
   sourceTypeUltra: "울트라 세일 팩",
   sourceTypePermanent: "상시 패키지",
-  sourceTypeWitch: "마녀의 선물",
-  ui_all: "전체",
 
   sourceTypeWitch: "마녀의 선물",
   ui_all: "전체",

@@ -112,8 +112,9 @@
 
       <!-- Dynamic View Rendering -->
       <div class="view active">
-        <KeepAlive>
-          <component :is="activeComponent" @navigate="navigateTo" />
+        <DataLoadState :error="languageError" @retry="changeLanguage" />
+        <KeepAlive :include="cachedViewNames" :max="cachedViewNames.length">
+          <component :is="activeComponent" v-on="activeViewListeners" />
         </KeepAlive>
       </div>
     </main>
@@ -121,10 +122,14 @@
 </template>
 
 <script setup>
+import { readStorage, writeStorage, removeStorage } from './utils/storage.js'
+
 import { ref, computed, onMounted, watch, watchEffect, defineAsyncComponent, h } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { setLang } from './i18n/index.js'
-import { DAMAGE_TABS, SIDEBAR_GROUPS, findModuleByView, findSidebarGroupByView } from './constants/navigation.js'
+import DataLoadState from './components/DataLoadState.vue'
+import { useViewNavigation } from './composables/useViewNavigation.js'
+import { languageError, languageSelection, setLang } from './i18n/index.js'
+import { VIEW_DEFINITIONS, DAMAGE_TABS, SIDEBAR_GROUPS, findModuleByView, findSidebarGroupByView } from './constants/navigation.js'
 
 const LoadingOverlay = {
   setup() {
@@ -141,31 +146,10 @@ const createAsyncView = (loader) => defineAsyncComponent({
   delay: 0
 })
 
-const CharacterCatalogView = createAsyncView(() => import('./views/CharacterCatalogView.vue'))
-const HomeView = createAsyncView(() => import('./views/HomeView.vue'))
-const CalculatorView = createAsyncView(() => import('./views/CalculatorView.vue'))
-const SweepChartView = createAsyncView(() => import('./views/SweepChartView.vue'))
-const HeatmapChartView = createAsyncView(() => import('./views/HeatmapChartView.vue'))
-const ComparePanelView = createAsyncView(() => import('./views/ComparePanelView.vue'))
-const TornadoChartView = createAsyncView(() => import('./views/TornadoChartView.vue'))
-const TableExportView = createAsyncView(() => import('./views/TableExportView.vue'))
-const RaidTableView = createAsyncView(() => import('./views/RaidTableView.vue'))
-const MysteriumPanelView = createAsyncView(() => import('./views/MysteriumPanelView.vue'))
-const PackCalculatorView = createAsyncView(() => import('./views/PackCalculatorView.vue'))
-const PackComparisonView = createAsyncView(() => import('./views/PackComparisonView.vue'))
-const ShopExchangeView = createAsyncView(() => import('./views/ShopExchangeView.vue'))
-const GachaAnalysisView = createAsyncView(() => import('./views/GachaAnalysisView.vue'))
-const ForbiddenWeaponGachaView = createAsyncView(() => import('./views/ForbiddenWeaponGachaView.vue'))
-const EquipmentUpgradeView = createAsyncView(() => import('./views/EquipmentUpgradeView.vue'))
-const EquipmentReinforcementView = createAsyncView(() => import('./views/EquipmentReinforcementView.vue'))
-const SerialCodeToolView = createAsyncView(() => import('./views/SerialCodeToolView.vue'))
-
 const { locale, t } = useI18n()
-const currentLanguage = ref(locale.value)
+const currentLanguage = languageSelection
 
-const changeLanguage = () => {
-  setLang(currentLanguage.value)
-}
+const changeLanguage = () => setLang(currentLanguage.value)
 
 watchEffect(() => {
   document.title = t('appTitle')
@@ -182,35 +166,14 @@ onMounted(() => {
   document.documentElement.style.setProperty('--body-bg-img', `linear-gradient(to bottom, rgba(var(--color-base-rgb), 0.82), rgba(var(--color-base-rgb), 0.94)), url('${basePath}assets/bg/bg.png')`)
 })
 
-const viewMap = {
-  characters: CharacterCatalogView,
-  home: HomeView,
-  calculator: CalculatorView,
-  sweep: SweepChartView,
-  heatmap: HeatmapChartView,
-  compare: ComparePanelView,
-  tornado: TornadoChartView,
-  table: TableExportView,
-  raidTable: RaidTableView,
-  mysterium: MysteriumPanelView,
-  shopExchange: ShopExchangeView,
-  packCalc: PackCalculatorView,
-  packCompare: PackComparisonView,
-  gacha: GachaAnalysisView,
-  forbiddenWeaponGacha: ForbiddenWeaponGachaView,
-  equipmentReinforcement: EquipmentReinforcementView,
-  equipmentUpgrade: EquipmentUpgradeView,
-  serialCode: SerialCodeToolView,
-}
-
-const savedView = location.hash.startsWith('#characters') ? 'characters' : localStorage.getItem('mmt-calc-current-view')
-const currentView = ref(Object.hasOwn(viewMap, savedView) ? savedView : 'home')
-window.addEventListener('hashchange', () => { if (location.hash.startsWith('#characters')) currentView.value = 'characters' })
-const sidebarCollapsed = ref(localStorage.getItem('mmt-calc-sidebar-collapsed') === 'true')
+const viewMap = Object.fromEntries(Object.entries(VIEW_DEFINITIONS).map(([id, view]) => [id, createAsyncView(view.load)]))
+const cachedViewNames = Object.values(VIEW_DEFINITIONS).filter(view => view.cache).map(view => view.name)
+const { currentView, navigateTo } = useViewNavigation(Object.keys(VIEW_DEFINITIONS))
+const sidebarCollapsed = ref(readStorage('mmt-calc-sidebar-collapsed') === 'true')
 const initialGroup = findSidebarGroupByView(currentView.value)?.id
 const validGroupIds = new Set(SIDEBAR_GROUPS.map((group) => group.id))
-const savedGroupsRaw = localStorage.getItem('mmt-calc-open-nav-groups')
-const legacySavedGroup = localStorage.getItem('mmt-calc-open-nav-group')
+const savedGroupsRaw = readStorage('mmt-calc-open-nav-groups')
+const legacySavedGroup = readStorage('mmt-calc-open-nav-group')
 let savedGroups = []
 try {
   const parsedGroups = JSON.parse(savedGroupsRaw)
@@ -225,6 +188,7 @@ if (initialGroup && !savedGroups.includes(initialGroup)) savedGroups.push(initia
 const openGroups = ref(savedGroups)
 
 const activeComponent = computed(() => viewMap[currentView.value])
+const activeViewListeners = computed(() => VIEW_DEFINITIONS[currentView.value].emitsNavigate ? { navigate: navigateTo } : {})
 const currentNavItem = computed(() => {
   if (currentView.value === 'home') return { icon: '⌂', labelKey: 'navHome' }
   return DAMAGE_TABS.find((item) => item.id === currentView.value) || findModuleByView(currentView.value)
@@ -237,11 +201,6 @@ const mobileNavGroups = SIDEBAR_GROUPS.map((group) => ({
     : [{ id: item.viewId, icon: item.icon, labelKey: item.labelKey }]),
 }))
 
-function navigateTo(viewId) {
-  if (!Object.hasOwn(viewMap, viewId)) return
-  currentView.value = viewId
-}
-
 function toggleGroup(groupId) {
   openGroups.value = openGroups.value.includes(groupId)
     ? openGroups.value.filter((id) => id !== groupId)
@@ -249,8 +208,6 @@ function toggleGroup(groupId) {
 }
 
 watch(currentView, (viewId) => {
-  if (viewId !== 'characters' && location.hash.startsWith('#characters')) history.replaceState(null, '', location.pathname + location.search)
-  localStorage.setItem('mmt-calc-current-view', viewId)
   const group = findSidebarGroupByView(viewId)
   if (group && !openGroups.value.includes(group.id)) {
     openGroups.value = [...openGroups.value, group.id]
@@ -258,12 +215,12 @@ watch(currentView, (viewId) => {
 })
 
 watch(openGroups, (groupIds) => {
-  localStorage.setItem('mmt-calc-open-nav-groups', JSON.stringify(groupIds))
-  localStorage.removeItem('mmt-calc-open-nav-group')
+  writeStorage('mmt-calc-open-nav-groups', JSON.stringify(groupIds))
+  removeStorage('mmt-calc-open-nav-group')
 })
 
 watch(sidebarCollapsed, (collapsed) => {
-  localStorage.setItem('mmt-calc-sidebar-collapsed', String(collapsed))
+  writeStorage('mmt-calc-sidebar-collapsed', String(collapsed))
 })
 </script>
 

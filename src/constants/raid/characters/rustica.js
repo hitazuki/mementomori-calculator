@@ -27,7 +27,7 @@ export default {
       ignoredKeys: ['raidIgnoredHpDrain'],
     },
     s2: {
-      key: 's2', nameKey: 'raidSkillRusticaS2', cooldown: 4, damageType: 'phys', hooks: [],
+      key: 's2', nameKey: 'raidSkillRusticaS2', cooldown: 4, damageType: 'phys',
       damageSteps: [{
         stat: 'ATK', percent: 740,
         hits: { type: 'skillUsesLinear', skillKey: 's2', base: 4, increment: 1, max: 6 },

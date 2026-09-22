@@ -235,7 +235,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart } from 'echarts/charts'
 import { TooltipComponent, GridComponent, GraphicComponent, TitleComponent, LegendComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
-import VChart from 'vue-echarts'
+import VChart from '../components/ActiveChart.vue'
 
 import { calcDamage } from '../engine/damageCalc.js'
 import { getMoriTheme, baseChartOption } from '../utils/chartTheme.js'

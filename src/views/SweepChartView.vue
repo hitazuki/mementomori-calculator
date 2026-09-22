@@ -210,7 +210,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
 import { TooltipComponent, GridComponent, GraphicComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
-import VChart from 'vue-echarts'
+import VChart from '../components/ActiveChart.vue'
 
 import { buildSweepData } from '../engine/damageCalc.js'
 import { getSweepVariables } from '../constants/presets.js'

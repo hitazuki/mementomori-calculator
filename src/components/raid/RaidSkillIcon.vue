@@ -1,7 +1,7 @@
 <template>
   <span class="raid-character-skill-slot" :class="{ 'raid-skill-icon': iconId && !failed }">
     <img v-if="iconId && !failed" :src="`${baseUrl}images/skills/${iconId}.png`" alt="" width="48" height="48" loading="lazy" decoding="async" @error="failed = true">
-    <span :class="{ 'raid-skill-icon-label': iconId && !failed }">{{ slot === 'NORMAL' ? 'N' : slot }}</span>
+    <span :class="{ 'raid-skill-icon-label': iconId && !failed }">{{ skillSlot === 'NORMAL' ? 'N' : skillSlot }}</span>
   </span>
 </template>
 
@@ -9,9 +9,9 @@
 import { computed, ref, watch } from 'vue'
 import { RAID_SKILL_ICONS } from '../../constants/raid/skillIcons.js'
 
-const props = defineProps({ characterId: { type: Number, required: true }, slot: { type: String, required: true } })
+const props = defineProps({ characterId: { type: Number, required: true }, skillSlot: { type: String, required: true } })
 const baseUrl = import.meta.env.BASE_URL
-const iconId = computed(() => RAID_SKILL_ICONS[props.characterId]?.[props.slot])
+const iconId = computed(() => RAID_SKILL_ICONS[props.characterId]?.[props.skillSlot])
 const failed = ref(false)
 watch(iconId, () => { failed.value = false })
 </script>

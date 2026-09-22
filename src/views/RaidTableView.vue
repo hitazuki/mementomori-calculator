@@ -436,7 +436,7 @@
           <div class="raid-character-skill-grid">
             <article v-for="skill in [...selectedCharacterDetail.skills, selectedCharacterDetail.normal].filter(Boolean)" :key="skill.key" class="raid-character-skill-card">
               <header>
-                <RaidSkillIcon :character-id="selectedCharacterDetail.id" :slot="skill.key.toUpperCase()" />
+                <RaidSkillIcon :character-id="selectedCharacterDetail.id" :skill-slot="skill.key.toUpperCase()" />
                 <div><h3>{{ $t(skill.nameKey) }}</h3><p>{{ skillMetaText(skill) }}</p></div>
               </header>
 
@@ -485,7 +485,7 @@
             <div v-else class="raid-character-mb-list">
               <article v-for="skill in selectedCharacterMbTexts" :key="`${skill.source}-${skill.id}`" class="raid-character-mb-card">
                 <header>
-                  <RaidSkillIcon :character-id="selectedCharacterDetail.id" :slot="skill.slot" />
+                  <RaidSkillIcon :character-id="selectedCharacterDetail.id" :skill-slot="skill.slot" />
                   <div><strong>{{ skill.name }}</strong></div>
                 </header>
                 <ul class="raid-character-mb-levels">

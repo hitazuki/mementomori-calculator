@@ -1,14 +1,10 @@
 import { computed, reactive } from 'vue'
-import { normalizeScores } from '../engine/packCalc.js'
-import { buildDerivedScoreState } from '../engine/derivedScores.js'
+import { derivedScoreState, normalizedScores } from '../store/derivedItemScores.js'
 import { editableScores, resetEditableScores } from '../store/itemScores.js'
 
 const LOCKED_SCORES = { '[2,1]': true }
 
 export function useItemScores({ t, itemDisplayName, itemLocaleField }) {
-  const baseScores = computed(() => normalizeScores(editableScores))
-  const derivedScoreState = computed(() => buildDerivedScoreState(baseScores.value))
-  const normalizedScores = computed(() => derivedScoreState.value.scores)
   const readonlyScoreRows = computed(() => derivedScoreState.value.readonlyRows)
   const editableScoreRows = computed(() => Object.entries(editableScores)
     .filter(([key, score]) => score.isBase && !isReadonlyScore(key))

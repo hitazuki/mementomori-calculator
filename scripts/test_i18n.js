@@ -1,48 +1,13 @@
-/** 脚本: test_i18n.js
- * 用途: 单元测试脚本，在打包前校验各多语言翻译文件的键值一致性，防止漏翻。
- */
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { validateTranslations } from './lib/translationValidation.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const localesDir = path.join(__dirname, '../src/locales')
-const locales = ['zh-CN.js', 'zh-TW.js', 'en.js', 'ja.js', 'ko.js']
-
-const keys = {}
-const allKeys = new Set()
-
-for (const l of locales) {
-  const content = fs.readFileSync(path.join(localesDir, l), 'utf-8')
-  // Match word characters preceding a colon: "  keyName: "
-  const matches = [...content.matchAll(/^\s*([a-zA-Z0-9_]+):/gm)]
-  keys[l] = new Set(matches.map(m => m[1]))
-  for (const k of keys[l]) {
-    allKeys.add(k)
-  }
-}
-
-let hasError = false
-const missing = {}
-
-for (const k of allKeys) {
-  for (const l of locales) {
-    if (!keys[l].has(k)) {
-      if (!missing[l]) missing[l] = []
-      missing[l].push(k)
-      hasError = true
-    }
-  }
-}
-
-if (hasError) {
-  console.error('\n❌ i18n Translation Consistency Check Failed!\n')
-  for (const [lang, missingKeys] of Object.entries(missing)) {
-    console.error(`Missing in ${lang}:`)
-    missingKeys.forEach(k => console.error(`  - ${k}`))
-  }
-  console.error('')
-  process.exit(1)
+const locales = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko']
+const messages = Object.fromEntries(await Promise.all(locales.map(async locale => [
+  locale, (await import(`../src/locales/${locale}.js`)).default,
+])))
+const { errors, keyCount } = validateTranslations(messages)
+if (errors.length) {
+  console.error(errors.join('\n'))
+  process.exitCode = 1
 } else {
-  console.log('✅ i18n Translation Consistency Check Passed!')
+  console.log(`i18n: ${keyCount} resolved keys and their placeholders match in ${locales.length} languages.`)
 }

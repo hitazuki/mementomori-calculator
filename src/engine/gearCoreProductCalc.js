@@ -1,5 +1,6 @@
 // Reference: https://tamamo.dev/GearParts?display=0 (EquipmentEvolution data).
 // Stage levels are TARGET levels: seraph 510→520 costs 30, 520→530 costs 40.
+/** @type {Record<string, { initialLevel: number, initialParts: number, exchangeParts: number, exchangeProducts: number, stages: number[][] }>} */
 const GEAR_PROGRESSIONS = {
   light: {
     initialLevel: 180,
@@ -61,12 +62,14 @@ const GEAR_PROGRESSIONS = {
 export const GEAR_CORE_MIN_LEVEL = 0
 export const GEAR_CORE_MAX_LEVEL = 1000
 
+/** @param {number | string} level */
 export function normalizeGearLevel(level) {
   const numericLevel = Math.ceil(Number(level) / 10) * 10
   if (!Number.isFinite(numericLevel)) return GEAR_CORE_MIN_LEVEL
   return Math.min(GEAR_CORE_MAX_LEVEL, Math.max(GEAR_CORE_MIN_LEVEL, numericLevel))
 }
 
+/** @param {number | string} level @param {string} gearKey */
 export function normalizeGearLevelForGear(level, gearKey) {
   const normalizedLevel = normalizeGearLevel(level)
   if (normalizedLevel === 0) return 0
@@ -74,11 +77,13 @@ export function normalizeGearLevelForGear(level, gearKey) {
   return Math.max(minimumLevel, normalizedLevel)
 }
 
+/** @param {number} level @param {number[]} stage */
 function countStageSteps(level, [start, end, step]) {
   if (level < start) return 0
   return Math.floor((Math.min(level, end) - start) / step) + 1
 }
 
+/** @param {number | string} level @param {string} gearKey */
 export function calculateGearParts(level, gearKey) {
   const normalizedLevel = normalizeGearLevel(level)
   const progression = GEAR_PROGRESSIONS[gearKey]
@@ -90,6 +95,7 @@ export function calculateGearParts(level, gearKey) {
   )
 }
 
+/** @param {number | string} level */
 export function calculateGearCoreProducts(level) {
   const normalizedLevel = normalizeGearLevel(level)
   return Object.entries(GEAR_PROGRESSIONS).map(([key, progression]) => {
@@ -105,6 +111,7 @@ export function calculateGearCoreProducts(level) {
   })
 }
 
+/** @param {number | string} currentLevel @param {number | string} targetLevel @param {string} gearKey */
 export function calculateGearCoreProductRange(currentLevel, targetLevel, gearKey) {
   const normalizedCurrentLevel = normalizeGearLevelForGear(currentLevel, gearKey)
   const normalizedTargetLevel = normalizeGearLevelForGear(targetLevel, gearKey)

@@ -9,6 +9,5 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(i18n)
 
-initI18n().then(() => {
-  app.mount('#app')
-})
+app.mount('#app')
+void initI18n()

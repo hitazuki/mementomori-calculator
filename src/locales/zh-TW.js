@@ -3,6 +3,9 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  dataLoading: '正在載入資料…',
+  dataLoadError: '資料載入失敗，請重試。',
+  dataRetry: '重試',
   reinforcementBenefitsTitle: "強化等級收益與性價比",
   reinforcementBenefitsScope: "僅按強化係數計算，每10級一檔；不讀取裝備等級或具體屬性值。強化0級倍率為1，累計加成為0%；件數和輸入起始等級不改變曲線。",
   reinforcementBenefitsUnavailable: "強化資料無法使用：係數或材料表缺失。",
@@ -664,22 +667,6 @@ export default {
   forbiddenWeaponGachaDesc: "連動道具評分表，分析天光/禁忌武具、魔女的奧祕召喚與聖天使的神諭召喚的副產物回收、核心產物推算價值與抽數收益。",
 
   packBadgePermanent: "常駐",
-  packBadgeWitch: "魔女",
-  packBadgeUltra: "限時",
-  packBadgeMixed: "混合",
-  origin_witch_first_four_elements: "魔女贈禮(首次-四屬) - {stage}",
-  origin_witch_first_light_dark: "魔女贈禮(首次-光暗) - {stage}",
-  origin_witch_rerun_four_elements: "魔女贈禮(復刻-四屬) - {stage}",
-  origin_witch_rerun_light_dark: "魔女贈禮(復刻-光暗) - {stage}",
-  origin_tower_infinite: "無窮塔",
-  origin_tower_blue: "藍塔",
-  origin_tower_red: "紅塔",
-  origin_tower_green: "翠塔",
-  origin_tower_yellow: "黃塔",
-  origin_tower_unknown: "塔",
-  origin_group_all_towers: "全屬性塔抵達",
-  origin_group_four_elements: "四屬塔",
-  origin_rank: "玩家等級",
   packBadgeWitch: "魔女",
   packBadgeUltra: "限時",
   packBadgeMixed: "混合",

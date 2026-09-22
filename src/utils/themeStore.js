@@ -1,6 +1,7 @@
+import { readStorage, writeStorage } from './storage.js'
 import { ref, watch } from 'vue'
 
-const saved = localStorage.getItem('mmt_theme') || 'dark'
+const saved = readStorage('mmt_theme') === 'light' ? 'light' : 'dark'
 export const currentTheme = ref(saved)
 
 export const toggleTheme = () => {
@@ -9,5 +10,5 @@ export const toggleTheme = () => {
 
 watch(currentTheme, (val) => {
   document.documentElement.setAttribute('data-theme', val)
-  localStorage.setItem('mmt_theme', val)
+  writeStorage('mmt_theme', val)
 }, { immediate: true })

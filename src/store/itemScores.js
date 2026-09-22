@@ -1,33 +1,20 @@
 import { reactive, watch } from 'vue'
 import scoresRaw from '../constants/itemScores.json'
+import { readStorage, writeStorage, removeStorage } from '../utils/storage.js'
+import { SCORE_STORAGE_KEY, LEGACY_SCORE_STORAGE_KEY, decodeScoreOverrides, encodeScoreOverrides } from './scorePersistence.js'
 
-const STORAGE_KEY = 'mmt-pack-scores-v2'
-const stored = localStorage.getItem(STORAGE_KEY)
-let initialScores = JSON.parse(JSON.stringify(scoresRaw)) // deep copy
-
-if (stored) {
-  try {
-    const parsed = JSON.parse(stored)
-    for (const key in parsed) {
-      if (initialScores[key]) {
-        initialScores[key].score = parsed[key].score
-      }
-    }
-  } catch(e) {
-    console.error('Failed to parse stored scores', e)
-  }
-}
-
-export const editableScores = reactive(initialScores)
+const stored = readStorage(SCORE_STORAGE_KEY)
+const overrides = decodeScoreOverrides(stored ?? readStorage(LEGACY_SCORE_STORAGE_KEY), scoresRaw, stored === null)
+export const editableScores = reactive(Object.fromEntries(Object.entries(scoresRaw).map(([key, item]) => [
+  key, { ...item, score: overrides[key] ?? item.score },
+])))
 
 export function resetEditableScores() {
-  for (const key in scoresRaw) {
-    if (editableScores[key]) {
-      editableScores[key].score = scoresRaw[key].score
-    }
-  }
+  for (const [key, item] of Object.entries(scoresRaw)) editableScores[key].score = item.score
 }
 
-watch(editableScores, (v) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(v))
-}, { deep: true })
+function persistScores() {
+  if (writeStorage(SCORE_STORAGE_KEY, encodeScoreOverrides(editableScores, scoresRaw))) removeStorage(LEGACY_SCORE_STORAGE_KEY)
+}
+persistScores()
+watch(editableScores, persistScores, { deep: true })

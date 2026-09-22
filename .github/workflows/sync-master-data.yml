@@ -62,7 +62,7 @@ jobs:
         if: steps.processed.outputs.cache-hit != 'true' || inputs.force == true
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Locate Master Data directory
         if: steps.processed.outputs.cache-hit != 'true' || inputs.force == true

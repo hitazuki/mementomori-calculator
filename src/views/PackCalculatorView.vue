@@ -11,6 +11,9 @@
     </p>
   </div>
 
+  <DataLoadState :loading="dataLoading" :error="!!dataError" @retry="loadData" />
+  <template v-if="!dataLoading && !dataError">
+
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
     <ItemScorePanel
       v-model:show-scores="showScores"
@@ -124,10 +127,14 @@
 
     </div>
   </div>
+  </template>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import DataLoadState from '../components/DataLoadState.vue'
+import { useAsyncResource } from '../composables/useAsyncResource.js'
+import { fetchJson } from '../utils/fetchJson.js'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ItemScorePanel from '../components/ItemScorePanel.vue'
 import PackQueryResults from '../components/pack/PackQueryResults.vue'
@@ -142,22 +149,24 @@ import { usePackPlannerView } from '../composables/pack/usePackPlannerView.js'
 const { t, locale } = useI18n()
 const baseUrl = import.meta.env.BASE_URL || '/'
 const showScores = ref(true)
-const packsRaw = ref([])
-const permanentPacksRaw = ref([])
+const { data: sourceData, loading: dataLoading, error: dataError, load: loadData } = useAsyncResource(
+  async signal => {
+    const [packs, permanent] = await Promise.all([
+      fetchJson(`${import.meta.env.BASE_URL}data/ultraSalePacks.json`, { signal, validate: Array.isArray }),
+      import('../constants/permanentPacks.json'),
+    ])
+    return { packs, permanent: permanent.default }
+  }, { packs: [], permanent: [] }
+)
+const packsRaw = computed(() => sourceData.value.packs)
+const permanentPacksRaw = computed(() => sourceData.value.permanent)
 const activePackTab = ref('query')
 
 function setActivePackTab(tab) {
   activePackTab.value = tab
 }
 
-onMounted(async () => {
-  try {
-    packsRaw.value = await fetch(`${import.meta.env.BASE_URL}data/ultraSalePacks.json`).then(r => r.json())
-  } catch (e) {
-    console.error('Failed to fetch ultraSalePacks.json', e)
-  }
-  permanentPacksRaw.value = (await import('../constants/permanentPacks.json')).default
-})
+onMounted(loadData)
 
 const {
   itemDisplayName,

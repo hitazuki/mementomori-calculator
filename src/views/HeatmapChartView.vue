@@ -173,7 +173,7 @@ import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { HeatmapChart } from 'echarts/charts'
 import { TooltipComponent, GridComponent, VisualMapComponent, TitleComponent } from 'echarts/components'
-import VChart from 'vue-echarts'
+import VChart from '../components/ActiveChart.vue'
 
 import { buildDynamicHeatmapData } from '../engine/damageCalc.js'
 import { getMoriTheme, HEATMAP_COLORS, baseChartOption } from '../utils/chartTheme.js'

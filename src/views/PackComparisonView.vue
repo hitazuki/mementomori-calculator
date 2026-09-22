@@ -6,6 +6,9 @@
     </p>
   </div>
 
+  <DataLoadState :loading="dataLoading" :error="!!dataError" @retry="loadData" />
+  <template v-if="!dataLoading && !dataError">
+
   <div class="grid-sidebar animate-fadeup" style="align-items:start;gap:16px">
     <ItemScorePanel
       v-model:show-scores="showScores"
@@ -219,21 +222,21 @@
       </div>
     </div>
   </div>
+  </template>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import DataLoadState from '../components/DataLoadState.vue'
+import { useAsyncResource } from '../composables/useAsyncResource.js'
+import { fetchJson } from '../utils/fetchJson.js'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ItemScorePanel from '../components/ItemScorePanel.vue'
 
-const packsRaw = ref([])
-onMounted(async () => {
-  try {
-    packsRaw.value = await fetch(`${import.meta.env.BASE_URL}data/allPacks.json`).then(r => r.json())
-  } catch (e) {
-    console.error('Failed to fetch allPacks.json', e)
-  }
-})
+const { data: packsRaw, loading: dataLoading, error: dataError, load: loadData } = useAsyncResource(
+  signal => fetchJson(`${import.meta.env.BASE_URL}data/allPacks.json`, { signal, validate: Array.isArray }), []
+)
+onMounted(loadData)
 import { calculatePackCE, getItemInfo, getBaseItemKey } from '../engine/packCalc.js'
 import { useItemScores } from '../composables/useItemScores.js'
 

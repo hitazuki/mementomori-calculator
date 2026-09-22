@@ -3,6 +3,9 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  dataLoading: 'データを読み込み中…',
+  dataLoadError: 'データを読み込めませんでした。再試行してください。',
+  dataRetry: '再試行',
   reinforcementBenefitsTitle: "強化レベルの上昇量と効率",
   reinforcementBenefitsScope: "強化係数のみを使い、10レベルごとに計算します。装備レベルや具体的な能力値は参照しません。強化0レベルの倍率は1、累計加算率は0%です。装備数と入力した開始レベルは曲線に影響しません。",
   reinforcementBenefitsUnavailable: "強化データを利用できません。係数または素材データが不足しています。",
@@ -417,24 +420,7 @@ export default {
   packColItems: "内容物",
   sourceTypeUltra: "ウルトラセールパック",
   sourceTypePermanent: "常設パック",
-  sourceTypeWitch: "魔女の贈り物",
-  ui_all: "全て",
 
-  origin_witch_first_four_elements: "魔女の贈り物 (初回-4属性) - {stage}",
-  origin_witch_first_light_dark: "魔女の贈り物 (初回-天冥) - {stage}",
-  origin_witch_rerun_four_elements: "魔女の贈り物 (復刻-4属性) - {stage}",
-  origin_witch_rerun_light_dark: "魔女の贈り物 (復刻-天冥) - {stage}",
-  origin_tower_infinite: "無窮の塔",
-  origin_tower_blue: "藍の塔",
-  origin_tower_red: "紅の塔",
-  origin_tower_green: "翠の塔",
-  origin_tower_yellow: "黄の塔",
-  origin_tower_unknown: "塔",
-  origin_group_all_towers: "全属性の塔到達",
-  origin_group_four_elements: "4属性の塔",
-  origin_rank: "プレイヤーランク",
-  origin_quest: "メインクエスト",
-  origin_unknown: "不明",
 
   sourceTypeWitch: "魔女の贈り物",
   ui_all: "全て",

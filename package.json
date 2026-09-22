@@ -7,11 +7,11 @@
     "prepare": "node scripts/install_git_hooks.js",
     "commit:check": "node scripts/validate_commit_message.js --message",
     "test:i18n": "node scripts/test_i18n.js",
-    "test:unit": "node --import ./scripts/registerRawLoader.mjs --test",
+    "test:unit": "node --import ./scripts/registerRawLoader.mjs --test test/*.test.js",
     "test": "npm run test:i18n && npm run test:unit",
-    "predev": "node scripts/gen_all_packs.js",
+    "predev": "npm run generate:ui-locales && node scripts/gen_all_packs.js",
     "dev": "vite",
-    "prebuild": "node scripts/build_character_rating_locales.mjs && npm run test && node scripts/gen_all_packs.js",
+    "prebuild": "node scripts/build_character_rating_locales.mjs && npm run generate:ui-locales && npm run test && node scripts/gen_all_packs.js",
     "build": "vite build",
     "preview": "vite preview",
     "fetch-packs": "node scripts/fetch_ultra_sale.js",
@@ -20,19 +20,32 @@
     "sync:master": "node scripts/extract_master_data.js",
     "sync:assets": "node scripts/sync_assets.js && npm run generate:character-thumbnails",
     "sync:raid-icons": "node scripts/sync_raid_skill_icons.mjs",
-    "sync:assets:legacy": "node scripts/sync_assets.js --legacy && npm run generate:character-thumbnails"
+    "sync:assets:legacy": "node scripts/sync_assets.js --legacy && npm run generate:character-thumbnails",
+    "test:e2e": "playwright test",
+    "lint": "eslint src test scripts/test_i18n.js scripts/lib/translationValidation.mjs scripts/build_ui_locales.mjs scripts/vite_ui_locales.mjs e2e vite.config.js playwright.config.js",
+    "typecheck": "tsc --noEmit",
+    "generate:ui-locales": "node scripts/build_ui_locales.mjs"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
+    "eslint": "^10.11.0",
+    "eslint-plugin-vue": "^10.11.0",
+    "globals": "^17.12.0",
     "sharp": "^0.35.4",
-    "vite": "^8.0.12"
+    "typescript": "^7.0.2",
+    "vite": "^8.0.12",
+    "@vitejs/plugin-vue": "^6.0.7"
   },
   "dependencies": {
-    "@vitejs/plugin-vue": "^6.0.7",
     "echarts": "^6.1.0",
     "html-to-image": "^1.11.13",
     "pinia": "^3.0.4",
     "vue": "^3.5.35",
     "vue-echarts": "^8.0.1",
     "vue-i18n": "^11.4.4"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

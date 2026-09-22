@@ -3,6 +3,9 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  dataLoading: 'Loading data…',
+  dataLoadError: 'Could not load data. Please retry.',
+  dataRetry: 'Retry',
   reinforcementBenefitsTitle: "Reinforcement gains and efficiency",
   reinforcementBenefitsScope: "Uses only reinforcement coefficients in 10-level tiers, without equipment levels or actual stat values. Reinforcement level 0 has a multiplier of 1 and a bonus of 0%. Quantities and the entered starting level do not change the curves.",
   reinforcementBenefitsUnavailable: "Reinforcement data unavailable: missing coefficients or material costs.",
@@ -667,21 +670,6 @@ export default {
   weaponGachaExpectedContribution: "Expected Contribution",
 
   packBadgePermanent: "Perm",
-  packBadgeWitch: "Witch",
-  packBadgeUltra: "Ultra",
-  packBadgeMixed: "Mixed",
-  origin_witch_first_four_elements: "Witch's Gift (First-4Elem) - {stage}",
-  origin_witch_first_light_dark: "Witch's Gift (First-L/D) - {stage}",
-  origin_witch_rerun_four_elements: "Witch's Gift (Rerun-4Elem) - {stage}",
-  origin_witch_rerun_light_dark: "Witch's Gift (Rerun-L/D) - {stage}",
-  origin_tower_infinite: "Infinite Tower",
-  origin_tower_blue: "Azure Tower",
-  origin_tower_red: "Crimson Tower",
-  origin_tower_green: "Emerald Tower",
-  origin_tower_yellow: "Amber Tower",
-  origin_tower_unknown: "Tower",
-  origin_group_all_towers: "All Attribute Towers Reached",
-  origin_group_four_elements: "4-Element Towers",
   packBadgeWitch: "Witch",
   packBadgeUltra: "Ultra",
   packBadgeMixed: "Mixed",

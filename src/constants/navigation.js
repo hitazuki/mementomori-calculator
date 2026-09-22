@@ -144,3 +144,25 @@ export function findGroupByView(viewId) {
 export function findSidebarGroupByView(viewId) {
   return SIDEBAR_GROUPS.find((group) => group.items.some((item) => item.matchViews.includes(viewId)))
 }
+
+// Registered pages and their cache policy live alongside navigation metadata.
+export const VIEW_DEFINITIONS = {
+  characters: { name: 'CharacterCatalogView', cache: true, load: () => import('../views/CharacterCatalogView.vue') },
+  home: { name: 'HomeView', cache: false, emitsNavigate: true, load: () => import('../views/HomeView.vue') },
+  calculator: { name: 'CalculatorView', cache: true, load: () => import('../views/CalculatorView.vue') },
+  sweep: { name: 'SweepChartView', cache: true, load: () => import('../views/SweepChartView.vue') },
+  heatmap: { name: 'HeatmapChartView', cache: true, load: () => import('../views/HeatmapChartView.vue') },
+  compare: { name: 'ComparePanelView', cache: true, load: () => import('../views/ComparePanelView.vue') },
+  tornado: { name: 'TornadoChartView', cache: true, load: () => import('../views/TornadoChartView.vue') },
+  table: { name: 'TableExportView', cache: true, load: () => import('../views/TableExportView.vue') },
+  raidTable: { name: 'RaidTableView', cache: true, load: () => import('../views/RaidTableView.vue') },
+  mysterium: { name: 'MysteriumPanelView', cache: true, load: () => import('../views/MysteriumPanelView.vue') },
+  shopExchange: { name: 'ShopExchangeView', cache: true, load: () => import('../views/ShopExchangeView.vue') },
+  packCalc: { name: 'PackCalculatorView', cache: true, load: () => import('../views/PackCalculatorView.vue') },
+  packCompare: { name: 'PackComparisonView', cache: true, load: () => import('../views/PackComparisonView.vue') },
+  gacha: { name: 'GachaAnalysisView', cache: true, load: () => import('../views/GachaAnalysisView.vue') },
+  forbiddenWeaponGacha: { name: 'ForbiddenWeaponGachaView', cache: true, load: () => import('../views/ForbiddenWeaponGachaView.vue') },
+  equipmentReinforcement: { name: 'EquipmentReinforcementView', cache: true, load: () => import('../views/EquipmentReinforcementView.vue') },
+  equipmentUpgrade: { name: 'EquipmentUpgradeView', cache: true, load: () => import('../views/EquipmentUpgradeView.vue') },
+  serialCode: { name: 'SerialCodeToolView', cache: false, load: () => import('../views/SerialCodeToolView.vue') },
+}

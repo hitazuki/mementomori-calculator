@@ -236,7 +236,7 @@ import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart, RadarChart } from 'echarts/charts'
 import { TooltipComponent, GridComponent, LegendComponent, TitleComponent } from 'echarts/components'
-import VChart from 'vue-echarts'
+import VChart from '../components/ActiveChart.vue'
 
 import { calcDamage } from '../engine/damageCalc.js'
 import { getDefBenchmarks } from '../constants/levelTable.js'

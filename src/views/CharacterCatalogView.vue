@@ -105,7 +105,7 @@ async function scrollToStart() {
   // The app scrolls its shared view container, not the window.
   catalogRoot.value?.closest('.view')?.scrollTo({ top: 0, left: 0, behavior: 'instant' })
 }
-function readHash() { selectedId.value = Number(location.hash.match(/^#characters\/(\d+)$/)?.[1]) || null; scrollToStart() }
+function readHash() { if (!/^#characters(?:\/|$)/.test(location.hash)) return; selectedId.value = Number(location.hash.match(/^#characters\/(\d+)$/)?.[1]) || null; scrollToStart() }
 function open(id) { selectedId.value = id; location.hash = id ? `characters/${id}` : 'characters'; scrollToStart() }
 function followCharacterLink(event) {
   if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return

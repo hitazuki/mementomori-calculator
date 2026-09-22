@@ -4,6 +4,9 @@
     <p class="view-desc">{{ $t('mysteriumDesc') }}</p>
   </div>
 
+  <DataLoadState :loading="dataLoading" :error="!!dataError" @retry="loadData" />
+  <template v-if="!dataLoading && !dataError">
+
   <div class="grid-sidebar mysterium-layout animate-fadeup" style="align-items:start;gap:16px;">
     <!-- Left Sidebar: Scoring Settings -->
     <div class="mysterium-settings" style="display: flex; flex-direction: column; max-height: calc(100vh - 120px);">
@@ -276,28 +279,29 @@
       </div>
     </div>
   </div>
+  </template>
 </template>
 
 <script setup>
+import DataLoadState from '../components/DataLoadState.vue'
+import { useAsyncResource } from '../composables/useAsyncResource.js'
+import { fetchJson, isRecord } from '../utils/fetchJson.js'
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { calculateMysteriumRankings } from '../engine/mysteriumCalc.js'
 
-const charactersRaw = ref({})
-const mysteriumRaw = ref({})
-
-onMounted(async () => {
-  try {
-    const [chars, myst] = await Promise.all([
-      fetch(`${import.meta.env.BASE_URL}data/characters.json`).then(r => r.json()),
-      fetch(`${import.meta.env.BASE_URL}data/mysterium_data.json`).then(r => r.json())
+const { data: sourceData, loading: dataLoading, error: dataError, load: loadData } = useAsyncResource(
+  async signal => {
+    const [characters, mysterium] = await Promise.all([
+      fetchJson(`${import.meta.env.BASE_URL}data/characters.json`, { signal, validate: isRecord }),
+      fetchJson(`${import.meta.env.BASE_URL}data/mysterium_data.json`, { signal, validate: Array.isArray }),
     ])
-    charactersRaw.value = chars
-    mysteriumRaw.value = myst
-  } catch (e) {
-    console.error('Failed to fetch mysterium data', e)
-  }
-})
+    return { characters, mysterium }
+  }, { characters: {}, mysterium: [] }
+)
+const charactersRaw = computed(() => sourceData.value.characters)
+const mysteriumRaw = computed(() => sourceData.value.mysterium)
+onMounted(loadData)
 
 const { t } = useI18n()
 

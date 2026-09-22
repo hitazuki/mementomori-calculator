@@ -26,6 +26,8 @@
           <input
             v-if="!isLocked(row.key)"
             class="form-input item-score-input"
+            :aria-label="itemDisplayName(row.item)"
+            :data-score-key="row.key"
             type="number"
             v-model.number="row.item.score"
             min="0"

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "noEmit": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
+    "types": [],
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/utils/fetchJson.js",
+    "src/i18n/languageLoader.js",
+    "src/composables/useAsyncResource.js",
+    "src/engine/gearCoreProductCalc.js",
+    "src/utils/storage.js",
+    "src/store/scorePersistence.js",
+    "src/utils/viewRoutes.js"
+  ]
+}

@@ -223,12 +223,10 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart, LineChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
-import VChart from 'vue-echarts'
+import VChart from '../components/ActiveChart.vue'
 
 import { buildGachaAnalysis, calcAtLeastOne, GACHA_BANNERS, GACHA_TYPES } from '../engine/gachaCalc.js'
-import { normalizeScores } from '../engine/packCalc.js'
-import { applyDerivedScores } from '../engine/derivedScores.js'
-import { editableScores } from '../store/itemScores.js'
+import { normalizedScores } from '../store/derivedItemScores.js'
 import { baseChartOption, getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 
@@ -243,7 +241,6 @@ const tr = (key, fallback, params = {}) => key ? t(key, params) : fallback
 const bannerOptions = Object.values(GACHA_BANNERS).map(({ key, label, labelKey }) => ({ key, label, labelKey }))
 const typeOptions = Object.values(GACHA_TYPES)
 
-const normalizedScores = computed(() => applyDerivedScores(normalizeScores(editableScores)))
 const analysis = computed(() => buildGachaAnalysis(selectedBanner.value, selectedType.value, normalizedScores.value))
 const hasSideReturn = computed(() => analysis.value.sideDrops.length > 0)
 const configBannerLabel = computed(() => tr(analysis.value.config.labelKey, analysis.value.config.bannerLabel))
