@@ -22,7 +22,8 @@ export function upgradeLevels(seriesId, stat, data = EQUIPMENT_UPGRADE_DATA) {
 export function buildEquipmentUpgrade(panel, plan, damageType = 'auto', data = EQUIPMENT_UPGRADE_DATA) {
   const { outsideBonus = (DEFAULT_UPGRADE_BONUSES[plan.stat]?.outsideBonus ?? 0), insideBonus = 0 } = plan
   if (damageType === 'auto') damageType = plan.stat === 'mdef' ? 'mag' : 'phys'
-  if (![panel.def, panel.pdef, panel.mdef, panel.pen, panel.pmPen, outsideBonus, insideBonus].every(nonnegative)
+  if (![panel.def, panel.pdef, panel.mdef, panel.pen, panel.pmPen, outsideBonus].every(nonnegative)
+    || typeof insideBonus !== 'number' || !Number.isFinite(insideBonus) || Math.abs(insideBonus) > Number.MAX_SAFE_INTEGER
     || ![panel.level, panel.enemyLevel].every(level => Number.isInteger(level) && level >= CHARACTER_LEVEL_RANGE[0] && level <= CHARACTER_LEVEL_RANGE[1])
     || !UPGRADE_STATS.includes(plan.stat) || !['phys', 'mag'].includes(damageType)) return { valid: false, error: 'input' }
   const rows = data.series.find(series => series.id === plan.seriesId)?.stats[plan.stat]
@@ -39,15 +40,16 @@ export function buildEquipmentUpgrade(panel, plan, damageType = 'auto', data = E
   }
   const attacker = getCoeffByLevel(panel.enemyLevel)
   const defender = getCoeffByLevel(panel.level)
+  const insideMultiplier = Math.max(0, 1 + insideBonus / 100)
   const rate = equipmentValue => {
     const adjusted = { def: panel.def, pdef: panel.pdef, mdef: panel.mdef }
-    adjusted[plan.stat] = panel[plan.stat] * (1 + insideBonus / 100) + equipmentValue
+    adjusted[plan.stat] = panel[plan.stat] * insideMultiplier + equipmentValue
     return calcDamageRate(adjusted.def, panel.pen, defender.cDef, attacker.cPen)
       * calcDamageRate(adjusted[damageType === 'phys' ? 'pdef' : 'mdef'], panel.pmPen, damageType === 'phys' ? defender.cPdef : defender.cMdef, attacker.cPmPen)
   }
   const measure = (before, after) => ({ ehp: (before / after - 1) * 100, reduction: (1 - after / before) * 100 })
   try {
-    const multiplier = (1 + outsideBonus / 100) * (1 + insideBonus / 100)
+    const multiplier = (1 + outsideBonus / 100) * insideMultiplier
     const origin = valueAt(plan.start) * multiplier
     const baseRate = rate(0)
     const points = []

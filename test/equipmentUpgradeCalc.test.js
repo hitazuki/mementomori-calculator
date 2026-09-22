@@ -44,7 +44,51 @@ test('in-battle bonus multiplies both unequipped and equipment stats at all tier
     })
   }
   for (const key of ['outsideBonus', 'insideBonus']) {
-    for (const value of ['', null, -1, NaN, Infinity]) assert.equal(build(defaults, { ...plan, [key]: value }).valid, false)
+    for (const value of ['', null, NaN, Infinity, -Infinity, Number.MAX_VALUE, -Number.MAX_VALUE]) assert.equal(build(defaults, { ...plan, [key]: value }).valid, false)
+  }
+  assert.equal(build(defaults, { ...plan, outsideBonus: -1 }).valid, false)
+})
+
+test('negative in-battle bonuses reduce both the baseline and equipment contribution', () => {
+  for (const stat of ['def', 'pdef', 'mdef']) {
+    for (const insideBonus of [-80, -99.9]) {
+      const baseline = { ...defaults, def: 2000000 }
+      const factor = 1 + insideBonus / 100
+      const scaled = structuredClone(data)
+      scaled.coefficients = scaled.coefficients.map(value => value * factor)
+      for (const start of [0, 380]) {
+        const actual = build(baseline, { ...plan, stat, start, outsideBonus: 10, insideBonus })
+        const expected = build({ ...baseline, [stat]: baseline[stat] * factor }, { ...plan, stat, start, outsideBonus: 10 }, 'auto', scaled)
+        assert.equal(actual.valid, true)
+        actual.points.forEach((point, index) => {
+          const other = expected.points[index]
+          near(point.increment, other.increment)
+          near(point.totalIncrement, other.totalIncrement)
+          near(point.adjacent.ehp, other.adjacent.ehp)
+          near(point.cumulative.ehp, other.cumulative.ehp)
+          near(point.cumulative.reduction, other.cumulative.reduction)
+          if (point.fragmentCost) near(point.efficiency.ehp, other.efficiency.ehp)
+        })
+      }
+    }
+  }
+})
+
+test('in-battle reductions of 100 percent or more floor the affected stat at zero', () => {
+  for (const stat of ['def', 'pdef', 'mdef']) {
+    for (const insideBonus of [-100, -120, -1000]) {
+      for (const start of [0, 380]) {
+        const result = build({ ...defaults, def: 2000000 }, { ...plan, stat, start, outsideBonus: 10, insideBonus })
+        assert.equal(result.valid, true)
+        for (const point of result.points) {
+          assert.equal(point.increment, 0)
+          assert.equal(point.totalIncrement, 0)
+          assert.deepEqual(point.adjacent, { ehp: 0, reduction: 0 })
+          assert.deepEqual(point.cumulative, { ehp: 0, reduction: 0 })
+          assert.equal(point.efficiency.ehp, point.fragmentCost > 0 ? 0 : null)
+        }
+      }
+    }
   }
 })
 

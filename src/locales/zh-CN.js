@@ -54,7 +54,7 @@ export default {
   upgradeOutsideHint: "包含秘仪和装备词条，填写合计百分比。默认按全常驻角色秘仪 LR5：防御1%，物防/魔防0%；切换属性会恢复对应场外默认值。",
   upgradeOutsideBonus: "场外属性加成（%）",
   upgradeInsideBonus: "场内属性加成（%）",
-  upgradeBonusFormula: "最终属性 =（无装备数值 + 装备属性 ×（1 + 场外加成））×（1 + 场内加成）。无装备基准同样计入场内加成。",
+  upgradeBonusFormula: "最终属性 =（无装备数值 + 装备属性 ×（1 + 场外加成））× max(0, 1 + 场内加成)。无装备基准同样计入场内加成。 场内加成支持负数：−80%表示保留20%；−100%及以下将对应属性降至0，不会变为负数。无装备基准同样处理。",
   upgradeBonus: "装备属性加成（%）",
   upgradeScope: "仅估算装备主属性；不计洗炼潜力、套装、神装变化或战斗额外效果。",
   upgradeDamage: "承受伤害类型",

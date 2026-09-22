@@ -21,7 +21,7 @@
         <label>{{ t('upgradeSeries') }}<select v-model.number="plan.seriesId" class="form-select"><option v-for="series in EQUIPMENT_UPGRADE_DATA.series" :key="series.id" :value="series.id">{{ series.names[locale] || series.names.en }}</option></select></label>
         <button v-if="plans.length > 1" type="button" class="btn btn-secondary" @click="plans.splice(index, 1)">{{ t('upgradeRemove') }}</button>
       </div>
-      <details><summary>{{ t('upgradeAdvanced') }}</summary><div class="upgrade-fields"><label>{{ t('upgradeOutsideBonus') }}<input v-model.number="plan.outsideBonus" class="form-input" type="number" min="0" step="0.1"><small class="view-desc">{{ t('upgradeOutsideHint') }}</small></label><label>{{ t('upgradeInsideBonus') }}<input v-model.number="plan.insideBonus" class="form-input" type="number" min="0" step="0.1"></label></div><p class="view-desc">{{ t('upgradeBonusFormula') }}</p></details>
+      <details><summary>{{ t('upgradeAdvanced') }}</summary><div class="upgrade-fields"><label>{{ t('upgradeOutsideBonus') }}<input v-model.number="plan.outsideBonus" class="form-input" type="number" min="0" step="0.1"><small class="view-desc">{{ t('upgradeOutsideHint') }}</small></label><label>{{ t('upgradeInsideBonus') }}<input v-model.number="plan.insideBonus" class="form-input" type="number" step="0.1"></label></div><p class="view-desc">{{ t('upgradeBonusFormula') }}</p></details>
     </div>
     </div>
       </div>

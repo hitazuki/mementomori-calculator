@@ -54,7 +54,7 @@ export default {
   upgradeOutsideHint: "Enter the combined Arcana and equipment-affix percentage. Defaults use LR+5 Arcana with only permanent characters: DEF 1%, P.DEF/M.DEF 0%. Changing the stat restores its out-of-battle default.",
   upgradeOutsideBonus: "Out-of-battle stat bonus (%)",
   upgradeInsideBonus: "In-battle stat bonus (%)",
-  upgradeBonusFormula: "Final stat = (unequipped stat + equipment stat × (1 + out-of-battle bonus)) × (1 + in-battle bonus). The unequipped baseline also includes the in-battle bonus.",
+  upgradeBonusFormula: "Final stat = (unequipped stat + equipment stat × (1 + out-of-battle bonus)) × max(0, 1 + in-battle bonus). The unequipped baseline also includes the in-battle bonus. In-battle bonuses may be negative: −80% retains 20%; −100% or lower reduces the affected stat to zero, never below zero. The unequipped baseline uses the same rule.",
   upgradeBonus: "Equipment stat bonus (%)",
   upgradeScope: "Estimates gear main stats only; excludes reforge potential, set or augment changes, and additional combat effects.",
   upgradeDamage: "Incoming damage type",
