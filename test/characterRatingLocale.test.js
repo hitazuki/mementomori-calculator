@@ -2,14 +2,18 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { ratingDisplayTexts, completeRatingTranslation, loadRatingTranslations } from '../src/utils/characterRatingLocale.js'
-import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
+import { ratingIndex } from '../src/utils/characterCatalog.js'
 
 const read=path=>JSON.parse(fs.readFileSync(new URL(path,import.meta.url)))
-const records=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters.map(c=>read(`../public/data/character-ratings/${c.id}.json`))
+// Pending characters have no assessment or localized rating copy yet.
+// Still require the full record for every current or stale assessment.
+const records=Object.values(ratingIndex(read('../public/data/character-ratings/index.json')))
+  .filter(entry=>entry.status!=='pending')
+  .map(entry=>read(`../public/data/character-ratings/${entry.id}.json`))
 const percentages=text=>(text.match(/\d+(?:\.\d+)?%/g)??[]).sort()
 
-test('all 134 characters have complete localized rating copy, with original percentages retained',()=>{
-  assert.equal(records.length,134)
+test('all published assessments have complete localized rating copy, with original percentages retained',()=>{
+  assert.ok(records.length>0)
   for(const locale of ['en','ja','ko','zh-TW']) {
     const bundle=read(`../public/data/character-ratings/i18n/${locale}.json`)
     const authored=read(`../doc/character-ratings/i18n/${locale}.json`)

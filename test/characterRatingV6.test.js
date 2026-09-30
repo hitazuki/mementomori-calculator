@@ -102,7 +102,11 @@ test('seven radar vertices are equally spaced and every new score dimension sort
     const a=radarPoint(i,10),b=radarPoint((i+1)%7,10)
     assert.ok(Math.abs(Math.hypot(a[0]-b[0],a[1]-b[1])-side)<1e-9)
     const sorted=filterCharacters(catalog,{sort:'rating',ratingAxis:RATING_AXES[i],ratings:index})
-    for(let j=1;j<sorted.length;j++) assert.ok(index[sorted[j-1].id].scores[RATING_AXES[i]]>=index[sorted[j].id].scores[RATING_AXES[i]])
+    for(let j=1;j<sorted.length;j++) {
+      const previous=index[sorted[j-1].id]?.scores?.[RATING_AXES[i]]??-1
+      const current=index[sorted[j].id]?.scores?.[RATING_AXES[i]]??-1
+      assert.ok(previous>=current)
+    }
   }
   const labels=fs.readFileSync(new URL('../src/locales/characterCatalog.js',import.meta.url),'utf8')
   for(const key of RATING_AXES) {

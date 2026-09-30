@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import { filterCharacters, ratingIndex } from '../src/utils/characterCatalog.js'
 import { NAV_GROUPS, findModuleByView } from '../src/constants/navigation.js'
 import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
+import { RATING_AXES } from '../src/utils/characterRatings.js'
 
 const characters = [
   { id: 3, name: 'B', title: 'Winter', element: 1, speed: 3000 },
@@ -29,6 +30,18 @@ test('rating sorting respects dimension, filters, ties and missing versus zero',
   assert.deepEqual(filterCharacters(characters, { sort: 'rating', ratings, element: 1, search: 'Winter' }).map(c => c.id), [3])
   assert.deepEqual(filterCharacters(characters, { sort: 'rating' }).map(c => c.id), [1, 2, 3])
   assert.deepEqual(characters.map(c => c.id), [3, 2, 1])
+})
+
+test('pending and missing assessments sort after genuine zero scores on every axis', () => {
+  const sample = [...characters, { id: 4, name: 'Pending', title: '', element: 1 }]
+  for (const axis of RATING_AXES) {
+    const ratings = {
+      1: { scores: { [axis]: 0 } },
+      3: { scores: { [axis]: 8 } },
+      4: { status: 'pending', scores: null },
+    }
+    assert.deepEqual(filterCharacters(sample, { sort: 'rating', ratingAxis: axis, ratings }).map(c => c.id), [3, 1, 2, 4])
+  }
 })
 
 test('published lightweight rating index agrees with full records and audit states', () => {
