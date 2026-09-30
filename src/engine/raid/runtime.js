@@ -93,10 +93,22 @@ export function runRaidProgram(program) {
     return Object.fromEntries(config.lineup.map(id => [id, removableBuffCount(actors.get(id))]))
   }
 
-  function snapshotStatuses() {
+  function snapshotStatus(status, context) {
+    const snapshot = cloneStatus(status)
+    const sourceActor = actors.get(status.sourceId)
+    for (const modifier of snapshot.modifiers) {
+      modifier.displayRate = modifier.compiledRate ? resolveValue(modifier.compiledRate, sourceActor, context) : modifier.rate
+    }
+    for (const modifier of snapshot.symbolicModifiers) {
+      modifier.displayCoefficient = modifier.compiledCoefficient ? resolveValue(modifier.compiledCoefficient, sourceActor, context) : modifier.coefficient
+    }
+    return snapshot
+  }
+
+  function snapshotStatuses(context) {
     return Object.fromEntries(config.lineup.map(id => [id, {
       removableBuffCount: removableBuffCount(actors.get(id)),
-      statuses: actors.get(id).statuses.map(cloneStatus),
+      statuses: actors.get(id).statuses.map(status => snapshotStatus(status, context)),
     }]))
   }
 
@@ -460,11 +472,11 @@ export function runRaidProgram(program) {
     return { actionOrder: [...override], orderSource: 'manual' }
   }
 
-  function consumeStatuses(actor, activeKeys) {
+  function consumeStatuses(actor, activeKeys, context) {
     const expired = []
     for (const status of actor.statuses) {
       if (status.remainingActions != null && activeKeys.has(statusKey(status))) status.remainingActions -= 1
-      if (status.remainingActions != null && status.remainingActions <= 0) expired.push(cloneStatus(status))
+      if (status.remainingActions != null && status.remainingActions <= 0) expired.push(snapshotStatus(status, context))
     }
     actor.statuses = actor.statuses.filter(status => status.remainingActions == null || status.remainingActions > 0)
     return expired
@@ -667,10 +679,10 @@ export function runRaidProgram(program) {
       const runtimeBefore = snapshotRuntime(actor)
       actor.runtime.actionCount += 1
       const cooldownsBefore = { ...actor.cooldowns }
-      const statusSnapshotBeforeAction = snapshotStatuses()
       const activeStatusKeys = new Set(actor.statuses.map(statusKey))
       const effectsApplied = []
       const context = { config, actors, boss, sequence, round: turn, effectsApplied, phase: 'actionStart', ownerId: actorId, runtimeBefore }
+      const statusSnapshotBeforeAction = snapshotStatuses(context)
 
       runHooks(actor, actor.definition.hooksByTrigger.actionStart, context, 'actionStart')
       const action = selectAction(actor, context, evaluateCondition)
@@ -678,7 +690,7 @@ export function runRaidProgram(program) {
 
       runHooks(actor, action.hooksByTrigger.beforeDamage, context, 'beforeDamage')
       runHooks(actor, actor.definition.hooksByTrigger.beforeDamage, context, 'beforeDamage')
-      const statusSnapshotAtDamage = snapshotStatuses()
+      const statusSnapshotAtDamage = snapshotStatuses({ ...context, phase: 'damage' })
       const removableBuffCountsAtDamage = removableBuffCounts()
       const damage = executeDamageSteps(actor, action, { ...context, phase: 'damage' })
       runHooks(actor, action.hooksByTrigger.afterDamage, context, 'afterDamage')
@@ -688,13 +700,13 @@ export function runRaidProgram(program) {
 
       const cooldownRecovery = Math.max(0, 1 + modifierSnapshot(actor, { ...context, phase: 'actionEnd' }).totals.cooldownRecoveryBonus)
       for (const key of ['s1', 's2']) actor.cooldowns[key] = Math.max(0, actor.cooldowns[key] - cooldownRecovery)
-      const expiredEffects = consumeStatuses(actor, activeStatusKeys)
+      const expiredEffects = consumeStatuses(actor, activeStatusKeys, { ...context, phase: 'actionEnd' })
       if (action.key !== 'normal') actor.runtime.skillUses[action.key] += 1
       runHooks(actor, actor.definition.hooksByTrigger.actionEnd, context, 'actionEnd')
       runHooks(actor, action.hooksByTrigger.actionEnd, context, 'actionEnd')
 
       const runtimeAfter = snapshotRuntime(actor)
-      const statusSnapshotAfterAction = snapshotStatuses()
+      const statusSnapshotAfterAction = snapshotStatuses({ ...context, phase: 'actionEnd' })
       const removableBuffCountsAfterAction = Object.fromEntries(Object.entries(statusSnapshotAfterAction).map(([id, snapshot]) => [id, snapshot.removableBuffCount]))
       const event = {
         sequence, turn, actorId, actionKey: action.key, skillNameKey: action.nameKey, damageType: action.damageType,

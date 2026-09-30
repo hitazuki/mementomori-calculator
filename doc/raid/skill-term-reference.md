@@ -347,7 +347,7 @@ hook('afterDamage', [{
 | `afterDamage` | 全部伤害段后 | Buff、减冷却、条件重置 |
 | `actionEnd` | 状态消费后 | 行动次数周期效果、结束条件 |
 
-行动详情同时保留 `statusSnapshotBeforeAction`、`statusSnapshotAtDamage` 与 `statusSnapshotAfterAction`。面板的可解除 Buff 数显示使用“行动前 → 行动后”；行动后快照在 `actionEnd` 钩子和本次应消耗的持续时间均结算完毕后生成。`afterHit` / `afterCriticalHit` 可声明在具体技能或角色顶层；运行时先执行技能钩子，再执行角色全局钩子。
+行动详情同时保留 `statusSnapshotBeforeAction`、`statusSnapshotAtDamage` 与 `statusSnapshotAfterAction`。状态快照与到期记录的属性条目用 `displayRate`、面板引用条目用 `displayCoefficient` 保留对应时点解析后的数值，供界面显示；原始值定义和复制值不变。Boss 状态显示每层属性乘当前层数的合计。未建模数值的状态仍只展示名称与状态信息。面板的可解除 Buff 数显示使用“行动前 → 行动后”；行动后快照在 `actionEnd` 钩子和本次应消耗的持续时间均结算完毕后生成。`afterHit` / `afterCriticalHit` 可声明在具体技能或角色顶层；运行时先执行技能钩子，再执行角色全局钩子。
 
 ### 9.2 行动周期被动
 

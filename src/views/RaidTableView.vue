@@ -1178,15 +1178,15 @@ function modifierBreakdown(event) {
 
 function bossStackSummary(statuses) {
   if (!statuses.length) return t('raidNoBossStatus')
-  return statuses.map(status => `${t(status.nameKey)}×${status.stacks}`).join(' · ')
+  return statuses.map(status => `${t(status.nameKey)}×${status.stacks}${bossRateSummary(status) ? ` (${bossRateSummary(status)})` : ''}`).join(' · ')
 }
 
 function bossStatusLabel(status) {
   const source = status.sourceId != null ? `${characterName(status.sourceId)} · ` : ''
   const statusClass = status.statusClass === 'unremovableDebuff' ? t('raidStatusUnremovableDebuff') : t('raidStatusRemovableDebuff')
   const duration = status.remainingRounds != null ? ` · ${t('raidRemainingRounds', { n: status.remainingRounds })}` : ''
-  const defenseRates = bossDefenseRateSummary(status)
-  return `${source}${t(status.nameKey)} · ${statusClass} · ${t('raidStatusStacks', { n: status.stacks })}${defenseRates ? ` · ${defenseRates}` : ''}${duration}`
+  const rates = bossRateSummary(status)
+  return `${source}${t(status.nameKey)}${rates ? ` · ${rates}` : ''} · ${statusClass} · ${t('raidStatusStacks', { n: status.stacks })}${duration}`
 }
 
 function statusClassLabel(statusClass) {
@@ -1204,11 +1204,28 @@ function actorStatusText(status, includeDuration = true) {
   const duration = includeDuration
     ? ` · ${status.remainingActions == null ? t('raidPermanent') : t('raidRemainingActions', { n: status.remainingActions })}`
     : ''
-  return `${t(status.nameKey)} · ${statusClassLabel(status.statusClass)}${duration}`
+  const values = statusValueSummary(status)
+  return `${t(status.nameKey)}${values ? ` · ${values}` : ''} · ${statusClassLabel(status.statusClass)}${duration}`
 }
 
-function bossDefenseRateSummary(status) {
+function statusValueSummary(status) {
+  const rates = (status.modifiers ?? []).flatMap(modifier => {
+    const rate = modifier.displayRate ?? modifier.copyRate ?? modifier.rate
+    return Number.isFinite(rate) ? [`${t(characterEffectChannelKeys[modifier.channel] ?? modifier.channel)} ${rate > 0 ? '+' : ''}${formatRate(rate)}`] : []
+  })
+  const symbolic = (status.symbolicModifiers ?? []).flatMap(modifier => {
+    const coefficient = modifier.displayCoefficient ?? modifier.copyCoefficient ?? modifier.coefficient
+    if (!Number.isFinite(coefficient)) return []
+    return [t(modifier.kind === 'sourceAttackOverTargetAttack' ? 'raidDetailSymbolicAttack' : 'raidDetailSymbolicDefense', {
+      value: formatRate(coefficient), source: modifier.kind === 'sourceAttackOverTargetAttack' ? characterName(modifier.sourceId) : '',
+    })]
+  })
+  return [...rates, ...symbolic].join(' · ')
+}
+
+function bossRateSummary(status) {
   return [
+    ['raidDamageRate', status.damageRatePerStack],
     ['raidDefenseRate', status.defenseRatePerStack],
     ['raidPhysicalDefenseRate', status.physicalDefenseRatePerStack],
     ['raidMagicDefenseRate', status.magicDefenseRatePerStack],
@@ -1225,15 +1242,20 @@ function effectText(effect) {
     return t('raidEffectStatusRemoved', { target: characterName(effect.targetId), status })
   }
   if (effect.type === 'counter') return t('raidEffectCounter', { target: characterName(effect.targetId), effect: t(effect.nameKey), n: effect.after })
-  if (effect.type === 'bossStatus') return `${characterName(effect.sourceId)} · ${t('raidEffectBossStatus', { effect: t(effect.nameKey), n: effect.stacks ?? 0 })}`
+  if (effect.type === 'bossStatus') {
+    const status = effect.after?.find(status => status.id === effect.id)
+    return status ? bossStatusLabel(status) : `${characterName(effect.sourceId)} · ${t('raidEffectBossStatus', { effect: t(effect.nameKey), n: effect.stacks ?? 0 })}`
+  }
+  const values = statusValueSummary(effect)
+  const statusName = `${t(effect.nameKey)}${values ? ` · ${values}` : ''}`
   if (effect.type === 'status' && effect.copiedFromId != null) return t('raidEffectCopiedStatus', {
-    target: characterName(effect.targetId), status: t(effect.nameKey), from: characterName(effect.copiedFromId), valueSource: valueSourceText(effect.sourceId), n: effect.duration ?? '∞',
+    target: characterName(effect.targetId), status: statusName, from: characterName(effect.copiedFromId), valueSource: valueSourceText(effect.sourceId), n: effect.duration ?? '∞',
   })
   const sourceAttack = effect.symbolicModifiers?.find(modifier => modifier.kind === 'sourceAttackOverTargetAttack')
   if (effect.type === 'status' && sourceAttack) return t('raidEffectStatusWithValueSource', {
-    target: characterName(effect.targetId), status: t(effect.nameKey), valueSource: valueSourceText(sourceAttack.sourceId), n: effect.duration ?? '∞',
+    target: characterName(effect.targetId), status: statusName, valueSource: valueSourceText(sourceAttack.sourceId), n: effect.duration ?? '∞',
   })
-  if (effect.type === 'status') return t('raidEffectStatus', { target: characterName(effect.targetId), status: t(effect.nameKey), class: statusClassLabel(effect.statusClass), n: effect.duration ?? '∞' })
+  if (effect.type === 'status') return t('raidEffectStatus', { target: characterName(effect.targetId), status: statusName, class: statusClassLabel(effect.statusClass), n: effect.duration ?? '∞' })
   return effect.type
 }
 </script>

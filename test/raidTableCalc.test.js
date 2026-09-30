@@ -372,6 +372,33 @@ test('job flags select physical or magic defense while direct damage bypasses bo
   assert.equal(luke[1].defenseMultiplier, 1)
 })
 
+test('status display values follow snapshot timing and remain frozen after expiry', () => {
+  const character = {
+    ...RAID_TABLE_CHARACTERS[FLORENCE],
+    hooks: [hook('battleStart', [statusEffect({
+      id: 'display-dynamic', effectGroupId: 991010, nameKey: 'raidBuffMerlynAttack', target: 'self', duration: 2,
+      modifiers: [{ channel: 'attackRate', rate: {
+        type: 'conditional', condition: { type: 'roundAtLeast', round: 2 }, whenTrue: 0.6, whenFalse: 0.2,
+      } }],
+      symbolicModifiers: [{ kind: 'targetBaseDefenseOverTargetAttack', coefficient: 2 }],
+    })])],
+  }
+  const result = simulateRaidTable(singleConfig(FLORENCE, { turns: 3 }), {
+    ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [FLORENCE]: character },
+  })
+  const first = action(result, 1, FLORENCE)
+  const second = action(result, 2, FLORENCE)
+  const find = snapshot => snapshot[FLORENCE].statuses.find(status => status.id === 'display-dynamic')
+  assert.equal(find(first.statusSnapshotBeforeAction).modifiers[0].displayRate, 0.2)
+  assert.equal(find(first.statusSnapshotAtDamage).modifiers[0].displayRate,
+    first.damageSteps[0].modifierSources.find(source => source.effectGroupId === 991010).rate)
+  assert.equal(find(second.statusSnapshotBeforeAction).modifiers[0].displayRate, 0.6)
+  assert.equal(find(first.statusSnapshotAfterAction).symbolicModifiers[0].displayCoefficient, 2)
+  assert.equal(second.expiredEffects.find(status => status.id === 'display-dynamic').modifiers[0].displayRate, 0.6)
+  assert.equal(find(second.statusSnapshotAfterAction), undefined)
+  assert.equal(find(first.statusSnapshotBeforeAction).modifiers[0].displayRate, 0.2)
+})
+
 test('Boss defense buffs and differently named debuffs add by defense path before mitigation', () => {
   const character = {
     ...RAID_TABLE_CHARACTERS[FLORENCE],
