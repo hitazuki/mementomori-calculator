@@ -30,8 +30,9 @@ function criticalChain(coefficient, hits, chance, weapon, additions = {}) {
 }
 
 export function referenceFor(character, stage = {}) {
-  const id = character.id, input = inputs.get(id)
-  if (!input || !outputNotes[id]) throw new Error('Missing authored attack review '+id)
+  const id = character.id, input = stage.authored?.input ?? inputs.get(id)
+  const note = stage.authored?.note ?? outputNotes[id]
+  if (!input || !note) throw new Error('Missing authored attack review '+id)
   const weapon = weaponReference(character)
   const base = {...effects[id],...stage.effects}
   if(id===38||id===89) base.attack*=1+weapon.attack
@@ -85,7 +86,7 @@ export function referenceFor(character, stage = {}) {
     return {enemies,skills,perAction:cycle.cycle.reduce((sum,slot)=>sum+skills[slot].equivalentBasicHits,0)/cycle.cycle.length,
       twoActiveTotal:skills.S1.equivalentBasicHits+skills.S2.equivalentBasicHits}
   })
-  const g = growth.get(id)
+  const g = stage.authored?.growth ?? growth.get(id)
   const burst = id===8 ? {
     assumptions:'标准有效基础暴率50%；S1攻击前40%抗暴率下降成功生效，所有段命中。专武暴击评级不直接换算暴率；敌方额外抗暴、弱化抵抗及目标差异未模拟。',
     samples:[0,1,2,9,15].map(round=>{
@@ -101,8 +102,8 @@ export function referenceFor(character, stage = {}) {
   const phase = id===61 ? {label:'神咒解放8回合窗口；不是永久循环',duration:8,afterExpiryCycle:ratingCycle(active.filter(s=>s.slot!=='S2')).cycle,
     afterExpiryPerAction:snapshots.map(s=>(s.skills.S1.equivalentBasicHits+3*s.skills.N.equivalentBasicHits)/4)} : null
   return {panel:RATING_PANEL,weapon,cycle,snapshots,coverage,phase,...(burst?{burst}:{}),growth:g?{...g,totalEvents: id===36||id===137?null:growthRequirement(g)}:null,
-    lifecycle:lifecycle.get(id)??{activeWindow:'无可确认自身防护',replenishment:'无补充渠道',afterExpiry:'无额外长期生存机制'},
-    note:outputNotes[id],external:external[id]??null,
+    lifecycle:stage.authored?.lifecycle??lifecycle.get(id)??{activeWindow:'无可确认自身防护',replenishment:'无补充渠道',afterExpiry:'无额外长期生存机制'},
+    note,external:external[id]??null,
     externalSamples:id===60?[0,1,2,4].map(hp=>({past20RoundsDamageInMaxHp:hp,perTargetDirectDamage:3*(2.2+weapon.hp)*hp*.2})):id===74?[3,30,300].map(hp=>({enemyCurrentHp:hp,perTargetDirectDamage:Math.min(hp*.2,5*(1+weapon.attack))})):null,
     limitations:['固定面板成熟条件快照；循环不模拟敌方行动、控制和速度。','延迟伤害按完整持续期、不净化且目标存活的条件样本，当前生命毒逐次递减，不能当首行动爆发。','直接/外部伤害不套未经证实的乘区；见该角色原文及专项说明。']}
 }

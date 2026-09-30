@@ -25,6 +25,7 @@ export const laterSpeed = {
 // reviewed opening/automatic protection, not a floor for offensive ratings.
 // action=2 retains an entire first-round gap even at high speed.
 export const actionDefense = {
+  154:{action:1,floor:9,limit:1,note:'首行动才追加30%生命和魔防；开局100%生命与60%减伤已支撑9分，不扣除常驻保护。'},
   4:{action:2,floor:0,limit:3,note:'S2击杀后才有盾；高速度仍不能跳过首轮或保证击杀。'},
   15:{action:1,floor:2,limit:1,note:'S1足够暴击后才加防；回合开始生命与条件净化保留。'},
   17:{action:2,floor:7,limit:1,note:'S2攻击后才有减伤；一次复活和常驻生命不受速度扣分。'},

@@ -1,10 +1,11 @@
 import { referenceFor } from './characterRatingV5.mjs'
 import { damageReference, criticalExtension } from '../../src/utils/characterRatingModel.js'
+import { newCharacters } from '../../doc/character-ratings/v6/new-characters.mjs'
 
 export function stageReference(c,config) {
   // Petra's passive replaces normals; Rosalie's post-S2 source attack is for nearby allies.
   const applied={...config,effects:{...(c.id===88?{attackFromHp:0}:{}),...config.effects},components:{...(c.id===14?{N:'2.2,2,0'}:{}),...(c.id===97?{S1:'4.2,1,5'}:{}),...config.components}}
-  const ref=referenceFor(c,applied)
+  const ref=referenceFor(c,{...applied,authored:newCharacters[c.id]})
   // These special attacks already calculate the correct target count; expose
   // their real components instead of the v5 zero-coefficient dispatch placeholder.
   if([20,60,74].includes(c.id)) for(const snapshot of ref.snapshots) {

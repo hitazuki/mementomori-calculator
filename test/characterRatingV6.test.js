@@ -13,6 +13,26 @@ const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',i
 const reviews=read('../doc/character-ratings/v6/review.json').records
 const score=(id,key)=>reviews.find(r=>r.id===id).axes.find(a=>a.key===key).score
 
+test('golden Artoria keeps the fifteen-heal unlock late and magical recovery outside lethal capacity',()=>{
+  const r=reviews.find(r=>r.id===154)
+  assert.deepEqual(r.axes.map(a=>a.score),[5,8,9,9,6,0,0])
+  for(const phase of ['lower','opening','quick']) {
+    assert.equal(r.output.stages[phase].snapshots[0].skills.S2.components[0].coefficient,5.4)
+  }
+  assert.equal(r.output.stages.mature.snapshots[0].skills.S2.components[0].coefficient,21.6)
+  assert.equal(r.output.growth.totalEvents,15)
+  assert.equal(r.output.readiness.events,4)
+  assert.ok(Math.abs(r.output.stages.opening.openingDamage[0]-(7.2+5.4*4)*1.18)<1e-9)
+  assert.ok(Math.abs(r.output.stages.mature.snapshots[0].perAction-(7.2+21.6*4+2)*1.18/4)<1e-9)
+  assert.equal(r.output.role,'单群兼顾')
+  assert.equal(r.survival.states[0].comparisons[0].physical.withoutShield,5)
+  assert.ok(Math.abs(r.survival.states[1].comparisons[0].physical.withoutShield-5.75)<1e-9)
+  assert.ok(Math.abs(r.survival.states[1].comparisons[0].magic.withoutShield-6.6125)<1e-9)
+  assert.equal(r.survival.initiative.penalty,0)
+  assert.equal(r.teamCare.heals.find(h=>h.slot==='P1').targets,4)
+  assert.match(r.axes[4].reason,/须存活/)
+})
+
 test('Cusie reviewed weapon stats affect output and finite shields without treating CRIT RES as mitigation',()=>{
   const r=reviews.find(r=>r.id===97)
   assert.deepEqual(r.axes.map(a=>a.score),[4,3,8,5,7,4,0])
@@ -27,7 +47,7 @@ test('Cusie reviewed weapon stats affect output and finite shields without treat
 })
 
 test('all seven-axis ratings retain reproducible lower, opening, mature and upper samples',()=>{
-  assert.equal(reviews.length,134)
+  assert.equal(reviews.length,135)
   assert.equal(RATING_AXES.length,7)
   for(const r of reviews){
     assert.deepEqual(r.axes.map(a=>a.key),RATING_AXES)

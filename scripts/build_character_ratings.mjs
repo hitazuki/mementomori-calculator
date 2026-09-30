@@ -60,6 +60,7 @@ const records = reviews.filter(line => !onlyIds || onlyIds.has(Number(line.split
   const assessment = assessments.get(id)
   if (!assessment || assessment.sourceHash !== digest(source) || assessment.rubricVersion !== RATING_VERSION ||
       assessment.axes.some((axis, index) => axis.score !== scores[index] || axis.reason !== notes[index])) throw new Error('Full v6 assessment needs review: ' + id)
+  record.assessedAt = assessment.reviewedAt
   record.assessment = {
     axes: assessment.axes.map(({oldScore,...axis})=>axis),
     growth: assessment.output.growth, lifecycle: assessment.output.lifecycle,

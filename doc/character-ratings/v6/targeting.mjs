@@ -2,6 +2,10 @@
 // expected-damage components: kill follow-ups are excluded there, and mixed
 // ally/enemy selection uses a fractional expectation rather than actual targets.
 export const targetingReviews = {
+  154: {
+    S1: { detail: '3目标群攻', quote: '再随机对3名敌人造成' },
+    S2: { detail: '随机单体4连击；累计15次主动恢复提高倍率，不增加目标数', quote: '攻击次数增加为4次' },
+  },
   8: { S2: { add: ['single'], detail: '多目标群攻；击杀后追击单体', quote: '再对当前生命值最低的敌人追加' } },
   16: { S1: { add: ['single'], detail: '3目标群攻；追击最低生命百分比单体', quote: '对生命值百分比最低的敌人追加技能总伤害' } },
   17: { S1: { add: ['group'], detail: '单体连击；本回合击杀后追加5目标群攻', quote: '再随机对5名敌人追加' } },

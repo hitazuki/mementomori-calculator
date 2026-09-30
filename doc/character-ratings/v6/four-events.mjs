@@ -2,6 +2,7 @@
 // state references, not a claim that both skills fit a single four-event trace.
 const sample=(config,reason,extra={})=>({events:4,config,reason:`累计4次事件参照（分技能比较，非连续行动轨迹）；${reason}`,...extra})
 export const fourEvents={
+  154:sample({components:{S2:'5.4,4,0'}},'4次全队主动恢复未达15次门槛，S2仍为540%随机四连击；自身两主动各1次，队友事件频率未知，不折算回合。'),
   75:sample({effects:{attack:.9},components:{S2:'5.8,7,0'}},'4次全队自损满40%加攻，合理红队另有50%；S2七段。'),
   80:sample({components:{S2:'4.8,4,0'}},'须自身收到主动恢复；4次未达6次门槛，S2仍为480%×4。'),
   89:sample({effects:{attack:.25},slots:{S1:{damage:.08},S2:{damage:.08}}},'4次全队自损给8%易伤；来源攻击按原文独立计算。'),

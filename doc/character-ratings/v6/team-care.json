@@ -750,5 +750,38 @@
     "previousReason": "P2普攻三人治疗及条件解控，S1前期治疗",
     "score": 4,
     "reviewedAt": "2026-09-16"
+  },
+  "154": {
+    "sourceHash": "3eadbd3509939fe596c0b2b241bec2fd4576c596399649ea91763ae7a98a5b31",
+    "reviewedAt": "2026-09-30",
+    "previousScore": null,
+    "previousReason": "新增角色，无旧评分",
+    "score": 6,
+    "heals": [
+      {
+        "slot": "S1",
+        "amount": 0.118,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline HP; source ATK 1.18 × 30% / baseline HP 3; lowest HP ratio can select self"
+      },
+      {
+        "slot": "S2",
+        "amount": 0.118,
+        "targets": 1,
+        "repeats": 1,
+        "unit": "baseline HP; source ATK 1.18 × 30% / baseline HP 3; lowest HP ratio can select self"
+      },
+      {
+        "slot": "P1",
+        "amount": 0.2,
+        "targets": 4,
+        "repeats": 1,
+        "unit": "recipient maximum HP cap per surviving magical hit; actual raw=min(received damage × 80%, recipient max HP × 20%); not a guaranteed flat heal"
+      }
+    ],
+    "cleanses": [],
+    "window": "S1/S2各CD4、各主动恢复1次；任一全队主动恢复把全体光辉补至3层（非叠至6层），每次存活魔法受击消耗1层；频率未知，不编造回合或连续3次满额恢复。自身死亡解除全队光辉。P2首行动仅自身和1名最高攻击其他友军获得30%生命/魔防，属性条件合理配队满足。",
+    "reason": "P2首行动给1名主攻友军30%生命与30%魔防；S1全队30%弱化抵抗2回合、CD4。P1全队3层受魔法伤后回血，须存活、每次80%承伤且封顶20%最大生命，主动恢复补层；双主动仅小额低血单疗，自身死亡解除光辉。"
   }
 }

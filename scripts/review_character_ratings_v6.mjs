@@ -12,6 +12,8 @@ import { RATING_AXES, RATING_VERSION, ratingSource } from '../src/utils/characte
 import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { lower, opening, upper, quick, defenseScores, lateCost, reviewNotes } from '../doc/character-ratings/v6/stages.mjs'
 import { readCharacterCatalog } from './lib/characterCatalog.mjs'
+import { newCharacters } from '../doc/character-ratings/v6/new-characters.mjs'
+import { referenceFor } from './lib/characterRatingV5.mjs'
 
 const root=new URL('../',import.meta.url), read=p=>JSON.parse(fs.readFileSync(new URL(p,root),'utf8'))
 const catalog=readCharacterCatalog(new URL('public/data/character-catalog/',root)).characters
@@ -39,7 +41,9 @@ const roleValues=snapshots=>snapshots.map((s,i)=>s.perAction/(i?3:1))
 const merge=(a={},b={})=>({...a,...b,effects:{...a.effects,...b.effects},components:{...a.components,...b.components},
   slots:Object.fromEntries(['S1','S2','N'].map(k=>[k,{...a.slots?.[k],...b.slots?.[k]}])),scenarios:{...a.scenarios,...b.scenarios}})
 const records=catalog.map(c=>{
-  const old=previous.find(r=>r.id===c.id)
+  const authored=newCharacters[c.id]
+  const old=previous.find(r=>r.id===c.id)??(authored?{sourceHash:authored.sourceHash,conditions:authored.conditions,tags:authored.tags,auxiliary:authored.auxiliary,id:c.id,name:c.title+' · '+c.name,
+    output:referenceFor(c,{authored}),survival:{states:authored.states,effectiveSustain:authored.lifecycle.replenishment+'；'+authored.lifecycle.afterExpiry}}:null)
   const hash=createHash('sha256').update(JSON.stringify(ratingSource(c))).digest('hex')
   if(!old||(old.sourceHash!==hash && hash!==reviewedSources[c.id])) throw new Error('Source changed; review stage inputs first: '+c.id)
   const weapon=weaponReference(c)
@@ -71,7 +75,8 @@ const records=catalog.map(c=>{
   const care=teamCare[c.id]?teamCareReference(teamCare[c.id]):null
   if(care && care.sourceHash!==hash) throw new Error('Team care source changed: '+c.id)
   const evidence=c.skills.map(s=>s.slot).concat('W','stats')
-  const values=[burst,late,...defense,...old.axes.slice(3).map(a=>a.key==='protection'&&care?care.score:a.key==='protection'&&c.id===97?7:a.score)]
+  const auxiliary=old.auxiliary??old.axes.slice(3)
+  const values=[burst,late,...defense,...auxiliary.map(a=>a.key==='protection'&&care?care.score:a.key==='protection'&&c.id===97?7:a.score)]
   const peak=Math.max(...finite.map(s=>Math.min(s.comparisons[0].physical.withShield,s.comparisons[0].magic.withShield)))
   const hasShield=finite.some(s=>s.comparisons[0].physical.factors.shield>0)
   const outputDetail=outputCopy[c.id]??old.output.growth?.detail??note
@@ -80,20 +85,20 @@ const records=catalog.map(c=>{
     `等效技能倍率（每行动，基础→后期）：单敌${equivalent(stages.lower.snapshots[0].perAction)}→${equivalent(stages.mature.snapshots[0].perAction)}；五敌总计${equivalent(stages.lower.snapshots[1].perAction)}→${equivalent(stages.mature.snapshots[1].perAction)}。${lateCost[c.id]?note:outputDetail}`,
     `${c.id===71?'等效生命：常驻200%，中毒来源/反伤400%，不能当作全来源常驻。':`等效生命${hasShield?'（完整护盾）':''}：${capacityText(finite)}。`}${life.activeWindow}。${initiative.note}`,
     `等效生命${hasShield?'（护盾耗尽后）':''}：${capacityText(finite,false)}。${life.replenishment==='无补充渠道'?'':life.replenishment+'；'}${life.afterExpiry}。`,
-    ...old.axes.slice(3).map(a=>a.key==='protection'&&care?care.reason:a.key==='protection'&&targetAvoidance[c.id]?.protection?targetAvoidance[c.id].protection:a.key==='protection'&&c.id===97?'P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化，不当作稳定群疗。':a.reason),
+    ...auxiliary.map(a=>a.key==='protection'&&care?care.reason:a.key==='protection'&&targetAvoidance[c.id]?.protection?targetAvoidance[c.id].protection:a.key==='protection'&&c.id===97?'P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化，不当作稳定群疗。':a.reason),
   ]
   const axes=RATING_AXES.map((key,i)=>{
     const base=i===0?Math.max(openingBand,quickBand):i===1?Math.max(...bases):i===2?defenseBase[0]:values[i]
     return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:cleanRatingCopy(key,reasons[i]),evidence,
       reviewBasis:i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`}
   })
-  return {...old,...(care?{teamCare:care}:{}),sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；最高专武攻击力+18%、防御力+5%已计入，暴击抗性+10%不折算为固定减伤。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:care?'2026-09-16':c.id===97?'2026-09-15':targetAvoidance[c.id]?'2026-09-09':'2026-09-08',axes,output:{...old.output,...(c.id===97?{weapon}:{}),lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
+  return {...old,...(care?{teamCare:care}:{}),sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；最高专武攻击力+18%、防御力+5%已计入，暴击抗性+10%不折算为固定减伤。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:authored?.reviewedAt??(care?'2026-09-16':c.id===97?'2026-09-15':targetAvoidance[c.id]?'2026-09-09':'2026-09-08'),axes,output:{...old.output,...(c.id===97?{weapon}:{}),lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
     assumptions:'范围为已审核的有限条件样本，不是所有外部队伍的理论极值；开局按前两次自身行动，短计数/短回合另列条件爆发，均仅计直接伤害；后期按成熟循环，无依据的事件频率不换算回合。延迟伤害仅在完整持续期样本计入。',
     equivalentSkillUnit:'100% = 固定基准面板下无角色自增益的100%攻击普攻；含适用乘区，特殊伤害仅按最终伤害折合，不改变其原始伤害类型。',
     comparison:{groupBenchmark:3,burstAnchors,lateAnchors,lowerBands:floors,matureBands:bases,openingBand,quickBand,penalties}},
     survival:{...old.survival,...(targetAvoidance[c.id]?{targetAvoidance:targetAvoidance[c.id],effectiveSustain:life.replenishment+'；'+life.afterExpiry}:{}),initiative,shortTermProtection:life.activeWindow,states:finite,scoringScenario:'neutral',peakOrdinaryCapacity:peak,burstScore:defense[0],sustainScore:defense[1]}}
 })
-if(records.length!==134) throw new Error('Expected all 134 characters')
+if(records.length!==135) throw new Error('Expected all 135 characters')
 const collection=(metadata,key,rows)=>JSON.stringify(metadata,null,2).slice(0,-2)+`,\n  "${key}": [\n`+rows.map(r=>'    '+JSON.stringify(r)).join(',\n')+'\n  ]\n}\n'
 fs.writeFileSync(new URL('review.json',folder),collection({rubricVersion:RATING_VERSION,burstAnchors,lateAnchors},'records',records))
 const inversions=[]
@@ -106,8 +111,8 @@ for(const key of ['burst','late','toughness','survival']) for(const a of records
 }
 fs.writeFileSync(new URL('inversions.json',folder),collection({rubricVersion:RATING_VERSION,count:inversions.length},'pairs',inversions))
 fs.writeFileSync(new URL('doc/character-ratings/reviews.txt',root),records.map(r=>[r.id,r.axes.map(a=>a.score).join(','),...r.axes.map(a=>a.reason),r.conditions,r.tags].join('|')).join('\n')+'\n')
-fs.writeFileSync(new URL('changes.md',folder),'# 七维评分 v6\n\n旧维度不能逐项相减。保留旧六维，并列新七维；范围仅为已审核的有限样本。134名角色、938项评分。\n\n|角色|旧：单/群/生存/防护/辅助/干扰|新：爆发/后期/爆防/生存/防护/辅助/干扰|基础→后期 单敌每行动等效技能倍率|\n|---|---|---|---|\n'+records.map(r=>`|${r.id} ${r.name}|${previous.find(p=>p.id===r.id).axes.map(a=>a.score).join('/')}|${r.axes.map(a=>a.score).join('/')}|${equivalent(r.output.stages.lower.snapshots[0].perAction)}→${equivalent(r.output.stages.mature.snapshots[0].perAction)}|`).join('\n')+'\n')
+fs.writeFileSync(new URL('changes.md',folder),'# 七维评分 v6\n\n旧维度不能逐项相减。保留旧六维，并列新七维；范围仅为已审核的有限样本。135名角色、945项评分。\n\n|角色|旧：单/群/生存/防护/辅助/干扰|新：爆发/后期/爆防/生存/防护/辅助/干扰|基础→后期 单敌每行动等效技能倍率|\n|---|---|---|---|\n'+records.map(r=>`|${r.id} ${r.name}|${previous.find(p=>p.id===r.id)?.axes.map(a=>a.score).join('/')??'新增，无旧评分'}|${r.axes.map(a=>a.score).join('/')}|${equivalent(r.output.stages.lower.snapshots[0].perAction)}→${equivalent(r.output.stages.mature.snapshots[0].perAction)}|`).join('\n')+'\n')
 console.log(`Reviewed ${records.length} characters / ${records.length*RATING_AXES.length} axes`)
-fs.writeFileSync(new URL('initiative-changes.md',folder),'# 行动防护速度修订\n\n仅调整爆发防御，爆发输出及其余维度不变。全池134名已检查；下表列出行动依赖项，含分数不变者。速度是同养成、无外援的编辑参照，不是实战先手保证。\n\n|角色|基础→有效开启速度|爆发防御原分→新分|开启条件与保底|\n|---|---|---|---|\n'+records.filter(r=>r.survival.initiative.gate).map(r=>{const a=r.survival.initiative;return `|${r.id} ${r.name}|${a.baseSpeed}→${Math.round(a.effectiveSpeed)}|${a.baseScore}→${a.score}|${a.note}|`}).join('\n')+'\n')
+fs.writeFileSync(new URL('initiative-changes.md',folder),'# 行动防护速度修订\n\n仅调整爆发防御，爆发输出及其余维度不变。全池135名已检查；下表列出行动依赖项，含分数不变者。速度是同养成、无外援的编辑参照，不是实战先手保证。\n\n|角色|基础→有效开启速度|爆发防御原分→新分|开启条件与保底|\n|---|---|---|---|\n'+records.filter(r=>r.survival.initiative.gate).map(r=>{const a=r.survival.initiative;return `|${r.id} ${r.name}|${a.baseSpeed}→${Math.round(a.effectiveSpeed)}|${a.baseScore}→${a.score}|${a.note}|`}).join('\n')+'\n')
 
-fs.writeFileSync(new URL('targeting-review.md',folder),'# 全角色输出目标结构审阅\n\n134名角色。按主动技能选敌、重复单位及条件分支判定；不按倍率大小、单群伤害比或评分判定。普通攻击不用于改变定位。条件分支列在技能依据中，不代表必定触发。此标签不衡量伤害强弱。\n\n|ID|角色|输出特点|技能分布|\n|---|---|---|---|\n'+records.map(r=>`|${r.id}|${r.name}|${r.output.role}|${r.output.targeting.detail}|`).join('\n')+'\n')
+fs.writeFileSync(new URL('targeting-review.md',folder),'# 全角色输出目标结构审阅\n\n135名角色。按主动技能选敌、重复单位及条件分支判定；不按倍率大小、单群伤害比或评分判定。普通攻击不用于改变定位。条件分支列在技能依据中，不代表必定触发。此标签不衡量伤害强弱。\n\n|ID|角色|输出特点|技能分布|\n|---|---|---|---|\n'+records.map(r=>`|${r.id}|${r.name}|${r.output.role}|${r.output.targeting.detail}|`).join('\n')+'\n')

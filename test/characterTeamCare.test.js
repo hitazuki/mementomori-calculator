@@ -29,11 +29,11 @@ test('cleansing counts only removable effects on affected targets, including all
   assert.equal(cleanseAmount({targets:1,count:1,probability:.3},{affected:1,removablePerTarget:2}),.3)
 })
 
-test('all 28 reviewed care profiles retain matching source hashes and published references',()=>{
+test('all 29 reviewed care profiles retain matching source hashes and published references',()=>{
   const profiles=read('../doc/character-ratings/v6/team-care.json')
   const records=read('../doc/character-ratings/v6/review.json').records
   const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
-  assert.equal(Object.keys(profiles).length,28)
+  assert.equal(Object.keys(profiles).length,29)
   for(const [id,profile] of Object.entries(profiles)) {
     const c=catalog.find(c=>c.id===Number(id))
     assert.equal(profile.sourceHash,createHash('sha256').update(JSON.stringify(ratingSource(c))).digest('hex'))

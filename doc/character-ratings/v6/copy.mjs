@@ -1,6 +1,7 @@
 // Dimension-specific display copy. Original inputs/evidence remain in review.json.
 // Do not move defensive growth or general rubric explanations into output reasons.
 export const outputCopy = {
+  154: 'S1为720%三目标群攻，S2为540%随机四连击；累计15次全队主动恢复才升至2160%四连击。两主动CD均4，成熟循环仍有两次普攻空窗。',
   15: '连击首次暴击后，后续攻击才必暴；追加攻击需要击杀。',
   22: '两主动技能倍率为520%和480%。',
   23: '两主动均为群攻；冷却期间仍需普通攻击。',
