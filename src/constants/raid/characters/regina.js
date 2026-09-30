@@ -47,7 +47,7 @@ export default {
       key: 's1', nameKey: 'raidSkillReginaS1', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [bossStatusEffect({
         id: 'regina-damage-taken', effectGroupId: 13700120201, nameKey: 'raidDebuffReginaDamageTaken',
-        durationRounds: 4, damageRatePerStack: 0.1,
+        durationRounds: 4, damageRatePerStack: { type: 'configuredTier', key: 'reginaDamageTaken', values: [0.1, 0.3] },
       })])],
       damageSteps: [{ stat: 'ATK', percent: 480, hits: 1, originalTargetCount: 5, damageType: 'phys', conditionKey: 'raidConditionLoggedTargetAttackNotLower' }],
       ignoredKeys: ['raidIgnoredBaseAttackComparisonBranch', 'raidIgnoredCriticalRateUp', 'raidIgnoredMaxHpUp', 'raidIgnoredIncomingDamageReduction'],

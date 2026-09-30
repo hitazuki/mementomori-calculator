@@ -134,8 +134,8 @@ function compileValue(value, mechanics, path, character) {
   if (!handler) throw new Error(`Unregistered raid value resolver '${value.type}' at ${path}`)
   if (value.type === 'configuredTier') {
     if (typeof value.key !== 'string' || !value.key) throw new Error(`Configured raid tier requires a non-empty key at ${path}`)
-    if (!Array.isArray(value.values) || value.values.length !== 5 || value.values.some(item => !Number.isFinite(item))) {
-      throw new Error(`Configured raid tier requires five finite values at ${path}`)
+    if (!Array.isArray(value.values) || value.values.length < 1 || value.values.length > 5 || value.values.some(item => !Number.isFinite(item))) {
+      throw new Error(`Configured raid tier requires one to five finite values at ${path}`)
     }
   }
   if (value.type === 'maxLineupRemovableBuffCountLinear') {
@@ -183,9 +183,13 @@ function compileEffect(effect, mechanics, path, character) {
   if (effect.type === 'status' && effect.replacementKey != null && (typeof effect.replacementKey !== 'string' || !effect.replacementKey)) {
     throw new Error(`Raid status replacementKey must be a non-empty string at ${path}`)
   }
+  const compiledBossRates = {}
   if (effect.type === 'bossStatus') {
     for (const key of ['damageRatePerStack', 'defenseRatePerStack', 'physicalDefenseRatePerStack', 'magicDefenseRatePerStack']) {
-      if (!Number.isFinite(effect[key] ?? 0)) throw new Error(`Raid bossStatus ${key} must be finite at ${path}`)
+      if (typeof (effect[key] ?? 0) === 'number' && !Number.isFinite(effect[key] ?? 0)) throw new Error(`Raid bossStatus ${key} must be finite at ${path}`)
+      const compiled = compileValue(effect[key] ?? 0, mechanics, `${path}.${key}`, character)
+      if (compiled.definition.counter && !(compiled.definition.counter in (character.runtime?.counters ?? {}))) throw new Error(`Unknown raid counter '${compiled.definition.counter}' at ${path}.${key}`)
+      compiledBossRates[key] = compiled
     }
   }
   if (effect.copyAttackRateAsSourceAttack != null && typeof effect.copyAttackRateAsSourceAttack !== 'boolean') throw new Error(`Raid copyAttackRateAsSourceAttack must be boolean at ${path}`)
@@ -213,6 +217,7 @@ function compileEffect(effect, mechanics, path, character) {
   }
   return {
     ...effect,
+    compiledBossRates,
     compiledEffectGroupId,
     modifiers: (effect.modifiers ?? []).map((modifier, index) => (
       compileModifier(modifier, `${path}.modifiers[${index}]`, 'rate')
@@ -314,6 +319,15 @@ export function compileRaidProgram(config = {}, environment = DEFAULT_RAID_ENVIR
   const mechanics = environment.mechanics ?? DEFAULT_RAID_MECHANICS
   const normalizedConfig = normalizeConfig(config, characters)
   const compiledCharacters = Object.fromEntries(normalizedConfig.lineup.map(id => [id, compileCharacter(characters[id], mechanics)]))
+  const validateTiers = value => {
+    if (!value || typeof value !== 'object') return
+    if (value.type === 'configuredTier') {
+      const tier = normalizedConfig.scenarioTiers[value.key]
+      if (!Number.isInteger(tier) || tier < 0 || tier >= value.values.length) throw new Error(`Invalid raid scenario tier: ${value.key}`)
+    }
+    Object.values(value).forEach(validateTiers)
+  }
+  validateTiers(compiledCharacters)
   const eventListeners = {}
   for (const id of normalizedConfig.lineup) {
     for (const eventHook of compiledCharacters[id].eventHooks) {

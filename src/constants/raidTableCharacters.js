@@ -58,6 +58,7 @@ export function createDefaultRaidTableConfig() {
     },
     scenarioTiers: {
       siviReactiveBladeIncomingHits: 0,
+      reginaDamageTaken: 1,
     },
     turns: 10,
   }

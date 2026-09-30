@@ -1374,14 +1374,14 @@ test('Cattleya and Rustica keep their ordinary attack buffs on the original targ
   assert.equal(Object.keys(cattleyya.scalingTotals).length, 0)
 })
 
-test('Regina uses the logged base-ATK branch and spends Remnant on round three cooldown support', () => {
+test('Regina defaults to 30% damage taken and spends Remnant on round three cooldown support', () => {
   const lineup = [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA]
   const result = simulateRaidTable({ lineup, attackPriority: [...lineup], turns: 6 })
   const s1 = action(result, 1, REGINA)
   assert.equal(s1.damageSteps.length, 1)
   assert.equal(s1.damageSteps[0].percent, 480)
   assert.equal(s1.damageSteps[0].originalTargetCount, 5)
-  assert.equal(s1.damageSteps[0].bossDamageRate, 0.1)
+  assert.equal(s1.damageSteps[0].bossDamageRate, 0.3)
   assert.equal(s1.bossStatusAfterAction.find(status => status.id === 'regina-damage-taken').effectGroupId, 13700120201)
 
   const s2 = action(result, 2, REGINA)
@@ -1390,6 +1390,51 @@ test('Regina uses the logged base-ATK branch and spends Remnant on round three c
   assert.equal(action(result, 3, REGINA).runtimeBefore.counters.remnant, 3)
   assert.ok(result.rounds[2].roundStartEffects.some(effect => effect.type === 'cooldownReduction' && effect.targetId === REGINA))
   assert.equal(action(result, 6, REGINA).statusSnapshotAfterAction[REGINA].statuses.some(status => status.id === 'regina-remnant'), false)
+})
+
+test('Regina damage-taken choices apply before damage, refresh, and expire after four rounds', () => {
+  for (const [tier, rate] of [[0, 0.1], [1, 0.3]]) {
+    const result = simulateRaidTable(singleConfig(REGINA, { turns: 5, scenarioTiers: { reginaDamageTaken: tier } }))
+    const first = action(result, 1, REGINA)
+    assert.equal(first.damageSteps[0].bossDamageRate, rate)
+    assert.equal(first.damageSteps[0].bossStatusBefore.find(status => status.id === 'regina-damage-taken').damageRatePerStack, rate)
+    assert.equal(first.effectsApplied.find(effect => effect.id === 'regina-damage-taken').damageRatePerStack, rate)
+    assert.equal(first.bossStatusAfterAction.find(status => status.id === 'regina-damage-taken').remainingRounds, 4)
+    assert.equal(result.rounds[3].bossStatusAfterRound.some(status => status.id === 'regina-damage-taken'), false)
+    assert.equal(action(result, 5, REGINA).bossStatusAfterAction.find(status => status.id === 'regina-damage-taken').damageRatePerStack, rate)
+    assert.equal(action(result, 2, REGINA).damageSteps[0].percent, 1520)
+  }
+  assert.throws(() => compileRaidProgram(singleConfig(REGINA, { scenarioTiers: { reginaDamageTaken: 2 } })), /Invalid raid scenario tier/)
+})
+
+test('Boss rate value resolvers freeze all four channels at application time', () => {
+  const rate = value => ({ type: 'configuredTier', key: 'testBossRates', values: [value, value * 2] })
+  const character = {
+    ...RAID_TABLE_CHARACTERS[REGINA],
+    hooks: [], eventHooks: [],
+    skills: {
+      ...RAID_TABLE_CHARACTERS[REGINA].skills,
+      s1: { ...RAID_TABLE_CHARACTERS[REGINA].skills.s1, hooks: [hook('beforeDamage', [bossStatusEffect({
+        id: 'test-boss-rates', effectGroupId: 991011, nameKey: 'raidDebuffReginaDamageTaken', durationRounds: 4,
+        damageRatePerStack: rate(0.1), defenseRatePerStack: rate(-0.1),
+        physicalDefenseRatePerStack: rate(-0.2), magicDefenseRatePerStack: rate(-0.3),
+      })])] },
+    },
+  }
+  const environment = { ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [REGINA]: character } }
+  const config = singleConfig(REGINA, { turns: 1, scenarioTiers: { testBossRates: 1 } })
+  const event = action(simulateRaidTable(config, environment), 1, REGINA)
+  const status = event.bossStatusAfterAction[0]
+  assert.equal(status.damageRatePerStack, 0.2)
+  assert.equal(status.defenseRatePerStack, -0.2)
+  assert.equal(status.physicalDefenseRatePerStack, -0.4)
+  assert.equal(status.magicDefenseRatePerStack, -0.6)
+  assert.equal(event.damageSteps[0].defense.defenseRate, -0.2)
+  assert.equal(event.damageSteps[0].defense.pmDefenseRate, -0.4)
+  assert.throws(() => compileRaidProgram({ ...config, scenarioTiers: {} }, environment), /Invalid raid scenario tier/)
+  const invalid = structuredClone(character)
+  invalid.skills.s1.hooks[0].effects[0].damageRatePerStack.values = []
+  assert.throws(() => compileRaidProgram(config, { ...environment, characters: { [REGINA]: invalid } }), /one to five finite values/)
 })
 
 test('Flower Natasha displays Aggravation and Poison without adding DOT damage', () => {

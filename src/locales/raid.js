@@ -960,6 +960,9 @@ for (const [locale, entries] of Object.entries(raidCharacterEffectContextExtensi
 
 // Explicit resolver and effect semantics for character details.
 Object.assign(raidTranslations["zh-CN"], {
+  raidReginaDamageTaken: '雷金娜・承受伤害增加',
+  raidReginaDamageTakenHint: '目标基础攻击力低于雷金娜时为30%，否则为10%；持续4回合。',
+  raidDetailConfiguredTier: '设置档位',
   "raidDetailBranch": "{condition}时：{yes}；否则：{no}",
   "raidDetailUses": "{skill}此前发动次数",
   "raidDetailPreviousCrits": "上次自身行动暴击命中数",
@@ -983,6 +986,9 @@ Object.assign(raidTranslations["zh-CN"], {
   "raidDetailTargetActions": "持续{n}次目标行动；施加当次不扣次数"
 })
 Object.assign(raidTranslations["zh-TW"], {
+  raidReginaDamageTaken: '雷金娜・承受傷害增加',
+  raidReginaDamageTakenHint: '目標基礎攻擊力低於雷金娜時為30%，否則為10%；持續4回合。',
+  raidDetailConfiguredTier: '設定檔位',
   "raidDetailBranch": "{condition}時：{yes}；否則：{no}",
   "raidDetailUses": "{skill}此前發動次數",
   "raidDetailPreviousCrits": "上次自身行動暴擊命中數",
@@ -1006,6 +1012,9 @@ Object.assign(raidTranslations["zh-TW"], {
   "raidDetailTargetActions": "持續{n}次目標行動；施加當次不扣次數"
 })
 Object.assign(raidTranslations["en"], {
+  raidReginaDamageTaken: 'Regina · Damage Taken Up',
+  raidReginaDamageTakenHint: '30% when target base ATK is lower than Regina’s, otherwise 10%; lasts 4 turns.',
+  raidDetailConfiguredTier: 'Configured tier',
   "raidDetailBranch": "If {condition}: {yes}; otherwise: {no}",
   "raidDetailUses": "previous {skill} uses",
   "raidDetailPreviousCrits": "critical hits in own previous action",
@@ -1029,6 +1038,9 @@ Object.assign(raidTranslations["en"], {
   "raidDetailTargetActions": "Lasts {n} target actions; application action does not consume duration"
 })
 Object.assign(raidTranslations["ja"], {
+  raidReginaDamageTaken: 'レジーナ・被ダメージ増加',
+  raidReginaDamageTakenHint: '対象の基礎攻撃力がレジーナより低い場合30%、それ以外は10%。4ターン持続。',
+  raidDetailConfiguredTier: '設定段階',
   "raidDetailBranch": "{condition}の場合：{yes}、それ以外：{no}",
   "raidDetailUses": "{skill}の過去の発動回数",
   "raidDetailPreviousCrits": "自身の前回行動のクリティカル命中数",
@@ -1052,6 +1064,9 @@ Object.assign(raidTranslations["ja"], {
   "raidDetailTargetActions": "対象の行動{n}回持続。付与した行動では減らない"
 })
 Object.assign(raidTranslations["ko"], {
+  raidReginaDamageTaken: '레지나・피해 대미지 증가',
+  raidReginaDamageTakenHint: '대상의 기본 공격력이 레지나보다 낮으면 30%, 그 외에는 10%. 4턴 지속.',
+  raidDetailConfiguredTier: '설정 단계',
   "raidDetailBranch": "{condition}: {yes}; 그 외: {no}",
   "raidDetailUses": "이전 {skill} 사용 횟수",
   "raidDetailPreviousCrits": "자신의 이전 행동 치명타 명중 수",

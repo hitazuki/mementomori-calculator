@@ -305,14 +305,19 @@ export function runRaidProgram(program) {
   }
 
   function applyBossStatusEffect(effect, context) {
-    const applied = applyBossStatus(effect, context.round, context.ownerId)
+    const resolvedEffect = { ...effect }
+    for (const [key, value] of Object.entries(effect.compiledBossRates ?? {})) {
+      resolvedEffect[key] = resolveValue(value, actors.get(context.ownerId), context)
+    }
+    const applied = applyBossStatus(resolvedEffect, context.round, context.ownerId)
     context.effectsApplied.push({
       type: 'bossStatus', id: effect.id, effectGroupId: effect.effectGroupId, nameKey: effect.nameKey,
       phase: context.phase, sourceId: context.ownerId, statusClass: effect.statusClass,
       addStacks: effect.addStacks, durationRounds: effect.durationRounds,
-      defenseRatePerStack: effect.defenseRatePerStack,
-      physicalDefenseRatePerStack: effect.physicalDefenseRatePerStack,
-      magicDefenseRatePerStack: effect.magicDefenseRatePerStack,
+      damageRatePerStack: applied.status.damageRatePerStack,
+      defenseRatePerStack: applied.status.defenseRatePerStack,
+      physicalDefenseRatePerStack: applied.status.physicalDefenseRatePerStack,
+      magicDefenseRatePerStack: applied.status.magicDefenseRatePerStack,
       before: applied.before, after: applied.after, stacks: applied.status.stacks,
     })
   }

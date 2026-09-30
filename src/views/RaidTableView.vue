@@ -162,6 +162,13 @@
         <span><strong>{{ $t('raidCandyCerberusReviveRound') }}</strong><small>{{ $t('raidCandyCerberusReviveRoundHint') }}</small></span>
         <span class="raid-number-input"><input v-model.number="activationRounds.candyCerberusKindMagic" type="number" min="1" max="10" step="1" @change="normalizeActivationRound('candyCerberusKindMagic')"><em>{{ $t('raidRoundUnit') }}</em></span>
       </label>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.REGINA)" class="raid-number-control raid-select-control">
+        <span><strong>{{ $t('raidReginaDamageTaken') }}</strong><small>{{ $t('raidReginaDamageTakenHint') }}</small></span>
+        <select v-model.number="scenarioTiers.reginaDamageTaken">
+          <option :value="0">10%</option>
+          <option :value="1">30%</option>
+        </select>
+      </label>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.SIVI)" class="raid-number-control raid-select-control">
         <span><strong>{{ $t('raidSiviDamageTier') }}</strong><small>{{ $t('raidSiviDamageTierHint') }}</small></span>
         <select v-model.number="scenarioTiers.siviReactiveBladeIncomingHits">
@@ -1070,6 +1077,9 @@ function activeRaidScenarioLines() {
     const hits = result.value.config.scenarioTiers.siviReactiveBladeIncomingHits
     const rate = siviDamageTiers.find(tier => tier.hits === hits)?.rate ?? 30
     lines.push(`${t('raidSiviDamageTier')}：${t('raidSiviDamageTierOption', { hits, rate })}`)
+  }
+  if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.REGINA)) {
+    lines.push(`${t('raidReginaDamageTaken')}：${result.value.config.scenarioTiers.reginaDamageTaken === 0 ? 10 : 30}%`)
   }
   return lines
 }

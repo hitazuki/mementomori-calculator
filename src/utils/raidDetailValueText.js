@@ -13,7 +13,7 @@ export function raidDetailValueText(spec, { t, conditionText, counterText, eleme
     previousActionCriticalHitsLinear: 'raidDetailPreviousCrits',
     otherLineupElementCountLinear: 'raidDetailElementCount',
     bossStatusCountLinear: 'raidDetailBossCount', bossStatusThresholds: 'raidDetailBossCount',
-    maxLineupRemovableBuffCountLinear: 'raidDetailMaxBuffs', configuredTier: 'raidDetailConfiguredHits',
+    maxLineupRemovableBuffCountLinear: 'raidDetailMaxBuffs', configuredTier: 'raidDetailConfiguredTier',
   }[spec.type] ?? 'raidCharacterDynamicValue', { element: elementText(spec.element) })
   if (spec.values) {
     const entries = spec.values.flatMap((value, index) => {
