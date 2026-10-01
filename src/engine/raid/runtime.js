@@ -1,6 +1,7 @@
 import { RAID_BASE_CRITICAL_DAMAGE_BONUS, RAID_JOB_FLAGS, RAID_MODIFIER_CHANNELS, RAID_STATUS_CLASSES } from '../../constants/raidTableCharacters.js'
 import { getCoeffByLevel } from '../../constants/levelTable.js'
 import { calcDamageRate } from '../damageCalc.js'
+import { calculateRaidElementAdvantage } from './elementBonus.js'
 
 const MODIFIER_CHANNELS = RAID_MODIFIER_CHANNELS
 
@@ -577,7 +578,10 @@ export function runRaidProgram(program) {
         const modifiers = modifierSnapshot(actor, context)
         const bossBefore = snapshotBoss(boss)
         const incomingRate = bossDamageRate()
-        const damageRate = modifiers.totals.damageRate + incomingRate
+        const elementAdvantageRate = calculateRaidElementAdvantage(actor.definition.element, boss.template.element, config.elementAdvantage)
+        const bossDamageReductionRate = boss.template.damageReductionRate ?? 0
+        const damageRate = modifiers.totals.damageRate + incomingRate + elementAdvantageRate - bossDamageReductionRate
+        const damageMultiplier = Math.max(0, 1 + damageRate)
         const critical = config.guaranteedCritical || Boolean(rawStep.compiledCriticalCondition && (
           rawStep.compiledCriticalCondition.handler(rawStep.compiledCriticalCondition.definition, {
             ...context, actor, ownerId: actor.id, config, actors, boss, api,
@@ -590,13 +594,13 @@ export function runRaidProgram(program) {
         const attackScale = preStatusAttackScale * combatAttackScale
         const damageType = actorDamageType(actor, rawStep)
         const defense = defenseSnapshot(actor, damageType, modifiers.totals)
-        const effectivePercent = percent * attackScale * (1 + damageRate) * criticalMultiplier * defense.multiplier
+        const effectivePercent = percent * attackScale * damageMultiplier * criticalMultiplier * defense.multiplier
         const scalingTerms = rawStep.stat === 'ATK'
           ? modifiers.symbolicSources.map(source => ({
             ...source,
             coefficient: percent * source.coefficient
               * (source.kind === 'targetBaseDefenseOverTargetAttack' ? 1 + config.elementBonus.dark.defenseRate : preStatusAttackScale)
-              * (1 + damageRate) * criticalMultiplier * defense.multiplier,
+              * damageMultiplier * criticalMultiplier * defense.multiplier,
           }))
           : []
         const normalizedSourceAttackPercent = scalingTerms
@@ -633,6 +637,7 @@ export function runRaidProgram(program) {
           critical, criticalMultiplier, preStatusCriticalDamageBonus,
           preStatusAttackScale, combatAttackScale, attackScale, attackRate: modifiers.totals.attackRate,
           actorDamageRate: modifiers.totals.damageRate, bossDamageRate: incomingRate, damageRate,
+          elementAdvantageRate, bossDamageReductionRate,
           defenseMultiplier: defense.multiplier, defense,
           effectivePercent: normalizedEffectivePercent, effectivePercentBeforeSourceAttack: effectivePercent,
           normalizedDefensePercent, normalizedSourceAttackPercent, scalingTerms, modifierSources: modifiers.sources,

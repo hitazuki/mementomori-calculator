@@ -43,6 +43,7 @@ export function createDefaultRaidTableConfig() {
     pmDefensePenetrations: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_PM_DEFENSE_PENETRATION + (RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES[id]?.pmDefensePenetration ?? 0)])),
     criticalDamageBonuses: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_CRITICAL_DAMAGE_BONUS + (RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES[id]?.criticalDamageBonus ?? 0)])),
     guaranteedCritical: true,
+    elementAdvantage: true,
     baseCriticalDamageBonus: DEFAULT_RAID_CRITICAL_DAMAGE_BONUS,
     probabilityOverrides: {
       liberiaSand: true, shizuSpeedDown: true, guinevereDamageTaken: true,

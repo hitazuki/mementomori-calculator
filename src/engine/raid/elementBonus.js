@@ -1,5 +1,18 @@
 import { RAID_ELEMENTS } from '../../constants/raid/shared.js'
 
+const ADVANTAGE_TARGETS = Object.freeze({
+  [RAID_ELEMENTS.BLUE]: RAID_ELEMENTS.RED,
+  [RAID_ELEMENTS.RED]: RAID_ELEMENTS.GREEN,
+  [RAID_ELEMENTS.GREEN]: RAID_ELEMENTS.YELLOW,
+  [RAID_ELEMENTS.YELLOW]: RAID_ELEMENTS.BLUE,
+  [RAID_ELEMENTS.LIGHT]: RAID_ELEMENTS.DARK,
+  [RAID_ELEMENTS.DARK]: RAID_ELEMENTS.LIGHT,
+})
+
+export function calculateRaidElementAdvantage(attackerElement, bossElement, enabled = true) {
+  return enabled && ADVANTAGE_TARGETS[attackerElement] === bossElement ? 0.25 : 0
+}
+
 const NORMAL_ELEMENT_TIERS = Object.freeze({
   0: Object.freeze({ phase: 0, hpRate: 0, attackRate: 0 }),
   1: Object.freeze({ phase: 1, hpRate: 0.10, attackRate: 0.10 }),

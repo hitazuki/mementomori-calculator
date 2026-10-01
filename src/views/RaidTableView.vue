@@ -98,6 +98,10 @@
         <input v-model="guaranteedCritical" type="checkbox">
         <span><strong>{{ $t('raidGuaranteedCritical') }}</strong><small>{{ $t('raidGuaranteedCriticalHint') }}</small></span>
       </label>
+      <label class="raid-toggle-control">
+        <input v-model="elementAdvantage" type="checkbox">
+        <span><strong>{{ $t('raidElementAdvantage') }}</strong><small>{{ $t('raidElementAdvantageHint') }}</small></span>
+      </label>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.LIBERIA)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.liberiaSand" type="checkbox">
         <span><strong>{{ $t('raidAssumeLiberiaSand') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
@@ -312,6 +316,7 @@
           <article v-for="step in selectedEvent.damageSteps" :key="step.index">
             <header><strong>#{{ step.index }} · {{ step.percent }}% {{ step.stat }}</strong><span>{{ formatStep(step) }}</span></header>
             <small>{{ $t('raidStepCritical', { value: formatter().format(step.criticalMultiplier) }) }} · {{ $t('raidStepDamageRate', { value: formatRate(step.damageRate) }) }} · {{ bossStackSummary(step.bossStatusBefore) }}</small>
+            <small v-if="step.elementAdvantageRate || step.bossDamageReductionRate"><span v-if="step.elementAdvantageRate">{{ $t('raidElementAdvantage') }} +{{ formatRate(step.elementAdvantageRate) }}</span><span v-if="step.elementAdvantageRate && step.bossDamageReductionRate"> · </span><span v-if="step.bossDamageReductionRate">{{ $t('raidBossDamageReduction') }} −{{ formatRate(step.bossDamageReductionRate) }}</span></small>
             <small v-if="step.defense.applies">{{ $t('raidStepDefenseMultiplier', { value: formatter(4).format(step.defenseMultiplier) }) }} · {{ $t('raidStepDefenseMitigation', { value: formatRate(step.defense.defenseMitigationRate) }) }} · {{ $t(step.damageType === 'mag' ? 'raidStepMagicDefenseMitigation' : 'raidStepPhysicalDefenseMitigation', { value: formatRate(step.defense.pmDefenseMitigationRate) }) }}</small>
             <small v-else>{{ $t('raidStepDirectIgnoresDefense') }}</small>
             <small v-if="step.defense.applies">{{ $t('raidStepPenetrationValues', { level: step.defense.attackerLevel, defense: formatter().format(step.defense.defensePenetration), pm: formatter().format(step.defense.pmDefensePenetration) }) }}</small>
@@ -656,6 +661,7 @@ const defensePenetrations = reactive({ ...defaults.defensePenetrations })
 const pmDefensePenetrations = reactive({ ...defaults.pmDefensePenetrations })
 const criticalDamagePercents = reactive(Object.fromEntries(Object.entries(defaults.criticalDamageBonuses).map(([id, value]) => [id, roundCriticalDamagePercent(value * 100)])))
 const guaranteedCritical = ref(defaults.guaranteedCritical)
+const elementAdvantage = ref(defaults.elementAdvantage)
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
 const activationRounds = reactive({ ...defaults.activationRounds })
 const scenarioTiers = reactive({ ...defaults.scenarioTiers })
@@ -708,6 +714,7 @@ const result = computed(() => simulateRaidTable({
   pmDefensePenetrations,
   criticalDamageBonuses: Object.fromEntries(Object.keys(criticalDamagePercents).map(id => [id, Math.max(0, Number(criticalDamagePercents[id]) || 0) / 100])),
   guaranteedCritical: guaranteedCritical.value,
+  elementAdvantage: elementAdvantage.value,
   probabilityOverrides,
   activationRounds: Object.fromEntries(Object.keys(activationRounds).map(key => [key, normalizedActivationRound(key)])),
   scenarioTiers: { ...scenarioTiers },
@@ -758,12 +765,12 @@ const elementBonusLines = computed(() => {
   return lines.length ? lines : [t('raidElementBonusNone')]
 })
 const selectedBossTemplate = computed(() => RAID_BOSS_TEMPLATES[bossTemplateId.value])
-const bossTemplateStats = computed(() => t('raidBossTemplateStats', {
+const bossTemplateStats = computed(() => `${t(elementNameKey(selectedBossTemplate.value.element))} · ${t('raidBossTemplateStats', {
   level: selectedBossTemplate.value.level,
   defense: formatter().format(selectedBossTemplate.value.defense),
   physical: formatter().format(selectedBossTemplate.value.physicalDefense),
   magic: formatter().format(selectedBossTemplate.value.magicDefense),
-}))
+})}${selectedBossTemplate.value.damageReductionRate ? ` · ${t('raidBossDamageReduction')} ${formatRate(selectedBossTemplate.value.damageReductionRate)}` : ''}`)
 
 function characterName(id) { return t(RAID_TABLE_CHARACTERS[id].nameKey) }
 function characterIconUrl(id) { return `${import.meta.env.BASE_URL}images/characters/${id}.png` }
@@ -1064,6 +1071,7 @@ function toggleRosterElement(element) {
 }
 
 function activeRaidScenarioLines() {
+  const affinity = `${t('raidElementAdvantage')}：${elementAdvantage.value ? '+25%' : '—'}`
   const lines = probabilityScenarioDefinitions
     .filter(([id, key]) => lineup.value.includes(id) && result.value.config.probabilityOverrides[key])
     .map(([, , labelKey]) => t(labelKey))
@@ -1081,7 +1089,7 @@ function activeRaidScenarioLines() {
   if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.REGINA)) {
     lines.push(`${t('raidReginaDamageTaken')}：${result.value.config.scenarioTiers.reginaDamageTaken === 0 ? 10 : 30}%`)
   }
-  return lines
+  return [affinity, ...lines]
 }
 
 function openRaidExport() {
@@ -1141,6 +1149,7 @@ function resetConfig() {
   lineup.value = [...next.lineup]; attackPriority.value = [...next.attackPriority]
   actionOrderOverrides.value = cloneActionOrderOverrides(next.actionOrderOverrides)
   Object.assign(speeds, next.speeds); guaranteedCritical.value = next.guaranteedCritical
+  elementAdvantage.value = next.elementAdvantage
   bossTemplateId.value = next.bossTemplateId
   Object.assign(levels, next.levels)
   Object.assign(defensePenetrations, next.defensePenetrations)

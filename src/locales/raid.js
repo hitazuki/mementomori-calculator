@@ -960,6 +960,10 @@ for (const [locale, entries] of Object.entries(raidCharacterEffectContextExtensi
 
 // Explicit resolver and effect semantics for character details.
 Object.assign(raidTranslations["zh-CN"], {
+  raidBossGoldenArtoria: '［黄金圣剑士］阿尔托莉亚',
+  raidElementAdvantage: '属性克制',
+  raidElementAdvantageHint: '克制Boss属性的角色增伤+25%；忧蓝→业红→苍翠→流金→忧蓝，天光与幽冥互克。',
+  raidBossDamageReduction: 'Boss常驻减伤',
   raidReginaDamageTaken: '雷金娜・承受伤害增加',
   raidReginaDamageTakenHint: '目标基础攻击力低于雷金娜时为30%，否则为10%；持续4回合。',
   raidDetailConfiguredTier: '设置档位',
@@ -986,6 +990,10 @@ Object.assign(raidTranslations["zh-CN"], {
   "raidDetailTargetActions": "持续{n}次目标行动；施加当次不扣次数"
 })
 Object.assign(raidTranslations["zh-TW"], {
+  raidBossGoldenArtoria: '［黃金聖劍士］阿爾托莉亞',
+  raidElementAdvantage: '屬性剋制',
+  raidElementAdvantageHint: '剋制Boss屬性的角色增傷+25%；憂藍→業紅→蒼翠→流金→憂藍，天光與幽冥互剋。',
+  raidBossDamageReduction: 'Boss常駐減傷',
   raidReginaDamageTaken: '雷金娜・承受傷害增加',
   raidReginaDamageTakenHint: '目標基礎攻擊力低於雷金娜時為30%，否則為10%；持續4回合。',
   raidDetailConfiguredTier: '設定檔位',
@@ -1012,6 +1020,10 @@ Object.assign(raidTranslations["zh-TW"], {
   "raidDetailTargetActions": "持續{n}次目標行動；施加當次不扣次數"
 })
 Object.assign(raidTranslations["en"], {
+  raidBossGoldenArtoria: '[Holy Sword of Golden Light] Artoria',
+  raidElementAdvantage: 'Soul affinity',
+  raidElementAdvantageHint: 'Advantage over the Boss grants +25% damage: Azure→Crimson→Emerald→Amber→Azure; Radiance and Chaos counter each other.',
+  raidBossDamageReduction: 'Boss permanent damage reduction',
   raidReginaDamageTaken: 'Regina · Damage Taken Up',
   raidReginaDamageTakenHint: '30% when target base ATK is lower than Regina’s, otherwise 10%; lasts 4 turns.',
   raidDetailConfiguredTier: 'Configured tier',
@@ -1038,6 +1050,10 @@ Object.assign(raidTranslations["en"], {
   "raidDetailTargetActions": "Lasts {n} target actions; application action does not consume duration"
 })
 Object.assign(raidTranslations["ja"], {
+  raidBossGoldenArtoria: '［黄金色の聖剣使い］アルトリア',
+  raidElementAdvantage: '属性相性',
+  raidElementAdvantageHint: 'Bossに有利な属性のキャラはダメージ+25%。藍→紅→翠→黄→藍、天と冥は互いに有利。',
+  raidBossDamageReduction: 'Boss常時被ダメージ減少',
   raidReginaDamageTaken: 'レジーナ・被ダメージ増加',
   raidReginaDamageTakenHint: '対象の基礎攻撃力がレジーナより低い場合30%、それ以外は10%。4ターン持続。',
   raidDetailConfiguredTier: '設定段階',
@@ -1064,6 +1080,10 @@ Object.assign(raidTranslations["ja"], {
   "raidDetailTargetActions": "対象の行動{n}回持続。付与した行動では減らない"
 })
 Object.assign(raidTranslations["ko"], {
+  raidBossGoldenArtoria: '[황금빛 성검의 주인] 아르토리아',
+  raidElementAdvantage: '속성 상성',
+  raidElementAdvantageHint: 'Boss에 유리한 속성 캐릭터의 대미지 +25%. 남색→홍색→비취→황색→남색, 빛과 어둠은 서로 유리.',
+  raidBossDamageReduction: 'Boss 상시 받는 대미지 감소',
   raidReginaDamageTaken: '레지나・피해 대미지 증가',
   raidReginaDamageTakenHint: '대상의 기본 공격력이 레지나보다 낮으면 30%, 그 외에는 10%. 4턴 지속.',
   raidDetailConfiguredTier: '설정 단계',

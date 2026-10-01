@@ -85,6 +85,8 @@ function normalizeConfig(config, characters) {
   const bossTemplateId = config.bossTemplateId ?? defaults.bossTemplateId
   const bossTemplate = RAID_BOSS_TEMPLATES[bossTemplateId]
   if (!bossTemplate) throw new Error(`Unsupported raid Boss template: ${bossTemplateId}`)
+  const elementAdvantage = config.elementAdvantage ?? defaults.elementAdvantage
+  if (typeof elementAdvantage !== 'boolean') throw new Error('Invalid raid element advantage toggle')
   const turns = config.turns ?? defaults.turns
   if (!Number.isInteger(turns) || turns < 1) throw new Error('turns must be a positive integer')
   const actionOrderOverrides = normalizeActionOrderOverrides(config.actionOrderOverrides ?? defaults.actionOrderOverrides, lineup, turns)
@@ -100,6 +102,7 @@ function normalizeConfig(config, characters) {
   return {
     lineup, attackPriority, actionOrderOverrides, speeds, levels, defensePenetrations, pmDefensePenetrations, criticalDamageBonuses,
     elementBonus,
+    elementAdvantage,
     bossTemplateId, bossTemplate, turns,
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
     baseCriticalDamageBonus: legacyCriticalDamageBonus ?? defaults.baseCriticalDamageBonus,

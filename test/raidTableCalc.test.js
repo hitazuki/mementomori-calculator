@@ -22,6 +22,7 @@ import {
   DEFAULT_RAID_ENVIRONMENT,
   DEFAULT_RAID_MECHANICS,
   calculateRaidElementBonus,
+  calculateRaidElementAdvantage,
   compileRaidProgram,
   simulateRaidTable,
 } from '../src/engine/raidTableCalc.js'
@@ -191,6 +192,60 @@ test('Boss template and per-character level and penetration settings change defe
   assert.equal(lukeStep.defense.baseDefense, 300_000)
   assert.equal(lukeStep.defense.basePmDefense, 600_000)
   assert.ok(lukeStep.defenseMultiplier < sonyaStep.defenseMultiplier)
+})
+
+test('element advantage covers the four-element cycle and the light-dark pair without penalties', () => {
+  const targets = { 1: 2, 2: 3, 3: 4, 4: 1, 5: 6, 6: 5 }
+  for (const attacker of Object.values(RAID_ELEMENTS)) {
+    for (const target of Object.values(RAID_ELEMENTS)) {
+      assert.equal(calculateRaidElementAdvantage(attacker, target), targets[attacker] === target ? 0.25 : 0)
+      assert.equal(calculateRaidElementAdvantage(attacker, target, false), 0)
+    }
+  }
+  assert.equal(createDefaultRaidTableConfig().elementAdvantage, true)
+  assert.throws(() => compileRaidProgram({ elementAdvantage: 'true' }), /Invalid raid element advantage/)
+})
+
+test('Golden Artoria defense, constant reduction, and affinity affect physical, magic, and direct attacks', () => {
+  const template = RAID_BOSS_TEMPLATES[RAID_BOSS_TEMPLATE_IDS.GOLDEN_ARTORIA]
+  assert.equal(template.masterId, 17)
+  assert.equal(template.element, RAID_ELEMENTS.GREEN)
+  assert.equal(template.defense, 20)
+  assert.equal(template.physicalDefense, 500_000)
+  assert.equal(template.magicDefense, 500_000)
+  assert.equal(template.damageReductionRate, 0.6)
+  for (const damageType of ['phys', 'mag', 'direct']) {
+    const character = {
+      ...RAID_TABLE_CHARACTERS[FLORENCE], element: RAID_ELEMENTS.RED,
+      permanentModifiers: [], hooks: [],
+      skills: { ...RAID_TABLE_CHARACTERS[FLORENCE].skills, s1: {
+        key: 's1', cooldown: 4, damageType,
+        damageSteps: [{ stat: damageType === 'direct' ? 'STR' : 'ATK', percent: 100, hits: 1, damageType }],
+        hooks: [hook('beforeDamage', [bossStatusEffect({
+          id: 'test-vulnerability', effectGroupId: 991012, nameKey: 'raidDebuffReginaDamageTaken', damageRatePerStack: 0.1,
+        })])],
+      } },
+    }
+    const environment = { ...DEFAULT_RAID_ENVIRONMENT, characters: { [FLORENCE]: character } }
+    const config = singleConfig(FLORENCE, { turns: 1, bossTemplateId: template.id })
+    const enabled = action(simulateRaidTable(config, environment), 1, FLORENCE).damageSteps[0]
+    const disabled = action(simulateRaidTable({ ...config, elementAdvantage: false }, environment), 1, FLORENCE).damageSteps[0]
+    assert.equal(enabled.elementAdvantageRate, 0.25)
+    assert.equal(enabled.bossDamageReductionRate, 0.6)
+    assert.equal(enabled.bossDamageRate, 0.1)
+    closeTo(enabled.damageRate, -0.25)
+    closeTo(disabled.damageRate, -0.5)
+    closeTo(enabled.effectivePercent / disabled.effectivePercent, 1.5)
+    if (damageType === 'direct') assert.equal(enabled.defenseMultiplier, 1)
+    else {
+      assert.equal(enabled.defense.baseDefense, 20)
+      assert.equal(enabled.defense.basePmDefense, 500_000)
+      assert.ok(enabled.defenseMultiplier < 1)
+    }
+    const againstSonya = action(simulateRaidTable({ ...config, bossTemplateId: RAID_BOSS_TEMPLATE_IDS.SONYA }, environment), 1, FLORENCE).damageSteps[0]
+    assert.equal(againstSonya.elementAdvantageRate, 0)
+    assert.equal(againstSonya.bossDamageReductionRate, 0)
+  }
 })
 
 test('default speed order matches MB values and can be overridden', () => {
@@ -1319,8 +1374,8 @@ test('Mowano copies all removable Buffs at action start, including attack, witho
   assert.equal(firstMowano.removableBuffCountsAtActionStart[MOWANO], 0)
   assert.equal(firstMowano.removableBuffCountsAtDamage[MOWANO], 3)
   assert.equal(firstMowano.damageSteps[0].attackRate, 0)
-  closeTo(firstMowano.effectiveAtkPercent, 590 * 1.2 * 2.1 * firstMowano.damageSteps[0].defenseMultiplier)
-  closeTo(firstMowano.damageSteps[0].normalizedSourceAttackPercent, 590 * 0.2 * 2.1 * firstMowano.damageSteps[0].defenseMultiplier)
+  closeTo(firstMowano.effectiveAtkPercent, 590 * 1.2 * 1.25 * 2.1 * firstMowano.damageSteps[0].defenseMultiplier)
+  closeTo(firstMowano.damageSteps[0].normalizedSourceAttackPercent, 590 * 0.2 * 1.25 * 2.1 * firstMowano.damageSteps[0].defenseMultiplier)
   assert.equal(copied.find(effect => effect.effectGroupId === 9000140103).symbolicModifiers[0].coefficient, 0.2)
   const copiedAttackSource = firstMowano.damageSteps[0].scalingTerms.find(source => source.effectGroupId === 9000140103)
   assert.equal(copiedAttackSource.sourceId, CATTLEYYA)
