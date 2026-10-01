@@ -592,6 +592,10 @@ export function runRaidProgram(program) {
         const preStatusAttackScale = rawStep.stat === 'ATK' ? 1 + config.elementBonus.normal.attackRate : 1
         const combatAttackScale = rawStep.stat === 'ATK' ? 1 + modifiers.totals.attackRate : 1
         const attackScale = preStatusAttackScale * combatAttackScale
+        const sourceAttackRate = rawStep.stat === 'ATK' ? modifiers.symbolicSources
+          .filter(source => source.kind === 'sourceAttackOverTargetAttack')
+          .reduce((total, source) => total + source.coefficient, 0) : 0
+        const normalizedAttackScale = preStatusAttackScale * (combatAttackScale + sourceAttackRate)
         const damageType = actorDamageType(actor, rawStep)
         const defense = defenseSnapshot(actor, damageType, modifiers.totals)
         const effectivePercent = percent * attackScale * damageMultiplier * criticalMultiplier * defense.multiplier
@@ -635,7 +639,11 @@ export function runRaidProgram(program) {
           index: hitSequence, stat: rawStep.stat, damageType, percent,
           hit, hits, originalTargetCount: rawStep.originalTargetCount, conditionKey: rawStep.conditionKey,
           critical, criticalMultiplier, preStatusCriticalDamageBonus,
+          panelCriticalDamageBonus: config.criticalDamageBonuses[actor.id],
+          formationCriticalDamageBonus: config.elementBonus.dark.criticalDamageBonus,
           preStatusAttackScale, combatAttackScale, attackScale, attackRate: modifiers.totals.attackRate,
+          normalizedAttackScale, symbolicModifierSources: modifiers.symbolicSources.map(source => ({ ...source })),
+          formationDefenseRate: config.elementBonus.dark.defenseRate,
           actorDamageRate: modifiers.totals.damageRate, bossDamageRate: incomingRate, damageRate,
           elementAdvantageRate, bossDamageReductionRate,
           defenseMultiplier: defense.multiplier, defense,

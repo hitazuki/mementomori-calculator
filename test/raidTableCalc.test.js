@@ -454,6 +454,30 @@ test('status display values follow snapshot timing and remain frozen after expir
   assert.equal(find(first.statusSnapshotBeforeAction).modifiers[0].displayRate, 0.2)
 })
 
+test('per-hit display factors reproduce damage with ATK references and separate DEF conversions', () => {
+  for (const [lineup, guaranteedCritical] of [
+    [[ARTORIA, LIBERIA, SPRING_SHIZU, MOWANO, CORDIE], true],
+    [[LUKE, AA], false],
+  ]) {
+    const result = simulateRaidTable({ lineup, attackPriority: [...lineup], guaranteedCritical, turns: 3 })
+    for (const round of result.rounds) for (const event of round.actions) for (const step of event.damageSteps) {
+      const downstream = Math.max(0, 1 + step.damageRate) * step.criticalMultiplier * step.defenseMultiplier
+      closeTo(step.effectivePercent, step.percent * step.normalizedAttackScale * downstream)
+      const referenceRate = step.stat === 'ATK' ? step.symbolicModifierSources
+        .filter(source => source.kind === 'sourceAttackOverTargetAttack')
+        .reduce((sum, source) => sum + source.coefficient, 0) : 0
+      closeTo(step.normalizedAttackScale, step.preStatusAttackScale * (step.combatAttackScale + referenceRate))
+      const defenseRate = step.stat === 'ATK' ? step.symbolicModifierSources
+        .filter(source => source.kind === 'targetBaseDefenseOverTargetAttack')
+        .reduce((sum, source) => sum + source.coefficient, 0) : 0
+      closeTo(step.normalizedDefensePercent, step.percent * defenseRate * (1 + step.formationDefenseRate) * downstream)
+      const skillCritical = step.modifierSources.filter(source => source.channel === 'criticalDamageBonus').reduce((sum, source) => sum + source.rate, 0)
+      closeTo(step.criticalMultiplier, step.critical ? 1.5 + step.panelCriticalDamageBonus + step.formationCriticalDamageBonus + skillCritical : 1)
+      if (step.stat !== 'ATK') assert.equal(step.normalizedAttackScale, 1)
+    }
+  }
+})
+
 test('Boss defense buffs and differently named debuffs add by defense path before mitigation', () => {
   const character = {
     ...RAID_TABLE_CHARACTERS[FLORENCE],

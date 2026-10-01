@@ -315,12 +315,13 @@
         <div v-if="selectedEvent.damageSteps.length" class="raid-step-list">
           <article v-for="step in selectedEvent.damageSteps" :key="step.index">
             <header><strong>#{{ step.index }} · {{ step.percent }}% {{ step.stat }}</strong><span>{{ formatStep(step) }}</span></header>
-            <small>{{ $t('raidStepCritical', { value: formatter().format(step.criticalMultiplier) }) }} · {{ $t('raidStepDamageRate', { value: formatRate(step.damageRate) }) }} · {{ bossStackSummary(step.bossStatusBefore) }}</small>
-            <small v-if="step.elementAdvantageRate || step.bossDamageReductionRate"><span v-if="step.elementAdvantageRate">{{ $t('raidElementAdvantage') }} +{{ formatRate(step.elementAdvantageRate) }}</span><span v-if="step.elementAdvantageRate && step.bossDamageReductionRate"> · </span><span v-if="step.bossDamageReductionRate">{{ $t('raidBossDamageReduction') }} −{{ formatRate(step.bossDamageReductionRate) }}</span></small>
-            <small v-if="step.defense.applies">{{ $t('raidStepDefenseMultiplier', { value: formatter(4).format(step.defenseMultiplier) }) }} · {{ $t('raidStepDefenseMitigation', { value: formatRate(step.defense.defenseMitigationRate) }) }} · {{ $t(step.damageType === 'mag' ? 'raidStepMagicDefenseMitigation' : 'raidStepPhysicalDefenseMitigation', { value: formatRate(step.defense.pmDefenseMitigationRate) }) }}</small>
-            <small v-else>{{ $t('raidStepDirectIgnoresDefense') }}</small>
-            <small v-if="step.defense.applies">{{ $t('raidStepPenetrationValues', { level: step.defense.attackerLevel, defense: formatter().format(step.defense.defensePenetration), pm: formatter().format(step.defense.pmDefensePenetration) }) }}</small>
-            <small v-if="visibleScalingTerms(step).length" class="raid-converted-stat">+ {{ formatScalingArray(visibleScalingTerms(step), selectedEvent.actorId) }}</small>
+            <small v-if="step.stat === 'ATK' && nonzero(step.normalizedAttackScale - 1)">{{ stepAttackText(step) }}</small>
+            <small v-if="nonzero(step.damageRate)">{{ stepDamageText(step) }}</small>
+            <small v-if="step.critical && nonzero(step.criticalMultiplier - 1)">{{ stepCriticalText(step) }}</small>
+            <small v-if="step.defense.applies && nonzero(step.defenseMultiplier - 1)">{{ stepDefenseText(step) }}</small>
+            <small v-if="step.defense.applies && nonzero(step.defenseMultiplier - 1)">{{ stepDefenseSources(step) }}</small>
+            <small v-if="step.defense.applies && nonzero(step.defenseMultiplier - 1)">{{ $t('raidStepPenetrationValues', { level: step.defense.attackerLevel, defense: formatter().format(step.defense.defensePenetration), pm: formatter().format(step.defense.pmDefensePenetration) }) }}{{ stepPenetrationSources(step) }}</small>
+            <small v-if="nonzero(step.normalizedDefensePercent)" class="raid-converted-stat">{{ stepDefenseConversionText(step) }}</small>
           </article>
         </div>
         <p v-else class="raid-muted">{{ $t('raidNoDamageSteps') }}</p>
@@ -812,10 +813,6 @@ function formatScalingTerm(term, ownerId = null) {
   return `${formatter().format(term.coefficient)}% ATK×(${term.key})${source}`
 }
 function formatScaling(totals) { return Object.values(totals).map(formatScalingTerm).join(' + ') }
-function formatScalingArray(terms, ownerId = null) { return terms.map(term => formatScalingTerm(term, ownerId)).join(' + ') }
-function visibleScalingTerms(step) { return step.scalingTerms.filter(term => (
-  term.kind === 'targetBaseDefenseOverTargetAttack' || term.valueSourceId !== selectedEvent.value?.actorId
-)) }
 function includedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind === 'sourceAttackOverTargetAttack')) }
 function unresolvedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind !== 'sourceAttackOverTargetAttack')) }
 function formatStep(step) { return `${formatter().format(step.effectivePercent)}% ${step.stat}` }
@@ -1195,9 +1192,71 @@ function modifierBreakdown(event) {
   })
 }
 
-function bossStackSummary(statuses) {
-  if (!statuses.length) return t('raidNoBossStatus')
-  return statuses.map(status => `${t(status.nameKey)}×${status.stacks}${bossRateSummary(status) ? ` (${bossRateSummary(status)})` : ''}`).join(' · ')
+function nonzero(value) { return Math.abs(value) > 1e-10 }
+function signedRate(rate) { return `${rate > 0 ? '+' : ''}${formatRate(rate)}` }
+
+function stepChannelSources(step, channel) {
+  return step.modifierSources.filter(source => source.channel === channel && source.rate)
+    .map(source => `${t(source.nameKey)} ${signedRate(source.rate)}`)
+}
+
+function stepAttackText(step) {
+  const combat = [...stepChannelSources(step, 'attackRate'), ...step.symbolicModifierSources
+    .filter(source => source.kind === 'sourceAttackOverTargetAttack' && source.coefficient)
+    .map(source => `${t(source.nameKey)} ${signedRate(source.coefficient)}（${valueSourceText(source.valueSourceId)}）`)]
+  const sources = combat.join(' + ') || '0%'
+  const formation = step.preStatusAttackScale !== 1
+    ? `${t('raidElementBonusTitle')} ×${formatter().format(step.preStatusAttackScale)} × (1 + ${sources})`
+    : sources
+  return `${t('raidStepAttackTotal', { rate: signedRate(step.normalizedAttackScale - 1), multiplier: formatter(4).format(step.normalizedAttackScale) })} · ${formation}`
+}
+
+function stepDamageText(step) {
+  const sources = stepChannelSources(step, 'damageRate')
+  for (const status of step.bossStatusBefore) {
+    if (status.damageRatePerStack) sources.push(`${t(status.nameKey)} ${signedRate(status.damageRatePerStack * status.stacks)}`)
+  }
+  if (step.elementAdvantageRate) sources.push(`${t('raidElementAdvantage')} ${signedRate(step.elementAdvantageRate)}`)
+  if (step.bossDamageReductionRate) sources.push(`${t('raidBossDamageReduction')} ${signedRate(-step.bossDamageReductionRate)}`)
+  return `${t('raidStepDamageTotal', { rate: signedRate(step.damageRate), multiplier: formatter(4).format(Math.max(0, 1 + step.damageRate)) })}${sources.length ? ` · ${sources.join('；')}` : ''}`
+}
+
+function stepCriticalText(step) {
+  const sources = [t('raidStepInnateCritical')]
+  if (nonzero(step.panelCriticalDamageBonus)) sources.push(`${t('raidStepPanelSource')} ${signedRate(step.panelCriticalDamageBonus)}`)
+  if (step.formationCriticalDamageBonus) sources.push(`${t('raidElementBonusTitle')} ${signedRate(step.formationCriticalDamageBonus)}`)
+  sources.push(...stepChannelSources(step, 'criticalDamageBonus'))
+  return `${t('raidStepCriticalTotal', { rate: signedRate(step.criticalMultiplier - 1), multiplier: formatter(4).format(step.criticalMultiplier) })} · ${sources.join('；')}`
+}
+
+function stepDefenseSources(step) {
+  const sources = [t(result.value.bossTemplate.nameKey)]
+  for (const status of step.bossStatusBefore) {
+    const rates = [['raidDefenseRate', status.defenseRatePerStack], [step.damageType === 'mag' ? 'raidMagicDefenseRate' : 'raidPhysicalDefenseRate', step.damageType === 'mag' ? status.magicDefenseRatePerStack : status.physicalDefenseRatePerStack]]
+      .filter(([, rate]) => rate).map(([key, rate]) => `${t(key)} ${signedRate(rate * status.stacks)}`)
+    if (rates.length) sources.push(`${t(status.nameKey)} ${rates.join(' / ')}`)
+  }
+  return t('raidStepDefenseSources', { sources: sources.join('；') })
+}
+
+function stepDefenseText(step) {
+  const paths = []
+  if (nonzero(step.defense.defensePassRate - 1)) paths.push(`${t('raidDefenseRate')} ×${formatter(4).format(step.defense.defensePassRate)}`)
+  if (nonzero(step.defense.pmDefensePassRate - 1)) paths.push(`${t(step.damageType === 'mag' ? 'raidMagicDefenseRate' : 'raidPhysicalDefenseRate')} ×${formatter(4).format(step.defense.pmDefensePassRate)}`)
+  return `${t('raidStepDefenseMultiplier', { value: formatter(4).format(step.defenseMultiplier) })} · ${paths.join(' × ')}`
+}
+
+function stepPenetrationSources(step) {
+  const sources = stepChannelSources(step, 'defensePenetrationRate')
+  if (step.defense.formationDefensePenetration) sources.unshift(`${t('raidElementBonusTitle')} +${formatter().format(step.defense.formationDefensePenetration)}`)
+  return sources.length ? ` · ${t('raidDefensePenetration')}：${sources.join('；')}` : ''
+}
+
+function stepDefenseConversionText(step) {
+  const sources = step.symbolicModifierSources.filter(source => source.kind === 'targetBaseDefenseOverTargetAttack' && source.coefficient)
+    .map(source => `${t(source.nameKey)} ${formatRate(source.coefficient)} DEF`)
+  if (step.formationDefenseRate) sources.push(`${t('raidElementBonusTitle')} ${t('raidDefenseRate')} ${signedRate(step.formationDefenseRate)}`)
+  return t('raidStepDefenseConversion', { value: formatStat(step.normalizedDefensePercent, 'DEF'), sources: sources.join('；') })
 }
 
 function bossStatusLabel(status) {

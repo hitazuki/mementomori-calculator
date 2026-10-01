@@ -615,6 +615,8 @@ eventHooks: [{
 | value resolver | `configuredTier` | 使用 `config.scenarioTiers[key]` 作为下标，从角色声明的一至五档有限数值 `values` 中读取数值；编译时拒绝未配置或越界下标。 |
 
 Boss 状态的 `damageRatePerStack`、`defenseRatePerStack`、`physicalDefenseRatePerStack`、`magicDefenseRatePerStack` 支持数值或已注册值解析器，在施加/刷新时解析并冻结，快照与施加记录保留解析结果。雷金娜通过 `scenarioTiers.reginaDamageTaken` 选择10%（下标0）或30%（下标1，默认），持续4回合；该选项不改变S2伤害分支。
+
+逐段明细按实际生效因子显示加攻、增伤、暴伤、双防御通过率、贯通Buff与DEF转模，并简写来源；合计为零或不适用的项省略。`normalizedAttackScale` 包含组队攻击乘区与归一后的ATK引用项，DEF引用仍单列；`symbolicModifierSources` 保留命中时原始引用系数，`panelCriticalDamageBonus`、`formationCriticalDamageBonus`、`formationDefenseRate` 保留对应面板/组队来源，避免把已受下游倍率影响的结果值误当原始加成。
 | target selector | `lowestSpeedOthers` | 按配置速度从低到高选择其他友军；配合 `targetCount` 限制人数，同速按站位顺序。 |
 | target selector | `selfAndLowestSpeedOthers` | 先选择自身，再按配置速度从低到高选择其他友军；同速按站位顺序。 |
 | battle event | `normalAttack` | 任意上阵角色完成普通攻击伤害与自身钩子后广播，发生在基础冷却恢复之前。 |

@@ -960,6 +960,13 @@ for (const [locale, entries] of Object.entries(raidCharacterEffectContextExtensi
 
 // Explicit resolver and effect semantics for character details.
 Object.assign(raidTranslations["zh-CN"], {
+  raidStepAttackTotal: '加攻 {rate}（×{multiplier}）',
+  raidStepDamageTotal: '增伤 {rate}（×{multiplier}）',
+  raidStepCriticalTotal: '暴伤 {rate}（×{multiplier}）',
+  raidStepInnateCritical: '初始 +50%',
+  raidStepPanelSource: '面板',
+  raidStepDefenseSources: '防御来源：{sources}',
+  raidStepDefenseConversion: 'DEF转模 {value} · {sources}；同乘增伤、暴伤及防御通过，不受加攻影响',
   raidBossGoldenArtoria: '［黄金圣剑士］阿尔托莉亚',
   raidElementAdvantage: '属性克制',
   raidElementAdvantageHint: '克制Boss属性的角色增伤+25%；忧蓝→业红→苍翠→流金→忧蓝，天光与幽冥互克。',
@@ -990,6 +997,13 @@ Object.assign(raidTranslations["zh-CN"], {
   "raidDetailTargetActions": "持续{n}次目标行动；施加当次不扣次数"
 })
 Object.assign(raidTranslations["zh-TW"], {
+  raidStepAttackTotal: '加攻 {rate}（×{multiplier}）',
+  raidStepDamageTotal: '增傷 {rate}（×{multiplier}）',
+  raidStepCriticalTotal: '暴傷 {rate}（×{multiplier}）',
+  raidStepInnateCritical: '初始 +50%',
+  raidStepPanelSource: '面板',
+  raidStepDefenseSources: '防禦來源：{sources}',
+  raidStepDefenseConversion: 'DEF轉模 {value} · {sources}；同乘增傷、暴傷及防禦通過，不受加攻影響',
   raidBossGoldenArtoria: '［黃金聖劍士］阿爾托莉亞',
   raidElementAdvantage: '屬性剋制',
   raidElementAdvantageHint: '剋制Boss屬性的角色增傷+25%；憂藍→業紅→蒼翠→流金→憂藍，天光與幽冥互剋。',
@@ -1020,6 +1034,13 @@ Object.assign(raidTranslations["zh-TW"], {
   "raidDetailTargetActions": "持續{n}次目標行動；施加當次不扣次數"
 })
 Object.assign(raidTranslations["en"], {
+  raidStepAttackTotal: 'ATK bonus {rate} (×{multiplier})',
+  raidStepDamageTotal: 'Damage bonus {rate} (×{multiplier})',
+  raidStepCriticalTotal: 'Crit damage bonus {rate} (×{multiplier})',
+  raidStepInnateCritical: 'Innate +50%',
+  raidStepPanelSource: 'Panel',
+  raidStepDefenseSources: 'Defense sources: {sources}',
+  raidStepDefenseConversion: 'DEF conversion {value} · {sources}; uses damage, crit, and defense multipliers; ignores ATK bonuses',
   raidBossGoldenArtoria: '[Holy Sword of Golden Light] Artoria',
   raidElementAdvantage: 'Soul affinity',
   raidElementAdvantageHint: 'Advantage over the Boss grants +25% damage: Azure→Crimson→Emerald→Amber→Azure; Radiance and Chaos counter each other.',
@@ -1050,6 +1071,13 @@ Object.assign(raidTranslations["en"], {
   "raidDetailTargetActions": "Lasts {n} target actions; application action does not consume duration"
 })
 Object.assign(raidTranslations["ja"], {
+  raidStepAttackTotal: '攻撃力増加 {rate}（×{multiplier}）',
+  raidStepDamageTotal: 'ダメージ増加 {rate}（×{multiplier}）',
+  raidStepCriticalTotal: 'クリティカルダメージ増加 {rate}（×{multiplier}）',
+  raidStepInnateCritical: '初期 +50%',
+  raidStepPanelSource: 'ステータス',
+  raidStepDefenseSources: '防御の内訳：{sources}',
+  raidStepDefenseConversion: 'DEF換算 {value} · {sources}。ダメージ・クリティカル・防御倍率を適用し、攻撃力増加は適用しない',
   raidBossGoldenArtoria: '［黄金色の聖剣使い］アルトリア',
   raidElementAdvantage: '属性相性',
   raidElementAdvantageHint: 'Bossに有利な属性のキャラはダメージ+25%。藍→紅→翠→黄→藍、天と冥は互いに有利。',
@@ -1080,6 +1108,13 @@ Object.assign(raidTranslations["ja"], {
   "raidDetailTargetActions": "対象の行動{n}回持続。付与した行動では減らない"
 })
 Object.assign(raidTranslations["ko"], {
+  raidStepAttackTotal: '공격력 증가 {rate} (×{multiplier})',
+  raidStepDamageTotal: '대미지 증가 {rate} (×{multiplier})',
+  raidStepCriticalTotal: '치명타 대미지 증가 {rate} (×{multiplier})',
+  raidStepInnateCritical: '기본 +50%',
+  raidStepPanelSource: '능력치',
+  raidStepDefenseSources: '방어력 출처: {sources}',
+  raidStepDefenseConversion: 'DEF 환산 {value} · {sources}. 대미지·치명타·방어 배율 적용, 공격력 증가 미적용',
   raidBossGoldenArtoria: '[황금빛 성검의 주인] 아르토리아',
   raidElementAdvantage: '속성 상성',
   raidElementAdvantageHint: 'Boss에 유리한 속성 캐릭터의 대미지 +25%. 남색→홍색→비취→황색→남색, 빛과 어둠은 서로 유리.',
