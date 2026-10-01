@@ -206,14 +206,14 @@ test('element advantage covers the four-element cycle and the light-dark pair wi
   assert.throws(() => compileRaidProgram({ elementAdvantage: 'true' }), /Invalid raid element advantage/)
 })
 
-test('Golden Artoria defense, constant reduction, and affinity affect physical, magic, and direct attacks', () => {
+test('Golden Artoria uses MB defenses and affinity without constant damage reduction', () => {
   const template = RAID_BOSS_TEMPLATES[RAID_BOSS_TEMPLATE_IDS.GOLDEN_ARTORIA]
   assert.equal(template.masterId, 17)
   assert.equal(template.element, RAID_ELEMENTS.GREEN)
   assert.equal(template.defense, 20)
   assert.equal(template.physicalDefense, 500_000)
   assert.equal(template.magicDefense, 500_000)
-  assert.equal(template.damageReductionRate, 0.6)
+  assert.equal(template.damageReductionRate, undefined)
   for (const damageType of ['phys', 'mag', 'direct']) {
     const character = {
       ...RAID_TABLE_CHARACTERS[FLORENCE], element: RAID_ELEMENTS.RED,
@@ -231,11 +231,11 @@ test('Golden Artoria defense, constant reduction, and affinity affect physical, 
     const enabled = action(simulateRaidTable(config, environment), 1, FLORENCE).damageSteps[0]
     const disabled = action(simulateRaidTable({ ...config, elementAdvantage: false }, environment), 1, FLORENCE).damageSteps[0]
     assert.equal(enabled.elementAdvantageRate, 0.25)
-    assert.equal(enabled.bossDamageReductionRate, 0.6)
+    assert.equal(enabled.bossDamageReductionRate, 0)
     assert.equal(enabled.bossDamageRate, 0.1)
-    closeTo(enabled.damageRate, -0.25)
-    closeTo(disabled.damageRate, -0.5)
-    closeTo(enabled.effectivePercent / disabled.effectivePercent, 1.5)
+    closeTo(enabled.damageRate, 0.35)
+    closeTo(disabled.damageRate, 0.1)
+    closeTo(enabled.effectivePercent / disabled.effectivePercent, 1.35 / 1.1)
     if (damageType === 'direct') assert.equal(enabled.defenseMultiplier, 1)
     else {
       assert.equal(enabled.defense.baseDefense, 20)

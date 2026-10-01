@@ -12,7 +12,6 @@ export const RAID_BOSS_TEMPLATES = Object.freeze({
     element: RAID_ELEMENTS.GREEN, level: 240,
     defense: 20, physicalDefense: 500_000, magicDefense: 500_000,
     defenseRate: 0, physicalDefenseRate: 0, magicDefenseRate: 0,
-    damageReductionRate: 0.6,
   }),
   [RAID_BOSS_TEMPLATE_IDS.SONYA]: Object.freeze({
     id: RAID_BOSS_TEMPLATE_IDS.SONYA,
