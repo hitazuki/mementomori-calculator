@@ -17,6 +17,34 @@ async function openView(page, view) {
   await page.goto('./', { waitUntil: 'domcontentloaded' })
 }
 
+test('raid table hides calculations for an empty lineup and restores them on selection', async ({ page }) => {
+  await openView(page, 'raidTable')
+  const selected = page.locator('.raid-roster-select[aria-pressed="true"]')
+  await expect(selected).toHaveCount(5)
+  await page.locator('.raid-action-cell').first().click()
+  await expect(page.locator('.raid-detail-card')).toBeVisible()
+  for (let remaining = 5; remaining > 0; remaining -= 1) {
+    await selected.first().click()
+    await expect(selected).toHaveCount(remaining - 1)
+  }
+  await expect(page.locator('.raid-roster-grid')).toBeVisible()
+  for (const selector of ['.raid-summary-grid', '.raid-assumption-grid', '.raid-order-grid', '.raid-penetration-editor', '.raid-matrix-card', '.raid-detail-card', '.raid-warning-list']) {
+    await expect(page.locator(selector)).toHaveCount(0)
+  }
+  await page.locator('.raid-roster-select').first().click()
+  await expect(selected).toHaveCount(1)
+  await expect(page.locator('.raid-summary-grid')).toBeVisible()
+  await expect(page.locator('.raid-matrix-card')).toBeVisible()
+  await expect(page.locator('.raid-penetration-editor tbody tr')).toHaveCount(1)
+  await page.locator('.raid-action-cell').first().click()
+  await expect(page.locator('.raid-detail-card')).toBeVisible()
+  await selected.first().click()
+  await expect(page.locator('.raid-matrix-card')).toHaveCount(0)
+  await page.locator('.raid-config-card .raid-section-head button').click()
+  await expect(selected).toHaveCount(5)
+  await expect(page.locator('.raid-matrix-card')).toBeVisible()
+})
+
 test('application shell renders while the master dictionary is pending', async ({ page }) => {
   let release
   const gate = new Promise(resolve => { release = resolve })

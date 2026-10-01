@@ -4,7 +4,7 @@
     <p class="view-desc">{{ $t('raidTableDesc') }}</p>
   </div>
 
-  <section class="raid-summary-grid animate-fadeup">
+  <section v-if="result" class="raid-summary-grid animate-fadeup">
     <div class="stat-box raid-summary-primary">
       <div class="stat-value">{{ formatPercent(result.teamAtkPercent) }}</div>
       <div v-for="term in conversionStatEntries(result.conversionTotals)" :key="term.stat" class="stat-value">{{ formatConversionTotal(term) }}</div>
@@ -62,7 +62,7 @@
         <button
           type="button"
           class="raid-roster-select"
-          :disabled="(!lineup.includes(id) && lineup.length >= 5) || (lineup.includes(id) && lineup.length <= 1)"
+          :disabled="!lineup.includes(id) && lineup.length >= 5"
           :aria-pressed="lineup.includes(id)"
           @click="toggleCharacter(id)"
         >
@@ -81,7 +81,7 @@
     </div>
     <p v-else class="raid-roster-empty">{{ $t('raidNoCharactersForElement') }}</p>
 
-    <div class="raid-assumption-grid">
+    <div v-if="result" class="raid-assumption-grid">
       <div class="raid-number-control">
         <span>
           <strong>{{ $t('raidElementBonusTitle') }}</strong>
@@ -181,7 +181,7 @@
       </label>
     </div>
 
-    <div class="raid-order-grid">
+    <div v-if="result" class="raid-order-grid">
       <OrderList :title="$t('raidPositionOrder')" :items="lineup" :name-of="characterName" :up-label="$t('raidMoveUp')" :down-label="$t('raidMoveDown')" @move="moveItem(lineup, $event.index, $event.delta)" />
       <OrderList :title="$t('raidAttackPriority')" :items="attackPriority" :name-of="characterName" :up-label="$t('raidMoveUp')" :down-label="$t('raidMoveDown')" @move="moveItem(attackPriority, $event.index, $event.delta)" />
       <div class="raid-speed-editor">
@@ -199,7 +199,7 @@
       </div>
     </div>
 
-    <div class="raid-penetration-editor">
+    <div v-if="result" class="raid-penetration-editor">
       <h3>{{ $t('raidPenetrationSettings') }}</h3>
       <p>{{ $t('raidPenetrationSettingsHint') }}</p>
       <div class="raid-penetration-scroll">
@@ -217,7 +217,7 @@
     </div>
   </section>
 
-  <section class="card raid-matrix-card animate-fadeup">
+  <section v-if="result" class="card raid-matrix-card animate-fadeup">
     <div class="raid-section-head">
       <div><h2>{{ $t('raidMatrixTitle') }}</h2><p>{{ $t('raidSelectCellHint') }}</p></div>
       <div class="raid-section-actions">
@@ -304,7 +304,7 @@
     </div>
   </section>
 
-  <section v-if="selectedEvent" class="card raid-detail-card animate-fadeup">
+  <section v-if="result && selectedEvent" class="card raid-detail-card animate-fadeup">
     <div class="raid-section-head">
       <div><h2>{{ $t('raidActionDetails') }}</h2><p class="raid-detail-heading">{{ $t('raidTurn', { n: selectedEvent.turn }) }} · <CharacterLabel :id="selectedEvent.actorId" /> · {{ $t(selectedEvent.skillNameKey) }}</p></div>
       <div class="raid-detail-total"><strong>{{ formatPercent(selectedEvent.effectiveAtkPercent) }}</strong><small v-for="term in conversionStatEntries(selectedEvent.conversionTotals)" :key="term.stat">{{ formatConversionTotal(term) }}</small><small v-if="conversionSourceEntries(selectedEvent.conversionTotals, selectedEvent.actorId).length" class="raid-conversion-sources">{{ $t('raidIncludedConversionScaling', { terms: formatConversionSources(conversionSourceEntries(selectedEvent.conversionTotals, selectedEvent.actorId)) }) }}</small></div>
@@ -395,7 +395,7 @@
     </div>
   </section>
 
-  <section class="raid-warning-list animate-fadeup"><p v-for="warning in result.warnings" :key="warning">ℹ {{ $t(warning) }}</p></section>
+  <section v-if="result" class="raid-warning-list animate-fadeup"><p v-for="warning in result.warnings" :key="warning">ℹ {{ $t(warning) }}</p></section>
 
   <RaidExportPreview
     v-if="raidExportSnapshot"
@@ -704,7 +704,7 @@ watch([selectedCharacterId, locale], async ([id, currentLocale]) => {
   }
 })
 
-const result = computed(() => simulateRaidTable({
+const result = computed(() => lineup.value.length ? simulateRaidTable({
   lineup: lineup.value,
   attackPriority: attackPriority.value,
   actionOrderOverrides: actionOrderOverrides.value,
@@ -720,9 +720,9 @@ const result = computed(() => simulateRaidTable({
   activationRounds: Object.fromEntries(Object.keys(activationRounds).map(key => [key, normalizedActivationRound(key)])),
   scenarioTiers: { ...scenarioTiers },
   turns: 10,
-}))
-const currentSpeedOrder = computed(() => result.value.rounds[0]?.speedOrder ?? [])
-const manualOrderCount = computed(() => result.value.rounds.filter(round => round.orderSource === 'manual').length)
+}) : null)
+const currentSpeedOrder = computed(() => result.value?.rounds[0]?.speedOrder ?? [])
+const manualOrderCount = computed(() => result.value?.rounds.filter(round => round.orderSource === 'manual').length ?? 0)
 
 const probabilityScenarioDefinitions = Object.freeze([
   [RAID_TABLE_CHARACTER_IDS.LIBERIA, 'liberiaSand', 'raidAssumeLiberiaSand'],
@@ -741,12 +741,14 @@ const probabilityScenarioDefinitions = Object.freeze([
   [RAID_TABLE_CHARACTER_IDS.WARM_MEMORY_SOLTINA, 'warmMemorySoltinaStun', 'raidAssumeWarmMemorySoltinaStun'],
 ])
 
-watch(() => result.value.config.actionOrderOverrides, normalized => {
+watch(() => result.value?.config.actionOrderOverrides, normalized => {
+  if (!normalized) return
   if (sameActionOrderOverrides(actionOrderOverrides.value, normalized)) return
   actionOrderOverrides.value = cloneActionOrderOverrides(normalized)
   selectedEvent.value = null
 })
 const elementBonusLines = computed(() => {
+  if (!result.value) return []
   const { normal, dark } = result.value.config.elementBonus
   const lines = []
   if (normal.phase > 0) lines.push(t('raidElementBonusNormalPhase', {
@@ -1042,7 +1044,6 @@ function restoreSpeedOrder(turn) {
 
 function toggleCharacter(id) {
   if (lineup.value.includes(id)) {
-    if (lineup.value.length <= 1) return
     lineup.value = lineup.value.filter(item => item !== id)
     attackPriority.value = attackPriority.value.filter(item => item !== id)
   } else {
