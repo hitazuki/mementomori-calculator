@@ -36,7 +36,7 @@ export const RATING_TAGS = {
   sleep: { group: 'debuff', label: '沉睡' },
   slow: { group: 'debuff', label: '速度下降' },
   delay: { group: 'debuff', label: '迟缓（冷却恢复减慢）' },
-  bind: { group: 'debuff', label: '禁锢' },
+  bind: { group: 'debuff', label: '禁锢（无法闪避）' },
   antiHeal: { group: 'debuff', label: '不治／回复抑制' },
   buffImmune: { group: 'debuff', label: '增益效果免疫' },
   dot: { group: 'debuff', label: '持续伤害' },

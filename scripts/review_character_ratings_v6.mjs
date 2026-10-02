@@ -13,6 +13,7 @@ import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { lower, opening, upper, quick, defenseScores, lateCost, reviewNotes } from '../doc/character-ratings/v6/stages.mjs'
 import { readCharacterCatalog } from './lib/characterCatalog.mjs'
 import { newCharacters } from '../doc/character-ratings/v6/new-characters.mjs'
+import { auxiliaryReviews } from '../doc/character-ratings/v6/auxiliary.mjs'
 import { referenceFor } from './lib/characterRatingV5.mjs'
 
 const root=new URL('../',import.meta.url), read=p=>JSON.parse(fs.readFileSync(new URL(p,root),'utf8'))
@@ -75,7 +76,8 @@ const records=catalog.map(c=>{
   const care=teamCare[c.id]?teamCareReference(teamCare[c.id]):null
   if(care && care.sourceHash!==hash) throw new Error('Team care source changed: '+c.id)
   const evidence=c.skills.map(s=>s.slot).concat('W','stats')
-  const auxiliary=old.auxiliary??old.axes.slice(3)
+  const auxiliaryReview=auxiliaryReviews[c.id]
+  const auxiliary=(old.auxiliary??old.axes.slice(3)).map(a=>({...a,...auxiliaryReview?.[a.key]}))
   const values=[burst,late,...defense,...auxiliary.map(a=>a.key==='protection'&&care?care.score:a.key==='protection'&&c.id===97?7:a.score)]
   const peak=Math.max(...finite.map(s=>Math.min(s.comparisons[0].physical.withShield,s.comparisons[0].magic.withShield)))
   const hasShield=finite.some(s=>s.comparisons[0].physical.factors.shield>0)
@@ -90,9 +92,9 @@ const records=catalog.map(c=>{
   const axes=RATING_AXES.map((key,i)=>{
     const base=i===0?Math.max(openingBand,quickBand):i===1?Math.max(...bases):i===2?defenseBase[0]:values[i]
     return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:cleanRatingCopy(key,reasons[i]),evidence,
-      reviewBasis:i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`}
+      reviewBasis:auxiliaryReview?.[key]?.reviewBasis??(i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`)}
   })
-  return {...old,...(care?{teamCare:care}:{}),sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；最高专武攻击力+18%、防御力+5%已计入，暴击抗性+10%不折算为固定减伤。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:authored?.reviewedAt??(care?'2026-09-16':c.id===97?'2026-09-15':targetAvoidance[c.id]?'2026-09-09':'2026-09-08'),axes,output:{...old.output,...(c.id===97?{weapon}:{}),lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
+  return {...old,...(care?{teamCare:care}:{}),sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；最高专武攻击力+18%、防御力+5%已计入，暴击抗性+10%不折算为固定减伤。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:auxiliaryReview?.reviewedAt??authored?.reviewedAt??(care?'2026-09-16':c.id===97?'2026-09-15':targetAvoidance[c.id]?'2026-09-09':'2026-09-08'),axes,output:{...old.output,...(c.id===97?{weapon}:{}),lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
     assumptions:'范围为已审核的有限条件样本，不是所有外部队伍的理论极值；开局按前两次自身行动，短计数/短回合另列条件爆发，均仅计直接伤害；后期按成熟循环，无依据的事件频率不换算回合。延迟伤害仅在完整持续期样本计入。',
     equivalentSkillUnit:'100% = 固定基准面板下无角色自增益的100%攻击普攻；含适用乘区，特殊伤害仅按最终伤害折合，不改变其原始伤害类型。',
     comparison:{groupBenchmark:3,burstAnchors,lateAnchors,lowerBands:floors,matureBands:bases,openingBand,quickBand,penalties}},
