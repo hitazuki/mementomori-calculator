@@ -1176,6 +1176,84 @@ test('active-skill healing events preserve recipients and apply green-team stack
   assert.equal(eideneS2.effectsApplied.filter(effect => effect.id === 'eidene-vigorous-bloom').length, 3)
 })
 
+test('damage-based active heals notify every team-healing listener once after the damage', () => {
+  const sources = [
+    { id: SIVI, counts: [1, 1, 0] },
+    { id: MERLYN, counts: [0, 1, 0] },
+    { id: VALERIEDE, counts: [1, 0, 0] },
+    { id: AA, counts: [0, 1, 0] },
+    { id: ARTIE, counts: [0, 1, 0] },
+    { id: MORGANA, counts: [0, 0, 0, 0, 1] },
+  ]
+  const listeners = [EIDENE, POLA, YILDIZ, WINTER_STELLA, TWILIGHT_FLORENCE]
+  for (const { id, counts } of sources) {
+    for (const listener of listeners) {
+      const lineup = [id, listener]
+      const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: counts.length })
+      for (const [index, expected] of counts.entries()) {
+        const current = action(result, index + 1, id)
+        const increments = current.effectsApplied.filter(effect => effect.type === 'counter' && effect.targetId === listener)
+        assert.equal(increments.length, expected, `source ${id}, listener ${listener}, round ${index + 1}`)
+        for (const increment of increments) {
+          assert.equal(increment.phase, 'afterDamage')
+          assert.equal(increment.after - increment.before, 1)
+        }
+      }
+    }
+  }
+  const timing = simulateRaidTable({
+    lineup: [SIVI, EIDENE], attackPriority: [SIVI, EIDENE], turns: 2, speeds: { [SIVI]: 5000 },
+  })
+  const first = action(timing, 1, SIVI)
+  assert.equal(first.damageSteps[0].attackRate, 0)
+  assert.equal(first.statusSnapshotAtDamage[SIVI].statuses.some(status => status.id === 'eidene-vigorous-bloom-other'), false)
+  closeTo(first.statusSnapshotAfterAction[SIVI].statuses.find(status => status.id === 'eidene-vigorous-bloom-other').modifiers[0].displayRate, 0.05)
+  closeTo(action(timing, 2, SIVI).damageSteps[0].attackRate, 0.05)
+})
+
+test('Sivi heals the three slowest allies including self, preserves recipients, and handles ties and small teams', () => {
+  const lineup = [SIVI, MILLA, FLORENCE, FENRIR, LUKE]
+  for (const [millaSpeed, expected] of [[200, 1], [400, 0]]) {
+    const result = simulateRaidTable({
+      lineup, attackPriority: lineup, turns: 2,
+      speeds: { [SIVI]: 500, [MILLA]: millaSpeed, [FLORENCE]: 100, [FENRIR]: 200, [LUKE]: 300 },
+    })
+    const s1 = action(result, 1, SIVI)
+    assert.equal(s1.effectsApplied.filter(effect => effect.counter === 'activeHealingReceived').length, 0)
+    const s2 = action(result, 2, SIVI)
+    assert.equal(s2.effectsApplied.filter(effect => effect.counter === 'activeHealingReceived').length, expected)
+    assert.equal(action(result, 2, MILLA).runtimeAfter.counters.activeHealingReceived, 2 + expected)
+  }
+  const small = simulateRaidTable({ lineup: [SIVI, MILLA], attackPriority: [SIVI, MILLA], turns: 2 })
+  assert.equal(action(small, 2, SIVI).effectsApplied.filter(effect => effect.counter === 'activeHealingReceived').length, 1)
+  const solo = simulateRaidTable(singleConfig(SIVI, { turns: 2 }))
+  assert.deepEqual(actionsFor(solo, SIVI), ['s1', 's2'])
+
+  const selector = DEFAULT_RAID_MECHANICS.targetSelectors.lowestSpeed
+  assert.deepEqual(selector({ config: { lineup, speeds: Object.fromEntries(lineup.map(id => [id, 100])) } }), lineup)
+  assert.deepEqual(selector({ config: { lineup: [SIVI], speeds: { [SIVI]: 100 } } }), [SIVI])
+})
+
+test('Merlyn healing uses the first full-HP ally and does not trigger the low-HP S1 branch', () => {
+  for (const lineup of [[MILLA, MERLYN], [MERLYN, MILLA]]) {
+    const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 2 })
+    assert.equal(action(result, 1, MERLYN).effectsApplied.filter(effect => effect.counter === 'activeHealingReceived').length, 0)
+    const received = action(result, 2, MERLYN).effectsApplied.filter(effect => effect.counter === 'activeHealingReceived')
+    assert.equal(received.length, lineup[0] === MILLA ? 1 : 0)
+  }
+})
+
+test('Morgana reads healing eligibility after the current self-damage adds Fighting Spirit', () => {
+  const lineup = [AISHE, MORGANA, POLA]
+  const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 1, speeds: { [AISHE]: 5000 } })
+  const s1 = action(result, 1, MORGANA)
+  assert.equal(s1.runtimeBefore.counters.fightingSpirit, 1)
+  assert.equal(s1.runtimeAfter.counters.fightingSpirit, 2)
+  const healing = s1.effectsApplied.filter(effect => effect.counter === 'courage')
+  assert.equal(healing.length, 1)
+  assert.equal(healing[0].phase, 'afterDamage')
+})
+
 test('Milla and Yildiz read healing counters before their conditional damage', () => {
   const milla = simulateRaidTable(singleConfig(MILLA, { turns: 10 }))
   assert.equal(action(milla, 1, MILLA).runtimeAfter.counters.activeHealingReceived, 1)

@@ -6,14 +6,14 @@
   "sources": { "activeSkillIds": [48001, 48002], "passiveSkillIds": [48003, 48004, 48005], "combatLogs": ["data/battle-logs/41-60-d.json"] },
   "terms": [
     { "kind": "activeSkill", "sourceId": 48001, "model": "implemented", "summary": "当前MB与日志均为4段710%魔法伤害。" },
-    { "kind": "activeSkill", "sourceId": 48002, "model": "implemented", "summary": "当前EX3为4目标魔力980%直接伤害，单木桩投影1段；41-60-d第6回合以HitType=3精确闭合MAG×980%×3.48，确认可暴击且无视防御。" },
+    { "kind": "activeSkill", "sourceId": 48002, "model": "implemented", "summary": "当前EX3为4目标魔力980%直接伤害，单木桩投影1段；41-60-d第6回合以HitType=3精确闭合MAG×980%×3.48，确认可暴击且无视防御；伤害后广播一次自身主动回复事件。" },
     { "kind": "passiveSkill", "sourceId": 48003, "model": "implemented", "summary": "普攻替换为3目标魔力330%直接伤害，单木桩投影1段；41-60-d确认暴击倍率与目标承伤降低30%均参与结算。" },
     { "kind": "passiveSkill", "sourceId": 48004, "model": "ignored", "summary": "承伤阻绝不进入木桩输出。" },
-    { "kind": "passiveSkill", "sourceId": 48005, "model": "ignored", "summary": "日志确认伤害后恢复，当前不结算治疗。" }
+    { "kind": "passiveSkill", "sourceId": 48005, "model": "ignored", "summary": "隐藏被动不结算；日志S1与强化普攻中SkillDisplayType=6的吸血不作为主动回复事件。" }
   ],
   "effectGroups": [],
   "ignored": [
-    { "key": "raidIgnoredHealing", "summary": "主动技能与强化普攻后的恢复不结算。" },
+    { "key": "raidIgnoredHealing", "summary": "S2回复量不结算，保留伤害后主动回复事件；S1和强化普攻没有技能文本规定的即时回复，不将日志吸血计入。" },
     { "key": "raidIgnoredIncomingDamageReduction", "summary": "爱的天使承伤阻绝不结算。" }
   ],
   "unresolved": [

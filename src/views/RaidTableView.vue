@@ -862,7 +862,7 @@ const characterEffectTargetKeys = {
   self: 'raidCharacterTargetSelf', boss: 'raidCharacterTargetBoss', eventSource: 'raidCharacterTargetEventSource',
   all: 'raidCharacterTargetAllAllies', allOther: 'raidCharacterTargetAllOtherAllies', adjacent: 'raidCharacterTargetAdjacentAllies',
   topAttack: 'raidCharacterTargetTopAttack', topAttackOther: 'raidCharacterTargetTopAttackOther', selfAndTopAttackOther: 'raidCharacterTargetSelfAndTopAttackOther',
-  lowestSpeedOther: 'raidCharacterTargetLowestSpeedOther', lowestSpeedOthers: 'raidCharacterTargetLowestSpeedOthers', selfAndLowestSpeedOthers: 'raidCharacterTargetSelfAndLowestSpeedOthers',
+  lowestSpeed: 'raidCharacterTargetLowestSpeed', lowestSpeedOther: 'raidCharacterTargetLowestSpeedOther', lowestSpeedOthers: 'raidCharacterTargetLowestSpeedOthers', selfAndLowestSpeedOthers: 'raidCharacterTargetSelfAndLowestSpeedOthers',
   highestSpeedOther: 'raidCharacterTargetHighestSpeedOther', highestBuffCount: 'raidCharacterTargetHighestBuffCount', highestBuffCountOther: 'raidCharacterTargetHighestBuffCountOther',
   internal: 'raidCharacterTargetInternal', event: 'raidCharacterTargetEvent',
 }

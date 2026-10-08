@@ -31,7 +31,7 @@
       "kind": "activeSkill",
       "sourceId": 26002,
       "model": "implemented",
-      "summary": "Three-target magic damage; enemy buff removal and healing are ignored."
+      "summary": "Three-target magic damage; after damage, emits one activeSkillHeal event targeting the first lineup ally under the full-HP tie convention. Enemy buff removal and healing amounts are ignored."
     },
     {
       "kind": "passiveSkill",
@@ -70,10 +70,10 @@
     },
     {
       "key": "raidIgnoredHealing",
-      "summary": "治疗未建模。"
+      "summary": "回复量不结算；S2回复事件和目标保留，S1低HP治疗分支不触发。"
     }
   ],
   "unresolved": [
-    "S2 healing target and the S1 low-HP healing branch remain outside the fixed-full-HP model."
+    "S2 full-HP healing ties use lineup order as a project convention; controlled in-game tie behavior remains unverified. The S1 low-HP branch remains outside the model."
   ]
 }

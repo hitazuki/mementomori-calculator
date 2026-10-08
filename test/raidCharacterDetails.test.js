@@ -91,7 +91,7 @@ test('raid character detail preserves support skills without damage steps', () =
 test('raid character details preserve targets, timing, and conditions for every included character', () => {
   const supportedTargets = new Set([
     'adjacent', 'all', 'allOther', 'boss', 'event', 'eventSource', 'highestBuffCount', 'highestBuffCountOther',
-    'highestSpeedOther', 'internal', 'lowestSpeedOther', 'lowestSpeedOthers', 'self', 'selfAndLowestSpeedOthers',
+    'highestSpeedOther', 'internal', 'lowestSpeed', 'lowestSpeedOther', 'lowestSpeedOthers', 'self', 'selfAndLowestSpeedOthers',
     'selfAndTopAttackOther', 'topAttack', 'topAttackOther',
   ])
   const supportedTriggers = new Set([

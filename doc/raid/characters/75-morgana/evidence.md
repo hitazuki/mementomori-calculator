@@ -27,6 +27,6 @@
 
 | 描述内容 | i18n key | 原因 |
 | --- | --- | --- |
-| S1 满两层后的治疗 | `raidIgnoredHealing` | 木桩模型不结算 HP。 |
+| S1 满两层后的治疗 | `raidIgnoredHealing` | 木桩模型不结算回复量，但在本次自伤叠层后满两层时，伤害后广播一次自身主动回复事件。 |
 | S1 每段降低受治疗量 | `raidIgnoredHealingReceivedDown` | 弱化状态与联动已保留；木桩不结算其对HP回复量的影响。 |
 | 物防与护盾 | `raidIgnoredDefenseBuff` / `raidIgnoredShield` | 木桩不结算防御与护盾。 |

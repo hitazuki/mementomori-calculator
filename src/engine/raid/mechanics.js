@@ -9,6 +9,9 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     self: ({ ownerId }) => [ownerId],
     eventSource: ({ eventSourceId }) => eventSourceId == null ? [] : [eventSourceId],
     all: ({ config }) => [...config.lineup],
+    lowestSpeed: ({ config }) => [...config.lineup].sort((left, right) => (
+      config.speeds[left] - config.speeds[right] || config.lineup.indexOf(left) - config.lineup.indexOf(right)
+    )),
     allOther: ({ ownerId, config }) => config.lineup.filter(id => id !== ownerId),
     topAttackOther: ({ ownerId, config }) => config.attackPriority.filter(id => id !== ownerId),
     selfAndTopAttackOther: ({ ownerId, config }) => [ownerId, ...config.attackPriority.filter(id => id !== ownerId)],

@@ -16,12 +16,17 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillSiviS1', cooldown: 4, damageType: 'phys',
-      hooks: [hook('beforeDamage', [reactiveBlade])],
+      hooks: [hook('beforeDamage', [reactiveBlade]), hook('afterDamage', [
+        { type: 'emitEvent', event: 'activeSkillHeal', target: 'self' },
+      ])],
       damageSteps: [{ stat: 'ATK', percent: 1170, hits: 1, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredPerTargetIncomingHitCount', 'raidIgnoredDefenseBuff', 'raidIgnoredIncomingDamageReduction'],
     },
     s2: {
-      key: 's2', nameKey: 'raidSkillSiviS2', cooldown: 4, damageType: 'phys', hooks: [],
+      key: 's2', nameKey: 'raidSkillSiviS2', cooldown: 4, damageType: 'phys',
+      hooks: [hook('afterDamage', [
+        { type: 'emitEvent', event: 'activeSkillHeal', target: 'lowestSpeed', targetCount: 3 },
+      ])],
       damageSteps: [{ stat: 'ATK', percent: 530, hits: 1, originalTargetCount: 4, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredDebuffCleanse', 'raidIgnoredDefenseBuff', 'raidIgnoredIncomingDamageReduction'],
     },

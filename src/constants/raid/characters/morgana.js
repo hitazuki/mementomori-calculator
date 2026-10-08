@@ -33,6 +33,10 @@ export default {
           damageRatePerStack: 0, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF,
           condition: { type: 'probabilityEnabled', key: 'morganaHealingDown' }, recordSkipped: true,
         })]),
+        hook('afterDamage', [{
+          type: 'emitEvent', event: 'activeSkillHeal', target: 'self',
+          condition: { type: 'counterAtLeast', counter: 'fightingSpirit', count: 2 },
+        }]),
       ],
       damageSteps: [{ stat: 'ATK', percent: 420, hits: 5, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredHealingReceivedDown'],

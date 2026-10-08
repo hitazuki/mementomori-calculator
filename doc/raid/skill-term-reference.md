@@ -557,6 +557,7 @@ eventHooks: [{
 | battle event | `activeSkillHeal` | 主动行动即时回复事件，包含带回复效果的普通攻击；`emitEvent.target` 保存本次回复目标，供接收者计数和全队监听被动使用。 |
 | target selector | `selfAndTopAttackOther` | 先选择自身，再按固定攻击优先级选择其他友军；配合 `targetCount` 表达自身加攻击最高N人。 |
 | condition | `eventTargetsIncludeOwner` | 当前事件的目标列表包含监听者本人。 |
+| target selector | `lowestSpeed` | 包含施法者的全队按配置速度升序排列，同速按站位；通过 `targetCount` 截取。希维S2取前三人，一次回复广播一次事件。 |
 | condition | `targetElementNot` | 候选目标不是指定属性，用于同一被动对翠/非翠使用不同EffectGroup。 |
 | condition | `roundAtLeast` | 当前全局回合不早于指定回合。 |
 | Boss status | `replacementKey` | 不同声明ID共享一个运行时替换槽；晚档替换早档并刷新，不叠加。 |

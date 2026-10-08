@@ -30,7 +30,8 @@ export default {
       ignoredKeys: ['raidIgnoredCriticalResistStacks', 'raidIgnoredMaxHpUp', 'raidIgnoredIncomingDamageReduction'],
     },
     s2: {
-      key: 's2', nameKey: 'raidSkillArtieS2', cooldown: 4, damageType: 'mag', hooks: [],
+      key: 's2', nameKey: 'raidSkillArtieS2', cooldown: 4, damageType: 'mag',
+      hooks: [hook('afterDamage', [{ type: 'emitEvent', event: 'activeSkillHeal', target: 'self' }])],
       damageSteps: [{
         stat: 'ATK', percent: 200, hits: 7, damageType: 'mag',
         criticalCondition: { type: 'bossStatusCountAtLeast', count: 1 },

@@ -10,7 +10,7 @@
   },
   "terms": [
     { "kind": "activeSkill", "sourceId": 58001, "model": "implemented", "summary": "伤害前给Boss施加4回合魔防-40%与承伤+20%的单一可解除EffectGroup，并把自身抗暴层数增加2层至最多10层，再造成350%魔法伤害。" },
-    { "kind": "activeSkill", "sourceId": 58002, "model": "implemented", "summary": "造成7次200%魔法伤害，Boss有任一弱化时强制暴击；目标生命比例低于自身的2倍分支和20%总伤害治疗不触发/不结算。" },
+    { "kind": "activeSkill", "sourceId": 58002, "model": "implemented", "summary": "造成7次200%魔法伤害，Boss有任一弱化时强制暴击；目标生命比例低于自身的2倍分支不触发；20%总伤害回复量不结算，但保留伤害后一次自身主动回复事件。" },
     { "kind": "passiveSkill", "sourceId": 58003, "model": "implemented", "summary": "开战保留最大生命+30%、承伤-30%的不可解除复合状态；数值不改变木桩输出。" },
     { "kind": "passiveSkill", "sourceId": 58004, "model": "implemented", "summary": "开战记录8层抗暴率状态；木桩无敌方攻击，层数不会被消耗，S1按已有状态每次补2层。" }
   ],
@@ -32,7 +32,7 @@
     { "key": "raidIgnoredMaxHpUp", "summary": "最大生命提升不改变输出倍率。" },
     { "key": "raidIgnoredIncomingDamageReduction", "summary": "承伤降低与伤害阻绝不进入输出倍率。" },
     { "key": "raidIgnoredTargetLowerHpDamageScaling", "summary": "木桩HP比例不低于满HP友方，S2使用200%基础倍率。" },
-    { "key": "raidIgnoredHealing", "summary": "S2总伤害20%的自身治疗不结算。" }
+    { "key": "raidIgnoredHealing", "summary": "S2总伤害20%的自身回复量不结算；伤害后广播一次主动回复事件。" }
   ],
   "unresolved": []
 }

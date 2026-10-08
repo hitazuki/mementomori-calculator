@@ -9,8 +9,8 @@
     "combatLogs": ["data/battle-logs/45-57-g.json"]
   },
   "terms": [
-    { "kind": "activeSkill", "sourceId": 52001, "model": "implemented", "summary": "S1 deals 1170% ATK physical damage and grants four-action damage dealt up to self and the two slowest other allies." },
-    { "kind": "activeSkill", "sourceId": 52002, "model": "implemented", "summary": "S2 projects its four-target 530% ATK physical attack onto the single raid dummy." },
+    { "kind": "activeSkill", "sourceId": 52001, "model": "implemented", "summary": "S1 deals 1170% ATK physical damage and grants four-action damage dealt up to self and the two slowest other allies; after damage, emits one self-targeted activeSkillHeal event." },
+    { "kind": "activeSkill", "sourceId": 52002, "model": "implemented", "summary": "S2 projects its four-target 530% ATK physical attack onto the single raid dummy; after damage, emits one activeSkillHeal event for the three slowest allies including self." },
     { "kind": "passiveSkill", "sourceId": 52003, "model": "outOfScope", "summary": "Self and adjacent ally defense buffs do not affect outgoing damage against a non-attacking dummy." },
     { "kind": "passiveSkill", "sourceId": 52004, "model": "outOfScope", "summary": "Debuff cleansing and incoming damage reduction are outside the current dummy model." }
   ],
@@ -20,7 +20,7 @@
     { "id": 5200330201, "model": "outOfScope", "summary": "Self DEF and physical DEF increase." }
   ],
   "ignored": [
-    { "key": "raidIgnoredHealing", "summary": "Damage-based healing is not calculated." },
+    { "key": "raidIgnoredHealing", "summary": "Healing amounts are not calculated; S1/S2 preserve activeSkillHeal events and recipients for passive stacks." },
     { "key": "raidIgnoredDebuffCleanse", "summary": "Debuff cleansing is not simulated." },
     { "key": "raidIgnoredDefenseBuff", "summary": "Ally-side defense buffs have no outgoing-damage effect on the dummy." },
     { "key": "raidIgnoredIncomingDamageReduction", "summary": "Incoming damage reduction is not simulated." },
