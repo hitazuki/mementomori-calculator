@@ -395,7 +395,13 @@ export function runRaidProgram(program) {
 
   function emitBattleEvent(effect, context) {
     const sourceId = context.ownerId
-    const eventTargetIds = effect.target ? resolveTargets(effect, sourceId, undefined, undefined, context) : []
+    let eventTargetIds = effect.target ? resolveTargets(effect, sourceId, undefined, undefined, context) : []
+    if (effect.compiledTargetCondition) {
+      eventTargetIds = eventTargetIds.filter(targetId => effect.compiledTargetCondition.handler(effect.compiledTargetCondition.definition, {
+        ...context, config, actors, boss, api, target: actors.get(targetId),
+      }))
+      if (!eventTargetIds.length) return
+    }
     for (const listener of program.eventListeners[effect.event] ?? []) {
       const actor = actors.get(listener.actorId)
       const listenerContext = {

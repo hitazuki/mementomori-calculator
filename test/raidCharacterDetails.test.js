@@ -105,7 +105,7 @@ test('raid character details preserve targets, timing, and conditions for every 
     'eventTargetsIncludeOwner', 'guaranteedCritical', 'otherLineupElementCountAtLeast', 'probabilityEnabled',
     'roundAtLeast', 'roundAtMost', 'skillUsesAtLeast', 'skillUsesAtMost', 'targetElementIn',
     'targetElementNot', 'targetElementNotIn', 'targetHasStatus', 'targetLacksStatus',
-    'targetRemovableDebuffCountAtMost',
+    'targetRemovableDebuffCountAtMost', 'targetHpBelow50', 'targetHpAtLeast50',
   ])
 
   assert.equal(Object.keys(RAID_TABLE_CHARACTERS).length, 47)

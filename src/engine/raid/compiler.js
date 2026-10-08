@@ -65,6 +65,10 @@ function normalizeConfig(config, characters) {
     return [id, value]
   }))
   const levels = normalizeActorValues('level', config.levels, defaults.levels, DEFAULT_RAID_CHARACTER_LEVEL, value => Number.isInteger(value) && value >= 1)
+  if (config.targetHpBelow50 != null && (typeof config.targetHpBelow50 !== 'object' || Array.isArray(config.targetHpBelow50))) {
+    throw new Error('targetHpBelow50 must be an object keyed by character')
+  }
+  const targetHpBelow50 = normalizeActorValues('targetHpBelow50', config.targetHpBelow50, defaults.targetHpBelow50, false, value => typeof value === 'boolean')
   const defensePenetrations = normalizeActorValues(
     'defense penetration', config.defensePenetrations, defaults.defensePenetrations, DEFAULT_RAID_DEFENSE_PENETRATION,
     value => Number.isFinite(value) && value >= 0,
@@ -107,7 +111,7 @@ function normalizeConfig(config, characters) {
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
     baseCriticalDamageBonus: legacyCriticalDamageBonus ?? defaults.baseCriticalDamageBonus,
     probabilityOverrides: { ...defaults.probabilityOverrides, ...(config.probabilityOverrides ?? {}) },
-    activationRounds, scenarioTiers,
+    activationRounds, scenarioTiers, targetHpBelow50,
   }
 }
 

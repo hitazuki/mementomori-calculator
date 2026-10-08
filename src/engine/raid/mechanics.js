@@ -56,6 +56,8 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
   }),
 
   conditionHandlers: Object.freeze({
+    targetHpBelow50: (_condition, { target, config }) => config.targetHpBelow50[target.id] === true,
+    targetHpAtLeast50: (_condition, { target, config }) => config.targetHpBelow50[target.id] !== true,
     anyRemovableBuffCountAtLeast: (condition, { config, actors, api }) => (
       config.lineup.some(id => api.removableBuffCount(actors.get(id)) >= condition.count)
     ),

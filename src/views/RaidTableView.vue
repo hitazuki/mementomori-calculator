@@ -102,6 +102,12 @@
         <input v-model="elementAdvantage" type="checkbox">
         <span><strong>{{ $t('raidElementAdvantage') }}</strong><small>{{ $t('raidElementAdvantageHint') }}</small></span>
       </label>
+      <template v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.MERLYN)">
+        <label v-for="id in attackPriority.slice(0, 2)" :key="`merlyn-hp-${id}`" class="raid-toggle-control">
+          <input v-model="targetHpBelow50[id]" type="checkbox">
+          <span><strong>{{ $t('raidMerlynTargetLowHp', { target: characterName(id) }) }}</strong><small>{{ $t('raidMerlynTargetLowHpHint') }}</small></span>
+        </label>
+      </template>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.LIBERIA)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.liberiaSand" type="checkbox">
         <span><strong>{{ $t('raidAssumeLiberiaSand') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
@@ -664,6 +670,7 @@ const criticalDamagePercents = reactive(Object.fromEntries(Object.entries(defaul
 const guaranteedCritical = ref(defaults.guaranteedCritical)
 const elementAdvantage = ref(defaults.elementAdvantage)
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
+const targetHpBelow50 = reactive({ ...defaults.targetHpBelow50 })
 const activationRounds = reactive({ ...defaults.activationRounds })
 const scenarioTiers = reactive({ ...defaults.scenarioTiers })
 const siviDamageTiers = Object.freeze([
@@ -717,6 +724,7 @@ const result = computed(() => lineup.value.length ? simulateRaidTable({
   guaranteedCritical: guaranteedCritical.value,
   elementAdvantage: elementAdvantage.value,
   probabilityOverrides,
+  targetHpBelow50: { ...targetHpBelow50 },
   activationRounds: Object.fromEntries(Object.keys(activationRounds).map(key => [key, normalizedActivationRound(key)])),
   scenarioTiers: { ...scenarioTiers },
   turns: 10,
@@ -913,6 +921,7 @@ function characterConditionText(condition) {
   const element = value => t(elementNameKey(value))
   const args = { n: condition.count, round: condition.round, skill: condition.skillKey?.toUpperCase(), element: condition.element == null ? '' : element(condition.element), elements: (condition.elements ?? []).map(element).join('/') }
   const keys = {
+    targetHpBelow50: 'raidCharacterConditionTargetHpBelow50', targetHpAtLeast50: 'raidCharacterConditionTargetHpAtLeast50',
     actorHasStatus: 'raidCharacterConditionActorHasStatus', actorRemovableBuffCountAtLeast: 'raidCharacterConditionActorBuffCountAtLeast',
     anyRemovableBuffCountAtLeast: 'raidCharacterConditionAnyBuffCountAtLeast', bossElementIs: 'raidCharacterConditionBossElementIs',
     bossStacksAtLeast: 'raidCharacterConditionBossStacksAtLeast', bossStatusCountAtLeast: 'raidCharacterConditionBossStatusCountAtLeast',
@@ -1073,6 +1082,11 @@ function activeRaidScenarioLines() {
   const lines = probabilityScenarioDefinitions
     .filter(([id, key]) => lineup.value.includes(id) && result.value.config.probabilityOverrides[key])
     .map(([, , labelKey]) => t(labelKey))
+  if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.MERLYN)) {
+    for (const id of attackPriority.value.slice(0, 2)) {
+      if (result.value.config.targetHpBelow50[id]) lines.push(t('raidMerlynTargetLowHp', { target: characterName(id) }))
+    }
+  }
   if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA)) {
     lines.push(`${t('raidWitchIllyaCurseUnleashedRound')}：${t('raidTurn', { n: result.value.config.activationRounds.witchIllyaCurseUnleashed })}`)
   }
@@ -1155,6 +1169,7 @@ function resetConfig() {
   Object.assign(criticalDamagePercents, Object.fromEntries(Object.entries(next.criticalDamageBonuses).map(([id, value]) => [id, roundCriticalDamagePercent(value * 100)])))
   Object.assign(activationRounds, next.activationRounds)
   Object.assign(scenarioTiers, next.scenarioTiers)
+  Object.assign(targetHpBelow50, next.targetHpBelow50)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
   raidExportSnapshot.value = null
   closeCharacterDetails()

@@ -1144,3 +1144,37 @@ Object.assign(raidTranslations["ko"], {
   "raidDetailCopy": "해제 가능 버프와 남은 행동 수 복사. 공격력 버프는 복사 대상 능력치로 환산",
   "raidDetailTargetActions": "대상 행동 {n}회 지속. 적용된 행동은 차감하지 않음"
 })
+
+const merlynHpScenarioTranslations = {
+  "zh-CN": {
+    "raidMerlynTargetLowHp": "梅琳 S1：{target} HP 低于 50%",
+    "raidMerlynTargetLowHpHint": "按攻击优先级选前两名；勾选时回复生命并触发回血被动，不附加本次暴伤增益。未勾选时附加暴伤增益。此设定用于每次 S1，攻击增益与净化仍按弱化条件处理。",
+    "raidCharacterConditionTargetHpBelow50": "目标 HP 低于 50%（场景设定）",
+    "raidCharacterConditionTargetHpAtLeast50": "目标 HP 为 50% 以上（场景设定）"
+  },
+  "zh-TW": {
+    "raidMerlynTargetLowHp": "梅琳 S1：{target} HP 低於 50%",
+    "raidMerlynTargetLowHpHint": "按攻擊優先級選前兩名；勾選時恢復生命並觸發回血被動，不附加本次暴傷增益。未勾選時附加暴傷增益。此設定用於每次 S1，攻擊增益與淨化仍按弱化條件處理。",
+    "raidCharacterConditionTargetHpBelow50": "目標 HP 低於 50%（情境設定）",
+    "raidCharacterConditionTargetHpAtLeast50": "目標 HP 為 50% 以上（情境設定）"
+  },
+  "en": {
+    "raidMerlynTargetLowHp": "Merlyn S1: {target} HP below 50%",
+    "raidMerlynTargetLowHpHint": "Targets the first two allies by ATK priority. Checked: heal and trigger healing passives instead of granting the critical-damage buff. Unchecked: grant the critical-damage buff. Applies to every S1; attack buffs and cleansing still follow debuff conditions.",
+    "raidCharacterConditionTargetHpBelow50": "Target HP below 50% (scenario)",
+    "raidCharacterConditionTargetHpAtLeast50": "Target HP at least 50% (scenario)"
+  },
+  "ja": {
+    "raidMerlynTargetLowHp": "マーリン S1：{target}のHPが50%未満",
+    "raidMerlynTargetLowHpHint": "攻撃力優先度の上位2人が対象。チェック時はクリティカルダメージのバフを付与せず、HP回復と回復パッシブを発動。未チェック時はバフを付与。毎回のS1に適用し、攻撃力バフと弱体解除は弱体効果の条件に従います。",
+    "raidCharacterConditionTargetHpBelow50": "対象のHPが50%未満（シナリオ設定）",
+    "raidCharacterConditionTargetHpAtLeast50": "対象のHPが50%以上（シナリオ設定）"
+  },
+  "ko": {
+    "raidMerlynTargetLowHp": "멀린 S1: {target} HP 50% 미만",
+    "raidMerlynTargetLowHpHint": "공격력 우선순위 상위 두 명을 선택합니다. 체크 시 치명타 피해 버프 대신 HP 회복과 회복 패시브를 발동합니다. 미체크 시 버프를 부여합니다. 매 S1에 적용하며, 공격력 버프와 약화 해제는 기존 약화 조건을 따릅니다.",
+    "raidCharacterConditionTargetHpBelow50": "대상 HP 50% 미만(시나리오 설정)",
+    "raidCharacterConditionTargetHpAtLeast50": "대상 HP 50% 이상(시나리오 설정)"
+  }
+}
+for (const [locale, entries] of Object.entries(merlynHpScenarioTranslations)) Object.assign(raidTranslations[locale], entries)

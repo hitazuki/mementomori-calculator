@@ -16,8 +16,13 @@ export default {
         }),
         statusEffect({
           id: 'merlyn-critical-damage', effectGroupId: 2600160103, nameKey: 'raidBuffMerlynCriticalDamage', target: 'topAttack', targetCount: 2,
+          targetCondition: { type: 'targetHpAtLeast50' }, recordSkipped: true,
           duration: 2, modifiers: [{ id: 'merlyn-critical-damage', channel: 'criticalDamageBonus', rate: 0.4 }],
         }),
+        {
+          type: 'emitEvent', event: 'activeSkillHeal', target: 'topAttack', targetCount: 2,
+          targetCondition: { type: 'targetHpBelow50' },
+        },
       ])],
     },
     s2: {

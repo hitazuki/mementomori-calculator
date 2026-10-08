@@ -25,7 +25,7 @@
       "kind": "activeSkill",
       "sourceId": 26001,
       "model": "implemented",
-      "summary": "Conditional attack buff, debuff removal, and critical-damage buff."
+      "summary": "Conditional attack buff and debuff removal; each of the two selected allies uses targetHpBelow50 to choose active healing below 50% or the critical-damage buff at 50% and above. One heal event preserves all eligible recipients."
     },
     {
       "kind": "activeSkill",
@@ -70,10 +70,10 @@
     },
     {
       "key": "raidIgnoredHealing",
-      "summary": "回复量不结算；S2回复事件和目标保留，S1低HP治疗分支不触发。"
+      "summary": "回复量不结算；S1按目标低HP场景开关选择回复或暴伤，S2回复事件和目标保留。"
     }
   ],
   "unresolved": [
-    "S2 full-HP healing ties use lineup order as a project convention; controlled in-game tie behavior remains unverified. The S1 low-HP branch remains outside the model."
+    "S2 full-HP healing ties use lineup order as a project convention; controlled in-game tie behavior remains unverified. S1 low-HP selection is a fixed per-target scenario applied to every S1; HP values and changes are not simulated."
   ]
 }

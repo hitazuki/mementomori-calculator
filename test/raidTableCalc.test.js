@@ -1243,6 +1243,59 @@ test('Merlyn healing uses the first full-HP ally and does not trigger the low-HP
   }
 })
 
+test('Merlyn S1 selects healing or critical-damage buffs independently for its two targets', () => {
+  const lineup = [MERLYN, MILLA, YILDIZ, POLA, EIDENE]
+  const attackPriority = [MILLA, YILDIZ, MERLYN, POLA, EIDENE]
+  for (const firstLow of [false, true]) for (const secondLow of [false, true]) {
+    const result = simulateRaidTable({
+      lineup, attackPriority, turns: 1, speeds: { [MERLYN]: 5000 },
+      targetHpBelow50: { [MILLA]: firstLow, [YILDIZ]: secondLow, [MERLYN]: true },
+    })
+    const s1 = action(result, 1, MERLYN)
+    for (const [id, low] of [[MILLA, firstLow], [YILDIZ, secondLow]]) {
+      const buffs = s1.statusSnapshotAfterAction[id].statuses
+      assert.equal(buffs.some(status => status.id === 'merlyn-critical-damage'), !low)
+      assert.equal(buffs.some(status => status.id === 'merlyn-atk'), true)
+    }
+    const received = s1.effectsApplied.filter(effect => effect.counter === 'activeHealingReceived')
+    assert.equal(received.length, firstLow ? 1 : 0)
+    for (const counter of ['bond', 'courage', 'vigorousBloom']) {
+      const events = s1.effectsApplied.filter(effect => effect.counter === counter)
+      assert.equal(events.length, firstLow || secondLow ? 1 : 0)
+      for (const event of events) {
+        assert.equal(event.phase, 'afterDamage')
+        assert.equal(event.after - event.before, 1)
+      }
+    }
+    assert.deepEqual(s1.cooldownsAfter, { s1: 3, s2: 0 })
+  }
+  const solo = simulateRaidTable(singleConfig(MERLYN, { turns: 1, targetHpBelow50: { [MERLYN]: true } }))
+  assert.equal(action(solo, 1, MERLYN).statusSnapshotAfterAction[MERLYN].statuses.some(status => status.id === 'merlyn-critical-damage'), false)
+})
+
+test('Merlyn low-HP scenario keeps debuff cleansing independent and validates boolean configuration', () => {
+  const lineup = [MERLYN, MILLA, POLA]
+  const config = { lineup, attackPriority: [MILLA, MERLYN, POLA], turns: 1, speeds: { [MERLYN]: 5000 }, targetHpBelow50: { [MILLA]: true } }
+  const merlyn = {
+    ...RAID_TABLE_CHARACTERS[MERLYN],
+    hooks: [hook('battleStart', [statusEffect({
+      id: 'test-low-hp-debuff', effectGroupId: 990006, nameKey: 'raidBuffMerlynAttack', target: 'topAttack', targetCount: 1,
+      duration: 2, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF,
+    })])],
+  }
+  const result = simulateRaidTable(config, {
+    ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [MERLYN]: merlyn },
+  })
+  const s1 = action(result, 1, MERLYN)
+  assert.equal(s1.effectsApplied.find(effect => effect.id === 'merlyn-atk' && effect.targetId === MILLA).skipped, true)
+  assert.equal(s1.effectsApplied.find(effect => effect.id === 'merlyn-debuff-cleanse' && effect.targetId === MILLA).removed.length, 1)
+  assert.equal(s1.effectsApplied.find(effect => effect.id === 'merlyn-critical-damage' && effect.targetId === MILLA).skipped, true)
+  assert.equal(s1.effectsApplied.filter(effect => effect.counter === 'activeHealingReceived').length, 1)
+  assert.equal(createDefaultRaidTableConfig().targetHpBelow50[MILLA], false)
+  assert.throws(() => compileRaidProgram({ ...config, targetHpBelow50: { [MILLA]: 'true' } }), /Invalid targetHpBelow50/)
+  assert.throws(() => compileRaidProgram({ ...config, targetHpBelow50: [] }), /targetHpBelow50 must be an object/)
+})
+
 test('Morgana reads healing eligibility after the current self-damage adds Fighting Spirit', () => {
   const lineup = [AISHE, MORGANA, POLA]
   const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 1, speeds: { [AISHE]: 5000 } })
