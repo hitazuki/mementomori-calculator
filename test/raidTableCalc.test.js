@@ -34,7 +34,7 @@ const {
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
   REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH,
-  MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE,
+  MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -53,15 +53,15 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes forty-seven characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 47)
+test('roster exposes fifty characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 50)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-16), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-19), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -1183,9 +1183,10 @@ test('damage-based active heals notify every team-healing listener once after th
     { id: VALERIEDE, counts: [1, 0, 0] },
     { id: AA, counts: [0, 1, 0] },
     { id: ARTIE, counts: [0, 1, 0] },
+    { id: TWILIGHT_FORTINA, counts: [0, 1, 0] },
     { id: MORGANA, counts: [0, 0, 0, 0, 1] },
   ]
-  const listeners = [EIDENE, POLA, YILDIZ, WINTER_STELLA, TWILIGHT_FLORENCE]
+  const listeners = [EIDENE, POLA, YILDIZ, WINTER_STELLA, TWILIGHT_FLORENCE, GOLDEN_ARTORIA]
   for (const { id, counts } of sources) {
     for (const listener of listeners) {
       const lineup = [id, listener]
@@ -1855,6 +1856,286 @@ test('Sivi uses one configured incoming-hit tier for every Reactive Blade recipi
     closeTo(status.modifiers[0].copyRate, 0.84)
   }
   assert.deepEqual(actionsFor(shared, SIVI), ['s1'])
+})
+
+test('Twilight Fortina counts actual attribute types and grants round-two source ATK independently of speed eligibility', () => {
+  for (const [lineup, enabled] of [
+    [[TWILIGHT_FORTINA], true], [[TWILIGHT_FORTINA, LIBERIA, APOSTLE_ROSALIE], true],
+    [[TWILIGHT_FORTINA, GOLDEN_ARTORIA, MILLA], true], [[TWILIGHT_FORTINA, GOLDEN_ARTORIA, FLORENCE], false],
+  ]) {
+    const result = simulateRaidTable({ lineup, attackPriority: [...lineup].reverse(), turns: 5 })
+    for (const id of lineup) closeTo(result.rounds[0].speedSnapshot[id].speedRate, enabled ? 0.1 : 0)
+    const first = action(result, 1, TWILIGHT_FORTINA)
+    assert.equal(first.damageSteps[0].percent, 480)
+    assert.equal(first.damageSteps[0].originalTargetCount, 5)
+    assert.equal(first.statusSnapshotAtDamage[TWILIGHT_FORTINA].statuses.some(status => status.id === 'twilight-fortina-attack'), false)
+    const second = action(result, 2, TWILIGHT_FORTINA)
+    for (const id of lineup) {
+      const buff = second.statusSnapshotAtDamage[id].statuses.find(status => status.id === 'twilight-fortina-attack')
+      assert.ok(buff)
+      assert.equal(buff.effectGroupId, 15100330201)
+      assert.equal(buff.symbolicModifiers[0].sourceId, TWILIGHT_FORTINA)
+      assert.equal(buff.symbolicModifiers[0].coefficient, 0.3)
+    }
+    assert.equal(action(result, 4, TWILIGHT_FORTINA).statusSnapshotAfterAction[TWILIGHT_FORTINA].statuses.some(status => status.id === 'twilight-fortina-attack'), false)
+    assert.equal(action(result, 5, TWILIGHT_FORTINA).damageSteps[0].symbolicModifierSources.some(source => source.sourceId === TWILIGHT_FORTINA), false)
+  }
+  const lineup = [TWILIGHT_FORTINA, FLORENCE, FENRIR, LUKE, MERTILLIER]
+  const priority = [LUKE, TWILIGHT_FORTINA, FLORENCE, MERTILLIER, FENRIR]
+  const result = simulateRaidTable({ lineup, attackPriority: priority, turns: 2 })
+  const second = action(result, 2, TWILIGHT_FORTINA)
+  assert.deepEqual(lineup.filter(id => second.statusSnapshotAtDamage[id].statuses.some(status => status.id === 'twilight-fortina-attack')), [TWILIGHT_FORTINA, FLORENCE, LUKE])
+})
+
+test('Twilight Fortina S1 compares live effective speed, excludes ties, and follows target action clocks under manual ordering', () => {
+  const lineup = [TWILIGHT_FORTINA, FLORENCE, FENRIR]
+  const definition = { ...RAID_TABLE_CHARACTERS[TWILIGHT_FORTINA], hooks: [
+    ...RAID_TABLE_CHARACTERS[TWILIGHT_FORTINA].hooks,
+    hook('battleStart', [statusEffect({ id: 'test-effective-speed', effectGroupId: 991151,
+      nameKey: 'raidBuffTwilightFortinaSpeed', target: 'topAttack', targetCount: 1, duration: null,
+      statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE, modifiers: [{ channel: 'speedRate', rate: 0.5 }],
+    })]),
+  ] }
+  const environment = { ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [TWILIGHT_FORTINA]: definition } }
+  const config = { lineup, attackPriority: [FLORENCE, TWILIGHT_FORTINA, FENRIR], turns: 4,
+    speeds: { [TWILIGHT_FORTINA]: 3423, [FLORENCE]: 3000, [FENRIR]: 3423 } }
+  for (const [manual, remaining] of [[false, 3], [true, 2]]) {
+    const result = simulateRaidTable({ ...config, actionOrderOverrides: manual ? { 1: lineup } : {} }, environment)
+    const s1 = action(result, 1, TWILIGHT_FORTINA)
+    for (const id of ['twilight-fortina-defense', 'twilight-fortina-physical-magic-defense']) {
+      assert.deepEqual(s1.effectsApplied.filter(effect => effect.id === id).map(effect => effect.targetId), [TWILIGHT_FORTINA, FLORENCE])
+      const flo = action(result, 1, FLORENCE)
+      const status = (manual ? flo.statusSnapshotAfterAction : s1.statusSnapshotAfterAction)[FLORENCE].statuses.find(status => status.id === id)
+      assert.equal(status.remainingActions, remaining)
+      assert.equal(status.statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+    }
+    assert.equal(s1.removableBuffCountsAtDamage[TWILIGHT_FORTINA], 0)
+    assert.equal(action(result, 4, TWILIGHT_FORTINA).statusSnapshotAfterAction[TWILIGHT_FORTINA].statuses.some(status => status.id === 'twilight-fortina-devotion'), false)
+    assert.ok(action(result, 4, TWILIGHT_FORTINA).statusSnapshotAfterAction[TWILIGHT_FORTINA].statuses.some(status => status.id === 'twilight-fortina-barrier'))
+  }
+})
+
+test('Twilight Fortina S2 heals self after all five physical hits and does not heal on S1 or normals', () => {
+  const lineup = [TWILIGHT_FORTINA, EIDENE, MILLA]
+  const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 3, speeds: { [TWILIGHT_FORTINA]: 5000 } })
+  assert.deepEqual(actionsFor(result, TWILIGHT_FORTINA), ['s1', 's2', 'normal'])
+  const s2 = action(result, 2, TWILIGHT_FORTINA)
+  assert.equal(s2.damageSteps.length, 5)
+  assert.ok(s2.damageSteps.every(step => step.percent === 610))
+  const healing = s2.effectsApplied.filter(effect => effect.counter === 'vigorousBloom')
+  assert.equal(healing.length, 1)
+  assert.equal(healing[0].phase, 'afterDamage')
+  assert.equal(s2.effectsApplied.filter(effect => effect.counter === 'activeHealingReceived').length, 0)
+  const after = s2.statusSnapshotAfterAction[TWILIGHT_FORTINA].statuses.find(status => status.id === 'eidene-vigorous-bloom-other')
+  const before = s2.statusSnapshotAtDamage[TWILIGHT_FORTINA].statuses.find(status => status.id === 'eidene-vigorous-bloom-other')
+  closeTo(after.modifiers[0].displayRate - before.modifiers[0].displayRate, 0.05)
+  assert.equal(action(result, 1, TWILIGHT_FORTINA).effectsApplied.some(effect => effect.counter === 'vigorousBloom'), false)
+  assert.equal(action(result, 3, TWILIGHT_FORTINA).effectsApplied.some(effect => effect.counter === 'vigorousBloom'), false)
+})
+
+test('lineup attribute count thresholds reject negative and noninteger values', () => {
+  for (const count of [-1, 1.5, '2']) {
+    const definition = { ...RAID_TABLE_CHARACTERS[TWILIGHT_FORTINA], hooks: [hook('battleStart', [], {
+      condition: { type: 'lineupElementCountAtMost', count },
+    })] }
+    assert.throws(() => compileRaidProgram(singleConfig(TWILIGHT_FORTINA), {
+      ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [TWILIGHT_FORTINA]: definition },
+    }), /lineup element count condition/)
+  }
+})
+
+test('Golden Artoria heals before both skills, keeps removable resistance buffs, and projects S1 onto one Boss', () => {
+  const result = simulateRaidTable(singleConfig(GOLDEN_ARTORIA, { turns: 5 }))
+  assert.deepEqual(actionsFor(result, GOLDEN_ARTORIA), ['s1', 's2', 'normal', 'normal', 's1'])
+  assert.deepEqual(result.rounds.map(round => action(result, round.turn, GOLDEN_ARTORIA).runtimeAfter.counters.activeHealingTriggers), [1, 2, 2, 2, 3])
+  const s1 = action(result, 1, GOLDEN_ARTORIA)
+  assert.equal(s1.damageSteps.length, 1)
+  assert.equal(s1.damageSteps[0].percent, 720)
+  assert.equal(s1.damageSteps[0].originalTargetCount, 3)
+  assert.equal(s1.cooldownsAfter.s1, 3)
+  assert.equal(s1.removableBuffCountsAtDamage[GOLDEN_ARTORIA], 1)
+  assert.equal(s1.effectsApplied.find(effect => effect.counter === 'activeHealingTriggers').phase, 'beforeDamage')
+  const statuses = s1.statusSnapshotAtDamage[GOLDEN_ARTORIA].statuses
+  assert.equal(statuses.find(status => status.effectGroupId === 15400140301).statusClass, RAID_STATUS_CLASSES.REMOVABLE_BUFF)
+  assert.equal(statuses.find(status => status.effectGroupId === 15400330101).statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+  assert.ok(statuses.some(status => status.effectGroupId === 15400430301))
+  assert.ok(statuses.some(status => status.effectGroupId === 15400400101))
+  assert.equal(statuses.some(status => status.effectGroupId === 15400400102), false)
+  const s2 = action(result, 2, GOLDEN_ARTORIA)
+  assert.equal(s2.damageSteps.length, 4)
+  assert.ok(s2.damageSteps.every(step => step.percent === 540))
+  assert.equal(action(result, 3, GOLDEN_ARTORIA).statusSnapshotAfterAction[GOLDEN_ARTORIA].statuses.some(status => status.effectGroupId === 15400140301), false)
+  assert.equal(action(result, 5, GOLDEN_ARTORIA).effectsApplied.some(effect => effect.id === 'golden-artoria-magic-defense'), false)
+})
+
+test('Golden Artoria S2 includes its current heal when crossing fifteen and respects earlier ally actions', () => {
+  for (const [initial, percent] of [[12, 540], [13, 2160]]) {
+    const definition = { ...RAID_TABLE_CHARACTERS[GOLDEN_ARTORIA], runtime: { counters: { activeHealingTriggers: initial }, flags: {} } }
+    const result = simulateRaidTable(singleConfig(GOLDEN_ARTORIA, { turns: 2, guaranteedCritical: false }), {
+      ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [GOLDEN_ARTORIA]: definition },
+    })
+    const s2 = action(result, 2, GOLDEN_ARTORIA)
+    assert.equal(s2.runtimeBefore.counters.activeHealingTriggers, initial + 1)
+    assert.equal(s2.runtimeAfter.counters.activeHealingTriggers, initial + 2)
+    assert.ok(s2.damageSteps.every(step => step.percent === percent && !step.critical))
+  }
+  const lineup = [GOLDEN_ARTORIA, EIDENE]
+  const definition = { ...RAID_TABLE_CHARACTERS[GOLDEN_ARTORIA], runtime: { counters: { activeHealingTriggers: 10 }, flags: {} } }
+  const environment = { ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [GOLDEN_ARTORIA]: definition } }
+  for (const [eideneFirst, percent] of [[true, 2160], [false, 540]]) {
+    const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 2,
+      speeds: { [EIDENE]: eideneFirst ? 5000 : 1 } }, environment)
+    assert.equal(action(result, 2, EIDENE).effectsApplied.filter(effect => effect.counter === 'activeHealingTriggers').length, 3)
+    assert.equal(action(result, 2, GOLDEN_ARTORIA).damageSteps[0].percent, percent)
+  }
+})
+
+test('Golden Artoria counts multi-recipient healing once and P2 accepts two other green or light allies', () => {
+  const lineups = [
+    { lineup: [GOLDEN_ARTORIA, MILLA], active: false },
+    { lineup: [GOLDEN_ARTORIA, LIBERIA], active: false },
+    { lineup: [GOLDEN_ARTORIA, MILLA, EIDENE], active: true },
+    { lineup: [GOLDEN_ARTORIA, MILLA, LIBERIA], active: true },
+    { lineup: [GOLDEN_ARTORIA, LIBERIA, APOSTLE_ROSALIE], active: true },
+    { lineup: [GOLDEN_ARTORIA, MILLA, FLORENCE], active: false },
+  ]
+  for (const { lineup, active } of lineups) {
+    const result = simulateRaidTable({ lineup, attackPriority: [...lineup].reverse(), turns: 1, speeds: { [GOLDEN_ARTORIA]: 5000 } })
+    const s1 = action(result, 1, GOLDEN_ARTORIA)
+    const recipients = lineup.filter(id => s1.statusSnapshotAfterAction[id].statuses.some(status => status.id === 'golden-artoria-team-hp'))
+    assert.deepEqual(recipients, active ? [GOLDEN_ARTORIA, lineup.at(-1)] : [])
+    for (const id of lineup) {
+      assert.ok(s1.statusSnapshotAtDamage[id].statuses.some(status => status.id === 'golden-artoria-sword-light'))
+      assert.equal(s1.removableBuffCountsAtDamage[id], 1)
+    }
+  }
+  const lineup = [GOLDEN_ARTORIA, WINTER_STELLA, MILLA]
+  const result = simulateRaidTable({ lineup, attackPriority: [MILLA, GOLDEN_ARTORIA, WINTER_STELLA], turns: 2 })
+  const stellaS2 = action(result, 2, WINTER_STELLA)
+  assert.equal(stellaS2.effectsApplied.filter(effect => effect.counter === 'activeHealingTriggers').length, 1)
+  const goldS1 = action(result, 1, GOLDEN_ARTORIA)
+  assert.equal(goldS1.effectsApplied.filter(effect => effect.counter === 'activeHealingReceived').length, 0)
+  const millaFirst = simulateRaidTable({ lineup: [MILLA, GOLDEN_ARTORIA], attackPriority: [MILLA, GOLDEN_ARTORIA], turns: 1 })
+  assert.equal(action(millaFirst, 1, GOLDEN_ARTORIA).effectsApplied.filter(effect => effect.counter === 'activeHealingReceived').length, 1)
+})
+
+test('element-set ally counts reject invalid elements and thresholds at compilation', () => {
+  for (const condition of [
+    { type: 'otherLineupElementInCountAtLeast', elements: [], count: 2 },
+    { type: 'otherLineupElementInCountAtLeast', elements: [999], count: 2 },
+    { type: 'otherLineupElementInCountAtLeast', elements: [RAID_ELEMENTS.GREEN], count: -1 },
+    { type: 'otherLineupElementInCountAtLeast', elements: [RAID_ELEMENTS.GREEN], count: 1.5 },
+  ]) {
+    const definition = { ...RAID_TABLE_CHARACTERS[GOLDEN_ARTORIA], hooks: [hook('actionStart', [], { condition })] }
+    assert.throws(() => compileRaidProgram(singleConfig(GOLDEN_ARTORIA), {
+      ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [GOLDEN_ARTORIA]: definition },
+    }), /element-set count condition/)
+  }
+})
+
+test('Apostle Rosalie reaches Memory naturally at round six and consumes it only once', () => {
+  const result = simulateRaidTable(singleConfig(APOSTLE_ROSALIE))
+  assert.deepEqual(actionsFor(result, APOSTLE_ROSALIE), ['s1', 's2', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1', 's2'])
+  assert.deepEqual(result.rounds.map(round => action(result, round.turn, APOSTLE_ROSALIE).runtimeAfter.counters.memory), [1, 4, 7, 10, 13, 0, 0, 0, 0, 0])
+  const first = action(result, 1, APOSTLE_ROSALIE)
+  assert.equal(first.damageSteps.length, 1)
+  assert.equal(first.damageSteps[0].percent, 240)
+  assert.equal(first.damageSteps[0].originalTargetCount, 5)
+  assert.equal(first.damageSteps[0].bossDamageRate, 0.1)
+  assert.equal(first.removableBuffCountsAtDamage[APOSTLE_ROSALIE], 0)
+  assert.ok(first.statusSnapshotAtDamage[APOSTLE_ROSALIE].statuses.some(status => status.effectGroupId === 8800440101))
+  assert.equal(action(result, 2, APOSTLE_ROSALIE).statusSnapshotAfterAction[APOSTLE_ROSALIE].statuses.some(status => status.effectGroupId === 8800440101), false)
+  assert.equal(action(result, 2, APOSTLE_ROSALIE).damageSteps[0].bossDamageRate, 0.1)
+  assert.equal(action(result, 3, APOSTLE_ROSALIE).damageSteps[0].bossDamageRate, 0)
+  const s2 = action(result, 6, APOSTLE_ROSALIE)
+  assert.equal(s2.runtimeBefore.counters.memory, 15)
+  assert.equal(s2.damageSteps.length, 10)
+  assert.ok(s2.damageSteps.every(step => step.percent === 180 && step.normalizedHpPercent > 0))
+  assert.equal(s2.statusSnapshotAtDamage[APOSTLE_ROSALIE].statuses.some(status => status.id === 'apostle-rosalie-memory'), false)
+  assert.ok(s2.statusSnapshotAtDamage[APOSTLE_ROSALIE].statuses.some(status => status.effectGroupId === 8800300316))
+  assert.ok(result.rounds[5].roundStartEffects.some(effect => effect.id === 'apostle-rosalie-memory-shield'))
+  assert.equal(action(result, 7, APOSTLE_ROSALIE).statusSnapshotAfterAction[APOSTLE_ROSALIE].statuses.some(status => status.id === 'apostle-rosalie-memory-shield'), false)
+  assert.equal(action(result, 10, APOSTLE_ROSALIE).effectsApplied.some(effect => effect.id === 'apostle-rosalie-memory-consumed'), false)
+  assert.ok(action(result, 10, APOSTLE_ROSALIE).damageSteps[0].normalizedHpPercent > 0)
+})
+
+test('Apostle Rosalie accepts full-Memory rounds one through six and rejects later or fractional rounds', () => {
+  for (const round of [1, 2, 3, 4, 5, 6]) {
+    const result = simulateRaidTable(singleConfig(APOSTLE_ROSALIE, { activationRounds: { apostleRosalieMemory: round } }))
+    const full = action(result, round, APOSTLE_ROSALIE)
+    assert.equal(full.runtimeBefore.counters.memory, 15)
+    const consumed = result.rounds.flatMap(r => r.actions).filter(a => a.effectsApplied.some(e => e.id === 'apostle-rosalie-memory-consumed'))
+    assert.equal(consumed.length, 1)
+    assert.equal(consumed[0].turn, round <= 2 ? 2 : 6)
+    assert.equal(result.rounds.flatMap(r => r.roundStartEffects).filter(e => e.id === 'apostle-rosalie-memory-attack').length, 1)
+  }
+  for (const round of [0, 7, 10, 1.5]) assert.throws(() => compileRaidProgram(singleConfig(APOSTLE_ROSALIE, {
+    activationRounds: { apostleRosalieMemory: round },
+  })), /Invalid raid activation round/)
+})
+
+test('Apostle Rosalie sacrifices after damage for adjacent allies and preserves two-action HP conversion', () => {
+  const lineup = [FLORENCE, APOSTLE_ROSALIE, MILLA]
+  for (const speed of [1, 5000]) {
+    const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 4,
+      speeds: { [APOSTLE_ROSALIE]: speed }, activationRounds: { apostleRosalieMemory: 1 } })
+    const s2 = action(result, 2, APOSTLE_ROSALIE)
+    const reductions = s2.effectsApplied.filter(effect => effect.type === 'cooldownReduction')
+    assert.deepEqual(reductions.map(effect => effect.targetId), [FLORENCE, MILLA])
+    for (const effect of reductions) {
+      assert.equal(effect.phase, 'afterDamage')
+      assert.equal(effect.amount, 2)
+      for (const key of ['s1', 's2']) assert.equal(effect.cooldownsAfter[key], Math.max(0, effect.cooldownsBefore[key] - 2))
+    }
+    for (const id of [FLORENCE, MILLA]) {
+      const status = s2.statusSnapshotAfterAction[id].statuses.find(status => status.id === 'apostle-rosalie-sacrifice-attack')
+      assert.equal(status.effectGroupId, 8800220702)
+      assert.equal(status.statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+      assert.equal(status.duration, 2)
+      const affected = action(result, speed > 4000 ? 2 : 3, id)
+      assert.ok(Object.values(affected.conversionTotals).some(term => term.stat === 'HP' && term.sourceId === APOSTLE_ROSALIE))
+      assert.equal(action(result, 4, id).statusSnapshotAfterAction[id].statuses.some(status => status.id === 'apostle-rosalie-sacrifice-attack'), false)
+    }
+  }
+  const edge = simulateRaidTable({ lineup: [APOSTLE_ROSALIE, FLORENCE, MILLA], attackPriority: [APOSTLE_ROSALIE, FLORENCE, MILLA], turns: 2,
+    activationRounds: { apostleRosalieMemory: 1 } })
+  assert.deepEqual(action(edge, 2, APOSTLE_ROSALIE).effectsApplied.filter(effect => effect.type === 'cooldownReduction').map(effect => effect.targetId), [FLORENCE])
+})
+
+test('Apostle Rosalie keeps maximum-HP and ATK units separate and ignores Boss debuffs for Memory growth', () => {
+  const off = simulateRaidTable(singleConfig(APOSTLE_ROSALIE, { turns: 1, guaranteedCritical: false,
+    probabilityOverrides: { apostleRosalieDamageTaken: false }, activationRounds: { apostleRosalieMemory: 1 } }))
+  const hit = action(off, 1, APOSTLE_ROSALIE).damageSteps[0]
+  assert.equal(hit.critical, false)
+  assert.equal(hit.bossDamageRate, 0)
+  closeTo(hit.normalizedHpPercent, hit.effectivePercent * 0.1)
+  assert.equal(hit.normalizedSourceAttackPercent, 0)
+  assert.equal(hit.normalizedDefensePercent, 0)
+  const grouped = Object.values(action(off, 1, APOSTLE_ROSALIE).conversionTotals)
+  assert.deepEqual(grouped.map(term => [term.stat, term.sourceId]), [['HP', APOSTLE_ROSALIE]])
+  const late = simulateRaidTable(singleConfig(APOSTLE_ROSALIE, { turns: 1, guaranteedCritical: false,
+    probabilityOverrides: { apostleRosalieDamageTaken: false } }))
+  closeTo(off.teamAtkPercent, late.teamAtkPercent)
+  assert.deepEqual(late.conversionTotals, {})
+  const formation = [APOSTLE_ROSALIE, FLORENCE, FENRIR, LUKE, MERTILLIER]
+  const formed = simulateRaidTable({ lineup: formation, attackPriority: formation, turns: 1,
+    activationRounds: { apostleRosalieMemory: 1 }, guaranteedCritical: false,
+    probabilityOverrides: { apostleRosalieDamageTaken: false } })
+  const formedHit = action(formed, 1, APOSTLE_ROSALIE).damageSteps[0]
+  closeTo(formedHit.normalizedHpPercent, formedHit.percent * 0.1 * (1 + formed.config.elementBonus.normal.hpRate)
+    * Math.max(0, 1 + formedHit.damageRate) * formedHit.criticalMultiplier * formedHit.defenseMultiplier)
+  const lineup = [APOSTLE_ROSALIE, FRACK]
+  const withDebuffs = simulateRaidTable({ lineup, attackPriority: lineup, turns: 3 })
+  assert.deepEqual(withDebuffs.rounds.map(round => action(withDebuffs, round.turn, APOSTLE_ROSALIE).runtimeAfter.counters.memory), [1, 4, 7])
+  assert.throws(() => compileRaidProgram(singleConfig(APOSTLE_ROSALIE), {
+    ...DEFAULT_RAID_ENVIRONMENT,
+    characters: { ...RAID_TABLE_CHARACTERS, [APOSTLE_ROSALIE]: {
+      ...RAID_TABLE_CHARACTERS[APOSTLE_ROSALIE], hooks: [hook('battleStart', [statusEffect({
+        id: 'invalid-hp', effectGroupId: 990088, nameKey: 'raidBuffApostleRosalieMemoryAttack', target: 'self', duration: null,
+        symbolicModifiers: [{ kind: 'sourceMaxHpOverTargetAttack', coefficient: 0.1 }],
+      })])],
+    } },
+  }), /maximum-HP modifier requires a registered sourceId/)
 })
 
 test('Eirene applies DEF down before S1 and upgrades every S2 from its third use', () => {

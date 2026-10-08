@@ -8,6 +8,7 @@ import { RAID_BOSS_TEMPLATE_IDS } from './raid/bosses.js'
 export const DEFAULT_RAID_CHARACTER_LEVEL = 500
 export const DEFAULT_RAID_DEFENSE_PENETRATION = 11_950
 export const DEFAULT_RAID_PM_DEFENSE_PENETRATION = 65_700
+export const RAID_ACTIVATION_ROUND_LIMITS = Object.freeze({ apostleRosalieMemory: 6 })
 export const RAID_BASE_CRITICAL_DAMAGE_BONUS = 0.5
 export const DEFAULT_RAID_CRITICAL_DAMAGE_BONUS = 0.6
 
@@ -47,6 +48,7 @@ export function createDefaultRaidTableConfig() {
     elementAdvantage: true,
     baseCriticalDamageBonus: DEFAULT_RAID_CRITICAL_DAMAGE_BONUS,
     probabilityOverrides: {
+      apostleRosalieDamageTaken: true,
       liberiaSand: true, shizuSpeedDown: true, guinevereDamageTaken: true,
       millaDelay: true, yildizBuffBlock: true, winterStellaSilence: true,
       lilicotteSilence: true, liebesStun: true, artoriaStun: true,
@@ -55,6 +57,7 @@ export function createDefaultRaidTableConfig() {
       warmMemorySoltinaStun: true,
     },
     activationRounds: {
+      apostleRosalieMemory: 6,
       candyCerberusKindMagic: 2,
       witchIllyaCurseUnleashed: 2,
     },

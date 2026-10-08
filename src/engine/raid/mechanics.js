@@ -15,6 +15,11 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     allOther: ({ ownerId, config }) => config.lineup.filter(id => id !== ownerId),
     topAttackOther: ({ ownerId, config }) => config.attackPriority.filter(id => id !== ownerId),
     selfAndTopAttackOther: ({ ownerId, config }) => [ownerId, ...config.attackPriority.filter(id => id !== ownerId)],
+    selfAndFasterAllies: context => {
+      const { ownerId, config, actors, api } = context
+      const sourceSpeed = api.effectiveSpeed(actors.get(ownerId), context).effectiveSpeed
+      return [ownerId, ...config.lineup.filter(id => id !== ownerId && api.effectiveSpeed(actors.get(id), context).effectiveSpeed > sourceSpeed)]
+    },
     lowestSpeedOthers: ({ ownerId, config }) => config.lineup.filter(id => id !== ownerId).sort((left, right) => (
       config.speeds[left] - config.speeds[right] || config.lineup.indexOf(left) - config.lineup.indexOf(right)
     )),
@@ -56,6 +61,9 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
   }),
 
   conditionHandlers: Object.freeze({
+    lineupElementCountAtMost: (condition, { config, actors }) => (
+      new Set(config.lineup.map(id => actors.get(id).definition.element)).size <= condition.count
+    ),
     targetHpBelow50: (_condition, { target, config }) => config.targetHpBelow50[target.id] === true,
     targetHpAtLeast50: (_condition, { target, config }) => config.targetHpBelow50[target.id] !== true,
     anyRemovableBuffCountAtLeast: (condition, { config, actors, api }) => (
@@ -83,6 +91,10 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     otherLineupElementCountAtLeast: (condition, { actor, ownerId, config, actors }) => {
       const sourceId = actor?.id ?? ownerId
       return config.lineup.filter(id => id !== sourceId && actors.get(id).definition.element === condition.element).length >= condition.count
+    },
+    otherLineupElementInCountAtLeast: (condition, { actor, ownerId, config, actors }) => {
+      const sourceId = actor?.id ?? ownerId
+      return config.lineup.filter(id => id !== sourceId && condition.elements.includes(actors.get(id).definition.element)).length >= condition.count
     },
     otherLineupCountAtLeast: (condition, { actor, ownerId, config }) => (
       config.lineup.filter(id => id !== (actor?.id ?? ownerId)).length >= condition.count

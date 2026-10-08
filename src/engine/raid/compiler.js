@@ -6,6 +6,7 @@ import {
   DEFAULT_RAID_PM_DEFENSE_PENETRATION,
   RAID_ELEMENTS,
   RAID_JOB_FLAGS,
+  RAID_ACTIVATION_ROUND_LIMITS,
   RAID_MODIFIER_CHANNELS,
   RAID_TABLE_CHARACTERS,
   createDefaultRaidTableConfig,
@@ -96,7 +97,7 @@ function normalizeConfig(config, characters) {
   const actionOrderOverrides = normalizeActionOrderOverrides(config.actionOrderOverrides ?? defaults.actionOrderOverrides, lineup, turns)
   const activationRounds = { ...defaults.activationRounds, ...(config.activationRounds ?? {}) }
   for (const [key, value] of Object.entries(activationRounds)) {
-    if (!Number.isInteger(value) || value < 1 || value > 10) throw new Error(`Invalid raid activation round: ${key}`)
+    if (!Number.isInteger(value) || value < 1 || value > (RAID_ACTIVATION_ROUND_LIMITS[key] ?? 10)) throw new Error(`Invalid raid activation round: ${key}`)
   }
   const scenarioTiers = { ...defaults.scenarioTiers, ...(config.scenarioTiers ?? {}) }
   for (const [key, value] of Object.entries(scenarioTiers)) {
@@ -124,6 +125,13 @@ function compileCondition(condition, mechanics, path, character) {
   }
   if (condition.type === 'bossElementIs' && !SUPPORTED_ELEMENTS.has(condition.element)) {
     throw new Error(`Invalid raid Boss element '${condition.element}' at ${path}`)
+  }
+  if (condition.type === 'otherLineupElementInCountAtLeast' && (
+    !Array.isArray(condition.elements) || !condition.elements.length || condition.elements.some(element => !SUPPORTED_ELEMENTS.has(element))
+    || !Number.isInteger(condition.count) || condition.count < 0
+  )) throw new Error(`Raid element-set count condition requires valid elements and a nonnegative integer count at ${path}`)
+  if (condition.type === 'lineupElementCountAtMost' && (!Number.isInteger(condition.count) || condition.count < 0)) {
+    throw new Error(`Raid lineup element count condition requires a nonnegative integer count at ${path}`)
   }
   if (condition.type === 'configuredActivationRoundReached' && (typeof condition.key !== 'string' || !condition.key)) {
     throw new Error(`Configured activation round condition requires a non-empty key at ${path}`)
@@ -204,10 +212,16 @@ function compileEffect(effect, mechanics, path, character) {
     throw new Error(`Unknown raid counter '${effect.counter}' at ${path}`)
   }
   const compileModifier = (modifier, modifierPath, valueKey) => {
+    if (valueKey === 'coefficient' && !['sourceAttackOverTargetAttack', 'targetBaseDefenseOverTargetAttack', 'sourceMaxHpOverTargetAttack'].includes(modifier.kind)) {
+      throw new Error(`Unsupported raid symbolic modifier kind '${modifier.kind}' at ${modifierPath}`)
+    }
     if (valueKey === 'rate' && !SUPPORTED_MODIFIER_CHANNELS.has(modifier.channel)) {
       throw new Error(`Unsupported raid modifier channel '${modifier.channel}' at ${modifierPath}`)
     }
     const compiledValue = compileValue(modifier[valueKey], mechanics, `${modifierPath}.${valueKey}`, character)
+    if (modifier.kind === 'sourceMaxHpOverTargetAttack' && (!Number.isInteger(modifier.sourceId) || !RAID_TABLE_CHARACTERS[modifier.sourceId])) {
+      throw new Error(`Raid maximum-HP modifier requires a registered sourceId at ${modifierPath}`)
+    }
     const counter = compiledValue.definition.counter
     if (counter && !(counter in (character.runtime?.counters ?? {}))) {
       throw new Error(`Unknown raid counter '${counter}' at ${modifierPath}`)

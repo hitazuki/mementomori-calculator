@@ -534,6 +534,8 @@ eventHooks: [{
 | condition | `actorHasStatus` | 当前行动者拥有指定运行时状态。 |
 | value resolver | `bossStatusCountLinear` | 以木桩状态组数量代入 `base + perStack × count`，并按 `max` 截断。 |
 | status modifier | `rate` / `coefficient` 值解析器 | 状态的倍率或符号项系数可使用已注册 value resolver；结算时按状态来源角色读取动态计数。 |
+| symbolic modifier | `sourceMaxHpOverTargetAttack` | 指定有效 `sourceId`，表示系数×来源基础最大HP/目标ATK。结算为独立 `%HP`，乘暴击、增伤、双防通过率及组队HP增幅，不与ATK/DEF合并。 |
+| configuration | `RAID_ACTIVATION_ROUND_LIMITS` | 为 `activationRounds` 指定按机制限制的最高回合，编译器拒绝越界，页面共用此限制。罗莎莉自然增长最迟第6回合满记忆，因此 `apostleRosalieMemory` 只能为1至6，默认6。 |
 
 `damageRatePerStack: 0` 且没有防御字段的 Boss 状态仍是可读取的弱化 EffectGroup：它不改变当前倍率，但会参与弱化数量、刷新与到期结算。防御类状态分别通过 `defenseRatePerStack`、`physicalDefenseRatePerStack`、`magicDefenseRatePerStack` 改变对应面板。运行时快照保留 EffectGroup、施加者、可解除类别、层数、每层防御修正与剩余回合；可解除与不可解除弱化都会展示，只有前者可被后续解除机制匹配。
 
@@ -647,5 +649,8 @@ Boss 状态的 `damageRatePerStack`、`defenseRatePerStack`、`physicalDefenseRa
 | condition | `targetLacksStatus` | 当前候选目标不持有指定运行时状态 `statusId` 时成立。 |
 | condition | `targetElementIn` | 当前候选目标属性包含在显式 `elements` 集合中时成立。 |
 | condition | `targetElementNotIn` | 当前候选目标属性不在显式 `elements` 集合中时成立。 |
+| condition | `otherLineupElementInCountAtLeast` | 排除本人后，统计队伍属性属于 `elements` 集合的友军数量，与非负整数 `count` 比较。黄金圣剑士P2使用苍翠/天光集合；编译拒绝空集合、非法属性与非法阈值。 |
+| condition | `lineupElementCountAtMost` | 统计上场角色实际属性的不同种类，包含施法者；天光独立计一种，不复用组队属性通配。与非负整数 `count` 比较，编译拒绝非法阈值。黄昏福尔蒂娜开战加速使用≤2。 |
+| target selector | `selfAndFasterAllies` | 自身及当前有效速度严格高于自身的其他友军，包含既有速度修正；同速排除。读取施加时点速度，手动行动顺序不改变比较。 |
 
 这些条件用于 `effect.targetCondition`，由目标选择器产生候选列表后逐目标判断。玛提尔德用目标状态决定S1持续1次或4次行动，索尔缇娜用目标属性集合决定普通/红绿强化档；两者都通过共同 `replacementKey` 保证同源档位互斥。

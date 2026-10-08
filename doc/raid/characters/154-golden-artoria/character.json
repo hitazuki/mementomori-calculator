@@ -1,0 +1,164 @@
+{
+  "formatVersion": 1,
+  "characterId": 154,
+  "slug": "golden-artoria",
+  "build": {
+    "level": 240,
+    "exclusive": "EX3"
+  },
+  "sources": {
+    "activeSkillIds": [
+      154001,
+      154002
+    ],
+    "passiveSkillIds": [
+      154003,
+      154004,
+      154005
+    ],
+    "combatLogs": [
+      "data/battle-logs/55-53-g.json"
+    ]
+  },
+  "terms": [
+    {
+      "kind": "activeSkill",
+      "sourceId": 154001,
+      "model": "implemented",
+      "summary": "First heals the lowest-HP ally, then grants a two-action removable 30% debuff-resistance buff to all allies, then deals 720% ATK physical damage to three targets (single-dummy one hit). 55-53-g confirms healing and resistance before damage, but uses the UR-character 660% non-EX3 damage subset."
+    },
+    {
+      "kind": "activeSkill",
+      "sourceId": 154002,
+      "model": "implemented",
+      "summary": "First heals the lowest-HP ally, then four physical hits of 540%; at 15 cumulative active-healing triggers the hits become 2160%. The current heal increments the counter before damage eligibility is read."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 154003,
+      "model": "implemented",
+      "summary": "Each active-healing effect grants all allies unremovable Holy Sword Light at three stacks (EX2). State retained; magic incoming-hit consumption, reactive healing and removal on caster death are not simulated."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 154004,
+      "model": "implemented",
+      "summary": "Opening unremovable self HP+100%/incoming-damage-60% compound state. On first-round action start, self and top-ATK other ally receive unremovable magic DEF+30%; with at least two other green/light allies they also receive unremovable HP+30%. HP/defense values not calculated."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 154005,
+      "model": "implemented",
+      "summary": "Hidden 15-cap active-healing counter 15400500101 represented by runtime.counters.activeHealingTriggers; SkillCategory=200, not a visible buff."
+    }
+  ],
+  "effectGroups": [
+    {
+      "id": 15400120301,
+      "model": "outOfScope",
+      "summary": "弱体効果耐性率が15%増加する。 Lower-tier state, outside the selected Lv240/EX3 build."
+    },
+    {
+      "id": 15400140301,
+      "model": "implemented",
+      "summary": "弱体効果耐性率が30%増加する。 Retained as an independent runtime state."
+    },
+    {
+      "id": 15400300101,
+      "model": "outOfScope",
+      "summary": "[聖剣の光] 魔法攻撃を受けたとき、1スタック消費してHPを被ダメージ×20%回復する（最大HPの10%まで）（最大3スタックまで）（解除不可）。現在のスタック数：{stack} Lower-tier state, outside the selected Lv240/EX3 build."
+    },
+    {
+      "id": 15400300301,
+      "model": "ignored",
+      "summary": "*『聖剣の光』を1スタック消費する。 Hidden execution marker: counter supported, incoming-hit/expiry/death operations ignored."
+    },
+    {
+      "id": 15400300401,
+      "model": "ignored",
+      "summary": "*『聖剣の光』を1スタック消費する。 Hidden execution marker: counter supported, incoming-hit/expiry/death operations ignored."
+    },
+    {
+      "id": 15400300501,
+      "model": "ignored",
+      "summary": "*『聖剣の光』を解除する。 Hidden execution marker: counter supported, incoming-hit/expiry/death operations ignored."
+    },
+    {
+      "id": 15400330101,
+      "model": "implemented",
+      "summary": "[聖剣の光] 魔法攻撃を受けたとき、1スタック消費してHPを被ダメージ×80%回復する（最大HPの20%まで）（最大3スタックまで）（解除不可）。現在のスタック数：{stack} Retained as an independent runtime state."
+    },
+    {
+      "id": 15400330301,
+      "model": "ignored",
+      "summary": "*『聖剣の光』を1スタック消費する。 Hidden execution marker: counter supported, incoming-hit/expiry/death operations ignored."
+    },
+    {
+      "id": 15400330401,
+      "model": "ignored",
+      "summary": "*『聖剣の光』を1スタック消費する。 Hidden execution marker: counter supported, incoming-hit/expiry/death operations ignored."
+    },
+    {
+      "id": 15400400101,
+      "model": "implemented",
+      "summary": "魔法防御が30%増加する（解除不可）。 Retained as an independent runtime state."
+    },
+    {
+      "id": 15400400102,
+      "model": "implemented",
+      "summary": "最大HPが30%増加する（解除不可）。 Retained as an independent runtime state."
+    },
+    {
+      "id": 15400420301,
+      "model": "ignored",
+      "summary": "*最大HPが20%増加し、被ダメージが10%減少する（解除不可）。 Hidden execution marker: counter supported, incoming-hit/expiry/death operations ignored."
+    },
+    {
+      "id": 15400430301,
+      "model": "implemented",
+      "summary": "*最大HPが100%増加し、被ダメージが60%減少する（解除不可）。 Retained as an independent runtime state."
+    },
+    {
+      "id": 15400500101,
+      "model": "implemented",
+      "summary": "Hidden active-healing count, SkillCategory=200, represented by activeHealingTriggers up to 15; not a visible state or removable buff."
+    }
+  ],
+  "ignored": [
+    {
+      "key": "raidIgnoredHealing",
+      "summary": "Healing amounts not calculated; active-healing events and recipients retained."
+    },
+    {
+      "key": "raidIgnoredGoldenArtoriaIncomingHealing",
+      "summary": "Incoming magic-hit stack consumption and passive healing, caster death/removal not simulated. Passive healing does not emit active-healing events."
+    },
+    {
+      "key": "raidIgnoredMaxHpUp",
+      "summary": "Self/team maximum-HP values not calculated; each unremovable state retained."
+    },
+    {
+      "key": "raidIgnoredDefenseBuff",
+      "summary": "Magic defense values not used against a non-attacking dummy; state retained."
+    },
+    {
+      "key": "raidIgnoredIncomingDamageReduction",
+      "summary": "Opening damage reduction not calculated; state retained."
+    },
+    {
+      "key": "raidIgnoredGoldenArtoriaDebuffResist",
+      "summary": "Resistance probability is outside fixed-success dummy semantics, but the removable effect group contributes one buff."
+    }
+  ],
+  "unresolved": [
+    {
+      "summary": "Supplied log only reaches 7 active-healing triggers before Artoria dies; the exact 14-to-15 threshold behavior follows MB/text order and is tested structurally, but is not isolated in this log."
+    },
+    {
+      "summary": "Lowest-HP healing ties use lineup order under the full-HP project model; not proven by this non-full-HP log."
+    },
+    {
+      "summary": "ActiveSkillMB Memo has stale S1 damage values; canonical official skill/exclusive description and the selected subset IDs are used instead."
+    }
+  ]
+}

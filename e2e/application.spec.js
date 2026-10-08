@@ -45,6 +45,30 @@ test('raid table hides calculations for an empty lineup and restores them on sel
   await expect(page.locator('.raid-matrix-card')).toBeVisible()
 })
 
+test('Apostle Rosalie early-Memory control limits full stacks to six rounds and resets to natural growth', async ({ page }) => {
+  await openView(page, 'raidTable')
+  await expect(page.locator('.raid-roster-select').first()).toBeVisible()
+  while (await page.locator('.raid-roster-select[aria-pressed="true"]').count()) {
+    await page.locator('.raid-roster-select[aria-pressed="true"]').first().click()
+  }
+  await page.locator('.raid-roster-select').filter({ hasText: '#88' }).click()
+  const checkbox = page.locator('.raid-assumption-grid label').filter({ has: page.locator('input[type="checkbox"]') }).filter({ hasText: '提前达到15层记忆' }).locator('input')
+  const round = page.locator('.raid-assumption-grid label').filter({ hasText: '记忆达到15层的回合' }).locator('select')
+  await expect(round).toBeDisabled()
+  await expect(round.locator('option')).toHaveCount(6)
+  await checkbox.check()
+  await round.selectOption('1')
+  await expect(round).toHaveValue('1')
+  await expect(page.locator('.raid-converted-stat').first()).toContainText('% HP')
+  await page.locator('.raid-roster-item').filter({ hasText: '#88' }).locator('.raid-roster-detail-button').click()
+  await expect(page.locator('.raid-character-detail-modal')).toBeVisible()
+  await expect(page.locator('.raid-character-detail-modal')).toContainText('最大生命值')
+  await page.keyboard.press('Escape')
+  await checkbox.uncheck()
+  await expect(round).toBeDisabled()
+  await expect(round).toHaveValue('6')
+})
+
 test('application shell renders while the master dictionary is pending', async ({ page }) => {
   let release
   const gate = new Promise(resolve => { release = resolve })
@@ -56,6 +80,46 @@ test('application shell renders while the master dictionary is pending', async (
   await expect(page.locator('.sidebar')).toBeVisible()
   await expect(page.locator('h1')).toBeVisible()
   release()
+})
+
+test('Golden Artoria displays S2 healing threshold upgrades and official skill details', async ({ page }) => {
+  await openView(page, 'raidTable')
+  await expect(page.locator('.raid-roster-select').first()).toBeVisible()
+  while (await page.locator('.raid-roster-select[aria-pressed="true"]').count()) {
+    await page.locator('.raid-roster-select[aria-pressed="true"]').first().click()
+  }
+  for (const id of [154, 92, 80, 114, 124]) {
+    await page.locator('.raid-roster-select').filter({ hasText: `#${id} ·` }).click()
+  }
+  const row = page.locator('.raid-matrix-card tbody tr').filter({ hasText: '#154' })
+  await row.locator('.raid-action-cell').nth(1).click()
+  await expect(page.locator('.raid-step-list article')).toHaveCount(4)
+  await expect(page.locator('.raid-step-list article header strong').first()).toContainText('540% ATK')
+  await row.locator('.raid-action-cell').nth(5).click()
+  await expect(page.locator('.raid-step-list article header strong').first()).toContainText('2160% ATK')
+  await expect(page.locator('.raid-detail-card')).toContainText('主动回复触发次数：15')
+  await page.locator('.raid-roster-item').filter({ hasText: '#154 ·' }).locator('.raid-roster-detail-button').click()
+  await expect(page.locator('.raid-character-detail-modal')).toBeVisible()
+  await expect(page.locator('.raid-character-detail-modal')).toContainText('破魔圣剑')
+  await expect(page.locator('.raid-character-detail-modal')).toContainText('圣剑光辉')
+  await expect(page.locator('.raid-character-detail-modal')).toContainText('其他苍翠/天光属性友军合计至少2名')
+})
+
+test('Twilight Fortina exposes attribute and speed rules and five-hit S2 details', async ({ page }) => {
+  await openView(page, 'raidTable')
+  await expect(page.locator('.raid-roster-select').first()).toBeVisible()
+  while (await page.locator('.raid-roster-select[aria-pressed="true"]').count()) {
+    await page.locator('.raid-roster-select[aria-pressed="true"]').first().click()
+  }
+  await page.locator('.raid-roster-select').filter({ hasText: '#151 ·' }).click()
+  await page.locator('.raid-roster-item').filter({ hasText: '#151 ·' }).locator('.raid-roster-detail-button').click()
+  await expect(page.locator('.raid-character-detail-modal')).toContainText('有效速度严格高于自身')
+  await expect(page.locator('.raid-character-detail-modal')).toContainText('天光单独计一种')
+  await expect(page.locator('.raid-character-detail-modal')).toContainText('夕阳色的约定')
+  await page.keyboard.press('Escape')
+  await page.locator('.raid-action-cell').nth(1).click()
+  await expect(page.locator('.raid-step-list article')).toHaveCount(5)
+  await expect(page.locator('.raid-step-list article header strong').first()).toContainText('610% ATK')
 })
 
 test('rapid language changes retain the last selection', async ({ page }) => {

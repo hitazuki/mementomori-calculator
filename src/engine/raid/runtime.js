@@ -416,6 +416,7 @@ export function runRaidProgram(program) {
     removableBuffCount, evaluateCondition, resolveTargets,
     applyActorStatusEffect, copyActorStatuses, removeActorStatuses, removeActorStatus, applyBossStatusEffect, applyCooldownReductionEffect,
     applyCounterEffect, applySetCooldownEffect, emitBattleEvent,
+    effectiveSpeed,
   }
 
   function modifierSnapshot(actor, context) {
@@ -442,10 +443,13 @@ export function runRaidProgram(program) {
       for (const modifier of status.symbolicModifiers) {
         const key = modifier.kind === 'sourceAttackOverTargetAttack'
           ? `ATK_${modifier.sourceId}/ATK_${actor.id}`
-          : `DEF0_${actor.id}/ATK_${actor.id}`
+          : modifier.kind === 'sourceMaxHpOverTargetAttack'
+            ? `HP0_${modifier.sourceId}/ATK_${actor.id}`
+            : `DEF0_${actor.id}/ATK_${actor.id}`
         symbolicSources.push({
           ...modifier, coefficient: modifier.compiledCoefficient ? resolveValue(modifier.compiledCoefficient, sourceActor, context) : modifier.coefficient,
-          key, targetId: actor.id, valueSourceId: modifier.kind === 'targetBaseDefenseOverTargetAttack' ? actor.id : modifier.sourceId,
+          key, stat: modifier.kind === 'sourceMaxHpOverTargetAttack' ? 'HP' : modifier.kind === 'targetBaseDefenseOverTargetAttack' ? 'DEF' : 'ATK',
+          targetId: actor.id, valueSourceId: modifier.kind === 'targetBaseDefenseOverTargetAttack' ? actor.id : modifier.sourceId,
           sourceId: modifier.sourceId ?? status.sourceId, copiedFromId: status.copiedFromId,
           nameKey: status.nameKey, effectGroupId: status.effectGroupId, remainingActions: status.remainingActions,
         })
@@ -456,8 +460,8 @@ export function runRaidProgram(program) {
     return { sources, symbolicSources, totals }
   }
 
-  function effectiveSpeed(actor) {
-    const snapshot = modifierSnapshot(actor, { phase: 'roundStart' })
+  function effectiveSpeed(actor, context = { phase: 'roundStart' }) {
+    const snapshot = modifierSnapshot(actor, context)
     const baseSpeed = config.speeds[actor.id]
     return {
       actorId: actor.id, baseSpeed, speedRate: snapshot.totals.speedRate,
@@ -609,7 +613,8 @@ export function runRaidProgram(program) {
           ? modifiers.symbolicSources.map(source => ({
             ...source,
             coefficient: percent * source.coefficient
-              * (source.kind === 'targetBaseDefenseOverTargetAttack' ? 1 + config.elementBonus.dark.defenseRate : preStatusAttackScale)
+              * (source.kind === 'targetBaseDefenseOverTargetAttack' ? 1 + config.elementBonus.dark.defenseRate
+                : source.kind === 'sourceMaxHpOverTargetAttack' ? 1 + config.elementBonus.normal.hpRate : preStatusAttackScale)
               * damageMultiplier * criticalMultiplier * defense.multiplier,
           }))
           : []
@@ -617,6 +622,8 @@ export function runRaidProgram(program) {
           .filter(term => term.kind === 'sourceAttackOverTargetAttack')
           .reduce((total, term) => total + term.coefficient, 0)
         const defenseScalingTerms = scalingTerms.filter(term => term.kind === 'targetBaseDefenseOverTargetAttack')
+        const hpScalingTerms = scalingTerms.filter(term => term.kind === 'sourceMaxHpOverTargetAttack')
+        const normalizedHpPercent = hpScalingTerms.reduce((total, term) => total + term.coefficient, 0)
         const normalizedDefensePercent = defenseScalingTerms.reduce((total, term) => total + term.coefficient, 0)
         const normalizedEffectivePercent = effectivePercent + normalizedSourceAttackPercent
 
@@ -627,6 +634,7 @@ export function runRaidProgram(program) {
             term.kind === 'sourceAttackOverTargetAttack' && term.valueSourceId !== actor.id
           )))
           for (const term of defenseScalingTerms) addConversionTotal(conversionTotals, term)
+          for (const term of hpScalingTerms) addConversionTotal(conversionTotals, term)
         } else {
           symbolicTotals[rawStep.stat] = (symbolicTotals[rawStep.stat] ?? 0) + effectivePercent
         }
@@ -654,7 +662,7 @@ export function runRaidProgram(program) {
           elementAdvantageRate, bossDamageReductionRate,
           defenseMultiplier: defense.multiplier, defense,
           effectivePercent: normalizedEffectivePercent, effectivePercentBeforeSourceAttack: effectivePercent,
-          normalizedDefensePercent, normalizedSourceAttackPercent, scalingTerms, modifierSources: modifiers.sources,
+          normalizedDefensePercent, normalizedHpPercent, normalizedSourceAttackPercent, scalingTerms, modifierSources: modifiers.sources,
           bossStatusBefore: bossBefore, bossStatusAfter: bossAfter,
         })
       }

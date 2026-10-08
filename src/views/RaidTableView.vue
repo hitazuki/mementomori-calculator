@@ -168,6 +168,22 @@
         <span><strong>{{ $t('raidWitchIllyaCurseUnleashedRound') }}</strong><small>{{ $t('raidWitchIllyaCurseUnleashedRoundHint') }}</small></span>
         <span class="raid-number-input"><input v-model.number="activationRounds.witchIllyaCurseUnleashed" type="number" min="1" max="10" step="1" @change="normalizeActivationRound('witchIllyaCurseUnleashed')"><em>{{ $t('raidRoundUnit') }}</em></span>
       </label>
+      <template v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.APOSTLE_ROSALIE)">
+        <label class="raid-toggle-control">
+          <input v-model="rosalieEarlyMemory" type="checkbox">
+          <span><strong>{{ $t('raidRosalieEarlyMemory') }}</strong><small>{{ $t('raidRosalieMemoryHint') }}</small></span>
+        </label>
+        <label class="raid-number-control raid-select-control">
+          <span><strong>{{ $t('raidRosalieMemoryRound') }}</strong><small>{{ $t('raidRosalieMemoryHint') }}</small></span>
+          <select v-model.number="rosalieMemoryRound" :disabled="!rosalieEarlyMemory">
+            <option v-for="round in RAID_ACTIVATION_ROUND_LIMITS.apostleRosalieMemory" :key="round" :value="round">{{ $t('raidTurn', { n: round }) }}</option>
+          </select>
+        </label>
+        <label class="raid-toggle-control">
+          <input v-model="probabilityOverrides.apostleRosalieDamageTaken" type="checkbox">
+          <span><strong>{{ $t('raidAssumeRosalieDamageTaken') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+        </label>
+      </template>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.CANDY_CERBERUS)" class="raid-number-control">
         <span><strong>{{ $t('raidCandyCerberusReviveRound') }}</strong><small>{{ $t('raidCandyCerberusReviveRoundHint') }}</small></span>
         <span class="raid-number-input"><input v-model.number="activationRounds.candyCerberusKindMagic" type="number" min="1" max="10" step="1" @change="normalizeActivationRound('candyCerberusKindMagic')"><em>{{ $t('raidRoundUnit') }}</em></span>
@@ -328,6 +344,7 @@
             <small v-if="step.defense.applies && nonzero(step.defenseMultiplier - 1)">{{ stepDefenseSources(step) }}</small>
             <small v-if="step.defense.applies && nonzero(step.defenseMultiplier - 1)">{{ $t('raidStepPenetrationValues', { level: step.defense.attackerLevel, defense: formatter().format(step.defense.defensePenetration), pm: formatter().format(step.defense.pmDefensePenetration) }) }}{{ stepPenetrationSources(step) }}</small>
             <small v-if="nonzero(step.normalizedDefensePercent)" class="raid-converted-stat">{{ stepDefenseConversionText(step) }}</small>
+            <small v-if="nonzero(step.normalizedHpPercent)" class="raid-converted-stat">{{ stepHpConversionText(step) }}</small>
           </article>
         </div>
         <p v-else class="raid-muted">{{ $t('raidNoDamageSteps') }}</p>
@@ -586,7 +603,7 @@
 <script setup>
 import { computed, defineComponent, h, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
+import { RAID_ACTIVATION_ROUND_LIMITS, RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
 import { loadRaidCharacterMbTexts } from '../constants/raid/characterMbTexts.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
@@ -672,6 +689,11 @@ const elementAdvantage = ref(defaults.elementAdvantage)
 const probabilityOverrides = reactive({ ...defaults.probabilityOverrides })
 const targetHpBelow50 = reactive({ ...defaults.targetHpBelow50 })
 const activationRounds = reactive({ ...defaults.activationRounds })
+const rosalieEarlyMemory = ref(false)
+const rosalieMemoryRound = computed({
+  get: () => rosalieEarlyMemory.value ? activationRounds.apostleRosalieMemory : 6,
+  set: value => { activationRounds.apostleRosalieMemory = value },
+})
 const scenarioTiers = reactive({ ...defaults.scenarioTiers })
 const siviDamageTiers = Object.freeze([
   { hits: 0, rate: 30 }, { hits: 1, rate: 54 }, { hits: 2, rate: 72 }, { hits: 3, rate: 84 }, { hits: 4, rate: 90 },
@@ -725,7 +747,9 @@ const result = computed(() => lineup.value.length ? simulateRaidTable({
   elementAdvantage: elementAdvantage.value,
   probabilityOverrides,
   targetHpBelow50: { ...targetHpBelow50 },
-  activationRounds: Object.fromEntries(Object.keys(activationRounds).map(key => [key, normalizedActivationRound(key)])),
+  activationRounds: Object.fromEntries(Object.keys(activationRounds).map(key => [key,
+    key === 'apostleRosalieMemory' && !rosalieEarlyMemory.value ? 6 : normalizedActivationRound(key),
+  ])),
   scenarioTiers: { ...scenarioTiers },
   turns: 10,
 }) : null)
@@ -733,6 +757,7 @@ const currentSpeedOrder = computed(() => result.value?.rounds[0]?.speedOrder ?? 
 const manualOrderCount = computed(() => result.value?.rounds.filter(round => round.orderSource === 'manual').length ?? 0)
 
 const probabilityScenarioDefinitions = Object.freeze([
+  [RAID_TABLE_CHARACTER_IDS.APOSTLE_ROSALIE, 'apostleRosalieDamageTaken', 'raidAssumeRosalieDamageTaken'],
   [RAID_TABLE_CHARACTER_IDS.LIBERIA, 'liberiaSand', 'raidAssumeLiberiaSand'],
   [RAID_TABLE_CHARACTER_IDS.SPRING_SHIZU, 'shizuSpeedDown', 'raidAssumeShizuSpeedDown'],
   [RAID_TABLE_CHARACTER_IDS.GUINEVERE, 'guinevereDamageTaken', 'raidAssumeGuinevereDamageTaken'],
@@ -797,7 +822,7 @@ function counterLabel(id, key) { return t(RAID_TABLE_CHARACTERS[id].counterLabel
 function formatter(maximumFractionDigits = 2) { return new Intl.NumberFormat(locale.value, { maximumFractionDigits, minimumFractionDigits: 0 }) }
 function roundCriticalDamagePercent(value) { return Number((Number(value) || 0).toFixed(1)) }
 function normalizeCriticalDamagePercent(id) { criticalDamagePercents[id] = roundCriticalDamagePercent(criticalDamagePercents[id]) }
-function normalizedActivationRound(key) { return Math.min(10, Math.max(1, Math.trunc(Number(activationRounds[key]) || defaults.activationRounds[key] || 1))) }
+function normalizedActivationRound(key) { return Math.min(RAID_ACTIVATION_ROUND_LIMITS[key] ?? 10, Math.max(1, Math.trunc(Number(activationRounds[key]) || defaults.activationRounds[key] || 1))) }
 function normalizeActivationRound(key) { activationRounds[key] = normalizedActivationRound(key) }
 function formatPercent(value) { return `${formatter().format(value)}% ATK` }
 function formatRate(value) { return `${formatter().format(value * 100)}%` }
@@ -816,9 +841,10 @@ function conversionSourceEntries(totals, ownerId = null) { return conversionEntr
 function formatConversionTotal(term) { return `+ ${formatStat(term.value, term.stat)}` }
 function formatConversionExportTotals(totals) { return conversionStatEntries(totals).map(term => formatStat(term.value, term.stat)) }
 function formatConversionSources(terms) { return terms.map(term => `${formatStat(term.value, term.stat)}（${valueSourceText(term.sourceId, term.stat)}）`).join(' + ') }
-function valueSourceText(sourceId, stat = 'ATK') { return t(stat === 'DEF' ? 'raidValueSourceDefense' : 'raidValueSourceAttack', { source: characterName(sourceId) }) }
+function valueSourceText(sourceId, stat = 'ATK') { return t(stat === 'HP' ? 'raidValueSourceHp' : stat === 'DEF' ? 'raidValueSourceDefense' : 'raidValueSourceAttack', { source: characterName(sourceId) }) }
 function formatScalingTerm(term, ownerId = null) {
   if (term.kind === 'targetBaseDefenseOverTargetAttack') return `${formatStat(term.coefficient, 'DEF')}${term.valueSourceId === ownerId ? '' : `（${valueSourceText(term.valueSourceId, 'DEF')}）`}`
+  if (term.kind === 'sourceMaxHpOverTargetAttack') return `${formatStat(term.coefficient, 'HP')}${term.valueSourceId === ownerId ? '' : `（${valueSourceText(term.valueSourceId, 'HP')}）`}`
   const source = term.kind === 'sourceAttackOverTargetAttack' ? `（${valueSourceText(term.valueSourceId ?? term.sourceId)}）` : ''
   return `${formatter().format(term.coefficient)}% ATK×(${term.key})${source}`
 }
@@ -869,6 +895,7 @@ function formatCharacterEffectRate({ channel, rate, valueSpec }) {
 const characterEffectTargetKeys = {
   self: 'raidCharacterTargetSelf', boss: 'raidCharacterTargetBoss', eventSource: 'raidCharacterTargetEventSource',
   all: 'raidCharacterTargetAllAllies', allOther: 'raidCharacterTargetAllOtherAllies', adjacent: 'raidCharacterTargetAdjacentAllies',
+  selfAndFasterAllies: 'raidCharacterTargetSelfAndFasterAllies',
   topAttack: 'raidCharacterTargetTopAttack', topAttackOther: 'raidCharacterTargetTopAttackOther', selfAndTopAttackOther: 'raidCharacterTargetSelfAndTopAttackOther',
   lowestSpeed: 'raidCharacterTargetLowestSpeed', lowestSpeedOther: 'raidCharacterTargetLowestSpeedOther', lowestSpeedOthers: 'raidCharacterTargetLowestSpeedOthers', selfAndLowestSpeedOthers: 'raidCharacterTargetSelfAndLowestSpeedOthers',
   highestSpeedOther: 'raidCharacterTargetHighestSpeedOther', highestBuffCount: 'raidCharacterTargetHighestBuffCount', highestBuffCountOther: 'raidCharacterTargetHighestBuffCountOther',
@@ -930,6 +957,8 @@ function characterConditionText(condition) {
     eventSourceHasStatus: 'raidCharacterConditionEventSourceHasStatus', eventSourceIsOwner: 'raidCharacterConditionEventSourceIsOwner',
     eventTargetsIncludeOwner: 'raidCharacterConditionEventTargetsIncludeOwner', guaranteedCritical: 'raidCharacterConditionGuaranteedCritical',
     otherLineupElementCountAtLeast: 'raidCharacterConditionOtherElementCountAtLeast', probabilityEnabled: 'raidCharacterConditionProbabilityEnabled',
+    otherLineupElementInCountAtLeast: 'raidCharacterConditionOtherElementsCountAtLeast',
+    lineupElementCountAtMost: 'raidCharacterConditionLineupElementCountAtMost',
     roundAtLeast: 'raidCharacterConditionRoundAtLeast', roundAtMost: 'raidCharacterConditionRoundAtMost',
     skillUsesAtLeast: 'raidCharacterConditionSkillUsesAtLeast', skillUsesAtMost: 'raidCharacterConditionSkillUsesAtMost',
     targetElementIn: 'raidCharacterConditionTargetElementIn', targetElementNot: 'raidCharacterConditionTargetElementNot',
@@ -939,7 +968,7 @@ function characterConditionText(condition) {
   const text = t(keys[condition.type] ?? 'raidCharacterConditionUnknown', args)
   const reference = condition.statusId ? detailStatusName(condition.statusId)
     : condition.counter ? counterLabel(selectedCharacterDetail.value.id, condition.counter)
-    : condition.key ? t(probabilityScenarioDefinitions.find(([, key]) => key === condition.key)?.[2] ?? { witchIllyaCurseUnleashed: 'raidWitchIllyaCurseUnleashedRound', candyCerberusKindMagic: 'raidCandyCerberusReviveRound' }[condition.key] ?? condition.key) : ''
+    : condition.key ? t(probabilityScenarioDefinitions.find(([, key]) => key === condition.key)?.[2] ?? { witchIllyaCurseUnleashed: 'raidWitchIllyaCurseUnleashedRound', candyCerberusKindMagic: 'raidCandyCerberusReviveRound', apostleRosalieMemory: 'raidRosalieMemoryRound' }[condition.key] ?? condition.key) : ''
   return reference ? `${text} (${reference})` : text
 }
 function characterEffectConditionText(effect) {
@@ -951,7 +980,7 @@ function characterEffectDetailText(effect) {
   const parts = [...effect.modifiers.map(formatCharacterEffectRate), ...effect.bossRates.map(rate => t('raidDetailPerStack', { value: formatCharacterEffectRate(rate) }))]
   const definition = effect.definition ?? {}
   if (definition.detailKey) parts.push(t(definition.detailKey))
-  for (const modifier of definition.symbolicModifiers ?? []) parts.push(t(modifier.kind === 'sourceAttackOverTargetAttack' ? 'raidDetailSymbolicAttack' : 'raidDetailSymbolicDefense', {
+  for (const modifier of definition.symbolicModifiers ?? []) parts.push(t(modifier.kind === 'sourceMaxHpOverTargetAttack' ? 'raidDetailSymbolicHp' : modifier.kind === 'sourceAttackOverTargetAttack' ? 'raidDetailSymbolicAttack' : 'raidDetailSymbolicDefense', {
     value: detailValueText(modifier.coefficient), source: characterName(modifier.sourceId ?? selectedCharacterDetail.value.id),
   }))
   if (effect.targetElement != null) parts.push(t('raidDetailFilterBefore'))
@@ -1087,6 +1116,9 @@ function activeRaidScenarioLines() {
       if (result.value.config.targetHpBelow50[id]) lines.push(t('raidMerlynTargetLowHp', { target: characterName(id) }))
     }
   }
+  if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.APOSTLE_ROSALIE)) {
+    lines.push(`${t('raidRosalieMemoryRound')}：${t('raidTurn', { n: result.value.config.activationRounds.apostleRosalieMemory })}`)
+  }
   if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.WITCH_ILLYA)) {
     lines.push(`${t('raidWitchIllyaCurseUnleashedRound')}：${t('raidTurn', { n: result.value.config.activationRounds.witchIllyaCurseUnleashed })}`)
   }
@@ -1168,6 +1200,7 @@ function resetConfig() {
   Object.assign(pmDefensePenetrations, next.pmDefensePenetrations)
   Object.assign(criticalDamagePercents, Object.fromEntries(Object.entries(next.criticalDamageBonuses).map(([id, value]) => [id, roundCriticalDamagePercent(value * 100)])))
   Object.assign(activationRounds, next.activationRounds)
+  rosalieEarlyMemory.value = false
   Object.assign(scenarioTiers, next.scenarioTiers)
   Object.assign(targetHpBelow50, next.targetHpBelow50)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
@@ -1274,6 +1307,11 @@ function stepDefenseConversionText(step) {
   if (step.formationDefenseRate) sources.push(`${t('raidElementBonusTitle')} ${t('raidDefenseRate')} ${signedRate(step.formationDefenseRate)}`)
   return t('raidStepDefenseConversion', { value: formatStat(step.normalizedDefensePercent, 'DEF'), sources: sources.join('；') })
 }
+function stepHpConversionText(step) {
+  const sources = step.symbolicModifierSources.filter(source => source.kind === 'sourceMaxHpOverTargetAttack' && source.coefficient)
+    .map(source => `${t(source.nameKey)} ${formatRate(source.coefficient)} ${valueSourceText(source.valueSourceId, 'HP')}`)
+  return t('raidStepHpConversion', { value: formatStat(step.normalizedHpPercent, 'HP'), sources: sources.join('；') })
+}
 
 function bossStatusLabel(status) {
   const source = status.sourceId != null ? `${characterName(status.sourceId)} · ` : ''
@@ -1310,8 +1348,8 @@ function statusValueSummary(status) {
   const symbolic = (status.symbolicModifiers ?? []).flatMap(modifier => {
     const coefficient = modifier.displayCoefficient ?? modifier.copyCoefficient ?? modifier.coefficient
     if (!Number.isFinite(coefficient)) return []
-    return [t(modifier.kind === 'sourceAttackOverTargetAttack' ? 'raidDetailSymbolicAttack' : 'raidDetailSymbolicDefense', {
-      value: formatRate(coefficient), source: modifier.kind === 'sourceAttackOverTargetAttack' ? characterName(modifier.sourceId) : '',
+    return [t(modifier.kind === 'sourceMaxHpOverTargetAttack' ? 'raidDetailSymbolicHp' : modifier.kind === 'sourceAttackOverTargetAttack' ? 'raidDetailSymbolicAttack' : 'raidDetailSymbolicDefense', {
+      value: formatRate(coefficient), source: modifier.kind !== 'targetBaseDefenseOverTargetAttack' ? characterName(modifier.sourceId) : '',
     })]
   })
   return [...rates, ...symbolic].join(' · ')

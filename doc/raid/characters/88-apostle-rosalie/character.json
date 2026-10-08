@@ -1,0 +1,247 @@
+{
+  "formatVersion": 1,
+  "characterId": 88,
+  "slug": "apostle-rosalie",
+  "build": {
+    "level": 240,
+    "exclusive": "EX3"
+  },
+  "sources": {
+    "activeSkillIds": [
+      88001,
+      88002,
+      88101
+    ],
+    "passiveSkillIds": [
+      88003,
+      88004,
+      88005
+    ],
+    "combatLogs": []
+  },
+  "terms": [
+    {
+      "kind": "activeSkill",
+      "sourceId": 88001,
+      "model": "implemented",
+      "summary": "S1 240% ATK single-dummy magic projection of five targets; 70% damage-taken +10% before damage, two rounds."
+    },
+    {
+      "kind": "activeSkill",
+      "sourceId": 88002,
+      "model": "implemented",
+      "summary": "S2 10×180% magic; checks pre-action Memory and consumes all 15 stacks before empowered damage."
+    },
+    {
+      "kind": "activeSkill",
+      "sourceId": 88101,
+      "model": "implemented",
+      "summary": "One-time empowered S2: 10×180%; after damage reduces two adjacent allies cooldowns by 2 and grants 10% source base-max-HP ATK for two target actions."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 88003,
+      "model": "implemented",
+      "summary": "Starts at 1 Memory; +3 at round start from round 2. Configured full-stack round 1–6 replaces unmodeled incoming allied debuffs. First 15-stack reward grants permanent self HP-to-ATK, cleanses 2 debuffs, and grants a two-action shield. No regrowth after S2 consumption."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 88004,
+      "model": "implemented",
+      "summary": "Two-action unremovable opening barrier on self and two adjacent allies; incoming-damage threshold and blocking amount not calculated."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 88005,
+      "model": "implemented",
+      "summary": "Hidden S2-upgrade condition is represented by pre-action Memory>=15, not a separately visible state."
+    }
+  ],
+  "effectGroups": [
+    {
+      "id": 8800120101,
+      "model": "outOfScope",
+      "summary": "被ダメージが10%増加する。 Lower skill/exclusive tier, not the selected Lv240/EX3 build."
+    },
+    {
+      "id": 8800130101,
+      "model": "implemented",
+      "summary": "被ダメージが10%増加する。 Runtime state; class derived from explicit unremovable text except S1 Boss debuff."
+    },
+    {
+      "id": 8800200101,
+      "model": "ignored",
+      "summary": "*『スキル2強化』を付与する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800200102,
+      "model": "ignored",
+      "summary": "*『スキル2強化』を解除する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800200401,
+      "model": "ignored",
+      "summary": "*『記憶』と『スキル2強化』を解除する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800200701,
+      "model": "ignored",
+      "summary": "*スキルクールタイムカウントを1減少させる。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800220702,
+      "model": "implemented",
+      "summary": "攻撃力がステータス増減前の付与者の最大HP×10%分増加する（解除不可）。 Runtime state; class derived from explicit unremovable text except S1 Boss debuff."
+    },
+    {
+      "id": 8800230701,
+      "model": "ignored",
+      "summary": "*スキルクールタイムカウントを2減少させる。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300101,
+      "model": "implemented",
+      "summary": "[記憶]スタック数が15になるとエンジェルレイの代わりにソウルサクリファイスを発動する（解除不可）。現在のスタック数：{stack} Runtime state; class derived from explicit unremovable text except S1 Boss debuff."
+    },
+    {
+      "id": 8800300301,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が1増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300302,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が2増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300303,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が3増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300304,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が4増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300305,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が5増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300306,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が6増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300307,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が7増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300308,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が8増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300309,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が9増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300310,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が10増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300311,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が11増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300312,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が12増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300313,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が13増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300314,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が14増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300315,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が15増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800300316,
+      "model": "implemented",
+      "summary": "攻撃力がステータス増減前の自身の最大HP×10%分増加する（解除不可）。 Runtime state; class derived from explicit unremovable text except S1 Boss debuff."
+    },
+    {
+      "id": 8800300317,
+      "model": "ignored",
+      "summary": "*[印] Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800320201,
+      "model": "ignored",
+      "summary": "*『記憶』のスタック数が3増加する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800330318,
+      "model": "ignored",
+      "summary": "*弱体効果を2つ解除する。 Hidden execution marker represented by counters/conditions or outside incoming-event modeling."
+    },
+    {
+      "id": 8800330319,
+      "model": "implemented",
+      "summary": "[シールド] ステータス増減前の最大HP×80%分のダメージを代わりに受ける（解除不可）。 Runtime state; class derived from explicit unremovable text except S1 Boss debuff."
+    },
+    {
+      "id": 8800400101,
+      "model": "outOfScope",
+      "summary": "[結界] 最大HP×20%を超えた分のダメージをステータス増減前の付与者の最大HP×20%分遮断する（解除不可）。 Lower skill/exclusive tier, not the selected Lv240/EX3 build."
+    },
+    {
+      "id": 8800420101,
+      "model": "outOfScope",
+      "summary": "[結界] 最大HP×20%を超えた分のダメージをステータス増減前の付与者の最大HP×20%分遮断する（解除不可）。 Lower skill/exclusive tier, not the selected Lv240/EX3 build."
+    },
+    {
+      "id": 8800440101,
+      "model": "implemented",
+      "summary": "[結界] 最大HP×20%を超えた分のダメージをステータス増減前の付与者の最大HP×50%分遮断する（解除不可）。 Runtime state; class derived from explicit unremovable text except S1 Boss debuff."
+    }
+  ],
+  "ignored": [
+    {
+      "key": "raidIgnoredShield",
+      "summary": "Shield values not calculated; unremovable shield state retained."
+    },
+    {
+      "key": "raidIgnoredIncomingDamageReduction",
+      "summary": "Barrier incoming damage and blocking values not calculated; state retained."
+    },
+    {
+      "key": "raidIgnoredApostleRosalieIncomingDebuffs",
+      "summary": "Enemy actions and incoming active-skill debuff events not simulated; user chooses the round to reach 15 Memory stacks."
+    }
+  ],
+  "unresolved": [
+    {
+      "summary": "No combat logs confirm SkillCategory, granter and settlement order. Selected early-full round is a round-start project approximation; actual incoming debuffs could occur within a round."
+    },
+    {
+      "summary": "Text says max HP before stat changes; HP0 is kept as an independent source unit with formation HP included, without inventing an HP/ATK ratio or applying transient max-HP buffs."
+    },
+    {
+      "summary": "Remote MB has no SubSetSkillMB/SubSkillMB files; damage-after cooldown and ATK ordering follows the skill text. The permanent self ATK status remains after Memory consumption because no removal is specified."
+    }
+  ]
+}

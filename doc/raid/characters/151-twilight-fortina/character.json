@@ -1,0 +1,129 @@
+{
+  "formatVersion": 1,
+  "characterId": 151,
+  "slug": "twilight-fortina",
+  "build": {
+    "level": 240,
+    "exclusive": "EX3"
+  },
+  "sources": {
+    "activeSkillIds": [
+      151001,
+      151002
+    ],
+    "passiveSkillIds": [
+      151003,
+      151004,
+      151005
+    ],
+    "combatLogs": []
+  },
+  "terms": [
+    {
+      "kind": "activeSkill",
+      "sourceId": 151001,
+      "model": "implemented",
+      "summary": "S1 CD4, 480% physical against five targets, single-dummy one hit. Two independent unremovable defensive states for self and strictly faster effective-speed allies before damage; values ignored."
+    },
+    {
+      "kind": "activeSkill",
+      "sourceId": 151002,
+      "model": "implemented",
+      "summary": "S2 CD4, five 610% physical hits; emits one self-targeted active heal only after all damage."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 151003,
+      "model": "implemented",
+      "summary": "Opening permanent team speed+10% for at most two distinct actual attributes (Light is distinct). Independent round-two one-shot source-ATK×30% buff to self and top two other allies for three target actions."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 151004,
+      "model": "implemented",
+      "summary": "First-round action-start unremovable three-action Devotion state; sharing and damage blocking ignored."
+    },
+    {
+      "kind": "passiveSkill",
+      "sourceId": 151005,
+      "model": "implemented",
+      "summary": "UR weapon hidden passive grants two unremovable Multi-Barrier layers at battle start; threshold and consumption ignored."
+    }
+  ],
+  "effectGroups": [
+    {
+      "id": 15100100101,
+      "model": "outOfScope",
+      "summary": "防御力が自身の防御力×25%増加する（解除不可）。 Lower selected-skill/weapon tier, not Lv240/EX3."
+    },
+    {
+      "id": 15100120201,
+      "model": "outOfScope",
+      "summary": "物理防御力が自身の物理防御力×25%増加する。魔法防御力が自身の魔法防御力×25%増加する（解除不可）。 Lower selected-skill/weapon tier, not Lv240/EX3."
+    },
+    {
+      "id": 15100140101,
+      "model": "implemented",
+      "summary": "防御力が自身の防御力×50%増加する（解除不可）。 Independent unremovable runtime state."
+    },
+    {
+      "id": 15100140201,
+      "model": "implemented",
+      "summary": "物理防御力が自身の物理防御力×50%増加する。魔法防御力が自身の魔法防御力×50%増加する（解除不可）。 Independent unremovable runtime state."
+    },
+    {
+      "id": 15100300101,
+      "model": "implemented",
+      "summary": "スピードが10%増加する（解除不可）。 Independent unremovable runtime state."
+    },
+    {
+      "id": 15100320201,
+      "model": "outOfScope",
+      "summary": "攻撃力が15%増加する（解除不可）。 Lower selected-skill/weapon tier, not Lv240/EX3."
+    },
+    {
+      "id": 15100330201,
+      "model": "implemented",
+      "summary": "攻撃力が30%増加する（解除不可）。 Independent unremovable runtime state."
+    },
+    {
+      "id": 15100400101,
+      "model": "implemented",
+      "summary": "自身に「献身」を付与する（解除不可）。自身以外の味方が受けるダメージ×50%を自身が代わりに受ける。 Independent unremovable runtime state."
+    },
+    {
+      "id": 15100500101,
+      "model": "implemented",
+      "summary": "[多重バリア] 最大HP×10%以上のダメージを1層消費して無効化する（解除不可）。 Independent unremovable runtime state."
+    }
+  ],
+  "ignored": [
+    {
+      "key": "raidIgnoredDefenseBuff",
+      "summary": "DEF, physical/magic DEF transfer values not calculated; states and speed recipients retained."
+    },
+    {
+      "key": "raidIgnoredHealing",
+      "summary": "S2 healing amount ignored; post-damage event retained."
+    },
+    {
+      "key": "raidIgnoredTwilightFortinaDevotion",
+      "summary": "Incoming damage sharing and 65% blocking not simulated; Devotion state retained."
+    },
+    {
+      "key": "raidIgnoredBarrierDamageNullification",
+      "summary": "Two-layer barrier state retained; damage threshold, consumption and blocking not simulated."
+    }
+  ],
+  "unresolved": [
+    {
+      "summary": "No available battle log includes UnitId151; classes follow explicit cannot-be-dispelled text and phase/duration follow existing project conventions."
+    },
+    {
+      "summary": "Skill text specifies source ATK×30% while EffectGroup Memo abbreviates ATK+30%. Source ownership is preserved using the existing normalized source-ATK symbol; exact source panel/buff snapshot at round two needs a controlled log."
+    },
+    {
+      "summary": "The faster-ally selector uses current effective speed at application; game comparison timing and compensation lack a controlled log."
+    }
+  ]
+}
