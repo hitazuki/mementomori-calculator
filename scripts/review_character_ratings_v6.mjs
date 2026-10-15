@@ -7,7 +7,7 @@ import { defenseInitiative } from './lib/characterInitiative.mjs'
 import { fourEvents } from '../doc/character-ratings/v6/four-events.mjs'
 import { characterOutputRole } from './lib/characterOutputRole.mjs'
 import { targetAvoidance } from '../doc/character-ratings/v6/target-avoidance.mjs'
-import { outputCopy, cleanRatingCopy } from '../doc/character-ratings/v6/copy.mjs'
+import { outputCopy, outputReasonOverrides, cleanRatingCopy } from '../doc/character-ratings/v6/copy.mjs'
 import { RATING_AXES, RATING_VERSION, ratingSource } from '../src/utils/characterRatings.js'
 import { compareSurvival } from '../src/utils/characterSurvival.js'
 import { lower, opening, upper, quick, defenseScores, lateCost, reviewNotes } from '../doc/character-ratings/v6/stages.mjs'
@@ -94,6 +94,7 @@ const records=catalog.filter(c=>previous.some(r=>r.id===c.id)||newCharacters[c.i
     `等效生命${hasShield?'（护盾耗尽后）':''}：${capacityText(finite,false)}。${life.replenishment==='无补充渠道'?'':life.replenishment+'；'}${life.afterExpiry}。`,
     ...auxiliary.map(a=>a.key==='protection'&&care?care.reason:a.key==='protection'&&targetAvoidance[c.id]?.protection?targetAvoidance[c.id].protection:a.key==='protection'&&c.id===97?'P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化，不当作稳定群疗。':a.reason),
   ]
+  for(const [i,key] of ['burst','late'].entries()) reasons[i]=outputReasonOverrides[c.id]?.[key]?.({stages,equivalent})??reasons[i]
   const axes=RATING_AXES.map((key,i)=>{
     const base=i===0?Math.max(openingBand,quickBand):i===1?Math.max(...bases):i===2?defenseBase[0]:values[i]
     return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:cleanRatingCopy(key,reasons[i]),evidence,

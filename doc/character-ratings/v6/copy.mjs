@@ -1,5 +1,11 @@
 // Dimension-specific display copy. Original inputs/evidence remain in review.json.
 // Do not move defensive growth or general rubric explanations into output reasons.
+export const outputReasonOverrides = {
+  155: {
+    burst: ({stages, equivalent}) => `等效技能倍率参照（单敌／五敌总计）：开局前两行动合计${equivalent(stages.opening.openingDamage[0])}／${equivalent(stages.opening.openingDamage[1])}，平均每行动${equivalent(stages.opening.openingDamage[0]/2)}／${equivalent(stages.opening.openingDamage[1]/2)}。满加攻、S2目标弱化且易伤生效时，S1与S2分别计算后的条件合计${equivalent(stages.quick.openingDamage[0])}／${equivalent(stages.quick.openingDamage[1])}；此项不代表开局连续两行动，也未计冷却普攻。`,
+    late: ({stages, equivalent}) => `等效技能倍率参照（含冷却普攻的完整循环，平均每行动）：单敌${equivalent(stages.lower.snapshots[0].perAction)}→${equivalent(stages.mature.snapshots[0].perAction)}，五敌总计${equivalent(stages.lower.snapshots[1].perAction)}→${equivalent(stages.mature.snapshots[1].perAction)}（基础→满条件）。满条件指第2回合已结算生效前攻击力50%的加攻上限、目标已有弱化且40%易伤生效；任意弱化只触发S2的540%倍率。S1的70%易伤概率按28%期望增伤作简化参照，不视为逐段精确期望。`,
+  },
+}
 export const outputCopy = {
   157:'暂定：不计缺失的专武被动属性。S1为640%五目标群攻；S2前两次320%单体5连击，第3次960%、第4次起1280%。自身指引每回合10%攻击，第6回合满60%；后期输出不预支为首轮。',
   155:'S1为320%随机8连击；S2为360%随机10连击，已有弱化时540%。基础样本不计弱化；开局S1易伤按70%概率折为28%期望增伤，S2不假定全部目标已弱化。第2回合来源加攻按实际首回合自损结算，上限为生效前攻击50%。',

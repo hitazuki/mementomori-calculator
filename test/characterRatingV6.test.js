@@ -56,7 +56,10 @@ test('Guardian Alexandra keeps first-round self-harm, conditional damage and exp
   assert.ok(Math.abs(r.survival.initiative.effectiveSpeed-3114*1.3)<1e-9)
   assert.equal(r.output.role,'随机连击')
   assert.match(r.axes[4].reason,/仅一次且自身死亡即解除/)
-  assert.match(r.axes[1].reason,/基础样本不计弱化/)
+  assert.match(r.axes[0].reason,/不代表开局连续两行动/)
+  assert.doesNotMatch(r.axes[0].reason,/阻绝|0\.59/)
+  assert.match(r.axes[1].reason,/含冷却普攻的完整循环，平均每行动/)
+  assert.match(r.axes[1].reason,/任意弱化只触发S2/)
 })
 
 test('Aine full-team Shields unlock the second-action burst without assuming shields survive',()=>{
