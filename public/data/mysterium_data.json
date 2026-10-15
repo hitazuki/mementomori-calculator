@@ -2304,5 +2304,30 @@
         "val": 40
       }
     ]
+  },
+  {
+    "id": 102,
+    "nameKey": "[CharacterCollectionName102]",
+    "reqCids": [
+      155,
+      82,
+      0
+    ],
+    "params": [
+      {
+        "ptype": 17,
+        "nameKey": "[BattleParameterTypeDamageReflect]",
+        "ctype": 2,
+        "val": 300
+      }
+    ],
+    "baseParams": [
+      {
+        "ptype": 1,
+        "nameKey": "appBasicStr",
+        "ctype": 3,
+        "val": 70
+      }
+    ]
   }
 ]
