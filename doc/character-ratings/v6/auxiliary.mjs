@@ -1,5 +1,13 @@
 // Explicit v6 editorial reviews; preserve v5 assessments as historical evidence.
 export const auxiliaryReviews = {
+  65: {
+    reviewedAt: '2026-10-15',
+    protection: {
+      score: 9,
+      reason: 'P1与W回合开始为全队补专长护盾：自身1500%→1700%，其他友军600%→800%；盾持续3回合，每结束1次行动后可再触发，新盾替换旧盾。持盾者抗暴率+60%；S1有概率使3名主攻敌人暴率降低30%，持续2回合。',
+      reviewBasis: '2026-10-15 MB将两名主攻手保护扩大至全队，其他友军护盾由300%→500%提高为600%→800%。统一专长0.25、生命3时，每名其他友军原始盾为50%→66.7%基准生命；持续3回合且每1次自身行动后可再补、不可驱散，广覆盖直接防护升至9分。盾可提前耗尽，替换不叠加，抗暴不视为固定减伤；S1仍需弱化命中，因此不评10分。',
+    },
+  },
   6: {
     reviewedAt: '2026-10-02',
     support: {

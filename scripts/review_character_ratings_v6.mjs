@@ -14,6 +14,7 @@ import { lower, opening, upper, quick, defenseScores, lateCost, reviewNotes } fr
 import { readCharacterCatalog } from './lib/characterCatalog.mjs'
 import { newCharacters } from '../doc/character-ratings/v6/new-characters.mjs'
 import { auxiliaryReviews } from '../doc/character-ratings/v6/auxiliary.mjs'
+import { sourceUpdates } from '../doc/character-ratings/v6/source-updates.mjs'
 import { referenceFor } from './lib/characterRatingV5.mjs'
 
 const root=new URL('../',import.meta.url), read=p=>JSON.parse(fs.readFileSync(new URL(p,root),'utf8'))
@@ -41,10 +42,13 @@ function capacityText(states,withShield=true) {
 const roleValues=snapshots=>snapshots.map((s,i)=>s.perAction/(i?3:1))
 const merge=(a={},b={})=>({...a,...b,effects:{...a.effects,...b.effects},components:{...a.components,...b.components},
   slots:Object.fromEntries(['S1','S2','N'].map(k=>[k,{...a.slots?.[k],...b.slots?.[k]}])),scenarios:{...a.scenarios,...b.scenarios}})
-const records=catalog.map(c=>{
+// Newly synced characters remain pending until an authored review exists.
+const records=catalog.filter(c=>previous.some(r=>r.id===c.id)||newCharacters[c.id]).map(c=>{
   const authored=newCharacters[c.id]
-  const old=previous.find(r=>r.id===c.id)??(authored?{sourceHash:authored.sourceHash,conditions:authored.conditions,tags:authored.tags,auxiliary:authored.auxiliary,id:c.id,name:c.title+' · '+c.name,
+  const historical=previous.find(r=>r.id===c.id)??(authored?{sourceHash:authored.sourceHash,conditions:authored.conditions,tags:authored.tags,auxiliary:authored.auxiliary,id:c.id,name:c.title+' · '+c.name,
     output:referenceFor(c,{authored}),survival:{states:authored.states,effectiveSustain:authored.lifecycle.replenishment+'；'+authored.lifecycle.afterExpiry}}:null)
+  const update=sourceUpdates[c.id]
+  const old=update?{...historical,...update,output:{...historical.output,...update.output}}:historical
   const hash=createHash('sha256').update(JSON.stringify(ratingSource(c))).digest('hex')
   if(!old||(old.sourceHash!==hash && hash!==reviewedSources[c.id])) throw new Error('Source changed; review stage inputs first: '+c.id)
   const weapon=weaponReference(c)

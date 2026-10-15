@@ -138,7 +138,13 @@ test('all 134 v5 assessments retain six decisions, reproducible final references
     if(current.has(r.id)) {
       // v5 predates both Cusie's recovered weapon text and the equipment rows
       // added on 2026-09-15. Reproduce that historical input, not the v6 review.
-      const historical=r.id===97?{...character(r.id),exclusiveEffects:[],exclusivePassives:[]}:character(r.id)
+      let historical=r.id===97?{...character(r.id),exclusiveEffects:[],exclusivePassives:[]}:character(r.id)
+      // Aine's 2026-10-15 team Shield buff is reviewed in v6; v5 retains
+      // the complete pre-buff source and must reproduce its original hash.
+      if(r.id===65) {
+        const source=read('../doc/character-ratings/v5/sources/65.json')
+        historical={...historical,...source,exclusivePassives:[source.exclusivePassive]}
+      }
       assert.deepEqual(r.output,referenceFor(historical))
       assert.equal(r.sourceHash,createHash('sha256').update(JSON.stringify(ratingSource(historical))).digest('hex'))
     }

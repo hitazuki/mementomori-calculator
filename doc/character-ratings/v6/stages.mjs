@@ -15,7 +15,7 @@ export const lower = {
   52:{},55:skill(null,'8,1,1'),56:skill('8,2,0',null),
   58:skill(null,'2,7,0'),59:attack(0),60:{pastDamageHp:0},
   61:{...skill('2.4,10,1+5.8,1,1','0,1,1'),disabled:['S2']},
-  63:{...skill(null,'9.8,4,0'),slots:{S2:{guaranteedCrit:false}}},64:skill(null,'8.8,1,3'),65:skill(null,'3.8,3,2'),
+  63:{...skill(null,'9.8,4,0'),slots:{S2:{guaranteedCrit:false}}},64:skill(null,'8.8,1,3'),65:skill(null,'3.8,3,2',{attack:0}),
   66:skill(null,'4.9,6,0'),68:skill(null,'6.8,1,1'),69:skill(null,'6.2,1,5'),
   71:skill(null,'2.3,4,0',{attack:0}),73:skill(null,'3.4,6,1'),75:skill(null,'5.8,3,0',{attack:.5}),
   77:skill(null,'7,1,3'),78:skill(null,'3.8,5,1',{attack:0}),
@@ -49,6 +49,7 @@ export const lower = {
 
 // Opening includes guaranteed own pre-hit events. Unknown teammate events are zero.
 export const opening = {
+  65:{components:{S2:'11.4,3,2'},slots:{S1:{attack:.15},S2:{attack:.3}}},
   5:{effects:{critRate:.3}},8:{effects:{critRate:.06},slots:{S2:{critRate:.12}}},
   14:{slots:{S2:{attack:.243}}},25:{},27:{},
   47:attack(.7),50:{components:{S2:'6,8,0'}},55:{components:{S2:'12,1,1'}},

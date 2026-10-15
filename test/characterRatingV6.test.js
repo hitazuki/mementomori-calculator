@@ -13,6 +13,26 @@ const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',i
 const reviews=read('../doc/character-ratings/v6/review.json').records
 const score=(id,key)=>reviews.find(r=>r.id===id).axes.find(a=>a.key===key).score
 
+test('Aine full-team Shields unlock the second-action burst without assuming shields survive',()=>{
+  const r=reviews.find(r=>r.id===65)
+  assert.deepEqual(r.axes.map(a=>a.score),[7,6,7,8,9,4,0])
+  const {lower,opening,mature}=r.output.stages
+  assert.equal(lower.snapshots[0].skills.S2.components[0].coefficient,3.8)
+  assert.equal(lower.snapshots[0].skills.S2.effects.attack,0)
+  assert.equal(opening.snapshots[0].skills.S1.effects.attack,.15)
+  assert.equal(opening.snapshots[0].skills.S2.effects.attack,.3)
+  assert.equal(opening.snapshots[0].skills.S2.components[0].coefficient,11.4)
+  assert.deepEqual(opening.firstActions,['S1','S2'])
+  assert.equal(opening.snapshots[0].skills.S2.damage,mature.snapshots[0].skills.S2.damage)
+  assert.ok(opening.openingDamage[0]>lower.openingDamage[0]*2)
+  assert.equal(r.output.growth.totalEvents,10)
+  assert.match(r.conditions,/5名存活友军/)
+  assert.match(r.conditions,/少人或破盾会延迟/)
+  assert.match(r.axes[4].reason,/其他友军600%→800%/)
+  assert.match(r.axes[4].reason,/新盾替换旧盾/)
+  assert.equal(r.survival.initiative.penalty,0)
+})
+
 test('golden Artoria keeps the fifteen-heal unlock late and magical recovery outside lethal capacity',()=>{
   const r=reviews.find(r=>r.id===154)
   assert.deepEqual(r.axes.map(a=>a.score),[5,8,9,9,6,0,0])

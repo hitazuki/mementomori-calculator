@@ -1,6 +1,7 @@
 import { referenceFor } from './characterRatingV5.mjs'
 import { damageReference, criticalExtension } from '../../src/utils/characterRatingModel.js'
 import { newCharacters } from '../../doc/character-ratings/v6/new-characters.mjs'
+import { sourceUpdates } from '../../doc/character-ratings/v6/source-updates.mjs'
 
 export function stageReference(c,config) {
   // Petra's passive replaces normals; Rosalie's post-S2 source attack is for nearby allies.
@@ -27,5 +28,5 @@ export function stageReference(c,config) {
   }
   const firstActions=[...ref.cycle.opening,...ref.cycle.cycle,...ref.cycle.cycle].slice(0,2)
   return {config,cycle:ref.cycle,snapshots:ref.snapshots,firstActions,openingDamage:ref.snapshots.map(s=>firstActions.reduce((n,key)=>n+s.skills[key].damage/.3125,0)),
-    note:ref.note}
+    note:sourceUpdates[c.id]?.output.note??ref.note}
 }
