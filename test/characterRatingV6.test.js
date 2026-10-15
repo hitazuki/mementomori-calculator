@@ -13,6 +13,29 @@ const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',i
 const reviews=read('../doc/character-ratings/v6/review.json').records
 const score=(id,key)=>reviews.find(r=>r.id===id).axes.find(a=>a.key===key).score
 
+test('Guardian Alexandra keeps first-round self-harm, conditional damage and expiring wards separate',()=>{
+  const r=reviews.find(r=>r.id===155)
+  assert.deepEqual(r.axes.map(a=>a.score),[9,10,6,2,7,8,0])
+  const {lower,opening,mature,quick}=r.output.stages
+  assert.equal(lower.snapshots[0].skills.S2.components[0].coefficient,3.6)
+  assert.equal(opening.snapshots[0].skills.S1.effects.attack,0)
+  assert.equal(opening.snapshots[0].skills.S2.effects.attack,.324)
+  assert.equal(mature.snapshots[0].skills.S2.components[0].coefficient,5.4)
+  assert.equal(mature.snapshots[0].skills.S2.effects.attack,.59)
+  assert.equal(quick.snapshots[0].skills.S1.components[0].hits,8)
+  assert.equal(quick.snapshots[0].skills.S2.components[0].hits,10)
+  assert.equal(r.output.growth.totalEvents,null)
+  assert.equal(r.output.readiness.events,4)
+  assert.deepEqual(r.survival.states.map(s=>s.effects.block??0),[.05,.17,.5,0])
+  assert.equal(r.survival.states[2].comparisons[0].physical.withoutShield,2)
+  assert.equal(r.survival.states[3].comparisons[0].physical.withoutShield,1)
+  assert.equal(r.survival.initiative.penalty,0)
+  assert.ok(Math.abs(r.survival.initiative.effectiveSpeed-3114*1.3)<1e-9)
+  assert.equal(r.output.role,'随机连击')
+  assert.match(r.axes[4].reason,/仅一次且自身死亡即解除/)
+  assert.match(r.axes[1].reason,/基础样本不计弱化/)
+})
+
 test('Aine full-team Shields unlock the second-action burst without assuming shields survive',()=>{
   const r=reviews.find(r=>r.id===65)
   assert.deepEqual(r.axes.map(a=>a.score),[7,6,7,8,9,4,0])
@@ -67,7 +90,7 @@ test('Cusie reviewed weapon stats affect output and finite shields without treat
 })
 
 test('all seven-axis ratings retain reproducible lower, opening, mature and upper samples',()=>{
-  assert.equal(reviews.length,135)
+  assert.equal(reviews.length,136)
   assert.equal(RATING_AXES.length,7)
   for(const r of reviews){
     assert.deepEqual(r.axes.map(a=>a.key),RATING_AXES)

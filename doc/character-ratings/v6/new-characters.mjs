@@ -1,6 +1,33 @@
 // New v6 reviews have no historical six-axis scores. All levels and three
 // weapon tiers were reviewed against the catalog; hashes are review evidence.
 export const newCharacters = {
+  155: {
+    sourceHash: 'ae1c581614f5a3a7af0fccf642c8a4fb30c8a8e5c645303721c83db0e995e2e7',
+    reviewedAt: '2026-10-15',
+    input: { S1: '3.2,8,0', S2: '5.4,10,0', N: '1,1,1' },
+    effects: { attack: .59 },
+    slots: { S1: { damage: .28 }, S2: { damage: .4 } },
+    note: 'S1为320%随机8连击，攻击前70%概率附加40%易伤；S2为360%随机10连击，目标已有弱化时升至540%。成熟条件取易伤已生效及第2回合加攻达到上限；随机连击可分散。',
+    growth: { event: '仅第1回合全队实际自损总量', initial: 0, cap: .59, perEvent: 0, totalEvents: null,
+      detail: '第2回合仅结算一次来源加攻=min(第1回合全队实际自损总量×30%, 生效前攻击×50%)；统一面板上限0.59，之后不重复成长。自身满血S1两次20%当前生命自损合计1.08，给0.324加攻；来伤或其他顺序会改变实际量。' },
+    lifecycle: {
+      activeWindow: 'P2开局自身与2名主攻友军结界3回合：初始5%阻绝，每次全队受击或自损后增加3%，最多50%；15次事件达上限，不能保护触发前伤害',
+      replenishment: '结界仅开局一次，不补发；4次事件为17%阻绝，持续期内仍可继续成长',
+      afterExpiry: '第4回合起结界消失，无额外防护或回复；S1两次、S2一次20%当前生命自损持续消耗生命，自身死亡解除友军结界' },
+    states: [
+      { label: '开局，首次受击前', effects: { block: .05 }, evidence: ['P2'] },
+      { label: '累计4次受击/自损后，结界尚在', effects: { block: .17 }, evidence: ['P2'] },
+      { label: '累计15次受击/自损后，结界尚在', effects: { block: .5 }, evidence: ['P2'] },
+      { label: '第4回合起结界到期', effects: {}, evidence: ['P2'] },
+    ],
+    auxiliary: [
+      { key: 'protection', score: 7, reason: 'P2与W开局给2名主攻友军结界3回合，阻绝5%起、全队累计15次受击或自损后达50%；4次事件仅17%。仅一次且自身死亡即解除，不能按常驻全队50%阻绝。' },
+      { key: 'support', score: 8, reason: 'S1随机8连击，攻击前70%概率附加40%易伤；合理至少2名其他业红友军时持续2回合，CD4。强易伤可辅助队友，但随机分散、弱化抵抗及覆盖空窗限制可靠性。' },
+      { key: 'control', score: 0, reason: '无沉默、晕厥、减速等行动干扰。' },
+    ],
+    conditions: '最高专武攻击+18%、防御穿透7000已计入；力量+8%不擅自换成攻击。P1仅第2回合结算第1回合实际自损，满加攻与S2强化均为条件样本；易伤持续2回合按至少2名其他业红友军满足。结界只持续开局3回合。',
+    tags: 'attack@P1,speed@P1,block@P2+W,vulnerability@S1',
+  },
   154: {
     sourceHash: '3eadbd3509939fe596c0b2b241bec2fd4576c596399649ea91763ae7a98a5b31',
     reviewedAt: '2026-09-30',

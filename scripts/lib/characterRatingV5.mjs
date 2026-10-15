@@ -34,7 +34,7 @@ export function referenceFor(character, stage = {}) {
   const note = stage.authored?.note ?? outputNotes[id]
   if (!input || !note) throw new Error('Missing authored attack review '+id)
   const weapon = weaponReference(character)
-  const base = {...effects[id],...stage.effects}
+  const base = {...effects[id],...stage.authored?.effects,...stage.effects}
   if(id===38||id===89) base.attack*=1+weapon.attack
   for (const k of ['primary','critDamage','penetration','specificPenetration']) base[k] = (base[k]??0)+weapon[k]
   const components = {...input,...componentOverrides[id],...stage.components}
@@ -53,7 +53,7 @@ export function referenceFor(character, stage = {}) {
       if (id===27 && enemies===1 && slot==='S2') state.defenseDown=.8
       if (id===58 && slot==='S2') Object.assign(state,{specificDefenseDown:.4,damage:.2})
       if (id===132 && slot==='S2') Object.assign(state,{specificDefenseDown:.4,damage:.2})
-      Object.assign(state,stage.scenarios?.[enemies]?.effects,stage.slots?.[slot],stage.scenarios?.[enemies]?.slots?.[slot])
+      Object.assign(state,stage.authored?.slots?.[slot],stage.scenarios?.[enemies]?.effects,stage.slots?.[slot],stage.scenarios?.[enemies]?.slots?.[slot])
       // Weapon contributions are additional to skill increments, including slot overrides.
       for (const k of ['critDamage','penetration','specificPenetration']) if (skillEffects[id]?.[slot]?.[k]!==undefined) state[k]+=weapon[k]
       let results = components.map(component=>damageReference(component,state,enemies,0,weapon.attack))
@@ -101,7 +101,7 @@ export function referenceFor(character, stage = {}) {
   const coverage = Math.max(...['S1','S2'].flatMap(slot=>parse(components[slot]).filter(c=>c.coefficient>0).map(c=>c.targets===0?5*(1-.8**c.hits):Math.min(5,c.targets))), ...([20,60].includes(id)?[3]:[1]))
   const phase = id===61 ? {label:'神咒解放8回合窗口；不是永久循环',duration:8,afterExpiryCycle:ratingCycle(active.filter(s=>s.slot!=='S2')).cycle,
     afterExpiryPerAction:snapshots.map(s=>(s.skills.S1.equivalentBasicHits+3*s.skills.N.equivalentBasicHits)/4)} : null
-  return {panel:RATING_PANEL,weapon,cycle,snapshots,coverage,phase,...(burst?{burst}:{}),growth:g?{...g,totalEvents: id===36||id===137?null:growthRequirement(g)}:null,
+  return {panel:RATING_PANEL,weapon,cycle,snapshots,coverage,phase,...(burst?{burst}:{}),growth:g?{...g,totalEvents: g.totalEvents!==undefined?g.totalEvents:id===36||id===137?null:growthRequirement(g)}:null,
     lifecycle:stage.authored?.lifecycle??lifecycle.get(id)??{activeWindow:'无可确认自身防护',replenishment:'无补充渠道',afterExpiry:'无额外长期生存机制'},
     note,external:external[id]??null,
     externalSamples:id===60?[0,1,2,4].map(hp=>({past20RoundsDamageInMaxHp:hp,perTargetDirectDamage:3*(2.2+weapon.hp)*hp*.2})):id===74?[3,30,300].map(hp=>({enemyCurrentHp:hp,perTargetDirectDamage:Math.min(hp*.2,5*(1+weapon.attack))})):null,

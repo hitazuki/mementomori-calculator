@@ -104,7 +104,7 @@ const records=catalog.filter(c=>previous.some(r=>r.id===c.id)||newCharacters[c.i
     comparison:{groupBenchmark:3,burstAnchors,lateAnchors,lowerBands:floors,matureBands:bases,openingBand,quickBand,penalties}},
     survival:{...old.survival,...(targetAvoidance[c.id]?{targetAvoidance:targetAvoidance[c.id],effectiveSustain:life.replenishment+'；'+life.afterExpiry}:{}),initiative,shortTermProtection:life.activeWindow,states:finite,scoringScenario:'neutral',peakOrdinaryCapacity:peak,burstScore:defense[0],sustainScore:defense[1]}}
 })
-if(records.length!==135) throw new Error('Expected all 135 characters')
+if(records.length!==136) throw new Error('Expected all 136 characters')
 const collection=(metadata,key,rows)=>JSON.stringify(metadata,null,2).slice(0,-2)+`,\n  "${key}": [\n`+rows.map(r=>'    '+JSON.stringify(r)).join(',\n')+'\n  ]\n}\n'
 fs.writeFileSync(new URL('review.json',folder),collection({rubricVersion:RATING_VERSION,burstAnchors,lateAnchors},'records',records))
 const inversions=[]
@@ -117,8 +117,8 @@ for(const key of ['burst','late','toughness','survival']) for(const a of records
 }
 fs.writeFileSync(new URL('inversions.json',folder),collection({rubricVersion:RATING_VERSION,count:inversions.length},'pairs',inversions))
 fs.writeFileSync(new URL('doc/character-ratings/reviews.txt',root),records.map(r=>[r.id,r.axes.map(a=>a.score).join(','),...r.axes.map(a=>a.reason),r.conditions,r.tags].join('|')).join('\n')+'\n')
-fs.writeFileSync(new URL('changes.md',folder),'# 七维评分 v6\n\n旧维度不能逐项相减。保留旧六维，并列新七维；范围仅为已审核的有限样本。135名角色、945项评分。\n\n|角色|旧：单/群/生存/防护/辅助/干扰|新：爆发/后期/爆防/生存/防护/辅助/干扰|基础→后期 单敌每行动等效技能倍率|\n|---|---|---|---|\n'+records.map(r=>`|${r.id} ${r.name}|${previous.find(p=>p.id===r.id)?.axes.map(a=>a.score).join('/')??'新增，无旧评分'}|${r.axes.map(a=>a.score).join('/')}|${equivalent(r.output.stages.lower.snapshots[0].perAction)}→${equivalent(r.output.stages.mature.snapshots[0].perAction)}|`).join('\n')+'\n')
+fs.writeFileSync(new URL('changes.md',folder),'# 七维评分 v6\n\n旧维度不能逐项相减。保留旧六维，并列新七维；范围仅为已审核的有限样本。136名角色、952项评分。\n\n|角色|旧：单/群/生存/防护/辅助/干扰|新：爆发/后期/爆防/生存/防护/辅助/干扰|基础→后期 单敌每行动等效技能倍率|\n|---|---|---|---|\n'+records.map(r=>`|${r.id} ${r.name}|${previous.find(p=>p.id===r.id)?.axes.map(a=>a.score).join('/')??'新增，无旧评分'}|${r.axes.map(a=>a.score).join('/')}|${equivalent(r.output.stages.lower.snapshots[0].perAction)}→${equivalent(r.output.stages.mature.snapshots[0].perAction)}|`).join('\n')+'\n')
 console.log(`Reviewed ${records.length} characters / ${records.length*RATING_AXES.length} axes`)
-fs.writeFileSync(new URL('initiative-changes.md',folder),'# 行动防护速度修订\n\n仅调整爆发防御，爆发输出及其余维度不变。全池135名已检查；下表列出行动依赖项，含分数不变者。速度是同养成、无外援的编辑参照，不是实战先手保证。\n\n|角色|基础→有效开启速度|爆发防御原分→新分|开启条件与保底|\n|---|---|---|---|\n'+records.filter(r=>r.survival.initiative.gate).map(r=>{const a=r.survival.initiative;return `|${r.id} ${r.name}|${a.baseSpeed}→${Math.round(a.effectiveSpeed)}|${a.baseScore}→${a.score}|${a.note}|`}).join('\n')+'\n')
+fs.writeFileSync(new URL('initiative-changes.md',folder),'# 行动防护速度修订\n\n仅调整爆发防御，爆发输出及其余维度不变。全池136名已检查；下表列出行动依赖项，含分数不变者。速度是同养成、无外援的编辑参照，不是实战先手保证。\n\n|角色|基础→有效开启速度|爆发防御原分→新分|开启条件与保底|\n|---|---|---|---|\n'+records.filter(r=>r.survival.initiative.gate).map(r=>{const a=r.survival.initiative;return `|${r.id} ${r.name}|${a.baseSpeed}→${Math.round(a.effectiveSpeed)}|${a.baseScore}→${a.score}|${a.note}|`}).join('\n')+'\n')
 
-fs.writeFileSync(new URL('targeting-review.md',folder),'# 全角色输出目标结构审阅\n\n135名角色。按主动技能选敌、重复单位及条件分支判定；不按倍率大小、单群伤害比或评分判定。普通攻击不用于改变定位。条件分支列在技能依据中，不代表必定触发。此标签不衡量伤害强弱。\n\n|ID|角色|输出特点|技能分布|\n|---|---|---|---|\n'+records.map(r=>`|${r.id}|${r.name}|${r.output.role}|${r.output.targeting.detail}|`).join('\n')+'\n')
+fs.writeFileSync(new URL('targeting-review.md',folder),'# 全角色输出目标结构审阅\n\n136名角色。按主动技能选敌、重复单位及条件分支判定；不按倍率大小、单群伤害比或评分判定。普通攻击不用于改变定位。条件分支列在技能依据中，不代表必定触发。此标签不衡量伤害强弱。\n\n|ID|角色|输出特点|技能分布|\n|---|---|---|---|\n'+records.map(r=>`|${r.id}|${r.name}|${r.output.role}|${r.output.targeting.detail}|`).join('\n')+'\n')

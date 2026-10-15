@@ -1,6 +1,7 @@
 // Authored from max-level skill + weapon text. Only self-applicable, pre-action
 // speed counts here. Percent speed bonuses share the same additive category.
 export const openingSpeed = {
+  155:[.30,'P1开局常驻30%'],
   4:[.10,'P1常驻10%'],36:[.20,'P1常驻20%'],39:[.15,'P1五人存活时15%'],
   43:[.20,'W开局20%，2回合'],44:[.30,'W开局30%，1回合；复活后的加速不重复计入'],
   57:[.25,'W开局25%，1回合'],84:[.20,'W开局20%，1回合'],

@@ -2,6 +2,9 @@
 // state references, not a claim that both skills fit a single four-event trace.
 const sample=(config,reason,extra={})=>({events:4,config,reason:`累计4次事件参照（分技能比较，非连续行动轨迹）；${reason}`,...extra})
 export const fourEvents={
+  155:sample({effects:{attack:.59},components:{S2:'5.4,10,0'},slots:{S1:{attack:.59,damage:.28},S2:{attack:.59,damage:.4}}},
+    '第1回合自身满血S1自损2次，加上2次其他满血友军20%当前生命自损，统一生命3时总量2.28，足够第2回合达到0.59来源加攻上限；受击或先前缺血会改变自损量。S2强化及40%易伤另需目标弱化，不保证随机目标全部覆盖；条件窗口降1档。结界4事件仅17%阻绝，不预支50%。',
+    {penalty:1,actions:2,round:2}),
   154:sample({components:{S2:'5.4,4,0'}},'4次全队主动恢复未达15次门槛，S2仍为540%随机四连击；自身两主动各1次，队友事件频率未知，不折算回合。'),
   75:sample({effects:{attack:.9},components:{S2:'5.8,7,0'}},'4次全队自损满40%加攻，合理红队另有50%；S2七段。'),
   80:sample({components:{S2:'4.8,4,0'}},'须自身收到主动恢复；4次未达6次门槛，S2仍为480%×4。'),
