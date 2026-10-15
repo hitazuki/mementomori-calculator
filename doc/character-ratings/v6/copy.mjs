@@ -1,6 +1,7 @@
 // Dimension-specific display copy. Original inputs/evidence remain in review.json.
 // Do not move defensive growth or general rubric explanations into output reasons.
 export const outputCopy = {
+  157:'暂定：不计缺失的专武被动属性。S1为640%五目标群攻；S2前两次320%单体5连击，第3次960%、第4次起1280%。自身指引每回合10%攻击，第6回合满60%；后期输出不预支为首轮。',
   155:'S1为320%随机8连击；S2为360%随机10连击，已有弱化时540%。基础样本不计弱化；开局S1易伤按70%概率折为28%期望增伤，S2不假定全部目标已弱化。第2回合来源加攻按实际首回合自损结算，上限为生效前攻击50%。',
   154: 'S1为720%三目标群攻，S2为540%随机四连击；累计15次全队主动恢复才升至2160%四连击。两主动CD均4，成熟循环仍有两次普攻空窗。',
   15: '连击首次暴击后，后续攻击才必暴；追加攻击需要击杀。',
