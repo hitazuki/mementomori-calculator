@@ -249,6 +249,18 @@ export function buildDerivedScoreState(baseScores) {
   for (const key of RELIC_KEYS) {
     setScore(scores, key, relicScore, '圣天使的神谕召唤本周50抽推算')
   }
+  // Synthetic item: the screenshot's gift box is valued as one relic.
+  setVirtualScore(scores, '[99,4]', {
+    name: '礼盒（圣遗物等价）',
+    nameZh: '礼盒（圣遗物等价）',
+    nameTw: '禮盒（聖遺物等價）',
+    nameEn: 'Gift Box (Relic Equivalent)',
+    nameJa: 'ギフトボックス（聖遺物相当）',
+    nameKo: '선물 상자 (성유물 상당)',
+    iconId: 195,
+    score: relicScore,
+    reason: '按1件圣遗物推算价值估算',
+  })
 
   const sealedChestScores = calculateSealedChestScores(scores)
   for (const [key, score] of Object.entries(sealedChestScores)) {

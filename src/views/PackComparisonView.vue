@@ -275,6 +275,7 @@ function sourceBadgeText(source) {
   if (source === 'ultra_sale') return t('packBadgeUltra')
   if (source === 'mixed') return t('packBadgeMixed')
   if (source === 'permanent_pack') return t('packBadgePermanent')
+  if (source === 'event_pack') return t('sourceTypeEvent')
   return source
 }
 
@@ -356,6 +357,7 @@ const availableSources = computed(() => {
     if (k === 'witch_gift') return { key: k, label: t('sourceTypeWitch') }
     if (k === 'ultra_sale') return { key: k, label: t('sourceTypeUltra') }
     if (k === 'permanent_pack') return { key: k, label: t('sourceTypePermanent') }
+    if (k === 'event_pack') return { key: k, label: t('sourceTypeEvent') }
     return { key: k, label: t(k) }
   })
 })

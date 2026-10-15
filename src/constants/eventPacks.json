@@ -1,0 +1,22 @@
+[
+  {
+    "nameKey": "origin_anniversary_pack_1",
+    "price": 6000,
+    "noteKeys": ["packAnniversaryRelicNote"],
+    "items": [
+      { "ItemType": 2, "ItemId": 1, "ItemCount": 3000 },
+      { "ItemType": 99, "ItemId": 4, "ItemCount": 1 },
+      { "ItemType": 16, "ItemId": 4, "ItemCount": 5 }
+    ]
+  },
+  {
+    "nameKey": "origin_anniversary_pack_2",
+    "price": 11800,
+    "noteKeys": ["packAnniversaryRelicNote"],
+    "items": [
+      { "ItemType": 2, "ItemId": 1, "ItemCount": 5900 },
+      { "ItemType": 99, "ItemId": 4, "ItemCount": 1 },
+      { "ItemType": 16, "ItemId": 12, "ItemCount": 20 }
+    ]
+  }
+]

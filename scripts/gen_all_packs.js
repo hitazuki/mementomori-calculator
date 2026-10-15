@@ -19,6 +19,7 @@ const witchGiftRaw = JSON.parse(fs.readFileSync(witchGiftPath, 'utf8'))
 const itemScores = JSON.parse(fs.readFileSync(itemScoresPath, 'utf8'))
 
 const permanentPacksPath = path.join(root, 'src', 'constants', 'permanentPacks.json')
+const eventPacks = JSON.parse(fs.readFileSync(path.join(root, 'src', 'constants', 'eventPacks.json'), 'utf8'))
 let permanentPacksRaw = []
 if (fs.existsSync(permanentPacksPath)) {
   permanentPacksRaw = JSON.parse(fs.readFileSync(permanentPacksPath, 'utf8'))
@@ -124,6 +125,10 @@ for (const p of permanentPacksRaw) {
 }
 
 // 3. Deduplication
+for (const p of eventPacks) {
+  allRawPacks.push({ ...p, _type: 'event' })
+}
+
 const dedupMap = new Map()
 
 for (const p of allRawPacks) {
@@ -181,6 +186,7 @@ function synthesizeI18nKeys(rawPacks) {
   let hasUltra = false
   let hasWitch = false
   let hasPermanent = false
+  let hasEvent = false
 
   for (const p of rawPacks) {
     for (const noteKey of p.noteKeys || []) noteKeys.add(noteKey)
@@ -200,6 +206,9 @@ function synthesizeI18nKeys(rawPacks) {
       } else {
         keys.add('origin_unknown')
       }
+    } else if (p._type === 'event') {
+      hasEvent = true
+      keys.add(p.nameKey)
     } else if (p._type === 'permanent') {
       hasPermanent = true
       const mappedKey = permPackNameMap[p.name] || p.name
@@ -208,9 +217,10 @@ function synthesizeI18nKeys(rawPacks) {
   }
 
   let sourceBadge = 'mixed'
-  if (hasUltra && !hasWitch && !hasPermanent) sourceBadge = 'ultra_sale'
-  if (!hasUltra && hasWitch && !hasPermanent) sourceBadge = 'witch_gift'
-  if (!hasUltra && !hasWitch && hasPermanent) sourceBadge = 'permanent_pack'
+  if (hasUltra && !hasWitch && !hasPermanent && !hasEvent) sourceBadge = 'ultra_sale'
+  if (!hasUltra && hasWitch && !hasPermanent && !hasEvent) sourceBadge = 'witch_gift'
+  if (!hasUltra && !hasWitch && hasPermanent && !hasEvent) sourceBadge = 'permanent_pack'
+  if (!hasUltra && !hasWitch && !hasPermanent && hasEvent) sourceBadge = 'event_pack'
 
   return {
     source: sourceBadge,

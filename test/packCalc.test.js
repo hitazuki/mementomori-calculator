@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 
 import { calculatePackCE, getBaseItemKey, getScore, normalizeScores } from '../src/engine/packCalc.js'
 import { buildDerivedScoreState } from '../src/engine/derivedScores.js'
@@ -12,6 +13,44 @@ const scores = normalizeScores({
   '[15,1]': { name: 'Oil', score: 50, batch: 1, iconId: 1 },
   '[17,5]': { name: 'Rune Lv2', score: 100, batch: 1, iconId: 5 },
   '[17,21]': { name: 'Letter SR Blue', score: 200, batch: 1, iconId: 21 },
+})
+
+test('anniversary packs use the local gift box icon and follow the derived relic value', () => {
+  const packs = JSON.parse(readFileSync(new URL('../src/constants/eventPacks.json', import.meta.url), 'utf8'))
+  const base = JSON.parse(readFileSync(new URL('../src/constants/itemScores.json', import.meta.url), 'utf8'))
+  assert.deepEqual(packs.map(p => [p.nameKey, p.price, p.items]), [
+    ['origin_anniversary_pack_1', 6000, [
+      { ItemType: 2, ItemId: 1, ItemCount: 3000 },
+      { ItemType: 99, ItemId: 4, ItemCount: 1 },
+      { ItemType: 16, ItemId: 4, ItemCount: 5 },
+    ]],
+    ['origin_anniversary_pack_2', 11800, [
+      { ItemType: 2, ItemId: 1, ItemCount: 5900 },
+      { ItemType: 99, ItemId: 4, ItemCount: 1 },
+      { ItemType: 16, ItemId: 12, ItemCount: 20 },
+    ]],
+  ])
+  const values = [200, 400].map(ticketScore => {
+    const state = buildDerivedScoreState(normalizeScores({
+      ...base,
+      '[16,1]': { ...base['[16,1]'], score: ticketScore, batch: 1 },
+    }))
+    const relicValue = getScore(state.scores, 13, 6)
+    assert.ok(relicValue > 0)
+    assert.equal(getScore(state.scores, 99, 4), relicValue)
+    assert.equal(state.scores['[99,4]'].isReadonlyDerived, true)
+    for (const pack of calculatePackCE(packs, state.scores)) {
+      const box = pack.items.find(item => item.itype === 99 && item.iid === 4)
+      assert.equal(box.iconId, 195)
+      assert.equal(box.value, relicValue)
+      const ticket = pack.items.find(item => item.itype === 16)
+      assert.equal(pack.originalValue, Math.round(pack.diamondCount + relicValue + ticket.value))
+      assert.equal(pack.rechargeValue, Math.round(pack.paidDiamonds * 1.2))
+    }
+    return relicValue
+  })
+  assert.ok(values[1] > values[0], 'gift box value must respond to score changes')
+  assert.ok(readFileSync(new URL('../public/images/items/Item_0195.png', import.meta.url)).length > 0)
 })
 
 test('calculatePackCE applies derived item scores and recharge value', () => {
