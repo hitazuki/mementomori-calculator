@@ -39,6 +39,10 @@ test('anniversary packs use the local gift box icon and follow the derived relic
     assert.ok(relicValue > 0)
     assert.equal(getScore(state.scores, 99, 4), relicValue)
     assert.equal(state.scores['[99,4]'].isReadonlyDerived, true)
+    assert.deepEqual(
+      ['nameZh', 'nameTw', 'nameEn', 'nameJa', 'nameKo'].map(field => state.scores['[99,4]'][field]),
+      ['圣天使宝箱', '聖天使寶箱', 'Chest of the Seraph', '聖天使の宝箱', '성천사의 보물상자'],
+    )
     for (const pack of calculatePackCE(packs, state.scores)) {
       const box = pack.items.find(item => item.itype === 99 && item.iid === 4)
       assert.equal(box.iconId, 195)

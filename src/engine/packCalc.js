@@ -118,6 +118,9 @@ export function getScore(scores, itype, iid) {
 }
 
 export function getBaseItemKey(itype, iid) {
+  // 钻石等价特权归入免费钻石筛选，具体收益仍按各自评分计算。
+  if (itype === 99 && [1, 2].includes(iid)) return '[1,1]'
+
   // 1. 挂机资源按时长 (金币/经验/潜能)
   const ts = DERIVED_RULES.resourceTimeScale[iid]
   if (itype === 10 && ts) return `[${itype},${ts.base}]`
