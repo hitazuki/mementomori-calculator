@@ -7,6 +7,7 @@ import {
   RAID_ELEMENTS,
   RAID_JOB_FLAGS,
   RAID_ACTIVATION_ROUND_LIMITS,
+  RAID_SCENARIO_RATE_LIMITS,
   RAID_MODIFIER_CHANNELS,
   RAID_TABLE_CHARACTERS,
   createDefaultRaidTableConfig,
@@ -104,6 +105,11 @@ function normalizeConfig(config, characters) {
     if (!Number.isInteger(value) || value < 0 || value > 4) throw new Error(`Invalid raid scenario tier: ${key}`)
   }
   const elementBonus = calculateRaidElementBonus(lineup, characters)
+  if (config.scenarioRates != null && (typeof config.scenarioRates !== 'object' || Array.isArray(config.scenarioRates))) throw new Error('scenarioRates must be an object')
+  const scenarioRates = { ...defaults.scenarioRates, ...(config.scenarioRates ?? {}) }
+  for (const [key, value] of Object.entries(scenarioRates)) {
+    if (!Object.hasOwn(RAID_SCENARIO_RATE_LIMITS, key) || !Number.isFinite(value) || value < 0 || value > RAID_SCENARIO_RATE_LIMITS[key]) throw new Error(`Invalid raid scenario rate: ${key}`)
+  }
   return {
     lineup, attackPriority, actionOrderOverrides, speeds, levels, defensePenetrations, pmDefensePenetrations, criticalDamageBonuses,
     elementBonus,
@@ -112,7 +118,7 @@ function normalizeConfig(config, characters) {
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
     baseCriticalDamageBonus: legacyCriticalDamageBonus ?? defaults.baseCriticalDamageBonus,
     probabilityOverrides: { ...defaults.probabilityOverrides, ...(config.probabilityOverrides ?? {}) },
-    activationRounds, scenarioTiers, targetHpBelow50,
+    activationRounds, scenarioTiers, scenarioRates, targetHpBelow50,
   }
 }
 
@@ -120,6 +126,7 @@ function compileCondition(condition, mechanics, path, character) {
   if (!condition) return null
   const handler = mechanics.conditionHandlers[condition.type]
   if (!handler) throw new Error(`Unregistered raid condition '${condition.type}' at ${path}`)
+  if (condition.type === 'otherLineupElementCountAtMost' && (!SUPPORTED_ELEMENTS.has(condition.element) || !Number.isInteger(condition.count) || condition.count < 0)) throw new Error(`Invalid raid element count condition at ${path}`)
   if (condition.counter && !(condition.counter in (character?.runtime?.counters ?? {}))) {
     throw new Error(`Unknown raid counter '${condition.counter}' at ${path}`)
   }
@@ -147,6 +154,7 @@ function compileValue(value, mechanics, path, character) {
   if (!value || typeof value !== 'object') throw new Error(`Invalid raid value at ${path}`)
   const handler = mechanics.valueResolvers[value.type]
   if (!handler) throw new Error(`Unregistered raid value resolver '${value.type}' at ${path}`)
+  if (value.type === 'configuredRate' && !Object.hasOwn(RAID_SCENARIO_RATE_LIMITS, value.key)) throw new Error(`Unknown raid scenario rate at ${path}`)
   if (value.type === 'configuredTier') {
     if (typeof value.key !== 'string' || !value.key) throw new Error(`Configured raid tier requires a non-empty key at ${path}`)
     if (!Array.isArray(value.values) || value.values.length < 1 || value.values.length > 5 || value.values.some(item => !Number.isFinite(item))) {
@@ -178,6 +186,10 @@ function validateEffectGroupIdValue(value, path) {
 }
 
 function compileEffect(effect, mechanics, path, character) {
+  if (effect.attackSnapshotRatio != null && effect.type !== 'status') throw new Error(`Raid attackSnapshotRatio requires a status at ${path}`)
+  if (effect.attackSnapshotRatio != null && typeof effect.attackSnapshotRatio !== 'number' && effect.attackSnapshotRatio?.type !== 'configuredRate') throw new Error(`Raid attackSnapshotRatio requires a fixed or configured rate at ${path}`)
+  const compiledAttackSnapshotRatio = effect.attackSnapshotRatio == null ? null : compileValue(effect.attackSnapshotRatio, mechanics, `${path}.attackSnapshotRatio`, character)
+  if (typeof effect.attackSnapshotRatio === 'number' && (!Number.isFinite(effect.attackSnapshotRatio) || effect.attackSnapshotRatio < 0 || effect.attackSnapshotRatio > 1)) throw new Error(`Invalid raid attack snapshot ratio at ${path}`)
   const handler = mechanics.effectHandlers[effect.type]
   if (!handler) throw new Error(`Unregistered raid effect '${effect.type}' at ${path}`)
   if (effect.target && !mechanics.targetSelectors[effect.target]) throw new Error(`Unregistered raid target selector '${effect.target}' at ${path}`)
@@ -238,6 +250,7 @@ function compileEffect(effect, mechanics, path, character) {
   }
   return {
     ...effect,
+    compiledAttackSnapshotRatio,
     compiledBossRates,
     compiledEffectGroupId,
     modifiers: (effect.modifiers ?? []).map((modifier, index) => (

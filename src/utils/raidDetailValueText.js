@@ -5,6 +5,7 @@ export function raidDetailValueText(spec, { t, conditionText, counterText, eleme
   if (typeof spec === 'number') return number(spec)
   if (!spec) return t('raidCharacterDynamicValue')
   if (spec.type === 'fixed') return recurse(spec.value)
+  if (spec.type === 'configuredRate') return t('raidDetailConfiguredRate')
   if (spec.type === 'conditional') return t('raidDetailBranch', { condition: conditionText(spec.condition), yes: recurse(spec.whenTrue), no: recurse(spec.whenFalse) })
   let input
   if (spec.counter) input = counterText(spec.counter)

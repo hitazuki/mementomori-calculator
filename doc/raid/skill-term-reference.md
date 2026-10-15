@@ -654,3 +654,10 @@ Boss 状态的 `damageRatePerStack`、`defenseRatePerStack`、`physicalDefenseRa
 | target selector | `selfAndFasterAllies` | 自身及当前有效速度严格高于自身的其他友军，包含既有速度修正；同速排除。读取施加时点速度，手动行动顺序不改变比较。 |
 
 这些条件用于 `effect.targetCondition`，由目标选择器产生候选列表后逐目标判断。玛提尔德用目标状态决定S1持续1次或4次行动，索尔缇娜用目标属性集合决定普通/红绿强化档；两者都通过共同 `replacementKey` 保证同源档位互斥。
+
+## 生效前攻击快照与连续比例配置（圣枪守护骑士）
+
+- `scenarioRates` 为连续比例输入，`configuredRate` 读取已登记键。`RAID_SCENARIO_RATE_LIMITS` 注册范围；未知键、非数值、非有限值及越界输入均在编译期拒绝。`holyLanceP1Attack` 为0～0.5，默认0.5。
+- 友方 `status.attackSnapshotRatio` 支持0～1固定数值或 `configuredRate`。施加前读取目标攻击修正，生成固定attackRate及固定符号系数，组队乘区沿用原伤害管线。ATK/DEF/HP保留原单位，原Buff到期不会改变快照。其他效果类型及未支持的动态比率编译拒绝。
+- `otherLineupElementCountAtMost` 统计指定属性其他友军，排除自身，要求合法属性和非负整数人数。与atLeast组合表达易伤持续分支。
+- 角色详情说明快照口径，动作快照与施加记录显示冻结数值，导出条件显示配置比例。

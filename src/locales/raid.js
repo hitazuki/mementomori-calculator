@@ -1435,3 +1435,97 @@ const twilightFortinaTranslations = {
   }
 }
 for (const [locale, entries] of Object.entries(twilightFortinaTranslations)) Object.assign(raidTranslations[locale], entries)
+
+const holyLanceAlexandraTranslations = {
+  "zh-CN": {
+    "raidHolyLanceP1Attack": "P1加攻量（生效前自身攻击）",
+    "raidHolyLanceP1AttackHint": "输入0%–50%，默认50%；第2回合开始时，以生效前自身攻击为基准一次性结算并固定。不自动推算第1回合自损量。",
+    "raidAssumeHolyLanceDamageTaken": "S1易伤成功（70%）",
+    "raidDetailHolyLanceBarrier": "结界仅保留不可解除状态与3次行动持续时间；初始5%、受击/自损后每次+3%、上限50%的阻绝及死亡解除不模拟。",
+    "raidIgnoredHolyLanceSelfDamageAmount": "实际自损量与P1来源量自动计算（保留每次自损事件；P1比例手动填写）",
+    "raidDetailConfiguredRate": "设置的加攻比例",
+    "raidDetailAttackSnapshot": "捕获生效前攻击的{ratio}并固定（保留ATK/DEF/HP来源）",
+    "raidCharacterConditionOtherElementCountAtMost": "其他{element}友军至多{n}名",
+    "raidCharHolyLanceAlexandra": "圣枪守护骑士 · 亚历珊卓",
+    "raidSkillHolyLanceS1": "守护圣十字",
+    "raidSkillHolyLanceS2": "孤忠骑士",
+    "raidBuffHolyLanceSpeed": "圣枪守护骑士 · 速度",
+    "raidBuffHolyLanceAttack": "圣枪守护骑士 · 攻击",
+    "raidBuffHolyLanceBarrier": "一同活下去",
+    "raidDebuffHolyLanceDamageTaken": "守护圣十字 · 承伤增加",
+    "raidIgnoredHolyLanceBarrier": "结界仅保留不可解除状态与3次行动持续时间；初始5%、受击/自损后每次+3%、上限50%的阻绝及死亡解除不模拟。"
+  },
+  "zh-TW": {
+    "raidHolyLanceP1Attack": "P1加攻量（生效前自身攻擊）",
+    "raidHolyLanceP1AttackHint": "輸入0%–50%，預設50%；第2回合開始時，以生效前自身攻擊為基準結算一次並固定。不自動推算第1回合自損量。",
+    "raidAssumeHolyLanceDamageTaken": "S1承受傷害上升成功（70%）",
+    "raidDetailHolyLanceBarrier": "結界僅保留無法解除狀態與3次行動持續時間；初始5%、受擊/自損後每次+3%、上限50%的阻絕及死亡解除不模擬。",
+    "raidIgnoredHolyLanceSelfDamageAmount": "實際自損量與P1來源量自動計算（保留每次自損事件；P1比例手動填寫）",
+    "raidDetailConfiguredRate": "設定的加攻比例",
+    "raidDetailAttackSnapshot": "擷取生效前攻擊的{ratio}並固定（保留ATK/DEF/HP來源）",
+    "raidCharacterConditionOtherElementCountAtMost": "其他{element}友軍至多{n}名",
+    "raidCharHolyLanceAlexandra": "聖槍守護騎士 · 亞歷珊卓",
+    "raidSkillHolyLanceS1": "守護聖十字",
+    "raidSkillHolyLanceS2": "孤忠騎士",
+    "raidBuffHolyLanceSpeed": "聖槍守護騎士 · 速度",
+    "raidBuffHolyLanceAttack": "聖槍守護騎士 · 攻擊",
+    "raidBuffHolyLanceBarrier": "一同活下去",
+    "raidDebuffHolyLanceDamageTaken": "守護聖十字 · 承受傷害增加",
+    "raidIgnoredHolyLanceBarrier": "結界僅保留無法解除狀態與3次行動持續時間；初始5%、受擊/自損後每次+3%、上限50%的阻絕及死亡解除不模擬。"
+  },
+  "en": {
+    "raidHolyLanceP1Attack": "P1 ATK gain (% of own ATK before activation)",
+    "raidHolyLanceP1AttackHint": "Enter 0–50%, default 50%. At the start of turn 2, capture this fraction of own ATK before activation and keep the gain fixed. Turn-1 self-damage amounts are not calculated.",
+    "raidAssumeHolyLanceDamageTaken": "S1 damage-taken increase succeeds (70%)",
+    "raidDetailHolyLanceBarrier": "Barrier retains its unremovable state for 3 target actions. Its 5% initial block, +3% per incoming attack/self-damage (50% cap), and removal on death are not simulated.",
+    "raidIgnoredHolyLanceSelfDamageAmount": "Actual self-damage amounts and automatic P1 gain calculation (each self-damage event is retained; enter the P1 ratio manually)",
+    "raidDetailConfiguredRate": "Configured ATK gain ratio",
+    "raidDetailAttackSnapshot": "Capture and freeze {ratio} of ATK before activation (retain ATK/DEF/HP sources)",
+    "raidCharacterConditionOtherElementCountAtMost": "At most {n} other {element} allies",
+    "raidCharHolyLanceAlexandra": "Guardian of the Lance · Alexandra",
+    "raidSkillHolyLanceS1": "Guarding Cross",
+    "raidSkillHolyLanceS2": "Final Shield",
+    "raidBuffHolyLanceSpeed": "Guardian of the Lance · Speed",
+    "raidBuffHolyLanceAttack": "Guardian of the Lance · ATK",
+    "raidBuffHolyLanceBarrier": "If You Live, I’ll Live Too",
+    "raidDebuffHolyLanceDamageTaken": "Guarding Cross · Damage Taken Up",
+    "raidIgnoredHolyLanceBarrier": "Barrier retains its unremovable state for 3 target actions. Its 5% initial block, +3% per incoming attack/self-damage (50% cap), and removal on death are not simulated."
+  },
+  "ja": {
+    "raidHolyLanceP1Attack": "P1攻撃力増加量（発動前の自身攻撃力比）",
+    "raidHolyLanceP1AttackHint": "0～50%を入力（初期値50%）。2ターン目開始時に発動前の自身攻撃力を参照して一度だけ加算し、固定します。1ターン目の自傷量は自動計算しません。",
+    "raidAssumeHolyLanceDamageTaken": "S1被ダメージ増加が成功（70%）",
+    "raidDetailHolyLanceBarrier": "結界は解除不可状態と対象の3回行動の持続のみ保持。初期5%、被攻撃・自傷ごとに3%増加（上限50%）の遮断と戦闘不能時の解除は未計算。",
+    "raidIgnoredHolyLanceSelfDamageAmount": "実際の自傷量とP1増加量の自動計算（自傷イベントは個別に保持、P1比率は手動入力）",
+    "raidDetailConfiguredRate": "設定した攻撃力増加比率",
+    "raidDetailAttackSnapshot": "発動前攻撃力の{ratio}を保存して固定（ATK/DEF/HPの参照元を保持）",
+    "raidCharacterConditionOtherElementCountAtMost": "他の{element}属性の味方が{n}体以下",
+    "raidCharHolyLanceAlexandra": "聖槍の守護騎士 · アレクサンドラ",
+    "raidSkillHolyLanceS1": "ガーディアンクロス",
+    "raidSkillHolyLanceS2": "ラスト・ナイト",
+    "raidBuffHolyLanceSpeed": "聖槍の守護騎士 · スピード",
+    "raidBuffHolyLanceAttack": "聖槍の守護騎士 · 攻撃力",
+    "raidBuffHolyLanceBarrier": "生きるなら共に",
+    "raidDebuffHolyLanceDamageTaken": "ガーディアンクロス · 与ダメージ",
+    "raidIgnoredHolyLanceBarrier": "結界は解除不可状態と対象の3回行動の持続のみ保持。初期5%、被攻撃・自傷ごとに3%増加（上限50%）の遮断と戦闘不能時の解除は未計算。"
+  },
+  "ko": {
+    "raidHolyLanceP1Attack": "P1 공격력 증가량(발동 전 자신의 공격력 대비)",
+    "raidHolyLanceP1AttackHint": "0~50% 입력, 기본 50%. 2턴 시작 시 발동 전 자신의 공격력을 기준으로 한 번 계산하여 고정합니다. 1턴 자해량은 자동 계산하지 않습니다.",
+    "raidAssumeHolyLanceDamageTaken": "S1 받는 피해 증가 성공(70%)",
+    "raidDetailHolyLanceBarrier": "결계는 해제 불가 상태와 대상 행동 3회의 지속만 유지합니다. 초기 5%, 피격/자해마다 +3%(최대 50%)의 차단과 사망 시 해제는 계산하지 않습니다.",
+    "raidIgnoredHolyLanceSelfDamageAmount": "실제 자해량과 P1 증가량 자동 계산(자해 이벤트는 개별 유지, P1 비율은 수동 입력)",
+    "raidDetailConfiguredRate": "설정한 공격력 증가 비율",
+    "raidDetailAttackSnapshot": "발동 전 공격력의 {ratio}를 저장하여 고정(ATK/DEF/HP 출처 유지)",
+    "raidCharacterConditionOtherElementCountAtMost": "다른 {element} 속성 아군이 {n}명 이하",
+    "raidCharHolyLanceAlexandra": "성창의 수호기사 · 알렉산드라",
+    "raidSkillHolyLanceS1": "가디언 슬래시",
+    "raidSkillHolyLanceS2": "라스트 나이트",
+    "raidBuffHolyLanceSpeed": "성창의 수호기사 · 스피드",
+    "raidBuffHolyLanceAttack": "성창의 수호기사 · 공격력",
+    "raidBuffHolyLanceBarrier": "어떤 가시밭길도 함께",
+    "raidDebuffHolyLanceDamageTaken": "가디언 슬래시 · 받는 피해 증가",
+    "raidIgnoredHolyLanceBarrier": "결계는 해제 불가 상태와 대상 행동 3회의 지속만 유지합니다. 초기 5%, 피격/자해마다 +3%(최대 50%)의 차단과 사망 시 해제는 계산하지 않습니다."
+  }
+}
+for (const [locale, entries] of Object.entries(holyLanceAlexandraTranslations)) Object.assign(raidTranslations[locale], entries)

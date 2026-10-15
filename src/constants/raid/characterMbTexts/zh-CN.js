@@ -6489,5 +6489,135 @@ export const RAID_CHARACTER_MB_TEXTS = Object.freeze({
         }
       ]
     }
+  ],
+  "155": [
+    {
+      "slot": "S1",
+      "source": "ActiveSkillMB",
+      "id": 155001,
+      "name": "守护圣十字",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 1,
+          "text": "“身为守护骑士，我必将尽忠职守！”亚历珊卓使自己受到2次当前生命值×20%的自损伤害，随机对敌人进行5次攻击，每次造成攻击力×290%的物理伤害。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 81,
+          "text": "发动攻击前，70%概率使技能目标额外增加40%承受伤害，效果持续1回合。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 161,
+          "text": "当队伍中的其他业红属性友军数为2名以上时，「承受伤害上升」效果增加为2回合。"
+        },
+        {
+          "type": "exclusive",
+          "level": 1,
+          "unlockLevel": 240,
+          "text": "强化守护圣十字，攻击次数增加为8次。"
+        },
+        {
+          "type": "exclusive",
+          "level": 3,
+          "unlockLevel": 240,
+          "text": "强化守护圣十字，造成的物理伤害提升为攻击力×320%。"
+        }
+      ]
+    },
+    {
+      "slot": "S2",
+      "source": "ActiveSkillMB",
+      "id": 155002,
+      "name": "孤忠骑士",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 11,
+          "text": "“埃尔芙琳黛陛下，请您拭目以待！”亚历珊卓使自己受到当前生命值×20%的自损伤害，随机对敌人进行6次攻击，每次造成攻击力×210%的物理伤害。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 21,
+          "text": "造成的物理伤害提升为攻击力×360%。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 101,
+          "text": "攻击次数增加为10次。"
+        },
+        {
+          "type": "level",
+          "level": 4,
+          "unlockLevel": 181,
+          "text": "当技能目标身上附带弱化效果时，造成的物理伤害提升为攻击力×540%。"
+        }
+      ]
+    },
+    {
+      "slot": "P1",
+      "source": "PassiveSkillMB",
+      "id": 155003,
+      "name": "圣枪守护骑士",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 41,
+          "text": "我愿以身为盾守护陛下，即使牺牲未来也在所不惜——第2回合开始时，亚历珊卓使自己增加攻击力，增幅为第1回合内亚历珊卓与友军承受的自损伤害总量×30%（增幅上限为状态效果生效前的亚历珊卓攻击力×50%）（无法被解除）。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 121,
+          "text": "战斗开始时，亚历珊卓额外增加15%速度（无法被解除）。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 201,
+          "text": "速度增幅提升为30%。"
+        }
+      ]
+    },
+    {
+      "slot": "P2",
+      "source": "PassiveSkillMB",
+      "id": 155004,
+      "name": "一同活下去",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 61,
+          "text": "无论背负着怎样的罪孽，我都希望您能活下去——战斗开始时，亚历珊卓使自己与攻击力最高的其他友军获得「结界」，效果持续1回合（无法被解除）。当此增益效果的附带者受到攻击时，阻绝5%伤害。当亚历珊卓失去战斗能力时，解除此技能附加的「结界」。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 141,
+          "text": "当亚历珊卓或友军受到攻击或自损伤害时，使此技能附加的「结界」的伤害阻绝量额外提升3%。每次受到攻击或自损伤害，再使伤害阻绝量提升3%（合计最多50%）。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 221,
+          "text": "「结界」效果增加为3回合。"
+        },
+        {
+          "type": "exclusive",
+          "level": 2,
+          "unlockLevel": 240,
+          "text": "强化一同活下去，「结界」的附加目标增加为亚历珊卓与攻击力最高的2名其他友军。"
+        }
+      ]
+    }
   ]
 })

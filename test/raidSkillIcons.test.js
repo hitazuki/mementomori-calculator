@@ -29,5 +29,5 @@ test('all raid skill slots share verified local icons across all five languages'
       }
     }
   }
-  assert.equal(checked.size, 200)
+  assert.equal(checked.size, 204)
 })

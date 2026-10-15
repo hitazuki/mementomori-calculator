@@ -144,6 +144,9 @@ export function runRaidProgram(program) {
       ? resolveValue(effect.compiledEffectGroupId, sourceActor, context)
       : effect.effectGroupId
     const replacementKey = effect.replacementKey ?? effectGroupId
+    // Capture before inserting/replacing the status, preserving ATK/DEF/HP units.
+    const attackSnapshot = effect.compiledAttackSnapshotRatio ? modifierSnapshot(target, context) : null
+    const snapshotRatio = attackSnapshot ? resolveValue(effect.compiledAttackSnapshotRatio, sourceActor, context) : 0
     const index = target.statuses.findIndex(status => (
       (status.replacementKey ?? status.effectGroupId) === replacementKey && status.sourceId === ownerId
     ))
@@ -161,6 +164,13 @@ export function runRaidProgram(program) {
         copyCoefficient: modifier.compiledCoefficient ? resolveValue(modifier.compiledCoefficient, sourceActor, context) : modifier.coefficient,
       })),
       appliedSequence: context.sequence,
+    }
+    if (attackSnapshot) {
+      status.modifiers.push({ id: effect.id, channel: 'attackRate', rate: snapshotRatio * (1 + attackSnapshot.totals.attackRate) })
+      status.symbolicModifiers.push(...attackSnapshot.symbolicSources.map(modifier => ({
+        kind: modifier.kind, sourceId: modifier.kind === 'sourceAttackOverTargetAttack' ? modifier.valueSourceId : modifier.sourceId,
+        coefficient: snapshotRatio * modifier.coefficient,
+      })))
     }
     if (index >= 0) target.statuses.splice(index, 1, status)
     else target.statuses.push(status)

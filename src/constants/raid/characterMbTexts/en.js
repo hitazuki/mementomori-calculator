@@ -6489,5 +6489,135 @@ export const RAID_CHARACTER_MB_TEXTS = Object.freeze({
         }
       ]
     }
+  ],
+  "155": [
+    {
+      "slot": "S1",
+      "source": "ActiveSkillMB",
+      "id": 155001,
+      "name": "Guarding Cross",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 1,
+          "text": "“I will fulfill my duty as a guardian knight. No matter what it takes...!” Alexandra deals damage equal to 20% of her current HP to herself 2 times, and deals 5 physical attacks equal to 290% of her ATK to enemies at random."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 81,
+          "text": "Additionally, before dealing the physical attacks, has a 70% chance to increase the damage all targets take by 40% for 1 turn."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 161,
+          "text": "Additionally, if the number of Crimson Soul allies other than Alexandra in the party is 2 or more, the number of turns of [Increased Damage Taken] becomes 2."
+        },
+        {
+          "type": "exclusive",
+          "level": 1,
+          "unlockLevel": 240,
+          "text": "Strengthens Guarding Cross. The number of physical attacks becomes 8."
+        },
+        {
+          "type": "exclusive",
+          "level": 3,
+          "unlockLevel": 240,
+          "text": "Strengthens Guarding Cross. The physical attacks’ damage becomes equal to 320% of her ATK."
+        }
+      ]
+    },
+    {
+      "slot": "S2",
+      "source": "ActiveSkillMB",
+      "id": 155002,
+      "name": "Final Shield",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 11,
+          "text": "“Please watch me, Lady Elfriede!” Alexandra deals damage equal to 20% of her current HP to herself, and deals 6 physical attacks equal to 210% of her ATK to enemies at random."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 21,
+          "text": "The physical attacks’ damage becomes equal to\n360% of her ATK."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 101,
+          "text": "The number of physical attacks becomes 10."
+        },
+        {
+          "type": "level",
+          "level": 4,
+          "unlockLevel": 181,
+          "text": "Additionally, before dealing the physical attacks, if a target is afflicted with a debuff, the physical attacks’ damage to that target becomes equal to 540% of Alexandra’s ATK."
+        }
+      ]
+    },
+    {
+      "slot": "P1",
+      "source": "PassiveSkillMB",
+      "id": 155003,
+      "name": "Guardian of the Lance",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 41,
+          "text": "“Even if I must forsake my own future, if I can be your shield, I...!” At the start of the 2nd turn, this skill increases Alexandra’s ATK by an amount equal to 30% of the total damage taken by her and her allies via dealing damage to self during the 1st turn (her ATK can increase up to 50% of her ATK before any stat increases or decreases were applied to it) (cannot be dispelled)."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 121,
+          "text": "Additionally, at the start of the battle, increases her SPD by 15% (cannot be dispelled)."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 201,
+          "text": "The amount her SPD increases by becomes 30%."
+        }
+      ]
+    },
+    {
+      "slot": "P2",
+      "source": "PassiveSkillMB",
+      "id": 155004,
+      "name": "If You Live, I’ll Live Too",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 61,
+          "text": "“No matter what sins may have sullied your hands, I still want you to live...!” At the start of the battle, this skill grants [Force Field] to Alexandra and the ally with the highest ATK for 1 turn (cannot be dispelled). When an enhanced target of [Force Field] is attacked, the attack’s damage is cut by 5%. When Alexandra is defeated, the [Force Field] granted to Alexandra and the ally target by this skill is dispelled."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 141,
+          "text": "Additionally, if Alexandra or an ally takes damage via an attack or dealing damage to self, the amount the damage is cut by the [Force Field] granted to Alexandra and the ally targets by this skill increases by 3%. The damage cutting is further increased by 3% for each time a target takes damage via an attack or dealing damage to self (total increase of 50% max)."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 221,
+          "text": "The number of turns of [Force Field] becomes 3."
+        },
+        {
+          "type": "exclusive",
+          "level": 2,
+          "unlockLevel": 240,
+          "text": "Strengthens If You Live, I’ll Live Too. The targets who are granted [Force Field] become Alexandra and the 2 allies with the highest ATK."
+        }
+      ]
+    }
   ]
 })

@@ -1,0 +1,29 @@
+{
+  "formatVersion": 1,
+  "characterId": 155,
+  "slug": "holy-lance-alexandra",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": { "activeSkillIds": [155001, 155002], "passiveSkillIds": [155003, 155004], "combatLogs": [], "catalog": "public/data/character-catalog/{locale}/details/7.json" },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 155001, "model": "implemented", "summary": "Lv240 EX3: two consecutive pre-damage selfDamage events, 8x320% physical. Deterministic success/failure applies 40% vulnerability before damage for 1/2 Boss rounds with fewer than two/at least two other red allies. No per-hit sampling." },
+    { "kind": "activeSkill", "sourceId": 155002, "model": "implemented", "summary": "One pre-damage selfDamage event, 10x360% physical, 540% while Boss has a negative state." },
+    { "kind": "passiveSkill", "sourceId": 155003, "model": "implemented", "summary": "Permanent unremovable 30% speed at battleStart. At round 2 start, capture 0-50% of pre-activation own attack once (default 50%). Freeze ATK/DEF/HP references. Configured ratio substitutes for actual first-round self-damage amounts, never inferred from event count." },
+    { "kind": "passiveSkill", "sourceId": 155004, "model": "implemented", "summary": "EX2: retain unremovable barrier on self and two other top-attack allies for 3 target actions, excluded from Buff count; blocking and removal on death ignored." }
+  ],
+  "effectGroups": [
+    { "id": -15500101, "model": "implemented", "summary": "Project placeholder: removable 40% vulnerability; official EffectGroup ID unverified." },
+    { "id": -15500301, "model": "implemented", "summary": "Project placeholder: explicitly unremovable speed state." },
+    { "id": -15500302, "model": "implemented", "summary": "Project placeholder: explicitly unremovable P1 attack state." },
+    { "id": -15500401, "model": "implemented", "summary": "Project placeholder: explicitly unremovable barrier state." }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredHolyLanceSelfDamageAmount", "summary": "Actual current-HP loss and automatic P1 source amount calculation; retain individual selfDamage events and use manually configured P1 ratio." },
+    { "key": "raidIgnoredHolyLanceBarrier", "summary": "Initial 5% blocking, +3% after each incoming attack/self-damage to 50%, incoming damage and removal on owner death." }
+  ],
+  "unresolved": [
+    "No raw Master directory or combat logs supplied. Negative status IDs are project placeholders, not official EffectGroup IDs. Confirm exact groups and SkillCategory later.",
+    "S1 vulnerability timing follows catalog text. One deterministic success/failure scenario applies vulnerability once before all single-Boss hits; independent per-hit chances and random targets are not simulated.",
+    "P2 follows existing target-action duration convention; raw log compensation is unverified.",
+    "Exclusive descriptions copied from local official catalog; raw exclusive unlock levels unverified. Final attack panel normalized as for other raid characters: weapon ATK 18% is not another combat buff, STR 8% not converted to attack, default DEF penetration includes 7000."
+  ]
+}

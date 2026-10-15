@@ -34,7 +34,7 @@ const {
   MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE,
   CORDIE, SUMMER_SABRINA,
   REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH,
-  MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA,
+  MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA, HOLY_LANCE_ALEXANDRA,
 } = RAID_TABLE_CHARACTER_IDS
 
 function action(result, turn, id) {
@@ -53,15 +53,102 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
-test('roster exposes fifty characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 50)
+test('holy lance Alexandra applies a configurable frozen P1 gain at turn 2 and retains her rotation', () => {
+  assert.equal(createDefaultRaidTableConfig().scenarioRates.holyLanceP1Attack, 0.5)
+  assert.equal(createDefaultRaidTableConfig().defensePenetrations[HOLY_LANCE_ALEXANDRA], 18_950)
+  for (const rate of [0, 0.25, 0.5]) {
+    const result = simulateRaidTable(singleConfig(HOLY_LANCE_ALEXANDRA, { scenarioRates: { holyLanceP1Attack: rate } }))
+    assert.deepEqual(actionsFor(result, HOLY_LANCE_ALEXANDRA), ['s1', 's2', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1', 's2'])
+    const first = action(result, 1, HOLY_LANCE_ALEXANDRA)
+    assert.equal(first.damageSteps.length, 8)
+    assert.ok(first.damageSteps.every(step => step.percent === 320 && step.attackRate === 0 && step.damageRate === 0.4))
+    assert.deepEqual(first.cooldownsAfter, { s1: 3, s2: 0 })
+    closeTo(result.rounds[0].speedSnapshot[HOLY_LANCE_ALEXANDRA].effectiveSpeed, 3114 * 1.3)
+    for (let turn = 2; turn <= 10; turn++) {
+      assert.ok(action(result, turn, HOLY_LANCE_ALEXANDRA).damageSteps.every(step => step.attackRate === rate))
+    }
+    assert.equal(result.rounds.flatMap(round => round.roundStartEffects).filter(effect => effect.id === 'holy-lance-attack').length, 1)
+    assert.equal(first.removableBuffCounts[HOLY_LANCE_ALEXANDRA], 0)
+    assert.ok(first.statusSnapshotAfterAction[HOLY_LANCE_ALEXANDRA].statuses.some(status => status.id === 'holy-lance-barrier'))
+    assert.ok(!action(result, 3, HOLY_LANCE_ALEXANDRA).statusSnapshotAfterAction[HOLY_LANCE_ALEXANDRA].statuses.some(status => status.id === 'holy-lance-barrier'))
+  }
+})
+
+test('holy lance P1 snapshots active attack and conversion contributions before their expiry', () => {
+  const id = HOLY_LANCE_ALEXANDRA
+  const definition = RAID_TABLE_CHARACTERS[id]
+  const environment = { ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [id]: {
+    ...definition, hooks: [...definition.hooks, hook('battleStart', [statusEffect({
+      id: 'snapshot-test', effectGroupId: -90001, nameKey: 'raidAttackRate', target: 'self', duration: 2,
+      modifiers: [{ channel: 'attackRate', rate: 0.4 }],
+      symbolicModifiers: [
+        { kind: 'sourceAttackOverTargetAttack', coefficient: 0.2, sourceId: id },
+        { kind: 'targetBaseDefenseOverTargetAttack', coefficient: 2 },
+        { kind: 'sourceMaxHpOverTargetAttack', coefficient: 0.3, sourceId: id },
+      ],
+    })])],
+  } } }
+  const result = simulateRaidTable(singleConfig(id), environment)
+  closeTo(action(result, 2, id).damageSteps[0].attackRate, 1.1)
+  const third = action(result, 3, id).damageSteps[0]
+  closeTo(third.attackRate, 0.7)
+  assert.deepEqual(third.symbolicModifierSources.map(term => [term.kind, term.coefficient]), [
+    ['sourceAttackOverTargetAttack', 0.1], ['targetBaseDefenseOverTargetAttack', 1], ['sourceMaxHpOverTargetAttack', 0.15],
+  ])
+  closeTo(action(result, 9, id).damageSteps[0].attackRate, 0.7)
+})
+
+test('holy lance vulnerability duration counts other red allies and the failure scenario preserves S2 fallback', () => {
+  for (const allies of [[], [GUINEVERE], [GUINEVERE, ARTORIA]]) {
+    const lineup = [HOLY_LANCE_ALEXANDRA, ...allies]
+    const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 3 })
+    const first = action(result, 1, HOLY_LANCE_ALEXANDRA)
+    const debuff = first.bossStatusAfterAction.find(status => status.id === 'holy-lance-vulnerability')
+    assert.equal(debuff.durationRounds, allies.length === 2 ? 2 : 1)
+    assert.equal(debuff.damageRatePerStack, 0.4)
+  }
+  const failed = simulateRaidTable(singleConfig(HOLY_LANCE_ALEXANDRA, { probabilityOverrides: { holyLanceDamageTaken: false }, guaranteedCritical: false }))
+  assert.ok(action(failed, 1, HOLY_LANCE_ALEXANDRA).damageSteps.every(step => step.damageRate === 0 && step.criticalMultiplier === 1))
+  assert.ok(action(failed, 2, HOLY_LANCE_ALEXANDRA).damageSteps.every(step => step.percent === 360))
+  const lineup = [HOLY_LANCE_ALEXANDRA, GUINEVERE, ARTORIA]
+  const success = simulateRaidTable({ lineup, attackPriority: lineup, turns: 2 })
+  assert.ok(action(success, 2, HOLY_LANCE_ALEXANDRA).damageSteps.every(step => step.percent === 540))
+})
+
+test('holy lance S1 emits two distinct pre-damage self-damage events and S2 emits one', () => {
+  const lineup = [HOLY_LANCE_ALEXANDRA, ARTORIA, GUINEVERE]
+  const order = { 1: lineup, 2: lineup }
+  const result = simulateRaidTable({ lineup, attackPriority: lineup, actionOrderOverrides: order, turns: 2 })
+  const first = action(result, 1, HOLY_LANCE_ALEXANDRA)
+  assert.equal(first.effectsApplied.filter(effect => effect.type === 'counter' && effect.targetId === GUINEVERE).length, 2)
+  assert.equal(first.effectsApplied.filter(effect => effect.targetId === ARTORIA && effect.counter === 'justice').length, 2)
+  const second = action(result, 2, HOLY_LANCE_ALEXANDRA)
+  assert.equal(second.effectsApplied.filter(effect => effect.type === 'counter' && effect.targetId === GUINEVERE).length, 1)
+  const barrierTargets = lineup.filter(id => first.statusSnapshotBeforeAction[id].statuses.some(status => status.id === 'holy-lance-barrier'))
+  assert.deepEqual(barrierTargets, lineup)
+})
+
+test('configured rates and attack snapshots reject invalid definitions at compile time', () => {
+  for (const value of [-0.1, 0.50001, NaN, Infinity, '0.5']) assert.throws(() => compileRaidProgram(singleConfig(HOLY_LANCE_ALEXANDRA, { scenarioRates: { holyLanceP1Attack: value } })), /Invalid raid scenario rate/)
+  assert.throws(() => compileRaidProgram(singleConfig(HOLY_LANCE_ALEXANDRA, { scenarioRates: { unknown: 0.1 } })), /Invalid raid scenario rate/)
+  for (const ratio of [-1, Infinity, { type: 'configuredRate', key: 'unknown' }, { type: 'counterLinear', counter: 'missing' }]) {
+    const definition = RAID_TABLE_CHARACTERS[HOLY_LANCE_ALEXANDRA]
+    const characters = { ...RAID_TABLE_CHARACTERS, [definition.id]: { ...definition, hooks: [hook('battleStart', [statusEffect({
+      id: 'bad-snapshot', effectGroupId: -999, nameKey: 'raidAttackRate', target: 'self', duration: null, attackSnapshotRatio: ratio,
+    })])] } }
+    assert.throws(() => compileRaidProgram(singleConfig(definition.id), { ...DEFAULT_RAID_ENVIRONMENT, characters }), /snapshot ratio|scenario rate|fixed or configured rate/)
+  }
+})
+
+test('roster exposes fifty-one characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 51)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-19), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-20), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA, HOLY_LANCE_ALEXANDRA])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {

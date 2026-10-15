@@ -61,6 +61,9 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
   }),
 
   conditionHandlers: Object.freeze({
+    otherLineupElementCountAtMost: (condition, { actor, ownerId, config, actors }) => (
+      config.lineup.filter(id => id !== (actor?.id ?? ownerId) && actors.get(id).definition.element === condition.element).length <= condition.count
+    ),
     lineupElementCountAtMost: (condition, { config, actors }) => (
       new Set(config.lineup.map(id => actors.get(id).definition.element)).size <= condition.count
     ),
@@ -128,6 +131,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
   }),
 
   valueResolvers: Object.freeze({
+    configuredRate: (spec, { config }) => config.scenarioRates[spec.key],
     fixed: spec => spec.value,
     configuredTier: (spec, { config }) => spec.values[config.scenarioTiers[spec.key]],
     counterLinear: (spec, { actor }) => linearValue(spec, actor.runtime.counters[spec.counter] ?? 0),

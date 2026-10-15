@@ -188,6 +188,16 @@
         <span><strong>{{ $t('raidCandyCerberusReviveRound') }}</strong><small>{{ $t('raidCandyCerberusReviveRoundHint') }}</small></span>
         <span class="raid-number-input"><input v-model.number="activationRounds.candyCerberusKindMagic" type="number" min="1" max="10" step="1" @change="normalizeActivationRound('candyCerberusKindMagic')"><em>{{ $t('raidRoundUnit') }}</em></span>
       </label>
+      <template v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.HOLY_LANCE_ALEXANDRA)">
+        <label class="raid-number-control">
+          <span><strong>{{ $t('raidHolyLanceP1Attack') }}</strong><small>{{ $t('raidHolyLanceP1AttackHint') }}</small></span>
+          <span class="raid-number-input"><input v-model.number="holyLanceP1AttackPercent" type="number" min="0" max="50" step="1" @change="normalizeHolyLanceP1Attack"><em>%</em></span>
+        </label>
+        <label class="raid-toggle-control">
+          <input v-model="probabilityOverrides.holyLanceDamageTaken" type="checkbox">
+          <span><strong>{{ $t('raidAssumeHolyLanceDamageTaken') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
+        </label>
+      </template>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.REGINA)" class="raid-number-control raid-select-control">
         <span><strong>{{ $t('raidReginaDamageTaken') }}</strong><small>{{ $t('raidReginaDamageTakenHint') }}</small></span>
         <select v-model.number="scenarioTiers.reginaDamageTaken">
@@ -695,6 +705,12 @@ const rosalieMemoryRound = computed({
   set: value => { activationRounds.apostleRosalieMemory = value },
 })
 const scenarioTiers = reactive({ ...defaults.scenarioTiers })
+const holyLanceP1AttackPercent = ref(defaults.scenarioRates.holyLanceP1Attack * 100)
+function normalizedHolyLanceP1Attack() {
+  const value = holyLanceP1AttackPercent.value
+  return value === '' || !Number.isFinite(Number(value)) ? 50 : Math.min(50, Math.max(0, Number(value)))
+}
+function normalizeHolyLanceP1Attack() { holyLanceP1AttackPercent.value = normalizedHolyLanceP1Attack() }
 const siviDamageTiers = Object.freeze([
   { hits: 0, rate: 30 }, { hits: 1, rate: 54 }, { hits: 2, rate: 72 }, { hits: 3, rate: 84 }, { hits: 4, rate: 90 },
 ])
@@ -751,12 +767,14 @@ const result = computed(() => lineup.value.length ? simulateRaidTable({
     key === 'apostleRosalieMemory' && !rosalieEarlyMemory.value ? 6 : normalizedActivationRound(key),
   ])),
   scenarioTiers: { ...scenarioTiers },
+  scenarioRates: { holyLanceP1Attack: normalizedHolyLanceP1Attack() / 100 },
   turns: 10,
 }) : null)
 const currentSpeedOrder = computed(() => result.value?.rounds[0]?.speedOrder ?? [])
 const manualOrderCount = computed(() => result.value?.rounds.filter(round => round.orderSource === 'manual').length ?? 0)
 
 const probabilityScenarioDefinitions = Object.freeze([
+  [RAID_TABLE_CHARACTER_IDS.HOLY_LANCE_ALEXANDRA, 'holyLanceDamageTaken', 'raidAssumeHolyLanceDamageTaken'],
   [RAID_TABLE_CHARACTER_IDS.APOSTLE_ROSALIE, 'apostleRosalieDamageTaken', 'raidAssumeRosalieDamageTaken'],
   [RAID_TABLE_CHARACTER_IDS.LIBERIA, 'liberiaSand', 'raidAssumeLiberiaSand'],
   [RAID_TABLE_CHARACTER_IDS.SPRING_SHIZU, 'shizuSpeedDown', 'raidAssumeShizuSpeedDown'],
@@ -948,6 +966,7 @@ function characterConditionText(condition) {
   const element = value => t(elementNameKey(value))
   const args = { n: condition.count, round: condition.round, skill: condition.skillKey?.toUpperCase(), element: condition.element == null ? '' : element(condition.element), elements: (condition.elements ?? []).map(element).join('/') }
   const keys = {
+    otherLineupElementCountAtMost: 'raidCharacterConditionOtherElementCountAtMost',
     targetHpBelow50: 'raidCharacterConditionTargetHpBelow50', targetHpAtLeast50: 'raidCharacterConditionTargetHpAtLeast50',
     actorHasStatus: 'raidCharacterConditionActorHasStatus', actorRemovableBuffCountAtLeast: 'raidCharacterConditionActorBuffCountAtLeast',
     anyRemovableBuffCountAtLeast: 'raidCharacterConditionAnyBuffCountAtLeast', bossElementIs: 'raidCharacterConditionBossElementIs',
@@ -980,6 +999,7 @@ function characterEffectDetailText(effect) {
   const parts = [...effect.modifiers.map(formatCharacterEffectRate), ...effect.bossRates.map(rate => t('raidDetailPerStack', { value: formatCharacterEffectRate(rate) }))]
   const definition = effect.definition ?? {}
   if (definition.detailKey) parts.push(t(definition.detailKey))
+  if (definition.attackSnapshotRatio != null) parts.push(t('raidDetailAttackSnapshot', { ratio: detailValueText(definition.attackSnapshotRatio, 100, '%') }))
   for (const modifier of definition.symbolicModifiers ?? []) parts.push(t(modifier.kind === 'sourceMaxHpOverTargetAttack' ? 'raidDetailSymbolicHp' : modifier.kind === 'sourceAttackOverTargetAttack' ? 'raidDetailSymbolicAttack' : 'raidDetailSymbolicDefense', {
     value: detailValueText(modifier.coefficient), source: characterName(modifier.sourceId ?? selectedCharacterDetail.value.id),
   }))
@@ -1111,6 +1131,9 @@ function activeRaidScenarioLines() {
   const lines = probabilityScenarioDefinitions
     .filter(([id, key]) => lineup.value.includes(id) && result.value.config.probabilityOverrides[key])
     .map(([, , labelKey]) => t(labelKey))
+  if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.HOLY_LANCE_ALEXANDRA)) {
+    lines.push(`${t('raidHolyLanceP1Attack')}：${formatter().format(result.value.config.scenarioRates.holyLanceP1Attack * 100)}%`)
+  }
   if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.MERLYN)) {
     for (const id of attackPriority.value.slice(0, 2)) {
       if (result.value.config.targetHpBelow50[id]) lines.push(t('raidMerlynTargetLowHp', { target: characterName(id) }))
@@ -1202,6 +1225,7 @@ function resetConfig() {
   Object.assign(activationRounds, next.activationRounds)
   rosalieEarlyMemory.value = false
   Object.assign(scenarioTiers, next.scenarioTiers)
+  holyLanceP1AttackPercent.value = next.scenarioRates.holyLanceP1Attack * 100
   Object.assign(targetHpBelow50, next.targetHpBelow50)
   Object.assign(probabilityOverrides, next.probabilityOverrides); selectedEvent.value = null
   raidExportSnapshot.value = null

@@ -6489,5 +6489,135 @@ export const RAID_CHARACTER_MB_TEXTS = Object.freeze({
         }
       ]
     }
+  ],
+  "155": [
+    {
+      "slot": "S1",
+      "source": "ActiveSkillMB",
+      "id": 155001,
+      "name": "守護聖十字",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 1,
+          "text": "「身為守護騎士，我必將盡忠職守！」亞歷珊卓使自己受到2次當前生命值×20%的自損傷害，隨機對敵人進行5次攻擊，每次造成攻擊力×290%的物理傷害。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 81,
+          "text": "發動攻擊前，70%機率使技能目標額外增加40%承受傷害，效果持續1回合。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 161,
+          "text": "當隊伍中的其他業紅屬性友軍數為2名以上時，「承受傷害上升」效果增加為2回合。"
+        },
+        {
+          "type": "exclusive",
+          "level": 1,
+          "unlockLevel": 240,
+          "text": "強化守護聖十字，攻擊次數增加為8次。"
+        },
+        {
+          "type": "exclusive",
+          "level": 3,
+          "unlockLevel": 240,
+          "text": "強化守護聖十字，造成的物理傷害提升為攻擊力×320%。"
+        }
+      ]
+    },
+    {
+      "slot": "S2",
+      "source": "ActiveSkillMB",
+      "id": 155002,
+      "name": "孤忠騎士",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 11,
+          "text": "「埃爾芙琳黛陛下，請您拭目以待！」亞歷珊卓使自己受到當前生命值×20%的自損傷害，隨機對敵人進行6次攻擊，每次造成攻擊力×210%的物理傷害。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 21,
+          "text": "造成的物理傷害提升為攻擊力×360%。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 101,
+          "text": "攻擊次數增加為10次。"
+        },
+        {
+          "type": "level",
+          "level": 4,
+          "unlockLevel": 181,
+          "text": "當技能目標身上附帶弱化效果時，造成的物理傷害提升為攻擊力×540%。"
+        }
+      ]
+    },
+    {
+      "slot": "P1",
+      "source": "PassiveSkillMB",
+      "id": 155003,
+      "name": "聖槍守護騎士",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 41,
+          "text": "我願以身為盾守護陛下，即使犧牲未來也在所不惜——第2回合開始時，亞歷珊卓使自己增加攻擊力，增幅為第1回合內亞歷珊卓與友軍承受的自損傷害總量×30%（增幅上限為狀態效果生效前的亞歷珊卓攻擊力×50%）（無法被解除）。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 121,
+          "text": "戰鬥開始時，亞歷珊卓額外增加15%速度（無法被解除）。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 201,
+          "text": "速度增幅提升為30%。"
+        }
+      ]
+    },
+    {
+      "slot": "P2",
+      "source": "PassiveSkillMB",
+      "id": 155004,
+      "name": "一同活下去",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 61,
+          "text": "無論身上背負著多少罪孽，我還是希望您活下去——戰鬥開始時，亞歷珊卓使自己與攻擊力最高的其他友軍獲得「結界」，效果持續1回合（無法被解除）。當此增益效果的附帶者受到攻擊時，阻絕5%傷害。當亞歷珊卓失去戰鬥能力時，解除此技能附加的「結界」。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 141,
+          "text": "當亞歷珊卓或友軍受到攻擊或自損傷害時，使此技能附加的「結界」的傷害阻絕量額外提升3%。每次受到攻擊或自損傷害，再使傷害阻絕量提升3%（合計最多50%）。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 221,
+          "text": "「結界」效果增加為3回合。"
+        },
+        {
+          "type": "exclusive",
+          "level": 2,
+          "unlockLevel": 240,
+          "text": "強化一同活下去，「結界」的附加目標增加為亞歷珊卓與攻擊力最高的2名其他友軍。"
+        }
+      ]
+    }
   ]
 })

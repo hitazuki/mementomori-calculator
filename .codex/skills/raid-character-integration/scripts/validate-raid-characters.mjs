@@ -64,6 +64,7 @@ function checkValue(value, location, character) {
     return
   }
   if (value.counter && !(value.counter in (character.runtime?.counters ?? {}))) error(`${location}: unknown counter '${value.counter}'`)
+  if (value.type === 'configuredRate' && !(value.key in defaultConfig.scenarioRates)) error(`${location}: scenario rate has no default`)
   if (value.type === 'conditional') {
     checkCondition(value.condition, `${location}.condition`, character)
     checkValue(value.whenTrue, `${location}.whenTrue`, character)
@@ -99,6 +100,7 @@ function checkEffect(effect, location, character) {
   checkLocaleKey(effect.nameKey, `${location}.nameKey`)
 
   if (effect.type === 'status') {
+    if (effect.attackSnapshotRatio != null) checkValue(effect.attackSnapshotRatio, `${location}.attackSnapshotRatio`, character)
     checkValue(effect.effectGroupId, `${location}.effectGroupId`, character)
     const effectGroupIds = [...collectResolvedNumbers(effect.effectGroupId)]
     if (!effectGroupIds.length) error(`${location}: actor status effectGroupId must resolve to at least one integer`)

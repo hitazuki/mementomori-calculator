@@ -9,10 +9,12 @@ export const DEFAULT_RAID_CHARACTER_LEVEL = 500
 export const DEFAULT_RAID_DEFENSE_PENETRATION = 11_950
 export const DEFAULT_RAID_PM_DEFENSE_PENETRATION = 65_700
 export const RAID_ACTIVATION_ROUND_LIMITS = Object.freeze({ apostleRosalieMemory: 6 })
+export const RAID_SCENARIO_RATE_LIMITS = Object.freeze({ holyLanceP1Attack: 0.5 })
 export const RAID_BASE_CRITICAL_DAMAGE_BONUS = 0.5
 export const DEFAULT_RAID_CRITICAL_DAMAGE_BONUS = 0.6
 
 export const RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES = Object.freeze({
+  [RAID_TABLE_CHARACTER_IDS.HOLY_LANCE_ALEXANDRA]: Object.freeze({ defensePenetration: 7_000 }),
   [RAID_TABLE_CHARACTER_IDS.FLORENCE]: Object.freeze({ pmDefensePenetration: 7_000 }),
   [RAID_TABLE_CHARACTER_IDS.LIBERIA]: Object.freeze({ pmDefensePenetration: 7_000 }),
   [RAID_TABLE_CHARACTER_IDS.CORDIE]: Object.freeze({ criticalDamageBonus: 0.35 }),
@@ -48,6 +50,7 @@ export function createDefaultRaidTableConfig() {
     elementAdvantage: true,
     baseCriticalDamageBonus: DEFAULT_RAID_CRITICAL_DAMAGE_BONUS,
     probabilityOverrides: {
+      holyLanceDamageTaken: true,
       apostleRosalieDamageTaken: true,
       liberiaSand: true, shizuSpeedDown: true, guinevereDamageTaken: true,
       millaDelay: true, yildizBuffBlock: true, winterStellaSilence: true,
@@ -65,6 +68,7 @@ export function createDefaultRaidTableConfig() {
       siviReactiveBladeIncomingHits: 0,
       reginaDamageTaken: 1,
     },
+    scenarioRates: { holyLanceP1Attack: 0.5 },
     turns: 10,
   }
 }
