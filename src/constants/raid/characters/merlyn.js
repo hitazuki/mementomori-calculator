@@ -28,7 +28,7 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillMerlynS2', cooldown: 4, damageType: 'mag',
       hooks: [hook('afterDamage', [{ type: 'emitEvent', event: 'activeSkillHeal', target: 'all', targetCount: 1 }])],
-      damageSteps: [{ stat: 'ATK', percent: 380, hits: 1, damageType: 'mag', originalTargetCount: 3 }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 3 }, stat: 'ATK', percent: 380, hits: 1, damageType: 'mag', originalTargetCount: 3 }],
       ignoredKeys: ['raidIgnoredBuffRemoval', 'raidIgnoredHealing'],
     },
   },

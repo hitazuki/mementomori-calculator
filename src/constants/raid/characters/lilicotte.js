@@ -5,7 +5,7 @@ const selfDamage = { type: 'emitEvent', event: 'selfDamage' }
 const enhancedNormal = {
   key: 'normal', nameKey: 'raidSkillLilicotteNormal', damageType: 'phys', hooks: [],
   damageSteps: [{
-    stat: 'ATK', percent: 300, hits: 3, damageType: 'phys', conditionKey: 'raidConditionAlliesFullHp',
+    enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 300, hits: 3, damageType: 'phys', conditionKey: 'raidConditionAlliesFullHp',
   }],
   ignoredKeys: ['raidIgnoredLowHpDamageScaling'],
 }
@@ -28,7 +28,7 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillLilicotteS1', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [selfDamage, selfDamage])],
-      damageSteps: [{ stat: 'ATK', percent: 630, hits: 6, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 630, hits: 6, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredBuffRemoval', 'raidIgnoredBuffRemovalTriggeredBuff'],
     },
     s2: {
@@ -40,7 +40,7 @@ export default {
           damageRatePerStack: 0, condition: { type: 'probabilityEnabled', key: 'lilicotteSilence' }, recordSkipped: true,
         })]),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 1120, hits: 1, originalTargetCount: 3, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 3 }, stat: 'ATK', percent: 1120, hits: 1, originalTargetCount: 3, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredBuffRemoval', 'raidIgnoredBuffRemovalTriggeredBuff'],
     },
   },

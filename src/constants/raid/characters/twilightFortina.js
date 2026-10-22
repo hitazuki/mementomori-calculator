@@ -26,7 +26,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillTwilightFortinaS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 480, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 480, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
       hooks: [hook('beforeDamage', [
         statusEffect({
           id: 'twilight-fortina-defense', effectGroupId: 15100140101, nameKey: 'raidBuffTwilightFortinaDefense',
@@ -41,7 +41,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillTwilightFortinaS2', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 610, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 610, hits: 5, damageType: 'phys' }],
       hooks: [hook('afterDamage', [{ type: 'emitEvent', event: 'activeSkillHeal', target: 'self' }])],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredTwilightFortinaDevotion', 'raidIgnoredBarrierDamageNullification'],
     },

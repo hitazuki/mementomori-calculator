@@ -27,7 +27,7 @@ export default {
           durationRounds: 3, damageRatePerStack: 0,
         })]),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 300, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 300, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredCriticalRateUp', 'raidIgnoredSilence'],
     },
     s2: {
@@ -36,7 +36,7 @@ export default {
         id: 'lunalynn-poison', effectGroupId: 4600240102, nameKey: 'raidDebuffLunalynnPoison',
         durationRounds: 3, damageRatePerStack: 0,
       })])],
-      damageSteps: [{ stat: 'ATK', percent: 285, hits: 1, originalTargetCount: 5, damageType: 'mag', conditionKey: 'raidConditionLoggedTargetMagicLower' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 285, hits: 1, originalTargetCount: 5, damageType: 'mag', conditionKey: 'raidConditionLoggedTargetMagicLower' }],
       ignoredKeys: ['raidIgnoredBaseMagicComparisonBranch', 'raidIgnoredDotDamage'],
     },
   },

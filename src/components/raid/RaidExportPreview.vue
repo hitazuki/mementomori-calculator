@@ -37,6 +37,10 @@
             <div><strong>{{ model.labels.scenarios }}</strong><span v-for="line in model.scenarioLines" :key="line">{{ line }}</span><span v-if="!model.scenarioLines.length">—</span></div>
           </section>
 
+          <section v-if="model.enemyTotals?.length" class="raid-export-panel-section">
+            <h2>{{ model.labels.fiveTargetTotal }}</h2>
+            <p v-for="target in model.enemyTotals" :key="target.id">{{ target.label }} · {{ target.attack }}<span v-for="value in target.conversion" :key="value"> + {{ value }}</span><span v-if="target.symbolic !== '—'"> + {{ target.symbolic }}</span></p>
+          </section>
           <section class="raid-export-panel-section">
             <h2>{{ model.labels.panelStats }}</h2>
             <table><thead><tr><th>{{ model.labels.character }}</th><th>{{ model.labels.level }}</th><th>{{ model.labels.speed }}</th><th>{{ model.labels.criticalDamage }}</th><th>{{ model.labels.defensePenetration }}</th><th>{{ model.labels.pmDefensePenetration }}</th></tr></thead>

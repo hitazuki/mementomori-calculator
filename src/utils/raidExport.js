@@ -71,6 +71,11 @@ export function buildRaidExportModel({
     generatedLabel: labels.generatedAt,
     generatedAt: generatedAt.toLocaleString(locale),
     boss: { name: bossName, stats: bossStats },
+    enemyTotals: result.config.bossTemplateId === 'five-targets' ? result.enemyTotals.map(target => ({
+      id: target.id, label: (labels.enemyTarget ?? 'Enemy {n}').replace('{n}', String(target.position)),
+      attack: formatPercent(target.atkPercent), symbolic: formatSymbolic(target.symbolicTotals),
+      conversion: Object.entries(target.conversionTotals).filter(([, value]) => value).map(([stat, value]) => `${value.toLocaleString(locale)}% ${stat}`),
+    })) : [],
     guaranteedCritical: result.config.guaranteedCritical,
     lineup: lineup.map(id => ({ id, name: characterName(id), icon: iconUrl(id) })),
     attackPriority: attackPriority.map(id => ({ id, name: characterName(id), icon: iconUrl(id) })),

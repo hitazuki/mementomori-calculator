@@ -50,7 +50,7 @@ export default {
         durationRounds: 2, damageRatePerStack: 0,
         condition: { type: 'probabilityEnabled', key: 'paladiaCriticalResistDown' }, recordSkipped: true,
       })])],
-      damageSteps: [{ stat: 'ATK', percent: 580, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 580, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredCriticalRateUp', 'raidIgnoredBarrierDamageNullification'],
     },
     s2: {
@@ -63,7 +63,7 @@ export default {
         }),
       ])],
       damageSteps: [{
-        stat: 'ATK', hits: 4, damageType: 'phys', criticalCondition: blackBulletRainCondition,
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', hits: 4, damageType: 'phys', criticalCondition: blackBulletRainCondition,
         percent: { type: 'conditional', condition: blackBulletRainCondition, whenTrue: 1960, whenFalse: 980 },
       }],
       ignoredKeys: ['raidIgnoredBuffRemoval', 'raidIgnoredCriticalRateUp', 'raidIgnoredBarrierDamageNullification'],

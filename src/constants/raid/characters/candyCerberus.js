@@ -36,7 +36,7 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillCandyCerberusS1', cooldown: 4, damageType: 'mag', hooks: [],
       damageSteps: [{
-        stat: 'ATK',
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK',
         percent: { type: 'conditional', condition: { type: 'actorHasStatus', statusId: 'candy-cerberus-kind-magic' }, whenTrue: 510, whenFalse: 340 },
         hits: 10, damageType: 'mag',
       }],
@@ -45,7 +45,7 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillCandyCerberusS2', cooldown: 4, damageType: 'mag', hooks: [],
       damageSteps: [{
-        stat: 'ATK',
+        enemyTarget: { type: 'randomGroup', count: 3 }, stat: 'ATK',
         percent: { type: 'conditional', condition: { type: 'actorHasStatus', statusId: 'candy-cerberus-kind-magic' }, whenTrue: 1980, whenFalse: 1320 },
         hits: 1, originalTargetCount: 3, damageType: 'mag',
       }],

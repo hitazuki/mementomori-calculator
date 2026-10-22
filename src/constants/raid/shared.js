@@ -16,13 +16,13 @@ export const RAID_MODIFIER_CHANNELS = Object.freeze([
 
 export const normalPhysical = Object.freeze({
   key: 'normal', nameKey: 'raidSkillNormalPhysical', damageType: 'phys',
-  damageSteps: [{ stat: 'ATK', percent: 100, hits: 1, damageType: 'phys' }],
+  damageSteps: [{ enemyTarget: { type: 'first' }, stat: 'ATK', percent: 100, hits: 1, damageType: 'phys' }],
   hooks: [],
 })
 
 export const normalMagic = Object.freeze({
   key: 'normal', nameKey: 'raidSkillNormalMagic', damageType: 'mag',
-  damageSteps: [{ stat: 'ATK', percent: 100, hits: 1, damageType: 'mag' }],
+  damageSteps: [{ enemyTarget: { type: 'first' }, stat: 'ATK', percent: 100, hits: 1, damageType: 'mag' }],
   hooks: [],
 })
 

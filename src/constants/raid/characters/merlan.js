@@ -18,7 +18,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillMerlanS1', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: 440, hits: 1, damageType: 'mag', originalTargetCount: 5 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 440, hits: 1, damageType: 'mag', originalTargetCount: 5 }],
       hooks: [hook('beforeDamage', [
         bossStatusEffect({ id: 'merlan-magic-defense-down', effectGroupId: 13500100102, nameKey: 'raidDebuffMerlanMagicDefenseDown', durationRounds: 5, addStacks: 1, maxStacks: 8, magicDefenseRatePerStack: -0.05 }),
         bossStatusEffect({ id: 'merlan-magic-defense-down', effectGroupId: 13500100102, nameKey: 'raidDebuffMerlanMagicDefenseDown', durationRounds: 5, addStacks: 2, maxStacks: 8, magicDefenseRatePerStack: -0.05, condition: { type: 'skillUsesAtLeast', skillKey: 's1', count: 2 } }),
@@ -26,7 +26,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillMerlanS2', cooldown: 4, damageType: 'mag', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [420, 420, 630, 840] }, hits: 7, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'lowestMagicDefense' }, stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [420, 420, 630, 840] }, hits: 7, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredShield'],
     },
   },

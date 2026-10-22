@@ -661,3 +661,25 @@ Boss 状态的 `damageRatePerStack`、`defenseRatePerStack`、`physicalDefenseRa
 - 友方 `status.attackSnapshotRatio` 支持0～1固定数值或 `configuredRate`。施加前读取目标攻击修正，生成固定attackRate及固定符号系数，组队乘区沿用原伤害管线。ATK/DEF/HP保留原单位，原Buff到期不会改变快照。其他效果类型及未支持的动态比率编译拒绝。
 - `otherLineupElementCountAtMost` 统计指定属性其他友军，排除自身，要求合法属性和非负整数人数。与atLeast组合表达易伤持续分支。
 - 角色详情说明快照口径，动作快照与施加记录显示冻结数值，导出条件显示配置比例。
+
+
+## 五目标选敌与结果接口
+
+配置：`bossTemplateId: 'five-targets'`、`enemyElement`（1至6，默认3）、`randomSeed`（uint32，默认1）。旧Boss忽略这两个字段对战斗的影响。所有目标共用黄金圣剑士面板，属性由配置覆盖。
+
+`damageSteps[].enemyTarget` 明确选敌，不能用展示字段 `originalTargetCount` 推断：
+
+| type | 行为 |
+| --- | --- |
+| `first` | 固定面板/血量并列按站位，`count` 默认1 |
+| `randomHit` | 每次攻击重新按距离权重抽取，可重复 |
+| `randomSingle` | 首次随机选一体，后续攻击锁定 |
+| `randomGroup` | `count` 名加权不放回目标，一批内按站位结算 |
+| `all` | 五体全部命中 |
+| `lowestMagicDefense` / `lowestPhysicalDefense` | 含状态修正后的对应防御最低者，并列按站位 |
+| `previousHit` | 已命中目标中站位最前者，适用于固定血量并列的追加攻击 |
+| `conditional` | `condition` 使用现有条件注册表，选择 `whenTrue` 或 `whenFalse` 选敌定义 |
+
+Boss效果默认作用于当前命中目标；命中外阶段使用该攻击计划或本次技能已命中目标集合。`enemyScope` 可显式为 `all`、`first`、`firstTwo`、`firstThree`、`firstHit`。随机多段的 `beforeDamage` Boss状态在每次命中前结算，己方状态/自损事件仍只按原技能阶段触发。`bossStacksAtLeast.anyEnemy: true` 在全场任一目标达标时满足。
+
+五目标逐命中记录增加 `targetId`。结果增加 `enemyTotals`（ATK、直接伤害和DEF/HP转换单位分开）与 `enemyStatusFinal`；行动/回合增加逐目标状态快照。原Boss状态数组在五目标中附带 `targetId`，单目标字段语义保持不变。

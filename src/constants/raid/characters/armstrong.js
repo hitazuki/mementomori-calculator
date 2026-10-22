@@ -32,12 +32,12 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillArmstrongS1', cooldown: 4, damageType: 'phys', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 600, hits: 2, originalTargetCount: 3, damageType: 'phys', conditionKey: 'raidConditionDummySurvives' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 3 }, stat: 'ATK', percent: 600, hits: 2, originalTargetCount: 3, damageType: 'phys', conditionKey: 'raidConditionDummySurvives' }],
       ignoredKeys: [],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillArmstrongS2', cooldown: 4, damageType: 'phys', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 600, hits: 8, originalTargetCount: 8, damageType: 'phys', conditionKey: 'raidConditionBossHpAtLeastHalf' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 600, hits: 8, originalTargetCount: 8, damageType: 'phys', conditionKey: 'raidConditionBossHpAtLeastHalf' }],
       ignoredKeys: ['raidIgnoredLowHpGuaranteedHit'],
     },
   },

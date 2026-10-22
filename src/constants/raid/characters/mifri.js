@@ -21,7 +21,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillMifriS1', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's1', values: [410, 410, 1640] }, hits: 1, damageType: 'mag', originalTargetCount: 4 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 4 }, stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's1', values: [410, 410, 1640] }, hits: 1, damageType: 'mag', originalTargetCount: 4 }],
       hooks: [hook('beforeDamage', [statusEffect({
         id: 'mifri-shield', effectGroupId: 12600140101, nameKey: 'raidBuffMifriShield', target: 'all', duration: 4,
       })], { condition: { type: 'skillUsesAtMost', skillKey: 's1', count: 1 } })],
@@ -29,7 +29,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillMifriS2', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [280, 280, 1120] }, hits: 4, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [280, 280, 1120] }, hits: 4, damageType: 'mag' }],
       hooks: [hook('afterDamage', [statusEffect({
         id: 'mifri-hasten', effectGroupId: 12600230301, nameKey: 'raidBuffMifriHasten', target: 'self', duration: 1,
         modifiers: [{ id: 'mifri-hasten', channel: 'cooldownRecoveryBonus', rate: 1 }],

@@ -1,12 +1,18 @@
 import { RAID_ELEMENTS } from './shared.js'
 
 export const RAID_BOSS_TEMPLATE_IDS = Object.freeze({
+  FIVE_TARGETS: 'five-targets',
   SONYA: 'sonya',
   LUKE: 'luke',
   GOLDEN_ARTORIA: 'golden-artoria',
 })
 
 export const RAID_BOSS_TEMPLATES = Object.freeze({
+  'five-targets': Object.freeze({
+    id: 'five-targets', nameKey: 'raidBossFiveTargets', targetCount: 5,
+    element: RAID_ELEMENTS.GREEN, level: 240, defense: 20, physicalDefense: 500_000, magicDefense: 500_000,
+    defenseRate: 0, physicalDefenseRate: 0, magicDefenseRate: 0,
+  }),
   [RAID_BOSS_TEMPLATE_IDS.GOLDEN_ARTORIA]: Object.freeze({
     id: RAID_BOSS_TEMPLATE_IDS.GOLDEN_ARTORIA, masterId: 17, nameKey: 'raidBossGoldenArtoria',
     element: RAID_ELEMENTS.GREEN, level: 240,

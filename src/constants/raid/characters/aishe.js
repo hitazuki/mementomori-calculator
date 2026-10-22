@@ -38,11 +38,11 @@ export default {
       hooks: [hook('beforeDamage', [selfDamage])],
       damageSteps: [
         {
-          stat: 'ATK', percent: 670, hits: 4, damageType: 'phys',
+          enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 670, hits: 4, damageType: 'phys',
           afterEffects: [{ ...selfDamage, condition: repeatCondition }],
         },
         {
-          stat: 'ATK', percent: 670,
+          enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 670,
           hits: { type: 'conditional', condition: repeatCondition, whenTrue: 4, whenFalse: 0 },
           damageType: 'phys',
         },
@@ -53,7 +53,7 @@ export default {
       key: 's2', nameKey: 'raidSkillAisheS2', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [selfDamage])],
       damageSteps: [{
-        stat: 'ATK', percent: 1520, hits: 5, damageType: 'phys', conditionKey: 'raidConditionDummyHighHp',
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 1520, hits: 5, damageType: 'phys', conditionKey: 'raidConditionDummyHighHp',
       }],
     },
   },

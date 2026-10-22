@@ -62,13 +62,13 @@ export default {
           }],
         }),
       ])],
-      damageSteps: [{ stat: 'ATK', percent: 580, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 580, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredCriticalRateUp', 'raidIgnoredDefenseBuff', 'raidIgnoredIncomingDamageReduction'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillShilohS2', cooldown: 4, damageType: 'phys', hooks: [],
       damageSteps: [{
-        stat: 'ATK', hits: 5, damageType: 'phys',
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', hits: 5, damageType: 'phys',
         percent: {
           type: 'conditional', condition: turnNineCondition, whenFalse: 640,
           whenTrue: { type: 'maxLineupRemovableBuffCountLinear', base: 640, perStack: 30, max: 940 },

@@ -18,7 +18,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillShizuS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 580, hits: 8, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 580, hits: 8, damageType: 'phys' }],
       hooks: [selfDamageHook, hook('beforeDamage', [bossStatusEffect({
         id: 'shizu-speed-down', effectGroupId: 11200120202, nameKey: 'raidDebuffShizuSpeedDown', durationRounds: 2,
         addStacks: 1, maxStacks: 1,
@@ -27,7 +27,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillShizuS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],
-      damageSteps: [{ stat: 'ATK', percent: 2280, hits: 1, damageType: 'phys', conditionKey: 'raidConditionDummyHigherHp' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 3 }, stat: 'ATK', percent: 2280, hits: 1, damageType: 'phys', conditionKey: 'raidConditionDummyHigherHp' }],
     },
   },
 }

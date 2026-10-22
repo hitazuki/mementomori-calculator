@@ -27,7 +27,7 @@ export default {
         bossStatusEffect({ id: 'winter-stella-damage-taken-late', replacementKey: 'winter-stella-damage-taken', effectGroupId: 13200130203, nameKey: 'raidDebuffWinterStellaDamageTaken', durationRounds: 4, damageRatePerStack: 0.2, condition: { type: 'roundAtLeast', round: 7 } }),
         bossStatusEffect({ id: 'winter-stella-magic-defense-down-late', replacementKey: 'winter-stella-magic-defense-down', effectGroupId: 13200130204, nameKey: 'raidDebuffWinterStellaMagicDefenseDown', durationRounds: 4, magicDefenseRatePerStack: -0.4, condition: { type: 'roundAtLeast', round: 7 } }),
       ])],
-      damageSteps: [{ stat: 'ATK', percent: 720, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 720, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredHealing'],
     },
     s2: {
@@ -35,11 +35,11 @@ export default {
       hooks: [
         hook('beforeDamage', [{ ...selfHeal, target: 'selfAndTopAttackOther', targetCount: 2 }]),
         hook('afterDamage', [bossStatusEffect({
-          id: 'winter-stella-silence', effectGroupId: 13200230501, nameKey: 'raidDebuffWinterStellaSilence', durationRounds: 2,
+          id: 'winter-stella-silence', enemyScope: 'firstTwo', effectGroupId: 13200230501, nameKey: 'raidDebuffWinterStellaSilence', durationRounds: 2,
           damageRatePerStack: 0, condition: { type: 'probabilityEnabled', key: 'winterStellaSilence' }, recordSkipped: true,
         })], { condition: { type: 'roundAtLeast', round: 7 } }),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 780, hits: 4, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 780, hits: 4, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredSilence'],
     },
   },

@@ -23,11 +23,11 @@ export default {
         hook('beforeDamage', [{ type: 'changeCounter', counter: 'wordSpell', amount: 1, max: 5, id: 'popri-word-spell', nameKey: 'raidBuffPopriWordSpell', eventType: 'counter' }, wordSpell]),
         hook('beforeDamage', [{ type: 'changeCounter', counter: 'wordSpell', amount: 1, max: 5, id: 'popri-word-spell-bonus', nameKey: 'raidBuffPopriWordSpell', eventType: 'counter' }], { condition: { type: 'otherLineupElementCountAtLeast', element: RAID_ELEMENTS.YELLOW, count: 2 } }),
       ],
-      damageSteps: [{ stat: 'ATK', percent: { type: 'counterThresholds', counter: 'wordSpell', values: [210, 210, 210, 630] }, hits: 6, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: { type: 'counterThresholds', counter: 'wordSpell', values: [210, 210, 210, 630] }, hits: 6, damageType: 'phys' }],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillPopriS2', cooldown: 4, damageType: 'phys', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: { type: 'counterThresholds', counter: 'wordSpell', values: [340, 340, 340, 1020, 1020, 2720] }, hits: 4, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: { type: 'counterThresholds', counter: 'wordSpell', values: [340, 340, 340, 1020, 1020, 2720] }, hits: 4, damageType: 'phys' }],
     },
   },
 }

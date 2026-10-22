@@ -9,7 +9,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillCarolS1', cooldown: 5, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: 590, hits: 1, damageType: 'mag', originalTargetCount: 3 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 3 }, stat: 'ATK', percent: 590, hits: 1, damageType: 'mag', originalTargetCount: 3 }],
       hooks: [hook('afterDamage', [bossStatusEffect({
         id: 'carol-silence', effectGroupId: 4000150102, nameKey: 'raidDebuffCarolSilence', durationRounds: 1,
         damageRatePerStack: 0, statusClass: RAID_STATUS_CLASSES.REMOVABLE_DEBUFF,
@@ -19,7 +19,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillCarolS2', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: 365, hits: 1, damageType: 'mag', originalTargetCount: 5 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 365, hits: 1, damageType: 'mag', originalTargetCount: 5 }],
       hooks: [hook('beforeDamage', [bossStatusEffect({ id: 'carol-defense-down', effectGroupId: 4000230101, nameKey: 'raidDebuffCarolDefenseDown', durationRounds: 2, defenseRatePerStack: -0.4 })])],
       ignoredKeys: ['raidIgnoredBuffDispel'],
     },

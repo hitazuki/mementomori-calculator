@@ -29,7 +29,7 @@ export default {
     hook('roundStart', [
       selfAggravation,
       bossStatusEffect({
-        id: 'flower-natasha-aggravation', effectGroupId: 10500300401, nameKey: 'raidDebuffFlowerNatashaAggravation',
+        id: 'flower-natasha-aggravation', enemyScope: 'firstThree', effectGroupId: 10500300401, nameKey: 'raidDebuffFlowerNatashaAggravation',
         durationRounds: 1, damageRatePerStack: 0, statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_DEBUFF,
       }),
     ]),
@@ -37,7 +37,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillFlowerNatashaS1', cooldown: 4, damageType: 'phys', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 680, hits: 2, originalTargetCount: 3, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 3 }, stat: 'ATK', percent: 680, hits: 2, originalTargetCount: 3, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHeartBloomIncomingStacks', 'raidIgnoredHeartBloomEnhancedSkill', 'raidIgnoredHitRateUp', 'raidIgnoredMaxHpUp', 'raidIgnoredBarrierDamageNullification', 'raidIgnoredDotDamage'],
     },
     s2: {
@@ -46,7 +46,7 @@ export default {
         id: 'flower-natasha-poison', effectGroupId: 10500250102, nameKey: 'raidDebuffFlowerNatashaPoison',
         durationRounds: 2, damageRatePerStack: 0,
       })])],
-      damageSteps: [{ stat: 'ATK', percent: 1320, hits: 1, originalTargetCount: 3, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 3 }, stat: 'ATK', percent: 1320, hits: 1, originalTargetCount: 3, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHeartBloomIncomingStacks', 'raidIgnoredHeartBloomEnhancedSkill', 'raidIgnoredHitRateUp', 'raidIgnoredMaxHpUp', 'raidIgnoredBarrierDamageNullification', 'raidIgnoredDotDamage'],
     },
   },

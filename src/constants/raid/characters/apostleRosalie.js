@@ -36,7 +36,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillApostleRosalieS1', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: 240, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 240, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
       hooks: [hook('beforeDamage', [bossStatusEffect({
         id: 'apostle-rosalie-damage-taken', effectGroupId: 8800130101, nameKey: 'raidDebuffApostleRosalieDamageTaken',
         durationRounds: 2, damageRatePerStack: 0.1,
@@ -45,7 +45,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillApostleRosalieS2', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: 180, hits: 10, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 180, hits: 10, damageType: 'mag' }],
       hooks: [
         hook('beforeDamage', [
           { type: 'changeCounter', counter: 'memory', amount: -15, min: 0, id: 'apostle-rosalie-memory-consumed', nameKey: 'raidBuffApostleRosalieMemory' },

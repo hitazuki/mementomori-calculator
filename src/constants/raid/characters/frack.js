@@ -38,12 +38,12 @@ export default {
           bossStatusEffect({ id: 'frack-healing-down', effectGroupId: 12200150202, nameKey: 'raidDebuffFrackHealingDown', durationRounds: 4, damageRatePerStack: 0 }),
         ]),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 790, hits: 1, damageType: 'phys', originalTargetCount: 5 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 790, hits: 1, damageType: 'phys', originalTargetCount: 5 }],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillFrackS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],
       damageSteps: [{
-        stat: 'ATK',
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK',
         percent: { type: 'conditional', condition: { type: 'actorHasStatus', statusId: 'frack-smile-talent' }, whenTrue: 1120, whenFalse: 560 },
         hits: 5, damageType: 'phys',
       }],

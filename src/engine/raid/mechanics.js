@@ -75,8 +75,8 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     actorRemovableBuffCountAtLeast: (condition, { actor, ownerId, actors, api }) => (
       api.removableBuffCount(actor ?? actors.get(ownerId)) >= condition.count
     ),
-    bossStacksAtLeast: (condition, { boss }) => (
-      (boss.statuses.find(status => status.id === condition.statusId)?.stacks ?? 0) >= condition.count
+    bossStacksAtLeast: (condition, { boss, enemies }) => (
+      (condition.anyEnemy ? enemies : [boss]).some(enemy => (enemy.statuses.find(status => status.id === condition.statusId)?.stacks ?? 0) >= condition.count)
     ),
     bossStatusCountAtLeast: (condition, { boss }) => boss.statuses.length >= condition.count,
     bossElementIs: (condition, { boss }) => boss.template.element === condition.element,

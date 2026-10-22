@@ -10,7 +10,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillLiberiaS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 480, hits: 8, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 480, hits: 8, damageType: 'phys' }],
       hooks: [hook('beforeDamage', [bossStatusEffect({
         id: 'liberia-sand', effectGroupId: 12800100101, nameKey: 'raidDebuffLiberiaSand', durationRounds: 2,
         addStacks: 2, maxStacks: 4, damageRatePerStack: 0.05,
@@ -19,9 +19,9 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillLiberiaS2', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 780, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 780, hits: 5, damageType: 'phys' }],
       hooks: [hook('afterDamage', [{ type: 'setCooldown', target: 'self', skills: ['s1', 's2'], value: 0, eventType: 'cooldownReset' }], {
-        condition: { type: 'bossStacksAtLeast', statusId: 'liberia-sand', count: 4 },
+        condition: { type: 'bossStacksAtLeast', anyEnemy: true, statusId: 'liberia-sand', count: 4 },
         onceKey: 'liberiaCooldownReset',
       })],
       ignoredKeys: ['raidIgnoredBuffRemoval'],

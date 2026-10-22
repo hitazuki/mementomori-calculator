@@ -15,16 +15,16 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillLukeS1', cooldown: 4, damageType: 'phys', hooks: [hook('afterDamage', [bossStatusEffect({
-        id: 'luke-attack-down', effectGroupId: 3000120202, nameKey: 'raidDebuffLukeAttackDown', durationRounds: 1, damageRatePerStack: 0,
+        id: 'luke-attack-down', enemyScope: 'first', effectGroupId: 3000120202, nameKey: 'raidDebuffLukeAttackDown', durationRounds: 1, damageRatePerStack: 0,
       })])],
       damageSteps: [
-        { stat: 'ATK', percent: 540, hits: 1, damageType: 'phys', originalTargetCount: 5 },
-        { stat: 'STR', percent: 150, hits: 1, damageType: 'direct' },
+        { enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 540, hits: 1, damageType: 'phys', originalTargetCount: 5 },
+        { enemyTarget: { type: 'first', count: 1 }, stat: 'STR', percent: 150, hits: 1, damageType: 'direct' },
       ],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillLukeS2', cooldown: 5, damageType: 'direct', hooks: [],
-      damageSteps: [{ stat: 'STR', percent: 780, hits: 1, damageType: 'direct', conditionKey: 'raidConditionDummyNoShield' }],
+      damageSteps: [{ enemyTarget: { type: 'randomSingle', count: 1 }, stat: 'STR', percent: 780, hits: 1, damageType: 'direct', conditionKey: 'raidConditionDummyNoShield' }],
     },
   },
 }

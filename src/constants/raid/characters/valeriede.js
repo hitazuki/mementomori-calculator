@@ -22,12 +22,12 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillValeriedeS1', cooldown: 4, damageType: 'phys',
       hooks: [hook('afterDamage', [{ type: 'emitEvent', event: 'activeSkillHeal', target: 'self' }])],
-      damageSteps: [{ stat: 'ATK', percent: 380, hits: 10, originalTargetCount: 1, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomSingle' }, stat: 'ATK', percent: 380, hits: 10, originalTargetCount: 1, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredIncomingDamageReduction', 'raidIgnoredKillFlameExtension'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillValeriedeS2', cooldown: 4, damageType: 'phys', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 620, hits: 6, originalTargetCount: 1, damageType: 'phys', conditionKey: 'raidConditionDummySurvives' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: 620, hits: 6, originalTargetCount: 1, damageType: 'phys', conditionKey: 'raidConditionDummySurvives' }],
       ignoredKeys: ['raidIgnoredKillFollowup', 'raidIgnoredIncomingDamageReduction', 'raidIgnoredKillFlameExtension'],
     },
   },

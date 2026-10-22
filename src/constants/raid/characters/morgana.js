@@ -38,13 +38,13 @@ export default {
           condition: { type: 'counterAtLeast', counter: 'fightingSpirit', count: 2 },
         }]),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 420, hits: 5, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 420, hits: 5, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredHealingReceivedDown'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillMorganaS2', cooldown: 4, damageType: 'mag', hooks: [selfDamageHook],
       damageSteps: [{
-        stat: 'ATK', percent: 580,
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 580,
         hits: { type: 'counterLinear', counter: 'fightingSpirit', base: 3, perStack: 1, max: 7 },
         damageType: 'mag',
       }],

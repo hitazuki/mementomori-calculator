@@ -3,7 +3,7 @@ import { RAID_ELEMENTS, RAID_STATUS_CLASSES, bossStatusEffect, hook, normalPhysi
 const selfDamageHook = hook('beforeDamage', [{ type: 'emitEvent', event: 'selfDamage' }])
 
 const radiantLight = bossStatusEffect({
-  id: 'lucille-radiant-light', effectGroupId: 8900430101, nameKey: 'raidDebuffLucilleRadiantLight',
+  id: 'lucille-radiant-light', enemyScope: 'all', effectGroupId: 8900430101, nameKey: 'raidDebuffLucilleRadiantLight',
   durationRounds: 2, addStacks: 1, maxStacks: 5, damageRatePerStack: 0.02,
 })
 
@@ -26,14 +26,14 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillLucilleS1', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],
       damageSteps: [{
-        stat: 'ATK',
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK',
         percent: { type: 'bossStatusThresholds', values: [420, 530, 730] },
         hits: 5, damageType: 'phys',
       }],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillLucilleS2', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 580, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 580, hits: 5, damageType: 'phys' }],
       hooks: [
         selfDamageHook,
         hook('afterDamage', [{
@@ -41,7 +41,7 @@ export default {
           targetCount: 1, amount: 2,
         }], {
           onceKey: 'lucilleCooldownReduction',
-          condition: { type: 'bossStacksAtLeast', statusId: 'lucille-radiant-light', count: 5 },
+          condition: { type: 'bossStacksAtLeast', anyEnemy: true, statusId: 'lucille-radiant-light', count: 5 },
         }),
       ],
     },

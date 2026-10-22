@@ -44,7 +44,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillLiebesS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 390, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 390, hits: 5, damageType: 'phys' }],
       hooks: [
         selfDamageHook,
         hook('beforeDamage', [
@@ -52,7 +52,7 @@ export default {
           bossStatusEffect({ id: 'liebes-physical-defense-down', effectGroupId: 10200120202, nameKey: 'raidDebuffLiebesPhysicalDefenseDown', durationRounds: 2, physicalDefenseRatePerStack: -0.1 }),
         ]),
         hook('afterDamage', [bossStatusEffect({
-          id: 'liebes-stun', effectGroupId: 10200100401, nameKey: 'raidDebuffStun', durationRounds: 1,
+          id: 'liebes-stun', enemyScope: 'first', effectGroupId: 10200100401, nameKey: 'raidDebuffStun', durationRounds: 1,
           condition: { type: 'probabilityEnabled', key: 'liebesStun' }, recordSkipped: true,
         })]),
       ],
@@ -60,7 +60,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillLiebesS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],
-      damageSteps: [{ stat: 'ATK', percent: { type: 'bossStatusCountLinear', base: 320, perStack: 140, max: 1020 }, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: { type: 'bossStatusCountLinear', base: 320, perStack: 140, max: 1020 }, hits: 5, damageType: 'phys' }],
     },
   },
 }

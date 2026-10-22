@@ -55,14 +55,14 @@ export default {
         id: 'eirene-defense-down', effectGroupId: 10900120103, nameKey: 'raidDebuffEireneDefense',
         durationRounds: 4, defenseRatePerStack: -0.25,
       })])],
-      damageSteps: [{ stat: 'ATK', percent: 280, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 280, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredIncomingDamageReduction'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillEireneS2', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [natalisHitRate])],
       damageSteps: [{
-        stat: 'ATK', damageType: 'phys',
+        enemyTarget: { type: 'conditional', condition: { type: 'skillUsesAtLeast', skillKey: 's2', count: 2 }, whenTrue: { type: 'first' }, whenFalse: { type: 'randomHit' } }, stat: 'ATK', damageType: 'phys',
         percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [380, 380, 760] },
         hits: { type: 'skillUsesThresholds', skillKey: 's2', values: [4, 4, 8] },
       }],

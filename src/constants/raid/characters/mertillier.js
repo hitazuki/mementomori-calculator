@@ -5,7 +5,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillMertillierS1', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: 410, hits: 1, damageType: 'mag', originalTargetCount: 4 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 4 }, stat: 'ATK', percent: 410, hits: 1, damageType: 'mag', originalTargetCount: 4 }],
       hooks: [hook('afterDamage', [statusEffect({ id: 'mertillier-shield', effectGroupId: 2900130201, nameKey: 'raidBuffMertillierShield', target: 'self', duration: 3 })])],
       ignoredKeys: ['raidIgnoredShield'],
     },

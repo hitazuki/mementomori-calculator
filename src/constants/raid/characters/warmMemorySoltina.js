@@ -28,7 +28,7 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillWarmMemorySoltinaS1', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [normalSnowFairy, enhancedSnowFairy])],
-      damageSteps: [{ stat: 'ATK', percent: 480, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 480, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHitRateUp', 'raidIgnoredDebuffCleanse'],
     },
     s2: {
@@ -37,7 +37,7 @@ export default {
         id: 'warm-memory-soltina-stun', effectGroupId: 10700240102, nameKey: 'raidDebuffStun', durationRounds: 2,
         damageRatePerStack: 0, condition: { type: 'probabilityEnabled', key: 'warmMemorySoltinaStun' }, recordSkipped: true,
       })])],
-      damageSteps: [{ stat: 'ATK', percent: 420, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: 420, hits: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredStunAction', 'raidIgnoredDebuffCleanse'],
     },
   },

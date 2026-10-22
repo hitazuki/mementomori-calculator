@@ -28,14 +28,14 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillEideneS1', cooldown: 4, damageType: 'mag', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 480, hits: 4, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 480, hits: 4, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredMaxHpUp', 'raidIgnoredRegeneration'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillEideneS2', cooldown: 4, damageType: 'mag',
       hooks: [hook('beforeDamage', [activeHealSelf, activeHealSelf, activeHealSelf])],
       damageSteps: [{
-        stat: 'ATK', percent: { type: 'conditional', condition: { type: 'roundAtMost', round: 6 }, whenTrue: 480, whenFalse: 1440 },
+        enemyTarget: { type: 'randomGroup', count: 3 }, stat: 'ATK', percent: { type: 'conditional', condition: { type: 'roundAtMost', round: 6 }, whenTrue: 480, whenFalse: 1440 },
         hits: 1, originalTargetCount: 3, damageType: 'mag',
       }],
       ignoredKeys: ['raidIgnoredHealing'],

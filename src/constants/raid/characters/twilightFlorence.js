@@ -16,7 +16,7 @@ export default {
   normal: {
     key: 'normal', nameKey: 'raidSkillNormalPhysical', damageType: 'phys',
     damageSteps: [{
-      stat: 'ATK',
+      enemyTarget: { type: 'conditional', condition: { type: 'actorHasStatus', statusId: 'twilight-florence-enhanced-normal' }, whenTrue: { type: 'randomGroup', count: 5 }, whenFalse: { type: 'first' } }, stat: 'ATK',
       percent: {
         type: 'conditional', condition: { type: 'actorHasStatus', statusId: 'twilight-florence-enhanced-normal' },
         whenTrue: 390, whenFalse: 100,
@@ -78,7 +78,7 @@ export default {
         condition: { type: 'roundAtMost', round: 6 },
       }])],
       damageSteps: [{
-        stat: 'ATK', percent: {
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: {
           type: 'conditional', condition: { type: 'roundAtLeast', round: 7 }, whenTrue: 1960, whenFalse: 980,
         },
         hits: 3, damageType: 'phys',
@@ -92,7 +92,7 @@ export default {
       key: 's2', nameKey: 'raidSkillTwilightFlorenceS2', cooldown: 4, damageType: 'phys',
       condition: { type: 'actorHasStatus', statusId: 'twilight-florence-vow' }, hooks: [],
       damageSteps: [{
-        stat: 'ATK', percent: 1050,
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 1050,
         hits: { type: 'conditional', condition: { type: 'guaranteedCritical' }, whenTrue: 10, whenFalse: 6 },
         damageType: 'phys',
       }],

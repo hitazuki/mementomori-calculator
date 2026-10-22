@@ -26,14 +26,14 @@ export default {
         }),
         { type: 'changeCounter', counter: 'criticalResistStacks', amount: 2, max: 10, id: 'artie-critical-resist-s1', nameKey: 'raidBuffArtieCriticalResist', eventType: 'counter' },
       ])],
-      damageSteps: [{ stat: 'ATK', percent: 350, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 350, hits: 1, originalTargetCount: 5, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredCriticalResistStacks', 'raidIgnoredMaxHpUp', 'raidIgnoredIncomingDamageReduction'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillArtieS2', cooldown: 4, damageType: 'mag',
       hooks: [hook('afterDamage', [{ type: 'emitEvent', event: 'activeSkillHeal', target: 'self' }])],
       damageSteps: [{
-        stat: 'ATK', percent: 200, hits: 7, damageType: 'mag',
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 200, hits: 7, damageType: 'mag',
         criticalCondition: { type: 'bossStatusCountAtLeast', count: 1 },
       }],
       ignoredKeys: ['raidIgnoredTargetLowerHpDamageScaling', 'raidIgnoredHealing', 'raidIgnoredCriticalResistStacks'],

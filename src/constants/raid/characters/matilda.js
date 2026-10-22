@@ -28,14 +28,14 @@ export default {
     s1: {
       key: 's1', nameKey: 'raidSkillMatildaS1', cooldown: 4, damageType: 'mag',
       hooks: [hook('beforeDamage', [queenShort, queenLong])],
-      damageSteps: [{ stat: 'ATK', percent: 680, hits: 1, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: 680, hits: 1, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredCriticalRateUp', 'raidIgnoredHitRateUp', 'raidIgnoredIncomingDamageReduction'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillMatildaS2', cooldown: 4, damageType: 'mag', hooks: [],
       damageSteps: [
-        { stat: 'ATK', percent: 380, hits: 1, originalTargetCount: 2, damageType: 'mag' },
-        { stat: 'ATK', percent: 380, hits: 1, originalTargetCount: 2, damageType: 'mag', conditionKey: 'raidConditionSelfHpAtLeastHalf' },
+        { enemyTarget: { type: 'first', count: 2 }, stat: 'ATK', percent: 380, hits: 1, originalTargetCount: 2, damageType: 'mag' },
+        { enemyTarget: { type: 'first', count: 2 }, stat: 'ATK', percent: 380, hits: 1, originalTargetCount: 2, damageType: 'mag', conditionKey: 'raidConditionSelfHpAtLeastHalf' },
       ],
       ignoredKeys: ['raidIgnoredHealing'],
     },

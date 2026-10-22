@@ -36,7 +36,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillGoldenArtoriaS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 720, hits: 1, originalTargetCount: 3, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 3 }, stat: 'ATK', percent: 720, hits: 1, originalTargetCount: 3, damageType: 'phys' }],
       hooks: [hook('beforeDamage', [activeHeal, statusEffect({
         id: 'golden-artoria-debuff-resist', effectGroupId: 15400140301, nameKey: 'raidBuffGoldenArtoriaDebuffResist',
         target: 'all', duration: 2, statusClass: RAID_STATUS_CLASSES.REMOVABLE_BUFF,
@@ -46,7 +46,7 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillGoldenArtoriaS2', cooldown: 4, damageType: 'phys',
       damageSteps: [{
-        stat: 'ATK', percent: { type: 'conditional', condition: { type: 'counterAtLeast', counter: 'activeHealingTriggers', count: 15 }, whenTrue: 2160, whenFalse: 540 },
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: { type: 'conditional', condition: { type: 'counterAtLeast', counter: 'activeHealingTriggers', count: 15 }, whenTrue: 2160, whenFalse: 540 },
         hits: 4, damageType: 'phys',
       }],
       hooks: [hook('beforeDamage', [activeHeal])],

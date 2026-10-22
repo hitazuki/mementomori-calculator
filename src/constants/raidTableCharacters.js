@@ -41,6 +41,7 @@ export function createDefaultRaidTableConfig() {
     actionOrderOverrides: {},
     targetHpBelow50: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, false])),
     speeds: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, RAID_TABLE_CHARACTERS[id].speed])),
+    enemyElement: 3, randomSeed: 1,
     bossTemplateId: RAID_BOSS_TEMPLATE_IDS.SONYA,
     levels: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_CHARACTER_LEVEL])),
     defensePenetrations: Object.fromEntries(RAID_TABLE_ROSTER.map(id => [id, DEFAULT_RAID_DEFENSE_PENETRATION + (RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES[id]?.defensePenetration ?? 0)])),

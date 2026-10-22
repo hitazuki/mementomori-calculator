@@ -67,3 +67,13 @@ test('PNG clipboard capability and writes are isolated from preview blob lifetim
   assert.equal(writes[0][0].data['image/png'], blob)
   await assert.rejects(copyPngBlob(blob, { secureContext: false, clipboard, ClipboardItemClass: FakeClipboardItem }), /unavailable/)
 })
+test('five-target exports retain separate damage units and target-qualified statuses', () => {
+  const lineup=[48,27]
+  const result=simulateRaidTable({bossTemplateId:'five-targets',enemyElement:2,randomSeed:42,lineup,attackPriority:lineup,turns:2})
+  const exported=model(result,lineup,lineup)
+  assert.equal(exported.enemyTotals.length,5)
+  assert.ok(exported.enemyTotals.some(target=>target.symbolic!=='—'))
+  assert.equal(exported.boss.stats,'Lv240 · DEF 200,000')
+  assert.equal(exported.rounds.length,2)
+  assert.ok(result.rounds[0].bossStatusAfterRound.every(status=>status.targetId))
+})

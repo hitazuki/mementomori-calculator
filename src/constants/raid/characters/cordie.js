@@ -28,13 +28,13 @@ export default {
         id: 'cordie-defense-down', effectGroupId: 2700150102, nameKey: 'raidDebuffCordieDefenseDown',
         durationRounds: 2, defenseRatePerStack: -0.8,
       })])],
-      damageSteps: [{ stat: 'ATK', percent: 570, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 570, hits: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredKillTriggeredAttackBuff', 'raidIgnoredDebuffImmunity'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillCordieS2', cooldown: 4, damageType: 'phys', hooks: [],
       damageSteps: [{
-        stat: 'ATK', percent: 520, hits: 1, originalTargetCount: 5, damageType: 'phys',
+        enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 520, hits: 1, originalTargetCount: 5, damageType: 'phys',
         conditionKey: 'raidConditionAlliesFullHp',
         criticalCondition: { type: 'bossStatusCountAtLeast', count: 1 },
       }],

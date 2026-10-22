@@ -20,7 +20,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillRusticaS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 640, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 640, hits: 5, damageType: 'phys' }],
       hooks: [hook('beforeDamage', [statusEffect({
         id: 'rustica-hp-drain', effectGroupId: 11300130101, nameKey: 'raidBuffRusticaHpDrain', target: 'highestBuffCount', duration: 4,
       })])],
@@ -29,7 +29,7 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillRusticaS2', cooldown: 4, damageType: 'phys',
       damageSteps: [{
-        stat: 'ATK', percent: 740,
+        enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: 740,
         hits: { type: 'skillUsesLinear', skillKey: 's2', base: 4, increment: 1, max: 6 },
         damageType: 'phys',
       }],

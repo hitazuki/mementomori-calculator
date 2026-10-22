@@ -12,7 +12,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillCattleyyaS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 590, hits: 4, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 590, hits: 4, damageType: 'phys' }],
       hooks: [hook('beforeDamage', [statusEffect({
         id: 'cattleyya-attack', effectGroupId: 9000140103, nameKey: 'raidBuffCattleyyaAttack', target: 'self', duration: 4,
         modifiers: [{ id: 'cattleyya-attack', channel: 'attackRate', rate: { type: 'skillUsesThresholds', skillKey: 's1', values: [0.2, 0.4, 0.8] } }],
@@ -21,7 +21,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillCattleyyaS2', cooldown: 4, damageType: 'phys', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 470, hits: { type: 'skillUsesThresholds', skillKey: 's2', values: [6, 9, 12] }, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'lowestPhysicalDefense' }, stat: 'ATK', percent: 470, hits: { type: 'skillUsesThresholds', skillKey: 's2', values: [6, 9, 12] }, damageType: 'phys' }],
     },
   },
 }

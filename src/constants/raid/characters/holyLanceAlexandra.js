@@ -35,7 +35,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillHolyLanceS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 320, hits: 8, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 320, hits: 8, damageType: 'phys' }],
       hooks: [
         hook('beforeDamage', [selfDamage, selfDamage]),
         hook('beforeDamage', [vulnerability], { condition: { type: 'otherLineupElementCountAtMost', element: RAID_ELEMENTS.RED, count: 1 } }),
@@ -45,7 +45,7 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillHolyLanceS2', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [selfDamage])],
-      damageSteps: [{ stat: 'ATK', hits: 10, damageType: 'phys', percent: {
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', hits: 10, damageType: 'phys', percent: {
         type: 'conditional', condition: { type: 'bossStatusCountAtLeast', count: 1 }, whenTrue: 540, whenFalse: 360,
       } }],
     },

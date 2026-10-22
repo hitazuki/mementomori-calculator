@@ -40,12 +40,12 @@ export default {
           damageRatePerStack: 0, condition: { type: 'probabilityEnabled', key: 'guinevereDamageTaken' }, recordSkipped: true,
         })]),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 720, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 720, hits: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredEnemyAttackDown', 'raidIgnoredStunImmunity'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillGuinevereS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],
-      damageSteps: [{ stat: 'ATK', percent: { type: 'counterLinear', counter: 'heartfulLover', base: 340, perStack: 50, max: 740 }, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: { type: 'counterLinear', counter: 'heartfulLover', base: 340, perStack: 50, max: 740 }, hits: 5, damageType: 'phys' }],
     },
   },
 }

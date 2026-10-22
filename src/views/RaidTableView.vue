@@ -94,6 +94,18 @@
           <option v-for="bossTemplate in bossTemplates" :key="bossTemplate.id" :value="bossTemplate.id">{{ $t(bossTemplate.nameKey) }}</option>
         </select>
       </label>
+      <template v-if="bossTemplateId === 'five-targets'">
+        <label class="raid-number-control raid-select-control">
+          <span><strong>{{ $t('raidEnemyElement') }}</strong><small>{{ $t('raidFiveTargetHint') }}</small></span>
+          <select v-model="enemyElement"><option v-for="element in Object.values(RAID_ELEMENTS)" :key="element" :value="element">{{ $t(elementNameKey(element)) }}</option></select>
+        </label>
+        <label class="raid-number-control">
+          <span><strong>{{ $t('raidRandomSeed') }}</strong><small>{{ $t('raidRandomModelHint') }}</small></span>
+          <input v-model.number="randomSeed" @change="randomSeed = normalizeRaidSeed(randomSeed)" type="number" min="0" max="4294967295" step="1">
+          <button type="button" class="btn" @click="randomSeed = (randomSeed + 1) >>> 0">{{ $t('raidResample') }}</button>
+        </label>
+        <div class="raid-muted">{{ $t('raidFiveTargetTotal') }}<div v-for="target in result.enemyTotals" :key="target.id">{{ $t('raidEnemyTarget', { n: target.position }) }} · {{ formatPercent(target.atkPercent) }}<span v-for="[stat, value] in Object.entries(target.symbolicTotals)" :key="stat"> · {{ formatStat(value, stat) }}</span><span v-for="[stat, value] in Object.entries(target.conversionTotals).filter(([, value]) => value)" :key="stat"> · {{ formatStat(value, stat) }}</span></div></div>
+      </template>
       <label class="raid-toggle-control">
         <input v-model="guaranteedCritical" type="checkbox">
         <span><strong>{{ $t('raidGuaranteedCritical') }}</strong><small>{{ $t('raidGuaranteedCriticalHint') }}</small></span>
@@ -311,7 +323,7 @@
             <td class="raid-sticky-total raid-boss-status-note">{{ $t('raidAfterRound') }}</td>
             <td v-for="round in result.rounds" :key="`boss-${round.turn}`" class="raid-boss-status-cell">
               <template v-if="round.bossStatusAfterRound.length">
-                <span v-for="status in round.bossStatusAfterRound" :key="status.id">{{ bossStatusLabel(status) }}</span>
+                <span v-for="status in round.bossStatusAfterRound" :key="`${status.targetId ?? 'boss'}-${status.id}`">{{ bossStatusLabel(status) }}</span>
               </template>
               <small v-else>{{ $t('raidNoBossStatus') }}</small>
             </td>
@@ -346,7 +358,7 @@
         <h3>{{ $t('raidDamageSteps') }}</h3>
         <div v-if="selectedEvent.damageSteps.length" class="raid-step-list">
           <article v-for="step in selectedEvent.damageSteps" :key="step.index">
-            <header><strong>#{{ step.index }} · {{ step.percent }}% {{ step.stat }}</strong><span>{{ formatStep(step) }}</span></header>
+            <header><strong><span v-if="step.targetId">{{ $t('raidEnemyTarget', { n: step.targetId.split('-')[1] }) }} · </span>#{{ step.index }} · {{ step.percent }}% {{ step.stat }}</strong><span>{{ formatStep(step) }}</span></header>
             <small v-if="step.stat === 'ATK' && nonzero(step.normalizedAttackScale - 1)">{{ stepAttackText(step) }}</small>
             <small v-if="nonzero(step.damageRate)">{{ stepDamageText(step) }}</small>
             <small v-if="step.critical && nonzero(step.criticalMultiplier - 1)">{{ stepCriticalText(step) }}</small>
@@ -397,7 +409,7 @@
         <ul v-if="selectedEvent.expiredEffects.length" class="raid-detail-items compact"><li v-for="status in selectedEvent.expiredEffects" :key="`expired-${status.effectGroupId}-${status.sourceId}-${status.appliedSequence}`">{{ actorStatusText(status, false) }}</li></ul>
         <p v-else class="raid-muted">—</p>
         <h3 class="raid-subtitle">{{ $t('raidBossStatus') }}</h3>
-        <ul v-if="selectedEvent.bossStatusAfterAction.length" class="raid-detail-items compact"><li v-for="status in selectedEvent.bossStatusAfterAction" :key="status.id">{{ bossStatusLabel(status) }}</li></ul>
+        <ul v-if="selectedEvent.bossStatusAfterAction.length" class="raid-detail-items compact"><li v-for="status in selectedEvent.bossStatusAfterAction" :key="`${status.targetId ?? 'boss'}-${status.id}`">{{ bossStatusLabel(status) }}</li></ul>
         <p v-else class="raid-muted">—</p>
       </div>
 
@@ -494,7 +506,8 @@
                     <span>{{ characterDamageStepText(step) }}</span>
                     <small v-if="step.definition.condition">{{ characterConditionText(step.definition.condition) }}</small>
                     <small v-if="step.conditionKey">{{ $t(step.conditionKey) }}</small>
-                    <small v-if="step.originalTargetCount">{{ $t('raidCharacterOriginalTargetCount', { n: step.originalTargetCount }) }}</small>
+                    <small v-if="step.definition.enemyTarget">{{ enemySelectionText(step.definition.enemyTarget) }}</small>
+                    <small v-if="step.originalTargetCount && bossTemplateId !== 'five-targets'">{{ $t('raidCharacterOriginalTargetCount', { n: step.originalTargetCount }) }}</small>
                   </li>
                 </ul>
                 <p v-else class="raid-muted">{{ $t('raidNoDamageSteps') }}</p>
@@ -690,6 +703,8 @@ const attackPriority = ref([...defaults.attackPriority])
 const actionOrderOverrides = ref(cloneActionOrderOverrides(defaults.actionOrderOverrides))
 const speeds = reactive({ ...defaults.speeds })
 const bossTemplateId = ref(defaults.bossTemplateId)
+const enemyElement = ref(defaults.enemyElement)
+const randomSeed = ref(defaults.randomSeed)
 const levels = reactive({ ...defaults.levels })
 const defensePenetrations = reactive({ ...defaults.defensePenetrations })
 const pmDefensePenetrations = reactive({ ...defaults.pmDefensePenetrations })
@@ -755,6 +770,7 @@ const result = computed(() => lineup.value.length ? simulateRaidTable({
   actionOrderOverrides: actionOrderOverrides.value,
   speeds,
   bossTemplateId: bossTemplateId.value,
+  enemyElement: enemyElement.value, randomSeed: normalizeRaidSeed(randomSeed.value),
   levels,
   defensePenetrations,
   pmDefensePenetrations,
@@ -818,8 +834,8 @@ const elementBonusLines = computed(() => {
   }
   return lines.length ? lines : [t('raidElementBonusNone')]
 })
-const selectedBossTemplate = computed(() => RAID_BOSS_TEMPLATES[bossTemplateId.value])
-const bossTemplateStats = computed(() => `${t(elementNameKey(selectedBossTemplate.value.element))} · ${t('raidBossTemplateStats', {
+const selectedBossTemplate = computed(() => bossTemplateId.value === 'five-targets' ? { ...RAID_BOSS_TEMPLATES[bossTemplateId.value], element: enemyElement.value } : RAID_BOSS_TEMPLATES[bossTemplateId.value])
+const bossTemplateStats = computed(() => `${bossTemplateId.value === 'five-targets' ? `${t('raidFiveTargetTotal')} · ${t('raidRandomSeed')} ${randomSeed.value} · ` : ''}${t(elementNameKey(selectedBossTemplate.value.element))} · ${t('raidBossTemplateStats', {
   level: selectedBossTemplate.value.level,
   defense: formatter().format(selectedBossTemplate.value.defense),
   physical: formatter().format(selectedBossTemplate.value.physicalDefense),
@@ -869,6 +885,11 @@ function formatScalingTerm(term, ownerId = null) {
 function formatScaling(totals) { return Object.values(totals).map(formatScalingTerm).join(' + ') }
 function includedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind === 'sourceAttackOverTargetAttack')) }
 function unresolvedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind !== 'sourceAttackOverTargetAttack')) }
+function normalizeRaidSeed(value) { return Number.isInteger(value) ? Math.max(0, Math.min(4294967295, value)) : 1 }
+function enemySelectionText(spec) {
+  const keys = { first: 'raidEnemyFirst', randomHit: 'raidEnemyRandomHit', randomSingle: 'raidEnemyRandomSingle', randomGroup: 'raidEnemyRandomGroup', all: 'raidEnemyAll', lowestMagicDefense: 'raidEnemyLowestMagic', lowestPhysicalDefense: 'raidEnemyLowestPhysical', previousHit: 'raidEnemyPrevious', conditional: 'raidEnemyConditional' }
+  return t(keys[spec.type], { n: spec.count ?? 1 })
+}
 function formatStep(step) { return `${formatter().format(step.effectivePercent)}% ${step.stat}` }
 function characterDamageStepText(step) {
   return t('raidCharacterDamageFormula', {
@@ -955,7 +976,10 @@ function characterEffectTimingText(effect) {
   return parts.join(' · ')
 }
 function characterEffectScopeText(effect) {
-  const parts = [t('raidCharacterEffectTarget', { target: characterEffectTargetText(effect.target, effect.targetCount, effect.targetElement) })]
+  const scope = effect.definition?.enemyScope
+  const enemyScopes = { all: { type: 'all' }, first: { type: 'first', count: 1 }, firstTwo: { type: 'first', count: 2 }, firstThree: { type: 'first', count: 3 }, firstHit: { type: 'previousHit' } }
+  const target = scope ? enemySelectionText(enemyScopes[scope]) : characterEffectTargetText(effect.target, effect.targetCount, effect.targetElement)
+  const parts = [t('raidCharacterEffectTarget', { target })]
   if (effect.sourceTarget) parts.push(t('raidCharacterEffectSource', { target: characterEffectTargetText(effect.sourceTarget) }))
   const timing = characterEffectTimingText(effect)
   if (timing) parts.push(t('raidCharacterEffectTiming', { timing }))
@@ -1192,6 +1216,7 @@ function openRaidExport() {
       panelStats: t('raidPenetrationSettings'), character: t('raidCharacter'), level: t('raidCharacterLevel'), speed: t('raidBaseSpeed'),
       criticalDamage: t('raidBaseCriticalDamage'), defensePenetration: t('raidDefensePenetration'), pmDefensePenetration: t('raidPmDefensePenetration'),
       matrix: t('raidMatrixTitle'), characterTotal: t('raidCharacterTotal'), manual: t('raidOrderManual'), automatic: t('raidOrderAutomatic'),
+      enemyTarget: t('raidEnemyTarget', { n: '{n}' }), fiveTargetTotal: t('raidFiveTargetTotal'),
       bossStatus: t('raidBossStatus'), afterRound: t('raidExportAfterRound'), roundTotal: t('raidRoundTotal'),
     },
   })
@@ -1217,6 +1242,8 @@ function resetConfig() {
   actionOrderOverrides.value = cloneActionOrderOverrides(next.actionOrderOverrides)
   Object.assign(speeds, next.speeds); guaranteedCritical.value = next.guaranteedCritical
   elementAdvantage.value = next.elementAdvantage
+  enemyElement.value = next.enemyElement
+  randomSeed.value = next.randomSeed
   bossTemplateId.value = next.bossTemplateId
   Object.assign(levels, next.levels)
   Object.assign(defensePenetrations, next.defensePenetrations)
@@ -1342,7 +1369,7 @@ function bossStatusLabel(status) {
   const statusClass = status.statusClass === 'unremovableDebuff' ? t('raidStatusUnremovableDebuff') : t('raidStatusRemovableDebuff')
   const duration = status.remainingRounds != null ? ` · ${t('raidRemainingRounds', { n: status.remainingRounds })}` : ''
   const rates = bossRateSummary(status)
-  return `${source}${t(status.nameKey)}${rates ? ` · ${rates}` : ''} · ${statusClass} · ${t('raidStatusStacks', { n: status.stacks })}${duration}`
+  return `${status.targetId ? `${t('raidEnemyTarget', { n: status.targetId.split('-')[1] })} · ` : ''}${source}${t(status.nameKey)}${rates ? ` · ${rates}` : ''} · ${statusClass} · ${t('raidStatusStacks', { n: status.stacks })}${duration}`
 }
 
 function statusClassLabel(statusClass) {

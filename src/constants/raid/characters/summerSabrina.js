@@ -22,11 +22,11 @@ export default {
           nameKey: 'raidDebuffSummerSabrinaCriticalResistDown', durationRounds: 4,
         })]),
         hook('afterDamage', [bossStatusEffect({
-          id: 'summer-sabrina-stun', effectGroupId: 7000120201,
+          id: 'summer-sabrina-stun', enemyScope: 'firstHit', effectGroupId: 7000120201,
           nameKey: 'raidDebuffStun', durationRounds: 2,
         })]),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 400, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 400, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
       ignoredKeys: [
         'raidIgnoredStunAction', 'raidIgnoredHitRateUp', 'raidIgnoredMaxHpUp',
         'raidIgnoredDefenseBuff', 'raidIgnoredDeathTriggeredStun',
@@ -35,9 +35,9 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillSummerSabrinaS2', cooldown: 4, damageType: 'phys', hooks: [],
       damageSteps: [
-        { stat: 'ATK', percent: 200, hits: 7, damageType: 'phys' },
+        { enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 200, hits: 7, damageType: 'phys' },
         {
-          stat: 'ATK', percent: 600,
+          enemyTarget: { type: 'previousHit' }, stat: 'ATK', percent: 600,
           hits: { type: 'conditional', condition: { type: 'guaranteedCritical' }, whenTrue: 1, whenFalse: 0 },
           damageType: 'phys',
         },

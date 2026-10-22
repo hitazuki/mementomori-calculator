@@ -2,7 +2,7 @@ import { RAID_ELEMENTS, hook } from '../shared.js'
 
 const enhancedNormal = Object.freeze({
   key: 'normal', nameKey: 'raidSkillAaEnhancedNormal', damageType: 'direct', hooks: [],
-  damageSteps: [{ stat: 'MAG', percent: 330, hits: 1, originalTargetCount: 3, damageType: 'direct' }],
+  damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'MAG', percent: 330, hits: 1, originalTargetCount: 3, damageType: 'direct' }],
   ignoredKeys: ['raidIgnoredIncomingDamageReduction'],
 })
 
@@ -12,13 +12,13 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillAaS1', cooldown: 4, damageType: 'mag', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 710, hits: 4, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 710, hits: 4, damageType: 'mag' }],
       ignoredKeys: ['raidIgnoredIncomingDamageReduction'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillAaS2', cooldown: 4, damageType: 'direct',
       hooks: [hook('afterDamage', [{ type: 'emitEvent', event: 'activeSkillHeal', target: 'self' }])],
-      damageSteps: [{ stat: 'MAG', percent: 980, hits: 1, originalTargetCount: 4, damageType: 'direct' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 4 }, stat: 'MAG', percent: 980, hits: 1, originalTargetCount: 4, damageType: 'direct' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredIncomingDamageReduction'],
     },
   },

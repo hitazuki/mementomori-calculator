@@ -25,12 +25,12 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillPolaS1', cooldown: 4, damageType: 'phys', hooks: [hook('beforeDamage', [earlySelfHeal])],
-      damageSteps: [{ stat: 'ATK', percent: { type: 'conditional', condition: { type: 'roundAtMost', round: 6 }, whenTrue: 590, whenFalse: 1180 }, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: { type: 'conditional', condition: { type: 'roundAtMost', round: 6 }, whenTrue: 590, whenFalse: 1180 }, hits: 1, originalTargetCount: 5, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHealing'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillPolaS2', cooldown: 4, damageType: 'phys', hooks: [hook('beforeDamage', [earlySelfHeal])],
-      damageSteps: [{ stat: 'ATK', percent: { type: 'conditional', condition: { type: 'roundAtMost', round: 6 }, whenTrue: 310, whenFalse: 620 }, hits: 8, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: { type: 'conditional', condition: { type: 'roundAtMost', round: 6 }, whenTrue: 310, whenFalse: 620 }, hits: 8, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHealing'],
     },
   },

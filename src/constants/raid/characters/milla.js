@@ -18,7 +18,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillMillaS1', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: 180, hits: 1, originalTargetCount: 3, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 3 }, stat: 'ATK', percent: 180, hits: 1, originalTargetCount: 3, damageType: 'mag' }],
       hooks: [hook('afterDamage', [
         bossStatusEffect({
           id: 'milla-delay', effectGroupId: 8000120102, nameKey: 'raidDebuffMillaDelay', durationRounds: 1,
@@ -31,7 +31,7 @@ export default {
     s2: {
       key: 's2', nameKey: 'raidSkillMillaS2', cooldown: 4, damageType: 'mag',
       damageSteps: [{
-        stat: 'ATK', percent: { type: 'counterThresholds', counter: 'activeHealingReceived', values: [480, 480, 480, 480, 480, 480, 1920] },
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: { type: 'counterThresholds', counter: 'activeHealingReceived', values: [480, 480, 480, 480, 480, 480, 1920] },
         hits: 4, damageType: 'mag',
       }],
       hooks: [hook('beforeDamage', [activeHealSelf])], ignoredKeys: ['raidIgnoredHealing'],

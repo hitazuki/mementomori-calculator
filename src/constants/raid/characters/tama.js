@@ -13,12 +13,12 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillTamaS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 280, hits: 1, damageType: 'phys', originalTargetCount: 3 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 3 }, stat: 'ATK', percent: 280, hits: 1, damageType: 'phys', originalTargetCount: 3 }],
       hooks: [hook('beforeDamage', [statusEffect({ id: 'tama-hit', effectGroupId: 8100130101, nameKey: 'raidBuffTamaHit', target: 'topAttack', targetCount: 2, duration: 4 })])],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillTamaS2', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [280, 280, 1120] }, hits: 4, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's2', values: [280, 280, 1120] }, hits: 4, damageType: 'phys' }],
       hooks: [hook('beforeDamage', [bossStatusEffect({
         id: 'tama-defense-down', effectGroupId: 8100230101, nameKey: 'raidDebuffTamaDefenseDown', durationRounds: 4,
         defenseRatePerStack: -0.5, physicalDefenseRatePerStack: -0.5,

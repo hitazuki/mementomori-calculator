@@ -15,14 +15,14 @@ export default {
         }),
       ])],
       damageSteps: [{
-        stat: 'ATK', percent: 525,
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 525,
         hits: { type: 'conditional', condition: { type: 'guaranteedCritical' }, whenTrue: 10, whenFalse: 6 },
         damageType: 'phys',
       }],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillFlorenceS2', cooldown: 4, damageType: 'phys', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 525, hits: 1, damageType: 'phys', originalTargetCount: 5 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 525, hits: 1, damageType: 'phys', originalTargetCount: 5 }],
       ignoredKeys: ['raidIgnoredKillFollowup'],
     },
   },

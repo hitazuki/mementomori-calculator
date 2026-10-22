@@ -5,7 +5,7 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillFenrirS1', cooldown: 4, damageType: 'mag',
-      damageSteps: [{ stat: 'ATK', percent: 720, hits: 1, damageType: 'mag' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 720, hits: 1, damageType: 'mag' }],
       hooks: [hook('afterDamage', [
         { type: 'cooldownReduction', target: 'adjacent', targetCount: 2, amount: 2 },
         statusEffect({
@@ -16,7 +16,7 @@ export default {
     },
     s2: {
       key: 's2', nameKey: 'raidSkillFenrirS2', cooldown: 4, damageType: 'mag', hooks: [],
-      damageSteps: [{ stat: 'ATK', percent: 380, hits: 1, damageType: 'mag', originalTargetCount: 5 }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 5 }, stat: 'ATK', percent: 380, hits: 1, damageType: 'mag', originalTargetCount: 5 }],
       ignoredKeys: ['raidIgnoredDebuffCleanse'],
     },
   },

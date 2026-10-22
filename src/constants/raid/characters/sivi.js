@@ -19,7 +19,7 @@ export default {
       hooks: [hook('beforeDamage', [reactiveBlade]), hook('afterDamage', [
         { type: 'emitEvent', event: 'activeSkillHeal', target: 'self' },
       ])],
-      damageSteps: [{ stat: 'ATK', percent: 1170, hits: 1, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: 1170, hits: 1, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredPerTargetIncomingHitCount', 'raidIgnoredDefenseBuff', 'raidIgnoredIncomingDamageReduction'],
     },
     s2: {
@@ -27,7 +27,7 @@ export default {
       hooks: [hook('afterDamage', [
         { type: 'emitEvent', event: 'activeSkillHeal', target: 'lowestSpeed', targetCount: 3 },
       ])],
-      damageSteps: [{ stat: 'ATK', percent: 530, hits: 1, originalTargetCount: 4, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomGroup', count: 4 }, stat: 'ATK', percent: 530, hits: 1, originalTargetCount: 4, damageType: 'phys' }],
       ignoredKeys: ['raidIgnoredHealing', 'raidIgnoredDebuffCleanse', 'raidIgnoredDefenseBuff', 'raidIgnoredIncomingDamageReduction'],
     },
   },

@@ -46,8 +46,8 @@ export default {
       key: 's1', nameKey: 'raidSkillWitchIllyaS1', cooldown: 4, damageType: 'phys',
       hooks: [hook('beforeDamage', [hitRate])],
       damageSteps: [
-        { stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's1', values: [240, 240, 720] }, hits: 10, damageType: 'phys' },
-        { stat: 'ATK', percent: 580, hits: 1, damageType: 'phys', conditionKey: 'raidConditionDummySurvives' },
+        { enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: { type: 'skillUsesThresholds', skillKey: 's1', values: [240, 240, 720] }, hits: 10, damageType: 'phys' },
+        { enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: 580, hits: 1, damageType: 'phys', conditionKey: 'raidConditionDummySurvives' },
       ],
       ignoredKeys: ['raidIgnoredHitRateUp', 'raidIgnoredBuffRemoval', 'raidIgnoredIncomingAttackTrigger', 'raidIgnoredBarrierDamageNullification', 'raidIgnoredReviveHealing'],
     },
@@ -55,7 +55,7 @@ export default {
       key: 's2', nameKey: 'raidSkillWitchIllyaS2', cooldown: 0, damageType: 'phys',
       condition: { type: 'actorHasStatus', statusId: 'witch-illya-curse-unleashed' }, hooks: [],
       damageSteps: [{
-        stat: 'ATK', hits: 5, damageType: 'phys',
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK', hits: 5, damageType: 'phys',
         percent: { type: 'conditional', condition: { type: 'bossStatusCountAtLeast', count: 1 }, whenTrue: 660, whenFalse: 440 },
       }],
       ignoredKeys: ['raidIgnoredIncomingAttackTrigger', 'raidIgnoredBarrierDamageNullification', 'raidIgnoredReviveHealing'],

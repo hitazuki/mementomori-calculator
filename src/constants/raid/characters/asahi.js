@@ -22,13 +22,13 @@ export default {
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillAsahiS1', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 380, hits: 5, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 380, hits: 5, damageType: 'phys' }],
       hooks: [hook('afterDamage', [statusEffect({ id: 'asahi-critical', effectGroupId: 7800130401, nameKey: 'raidBuffAsahiCritical', target: 'self', duration: 10 })])],
       ignoredKeys: ['raidIgnoredHitRateUp'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillAsahiS2', cooldown: 4, damageType: 'phys',
-      damageSteps: [{ stat: 'ATK', percent: 380, hits: { type: 'counterThresholds', counter: 'windForest', values: [5, 5, 5, 5, 5, 5, 10, 10, 10, 10, 10, 10, 15] }, damageType: 'phys' }],
+      damageSteps: [{ enemyTarget: { type: 'first', count: 1 }, stat: 'ATK', percent: 380, hits: { type: 'counterThresholds', counter: 'windForest', values: [5, 5, 5, 5, 5, 5, 10, 10, 10, 10, 10, 10, 15] }, damageType: 'phys' }],
       hooks: [],
     },
   },

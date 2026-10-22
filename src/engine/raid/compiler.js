@@ -89,8 +89,13 @@ function normalizeConfig(config, characters) {
     DEFAULT_RAID_CRITICAL_DAMAGE_BONUS, value => Number.isFinite(value) && value >= 0,
   )
   const bossTemplateId = config.bossTemplateId ?? defaults.bossTemplateId
-  const bossTemplate = RAID_BOSS_TEMPLATES[bossTemplateId]
+  let bossTemplate = RAID_BOSS_TEMPLATES[bossTemplateId]
   if (!bossTemplate) throw new Error(`Unsupported raid Boss template: ${bossTemplateId}`)
+  const enemyElement = config.enemyElement ?? 3
+  const randomSeed = config.randomSeed ?? 1
+  if (!SUPPORTED_ELEMENTS.has(enemyElement)) throw new Error('Invalid raid enemy element')
+  if (!Number.isInteger(randomSeed) || randomSeed < 0 || randomSeed > 4294967295) throw new Error('Invalid raid random seed')
+  if (bossTemplate.targetCount === 5) bossTemplate = { ...bossTemplate, element: enemyElement }
   const elementAdvantage = config.elementAdvantage ?? defaults.elementAdvantage
   if (typeof elementAdvantage !== 'boolean') throw new Error('Invalid raid element advantage toggle')
   const turns = config.turns ?? defaults.turns
@@ -114,7 +119,7 @@ function normalizeConfig(config, characters) {
     lineup, attackPriority, actionOrderOverrides, speeds, levels, defensePenetrations, pmDefensePenetrations, criticalDamageBonuses,
     elementBonus,
     elementAdvantage,
-    bossTemplateId, bossTemplate, turns,
+    bossTemplateId, bossTemplate, enemyElement, randomSeed, turns,
     guaranteedCritical: config.guaranteedCritical ?? defaults.guaranteedCritical,
     baseCriticalDamageBonus: legacyCriticalDamageBonus ?? defaults.baseCriticalDamageBonus,
     probabilityOverrides: { ...defaults.probabilityOverrides, ...(config.probabilityOverrides ?? {}) },
@@ -194,6 +199,7 @@ function compileEffect(effect, mechanics, path, character) {
   if (!handler) throw new Error(`Unregistered raid effect '${effect.type}' at ${path}`)
   if (effect.target && !mechanics.targetSelectors[effect.target]) throw new Error(`Unregistered raid target selector '${effect.target}' at ${path}`)
   if (effect.sourceTarget && !mechanics.targetSelectors[effect.sourceTarget]) throw new Error(`Unregistered raid source target selector '${effect.sourceTarget}' at ${path}`)
+  if (effect.enemyScope != null && !['all', 'first', 'firstHit', 'firstTwo', 'firstThree'].includes(effect.enemyScope)) throw new Error(`Invalid raid enemy scope at ${path}`)
   if (effect.type === 'copyStatuses' && !effect.sourceTarget) throw new Error(`Raid copyStatuses effect requires sourceTarget at ${path}`)
   if (effect.type === 'removeStatuses' && (!Number.isInteger(effect.count) || effect.count < 1)) {
     throw new Error(`Raid removeStatuses effect requires a positive integer count at ${path}`)
@@ -281,6 +287,20 @@ function groupHooks(hooks) {
 }
 
 function compileDamageStep(step, mechanics, path, character) {
+  function validateEnemyTarget(spec, targetPath) {
+    if (!spec || !['randomHit', 'randomSingle', 'randomGroup', 'first', 'all', 'lowestMagicDefense', 'previousHit', 'conditional', 'lowestPhysicalDefense'].includes(spec.type)) throw new Error(`Invalid raid enemy target at ${targetPath}`)
+    if (spec.type === 'randomGroup' && spec.count == null) throw new Error(`Missing raid enemy target count at ${targetPath}`)
+    if (spec.count != null && (!Number.isInteger(spec.count) || spec.count < 1 || spec.count > 5)) throw new Error(`Invalid raid enemy target count at ${targetPath}`)
+    if (spec.type === 'conditional') {
+      if (!spec.condition) throw new Error(`Missing raid enemy target condition at ${targetPath}`)
+      compileCondition(spec.condition, mechanics, `${targetPath}.condition`, character)
+      for (const branch of ['whenTrue', 'whenFalse']) {
+        if (spec[branch]?.type === 'conditional') throw new Error(`Nested raid enemy target condition at ${targetPath}`)
+        validateEnemyTarget(spec[branch], `${targetPath}.${branch}`)
+      }
+    }
+  }
+  if (step.enemyTarget != null) validateEnemyTarget(step.enemyTarget, `${path}.enemyTarget`)
   const percent = compileValue(step.percent, mechanics, `${path}.percent`, character)
   const hits = compileValue(step.hits ?? 1, mechanics, `${path}.hits`, character)
   for (const compiled of [percent, hits]) {

@@ -47,12 +47,12 @@ export default {
           condition: { type: 'probabilityEnabled', key: 'artoriaStun' }, recordSkipped: true,
         })], { condition: { type: 'bossElementIs', element: RAID_ELEMENTS.GREEN } }),
       ],
-      damageSteps: [{ stat: 'ATK', percent: 520, hits: 6, damageType: 'phys' }], ignoredKeys: ['raidIgnoredStunAction', 'raidIgnoredShield'],
+      damageSteps: [{ enemyTarget: { type: 'randomHit' }, stat: 'ATK', percent: 520, hits: 6, damageType: 'phys' }], ignoredKeys: ['raidIgnoredStunAction', 'raidIgnoredShield'],
     },
     s2: {
       key: 's2', nameKey: 'raidSkillArtoriaS2', cooldown: 4, damageType: 'phys', hooks: [selfDamageHook],
       damageSteps: [{
-        stat: 'ATK',
+        enemyTarget: { type: 'randomHit' }, stat: 'ATK',
         percent: { type: 'counterLinear', counter: 'justice', base: 540, perStack: 150, max: 1140 },
         hits: 7, damageType: 'phys',
       }],
