@@ -322,10 +322,10 @@
             <th class="raid-sticky-col">{{ $t('raidBossStatus') }}</th>
             <td class="raid-sticky-total raid-boss-status-note">{{ $t('raidAfterRound') }}</td>
             <td v-for="round in result.rounds" :key="`boss-${round.turn}`" class="raid-boss-status-cell">
-              <template v-if="round.bossStatusAfterRound.length">
-                <span v-for="status in round.bossStatusAfterRound" :key="`${status.targetId ?? 'boss'}-${status.id}`">{{ bossStatusLabel(status) }}</span>
+              <template v-if="bossStatusSummary(round.bossStatusAfterRound).length">
+                <span v-for="line in bossStatusSummary(round.bossStatusAfterRound)" :key="line">{{ line }}</span>
               </template>
-              <small v-else>{{ $t('raidNoBossStatus') }}</small>
+              <small v-else>—</small>
             </td>
           </tr>
         </tbody>
@@ -633,7 +633,7 @@ import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
 import RaidSkillIcon from '../components/raid/RaidSkillIcon.vue'
 import { raidDetailValueText } from '../utils/raidDetailValueText.js'
 import { buildRaidCharacterDetail } from '../utils/raidCharacterDetails.js'
-import { buildRaidExportModel, raidExportFilename } from '../utils/raidExport.js'
+import { buildRaidExportModel, raidExportFilename, summarizeRaidBossRates } from '../utils/raidExport.js'
 import { currentTheme } from '../utils/themeStore.js'
 
 const OrderList = defineComponent({
@@ -1202,6 +1202,7 @@ function openRaidExport() {
     formatSymbolic,
     formatConversionTotals: formatConversionExportTotals,
     bossStatusText: bossStatusLabel,
+    bossStatusSummary,
     elementBonusLines: elementBonusLines.value,
     scenarioLines: activeRaidScenarioLines(),
     warningLines: result.value.warnings.map(key => t(key)),
@@ -1362,6 +1363,14 @@ function stepHpConversionText(step) {
   const sources = step.symbolicModifierSources.filter(source => source.kind === 'sourceMaxHpOverTargetAttack' && source.coefficient)
     .map(source => `${t(source.nameKey)} ${formatRate(source.coefficient)} ${valueSourceText(source.valueSourceId, 'HP')}`)
   return t('raidStepHpConversion', { value: formatStat(step.normalizedHpPercent, 'HP'), sources: sources.join('；') })
+}
+
+function bossStatusSummary(statuses) {
+  const keys = { damageRatePerStack: 'raidDamageRate', defenseRatePerStack: 'raidDefenseRate', physicalDefenseRatePerStack: 'raidPhysicalDefenseRate', magicDefenseRatePerStack: 'raidMagicDefenseRate' }
+  return summarizeRaidBossRates(statuses, result.value.bossTemplate.targetCount ?? 1).map(({ channel, min, max }) => {
+    const value = min === max ? signedRate(min) : `${signedRate(min)}～${signedRate(max)}`
+    return `${t(keys[channel])} ${value}`
+  })
 }
 
 function bossStatusLabel(status) {

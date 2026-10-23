@@ -489,7 +489,7 @@
 .raid-boss-status-row .raid-sticky-total { background: var(--bg-surface); }
 .raid-boss-status-note,
 .raid-boss-status-cell small { color: var(--text-muted); font-size: var(--fs-xs); }
-.raid-boss-status-cell span { display: block; color: var(--success); font-size: var(--fs-xs); line-height: 1.4; }
+.raid-boss-status-cell span { display: block; white-space: nowrap; color: var(--success); font-size: var(--fs-xs); line-height: 1.4; }
 .raid-boss-status-cell span + span { margin-top: 4px; }
 
 .raid-row-total { color: var(--gold-light); font-family: var(--font-mono); font-weight: 700; }

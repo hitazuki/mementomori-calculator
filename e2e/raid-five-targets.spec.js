@@ -26,3 +26,34 @@ test('five-target Boss shares element, preserves configuration, and exposes seed
   await page.screenshot({path:'test-results/raid-five-targets.png',fullPage:true})
   expect(errors).toEqual([])
 })
+
+test('Boss status cells and PNG export show only compact numeric modifiers', async ({ page }) => {
+  test.setTimeout(120000)
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.route(/https:\/\/fonts\.(googleapis|gstatic)\.com\//, route => route.abort())
+  await page.addInitScript(() => localStorage.setItem('mmt-calc-current-view', 'raidTable'))
+  await page.goto('./', { waitUntil: 'domcontentloaded' })
+  const selected = page.locator('.raid-roster-select[aria-pressed="true"]')
+  await expect(selected).toHaveCount(5)
+  while (await selected.count()) await selected.first().click()
+  for (const id of [148, 102, 155]) await page.locator('.raid-roster-select').filter({ hasText: `#${id}` }).click()
+  await page.locator('select').filter({ has: page.locator('option[value="five-targets"]') }).selectOption('five-targets')
+  const cells = page.locator('.raid-boss-status-cell')
+  await expect(cells).toHaveCount(10)
+  await expect(cells.first()).toContainText('%')
+  for (const cell of await cells.all()) {
+    expect(await cell.locator('span').count()).toBeLessThanOrEqual(4)
+    expect(await cell.innerText()).not.toMatch(/敌方|桂妮|圣枪|剩余|层|解除/)
+  }
+  await page.getByRole('button', { name: /导出图片/ }).click()
+  const preview = page.locator('.raid-export-preview-image')
+  await expect(preview).toBeVisible({ timeout: 90000 })
+  const row = page.locator('.raid-export-sheet .boss-row')
+  expect(await row.innerText()).not.toMatch(/桂妮|圣枪|剩余|层|解除/)
+  const downloadReady = page.waitForEvent('download')
+  await page.getByRole('button', { name: /下载 PNG/ }).click()
+  const download = await downloadReady
+  await download.saveAs('test-results/raid-compact-status-export.png')
+  expect(errors).toEqual([])
+})

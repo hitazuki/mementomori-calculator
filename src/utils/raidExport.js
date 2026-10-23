@@ -25,10 +25,31 @@ export async function copyPngBlob(blob, { clipboard = globalThis.navigator?.clip
   await clipboard.write([new ClipboardItemClass({ 'image/png': blob })])
 }
 
+// Summarize combat modifiers, keeping unaffected enemies in the range as zero.
+// Names, sources, durations and non-numeric effects remain in action details.
+export function summarizeRaidBossRates(statuses, targetCount = 1) {
+  const channels = ['damageRatePerStack', 'defenseRatePerStack', 'physicalDefenseRatePerStack', 'magicDefenseRatePerStack']
+  const empty = () => Object.fromEntries(channels.map(channel => [channel, 0]))
+  const firstId = targetCount > 1 ? 'enemy-1' : 'boss'
+  const targets = new Map(Array.from({ length: targetCount }, (_, index) => [targetCount > 1 ? `enemy-${index + 1}` : 'boss', empty()]))
+  for (const status of statuses) {
+    const id = status.targetId ?? firstId
+    if (!targets.has(id)) targets.set(id, empty())
+    const rates = targets.get(id)
+    for (const channel of channels) rates[channel] += (status[channel] ?? 0) * (status.stacks ?? 1)
+  }
+  return channels.flatMap(channel => {
+    const values = [...targets.values()].map(rates => Number(rates[channel].toFixed(12)))
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    return min || max ? [{ channel, min, max }] : []
+  })
+}
+
 export function buildRaidExportModel({
   result, lineup, attackPriority, characters, bossName, bossStats, generatedAt = new Date(),
   locale, characterName, skillName, iconUrl, turnLabel, formatPercent, formatSymbolic, formatConversionTotals,
-  bossStatusText, elementBonusLines = [], scenarioLines = [], warningLines = [], labels,
+  bossStatusText, bossStatusSummary, elementBonusLines = [], scenarioLines = [], warningLines = [], labels,
 }) {
   const rows = lineup.map(id => ({
     id,
@@ -62,7 +83,7 @@ export function buildRaidExportModel({
     total: formatPercent(round.atkPercent),
     conversionTotals: formatConversionTotals(round.conversionTotals),
     symbolicTotal: formatSymbolic(round.symbolicTotals),
-    bossStatuses: round.bossStatusAfterRound.map(bossStatusText),
+    bossStatuses: bossStatusSummary ? bossStatusSummary(round.bossStatusAfterRound) : round.bossStatusAfterRound.map(bossStatusText),
   }))
 
   return {

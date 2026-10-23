@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 
 import { RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS } from '../src/constants/raidTableCharacters.js'
 import { simulateRaidTable } from '../src/engine/raidTableCalc.js'
-import { buildRaidExportModel, canCopyPng, copyPngBlob, raidExportFilename } from '../src/utils/raidExport.js'
+import { buildRaidExportModel, summarizeRaidBossRates, canCopyPng, copyPngBlob, raidExportFilename } from '../src/utils/raidExport.js'
 
 const { FLORENCE, LUKE } = RAID_TABLE_CHARACTER_IDS
 
@@ -76,4 +76,47 @@ test('five-target exports retain separate damage units and target-qualified stat
   assert.equal(exported.boss.stats,'Lv240 · DEF 200,000')
   assert.equal(exported.rounds.length,2)
   assert.ok(result.rounds[0].bossStatusAfterRound.every(status=>status.targetId))
+})
+
+
+test('Boss numeric summaries aggregate stacks and sources without repeating five targets', () => {
+  const statuses = Array.from({ length: 5 }, (_, index) => [
+    { targetId: `enemy-${index + 1}`, sourceId: 148, damageRatePerStack: 0.1, stacks: 2 },
+    { targetId: `enemy-${index + 1}`, sourceId: 155, damageRatePerStack: 0.4, stacks: 1 },
+    { targetId: `enemy-${index + 1}`, defenseRatePerStack: -0.1, stacks: 1 },
+    { targetId: `enemy-${index + 1}`, nameKey: 'control-effect', stacks: 1 },
+  ]).flat()
+  const original = structuredClone(statuses)
+  assert.deepEqual(summarizeRaidBossRates(statuses, 5), [
+    { channel: 'damageRatePerStack', min: 0.6, max: 0.6 },
+    { channel: 'defenseRatePerStack', min: -0.1, max: -0.1 },
+  ])
+  assert.deepEqual(statuses, original)
+})
+
+test('Boss summaries retain variation and zero for unaffected targets and omit non-numeric states', () => {
+  assert.deepEqual(summarizeRaidBossRates([{ targetId: 'enemy-3', defenseRatePerStack: -0.4, stacks: 2 }], 5), [
+    { channel: 'defenseRatePerStack', min: -0.8, max: 0 },
+  ])
+  assert.deepEqual(summarizeRaidBossRates([{ magicDefenseRatePerStack: -0.4, stacks: 1 }]), [
+    { channel: 'magicDefenseRatePerStack', min: -0.4, max: -0.4 },
+  ])
+  assert.deepEqual(summarizeRaidBossRates([{ nameKey: 'stun', stacks: 1 }], 5), [])
+  assert.deepEqual(summarizeRaidBossRates([], 5), [])
+})
+
+test('export model accepts the same compact numeric summaries as the on-screen matrix', () => {
+  const lineup = [148, 102, 155]
+  const result = simulateRaidTable({ bossTemplateId: 'five-targets', lineup, attackPriority: lineup })
+  const output = buildRaidExportModel({
+    result, lineup, attackPriority: lineup, characters: RAID_TABLE_CHARACTERS,
+    bossName: 'Five targets', bossStats: '', locale: 'en',
+    characterName: String, skillName: String, iconUrl: String, turnLabel: String,
+    formatPercent: String, formatSymbolic: JSON.stringify, formatConversionTotals: () => [],
+    bossStatusText: () => { throw new Error('Full status descriptions must not be exported') },
+    bossStatusSummary: statuses => summarizeRaidBossRates(statuses, 5).map(rate => `${rate.channel} ${rate.min} / ${rate.max}`),
+    labels: {},
+  })
+  assert.ok(output.rounds.some(round => round.bossStatuses.length > 0))
+  assert.ok(output.rounds.every(round => round.bossStatuses.length <= 4))
 })
