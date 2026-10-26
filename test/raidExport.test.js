@@ -54,6 +54,19 @@ test('raid export filenames sanitize boss names and use a stable local timestamp
   assert.equal(raidExportFilename('光士 / Luke:*?', date), 'mmt-raid-光士-Luke-20260813-1745.png')
 })
 
+test('export retains one-round Boss statuses before expiry for single and five targets', () => {
+  const lineup = [RAID_TABLE_CHARACTER_IDS.HOLY_LANCE_ALEXANDRA]
+  for (const bossTemplateId of ['sonya', 'five-targets']) {
+    const result = simulateRaidTable({ lineup, attackPriority: lineup, bossTemplateId, turns: 1 })
+    const before = result.rounds[0].bossStatusBeforeAction
+    assert.ok(before.some(status => status.id === 'holy-lance-vulnerability'))
+    assert.ok(before.every(status => status.remainingRounds === 1))
+    if (bossTemplateId === 'five-targets') assert.ok(before.every(status => status.targetId))
+    assert.deepEqual(result.rounds[0].bossStatusAfterRound, [])
+    assert.deepEqual(model(result, lineup, lineup).rounds[0].bossStatuses, before.map(status => status.id))
+  }
+})
+
 test('PNG clipboard capability and writes are isolated from preview blob lifetime', async () => {
   const writes = []
   class FakeClipboardItem { constructor(data) { this.data = data } }
@@ -119,4 +132,6 @@ test('export model accepts the same compact numeric summaries as the on-screen m
   })
   assert.ok(output.rounds.some(round => round.bossStatuses.length > 0))
   assert.ok(output.rounds.every(round => round.bossStatuses.length <= 4))
+  assert.deepEqual(output.rounds.map(round => round.bossStatuses), result.rounds.map(round =>
+    summarizeRaidBossRates(round.bossStatusBeforeAction, 5).map(rate => `${rate.channel} ${rate.min} / ${rate.max}`)))
 })

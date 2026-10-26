@@ -320,10 +320,10 @@
           </tr>
           <tr class="raid-boss-status-row">
             <th class="raid-sticky-col">{{ $t('raidBossStatus') }}</th>
-            <td class="raid-sticky-total raid-boss-status-note">{{ $t('raidAfterRound') }}</td>
+            <td class="raid-sticky-total raid-boss-status-note">{{ $t('raidBeforeBossAction') }}</td>
             <td v-for="round in result.rounds" :key="`boss-${round.turn}`" class="raid-boss-status-cell">
-              <template v-if="bossStatusSummary(round.bossStatusAfterRound).length">
-                <span v-for="line in bossStatusSummary(round.bossStatusAfterRound)" :key="line">{{ line }}</span>
+              <template v-if="bossStatusSummary(round.bossStatusBeforeAction).length">
+                <span v-for="line in bossStatusSummary(round.bossStatusBeforeAction)" :key="line">{{ line }}</span>
               </template>
               <small v-else>—</small>
             </td>
@@ -1218,7 +1218,7 @@ function openRaidExport() {
       criticalDamage: t('raidBaseCriticalDamage'), defensePenetration: t('raidDefensePenetration'), pmDefensePenetration: t('raidPmDefensePenetration'),
       matrix: t('raidMatrixTitle'), characterTotal: t('raidCharacterTotal'), manual: t('raidOrderManual'), automatic: t('raidOrderAutomatic'),
       enemyTarget: t('raidEnemyTarget', { n: '{n}' }), fiveTargetTotal: t('raidFiveTargetTotal'),
-      bossStatus: t('raidBossStatus'), afterRound: t('raidExportAfterRound'), roundTotal: t('raidRoundTotal'),
+      bossStatus: t('raidBossStatus'), beforeBossAction: t('raidBeforeBossAction'), roundTotal: t('raidRoundTotal'),
     },
   })
   raidExportSnapshot.value = {
@@ -1366,7 +1366,7 @@ function stepHpConversionText(step) {
 }
 
 function bossStatusSummary(statuses) {
-  const keys = { damageRatePerStack: 'raidDamageRate', defenseRatePerStack: 'raidDefenseRate', physicalDefenseRatePerStack: 'raidPhysicalDefenseRate', magicDefenseRatePerStack: 'raidMagicDefenseRate' }
+  const keys = { damageRatePerStack: 'raidDamageTakenRate', defenseRatePerStack: 'raidDefenseRate', physicalDefenseRatePerStack: 'raidPhysicalDefenseRate', magicDefenseRatePerStack: 'raidMagicDefenseRate' }
   return summarizeRaidBossRates(statuses, result.value.bossTemplate.targetCount ?? 1).map(({ channel, min, max }) => {
     const value = min === max ? signedRate(min) : `${signedRate(min)}～${signedRate(max)}`
     return `${t(keys[channel])} ${value}`
@@ -1417,7 +1417,7 @@ function statusValueSummary(status) {
 
 function bossRateSummary(status) {
   return [
-    ['raidDamageRate', status.damageRatePerStack],
+    ['raidDamageTakenRate', status.damageRatePerStack],
     ['raidDefenseRate', status.defenseRatePerStack],
     ['raidPhysicalDefenseRate', status.physicalDefenseRatePerStack],
     ['raidMagicDefenseRate', status.magicDefenseRatePerStack],

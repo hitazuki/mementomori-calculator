@@ -83,7 +83,7 @@ export function buildRaidExportModel({
     total: formatPercent(round.atkPercent),
     conversionTotals: formatConversionTotals(round.conversionTotals),
     symbolicTotal: formatSymbolic(round.symbolicTotals),
-    bossStatuses: bossStatusSummary ? bossStatusSummary(round.bossStatusAfterRound) : round.bossStatusAfterRound.map(bossStatusText),
+    bossStatuses: bossStatusSummary ? bossStatusSummary(round.bossStatusBeforeAction) : round.bossStatusBeforeAction.map(bossStatusText),
   }))
 
   return {

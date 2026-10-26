@@ -839,6 +839,8 @@ export function runRaidProgram(program) {
       addConversionTotals(conversionTotals, event.conversionTotals)
       mergeScaling(scalingTotals, Object.values(event.scalingTotals))
     }
+    // The dummy does not act; expose its pre-action state before round expiry.
+    round.bossStatusBeforeAction = allBossStatuses()
     round.expiredBossEffects = enemies.flatMap(enemy => {
       boss = enemy
       return expireBossStatuses().map(status => multipleEnemies ? { ...status, targetId: enemy.id } : status)

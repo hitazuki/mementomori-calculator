@@ -106,6 +106,9 @@ test('holy lance vulnerability duration counts other red allies and the failure 
     const debuff = first.bossStatusAfterAction.find(status => status.id === 'holy-lance-vulnerability')
     assert.equal(debuff.durationRounds, allies.length === 2 ? 2 : 1)
     assert.equal(debuff.damageRatePerStack, 0.4)
+    const beforeBoss = result.rounds[0].bossStatusBeforeAction.find(status => status.id === 'holy-lance-vulnerability')
+    assert.equal(beforeBoss.remainingRounds, allies.length === 2 ? 2 : 1)
+    assert.equal(result.rounds[0].bossStatusAfterRound.some(status => status.id === 'holy-lance-vulnerability'), allies.length === 2)
   }
   const failed = simulateRaidTable(singleConfig(HOLY_LANCE_ALEXANDRA, { probabilityOverrides: { holyLanceDamageTaken: false }, guaranteedCritical: false }))
   assert.ok(action(failed, 1, HOLY_LANCE_ALEXANDRA).damageSteps.every(step => step.damageRate === 0 && step.criticalMultiplier === 1))
@@ -620,6 +623,8 @@ test('Liberia applies two Sand stacks before all eight S1 hits and the toggle ca
   assert.ok(s1.damageSteps.every(step => Math.abs(step.bossDamageRate - 0.1) < 1e-12))
   assert.equal(s1.bossStatusAfterAction.find(status => status.id === 'liberia-sand').stacks, 2)
   assert.equal(enabled.rounds[0].bossStatusAfterRound.find(status => status.id === 'liberia-sand').remainingRounds, 1)
+  assert.equal(enabled.rounds[0].bossStatusBeforeAction.find(status => status.id === 'liberia-sand').remainingRounds, 2)
+  assert.equal(enabled.rounds[1].bossStatusBeforeAction.find(status => status.id === 'liberia-sand').remainingRounds, 1)
   assert.equal(enabled.rounds[1].bossStatusAfterRound.some(status => status.id === 'liberia-sand'), false)
 
   const disabled = simulateRaidTable({
