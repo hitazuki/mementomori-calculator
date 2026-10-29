@@ -3,6 +3,7 @@
 const attack = n => ({effects:{attack:n},early:true})
 const skill = (S1,S2,effects={}) => ({components:{...(S1?{S1}:{}),...(S2?{S2}:{})},effects,early:true})
 export const lower = {
+  156:{effects:{damage:0},components:{S1:'6.8,1,3',S2:'5.8,5,0'},scenarios:{1:{components:{S1:'20.4,1,1'}}}},
   157:{effects:{attack:0},components:{S2:'3.2,5,1'}},
   155:{effects:{attack:0},components:{S2:'3.6,10,0'},slots:{S1:{damage:0},S2:{damage:0}}},
   154:skill(null,'5.4,4,0'),
@@ -51,6 +52,7 @@ export const lower = {
 
 // Opening includes guaranteed own pre-hit events. Unknown teammate events are zero.
 export const opening = {
+  156:{effects:{damage:.1},slots:{S1:{damage:.1},S2:{damage:.2}}},
   157:{slots:{S1:{attack:.1},S2:{attack:.2}}},
   155:{slots:{S1:{attack:0,damage:.28},S2:{attack:.324,damage:0}}},
   65:{components:{S2:'11.4,3,2'},slots:{S1:{attack:.15},S2:{attack:.3}}},
@@ -108,7 +110,11 @@ export const upper = {
 
 // Short-term vs long-term editorial judgments, based on lifecycle and 0%-bonus capacity.
 // Keys are explicit authored scores; no keywords in the original text award points.
-export const defenseScores = {
+export { calibratedDefenseScores as defenseScores } from '../../../scripts/lib/characterSurvivalCalibration.mjs'
+// Historical inputs, retained for comparisons. Current scores are the full-pool
+// authored calibration above, not these former compressed capacity decisions.
+export const legacyDefenseScores = {
+  156:[9,9],
   157:[10,9],
   155:[6,2],
   1:[0,1],2:[0,0],3:[0,0],4:[5,2],5:[8,7],6:[9,2],7:[3,6],8:[0,0],9:[4,4],10:[1,4],

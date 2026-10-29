@@ -2,6 +2,7 @@
 // expected-damage components: kill follow-ups are excluded there, and mixed
 // ally/enemy selection uses a fractional expectation rather than actual targets.
 export const targetingReviews = {
+  156:{S1:{detail:'3目标群攻；剩1敌时伤害三倍',quote:'对攻击力最高的2名敌人'},S2:{detail:'随机单体5连击；满10层后追击最高攻击单体3次',quote:'物理攻击次数增加为5次'}},
   157: {
     S1: { detail: '5目标群攻', quote: '随机对3名敌人造成' },
     S2: { detail: '最低魔防单体5连击；第3/4次施放提高倍率', quote: '对魔法防御力最低的敌人进行3次攻击' },

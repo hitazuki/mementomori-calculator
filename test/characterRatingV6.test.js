@@ -13,9 +13,29 @@ const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',i
 const reviews=read('../doc/character-ratings/v6/review.json').records
 const score=(id,key)=>reviews.find(r=>r.id===id).axes.find(a=>a.key===key).score
 
+test('Superbia Elfriede opens below ten stacks and applies critical only to explicit direct follow-ups',()=>{
+  const r=reviews.find(r=>r.id===156),opening=r.output.stages.opening,mature=r.output.stages.mature
+  assert.deepEqual(r.axes.map(a=>a.score),[9,10,10,10,2,8,0])
+  assert.equal(opening.snapshots[0].skills.S1.components[0].coefficient,20.4)
+  assert.equal(opening.snapshots[1].skills.S1.components[0].coefficient,6.8)
+  assert.equal(opening.snapshots[0].skills.S1.effects.damage,.1)
+  assert.equal(opening.snapshots[0].skills.S2.effects.damage,.2)
+  assert.equal(opening.snapshots[0].skills.S2.components.length,1)
+  assert.equal(mature.snapshots[0].skills.S1.components[0].coefficient,30.6)
+  const direct=mature.snapshots[0].skills.S2.segments[1]
+  assert.equal(direct.factors.critical,1.5)
+  assert.equal(direct.factors.defense,1)
+  assert.equal(direct.factors.bonus,1)
+  assert.equal(direct.damage,15*3*.25*1.5)
+  assert.equal(r.output.growth.totalEvents,5)
+  assert.equal(r.survival.states[0].comparisons[0].physical.withoutShield,8)
+  assert.equal(r.survival.initiative.penalty,0)
+  assert.match(r.axes[4].reason,/行动结束即解除/)
+})
+
 test('provisional Lamis keeps late S2 casts separate from shields that stop before round thirteen',()=>{
   const r=reviews.find(r=>r.id===157)
-  assert.deepEqual(r.axes.map(a=>a.score),[5,8,10,9,8,8,0])
+  assert.deepEqual(r.axes.map(a=>a.score),[5,8,9,8,8,8,0])
   assert.match(r.conditions,/暂定评分/)
   assert.match(r.conditions,/缺少专武被动属性/)
   assert.equal(r.output.weapon.attack,0)
@@ -38,7 +58,7 @@ test('provisional Lamis keeps late S2 casts separate from shields that stop befo
 
 test('Guardian Alexandra keeps first-round self-harm, conditional damage and expiring wards separate',()=>{
   const r=reviews.find(r=>r.id===155)
-  assert.deepEqual(r.axes.map(a=>a.score),[9,10,6,2,7,8,0])
+  assert.deepEqual(r.axes.map(a=>a.score),[9,10,2,0,7,8,0])
   const {lower,opening,mature,quick}=r.output.stages
   assert.equal(lower.snapshots[0].skills.S2.components[0].coefficient,3.6)
   assert.equal(opening.snapshots[0].skills.S1.effects.attack,0)
@@ -64,7 +84,7 @@ test('Guardian Alexandra keeps first-round self-harm, conditional damage and exp
 
 test('Aine full-team Shields unlock the second-action burst without assuming shields survive',()=>{
   const r=reviews.find(r=>r.id===65)
-  assert.deepEqual(r.axes.map(a=>a.score),[7,6,7,8,9,4,0])
+  assert.deepEqual(r.axes.map(a=>a.score),[7,6,6,8,9,4,0])
   const {lower,opening,mature}=r.output.stages
   assert.equal(lower.snapshots[0].skills.S2.components[0].coefficient,3.8)
   assert.equal(lower.snapshots[0].skills.S2.effects.attack,0)
@@ -84,7 +104,7 @@ test('Aine full-team Shields unlock the second-action burst without assuming shi
 
 test('golden Artoria keeps the fifteen-heal unlock late and magical recovery outside lethal capacity',()=>{
   const r=reviews.find(r=>r.id===154)
-  assert.deepEqual(r.axes.map(a=>a.score),[5,8,9,9,6,0,0])
+  assert.deepEqual(r.axes.map(a=>a.score),[5,8,8,9,6,0,0])
   for(const phase of ['lower','opening','quick']) {
     assert.equal(r.output.stages[phase].snapshots[0].skills.S2.components[0].coefficient,5.4)
   }
@@ -104,7 +124,7 @@ test('golden Artoria keeps the fifteen-heal unlock late and magical recovery out
 
 test('Cusie reviewed weapon stats affect output and finite shields without treating CRIT RES as mitigation',()=>{
   const r=reviews.find(r=>r.id===97)
-  assert.deepEqual(r.axes.map(a=>a.score),[4,3,8,5,7,4,0])
+  assert.deepEqual(r.axes.map(a=>a.score),[4,3,8,4,7,4,0])
   assert.equal(r.output.weapon.attack,.18)
   assert.equal(r.output.weapon.defense,.05)
   assert.equal(r.output.weapon.excluded.find(p=>p.name==='暴击抗性').value,10)
@@ -116,7 +136,7 @@ test('Cusie reviewed weapon stats affect output and finite shields without treat
 })
 
 test('all seven-axis ratings retain reproducible lower, opening, mature and upper samples',()=>{
-  assert.equal(reviews.length,137)
+  assert.equal(reviews.length,138)
   assert.equal(RATING_AXES.length,7)
   for(const r of reviews){
     assert.deepEqual(r.axes.map(a=>a.key),RATING_AXES)
@@ -177,7 +197,7 @@ test('burst does not borrow late skill unlocks, stacks or delayed damage',()=>{
 
 test('one-time shields and immortality stay distinct from enduring defenses at zero damage bonus',()=>{
   for(const id of [6,57,69,78,100]) assert.ok(score(id,'toughness')>score(id,'survival'))
-  assert.equal(score(71,'survival'),7)
+  assert.equal(score(71,'survival'),6)
   assert.ok(score(114,'survival')>score(71,'survival'))
   assert.ok(score(134,'toughness')>score(71,'toughness'))
   assert.ok(Math.abs(survivalCapacity({reduction:.65,hp:1}).withoutShield-2/.35)<1e-9)

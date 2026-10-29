@@ -1,6 +1,27 @@
 // New v6 reviews have no historical six-axis scores. All levels and three
 // weapon tiers were reviewed against the catalog; hashes are review evidence.
 export const newCharacters = {
+  156: {
+    sourceHash: 'c223353fb9e5b50e34f564b9405909f1eca086e081a8095ff5a0b6c7e6d7c62c',
+    reviewedAt: '2026-10-29',
+    input: { S1: '10.2,1,3', S2: '8.7,5,0+p15,3,1', N: '1,1,1' },
+    effects: { damage: .5 },
+    note: '每层5%输出伤害，10层共50%；高血每回合2层，第5回合满层，低血每回合1层。满层S1为1020%三目标、单敌三倍；S2为870%随机5连击并追击3次力量1500%直接伤害，追击明示必暴，仅追加确认的暴击乘区。',
+    growth: { event: '回合开始附加层数', initial: 0, cap: 10, perEvent: 2, totalEvents: 5, detail: '自身生命至少50%时每回合2层，最快第5回合满；低血每回合1层，最迟第10回合满；不消耗、不重置，死亡仍可给友军附层。' },
+    lifecycle: { activeWindow: '开局50%减伤与75%阻绝，无需先行动；受击后存活才对该敌人叠层，后续攻击每层再加3%阻绝，最高90%', replenishment: '常驻减伤与基础阻绝不消耗；敌方每次攻击后存活附1层，最高5层，无回复渠道', afterExpiry: '敌人行动结束解除其全部层数，下一次攻击不预支90%阻绝；自身无治疗、护盾或复活' },
+    states: [
+      { label: '首击或敌人行动结束后', effects: { reduction: .5, block: .75 }, evidence: ['P1','P2'] },
+      { label: '同一敌人已有5层，下一次攻击前', effects: { reduction: .5, block: .9 }, evidence: ['P1','P2'] },
+    ],
+    auxiliary: [
+      { key: 'protection', score: 2, reason: 'P2存活受击后降低该敌人5%防御穿透每层，最多25%；敌人行动结束即解除，保护后续友军的窗口有限。75%至90%阻绝仅保护自身。' },
+      { key: 'support', score: 8, reason: 'P1每回合给2名最高攻击其他友军叠输出伤害，每层5%、最高50%，无法驱散；自身高血每回合2层，最快第5回合满层，低血较慢，死亡仍可附层。' },
+      { key: 'control', score: 0, reason: '无沉默、晕厥、减速等行动干扰。' },
+    ],
+    conditions: '最高专武攻击+18%、防御穿透7000与物魔防御穿透7000已计入。高血最快第5回合满层；开局不预支满层追击。力量直接伤害明示必暴，按基础暴伤计，不额外套攻击、双防或未确认的增伤区。',
+    tags: 'damageUp@P1+W,accuracy@P1+W,reduction@P1,block@P2,penetrationDown@P2,direct@S2,critical@S2',
+  },
+
   157: {
     sourceHash: '099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9',
     reviewedAt: '2026-10-15',

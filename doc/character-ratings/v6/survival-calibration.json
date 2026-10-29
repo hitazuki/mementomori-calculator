@@ -1,0 +1,2088 @@
+{
+  "version": "survival-calibration-2026-10-29",
+  "reviewedAt": "2026-10-29",
+  "capacityAnchors": [
+    1.05,
+    1.15,
+    1.3,
+    1.5,
+    1.8,
+    2.2,
+    3,
+    4,
+    6,
+    8
+  ],
+  "records": {
+    "1": {
+      "sourceHash": "68e877144ea566a89bc49efb1813d847d6962d29e845528f7c9cfeb23910ad3d",
+      "previousScores": [
+        0,
+        1
+      ],
+      "burstBase": 0,
+      "sustain": 1,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "治疗选中自身才有小额回复，不提高首击容量",
+      "preservedAxesHash": "6fd476ec15b7a81fce8f41ce70634b96be3504951127d84927106ddc189660be",
+      "preservedOutputHash": "be1b558610c1a95c33c9ff4f1b65d4aa0270c8a981074f4dc8888dddac04a84f",
+      "preservedStatesHash": "608641531e1b2ee497bf87c5d71c30b9d16659bf9be5a74c6ae1539fc5b9450e"
+    },
+    "2": {
+      "sourceHash": "dc7237f97e30e7640353ba9d28d6201d5fa161051f930f4c7df5509ae71ddf31",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "a4ee6173fa01c0571fa6bcd508722bc68791cbc523d25f24b3a3bffcfbf94d52",
+      "preservedOutputHash": "0e3d4195f56a9174c6350eb1e52f1e283b467f6809777e378469725abd957b60",
+      "preservedStatesHash": "3646ca441cb7e27f13b0743568328f3765855b07507975eb5e397b36702a3078"
+    },
+    "3": {
+      "sourceHash": "d26f53245b749a01e55c76329169b560ce6fc0e6e52df730516e4e750d0c6977",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "6ab96d66cae1172c02c620b5c26f667591c00cae7b140de0ba665db4d71ee0c2",
+      "preservedOutputHash": "4ae897b118e686775703a1e486382ea7bf9a21da2669064f78530170c875d58c",
+      "preservedStatesHash": "3646ca441cb7e27f13b0743568328f3765855b07507975eb5e397b36702a3078"
+    },
+    "4": {
+      "sourceHash": "e4c8c020462366f5e9681706f77de03580d4e3096cf85f28c85e413948346611",
+      "previousScores": [
+        4,
+        2
+      ],
+      "burstBase": 5,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "CD4击杀后才补盾，首轮与无击杀空窗另扣",
+      "preservedAxesHash": "08b66b681041ffd50dd4dc6480a4ac60b68ac262b6640a733e904486283ab9a5",
+      "preservedOutputHash": "196520b40e9206aed76212675bf8c34351894967158dfd2f13232566809ea9ed",
+      "preservedStatesHash": "79574d71f991b12dca277e40f955706026ecf5f9df9d24ac6fd179c190f95be4"
+    },
+    "5": {
+      "sourceHash": "bfc4e1ccbb0cf97d83d5c65724a60594ab093cd5bab6c70486560132efb0c4a0",
+      "previousScores": [
+        8,
+        7
+      ],
+      "burstBase": 8,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "四层阈值屏障可重发，但多段消耗、四行动补充间隔",
+      "preservedAxesHash": "7b925bd313b378d946400d618cd5e5b2fd54a62e98944197a2d944e301126ab2",
+      "preservedOutputHash": "cdd0b9bd875ff6adab1eef89191101e4c9ebf3c8c711e3837b95060e073848d1",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "6": {
+      "sourceHash": "5eb65b36b4a2b9a8796b66f48c663ec2bea174bcdf16edab03a18241c3de3fff",
+      "previousScores": [
+        9,
+        2
+      ],
+      "burstBase": 9,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次三回合不死保爆发，到期无持续保护",
+      "preservedAxesHash": "ac643313f8d9feb4015ad024126edcf62e5b267f3ada0e81f1d67a87ae733263",
+      "preservedOutputHash": "b4633f4b6e494e01c2808d50e30d9902407c703c186f6d0ab8a0e92097d1b029",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "7": {
+      "sourceHash": "e81afbff4b81dabfbc34d16e669f7d306b21ff05b1ac1eb2fc50dfbb4d17176a",
+      "previousScores": [
+        3,
+        6
+      ],
+      "burstBase": 3,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "常驻防御容量有限，低血回复可重触发但不能救致命伤",
+      "preservedAxesHash": "aebce019c4183e90027b9094c412ca91fb050309537594bc8f3b870abe756046",
+      "preservedOutputHash": "fc0758210e88b5e37a5524bcd048fa5111c8d2c1ccbf2a7deb2d9f15901b0575",
+      "preservedStatesHash": "8a385df817fcd1d35f5b5d8761cbde8e5648fde849e4be590a0f3821a555055a"
+    },
+    "8": {
+      "sourceHash": "1347dc4be6c062bf1e20d224b2dcebfd1f8169e34879bc25db65034336e46d71",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "87b30afb513ba64028dd145fcda7b84cc0a56514e33b383ae0276118c3ef609d",
+      "preservedOutputHash": "21c1861417dd0b1a1c85be5f3eb6b3648e935bc84e0d7e315c1560eab8332b7e",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "9": {
+      "sourceHash": "f83c51af7b0069a5d91f76a77b24c0004412214b0d6c0c431e1e50688971381e",
+      "previousScores": [
+        4,
+        4
+      ],
+      "burstBase": 3,
+      "sustain": 3,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "五人队145%稳定容量，无额外续航",
+      "preservedAxesHash": "5bce6ef0ce608960222748fa31fb747f5bd9d31a2fae449d2bba31c04594f650",
+      "preservedOutputHash": "399997b3b91e99aa4103a35b2bc2a53aaaff581798a2c03c9448c56dddb842d7",
+      "preservedStatesHash": "d39b65e3b3a95a29feb614038b3076911c621e870dd05b972ae0316ab3db76bd"
+    },
+    "10": {
+      "sourceHash": "38a8e6fd77cd4d58edd94568149b4d8f6f40145a5e7ab35a6dfea7128c4f3214",
+      "previousScores": [
+        1,
+        4
+      ],
+      "burstBase": 0,
+      "sustain": 3,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "阈值再生不挡致命，两次有限恢复到期后无补充",
+      "preservedAxesHash": "f9acff1522509a1eb68234daa799f8b820bc21fcf2e1a4dcd92f457f74ba7c2c",
+      "preservedOutputHash": "d26c872c65379dc390d4e6432a63fbe72ee102f430da5847138bcbb37a87833e",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "11": {
+      "sourceHash": "8f0669532288864c3a344a44201442727aae90feed405e4f4381ff17cf2c8c87",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "2e235d467f4ac14674d895c234a1ba4420052f81e9ff70686f2d7cf55c0bad90",
+      "preservedOutputHash": "9b1e22b17ce117b23f1a407e6525b1a1fd08da3de285fdc515aa56af4d73106b",
+      "preservedStatesHash": "608641531e1b2ee497bf87c5d71c30b9d16659bf9be5a74c6ae1539fc5b9450e"
+    },
+    "12": {
+      "sourceHash": "08fcbf4dfaf794e5737a375d63f7f6f8943102dde35786b419cb6833f0a65ebd",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "b9988509140255717ec16ef68fee0cf76898686572a8b379e922a3c62510b5b8",
+      "preservedOutputHash": "cdc6808868bceffe7f89c2473b051d02d07fcdf4ce824be05984fa1a617b34c2",
+      "preservedStatesHash": "3646ca441cb7e27f13b0743568328f3765855b07507975eb5e397b36702a3078"
+    },
+    "13": {
+      "sourceHash": "48ec97a100958d2953bef774462c160dc1d0a363b6fec7629f4fb3f5f3e3e8c8",
+      "previousScores": [
+        3,
+        3
+      ],
+      "burstBase": 2,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "120%固定容量，无回复",
+      "preservedAxesHash": "66baeef57c3de109e096ae4a2edaa3961578889966d658560900229f84873182",
+      "preservedOutputHash": "4e591c168e4c11dd8d9ec433ecfa5edbed84ea75b34d350d43c4d3c884f0b7fc",
+      "preservedStatesHash": "1f2ae91eec40dc1dd27fffdd6e01c93d32a4c804191ffd34a2fe75b427d64d06"
+    },
+    "14": {
+      "sourceHash": "d9508f25c176083ca36f99976d88e8eab1045ce12e442a4ba974bd64ae3c186c",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "击杀回复受限，主动自损不能当稳定续航",
+      "preservedAxesHash": "5fc9bdf657d441c0de5fb273086714b8092f9b48b4e5339ed8e220a6e5e5e418",
+      "preservedOutputHash": "c0b89e5e03d3d5f061b59df27a053f08385b7d7cda351fe10381745f657cb975",
+      "preservedStatesHash": "3646ca441cb7e27f13b0743568328f3765855b07507975eb5e397b36702a3078"
+    },
+    "15": {
+      "sourceHash": "27b82ac4c0ce3eee186de3d37bfc783b56fef90296e643b5a5d7450ffd7a64d4",
+      "previousScores": [
+        2,
+        6
+      ],
+      "burstBase": 2,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 2,
+      "note": "首轮生命仅7%，成熟240%容量叠周期净化免控，不能借满成长抗首击",
+      "preservedAxesHash": "34adc115009df50b3884d216cfa31d6e54a1f7272cd3890595924b91626b8523",
+      "preservedOutputHash": "47dbd3c2ff5356dea3a2a6fb6a585b507c7b5fbf5d7a75e97f14d0d081f5ef9e",
+      "preservedStatesHash": "bff82f1f024d91d9080030da32a2e35a98bba295f3726df7f030444fd48a80dd"
+    },
+    "16": {
+      "sourceHash": "e15c6afccb3f02fecb6e22484ab8645d3ec52037d74e6f163ead43ed906dca3a",
+      "previousScores": [
+        2,
+        4
+      ],
+      "burstBase": 3,
+      "sustain": 4,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "小额常驻减伤加概率闪避，治疗选择不保证自身",
+      "preservedAxesHash": "bbd50a3ca3d497e2339589138156d98ea548d7d9cae622553efbb4cc5127631d",
+      "preservedOutputHash": "41096cf93b92701efc77fbb77e6669f2453c80b4e4eaeee21332122acb19acc6",
+      "preservedStatesHash": "c088dc7add0d8f2de47c59975be36a75ec70020a4eae44d88d0b4027f9b0ff98"
+    },
+    "17": {
+      "sourceHash": "f7bb7bcbb6019c1890d006c0defdf3465921971f0f1e8ae0acdd14c77a267a6c",
+      "previousScores": [
+        7,
+        4
+      ],
+      "burstBase": 8,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次复活独立保底，CD5短减伤有长空窗",
+      "preservedAxesHash": "6e553de0a416774ccb93413112058efaa0c5f0efbb3b44018a247c831252fe5d",
+      "preservedOutputHash": "d34bf0bfeb7a1dd42ad6ae5ed8d3637e410b3e4fe9d13588da62b842100e155a",
+      "preservedStatesHash": "50143100d2762e1d8d8ecc266bf1ddcc321b59bdec28a03454aa62c0c9dd919e"
+    },
+    "18": {
+      "sourceHash": "aebbe20953766e3f4f4b978a8de321ffa19550edd0490388597047b92147ae60",
+      "previousScores": [
+        7,
+        5
+      ],
+      "burstBase": 6,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次开局盾约297%，耗尽后靠CD4伤害回复",
+      "preservedAxesHash": "8d260f3ffea56f22c0587ed5c67e3560f99eebe8c5c8e924ac618db3bf0a03dd",
+      "preservedOutputHash": "01c9a55e7f0ee44c42783cc978b35325a4025421f062a8d6cbaa81074e8f7782",
+      "preservedStatesHash": "0ca75eda96fe8e5cee8fde9e8e4feda31893cc6231bd0b6c9f9a8930429513bb"
+    },
+    "19": {
+      "sourceHash": "489e33db6ded4e443a0aab2984b2bd25cb355ac534471d1fd6166d6aec9569aa",
+      "previousScores": [
+        7,
+        7
+      ],
+      "burstBase": 7,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "低血伤害截断与转盾反复生效，触发前可致命，无无限容量",
+      "preservedAxesHash": "ea7e8d6a3f46abf74c002b43803c62cc38f46252e0581700def6798bb47c8376",
+      "preservedOutputHash": "adb72c2ba5398801cd7c75559d9ea007703839dfe06a2d5f075d580d5b5502eb",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "20": {
+      "sourceHash": "48ecbedf0605e8887e576b161bc83010198e341816c40f867b1cf834faaaf647",
+      "previousScores": [
+        6,
+        7
+      ],
+      "burstBase": 6,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "受击低于40%才透明，友军人数与全员透明失效；再生抵消部分自损",
+      "preservedAxesHash": "cf601e4cd199cf3e38b50db622ba3fa5f17c84e2d64bd15ef94a537cc1f101c6",
+      "preservedOutputHash": "cdb97c7cf0a2050e6219713b6f66d6e1549e964c08018c52a05a719dfd6e0619",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "21": {
+      "sourceHash": "6d558efb3896bc5eb3842f9bc34c0594c2a6236b950716cdfa66b8822449d47c",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "0b91558b2eb2ebd66c6adbf82c3d68abf3a9489dad3d21db46afe6d20a94b1cb",
+      "preservedOutputHash": "f14cc4ace6ad77fc078a886b5033e5abb33b3e8ea71b4f2d3ca97926c83c7c79",
+      "preservedStatesHash": "608641531e1b2ee497bf87c5d71c30b9d16659bf9be5a74c6ae1539fc5b9450e"
+    },
+    "22": {
+      "sourceHash": "1dbeb401bb68fdc60bde8de67984d46ea72a2539fb4bd000f66886fade50b1f1",
+      "previousScores": [
+        2,
+        1
+      ],
+      "burstBase": 1,
+      "sustain": 1,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "减伤只覆盖低血尾段，触发前伤害不回填，无回复",
+      "preservedAxesHash": "383c0427ca7af074f2c957bca114a0e6d553314cd6d4ed4aa3655763ed0fc8b7",
+      "preservedOutputHash": "ac9d0de0366c09ec472e18cfcf85742bcfe474aa117c838a7352b7ba0e512058",
+      "preservedStatesHash": "46ca932dd651f35bf3441a5816fb4d6440828be6b458d2db574c8a4c4c71aa78"
+    },
+    "23": {
+      "sourceHash": "aebd9831e73292ddd40fdc61dd6af62d3818ae1979b73cf59e448f644a70af76",
+      "previousScores": [
+        5,
+        8
+      ],
+      "burstBase": 8,
+      "sustain": 9,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "S2免疫两回合可重复，常驻再生与伤害回复支撑持续高档，开启另扣",
+      "preservedAxesHash": "beba2828e717a28bf43ea01435d7660752a357e7ed055596d61c70562799cdaa",
+      "preservedOutputHash": "0beccebedb3aa41c2240d7761aa3d896d4472c1e0ca1b803b3af2bf30ac9e7b3",
+      "preservedStatesHash": "3646ca441cb7e27f13b0743568328f3765855b07507975eb5e397b36702a3078"
+    },
+    "24": {
+      "sourceHash": "a671da5ad4736bf934cb5fd863460da97ab683eec55856f92ff33b6276d9bbc1",
+      "previousScores": [
+        3,
+        2
+      ],
+      "burstBase": 3,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "概率闪避受命中克制，不折算固定容量",
+      "preservedAxesHash": "a2cfebd4a3e462d58d4f2793df68f16405acfbf49cf2b780b6ab9ffdeace2938",
+      "preservedOutputHash": "be1d1fee1dc3ab7ed7d8c692aff04edf8dc5460ae6347a0a4587a7683d46dbe7",
+      "preservedStatesHash": "3646ca441cb7e27f13b0743568328f3765855b07507975eb5e397b36702a3078"
+    },
+    "25": {
+      "sourceHash": "6542ac87708ec13efa37287444fd50fcc81d4d167a3d7b70075253be385427ae",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "95d242e5f76c97538e59422304848260fbd21f98a404c06b499645adf9fa1574",
+      "preservedOutputHash": "1aa72cced7f235e0255b66ac347c396ef95777c9068f4a3e03b762a4d3945f49",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "26": {
+      "sourceHash": "a2a2c4eb676e68ff8bde54aed7ae84315f76ea96c9a265ff073ff15159910191",
+      "previousScores": [
+        2,
+        3
+      ],
+      "burstBase": 2,
+      "sustain": 3,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "低血再生与残局防御均有限，主动治疗需选中自身",
+      "preservedAxesHash": "7cdaf1ed35a3bf96e7d7357e46f073e3f4a5ae9259f1fb885f84df69d271f552",
+      "preservedOutputHash": "a2764c100744f386fe1486d1a9c14e526ae44bf05ffb9e3a757ffcbaf86a837c",
+      "preservedStatesHash": "bb978e1700f9e57a80a92f5b294b261afe95a6e6c3c3e5bf3523c4d8ffceb5f3"
+    },
+    "27": {
+      "sourceHash": "dc04a2d7e0af8aa6bd9a3da5616ed7be3cb5180392306273135ede3ac3a1f4a3",
+      "previousScores": [
+        2,
+        2
+      ],
+      "burstBase": 2,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "周期弱化免疫只提高可靠性，无额外容量或回复",
+      "preservedAxesHash": "1a7deb69fce6df725d9722106e3cda22901d12b3ee4c6a6e2d082c6a17838020",
+      "preservedOutputHash": "fe495cf165031bb31bab791a291c9a0bd68372a631671b85ba774d3452fc8450",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "28": {
+      "sourceHash": "29535c46adbadbc5376d13ba2e6f4e56563d5d49458e7859163a3c52d3fd929e",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 8,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "常驻减伤加超当前生命阈值部分截断；闪避净化另评，无回复",
+      "preservedAxesHash": "60cceb9f0cbef772f6f55cad0363819a973461e4f7b2254d8951f6af1ee7138b",
+      "preservedOutputHash": "7430a37a66fb7ddc30ff17bab7819941409aa12dd2526dedda131454ff4425b8",
+      "preservedStatesHash": "6b4a7c35c7f668201252355799752c0bd9e604312b6d00522ed0c595c15d7f57"
+    },
+    "29": {
+      "sourceHash": "a4a8f0fe70ddb2a2627b9b203cd11c724bd07277190d91f440d3d11b2910cfb3",
+      "previousScores": [
+        5,
+        7
+      ],
+      "burstBase": 6,
+      "sustain": 7,
+      "burstState": 2,
+      "sustainState": 0,
+      "note": "周期伤害盾有空窗，低血可重发隐身和再生，群攻仍可命中",
+      "preservedAxesHash": "07d90d23fa66991068e8feef0309a082d0030b3c9ef607a7264c86d09a8d7f68",
+      "preservedOutputHash": "31bfd045ee345008bc2ddc0fb1cd9df9f1365a75ac70c963028caa890bd367ab",
+      "preservedStatesHash": "c0844b5106578733f0ffbc81af0e9d8fe1bf51bf1a470dd62e91e3ed2f3d30e4"
+    },
+    "30": {
+      "sourceHash": "b19cec8c31aa9339862da204d6c85b6d3fb2c798fb569405187c30323f366632",
+      "previousScores": [
+        2,
+        2
+      ],
+      "burstBase": 2,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "短抗暴与每回合小额攻击治疗，不假造抗暴减伤倍率",
+      "preservedAxesHash": "e1805cb1c026b193de0c0f6609047111a34c001b458638692ac011eee77e6414",
+      "preservedOutputHash": "8945861138fb6213d25c277c5207d1a39d6619f4ff32f66b9148162079209c1a",
+      "preservedStatesHash": "fe308896932ab9ce99856704dc06831e6b80e095cab1c4f1e6d22c114031ae5b"
+    },
+    "31": {
+      "sourceHash": "48e7f590348df172b32f51f3bf21b89b5027494848657f4e58c9857416be1df5",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "0669a55c06509af7be0f76a45cb9c45268cb4517384edb04ccc1ac1d90e4289e",
+      "preservedOutputHash": "5a4a0120fc68dec8ef8eaaba3436eecb405b2563ef403e40411d748ae953b4a6",
+      "preservedStatesHash": "608641531e1b2ee497bf87c5d71c30b9d16659bf9be5a74c6ae1539fc5b9450e"
+    },
+    "32": {
+      "sourceHash": "e3c4a5f3eee1ea3a8487dfca5327662d8ca6d054540083394a493c0c23ca0b17",
+      "previousScores": [
+        3,
+        4
+      ],
+      "burstBase": 3,
+      "sustain": 4,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "130%常驻容量，CD4低血群疗可能覆盖自身",
+      "preservedAxesHash": "0d2aa6f8c53fc0c99b0d2d6e66cee6d243185895c35d4bc202146108f063024f",
+      "preservedOutputHash": "9f35f8a14e4efb9cb0e03d346485fcd46e29cf09b7c055a9b176011f4c82fa32",
+      "preservedStatesHash": "41435f2cdff2ece5ed0a652f7c199f7c8e477696296f451dbf6fc57c59543ea4"
+    },
+    "33": {
+      "sourceHash": "f0eb1dfc4ca7bdd0645b36a743091a9d081888af2b081653de5c2b8211f9a5e0",
+      "previousScores": [
+        0,
+        3
+      ],
+      "burstBase": 0,
+      "sustain": 3,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "吸血随实际伤害，不能挡首击致命",
+      "preservedAxesHash": "df532dc4856eedd5aa10120076e9b465ace9b37f6d653b7abe4902e9d480d83a",
+      "preservedOutputHash": "4e3896bd4dd2d592a85e8d44d3d718621ecd399ef39e364f14095fc5f2eb2f83",
+      "preservedStatesHash": "3646ca441cb7e27f13b0743568328f3765855b07507975eb5e397b36702a3078"
+    },
+    "34": {
+      "sourceHash": "465d853c85154acc114570ca4c617a976a615b66f502c4acc97d1ef01290fb99",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "139e69388584577e28c8090cd38673142c8c3af0bfeb65ff2856d5680f4aed8f",
+      "preservedOutputHash": "2a99fae0c4e27fce70da1120da91bc56891cf44668ccff788401373e2d6b898f",
+      "preservedStatesHash": "3646ca441cb7e27f13b0743568328f3765855b07507975eb5e397b36702a3078"
+    },
+    "35": {
+      "sourceHash": "f06261d405d2fcca6fca6beec0977665ae954b61170f7b458b0faced2e4d0e95",
+      "previousScores": [
+        5,
+        6
+      ],
+      "burstBase": 7,
+      "sustain": 6,
+      "burstState": 2,
+      "sustainState": 0,
+      "note": "多敌伤害盾有上界，但S2开启、CD4重新生成有空窗",
+      "preservedAxesHash": "84d4c98a3f432d7dae50d1b734e81cc34ab663d7a518f7b25210d6c887a26502",
+      "preservedOutputHash": "496f19454d16ec7e508808f620a277c05c12a0ff9ab987f90cb80bcbccd3a58d",
+      "preservedStatesHash": "d8ce1d9e40c6752be64085ff50c0e4db42d486637cc303fc3f757731b4f6e864"
+    },
+    "36": {
+      "sourceHash": "b1d1e61b449aacd693cd060cddd67d708fd4575f05251e1c99684023ba34f3f3",
+      "previousScores": [
+        4,
+        5
+      ],
+      "burstBase": 3,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "140%常驻容量，伤害回复可循环但存在暴击分支",
+      "preservedAxesHash": "39a9cac6d7da70acbd0f9410adcad5b7a4a8f191243becabed456fd82e851ba5",
+      "preservedOutputHash": "8c6caa532a6d9a2710e87d315b21e057bda7659a0edd7b78c668454716d0b2b7",
+      "preservedStatesHash": "3c2a55cc6032173ad919229818d1382316ccea49619a102f7cca15ad5dc53a72"
+    },
+    "37": {
+      "sourceHash": "fb39912c0412f622dc4f536cc5e1c84855eab0c37689daec253c67b0b03b0b5e",
+      "previousScores": [
+        0,
+        3
+      ],
+      "burstBase": 0,
+      "sustain": 3,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "CD4伤害回复，无首击容量保护",
+      "preservedAxesHash": "0e357c8eac9729b08143e92a0af223c5fac9b1d4b6ac65a470a30d0e8e0101cc",
+      "preservedOutputHash": "25433e0ce841b96757d1c2fcdbfdb87879720fb68c7cbe4e3e612505744b3a3a",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "38": {
+      "sourceHash": "8e3d9f075c4cc60ab5b943d4d52233976c4ddd2cdec7d96f0117da84b8e094af",
+      "previousScores": [
+        5,
+        6
+      ],
+      "burstBase": 7,
+      "sustain": 6,
+      "burstState": 2,
+      "sustainState": 0,
+      "note": "S2盾CD6，S1加防短效；常驻容量保底，不以满盾当持续容量",
+      "preservedAxesHash": "d10b363389455813036575df73f9cc073499c8ce95f600a89fc815c982220e26",
+      "preservedOutputHash": "51ab0198b0aa87c65aaef973511f69073e1b17886a139ae6d46847b9ab923223",
+      "preservedStatesHash": "6a76b5cc1a386aced6f9307c78dbb044dc070bddf9076e4fdfc04f3d1b21db36"
+    },
+    "39": {
+      "sourceHash": "c0299a310046bf794348bea8c4cc63f06b526b915f0a8274f275f6f794d29914",
+      "previousScores": [
+        2,
+        2
+      ],
+      "burstBase": 2,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "弱化抵抗不折成直接承伤保护，无回复",
+      "preservedAxesHash": "911ae560a8d556c72bcafe33eb77580ea8252e09738cfbad91b905cde0087a42",
+      "preservedOutputHash": "5e254340284318b75f18e04f3d9f0d62958f19c387f6d0b265242f149ed9278b",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "40": {
+      "sourceHash": "d2da00a0333bca4ed95219e805b1a6c22e448955daaee6ff9903f61a6e026b5c",
+      "previousScores": [
+        5,
+        5
+      ],
+      "burstBase": 4,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "160%常驻容量，回复按损耗生命且需友军事件",
+      "preservedAxesHash": "35befa2f7c61da1600a7aa331173c5fce19e7a3df42bb8a9b6f17c013bfa9f20",
+      "preservedOutputHash": "1473f14a613d8f664460421f996322dc0d7bea15388abb579c832dc6d923a554",
+      "preservedStatesHash": "9ed480771bda0bec308306ce17db27fba7a620aba2a5b025211062d44433bc90"
+    },
+    "41": {
+      "sourceHash": "07d3ab7603151d116473f3799da5bf18f9291897cdf0adcf1cee1354a88bd3f1",
+      "previousScores": [
+        3,
+        3
+      ],
+      "burstBase": 3,
+      "sustain": 3,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "低于半血才阻绝，完整血条收益低于全程40%阻绝",
+      "preservedAxesHash": "f6efd6cac33f27b76331209b139d4b524c8c7e099041aaec47029c4054147d8e",
+      "preservedOutputHash": "37d648e940edd34f7cd62e437d3bd9d947c30aaa32a62824653596b99a6c7a45",
+      "preservedStatesHash": "a1758487029751381a816a81c20d96618cc406ce521cea67aa18372e3b1906d5"
+    },
+    "42": {
+      "sourceHash": "daa005faf3473b208456f7d03ffa3bf0ccae53f2c7115188fe363cfc0651f7a6",
+      "previousScores": [
+        8,
+        8
+      ],
+      "burstBase": 9,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "前两次盾629%、后续478%，CD4补盾及再生，破盾空窗仍存在",
+      "preservedAxesHash": "47002839a78922301da614904a109f2c03a5a095b4e0211edba5d91f20d5a60c",
+      "preservedOutputHash": "6bd75faa8859fe07fed8741beac0d0bd6149970d78d782868811ca4ed644d38a",
+      "preservedStatesHash": "7e81856216a1d95a28f7bfea7e9af1fb67c8b857fbd85373a2bfcda0d28bf7a6"
+    },
+    "43": {
+      "sourceHash": "66d8e1bc1f34de9016432835f812aee649c73a319641e84260c0fbe86c6a3ec7",
+      "previousScores": [
+        2,
+        1
+      ],
+      "burstBase": 1,
+      "sustain": 1,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "第2回合一次净化免疫短效，不能保护全部开局与长线",
+      "preservedAxesHash": "37b3ff98413cf11b9844313e60699ff73bb717d47c1753a26cb2c55a019cf8d6",
+      "preservedOutputHash": "8e13592128cb4658e78494e8b48d8c092ddb2b1ee6fdf0d6754f17ce3869a8f6",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "44": {
+      "sourceHash": "07ac896d2c9676e5b549f747ca7e9c85864548a5510f2d2497abff3596bbf304",
+      "previousScores": [
+        8,
+        2
+      ],
+      "burstBase": 8,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次复活及五屏障可挡有限多段，耗尽无补充",
+      "preservedAxesHash": "0e4f2ef0f3f6756b33bae4993a24cd50556290aa9ec23c94c4433e33db35bd7a",
+      "preservedOutputHash": "a54daa1135121228e5d258c41fb9726e6cdc2ffd9e15acf68102031caff00a60",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "45": {
+      "sourceHash": "cb051368b4b762ad659928bae8900a9cd867a0af1ad53b4fda15d024a144b4b1",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 8,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "开局四层三防，短增益可成熟；90%大伤阻绝每行动一次，不覆盖全部多段",
+      "preservedAxesHash": "e8ab4f7ccf5de49432b49b59abe3e0bdb799b7c7f7f561f5296c00e3ab9417ad",
+      "preservedOutputHash": "a25d8906829faf961ab78237726bb718c5a5bec68b51e0b4efd52e3851506aa1",
+      "preservedStatesHash": "739b43c9ec3cb6198c6f312cd8c8ced161d04ba2d594968bf4a0d02dfef28a0f"
+    },
+    "46": {
+      "sourceHash": "0367b27f53f54e9d14f6753b48b380f7cbcd22d0fd7c1307743ca94618bbc829",
+      "previousScores": [
+        6,
+        6
+      ],
+      "burstBase": 4,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "常驻167%普通容量，物理单路更强，吸血需实际伤害",
+      "preservedAxesHash": "c8df7d9cb56022daf7cd26c34ea7519b32d2be9dca2537da0ce220cdae3ec7b8",
+      "preservedOutputHash": "a30fac61044134412239d84787de1695469b24c828f4c64767f514e1b66d7ebd",
+      "preservedStatesHash": "9043f333aa3e49dd93382456c2f5d9bde9b41eb01143fef197cc708cae267d55"
+    },
+    "47": {
+      "sourceHash": "1bb79a720d6ec65d152e815de98b3efd8e80f56fbca1c8670ed33566f1a73265",
+      "previousScores": [
+        7,
+        6
+      ],
+      "burstBase": 6,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "开局250%容量短效，续期需击杀；低血再生及吸血另评",
+      "preservedAxesHash": "79a13db486aa068c3dfce48f1d5c18b80f4824c3f6ebb99725f1d1e5eeb71885",
+      "preservedOutputHash": "2d71020b2feaf396d490fb00225500ce18ae3cf3cf798b7b49989ada7551f479",
+      "preservedStatesHash": "14756fb4c8a12501612ce73a90e538dd35d9a80d48d6349f2a51d729b006e3f7"
+    },
+    "48": {
+      "sourceHash": "8294074d173fa4f7f1d72ac4928460895df3169ac5e349b8b53adc9279043f57",
+      "previousScores": [
+        9,
+        7
+      ],
+      "burstBase": 9,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "前四回合667%，之后250%，伤害回复补续航但不保留85%阻绝",
+      "preservedAxesHash": "2e67b7c9eaca9e74feeaab2b8531dc9914c7d6646e05f4fa6e704b4f31b05c7c",
+      "preservedOutputHash": "261a439c0106e292c6181d0bcff2b9760e326655f78ab8baca441d16c49b3701",
+      "preservedStatesHash": "7dca997e0bf08865cf286deb6deefa525a0e464e57b1f618fe4e681957fcea16"
+    },
+    "49": {
+      "sourceHash": "1ba41dd55e51354981b11d78aeabf69abf90fcb49462a3c0db6b5217c6dfadbf",
+      "previousScores": [
+        8,
+        7
+      ],
+      "burstBase": 7,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次致命保命与物理受击回复，挑衅提高压力，魔法不触发回血",
+      "preservedAxesHash": "04cfa3d15432d07fa137cd3fad61b9baeef1413ee83c3d24069a426d3c95210a",
+      "preservedOutputHash": "9ea6da09e237457f44ec40a7a250563db1d8e567f119c2b62c8cadf1626aaa50",
+      "preservedStatesHash": "76d76defb947fcef613c4b9a7385616a911edc646a1e74f51b64205d3ed1d858"
+    },
+    "50": {
+      "sourceHash": "1887aa904676024ccbb9092a27322c703ad4064d00d5832a828e9069ad68b3b1",
+      "previousScores": [
+        7,
+        5
+      ],
+      "burstBase": 6,
+      "sustain": 4,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "开局250%随暴击降至167%，无回复，不能拼开局阻绝与成熟加攻",
+      "preservedAxesHash": "95908afeb8fc4bab78622ee31a90864c324ba75993414d42488af4056e8f3bbe",
+      "preservedOutputHash": "d82b3b14a431c7ce8c1c68a3ed6ed9fa4778a3c7a256a050b535ad5f65b1d5ca",
+      "preservedStatesHash": "6d481e59df9a9424a468b97710111d26ba940bb5c96ceb600525a5d854cb2963"
+    },
+    "51": {
+      "sourceHash": "9b280b48f677a3949d5956dee1b3e2de1cd6ad5e372e6f649f098e00b571288a",
+      "previousScores": [
+        4,
+        5
+      ],
+      "burstBase": 4,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "130%容量加抗暴，低血CD4治疗与周期缩短弱化",
+      "preservedAxesHash": "3df390ac393ae50e96ca38617c08b3fe3dddf06c985a7d1699e80946544ee376",
+      "preservedOutputHash": "6841e213d9facec4bf183eb0b8df3c64222e4e82dabf994dff2499ca1a8c8e33",
+      "preservedStatesHash": "489d1b83e1b4d427a3a233fcee3c888b3962661ecf4d3184835071aa1a438a43"
+    },
+    "52": {
+      "sourceHash": "575cc4a08eac2fdc1544b69a34b7e1fc945b746f7ff0de4bd3e9c053e9bcc94e",
+      "previousScores": [
+        7,
+        7
+      ],
+      "burstBase": 6,
+      "sustain": 6,
+      "burstState": 1,
+      "sustainState": 0,
+      "note": "净化后减伤短窗，常驻较低容量；伤害回复有用但不能抹平间隔",
+      "preservedAxesHash": "c4e84399a4cd83c43786a35a74ced27e9bf163cdee88c0479d7917a03093b506",
+      "preservedOutputHash": "52d3ac2b8a79d0cdd7ea6e55aac0c6b72aadcc88b754d2ea207d59a4c8a4404d",
+      "preservedStatesHash": "7c3830a46a456f73d358501489e608129db0e38105ef6eef8246ca05a38d639c"
+    },
+    "53": {
+      "sourceHash": "e1b6e2c8683a5c98cd3dcdea68460f511be47a2dffdc20c6c39071bcfe87d77e",
+      "previousScores": [
+        6,
+        6
+      ],
+      "burstBase": 6,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "低血后触发盾净化，CD4与伤害回复；致命前不能临时补盾",
+      "preservedAxesHash": "1a2fedde36ab5ab9da3e6a1e55b08d93181c0d5ad48bacce46dae72781e67198",
+      "preservedOutputHash": "81f87b6c8fa304a454ecdca0c81fb631e697ac925b4d1f11e4bd0447fb6cc1fd",
+      "preservedStatesHash": "c7f5557ca06e6e7966e24ec3ed46162eb5174f993c5e2ff09e2dc7fc5a6b843f"
+    },
+    "54": {
+      "sourceHash": "348e516873954f8b1b178fa572c214d29883d54314a04e10990d70ac63b5e8e2",
+      "previousScores": [
+        6,
+        6
+      ],
+      "burstBase": 6,
+      "sustain": 5,
+      "burstState": 1,
+      "sustainState": 0,
+      "note": "早期阈值阻绝会衰减到期，短加防不替代长期常驻容量",
+      "preservedAxesHash": "dd03250473306c0da9b618243f91f1f38bbab43b8478bcc00ef17fc9ab011527",
+      "preservedOutputHash": "7317864fb424e18846a229d642e2b784815864bf49c0e897000e4979650e7379",
+      "preservedStatesHash": "aad93a9ac507ee4ccecc467fae472992080a5fa4b02d150768f02370549c5292"
+    },
+    "55": {
+      "sourceHash": "b92b21fd439ee82146f48aca7d01ff0efb4bf173a9e945ba7338e3558bef6a9e",
+      "previousScores": [
+        5,
+        2
+      ],
+      "burstBase": 5,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "开局隐身一次短效，后续受击小减伤有四行动间隔",
+      "preservedAxesHash": "13fa459b1263e9eedad80cd9c3ed04cf9db0b793ae25060aba32ef2f0a5772b3",
+      "preservedOutputHash": "36979ead1405febcb4d6fb64b12ee95f537cc2a4f45d78c26195900df83cbb37",
+      "preservedStatesHash": "0af641ad506a6f555ccc6b89c3c143b5e5d49823cc99b7166f25616ce8dee254"
+    },
+    "56": {
+      "sourceHash": "0a9203835d5f60dccc718eb6686cbf2171248042a87170fa2621fa5587156385",
+      "previousScores": [
+        8,
+        8
+      ],
+      "burstBase": 7,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "低血阶梯阻绝加伤害回血，但自损持续消耗生命，不能把低血80%套满血条",
+      "preservedAxesHash": "00ec8212dc5b98862a9380a5d7c784270fd2b5d6f73c1d8f0ef8aa60e2e7589b",
+      "preservedOutputHash": "c1187980e4053242b9f22db6fcd79402f47a12585df24e5410d45d5592f446ff",
+      "preservedStatesHash": "d3f1565b3aa7fb65f8b8047de33bba8a3a053cca63ad4b240bcb6cf5c3d60a5c"
+    },
+    "57": {
+      "sourceHash": "327bb7d4c5dd550f6922b920b319fd755bbc297df1cfa2710ea5425b80c9cc63",
+      "previousScores": [
+        9,
+        2
+      ],
+      "burstBase": 8,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次开局盾518%，耗尽只剩小额可重发防御",
+      "preservedAxesHash": "f6c00860a2d197922fcef85e2de405cb6b5548c9c1d5df71dd675c7e09d3a657",
+      "preservedOutputHash": "3366dea8fbdea8922adb09f61349655754a048405dea70d6ba8c26c2db71aa8c",
+      "preservedStatesHash": "7651238d1f17986d37347467925620ee566f494acf180c996e22e5e911ae9ff0"
+    },
+    "58": {
+      "sourceHash": "2eaf8f059c1a5c9dbbbca9b9abc07a6f80935b339c42484b24f0071d13db7ae4",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 9,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "八层阈值截断保护强，可主动补层；多段耗尽和行动补充限制长线",
+      "preservedAxesHash": "392466f07906f41beb1f02b1ccd7f38d07574ca8dff0d16b062b51813fc387a1",
+      "preservedOutputHash": "ee9536862a7246d42a69b1259996f3a5541ee42bc478a51e5c0f692f0ecb924a",
+      "preservedStatesHash": "e662a7c85e286f02572bba76ee290f88e322d008892e97347f3704d04c954903"
+    },
+    "59": {
+      "sourceHash": "fe51240eb47904afae4cb595b35c3163f45f1ceda0484035e700e5535974a694",
+      "previousScores": [
+        7,
+        7
+      ],
+      "burstBase": 6,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "每行动条件补约297%容量盾，受控敌人存在时改分支，不能按无条件永久盾",
+      "preservedAxesHash": "00a8b2b48085a8ac552b7ed02b0061326242be53bfeec57f98b4cff239410c15",
+      "preservedOutputHash": "1e49f3ecdbacae70b1fd742606a407132be936508d13fd016a5e13664526d2a3",
+      "preservedStatesHash": "2fed0c5764308ef7d9d6a796851f5c6815cb579a283a40da081dd7659493ebd6"
+    },
+    "60": {
+      "sourceHash": "00b99b2930a8e24167342ca86787a6f45cd4e7f0a9765edc7d64ecc881f0fca3",
+      "previousScores": [
+        7,
+        8
+      ],
+      "burstBase": 6,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "225%常驻容量加可重复受击回复及吸血，回复有上限且不能救致命",
+      "preservedAxesHash": "6cbb78d7b05fa020a9612a69aa4c8e6ae09ced21fba5703de433232edf83fb99",
+      "preservedOutputHash": "df057173e72fa4d467d583ddce38a00f807b2b5b28fa18fbf30c6c6caba28dcc",
+      "preservedStatesHash": "b44d78e652ff354536f6b93d7efe0d0c83c6e5f6394c9254135ce96e2243488c"
+    },
+    "61": {
+      "sourceHash": "eadd8a1ec93cff069982abca2461a990f7fb431bf799882c38967ea63e2f1929",
+      "previousScores": [
+        8,
+        6
+      ],
+      "burstBase": 9,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "三屏障加一次致命全回复，连击阻绝从同来源第二次起，代伤增加压力",
+      "preservedAxesHash": "e99c31a7563bf4487bf5d9f02acda5748b744c81c1e2775844fa82cd80deca45",
+      "preservedOutputHash": "a1d0490bbd4eb8278159f428db6248cea4402631f5f4de5dcfd7e061b6cbd8a9",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "62": {
+      "sourceHash": "c429b49a7d4b5aa19aa96b5f176489b176b767dbca5ac5953ece6aae6f8af971",
+      "previousScores": [
+        6,
+        6
+      ],
+      "burstBase": 5,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "初期防御随弱化消耗，物理较弱；治疗可能选中自身，后期不保留初期防御",
+      "preservedAxesHash": "d606235cb1f28fd07e6fc484ec238fa3a5b2fe75798d9cc313ff6608ec98e6fd",
+      "preservedOutputHash": "5799604dd18db0b86aeefc8f2f92f79de07ce1e614657ee563e667b96c818e9c",
+      "preservedStatesHash": "76ea668570a6c9e50e065ee5393b55403bb60f2f3f3e6cb2de5902184fe81f03"
+    },
+    "63": {
+      "sourceHash": "fee39dcfbf889e7dc7a8a43c1b556b2d03481634e533af010786f04e51be3f2a",
+      "previousScores": [
+        8,
+        4
+      ],
+      "burstBase": 7,
+      "sustain": 4,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "开局三层屏障，暴击补层需选中自身，不能假定自补必得",
+      "preservedAxesHash": "e8db424b5be0ad448799bd1b495207c529f3a2cddc651379f4aa3c3275a9b090",
+      "preservedOutputHash": "2fc7d45f6e929713ebffa8248815ea9a19a40a99783a66ab70f2d1aef8a54953",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "64": {
+      "sourceHash": "43b038589e6418f18df80be9908b45fc9127a6355ec101c9d047eef7224415f4",
+      "previousScores": [
+        7,
+        2
+      ],
+      "burstBase": 7,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次三屏障，后期只剩条件抗暴",
+      "preservedAxesHash": "2c1eec63c702f0b7f362ed18c439a78306b9e6dc38957138ae6f2a3a999ff566",
+      "preservedOutputHash": "2a587c736d894a78ad81d9927a77ee90e440ed73db6c09daed2a533abba0ebef",
+      "preservedStatesHash": "395e6d72dfaf781060a0b70806c412f9f923ded069e0af671a99c71f54ff8f77"
+    },
+    "65": {
+      "sourceHash": "d088bd4a56838c81b956c869630f1392a2225056635f9ee0b9f3e147c3537726",
+      "previousScores": [
+        7,
+        8
+      ],
+      "burstBase": 6,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "专长盾约235%至253%，每行动补发与持盾抗暴，破盾后有空窗",
+      "preservedAxesHash": "f0b7407857ff6e52d1fa9170253f6704b7c094d38e1f11b5588104d455277987",
+      "preservedOutputHash": "7786571ccbbd589bb8422b120ce22966f59214b49de632be9a3a537c43d3e93d",
+      "preservedStatesHash": "e3238c32c5b16c912bb94a67978a76b96b7879e246d109ccaae18ded6787f5db"
+    },
+    "66": {
+      "sourceHash": "d9488ba4dec4c746494ab5c60d3a2769c4787270e9435c8679aded969dfa42dc",
+      "previousScores": [
+        7,
+        2
+      ],
+      "burstBase": 6,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "开局结界与一次低血盾，均不构成长线补充",
+      "preservedAxesHash": "e697f9a80dedfa7bef2101ec1ca314c65523144f63cadd6097d13e66f7986f1f",
+      "preservedOutputHash": "6282c4ed23db923d6f17ce187b47896ab9f5d80e7fb0fe6a235668cf5ab5f0fe",
+      "preservedStatesHash": "06d61afeb0592e646f2b8e0b8650d9716b54b7920da6a1099afb05447512cbaa"
+    },
+    "67": {
+      "sourceHash": "3ee749875b7c753d88120a1ddd2c9ef908a90bf14dacb7ce4bef3d418b9f47be",
+      "previousScores": [
+        8,
+        7
+      ],
+      "burstBase": 7,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "S1周期盾约371%，低血另补短盾，两路空窗不能拼总盾",
+      "preservedAxesHash": "bbba5e4ff1a4567dc052084c09995480ff12bb21bbfd78c0f9222472aafb4590",
+      "preservedOutputHash": "4d743c4bbf6e6d30ccc61f5aec81d35e34a7bd5c0b625a4dc6c46512aec87e0f",
+      "preservedStatesHash": "193dc6d0a53e7603d01d1f15dfea783a2261651b7b83b0234278891e0faeaff4"
+    },
+    "68": {
+      "sourceHash": "f6630432a38b2c1cb2765e49540916606a74656eba56cfadd0e1f409270a4606",
+      "previousScores": [
+        7,
+        3
+      ],
+      "burstBase": 7,
+      "sustain": 3,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "低血后透明三回合仅一次，不挡触发前致命或延长到长线",
+      "preservedAxesHash": "9ec8ebca4ce296f63ef4e0194219efa4b885febb025157b1ffae35a360575c8e",
+      "preservedOutputHash": "086fd020a1fea92f6c3f120eb8cd7604101b235aa1eb3f54243e47a2b37de201",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "69": {
+      "sourceHash": "af55a99a98283974405da25f79323686124f8837890477a14df9636fbc42ee3c",
+      "previousScores": [
+        10,
+        5
+      ],
+      "burstBase": 10,
+      "sustain": 4,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次开局盾822%已达容量10档，耗尽后167%常驻容量，不能当持续满盾",
+      "preservedAxesHash": "6cf28ed31fcee0d3b7e862f50112e8edd6242d5ec3a2d43a76913813f705af22",
+      "preservedOutputHash": "b02e4999e3271c43b25acae87452609ec24af84e680eee573ef3a1e35df2ec45",
+      "preservedStatesHash": "54f953acc9c030df70c7420de179adcb9d2b33abad7332b1f0012018a6208dee"
+    },
+    "70": {
+      "sourceHash": "7a14444823b83a958b47fa68cc1961b5deaeefb754b3224a8adbbd3e63615bf3",
+      "previousScores": [
+        6,
+        6
+      ],
+      "burstBase": 5,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "210%稳定容量，无额外回复",
+      "preservedAxesHash": "911e8d5d9182c96d423132f95657e9f5049ac0807863270156f3dedbcadccdcf",
+      "preservedOutputHash": "d4e1a747f3db6c91e118bc16d2cb3d3ca399eac0f942f73c6a60068ca8721653",
+      "preservedStatesHash": "05c085396d2eeab983afb0feea07e95b8f831f40e87418f571d912b2ea2362b8"
+    },
+    "71": {
+      "sourceHash": "0ca96aeabfb65f842ad526ee00f1a608eb890e60b318eb799e3410b95ba15e1c",
+      "previousScores": [
+        7,
+        7
+      ],
+      "burstBase": 6,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "常驻200%，400%仅中毒来源或反伤，来源覆盖不保证",
+      "preservedAxesHash": "6f2a2f0bd608cbaf837829ab53b5f8da29840a9c24799728eac1782a81c90104",
+      "preservedOutputHash": "8d265b2bc312fc4f2c9c39edd584efd14cc0394ae6e4aba608073591e83fd68b",
+      "preservedStatesHash": "02408bba55e63c02dceea882257ff547e5fd0e434a06bcb3c5cf965178cfd8e1"
+    },
+    "72": {
+      "sourceHash": "da2a4c37b5e4951b8bea42f7203d88bd89ef069c7f687cc10166c9480887a817",
+      "previousScores": [
+        3,
+        4
+      ],
+      "burstBase": 3,
+      "sustain": 4,
+      "burstState": 1,
+      "sustainState": 0,
+      "note": "本回合需重新叠层，魔法较弱，十事件物防优势不能视为全程",
+      "preservedAxesHash": "a6352f1caffafbc65c69b00917aafece723c2e5cbe9533f131253e000eb2014e",
+      "preservedOutputHash": "ff6b115147509b09619311b48ac06e20f387813f1849f1749585c9276372dabc",
+      "preservedStatesHash": "22ac2d36af8c13fa6ed9a91e890d245cc24ca0bbb3991eecdf7724778c309bc1"
+    },
+    "73": {
+      "sourceHash": "1a3bf1062894af9db1424b33b7e06201f035584f09679ccc1545cf97a34fa75f",
+      "previousScores": [
+        8,
+        2
+      ],
+      "burstBase": 8,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次首击减伤及复活，后续资源不补充，无稳定回复",
+      "preservedAxesHash": "b6cab3340fc5a5c3fd7088bb0b6f03ec50f0810933a4e656c40767cc037f768f",
+      "preservedOutputHash": "8fc74758fd9ef2f3750ea546be144d2eb841cbb7796b516572a3b75044725289",
+      "preservedStatesHash": "3d90678b325b422ca50f195af1c3dc25c318365e8b15471415cab3aa8c6011b6"
+    },
+    "74": {
+      "sourceHash": "169faa0b0e5c1edf4171c0f82ec8914c1485fbe6c2428c5c2463419bf53e277f",
+      "previousScores": [
+        5,
+        5
+      ],
+      "burstBase": 5,
+      "sustain": 5,
+      "burstState": 1,
+      "sustainState": 0,
+      "note": "生命常驻，伤害盾CD4短效；来源生命与攻击封顶限制盾量",
+      "preservedAxesHash": "4cc86685662e7c076357777755ee2301ac84cf4ce5dd7b7d40b33c3805b7d5a3",
+      "preservedOutputHash": "95b0553d55148a9efeb3931355f3a26d274d42e07a811b1293aa95fab3385f05",
+      "preservedStatesHash": "350a57dd069537fef2c85edd6e872e22beed22ca98afa65084d2238327a3a0e5"
+    },
+    "75": {
+      "sourceHash": "3504023709d5880a0a4d0eecab6c3d0063e6650c5537a450e84e02f2d3638fba",
+      "previousScores": [
+        9,
+        4
+      ],
+      "burstBase": 9,
+      "sustain": 3,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次开局盾660%，耗尽后自损与低比例伤害回复限制续航",
+      "preservedAxesHash": "7352ca1b1df2d7f4188a07b439b10e73578a5f335076d9f5f53717584d7ff3ea",
+      "preservedOutputHash": "843252a71d0d1a8aa7b313b7f0a0f4f5b67a5915cddd0add985489d0f1d7ae46",
+      "preservedStatesHash": "479e20bd9330ddb538e68eba7b0adb154fb66e4f9413f10d685b5f04f11b819a"
+    },
+    "76": {
+      "sourceHash": "6a7ddf416a6099875a0492c950b0df633537a696ae48cfae75e21b9da0b7e01d",
+      "previousScores": [
+        3,
+        4
+      ],
+      "burstBase": 4,
+      "sustain": 4,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "153%容量加抗暴，主动治疗未必选中自身",
+      "preservedAxesHash": "586925b364af139e1ab8e4165da0ea752e7e832803f2f45990f71ecd9a8151c6",
+      "preservedOutputHash": "a98ff984022e22e8cb1ff767a09f3ab7e94cd4eb5ed61fe70fc9f92cbd457631",
+      "preservedStatesHash": "b1919875e3c49e42116d6a50d352a41a2bba01d7428a5cc3c5faeede41eb996c"
+    },
+    "77": {
+      "sourceHash": "c99730844edda8202f60066ff975bcfccbd3765dffca79bb0fb24e5e1be29803",
+      "previousScores": [
+        7,
+        5
+      ],
+      "burstBase": 7,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "开局隐身与低血三屏障；隐身一次且可被连带解除，屏障四行动补充",
+      "preservedAxesHash": "eb35d2c2bdc0498598a05e2c086b2f43a667e68be77d738a662f28bf08448155",
+      "preservedOutputHash": "9bfa75ac761951b584c2a1dcc21e13d46ef4d3f369c902763889bc4897a7d63d",
+      "preservedStatesHash": "bb978e1700f9e57a80a92f5b294b261afe95a6e6c3c3e5bf3523c4d8ffceb5f3"
+    },
+    "78": {
+      "sourceHash": "c6d9401072365813df21f946d3485eeb1fa82e377a2c2afef0bcde324357acec",
+      "previousScores": [
+        10,
+        1
+      ],
+      "burstBase": 10,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 2,
+      "note": "开局1037%盾容量，但第11回合所有额外保护到期且无回复",
+      "preservedAxesHash": "ce4dac3688682b44e671b4b7ad2c5be7f83bb4c87f61797db925b4a323606d0a",
+      "preservedOutputHash": "4039a4f6860c160eaa3aa1ca6932a3fd6642a3ac33766fb32f77467dbcb7dd56",
+      "preservedStatesHash": "14635a5398a3c3cf890f1341a5151ae134b2a7353ce0f17dcf259c5e5ab6a155"
+    },
+    "79": {
+      "sourceHash": "ec277d294a96a9e112bef66fb4cf71f27b1d0564ef89f2441fff46827687462c",
+      "previousScores": [
+        9,
+        2
+      ],
+      "burstBase": 8,
+      "sustain": 1,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "425%开局盾仅前两回合可重发，后期没有补盾",
+      "preservedAxesHash": "4212fc1a708a5001ae9f829d6b70d13e036570cdf3a55a1f57c64c6bb823416d",
+      "preservedOutputHash": "59bf322b9734e64bf4941114f35abd71d916972458ef08d1da0b314a9c8c2519",
+      "preservedStatesHash": "ca10fa8a660b9548ea5f73452d98fe5f5e2f2757a5c8c470dac31f6367d27885"
+    },
+    "80": {
+      "sourceHash": "88f0578fdc4057497cc6c6190ad1f1737b081235ab9d4ad9b6ed781da42aec09",
+      "previousScores": [
+        8,
+        8
+      ],
+      "burstBase": 7,
+      "sustain": 9,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "319%常驻容量，周期再生与双主动自疗可靠，回复不加入致命容量",
+      "preservedAxesHash": "137ededb355b6e025f406aa9ed0ec52a8d577558cc6fef31efde523c61e732a7",
+      "preservedOutputHash": "abff64c8f51463a51cc18c03a646e6cccb554464b97e4b49cf5aee8e7e9b814c",
+      "preservedStatesHash": "72791da1a2322ff762523421f8cc8b3a8cd23136044ef7614362d5c3956b66ab"
+    },
+    "81": {
+      "sourceHash": "2f4d80abccc755e85a39108d5b5a49338aee991d5b344018e42bb3df50a5f0ff",
+      "previousScores": [
+        7,
+        8
+      ],
+      "burstBase": 7,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "低血透明32回合覆盖长线，但受友军人数与触发前致命限制",
+      "preservedAxesHash": "e55584da5f7ff9ff292bf262ca39a8eb893950a105e7707c249c312e67f1e579",
+      "preservedOutputHash": "0afaf9a264d3e3a40831a1ab4af096cbf3681263c7f1788f3b8df80799590332",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "82": {
+      "sourceHash": "f23120eef2bf5dee38e85e3921cc3b4212aca814bed60d65fd95445370dfe59d",
+      "previousScores": [
+        1,
+        7
+      ],
+      "burstBase": 2,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "122%首击容量，受击80%回复最多五次，不等同80%阻绝",
+      "preservedAxesHash": "da1f1a9fcd76b40c103d49f1ba6f5888c52e06f17cb479471e609808a1159fed",
+      "preservedOutputHash": "5e0f7ebcb0c52353ec01d617f15c2914ce4fa6ab80ede930c5bc8b4f22293996",
+      "preservedStatesHash": "f4c5afe4d8adbf5fd710eb6228f211da5a2f142b67490b3326156e58034f3d7a"
+    },
+    "83": {
+      "sourceHash": "9b0f4b497e423bde67a4b29397f03370aaff53eb882ed1a971b76a26e51c9df2",
+      "previousScores": [
+        7,
+        7
+      ],
+      "burstBase": 6,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "250%常驻阻绝容量，前六回合治疗到期后仍有吸血",
+      "preservedAxesHash": "5f1d90d1ac45be5afe1e6a4592231f78513448e647ea1fc34f0f8d6b2d2cbf99",
+      "preservedOutputHash": "2d8798f2405dd521c0c23f843ad8ee6dcdc881a3367fca32aeb462c36dde82d2",
+      "preservedStatesHash": "11829aecec4e40fe50954e89fbbec69f43652e9fbfa7c7edee0bd5b90b3e3794"
+    },
+    "84": {
+      "sourceHash": "30be7b7fa47e7716e25350e5eab3cb5c29246d8a3a0fb77110413f7ebce1eebd",
+      "previousScores": [
+        0,
+        2
+      ],
+      "burstBase": 0,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次两回合再生不保护首击，长线无刷新",
+      "preservedAxesHash": "e421ec603d5dd3208f4b08137e8cc2eb3079f04670a23c9ffda1fa11109d4971",
+      "preservedOutputHash": "4db1e324a924ab2f150eade78c0ec31c7d88d416b301cf92d01c73c7857329d8",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "85": {
+      "sourceHash": "3a9bfa6377cfbc81b477d9bb6d5fc6eb272750389f75c5afa8b3e80e9cfdbd06",
+      "previousScores": [
+        5,
+        6
+      ],
+      "burstBase": 5,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "203%需其他友军至少两名，残局降136%；低血CD4治疗仍需存活",
+      "preservedAxesHash": "184d514b5d01dabfaadfc1ed34cea8ca468f9c3d0d357bec51468f31fa53a800",
+      "preservedOutputHash": "d91157f8c266897b2d08f4506adf2f797c50e5866bf938beee113603f770a9a4",
+      "preservedStatesHash": "844411664c655b298b99cb86152c8898ab856c01bd8f802f0fb8d527ddcf172c"
+    },
+    "86": {
+      "sourceHash": "656a35112c2941eb13d642616b29fa2c2524d23dd29c34920cceba37962165d5",
+      "previousScores": [
+        5,
+        7
+      ],
+      "burstBase": 5,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "攻击且目标存活后补屏障，最多四层，多段消耗与首次开启分开",
+      "preservedAxesHash": "ba0a717810087b4c29466468e0e387241b640a4791328149b2993f83774a885d",
+      "preservedOutputHash": "43f898fd8dcca3ae830003301424dd08a73cdb40116500dce44d552ef220562c",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "87": {
+      "sourceHash": "3a724fd117fd70d0d453a591ae3cb2a401adf691d01fa763300932fc70ed68b0",
+      "previousScores": [
+        9,
+        6
+      ],
+      "burstBase": 8,
+      "sustain": 5,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "前六回合400%，之后200%，无稳定回复",
+      "preservedAxesHash": "e5336545547fe092f2c93e4bd6d2bf8860d61025599e3e827b900b2afaa38a6d",
+      "preservedOutputHash": "618a3db3bcc59634a282ffbbaae6ab79135a2c5e794dcd96052ff528c48bdc82",
+      "preservedStatesHash": "06d83cdf77105cd6fd7c59f23f71383d2e1c68dbcecb32226da07bb7ed0c96e1"
+    },
+    "88": {
+      "sourceHash": "7c463f9a279106f941cfcc83a3f879b6ba608e8e9541a3a92b662a5bd2b9b345",
+      "previousScores": [
+        6,
+        2
+      ],
+      "burstBase": 6,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "短时结界与满记忆一次盾，资源消耗后不再补充",
+      "preservedAxesHash": "8486414e3282ecb09e8c45cbe1322240a2d91aa8f9f0f19c68aafe2ed0089443",
+      "preservedOutputHash": "d0e6d4ca90fe18b68ce901c2f58ec4ce645b4f8371c353723c28df57acd8d3ad",
+      "preservedStatesHash": "0a001b1f95b94184d1a4e677392812ff1a568d1f3550d7bfaf5647f6581dff0e"
+    },
+    "89": {
+      "sourceHash": "d1b3e499a049fed5546e97973753d78e52ad1568991d6548c40589c90e5b5328",
+      "previousScores": [
+        1,
+        0
+      ],
+      "burstBase": 2,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "专武122%容量保首击，主动自损持续消耗，无回复",
+      "preservedAxesHash": "9e6011de7809c249cdbf41b087913dddcca1bf57cfb997f87be85c4f15b2a40e",
+      "preservedOutputHash": "7d5909a3c3262a18b6de33f9705fa6f003b530766885a4e0fa45f68af815e5ed",
+      "preservedStatesHash": "f4c5afe4d8adbf5fd710eb6228f211da5a2f142b67490b3326156e58034f3d7a"
+    },
+    "90": {
+      "sourceHash": "df875139585f10bf98a5e65cc865b5dba1cc65f7e2af5672a8082147d3842c34",
+      "previousScores": [
+        10,
+        9
+      ],
+      "burstBase": 10,
+      "sustain": 9,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "周期盾1313%、底座438%，CD4可补但提前破盾不能无缝续航",
+      "preservedAxesHash": "daaaa42a314bfeb8dba82342484688c38d607f068459e9519c793bfa888b11d1",
+      "preservedOutputHash": "2776f93b2e224f8a970439d589f79d6aeff310db0d83790fd43574d8805579f3",
+      "preservedStatesHash": "f72befcfb31205fd1eba785bd6f2f2e24686922c358c84a5d9eadc3282c85274"
+    },
+    "92": {
+      "sourceHash": "fd67638a5168631a31d836d779ffece52c8017357f274158f02ef2dbd386588a",
+      "previousScores": [
+        7,
+        9
+      ],
+      "burstBase": 7,
+      "sustain": 9,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "开局222%成长至302%，60%受击回复与再生可循环，不能救致命",
+      "preservedAxesHash": "f8840c2518d1040a43f64a04731e01fba6db58222a185e0b27f4da77d894cfb2",
+      "preservedOutputHash": "83fbf72c9fd3e3a48d219f54653fd897bacab83833bd876c04de41285f677b9f",
+      "preservedStatesHash": "99816761f5f9ab5e42100e4bfec4530b2ec5641051602d445e94ebd97e7cca99"
+    },
+    "93": {
+      "sourceHash": "f8607be03eb8f51324771c7d9a54ca6b0c59261123a62db4ad9bccdaec330de8",
+      "previousScores": [
+        3,
+        0
+      ],
+      "burstBase": 3,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次单层阈值屏障，消耗后无防护且持续自损",
+      "preservedAxesHash": "2a589cdc775c21c42f8e439b4df7229fe499b1fa03192cd64b529127d8b1f8de",
+      "preservedOutputHash": "ef8049dd4c4ddb9ecf6011d8669eb9493f93940378992cab96de7e492d0b81ac",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "95": {
+      "sourceHash": "8edfaeeb996caecec1d1055ed3a4da8e847172704e0d7605d81af47d5fa86225",
+      "previousScores": [
+        7,
+        2
+      ],
+      "burstBase": 7,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "开局305%持盾容量，破盾连带失去阻绝，补盾依赖友军死亡",
+      "preservedAxesHash": "b050489848909cc7678eaf09a2ec56d1edeab699139e667d684f46cde69737dd",
+      "preservedOutputHash": "5dfe75611ca77c4a9935b559283458f370d064a62b0e588fa93fb2d23d05626f",
+      "preservedStatesHash": "f788b849916e815c5b2275794afcd124cdb72992b76e7db3a6d8d0cbbb099456"
+    },
+    "96": {
+      "sourceHash": "cc22bcb5f528fbf57f66b222d754377137a60f69bcac8e83aaa2cd3c2f887e9e",
+      "previousScores": [
+        9,
+        9
+      ],
+      "burstBase": 9,
+      "sustain": 9,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "可重复十回合不死及受击回复，多段减持续、四行动间隔且第33回合停止",
+      "preservedAxesHash": "f553f4d490997c5482ba5d9fe709ac9cdc75d32c37fd586c1ba6b201f3d6a03c",
+      "preservedOutputHash": "6d0139152f28851f45716353f17b5f65704e4deb7ab9966c4f1a4ec2412f3ae0",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "97": {
+      "sourceHash": "428f278d7ea7a11f2c572aeee668d12ce7466e2137364f1050e510490245035b",
+      "previousScores": [
+        8,
+        5
+      ],
+      "burstBase": 8,
+      "sustain": 4,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次忧蓝盾507%，耗尽171%常驻容量，概率净化不补生命",
+      "preservedAxesHash": "fac32c94a038394c575110d91a5657fa80e83b54f736d78be1727449249e6115",
+      "preservedOutputHash": "9e33edfa75c6babf1adec974e5b2093ff964bffebde4800e3895e90af2901b5a",
+      "preservedStatesHash": "c467affe4a93858cafca815921e5ec2deff4416dd3f8e7e9d12e015711bece80"
+    },
+    "99": {
+      "sourceHash": "5136ecf2bbdcc45f585951410436f836073284a7efbec722584d9ff0c68f2f71",
+      "previousScores": [
+        1,
+        0
+      ],
+      "burstBase": 1,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "小额驱散条件防御不足抵消双主动自损",
+      "preservedAxesHash": "715fcff82c83cb3650e29b1dc77b78f77a41e5410c8fb45ec98e2f9e2aac0230",
+      "preservedOutputHash": "252d1d673c1a71dbda7519cbd1af0a65dc8ae18608877133b6c224bc7617293e",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "100": {
+      "sourceHash": "1fd245046b170484855a5b38e64f776a136b472a5b5697377a4805c9ead66710",
+      "previousScores": [
+        8,
+        1
+      ],
+      "burstBase": 8,
+      "sustain": 1,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次415%盾可持续十回合但不可补，不假造复制大盾",
+      "preservedAxesHash": "d62a635ec626d01d98ae12c5c5bd58b8366b5c98bc0db24003fe1fb17e551774",
+      "preservedOutputHash": "ed8b1862f90f1c14e83691bfdff490066469ac28fc9b0725811bc67cbc954d43",
+      "preservedStatesHash": "726b5abdad012e6d66f6017301e47583c6ccc96b81eca7466a7bc7a6acb21f2e"
+    },
+    "101": {
+      "sourceHash": "520b9acf00878ad2d43bf5266eed085eb450a5bf754e1b44311e2bcdf0115141",
+      "previousScores": [
+        10,
+        7
+      ],
+      "burstBase": 10,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "一次1066%容量，盾破后256%常驻及条件净化",
+      "preservedAxesHash": "dc3992c9855432bb44c94205a5f8d6306e612b54e7aead5737ed2a94a8a09846",
+      "preservedOutputHash": "976d3257a67b0d9c711cf8dfb84ef6846a9efc04842199727ef7f0f141b98491",
+      "preservedStatesHash": "ec2c9a82ba5985c0ca7f283ff9616918ba65879d0ae3fedfa775a4beeee2fb3a"
+    },
+    "102": {
+      "sourceHash": "cf188885104b1cd894788fda591cc41c485361bf24567c8419e44b2504d3de7f",
+      "previousScores": [
+        3,
+        0
+      ],
+      "burstBase": 3,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次单层阈值屏障，主动自损不能当回复",
+      "preservedAxesHash": "7bf75da91b69eb8a175087b6b825cf5b95821994b22b78b49d8392ee696fdf72",
+      "preservedOutputHash": "586408aa2ba3a868210e36c363e2fee6687f0251fc23435b59aba6e758a920bb",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "103": {
+      "sourceHash": "ca03458f20b9be08e216f2ed4783dd225d3606f2292f7f557ba01a31815b14c7",
+      "previousScores": [
+        7,
+        8
+      ],
+      "burstBase": 6,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "237%常驻容量，40%受击回复与主动治疗，选人及致命限制保留",
+      "preservedAxesHash": "6277b01bf2631eb2563f22c875c1d3a44aa4f7e142e9e49124d70648004a5f52",
+      "preservedOutputHash": "5f00c81e733453b4832f107e7f1535d05e6e008cae0b1f698c45a637161d3eae",
+      "preservedStatesHash": "c847fdb524bf0e1ca530624d98751233b49cbe9ee7728366b29d44fbd216b029"
+    },
+    "105": {
+      "sourceHash": "af20d8240a0c59abb0630bb741c059e8af57480f23078cfb272a8dd94d4c54ab",
+      "previousScores": [
+        10,
+        9
+      ],
+      "burstBase": 9,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "550%常驻容量加一次三屏障，持续伤害恶化且屏障不补",
+      "preservedAxesHash": "08a9d28caeb860db327bf1f3cb84733e753d1303defb3f18f35fc77c78d31bfc",
+      "preservedOutputHash": "85adf7a9c549fe5bddaec35ea712e279d0dcb3f74ed8707a5e7293bf30cdebe2",
+      "preservedStatesHash": "bc08a89326eeed7630879e0fac726ef25fde9604331317a1d3af78a5775a71f9"
+    },
+    "106": {
+      "sourceHash": "6cedc07e1974fd2ef560621fc314051610ea1c81f0bb48864ac6c9a8934dbeb9",
+      "previousScores": [
+        3,
+        1
+      ],
+      "burstBase": 3,
+      "sustain": 1,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次单屏障，净化有作用，死亡盾只保护他人",
+      "preservedAxesHash": "6d3d47998e41387f02f2faec2e73fc5353a4c5468b81c7efdeebc4ae056a82cf",
+      "preservedOutputHash": "ccfc1d7be2be9c3b6360534dc8371fced44b8e79134d44d92d6a379bfed3f87a",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "107": {
+      "sourceHash": "caccead8befbd033c5029f5ccdaaf95cbae12e5e3b4f6faa2b9b89234b28e051",
+      "previousScores": [
+        2,
+        2
+      ],
+      "burstBase": 2,
+      "sustain": 2,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "主动弱化触发净化，未增加承伤容量，无回复",
+      "preservedAxesHash": "cbb26bc5f62e41dc8c2ec4401d6f4b8ca9f32d89a35df277cbb0b7bf5f2951b8",
+      "preservedOutputHash": "104fea40543cd76180a345a8e8945c9a553543ae03cc88b01b5b2ff68b6855d9",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "108": {
+      "sourceHash": "bcf34fc26cf1b93f67a4cf00a833d9642a1678dbb5116a4f4d475ba54af7b837",
+      "previousScores": [
+        7,
+        7
+      ],
+      "burstBase": 7,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "305%常驻容量，80%吸血前六回合到期，不能延续到成熟高伤害阶段",
+      "preservedAxesHash": "614c3685f15e833d6dbd5e11e0d239b6060375aa3e05941b90f9bb7f9e64f61c",
+      "preservedOutputHash": "4c03c3a4387a8991d12f33d59e679fe4145b8262a90ef5f559942c8eb26b741d",
+      "preservedStatesHash": "5445a4178bfcbc0cdcdd58fce22169fec0a53310f6d20407d6ae8ac030c4636c"
+    },
+    "109": {
+      "sourceHash": "d548f714f6f71b8b98debafdf82d98c79ae643abfe30f2a4ed1f8b3e471dd292",
+      "previousScores": [
+        8,
+        8
+      ],
+      "burstBase": 7,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "333%常驻容量，吸血与周期净化可补续航",
+      "preservedAxesHash": "92721440967ca224de6c461889912b90f87a1ed097b269c4dc4ebcfff14eae05",
+      "preservedOutputHash": "77182c39b891518b0736c1314c6a3034cbce13935adce0319374d66888858285",
+      "preservedStatesHash": "fe28dd6de28fa5d815b830e5eea5c1ae27de97721d19724e42c911024958adbc"
+    },
+    "111": {
+      "sourceHash": "17293b7abac5cd925671a508a50a292b53723ee7979db06357a0f4e800da74e7",
+      "previousScores": [
+        6,
+        8
+      ],
+      "burstBase": 5,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "180%首击容量，60%受击回复持续有效但致命后为零",
+      "preservedAxesHash": "6fc39f1bb4606d39532538cf012555fb660aded196e63c8ebb4d6c3e31bc9d8d",
+      "preservedOutputHash": "368d937078c65f96f2d561336f0ef2ca1a4b147dc25252d53fc140a6f8064ccd",
+      "preservedStatesHash": "6d357fdd6de036ecd873675eece3f91d76e3fd3e478ee689272c640ebdfd1ec8"
+    },
+    "112": {
+      "sourceHash": "5eef6f675dcdd8b2bdc4d9735ec5f62e3182d265a2419ef61846d814df46b330",
+      "previousScores": [
+        3,
+        0
+      ],
+      "burstBase": 3,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次单屏障，主动自损，无长期补充",
+      "preservedAxesHash": "4e48e3f9cf7737d530d0dcca4ef14e1badf7cfc1c6fb35924f1f37441e2c89e7",
+      "preservedOutputHash": "5fb3b0111650bdae6c09b3c1f492619d66ea108df7ea023c9a59e05a8c66e475",
+      "preservedStatesHash": "bb978e1700f9e57a80a92f5b294b261afe95a6e6c3c3e5bf3523c4d8ffceb5f3"
+    },
+    "113": {
+      "sourceHash": "f71382f52e59e74c611ab0336d0a04cada5db8a2efea9919ee6f3fb2dbe2d41c",
+      "previousScores": [
+        8,
+        8
+      ],
+      "burstBase": 10,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "条件续期底座410%，大盾需行动后且八行动补发，破盾与续期失败有风险",
+      "preservedAxesHash": "6c69728aea8073f15ccf0f5d313956befb257eefb337a9cda4358f004b2fc459",
+      "preservedOutputHash": "569cb043b3daf9571d102e97c6eab00410e34636edc2b00687411f0ba7aa9f58",
+      "preservedStatesHash": "7e9e6b76abd975e0be7861986b6d523b53012eef03d4451c90338b5ab9fd682f"
+    },
+    "114": {
+      "sourceHash": "f71f7ab5eb97751c1d7be417758e508cb18f210f5553e5ea6c076c08a034ee79",
+      "previousScores": [
+        9,
+        9
+      ],
+      "burstBase": 9,
+      "sustain": 9,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "634%常驻容量已属9档，治疗有限次与晚期停用不另抬至10",
+      "preservedAxesHash": "d16c6a91ce1e6c5edd71deab61932dfdc9b9fcf5e5bc46ffb1b14ab20bcbf1d6",
+      "preservedOutputHash": "79398e43e9654e9e649abb1b42677736041508d7706e8bb924697e8291c1b325",
+      "preservedStatesHash": "a234d6014ce98bab52875f7f76abae1e6ddf4a9451647656b29ff44a866d8ea5"
+    },
+    "115": {
+      "sourceHash": "ed4191b2e418ba8620740a2f790a23023c2fc937f4924de9398c5a864c7bff16",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 8,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "魔法375%、物理563%，周期防护与护罩可靠，但不当作全来源563%",
+      "preservedAxesHash": "f1ee2f0b27a81b4c1010d7503fffdd8406a2b2f9a1c4de5c214acff2124d28c4",
+      "preservedOutputHash": "6e24dd79db0857ca7a24036d5c9604b532ea4542fd494ebb8ef4bc3edd04fdf9",
+      "preservedStatesHash": "0734ebf5205af9c29148a00f97a92da74304b90df659a9a128157a17e07e02ea"
+    },
+    "116": {
+      "sourceHash": "01d8b27eb0f520d0c2893513fd2777ed61b5f007e415d9aa806115743e8c8c76",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 8,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "普通来源400%，667%需低速攻击方或反伤，无自疗但稳定容量不额外扣分",
+      "preservedAxesHash": "02250651088f0ab90908220ef43823105d3eb6a0adc774a035a5f026007818de",
+      "preservedOutputHash": "e31be584ea44ddb784bf258b9fc682196c3bdf61f6d0bdf61321330b095badc9",
+      "preservedStatesHash": "1771c3c624f3a7a3c0c2821b068c2c281c70bbeebd16c2d1bb974330b26eab46"
+    },
+    "117": {
+      "sourceHash": "f0ccdbf29c62247129faa64a34f4cb3443e19edb31138e844ef68daffb9047bf",
+      "previousScores": [
+        9,
+        7
+      ],
+      "burstBase": 9,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "前四回合610%，之后305%，友军生命盾不默认给自己",
+      "preservedAxesHash": "ad4ffcf2a999b64a0323cfc445e17d3a9e20df18d71fc9ea2d21abf6d0cbb94f",
+      "preservedOutputHash": "f4366e1b48b83141025baee3adc74b7aed7a07a87321acabd0c8e9e2133738ff",
+      "preservedStatesHash": "bc707bacf25dac9d53e93bf4c6def7a903a5f519f280683bec77543ec157817b"
+    },
+    "121": {
+      "sourceHash": "f43a02d3d41fe2713881e8dbb37def5996883c7e96b27fc3d42a4d73469a3f4b",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "39b38dfa9eee3befbebe0641c59792f58187346f625e36d7300cacd556c77a1a",
+      "preservedOutputHash": "03f601771f3b99b0d45fe77d1cd04fc969f4704e5058b790e663f21c384b767a",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "122": {
+      "sourceHash": "521bc59b968b15bf871bee3f7b93c492fc39925795b8005bee200d5280e83e19",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "fad329249afb239a0aa44bd79533c813546dd18ba7c40321b0f5986adfd7741d",
+      "preservedOutputHash": "ff2b826209c718f977e3161beb0e0019e79d096d57fea9db3a62bc59129687ad",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "123": {
+      "sourceHash": "9983d1685b3fd4bd3e4fc633075b09e05cd5729db9963fcc85ccdb61d86b9ad5",
+      "previousScores": [
+        10,
+        8
+      ],
+      "burstBase": 10,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "开局742%盾加两屏障，耗尽后250%常驻及每行动净化，资源不补",
+      "preservedAxesHash": "601c5f5ce360dca1978c70529e1fd24b5829c097991484c7765473d55f4b14e4",
+      "preservedOutputHash": "cc07751d776bb99351dcf7f025f66ebf54fd22dc7c5b7c9822034ec4156fc4e0",
+      "preservedStatesHash": "b86170b13dd68cd4c96bdaa28e5b081374a2c429a7af581f442e947c2f4379e5"
+    },
+    "124": {
+      "sourceHash": "3b1870d1958cdffdbc1bd6b3adaef6da23c374f47403dee4d14a48857a119931",
+      "previousScores": [
+        9,
+        9
+      ],
+      "burstBase": 8,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "魔法311%、物理435%，双主动小额自疗；合理属性条件不额外扣分",
+      "preservedAxesHash": "18d993b4c1f692e5624958f60ed4ae5da7fe562a85dc55f07a0601facd129a1d",
+      "preservedOutputHash": "494d3a0a456d3c6fda2e7eff8e50740cbf783f959f90f5762f5b56b756218fa0",
+      "preservedStatesHash": "30a7cdca3fe2360bb8f1a6f846117c64b3968d892174d6c6e286de9b4651db0d"
+    },
+    "125": {
+      "sourceHash": "f4357b6dddbd3fc73bcbf5edfa12fd38e817e3617ef1362cafa578dfcd9dc849",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 8,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "400%常驻容量，无自疗也保8档，前四回合敌方削弱不延至后期",
+      "preservedAxesHash": "618ccfcf50be4e348ac5d4d243665c1b530c53e22aea23a0485a66c012ef936a",
+      "preservedOutputHash": "322cf2d56f1ab49788c2b4365f9f4643467c835b23c9993e0ae3016532eacb5c",
+      "preservedStatesHash": "5a00c7ce3e4691889e1de9965ac30da141e2e59d7a7225f4f07fcf9e80f836a5"
+    },
+    "126": {
+      "sourceHash": "49272c4e74d1c365880cca7ed5e5ceae9f7536801e17dcc513201966627206ff",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 10,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "早期盾1178%，仅前两次S1补发；长期410%底座",
+      "preservedAxesHash": "a763a62a8aae3a9d9478a4f8197861af7b36599f9bc35b5c8b459255bc370904",
+      "preservedOutputHash": "fad07c70a0901940aa28ec9ca57e407f662a2bc568b40efd35de8ddf200dfde7",
+      "preservedStatesHash": "934a0120be3df04c653bfdc198e75d4de366768342c0f2c9567b476238bdd0cb"
+    },
+    "128": {
+      "sourceHash": "ad42eb7b8018105925af6550ae78577e6b23ddefe5035a1172def99039fbd206",
+      "previousScores": [
+        4,
+        0
+      ],
+      "burstBase": 4,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "第1/2回合各一屏障不能同时叠两层，之后无防护",
+      "preservedAxesHash": "4e93c5dbb209991de1d5d4f4b821a8caed0959c7a970056f2080dd6a5c8e2a03",
+      "preservedOutputHash": "5324fe0d75bb614dd8cf185a2b16a0a08c15a922ec3924afbca2e0fb30220c0c",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "129": {
+      "sourceHash": "73043027036f41e4df410bb1cc35b23c19a235c40a781eb1f9f317a70fa9843b",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 9,
+      "sustain": 8,
+      "burstState": 1,
+      "sustainState": 2,
+      "note": "一次致命保命后四回合667%，之后333%加吸血；触发前不预支阻绝",
+      "preservedAxesHash": "b2edb61b74e8f375ab694814400121cc1835b36942c882d8bee3b727b5970883",
+      "preservedOutputHash": "c78be7fbf5552943baf47b1add0dbdf89d53a70d618f053f39839b4c3adfb4f0",
+      "preservedStatesHash": "7530a1134f69be9e32f27764742cdae1bcc5f17ebc3c13c5b4915f05efa7150a"
+    },
+    "130": {
+      "sourceHash": "e5c1069ddab65b7a241735d7ad96d3edff39568881f5a1c08c7c0e787233e087",
+      "previousScores": [
+        3,
+        0
+      ],
+      "burstBase": 3,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次单屏障，成熟重放自损持续消耗",
+      "preservedAxesHash": "1063b6bda753e1bcfb40ee5c64815e79dbf529be0a0cbdf1f0888f523100cb8b",
+      "preservedOutputHash": "0836bb4c106550146fdb4f22f405b5de65b2bf6f4e2b84c33a533a9f14864c66",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "131": {
+      "sourceHash": "c90b8d28da9a013af5702ce911810ba4921660661393f6e36a7cfee79d912081",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 8,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "普通来源333%，前六回合物理500%，后期净化保留但防御会到期",
+      "preservedAxesHash": "855aac0f4fe9fdef538a7401c3df89d441cbe0cc440a417edb51dced7cc3b306",
+      "preservedOutputHash": "0dde9412beab6cbc51565fba015caee5b145482aafe14287f36c48f3b2508a62",
+      "preservedStatesHash": "62add138fd69e0e752b74754eeb3ee02bf69fedc638d028feb067132a7da2836"
+    },
+    "132": {
+      "sourceHash": "e279fa9d91d45868996d1ddd201ae4ef9e43126a2281e4317dba89b1875e76d8",
+      "previousScores": [
+        9,
+        9
+      ],
+      "burstBase": 8,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "常驻583%，成熟仅物理升758%，早期治疗会停止，不按全来源成熟上界",
+      "preservedAxesHash": "5eb31d46ff32a5e84935ed400323e218bdb29a511f3bc5852703c1a8474c606f",
+      "preservedOutputHash": "e24b6138abb01181fe1d2a640a2b40b6ed8f06ca1c27f988d81579e851a66662",
+      "preservedStatesHash": "d803090af6018d86733fae6267977f2bba0be44831c0febe3403a85b5b03bf9e"
+    },
+    "134": {
+      "sourceHash": "f3d36d0f25cd5c2461ecfd497ed95da8619c7f31e6c1cc795157ad1a36067f35",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 9,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "第1–2/5–6回合667%，其余333%加条件净化，短阻绝不当常驻",
+      "preservedAxesHash": "64996ea248db2b1fc7485d1c214c5552bb517b1c4c69ea28e041d0d5bd2fa1e7",
+      "preservedOutputHash": "da43ac2cd679b42fbfa871e2d112969c66aefa14c9510c8bdcc8b7b7a4d9100c",
+      "preservedStatesHash": "817ef4e559ad705acd84f92970e59ef09530eebee44a414dd1933dcaced1a280"
+    },
+    "135": {
+      "sourceHash": "7c5c58e4303fb79c0070f21ca54c4d37ee126418d0c83ef5efb8bfe5bd31f83d",
+      "previousScores": [
+        10,
+        7
+      ],
+      "burstBase": 10,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 2,
+      "note": "早期周期盾1233%，第13回合停止；长期250%底座，晚成长不补盾",
+      "preservedAxesHash": "f0742d8ee67a1994aa40106a7831e789ba39610a4c491852e26bb99f9ecb849c",
+      "preservedOutputHash": "d937214bfd43d44ba07fac319be014d52ba62c72bebd46576fc8b3a14e931bfd",
+      "preservedStatesHash": "35c367844032bfbaa13663be481da9cabe75f1865b0309f761e0bf12af52cec0"
+    },
+    "137": {
+      "sourceHash": "cba091aacaf3c14c970a3764f567ecf25a2d817b2a9a0cbe8c1fe115d2792c66",
+      "previousScores": [
+        9,
+        7
+      ],
+      "burstBase": 8,
+      "sustain": 6,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "身影存在400%，耗尽250%，消耗不补发",
+      "preservedAxesHash": "f4bb6373754e95bd20dc00c023be0ba81f38fc34b1c88431955e4ebd1ec9f41b",
+      "preservedOutputHash": "38a52979fabca01b723a61fe0439677d37d7262e744f86effcf3b50ce5ecb857",
+      "preservedStatesHash": "dca2edfff437a492f4efde6db3a3d84c243dcef245af971670944cc186fa030a"
+    },
+    "139": {
+      "sourceHash": "e686f7e4bf35af8070697147c1148e8a3e2ac73b5599ded79bec31edb8bc2544",
+      "previousScores": [
+        9,
+        9
+      ],
+      "burstBase": 10,
+      "sustain": 9,
+      "burstState": 0,
+      "sustainState": 2,
+      "note": "首行动前完整盾989%已达10档，不能因尚未加防扣掉开局容量；长期500%及条件吸血",
+      "preservedAxesHash": "7443d8d691c16beb674719a842055c74a1bdd15ec66d26dc85f635182ca036f2",
+      "preservedOutputHash": "1f1602d2334b63bc43b6af34e6303873d4f88aeb4b34343fe3de57b2f73fb24d",
+      "preservedStatesHash": "ef868b381a65ad6ac72a3b3ac666a2db5434cb00c7233c4689f77f8585bb1f7d"
+    },
+    "140": {
+      "sourceHash": "109825e315b645ed472ae8ab15cf15eb4ae4b62eaf310f034938f26ccea8edfe",
+      "previousScores": [
+        9,
+        7
+      ],
+      "burstBase": 7,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "初期物理350%、魔法420%，晚期250%加一次低血治疗净化",
+      "preservedAxesHash": "68db306dd5daf95a64030fa530ea0699a2b81b6178c5741d746e53cfba83269e",
+      "preservedOutputHash": "7ae9b5c010ba26735969f9323ab4df639d96da85fd40445ce10a79324cbd2551",
+      "preservedStatesHash": "8e04c528b541c6f119ec9081dbb0c22df7eb7b234dec223e047c390d48774eb1"
+    },
+    "141": {
+      "sourceHash": "18b1f9c45faed3f7e7a5a07b0c4bfb5b7fe128e208963803b5aff6d37e251728",
+      "previousScores": [
+        0,
+        0
+      ],
+      "burstBase": 0,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "无自身防护或回复",
+      "preservedAxesHash": "2a86189f87562c5cd8e05e9db9f01ed0dbbb2f317b2c124796e10fde6a574139",
+      "preservedOutputHash": "e2e5c5419062925d9c26486144ab3b8bfb948b1ed7f22bf582b0a1e4d4a3933b",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "148": {
+      "sourceHash": "17888b0a9711cd6e083cb323915034a0aac64e1d94384f08f21ac27b09e88ac1",
+      "previousScores": [
+        1,
+        0
+      ],
+      "burstBase": 1,
+      "sustain": 0,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "一次条件晕厥免疫，无容量或回复，双主动自损",
+      "preservedAxesHash": "f0f40d8d1248238848d3c1ba87a9b8288e45971e1e2b3c4c74f71dc813b48d35",
+      "preservedOutputHash": "369dbda2f0ad11cca4cf934bbba2b7895baa0d3e2d8f225a536a0843d9d04fbf",
+      "preservedStatesHash": "8b5d34ad486c8de2913faa6f1fef3d72c498e66843b130bc651910945fe23c51"
+    },
+    "149": {
+      "sourceHash": "0cd508c4d2c0c4282096e67930010880ca4f44f5b6af2d41c1aa4998e6919840",
+      "previousScores": [
+        9,
+        8
+      ],
+      "burstBase": 8,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "前六回合592%，之后342%及条件净化，按实际到期分开",
+      "preservedAxesHash": "7c927e990f2b5d6486c20106ccd87dfe3918acad474c810d7781954a3f8bf9dd",
+      "preservedOutputHash": "038816643f9b14282c8f2cbb8a9cf1397d99ef4874a0e3f5981f86ea61e23c3a",
+      "preservedStatesHash": "f0ae80a1160e53bb90719e9b38674fa412410ead07adb435b5b7db424a0f266d"
+    },
+    "150": {
+      "sourceHash": "4081c29f9e19980b71494291944c71defc4f4b3e09c2d2b3ac8a71fe4136c1ea",
+      "previousScores": [
+        9,
+        7
+      ],
+      "burstBase": 8,
+      "sustain": 7,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "早期500%和有限治疗，十一回合后333%，治疗同步到期",
+      "preservedAxesHash": "6bc5fb7b6758585964f065aef6e1f22ca9473ee850551fb9903ba133e1b17b06",
+      "preservedOutputHash": "0db1270d157ba4c66f33ed4d8a70d6de9cf0e5edf58dbcdde13c7955a3ad7874",
+      "preservedStatesHash": "9a01ab2344bc86313f8cb5ad520ac1d1a0fa151b86288a2e81d982cf219ea5ad"
+    },
+    "151": {
+      "sourceHash": "0e37a2971ebc0dbda6586affb87948a107305359fb7c1e95261ce06ee3b851bf",
+      "previousScores": [
+        8,
+        4
+      ],
+      "burstBase": 8,
+      "sustain": 4,
+      "burstState": 0,
+      "sustainState": 1,
+      "note": "献身与两屏障只一次，代伤提高压力；到期后仅小容量与伤害回复",
+      "preservedAxesHash": "b7d58d1a15c80ec1c029a51c8970c5a8fb5215f0dbd61363a245641b712ea8bd",
+      "preservedOutputHash": "de359656de67f72f7172ebcff39fc9d339597476fe2a4445289d5058909ac280",
+      "preservedStatesHash": "b78bb9141a372b28528e264d1423dbeadfa42bd392593edb5913290bf0464916"
+    },
+    "153": {
+      "sourceHash": "d40dc2c85ad4d612866ec0a8a73cc541ffaac3fe7561cbf31fd42063543357c2",
+      "previousScores": [
+        8,
+        9
+      ],
+      "burstBase": 9,
+      "sustain": 9,
+      "burstState": 1,
+      "sustainState": 1,
+      "note": "开局410%，首行动后710%，周期来源防御可刷新；无自疗不否决高容量",
+      "preservedAxesHash": "090b7f963977034d74f1f9fcde8a96365d299ae7ef4d5cd62ef65f15017163ef",
+      "preservedOutputHash": "ee79978d9dfe90b37baa340b0eb82f24209cef381a6bc22ea862e473eed0cd7e",
+      "preservedStatesHash": "67e0b07867eb64f9bbe51804195a30b7fb393466dde61f09c2e4178f7499df8f"
+    },
+    "154": {
+      "sourceHash": "3eadbd3509939fe596c0b2b241bec2fd4576c596399649ea91763ae7a98a5b31",
+      "previousScores": [
+        9,
+        9
+      ],
+      "burstBase": 8,
+      "sustain": 9,
+      "burstState": 1,
+      "sustainState": 2,
+      "note": "开局500%，成熟物理575%魔法661%，可补魔法受击回复仅存活后触发",
+      "preservedAxesHash": "2d444dca848f89bf409cb462c49748c8c503014284c42c8f94a4b8986b6d381f",
+      "preservedOutputHash": "24233ecbd60a2f31b4f7cb8496e8bbb6b535bd144db020914e74ec9c847d2c5d",
+      "preservedStatesHash": "834af72ecfcbe7221b766ee12b242f52ac1c3a9e2e865ccf2f3ea43e96a9233c"
+    },
+    "155": {
+      "sourceHash": "ae1c581614f5a3a7af0fccf642c8a4fb30c8a8e5c645303721c83db0e995e2e7",
+      "previousScores": [
+        6,
+        2
+      ],
+      "burstBase": 2,
+      "sustain": 0,
+      "burstState": 1,
+      "sustainState": 3,
+      "note": "短期四事件仅120%，十五事件200%不预支首轮；结界三回合到期且自损持续",
+      "preservedAxesHash": "e0ee261d254acfb0103d2d31a1eee10a4038996e1fae0c7474c1818467503107",
+      "preservedOutputHash": "69515bc51f830383bf891a9bd68fdd98bafeb3ae19648d710e2fafa090db4266",
+      "preservedStatesHash": "5b1b7bce14c5ad2be741bd16eed736a5f5e6175ac9881e10b5dbf9464dcdcf42"
+    },
+    "156": {
+      "sourceHash": "c223353fb9e5b50e34f564b9405909f1eca086e081a8095ff5a0b6c7e6d7c62c",
+      "previousScores": [
+        9,
+        9
+      ],
+      "burstBase": 10,
+      "sustain": 10,
+      "burstState": 0,
+      "sustainState": 0,
+      "note": "常驻800%本身达到10档，无回复不否决；2000%仅同敌叠层且行动末清空",
+      "preservedAxesHash": "da688151f290c54efddb59d8410415ce8be9403704eb194085c951020be039e7",
+      "preservedOutputHash": "09228840d837134e3975ecabc2da09e378e0cb571c766ea2c82284bf2ee11c96",
+      "preservedStatesHash": "ef6b3de73a4e13cbab4a8929b429f7b1c14af9f171c0d395fd8af54ece1b4277"
+    },
+    "157": {
+      "sourceHash": "099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9",
+      "previousScores": [
+        10,
+        9
+      ],
+      "burstBase": 9,
+      "sustain": 8,
+      "burstState": 0,
+      "sustainState": 3,
+      "note": "开局667%，第4回合后才大幅补盾，第13回合停止；长期400%底座",
+      "preservedAxesHash": "3af9a70faafd57071dce3b8aed88959b16913fd7d96549db2e6850777a47ecd8",
+      "preservedOutputHash": "6a44db190d2c1dbfc5098aefe9027ce14101b00fb29f7fc8b791a1cef7947716",
+      "preservedStatesHash": "2cf83422f32f7eb5a8a449b030f6071292c044ad0f4cf457b2fafd2800cd8e77"
+    }
+  }
+}

@@ -25,7 +25,7 @@ test('starting and automatic defenses retain their scores regardless of speed',(
     assert.equal(defenseInitiative({...character(id),speed:1000},defenseScores[id][0]).penalty,0)
   }
   const mixed=defenseInitiative({...character(139),speed:1000},10)
-  assert.equal(mixed.score,9) // Preserve starting shield and 70% reduction.
+  assert.equal(mixed.score,10) // Starting full shield alone already exceeds the new 800% threshold.
   assert.equal(defenseInitiative({...character(151),speed:1000},8).score,6)
 })
 

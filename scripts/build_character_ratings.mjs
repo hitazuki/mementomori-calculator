@@ -67,6 +67,7 @@ const records = reviews.filter(line => !onlyIds || onlyIds.has(Number(line.split
     shortTermProtection: assessment.survival.shortTermProtection,
     effectiveSustain: assessment.survival.effectiveSustain,
     defenseInitiative: assessment.survival.initiative,
+    survivalCalibration: assessment.survival.calibration,
     ...(assessment.survival.targetAvoidance ? {targetAvoidance:assessment.survival.targetAvoidance} : {}),
   }
   record.outputRole = assessment.output.role
@@ -87,7 +88,7 @@ const records = reviews.filter(line => !onlyIds || onlyIds.has(Number(line.split
       throw new Error('Source changed; review the character before using --reviewed=' + id)
     }
     if (explicitlyReviewed.has(id)) record.assessedAt = new Date().toISOString().slice(0, 10)
-    else if (previous.rubricVersion === RATING_VERSION) record.assessedAt = previous.assessedAt
+    else if (previous.rubricVersion === RATING_VERSION && JSON.stringify(previous.axes) === JSON.stringify(record.axes)) record.assessedAt = previous.assessedAt
   }
   return record
 })

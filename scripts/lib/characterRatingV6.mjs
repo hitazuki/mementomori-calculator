@@ -7,6 +7,27 @@ export function stageReference(c,config) {
   // Petra's passive replaces normals; Rosalie's post-S2 source attack is for nearby allies.
   const applied={...config,effects:{...(c.id===88?{attackFromHp:0}:{}),...config.effects},components:{...(c.id===14?{N:'2.2,2,0'}:{}),...(c.id===97?{S1:'4.2,1,5'}:{}),...config.components}}
   const ref=referenceFor(c,{...applied,authored:newCharacters[c.id]})
+  if(c.id===156) for(const snapshot of ref.snapshots) {
+    if(snapshot.enemies===1 && !config.components?.S1) {
+      const skill=snapshot.skills.S1
+      const segment=damageReference({coefficient:30.6},skill.effects,1,0,ref.weapon.attack)
+      skill.components=[{coefficient:30.6,hits:1,targets:1,basis:'attack'}]
+      Object.assign(skill,{segments:[segment],damage:segment.damage,equivalentBasicHits:segment.equivalentBasicHits})
+    }
+    const skill=snapshot.skills.S2
+    for(let i=0;i<skill.components.length;i++) if(skill.components[i].basis==='primary-direct') {
+      // Explicit guaranteed critical: only the confirmed critical multiplier;
+      // do not import attack, defense or the unconfirmed damage bucket.
+      const segment=skill.segments[i]
+      segment.factors.critical=1.5
+      segment.damage*=1.5
+      segment.equivalentBasicHits*=1.5
+    }
+    skill.damage=skill.segments.reduce((n,s)=>n+s.damage,0)
+    skill.equivalentBasicHits=skill.damage/.3125
+    snapshot.perAction=ref.cycle.cycle.reduce((n,key)=>n+snapshot.skills[key].equivalentBasicHits,0)/ref.cycle.cycle.length
+    snapshot.twoActiveTotal=snapshot.skills.S1.equivalentBasicHits+skill.equivalentBasicHits
+  }
   // These special attacks already calculate the correct target count; expose
   // their real components instead of the v5 zero-coefficient dispatch placeholder.
   if([20,60,74].includes(c.id)) for(const snapshot of ref.snapshots) {
