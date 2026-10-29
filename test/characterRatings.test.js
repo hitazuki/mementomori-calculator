@@ -78,6 +78,8 @@ test('radar uses a fixed 0–10 scale and zero collapses to center', () => {
     const [halfX, halfY] = radarPoint(i, 5)
     assert.ok(Math.abs(Math.hypot(halfX - 160, halfY - 145) - 44) < 1e-8)
   }
+  const [x,y]=radarPoint(0,8.85)
+  assert.ok(Math.abs(Math.hypot(x-160,y-145)-88*.885)<1e-8)
 })
 
 test('output suppression, weakness and attack reduction retain distinct layers and defensive roles', () => {

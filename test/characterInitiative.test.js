@@ -46,7 +46,7 @@ test('all published defensive adjustments reproduce and offensive burst stays sp
     assert.deepEqual(r.survival.initiative,initiative)
     assert.equal(r.axes[2].score,initiative.score)
     const {openingBand,quickBand}=r.output.comparison
-    assert.equal(r.axes[0].score,Math.max(openingBand,quickBand-(r.output.readiness?.penalty??0)))
+    assert.equal(r.axes[0].score,r.outputCalibration.scores[0])
     assert.equal(r.axes[3].score,defenseScores[c.id][1])
     const published=read(`../public/data/character-ratings/${c.id}.json`)
     assert.deepEqual(published.assessment.defenseInitiative,initiative)

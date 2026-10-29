@@ -1,4 +1,6 @@
 import fs from 'node:fs'
+import { writeGeneratedFile } from './lib/writeGeneratedFile.mjs'
+import { outputCalibrationReference, outputCalibrationReport } from './lib/characterOutputCalibration.mjs'
 import { teamCareReference } from './lib/characterTeamCare.mjs'
 import { createHash } from 'node:crypto'
 import { stageReference } from './lib/characterRatingV6.mjs'
@@ -66,12 +68,14 @@ const records=catalog.filter(c=>previous.some(r=>r.id===c.id)||newCharacters[c.i
   const floors=roleValues(stages.lower.snapshots).map(n=>band(n,lateAnchors))
   const bases=roleValues(stages.mature.snapshots).map(n=>band(n,lateAnchors))
   const penalties=bases.map((base,i)=>Math.min(Math.max(0,base-floors[i]),lateCost[c.id]??0))
-  const late=Math.max(...bases.map((base,i)=>Math.max(floors[i],base-penalties[i])))
+  let late=Math.max(...bases.map((base,i)=>Math.max(floors[i],base-penalties[i])))
   const openingValues=stages.opening.openingDamage.map((n,i)=>n/2/(i?3:1))
   const quickValues=(stages.quickUpper??stages.quick)?.openingDamage.map((n,i)=>n/2/(i?3:1))
   const openingBand=Math.max(...openingValues.map(n=>band(n,burstAnchors)))
   const quickBand=quickValues?Math.max(...quickValues.map(n=>band(n,burstAnchors))):0
-  const burst=Math.max(openingBand,quickBand-(readiness?.penalty??0))
+  let burst=Math.max(openingBand,quickBand-(readiness?.penalty??0))
+  const outputCalibration=outputCalibrationReference(c,stages,hash,old.output)
+  ;[burst,late]=outputCalibration.scores
   const defenseBase=defenseScores[c.id]
   const calibration=survivalCalibrationReference(c.id,finite,hash)
   if(!defenseBase) throw new Error('Missing independent defensive assessments '+c.id)
@@ -97,34 +101,37 @@ const records=catalog.filter(c=>previous.some(r=>r.id===c.id)||newCharacters[c.i
     ...auxiliary.map(a=>a.key==='protection'&&care?care.reason:a.key==='protection'&&targetAvoidance[c.id]?.protection?targetAvoidance[c.id].protection:a.key==='protection'&&c.id===97?'P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化，不当作稳定群疗。':a.reason),
   ]
   for(const [i,key] of ['burst','late'].entries()) reasons[i]=outputReasonOverrides[c.id]?.[key]?.({stages,equivalent})??reasons[i]
+  const tagsForOutput=[...(outputCalibration.events4?['自伤／主动回复按4次事件。']:[]),...(outputCalibration.rounds?['回合成长按前两行动实际回合。']:[]),...(outputCalibration.special?['特殊条件取折中伤害。']:[])]
+  reasons[0]='等效技能倍率（早期两行动平均）：单敌'+equivalent(outputCalibration.burstTotals[0]/2)+'、五敌总计'+equivalent(outputCalibration.burstTotals[1]/2)+'。'+tagsForOutput.join('')
+  reasons[1]='等效技能倍率（成熟两行动平均）：单敌'+equivalent(outputCalibration.lateActions[0])+'、五敌总计'+equivalent(outputCalibration.lateActions[1])+'。'+(outputCalibration.events4?'自伤／主动回复成长取满层。':'')+(outputCalibration.rounds?'回合成长按成熟回合及到期状态。':'')+(outputCalibration.special?'特殊条件取折中伤害。':'')
   const axes=RATING_AXES.map((key,i)=>{
-    const base=i===0?Math.max(openingBand,quickBand):i===1?Math.max(...bases):i===2?defenseBase[0]:values[i]
+    const base=i<2?values[i]:i===2?defenseBase[0]:values[i]
     return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:cleanRatingCopy(key,reasons[i]),evidence,
-      reviewBasis:i===2||i===3?`${reasons[i]}；${calibration.note}；容量参照与非容量机制分别审核，采用${calibration.version}统一量尺。`:auxiliaryReview?.[key]?.reviewBasis??(i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`)}
+      reviewBasis:i<2?reasons[i]+'；恢复原分档：单敌/五敌三倍量尺择优；条件先折中伤害再分档。':i===2||i===3?`${reasons[i]}；${calibration.note}；容量参照与非容量机制分别审核，采用${calibration.version}统一量尺。`:auxiliaryReview?.[key]?.reviewBasis??(i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`)}
   })
-  return {...old,...(care?{teamCare:care}:{}),sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；最高专武攻击力+18%、防御力+5%已计入，暴击抗性+10%不折算为固定减伤。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:calibration.reviewedAt??auxiliaryReview?.reviewedAt??authored?.reviewedAt??(care?'2026-09-16':c.id===97?'2026-09-15':targetAvoidance[c.id]?'2026-09-09':'2026-09-08'),axes,output:{...old.output,...(c.id===97?{weapon}:{}),lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
+  return {...old,outputCalibration,...(care?{teamCare:care}:{}),sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；最高专武攻击力+18%、防御力+5%已计入，暴击抗性+10%不折算为固定减伤。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:outputCalibration.reviewedAt??calibration.reviewedAt??auxiliaryReview?.reviewedAt??authored?.reviewedAt??(care?'2026-09-16':c.id===97?'2026-09-15':targetAvoidance[c.id]?'2026-09-09':'2026-09-08'),axes,output:{...old.output,...(c.id===97?{weapon}:{}),lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
     assumptions:'范围为已审核的有限条件样本，不是所有外部队伍的理论极值；开局按前两次自身行动，短计数/短回合另列条件爆发，均仅计直接伤害；后期按成熟循环，无依据的事件频率不换算回合。延迟伤害仅在完整持续期样本计入。',
     equivalentSkillUnit:'100% = 固定基准面板下无角色自增益的100%攻击普攻；含适用乘区，特殊伤害仅按最终伤害折合，不改变其原始伤害类型。',
     comparison:{groupBenchmark:3,burstAnchors,lateAnchors,lowerBands:floors,matureBands:bases,openingBand,quickBand,penalties}},
     survival:{...old.survival,...(targetAvoidance[c.id]?{targetAvoidance:targetAvoidance[c.id],effectiveSustain:life.replenishment+'；'+life.afterExpiry}:{}),calibration,initiative,shortTermProtection:life.activeWindow,states:finite,scoringScenario:'neutral',peakOrdinaryCapacity:peak,burstScore:defense[0],sustainScore:defense[1]}}
 })
 if(records.length!==138) throw new Error('Expected all 138 characters')
-fs.writeFileSync(new URL('survival-calibration.md',folder),survivalCalibrationReport(records))
+writeGeneratedFile(new URL('output-calibration.md',folder),outputCalibrationReport(records))
+writeGeneratedFile(new URL('survival-calibration.md',folder),survivalCalibrationReport(records))
 const collection=(metadata,key,rows)=>JSON.stringify(metadata,null,2).slice(0,-2)+`,\n  "${key}": [\n`+rows.map(r=>'    '+JSON.stringify(r)).join(',\n')+'\n  ]\n}\n'
-fs.writeFileSync(new URL('review.json',folder),collection({rubricVersion:RATING_VERSION,burstAnchors,lateAnchors},'records',records))
+writeGeneratedFile(new URL('review.json',folder),collection({rubricVersion:RATING_VERSION,burstAnchors,lateAnchors},'records',records))
 const inversions=[]
 for(const key of ['burst','late','toughness','survival']) for(const a of records) for(const b of records) {
-  const metric=r=>key==='late'?Math.max(...roleValues(r.output.stages.mature.snapshots)):key==='burst'?
-    Math.max(...[r.output.stages.opening,r.output.stages.quick,r.output.stages.quickUpper].filter(Boolean).flatMap(s=>s.openingDamage.map((n,i)=>n/2/(i?3:1)))):
+  const metric=r=>key==='late'?r.outputCalibration.normalized.late:key==='burst'?r.outputCalibration.normalized.burst:
       r.survival.calibration[key==='toughness'?'burstReference':'sustainReference'].capacity
   const av=metric(a),bv=metric(b),aa=a.axes.find(axis=>axis.key===key),ba=b.axes.find(axis=>axis.key===key)
   if(av>bv+1e-9 && aa.score<ba.score) inversions.push({axis:key,higherMultiplier:a.id,lowerMultiplier:b.id,
     values:[av,bv],scores:[aa.score,ba.score],reason:`${key==='toughness'||key==='survival'?aa.reviewBasis:aa.reason} 对照：${key==='toughness'||key==='survival'?ba.reviewBasis:ba.reason}`})
 }
-fs.writeFileSync(new URL('inversions.json',folder),collection({rubricVersion:RATING_VERSION,count:inversions.length},'pairs',inversions))
-fs.writeFileSync(new URL('doc/character-ratings/reviews.txt',root),records.map(r=>[r.id,r.axes.map(a=>a.score).join(','),...r.axes.map(a=>a.reason),r.conditions,r.tags].join('|')).join('\n')+'\n')
-fs.writeFileSync(new URL('changes.md',folder),'# 七维评分 v6\n\n旧维度不能逐项相减。保留旧六维，并列新七维；范围仅为已审核的有限样本。138名角色、966项评分。\n\n|角色|旧：单/群/生存/防护/辅助/干扰|新：爆发/后期/爆防/生存/防护/辅助/干扰|基础→后期 单敌每行动等效技能倍率|\n|---|---|---|---|\n'+records.map(r=>`|${r.id} ${r.name}|${previous.find(p=>p.id===r.id)?.axes.map(a=>a.score).join('/')??'新增，无旧评分'}|${r.axes.map(a=>a.score).join('/')}|${equivalent(r.output.stages.lower.snapshots[0].perAction)}→${equivalent(r.output.stages.mature.snapshots[0].perAction)}|`).join('\n')+'\n')
+writeGeneratedFile(new URL('inversions.json',folder),collection({rubricVersion:RATING_VERSION,count:inversions.length},'pairs',inversions))
+writeGeneratedFile(new URL('doc/character-ratings/reviews.txt',root),records.map(r=>[r.id,r.axes.map(a=>a.score).join(','),...r.axes.map(a=>a.reason),r.conditions,r.tags].join('|')).join('\n')+'\n')
+writeGeneratedFile(new URL('changes.md',folder),'# 七维评分 v6\n\n旧维度不能逐项相减。保留旧六维，并列新七维；范围仅为已审核的有限样本。138名角色、966项评分。\n\n|角色|旧：单/群/生存/防护/辅助/干扰|新：爆发/后期/爆防/生存/防护/辅助/干扰|基础→后期 单敌每行动等效技能倍率|\n|---|---|---|---|\n'+records.map(r=>`|${r.id} ${r.name}|${previous.find(p=>p.id===r.id)?.axes.map(a=>a.score).join('/')??'新增，无旧评分'}|${r.axes.map(a=>a.score).join('/')}|${equivalent(r.output.stages.lower.snapshots[0].perAction)}→${equivalent(r.output.stages.mature.snapshots[0].perAction)}|`).join('\n')+'\n')
 console.log(`Reviewed ${records.length} characters / ${records.length*RATING_AXES.length} axes`)
-fs.writeFileSync(new URL('initiative-changes.md',folder),'# 行动防护速度修订\n\n仅调整爆发防御，爆发输出及其余维度不变。全池138名已检查；下表列出行动依赖项，含分数不变者。速度是同养成、无外援的编辑参照，不是实战先手保证。\n\n|角色|基础→有效开启速度|爆发防御原分→新分|开启条件与保底|\n|---|---|---|---|\n'+records.filter(r=>r.survival.initiative.gate).map(r=>{const a=r.survival.initiative;return `|${r.id} ${r.name}|${a.baseSpeed}→${Math.round(a.effectiveSpeed)}|${a.baseScore}→${a.score}|${a.note}|`}).join('\n')+'\n')
+writeGeneratedFile(new URL('initiative-changes.md',folder),'# 行动防护速度修订\n\n仅调整爆发防御，爆发输出及其余维度不变。全池138名已检查；下表列出行动依赖项，含分数不变者。速度是同养成、无外援的编辑参照，不是实战先手保证。\n\n|角色|基础→有效开启速度|爆发防御原分→新分|开启条件与保底|\n|---|---|---|---|\n'+records.filter(r=>r.survival.initiative.gate).map(r=>{const a=r.survival.initiative;return `|${r.id} ${r.name}|${a.baseSpeed}→${Math.round(a.effectiveSpeed)}|${a.baseScore}→${a.score}|${a.note}|`}).join('\n')+'\n')
 
-fs.writeFileSync(new URL('targeting-review.md',folder),'# 全角色输出目标结构审阅\n\n138名角色。按主动技能选敌、重复单位及条件分支判定；不按倍率大小、单群伤害比或评分判定。普通攻击不用于改变定位。条件分支列在技能依据中，不代表必定触发。此标签不衡量伤害强弱。\n\n|ID|角色|输出特点|技能分布|\n|---|---|---|---|\n'+records.map(r=>`|${r.id}|${r.name}|${r.output.role}|${r.output.targeting.detail}|`).join('\n')+'\n')
+writeGeneratedFile(new URL('targeting-review.md',folder),'# 全角色输出目标结构审阅\n\n138名角色。按主动技能选敌、重复单位及条件分支判定；不按倍率大小、单群伤害比或评分判定。普通攻击不用于改变定位。条件分支列在技能依据中，不代表必定触发。此标签不衡量伤害强弱。\n\n|ID|角色|输出特点|技能分布|\n|---|---|---|---|\n'+records.map(r=>`|${r.id}|${r.name}|${r.output.role}|${r.output.targeting.detail}|`).join('\n')+'\n')

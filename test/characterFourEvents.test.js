@@ -27,8 +27,8 @@ test('Aisha replays with the third and fourth event attack separately and retain
   near(high.skills.S2.equivalentBasicHits,15.2*5*1.58)
   assert.ok(a.output.stages.quick.openingDamage[0]<get(93).output.stages.quick.openingDamage[0])
   assert.ok(a.output.stages.quickUpper.openingDamage[0]>get(93).output.stages.quick.openingDamage[0])
-  assert.equal(a.axes[0].score,10)
-  assert.match(a.axes[0].reason,/上界不保证每段/)
+  assert.equal(a.outputCalibration.events4,true)
+  assert.match(a.axes[0].reason,/特殊条件取折中伤害/)
 })
 
 test('equivalent coefficients include critical and nonlinear defense multipliers only when applicable',()=>{

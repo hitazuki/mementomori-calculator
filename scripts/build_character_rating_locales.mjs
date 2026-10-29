@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { writeGeneratedFile } from './lib/writeGeneratedFile.mjs'
 import { createHash } from 'node:crypto'
 import { RATING_LOCALES, ratingDisplayTexts } from '../src/utils/characterRatingLocale.js'
 import { readCharacterCatalog } from './lib/characterCatalog.mjs'
@@ -18,5 +19,5 @@ const bundles = RATING_LOCALES.filter(locale => locale !== 'zh-CN').map(locale =
   return { locale, sourceLocale: 'zh-CN', sourceHash, translations: Object.fromEntries(texts.map(text => [text, authored[text]])) }
 })
 fs.mkdirSync(output, { recursive: true })
-for (const bundle of bundles) fs.writeFileSync(new URL(`${bundle.locale}.json`, output), JSON.stringify(bundle) + '\n')
+for (const bundle of bundles) writeGeneratedFile(new URL(`${bundle.locale}.json`, output), JSON.stringify(bundle) + '\n')
 console.log(`Packed ${texts.length} rating texts in ${bundles.length} translated languages.`)

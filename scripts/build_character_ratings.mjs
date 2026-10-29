@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { writeGeneratedFile } from './lib/writeGeneratedFile.mjs'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { RATING_AXES, RATING_VERSION, RATING_MAX, ratingSource, validRating } from '../src/utils/characterRatings.js'
@@ -72,7 +73,7 @@ const records = reviews.filter(line => !onlyIds || onlyIds.has(Number(line.split
   }
   record.outputRole = assessment.output.role
   record.outputRoleDetail = assessment.output.targeting.detail
-  const quantitative = { ...(assessment.teamCare?{teamCare:assessment.teamCare}:{}), finalOutput: assessment.output, survival: {
+  const quantitative = { outputCalibration: assessment.outputCalibration, ...(assessment.teamCare?{teamCare:assessment.teamCare}:{}), finalOutput: assessment.output, survival: {
     version:'survival-reference-v6',reviewedAt:assessment.reviewedAt,scoringScenario:'neutral',
     assumptions:SURVIVAL_SCENARIOS,states:assessment.survival.states,
   } }
@@ -98,6 +99,6 @@ for (const character of catalogs['zh-CN']) {
 }
 // Validate everything before writing any files. This packs authored AI reviews; it does not infer scores.
 fs.mkdirSync(output, { recursive: true })
-for (const record of records) fs.writeFileSync(path.join(output, record.id + '.json'), JSON.stringify(record) + '\n')
+for (const record of records) writeGeneratedFile(path.join(output, record.id + '.json'), JSON.stringify(record) + '\n')
 console.log('Packed ' + records.length + ' AI reviews, ' + records.length * RATING_AXES.length + ' axis explanations.')
 await import('./build_character_rating_locales.mjs')

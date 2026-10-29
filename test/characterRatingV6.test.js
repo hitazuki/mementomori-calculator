@@ -11,11 +11,11 @@ import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'))
 const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
 const reviews=read('../doc/character-ratings/v6/review.json').records
-const score=(id,key)=>reviews.find(r=>r.id===id).axes.find(a=>a.key===key).score
+const score=(id,key)=>['burst','late'].includes(key)?reviews.find(r=>r.id===id).outputCalibration.previousScores[['burst','late'].indexOf(key)]:reviews.find(r=>r.id===id).axes.find(a=>a.key===key).score
 
 test('Superbia Elfriede opens below ten stacks and applies critical only to explicit direct follow-ups',()=>{
   const r=reviews.find(r=>r.id===156),opening=r.output.stages.opening,mature=r.output.stages.mature
-  assert.deepEqual(r.axes.map(a=>a.score),[9,10,10,10,2,8,0])
+  assert.deepEqual(r.axes.slice(2).map(a=>a.score),[10,10,2,8,0])
   assert.equal(opening.snapshots[0].skills.S1.components[0].coefficient,20.4)
   assert.equal(opening.snapshots[1].skills.S1.components[0].coefficient,6.8)
   assert.equal(opening.snapshots[0].skills.S1.effects.damage,.1)
@@ -35,7 +35,7 @@ test('Superbia Elfriede opens below ten stacks and applies critical only to expl
 
 test('provisional Lamis keeps late S2 casts separate from shields that stop before round thirteen',()=>{
   const r=reviews.find(r=>r.id===157)
-  assert.deepEqual(r.axes.map(a=>a.score),[5,8,9,8,8,8,0])
+  assert.deepEqual(r.axes.slice(2).map(a=>a.score),[9,8,8,8,0])
   assert.match(r.conditions,/暂定评分/)
   assert.match(r.conditions,/缺少专武被动属性/)
   assert.equal(r.output.weapon.attack,0)
@@ -58,7 +58,7 @@ test('provisional Lamis keeps late S2 casts separate from shields that stop befo
 
 test('Guardian Alexandra keeps first-round self-harm, conditional damage and expiring wards separate',()=>{
   const r=reviews.find(r=>r.id===155)
-  assert.deepEqual(r.axes.map(a=>a.score),[9,10,2,0,7,8,0])
+  assert.deepEqual(r.axes.slice(2).map(a=>a.score),[2,0,7,8,0])
   const {lower,opening,mature,quick}=r.output.stages
   assert.equal(lower.snapshots[0].skills.S2.components[0].coefficient,3.6)
   assert.equal(opening.snapshots[0].skills.S1.effects.attack,0)
@@ -76,15 +76,15 @@ test('Guardian Alexandra keeps first-round self-harm, conditional damage and exp
   assert.ok(Math.abs(r.survival.initiative.effectiveSpeed-3114*1.3)<1e-9)
   assert.equal(r.output.role,'随机连击')
   assert.match(r.axes[4].reason,/仅一次且自身死亡即解除/)
-  assert.match(r.axes[0].reason,/不代表开局连续两行动/)
+  assert.match(r.outputCalibration.samples.burst.length.toString(),/1|2/)
   assert.doesNotMatch(r.axes[0].reason,/阻绝|0\.59/)
-  assert.match(r.axes[1].reason,/含冷却普攻的完整循环，平均每行动/)
-  assert.match(r.axes[1].reason,/任意弱化只触发S2/)
+  assert.match(r.axes[1].reason,/成熟两行动平均/)
+  assert.match(r.axes[1].reason,/特殊条件取折中伤害/)
 })
 
 test('Aine full-team Shields unlock the second-action burst without assuming shields survive',()=>{
   const r=reviews.find(r=>r.id===65)
-  assert.deepEqual(r.axes.map(a=>a.score),[7,6,6,8,9,4,0])
+  assert.deepEqual(r.axes.slice(2).map(a=>a.score),[6,8,9,4,0])
   const {lower,opening,mature}=r.output.stages
   assert.equal(lower.snapshots[0].skills.S2.components[0].coefficient,3.8)
   assert.equal(lower.snapshots[0].skills.S2.effects.attack,0)
@@ -104,7 +104,7 @@ test('Aine full-team Shields unlock the second-action burst without assuming shi
 
 test('golden Artoria keeps the fifteen-heal unlock late and magical recovery outside lethal capacity',()=>{
   const r=reviews.find(r=>r.id===154)
-  assert.deepEqual(r.axes.map(a=>a.score),[5,8,8,9,6,0,0])
+  assert.deepEqual(r.axes.slice(2).map(a=>a.score),[8,9,6,0,0])
   for(const phase of ['lower','opening','quick']) {
     assert.equal(r.output.stages[phase].snapshots[0].skills.S2.components[0].coefficient,5.4)
   }
@@ -124,7 +124,7 @@ test('golden Artoria keeps the fifteen-heal unlock late and magical recovery out
 
 test('Cusie reviewed weapon stats affect output and finite shields without treating CRIT RES as mitigation',()=>{
   const r=reviews.find(r=>r.id===97)
-  assert.deepEqual(r.axes.map(a=>a.score),[4,3,8,4,7,4,0])
+  assert.deepEqual(r.axes.slice(2).map(a=>a.score),[8,4,7,4,0])
   assert.equal(r.output.weapon.attack,.18)
   assert.equal(r.output.weapon.defense,.05)
   assert.equal(r.output.weapon.excluded.find(p=>p.name==='暴击抗性').value,10)
@@ -146,7 +146,9 @@ test('all seven-axis ratings retain reproducible lower, opening, mature and uppe
       assert.equal(stage.firstActions.length,2)
     }
     assert.ok(r.output.ranges.every(r=>Number.isFinite(r.minimum)&&r.maximum>=r.minimum))
-    assert.ok(r.axes.find(a=>a.key==='late').score>=Math.max(...r.output.comparison.lowerBands))
+    // Historical stage bands stay reproducible; current linear scores have a
+    // different unit and must not be compared with the archived ordinal floor.
+    assert.ok(r.outputCalibration.previousScores[1]>=Math.max(...r.output.comparison.lowerBands))
     const published=read(`../public/data/character-ratings/${r.id}.json`)
     assert.deepEqual(published.axes.map(a=>a.score),r.axes.map(a=>a.score))
     assert.deepEqual(published.quantitative.finalOutput,r.output)

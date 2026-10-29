@@ -63,11 +63,15 @@ export function ratingSource(character) {
     exclusivePassive: character.exclusivePassives?.at(-1) ?? null,
   }
 }
+export function validRatingScore(key, score) {
+  return RATING_AXES.includes(key) && Number.isFinite(score) && score >= 0 && score <= RATING_MAX
+    && Number.isInteger(score)
+}
 export function validRating(rating, id) {
   return rating?.schemaVersion === 2 && rating.id === id && rating.rubricVersion === RATING_VERSION && rating.scaleMax === RATING_MAX
     && rating.assessmentType === 'ai-editorial' && rating.axes?.length === RATING_AXES.length
     && rating.axes.every((axis, index) => axis.key === RATING_AXES[index]
-      && Number.isInteger(axis.score) && axis.score >= 0 && axis.score <= RATING_MAX
+      && validRatingScore(axis.key,axis.score)
       && typeof axis.reason === 'string' && axis.reason.length > 0
       && Array.isArray(axis.evidence) && axis.evidence.every(key => rating.sources?.some(source => source.key === key)))
     && Array.isArray(rating.tags) && rating.tags.length > 0
@@ -77,7 +81,7 @@ export function validRating(rating, id) {
     && typeof rating.conditions === 'string' && rating.conditions.length > 0
     && rating.assessment?.axes?.length === RATING_AXES.length
     && rating.assessment.axes.every((axis,index) => axis.key === RATING_AXES[index]
-      && axis.score === rating.axes[index].score && Number.isInteger(axis.baseBand)
+      && axis.score === rating.axes[index].score && validRatingScore(axis.key,axis.baseBand)
       && axis.baseBand >= 0 && axis.baseBand <= RATING_MAX && axis.reviewBasis
       && Array.isArray(axis.adjustments) && axis.adjustments.every(a=>Number.isInteger(a.points)&&a.reason))
     && rating.assessment.lifecycle?.activeWindow && rating.assessment.lifecycle?.replenishment && rating.assessment.lifecycle?.afterExpiry

@@ -1,0 +1,42 @@
+{
+  "zh-TW": [
+    "等效技能倍率（早期兩行動平均）：單敵",
+    "等效技能倍率（成熟兩行動平均）：單敵",
+    "自傷／主動恢復按4次事件。",
+    "回合成長按前兩行動實際回合。",
+    "特殊條件取折中傷害。",
+    "自傷／主動恢復成長取滿層。",
+    "回合成長按成熟回合及到期狀態。",
+    "、五敵總計"
+  ],
+  "en": [
+    "Equivalent skill coefficient (early two-action average): one enemy ",
+    "Equivalent skill coefficient (mature two-action average): one enemy ",
+    "Self-harm/active healing uses 4 events. ",
+    "Turn growth uses the actual turns of the first two actions. ",
+    "Special conditions use midpoint damage. ",
+    "Self-harm/active healing growth uses full stacks. ",
+    "Turn growth uses mature turns and expiry states. ",
+    "; five enemies total "
+  ],
+  "ja": [
+    "等価スキル倍率（初期2行動平均）：敵1体",
+    "等価スキル倍率（成熟後2行動平均）：敵1体",
+    "自傷／アクティブ回復は4イベントで評価。",
+    "ターン成長は最初の2行動の実際のターンで評価。",
+    "特殊条件は中間ダメージで評価。",
+    "自傷／アクティブ回復の成長は最大スタックで評価。",
+    "ターン成長は成熟ターンと効果終了後の状態で評価。",
+    "、敵5体合計"
+  ],
+  "ko": [
+    "등가 스킬 배율(초기 두 행동 평균): 적 1명 ",
+    "등가 스킬 배율(성숙 후 두 행동 평균): 적 1명 ",
+    "자해/액티브 회복은 4회 이벤트로 평가. ",
+    "턴 성장은 첫 두 행동의 실제 턴으로 평가. ",
+    "특수 조건은 중간 피해로 평가. ",
+    "자해/액티브 회복 성장은 최대 스택으로 평가. ",
+    "턴 성장은 성숙 턴과 효과 만료 상태로 평가. ",
+    "; 적 5명 총합 "
+  ]
+}

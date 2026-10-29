@@ -1,11 +1,11 @@
-import { RATING_AXES, RATING_MAX, RATING_VERSION } from './characterRatings.js'
+import { RATING_AXES, RATING_MAX, RATING_VERSION, validRatingScore } from './characterRatings.js'
 
 export function ratingIndex(data) {
   if (data?.schemaVersion !== 1 || data.rubricVersion !== RATING_VERSION || data.scaleMax !== RATING_MAX || !Array.isArray(data.characters)) throw new Error('Invalid rating index')
   const result = {}
   for (const entry of data.characters) {
     if (!Number.isInteger(entry.id) || Object.hasOwn(result, entry.id) || !['current', 'stale', 'pending'].includes(entry.status)) throw new Error('Invalid rating entry')
-    if (entry.status !== 'pending' && !RATING_AXES.every(key => Number.isInteger(entry.scores?.[key]) && entry.scores[key] >= 0 && entry.scores[key] <= RATING_MAX)) throw new Error('Invalid indexed score')
+    if (entry.status !== 'pending' && !RATING_AXES.every(key => validRatingScore(key,entry.scores?.[key]))) throw new Error('Invalid indexed score')
     result[entry.id] = entry.status === 'pending' ? { ...entry, scores: null } : entry
   }
   return result

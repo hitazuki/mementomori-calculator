@@ -24,7 +24,8 @@ test('all 138 authored reviews retain source checks and freeze the other five ax
   for(const r of records) {
     const c=survivalCalibration.records[r.id]
     assert.equal(c.sourceHash,r.sourceHash)
-    assert.equal(hash(r.axes.filter(a=>!['toughness','survival'].includes(a.key))),c.preservedAxesHash)
+    const baseline=read('../doc/character-ratings/v6/output-calibration.json').records[r.id]
+    assert.equal(hash([...baseline.previousAxes,...r.axes.slice(4)]),c.preservedAxesHash)
     assert.equal(hash(r.output),c.preservedOutputHash)
     assert.equal(hash(r.survival.states),c.preservedStatesHash)
     assert.deepEqual(r.survival.calibration,survivalCalibrationReference(r.id,r.survival.states,r.sourceHash))
