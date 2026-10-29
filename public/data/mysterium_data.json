@@ -2311,7 +2311,7 @@
     "reqCids": [
       155,
       82,
-      0
+      156
     ],
     "params": [
       {
@@ -2329,5 +2329,29 @@
         "val": 70
       }
     ]
+  },
+  {
+    "id": 103,
+    "nameKey": "[CharacterCollectionName103]",
+    "reqCids": [
+      156,
+      45,
+      4
+    ],
+    "params": [
+      {
+        "ptype": 16,
+        "nameKey": "[BattleParameterTypeDebuffResist]",
+        "ctype": 2,
+        "val": 150
+      },
+      {
+        "ptype": 2,
+        "nameKey": "[BattleParameterTypeAttackPower]",
+        "ctype": 2,
+        "val": 200
+      }
+    ],
+    "baseParams": []
   }
 ]
