@@ -1,9 +1,14 @@
 import { referenceFor } from './characterRatingV5.mjs'
-import { damageReference, criticalExtension } from '../../src/utils/characterRatingModel.js'
+import { damageReference as legacyDamageReference, criticalExtension } from '../../src/utils/characterRatingModel.js'
 import { newCharacters } from '../../doc/character-ratings/v6/new-characters.mjs'
 import { sourceUpdates } from '../../doc/character-ratings/v6/source-updates.mjs'
 
+import { panelDamageReference, PANEL_BASE_DAMAGE, CHARACTER_RATING_PANEL } from '../../src/utils/characterRatingPanel.js'
+
 export function stageReference(c,config) {
+  const current=config.panelVersion===CHARACTER_RATING_PANEL.version
+  const damageReference=current?panelDamageReference:legacyDamageReference
+  const baseDamage=current?PANEL_BASE_DAMAGE:.3125
   // Petra's passive replaces normals; Rosalie's post-S2 source attack is for nearby allies.
   const applied={...config,effects:{...(c.id===88?{attackFromHp:0}:{}),...config.effects},components:{...(c.id===14?{N:'2.2,2,0'}:{}),...(c.id===97?{S1:'4.2,1,5'}:{}),...config.components}}
   const ref=referenceFor(c,{...applied,authored:newCharacters[c.id]})
@@ -19,12 +24,13 @@ export function stageReference(c,config) {
       // Explicit guaranteed critical: only the confirmed critical multiplier;
       // do not import attack, defense or the unconfirmed damage bucket.
       const segment=skill.segments[i]
-      segment.factors.critical=1.5
-      segment.damage*=1.5
-      segment.equivalentBasicHits*=1.5
+      const critical=current?1+CHARACTER_RATING_PANEL.baseCritDamage+CHARACTER_RATING_PANEL.extraCritDamage:1.5
+      segment.factors.critical=critical
+      segment.damage*=critical
+      segment.equivalentBasicHits*=critical
     }
     skill.damage=skill.segments.reduce((n,s)=>n+s.damage,0)
-    skill.equivalentBasicHits=skill.damage/.3125
+    skill.equivalentBasicHits=skill.damage/baseDamage
     snapshot.perAction=ref.cycle.cycle.reduce((n,key)=>n+snapshot.skills[key].equivalentBasicHits,0)/ref.cycle.cycle.length
     snapshot.twoActiveTotal=snapshot.skills.S1.equivalentBasicHits+skill.equivalentBasicHits
   }
@@ -48,6 +54,6 @@ export function stageReference(c,config) {
     snapshot.perAction=ref.cycle.cycle.reduce((n,key)=>n+snapshot.skills[key].equivalentBasicHits,0)/ref.cycle.cycle.length
   }
   const firstActions=[...ref.cycle.opening,...ref.cycle.cycle,...ref.cycle.cycle].slice(0,2)
-  return {config,cycle:ref.cycle,snapshots:ref.snapshots,firstActions,openingDamage:ref.snapshots.map(s=>firstActions.reduce((n,key)=>n+s.skills[key].damage/.3125,0)),
+  return {config,cycle:ref.cycle,snapshots:ref.snapshots,firstActions,openingDamage:ref.snapshots.map(s=>firstActions.reduce((n,key)=>n+s.skills[key].damage/baseDamage,0)),
     note:sourceUpdates[c.id]?.output.note??ref.note}
 }

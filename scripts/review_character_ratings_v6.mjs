@@ -19,6 +19,9 @@ import { auxiliaryReviews } from '../doc/character-ratings/v6/auxiliary.mjs'
 import { sourceUpdates } from '../doc/character-ratings/v6/source-updates.mjs'
 import { referenceFor } from './lib/characterRatingV5.mjs'
 import { survivalCalibrationReference, survivalCalibrationReport } from './lib/characterSurvivalCalibration.mjs'
+import { panelSurvivalStates } from './lib/characterPanelSurvival.mjs'
+import { CHARACTER_RATING_PANEL } from '../src/utils/characterRatingPanel.js'
+import { panelCalibrationReport } from './lib/characterPanelReport.mjs'
 
 const root=new URL('../',import.meta.url), read=p=>JSON.parse(fs.readFileSync(new URL(p,root),'utf8'))
 const catalog=readCharacterCatalog(new URL('public/data/character-catalog/',root)).characters
@@ -55,7 +58,8 @@ const records=catalog.filter(c=>previous.some(r=>r.id===c.id)||newCharacters[c.i
   const hash=createHash('sha256').update(JSON.stringify(ratingSource(c))).digest('hex')
   if(!old||(old.sourceHash!==hash && hash!==reviewedSources[c.id])) throw new Error('Source changed; review stage inputs first: '+c.id)
   const weapon=weaponReference(c)
-  const finite=compareSurvival(old.survival.states.map(({comparisons,...s})=>c.id===97?{...s,effects:{...s.effects,attack:weapon.attack,defense:weapon.defense,...(s.effects.shieldAttack?{shieldAttack:5}:{})}}:s))
+  const legacyFinite=compareSurvival(old.survival.states.map(({comparisons,...s})=>c.id===97?{...s,effects:{...s.effects,attack:weapon.attack,defense:weapon.defense,...(s.effects.shieldAttack?{shieldAttack:5}:{})}}:s))
+  const finite=panelSurvivalStates(c,legacyFinite,stageReference(c,{panelVersion:CHARACTER_RATING_PANEL.version}))
   const life=targetAvoidance[c.id]??(c.id===97?{...old.output.lifecycle,activeWindow:'首回合忧蓝500%攻击盾6回合，仅一次；40%减伤常驻'}:c.id===93?
     {activeWindow:'P1开局一层屏障，抵消一次超过最大生命10%的伤害',replenishment:'屏障仅一次，不补发',afterExpiry:'屏障消耗后无抗伤或回血；主动自损持续消耗生命'}:old.output.lifecycle)
   const note=reviewNotes[c.id]??old.output.note
@@ -101,22 +105,28 @@ const records=catalog.filter(c=>previous.some(r=>r.id===c.id)||newCharacters[c.i
     ...auxiliary.map(a=>a.key==='protection'&&care?care.reason:a.key==='protection'&&targetAvoidance[c.id]?.protection?targetAvoidance[c.id].protection:a.key==='protection'&&c.id===97?'P2首回合全体100%攻击盾、忧蓝500%，持续6回合且仅一次；P1受击30%概率净化，不当作稳定群疗。':a.reason),
   ]
   for(const [i,key] of ['burst','late'].entries()) reasons[i]=outputReasonOverrides[c.id]?.[key]?.({stages,equivalent})??reasons[i]
-  const tagsForOutput=[...(outputCalibration.events4?['自伤／主动回复按4次事件。']:[]),...(outputCalibration.rounds?['回合成长按前两行动实际回合。']:[]),...(outputCalibration.special?['特殊条件取折中伤害。']:[])]
+  const conditionReason=outputCalibration.special?(outputCalibration.conditionReason??'特殊条件取折中伤害。'):''
+  const tagsForOutput=[...(outputCalibration.events4?['自伤／主动回复按4次事件。']:[]),...(outputCalibration.rounds?['回合成长按前两行动实际回合。']:[]),...(conditionReason?[conditionReason]:[])]
   reasons[0]='等效技能倍率（早期两行动平均）：单敌'+equivalent(outputCalibration.burstTotals[0]/2)+'、五敌总计'+equivalent(outputCalibration.burstTotals[1]/2)+'。'+tagsForOutput.join('')
-  reasons[1]='等效技能倍率（成熟两行动平均）：单敌'+equivalent(outputCalibration.lateActions[0])+'、五敌总计'+equivalent(outputCalibration.lateActions[1])+'。'+(outputCalibration.events4?'自伤／主动回复成长取满层。':'')+(outputCalibration.rounds?'回合成长按成熟回合及到期状态。':'')+(outputCalibration.special?'特殊条件取折中伤害。':'')
+  reasons[1]='等效技能倍率（成熟两行动平均）：单敌'+equivalent(outputCalibration.lateActions[0])+'、五敌总计'+equivalent(outputCalibration.lateActions[1])+'。'+(outputCalibration.events4?'自伤／主动回复成长取满层。':'')+(outputCalibration.rounds?'回合成长按成熟回合及到期状态。':'')+conditionReason
+  if(calibration.sustainWindow){
+    const w=calibration.sustainWindow,ref=calibration.sustainReference,after=calibration.afterExpiryReference
+    reasons[3]=`等效生命（护盾耗尽后）：前${w.throughRound}回合物理${equivalent(ref.physical)}、魔法${equivalent(ref.magic)}；第${w.throughRound+1}回合后${equivalent(after.capacity)}。${w.reason}`
+  }
   const axes=RATING_AXES.map((key,i)=>{
     const base=i<2?values[i]:i===2?defenseBase[0]:values[i]
     return {key,score:values[i],baseBand:base,adjustments:values[i]===base?[]:[{points:values[i]-base,reason:i===0?readiness.reason:i===2?initiative.note:note}],reason:cleanRatingCopy(key,reasons[i]),evidence,
-      reviewBasis:i<2?reasons[i]+'；恢复原分档：单敌/五敌三倍量尺择优；条件先折中伤害再分档。':i===2||i===3?`${reasons[i]}；${calibration.note}；容量参照与非容量机制分别审核，采用${calibration.version}统一量尺。`:auxiliaryReview?.[key]?.reviewBasis??(i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`)}
+      reviewBasis:i<2?reasons[i]+(outputCalibration.conditionReason?'；单敌/五敌三倍量尺择优；条件按上述状态计算后分档。':'；当前统一分档：单敌/五敌三倍量尺择优；关联条件联合计算后分档。'):i===2||i===3?`${reasons[i]}；${calibration.note}；容量参照与非容量机制分别审核，采用${calibration.version}统一量尺。`:auxiliaryReview?.[key]?.reviewBasis??(i<2?`${reasons[i]}；单敌/五敌按独立量尺取优势定位，不将五敌总量与单敌直接比较。`:`${reasons[i]}；防护持续、消耗与回复分别评审。`)}
   })
   return {...old,outputCalibration,...(care?{teamCare:care}:{}),sourceHash:hash,conditions:c.id===97?'S1同时降低其他友军吸血；最高专武攻击力+18%、防御力+5%已计入，暴击抗性+10%不折算为固定减伤。':old.conditions,rubricVersion:RATING_VERSION,reviewedAt:outputCalibration.reviewedAt??calibration.reviewedAt??auxiliaryReview?.reviewedAt??authored?.reviewedAt??(care?'2026-09-16':c.id===97?'2026-09-15':targetAvoidance[c.id]?'2026-09-09':'2026-09-08'),axes,output:{...old.output,...(c.id===97?{weapon}:{}),lifecycle:life,snapshots:stages.mature.snapshots,cycle:stages.mature.cycle,note,stages,readiness:readiness??null,ranges:rawRanges,role:outputRole,targeting,
     assumptions:'范围为已审核的有限条件样本，不是所有外部队伍的理论极值；开局按前两次自身行动，短计数/短回合另列条件爆发，均仅计直接伤害；后期按成熟循环，无依据的事件频率不换算回合。延迟伤害仅在完整持续期样本计入。',
     equivalentSkillUnit:'100% = 固定基准面板下无角色自增益的100%攻击普攻；含适用乘区，特殊伤害仅按最终伤害折合，不改变其原始伤害类型。',
     comparison:{groupBenchmark:3,burstAnchors,lateAnchors,lowerBands:floors,matureBands:bases,openingBand,quickBand,penalties}},
-    survival:{...old.survival,...(targetAvoidance[c.id]?{targetAvoidance:targetAvoidance[c.id],effectiveSustain:life.replenishment+'；'+life.afterExpiry}:{}),calibration,initiative,shortTermProtection:life.activeWindow,states:finite,scoringScenario:'neutral',peakOrdinaryCapacity:peak,burstScore:defense[0],sustainScore:defense[1]}}
+    survival:{...old.survival,...(targetAvoidance[c.id]?{targetAvoidance:targetAvoidance[c.id],effectiveSustain:life.replenishment+'；'+life.afterExpiry}:{}),panel:CHARACTER_RATING_PANEL,legacyStates:legacyFinite,calibration,initiative,shortTermProtection:life.activeWindow,states:finite,scoringScenario:'neutral',peakOrdinaryCapacity:peak,burstScore:defense[0],sustainScore:defense[1]}}
 })
 if(records.length!==138) throw new Error('Expected all 138 characters')
 writeGeneratedFile(new URL('output-calibration.md',folder),outputCalibrationReport(records))
+writeGeneratedFile(new URL('panel-recalibration.md',folder),panelCalibrationReport(records))
 writeGeneratedFile(new URL('survival-calibration.md',folder),survivalCalibrationReport(records))
 const collection=(metadata,key,rows)=>JSON.stringify(metadata,null,2).slice(0,-2)+`,\n  "${key}": [\n`+rows.map(r=>'    '+JSON.stringify(r)).join(',\n')+'\n  ]\n}\n'
 writeGeneratedFile(new URL('review.json',folder),collection({rubricVersion:RATING_VERSION,burstAnchors,lateAnchors},'records',records))

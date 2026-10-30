@@ -3,6 +3,10 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { survivalCapacity, SURVIVAL_SCENARIOS } from '../src/utils/characterSurvival.js'
 import { offenseGain, OFFENSE_SCENARIOS } from '../src/utils/characterOffense.js'
+import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
+import { panelSurvivalStates } from '../scripts/lib/characterPanelSurvival.mjs'
+import { stageReference } from '../scripts/lib/characterRatingV6.mjs'
+import { CHARACTER_RATING_PANEL } from '../src/utils/characterRatingPanel.js'
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} != ${expected}`)
 test('HP and independent block multiply; damage-bucket reduction is diluted by damage bonuses', () => {
   near(survivalCapacity({ hp: 1, block: .5 }).withoutShield, 4)
@@ -41,15 +45,19 @@ test('unbounded mitigation and invalid inputs are rejected', () => {
 })
 test('published reference states preserve reviewed inputs, sources and score decisions', () => {
   const source = JSON.parse(fs.readFileSync(new URL('../doc/character-ratings/v6/review.json', import.meta.url)))
+  const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
   for (const profile of source.records) {
+      const character=catalog.find(c=>c.id===profile.id)
+      const expectedStates=panelSurvivalStates(character,profile.survival.legacyStates,stageReference(character,{panelVersion:CHARACTER_RATING_PANEL.version}))
       const rating = JSON.parse(fs.readFileSync(new URL(`../public/data/character-ratings/${profile.id}.json`, import.meta.url)))
       const published = rating.quantitative.survival
       assert.equal(published.version, 'survival-reference-v6')
       assert.equal(published.scoringScenario, 'neutral')
       assert.deepEqual(published.states, profile.survival.states)
+      assert.deepEqual(published.states,expectedStates)
       assert.equal(rating.axes.find(a=>a.key==='toughness').score, profile.survival.burstScore)
       assert.equal(rating.axes.find(a=>a.key==='survival').score, profile.survival.sustainScore)
-      for (const state of published.states) {
+      for (const state of profile.survival.legacyStates) {
         assert.ok(state.evidence.every(key => rating.sources.some(s => s.key === key)))
         for (const result of state.comparisons) {
           const expected = {

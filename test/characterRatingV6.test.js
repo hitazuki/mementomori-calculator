@@ -8,6 +8,13 @@ import { survivalCapacity } from '../src/utils/characterSurvival.js'
 import { createHash } from 'node:crypto'
 import { ratingSource } from '../src/utils/characterRatings.js'
 import { readCharacterCatalog } from '../scripts/lib/characterCatalog.mjs'
+import { calcDamageRate } from '../src/engine/damageCalc.js'
+import { RATING_LEVEL_COEFFICIENTS as panelCoefficients } from '../src/utils/characterRatingPanel.js'
+const defenseGain=(ratio=1,magic=false)=>{
+  const c=panelCoefficients,p=magic?65700:11950,d=magic?c.cMdef:c.cDef,k=magic?c.cPmPen:c.cPen
+  return calcDamageRate(6000000,p,d,k)/calcDamageRate(6000000*ratio,p,d,k)
+}
+const cusieCapacity=(1+5/2.5*(1.48/1.3))*defenseGain(1.05)/.6
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'))
 const catalog=readCharacterCatalog(new URL('../public/data/character-catalog/',import.meta.url)).characters
 const reviews=read('../doc/character-ratings/v6/review.json').records
@@ -49,7 +56,7 @@ test('provisional Lamis keeps late S2 casts separate from shields that stop befo
   assert.equal(r.output.growth.totalEvents,6)
   assert.equal(r.survival.states[0].effects.shieldAttack,2)
   assert.equal(r.survival.states[2].effects.shieldAttack,6)
-  assert.ok(Math.abs(r.survival.states[2].comparisons[0].physical.withShield-16.8)<1e-9)
+  assert.ok(Math.abs(r.survival.states[2].comparisons[0].physical.withShield-(1+6/2.5*1.6)*4)<1e-9)
   assert.equal(r.survival.states[3].comparisons[0].physical.withShield,4)
   assert.equal(r.survival.initiative.penalty,0)
   assert.match(r.output.lifecycle.replenishment,/第13回合起停止/)
@@ -79,7 +86,7 @@ test('Guardian Alexandra keeps first-round self-harm, conditional damage and exp
   assert.match(r.outputCalibration.samples.burst.length.toString(),/1|2/)
   assert.doesNotMatch(r.axes[0].reason,/阻绝|0\.59/)
   assert.match(r.axes[1].reason,/成熟两行动平均/)
-  assert.match(r.axes[1].reason,/特殊条件取折中伤害/)
+  assert.match(r.axes[1].reason,/70%成功与30%失败/)
 })
 
 test('Aine full-team Shields unlock the second-action burst without assuming shields survive',()=>{
@@ -116,7 +123,7 @@ test('golden Artoria keeps the fifteen-heal unlock late and magical recovery out
   assert.equal(r.output.role,'单群兼顾')
   assert.equal(r.survival.states[0].comparisons[0].physical.withoutShield,5)
   assert.ok(Math.abs(r.survival.states[1].comparisons[0].physical.withoutShield-5.75)<1e-9)
-  assert.ok(Math.abs(r.survival.states[1].comparisons[0].magic.withoutShield-6.6125)<1e-9)
+  assert.ok(Math.abs(r.survival.states[1].comparisons[0].magic.withoutShield-5.75*defenseGain(1.3,true))<1e-9)
   assert.equal(r.survival.initiative.penalty,0)
   assert.equal(r.teamCare.heals.find(h=>h.slot==='P1').targets,4)
   assert.match(r.axes[4].reason,/须存活/)
@@ -131,8 +138,8 @@ test('Cusie reviewed weapon stats affect output and finite shields without treat
   assert.ok(Math.abs(r.output.stages.opening.openingDamage[1]-45.312)<1e-9)
   const full=r.survival.states.find(s=>s.effects.shieldAttack)
   const empty=r.survival.states.find(s=>!s.effects.shieldAttack)
-  assert.ok(Math.abs(full.comparisons[0].physical.withShield-(1+5/3*1.18)*1.025/.6)<1e-9)
-  assert.ok(Math.abs(empty.comparisons[0].physical.withoutShield-1.025/.6)<1e-9)
+  assert.ok(Math.abs(full.comparisons[0].physical.withShield-cusieCapacity)<1e-9)
+  assert.ok(Math.abs(empty.comparisons[0].physical.withoutShield-defenseGain(1.05)/.6)<1e-9)
 })
 
 test('all seven-axis ratings retain reproducible lower, opening, mature and upper samples',()=>{
@@ -174,7 +181,7 @@ test('short event routes contribute to burst while long growth is rated by late 
   assert.equal(cusie.output.stages.opening.snapshots[1].skills.S1.components[0].coefficient,4.2)
   assert.equal(cusie.output.stages.opening.snapshots[1].skills.S1.components[0].targets,5)
   assert.equal(cusie.survival.states[0].effects.shieldAttack,5)
-  assert.ok(Math.abs(cusie.survival.peakOrdinaryCapacity-(1+5/3*1.18)*1.025/.6)<1e-9)
+  assert.ok(Math.abs(cusie.survival.peakOrdinaryCapacity-cusieCapacity)<1e-9)
   for(const r of reviews) {
     assert.match(r.axes[0].reason,/等效技能倍率/)
     assert.match(r.axes[1].reason,/等效技能倍率/)

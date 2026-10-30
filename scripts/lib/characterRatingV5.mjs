@@ -1,7 +1,9 @@
 import fs from 'node:fs'
-import { damageReference, ratingCycle, growthRequirement, criticalExtension, RATING_PANEL } from '../../src/utils/characterRatingModel.js'
+import { damageReference as legacyDamageReference, ratingCycle, growthRequirement, criticalExtension, RATING_PANEL } from '../../src/utils/characterRatingModel.js'
 import { effects, skillEffects, componentOverrides, singleOverrides, scenarioEffects, outputNotes } from '../../doc/character-ratings/v5/decisions.mjs'
 import { dots, external } from '../../doc/character-ratings/v5/secondary-inputs.mjs'
+
+import { panelDamageReference, PANEL_BASE_DAMAGE, CHARACTER_RATING_PANEL, panelStatFactor } from '../../src/utils/characterRatingPanel.js'
 
 const folder = new URL('../../doc/character-ratings/v5/', import.meta.url)
 export const readRows = name => fs.readFileSync(new URL(name, folder), 'utf8').trim().split(/\r?\n/).filter(s => s && !s.startsWith('#')).map(s => s.split('|'))
@@ -24,19 +26,24 @@ export function weaponReference(character) {
   return result
 }
 
-function criticalChain(coefficient, hits, chance, weapon, additions = {}) {
+function criticalChain(coefficient, hits, chance, weapon, additions = {}, damageReference = legacyDamageReference) {
   // After the first critical, remaining hits are guaranteed. First hit remains stochastic.
   return Array.from({length:hits},(_,i) => damageReference({coefficient}, {...additions,critRate:1-(1-chance)**(i+1)-.5,critDamage:weapon.critDamage},1,0,weapon.attack))
 }
 
 export function referenceFor(character, stage = {}) {
+  const current=stage.panelVersion===CHARACTER_RATING_PANEL.version
+  const damageReference=current?panelDamageReference:legacyDamageReference
+  const baseDamage=current?PANEL_BASE_DAMAGE:.3125
+  const hp=current?CHARACTER_RATING_PANEL.hp:3
   const id = character.id, input = stage.authored?.input ?? inputs.get(id)
   const note = stage.authored?.note ?? outputNotes[id]
   if (!input || !note) throw new Error('Missing authored attack review '+id)
   const weapon = weaponReference(character)
   const base = {...effects[id],...stage.authored?.effects,...stage.effects}
-  if(id===38||id===89) base.attack*=1+weapon.attack
-  for (const k of ['primary','critDamage','penetration','specificPenetration']) base[k] = (base[k]??0)+weapon[k]
+  if(!current&&(id===38||id===89)) base.attack*=1+weapon.attack
+  for (const k of (current?['primary','critDamage']:['primary','critDamage','penetration','specificPenetration'])) base[k] = (base[k]??0)+weapon[k]
+  if(current) Object.assign(base,{flatPenetration:weapon.penetration*1725,flatSpecificPenetration:weapon.specificPenetration*16660,panelHp:weapon.hp,panelDefense:weapon.defense,damageType:character.job===4?'magic':'physical'})
   const components = {...input,...componentOverrides[id],...stage.components}
   const active = character.skills.filter(s=>/^S[12]$/.test(s.slot) && !stage.disabled?.includes(s.slot)).map(s=>({slot:s.slot,cooldown:s.cooldown}))
   // These changes recur in the mature form. Finite transformations are kept out.
@@ -55,12 +62,12 @@ export function referenceFor(character, stage = {}) {
       if (id===132 && slot==='S2') Object.assign(state,{specificDefenseDown:.4,damage:.2})
       Object.assign(state,stage.authored?.slots?.[slot],stage.scenarios?.[enemies]?.effects,stage.slots?.[slot],stage.scenarios?.[enemies]?.slots?.[slot])
       // Weapon contributions are additional to skill increments, including slot overrides.
-      for (const k of ['critDamage','penetration','specificPenetration']) if (skillEffects[id]?.[slot]?.[k]!==undefined) state[k]+=weapon[k]
+      for (const k of (current?['critDamage']:['critDamage','penetration','specificPenetration'])) if (skillEffects[id]?.[slot]?.[k]!==undefined) state[k]+=weapon[k]
       let results = components.map(component=>damageReference(component,state,enemies,0,weapon.attack))
       if (id===16 && slot==='S1') results.push({damage:results[0].damage*.25,equivalentBasicHits:results[0].equivalentBasicHits*.25,factors:{derivedFrom:'S1 actual damage',fraction:.25}})
       if ((id===15 && slot==='S1')||(id===70 && slot==='S2')) {
         const first = components[0], chance=id===70?.9:.5
-        results = criticalChain(first.coefficient,first.hits,chance,weapon)
+        results = criticalChain(first.coefficient,first.hits,chance,weapon,current?state:{},damageReference)
         if (id===70) results.push(damageReference({...components[1],hits:1-(1-chance)**4},{...state,guaranteedCrit:true},1,0,weapon.attack))
       }
       if (id===18 && slot==='S1') {
@@ -72,16 +79,16 @@ export function referenceFor(character, stage = {}) {
       }
       if (id===33 && slot==='S1') results=Array.from({length:5},(_,i)=>damageReference({coefficient:2.3},{...state,attack:.1*i*.5},1,0,weapon.attack))
       if (id===65 && slot==='S2') results=Array.from({length:3},(_,i)=>damageReference({coefficient:components[0].coefficient,hits:1,targets:2},{...state,defenseDown:.15*i},enemies,0,weapon.attack))
-      if (id===20 && slot==='S2') results=[damageReference({coefficient:3*(1+weapon.hp)*.35,targets:3,basis:'fixed-direct'},{},enemies)]
-      if (id===60 && slot==='S2') results=[damageReference({coefficient:3*(2.2+weapon.hp)*(stage.pastDamageHp??2)*.2,targets:3,basis:'fixed-direct'},{},enemies)]
-      if (id===74 && slot==='S1') results=[damageReference({coefficient:Math.min(3*.2,5*(1+weapon.attack)),basis:'fixed-direct'},{},enemies)]
+      if (id===20 && slot==='S2') results=[damageReference({coefficient:hp*(current?panelStatFactor(weapon.hp,'hp'):1+weapon.hp)*.35,targets:3,basis:'fixed-direct'},{},enemies)]
+      if (id===60 && slot==='S2') results=[damageReference({coefficient:hp*(current?panelStatFactor(weapon.hp,'hp')*2.2:2.2+weapon.hp)*(stage.pastDamageHp??2)*.2,targets:3,basis:'fixed-direct'},{},enemies)]
+      if (id===74 && slot==='S1') results=[damageReference({coefficient:Math.min(hp*.2,5*(current?panelStatFactor(weapon.attack):1+weapon.attack)),basis:'fixed-direct'},{},enemies)]
       const damage=results.reduce((n,r)=>n+r.damage,0)
       const dot=dots[id]?.slot===slot?dots[id]:null
       const targetCount=dot?Math.min(dot.targets,enemies):0
-      const delayed=!dot?0:dot.chance*(dot.basis==='currentHp'?3*(1-(1-dot.value)**dot.ticks)*targetCount:
+      const delayed=!dot?0:dot.chance*(dot.basis==='currentHp'?hp*(1-(1-dot.value)**dot.ticks)*targetCount:
         dot.basis==='actualDamage'?damage*dot.value*dot.ticks:(1+weapon.attack+(state.attack??0))*dot.value*dot.ticks*targetCount)
       return [slot,{components,effects:state,segments:results,damage,delayedDamage:delayed,delayedAssumptions:dot,
-        equivalentBasicHits:(damage+delayed)/.3125}]
+        equivalentBasicHits:(damage+delayed)/baseDamage}]
     }))
     return {enemies,skills,perAction:cycle.cycle.reduce((sum,slot)=>sum+skills[slot].equivalentBasicHits,0)/cycle.cycle.length,
       twoActiveTotal:skills.S1.equivalentBasicHits+skills.S2.equivalentBasicHits}

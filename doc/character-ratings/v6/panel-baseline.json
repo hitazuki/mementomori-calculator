@@ -1,0 +1,2627 @@
+{
+  "version": "before-panel-reference-2026-10-30",
+  "records": {
+    "1": {
+      "sourceHash": "68e877144ea566a89bc49efb1813d847d6962d29e845528f7c9cfeb23910ad3d",
+      "scores": [
+        1,
+        1,
+        0,
+        1,
+        2,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "bde9e5af28ade4455c785a8ec2faef5a80bd29e7db86b30e7e15912cbc420b7b",
+      "output": {
+        "burst": 0.525,
+        "late": 0.525
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "2": {
+      "sourceHash": "dc7237f97e30e7640353ba9d28d6201d5fa161051f930f4c7df5509ae71ddf31",
+      "scores": [
+        4,
+        4,
+        0,
+        0,
+        0,
+        0,
+        5
+      ],
+      "auxiliaryAxesHash": "2bc97dfac58c6ef2237540439170308aff96b2b9ec739b1d0ce224c2500b6ab3",
+      "output": {
+        "burst": 7.025,
+        "late": 7.025
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "3": {
+      "sourceHash": "d26f53245b749a01e55c76329169b560ce6fc0e6e52df730516e4e750d0c6977",
+      "scores": [
+        3,
+        3,
+        0,
+        0,
+        5,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "e4b331e76650966c003fec6c9ba9885b3536af141f2dd36241864d333cd2906a",
+      "output": {
+        "burst": 5.916666666666667,
+        "late": 5.916666666666667
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "4": {
+      "sourceHash": "e4c8c020462366f5e9681706f77de03580d4e3096cf85f28c85e413948346611",
+      "scores": [
+        3,
+        3,
+        4,
+        2,
+        0,
+        0,
+        3
+      ],
+      "auxiliaryAxesHash": "b1b2c1e569643b72f58d6f65cfbc53b1f250304f8dc2abb22501c27a41f6b1f2",
+      "output": {
+        "burst": 4.1080000000000005,
+        "late": 4.1080000000000005
+      },
+      "burstCapacity": 2,
+      "sustainCapacity": 1
+    },
+    "5": {
+      "sourceHash": "bfc4e1ccbb0cf97d83d5c65724a60594ab093cd5bab6c70486560132efb0c4a0",
+      "scores": [
+        4,
+        4,
+        8,
+        7,
+        0,
+        0,
+        7
+      ],
+      "auxiliaryAxesHash": "0bda1575bdac969cf688ef8a59e7918201a93c293e553bebf49f35240b58c781",
+      "output": {
+        "burst": 8.32608,
+        "late": 8.32608
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "6": {
+      "sourceHash": "5eb65b36b4a2b9a8796b66f48c663ec2bea174bcdf16edab03a18241c3de3fff",
+      "scores": [
+        6,
+        6,
+        9,
+        2,
+        0,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "e8143b2a04fa3207dc3f012c272cdfb761eb22c7aaf8c763f16f8f7227bade97",
+      "output": {
+        "burst": 22.041,
+        "late": 22.041
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "7": {
+      "sourceHash": "e81afbff4b81dabfbc34d16e669f7d306b21ff05b1ac1eb2fc50dfbb4d17176a",
+      "scores": [
+        3,
+        3,
+        3,
+        6,
+        6,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "ddd56ebc1383da2e838d02bbfbc3bec49bea17f0ecd6530690156448721733a5",
+      "output": {
+        "burst": 6.49,
+        "late": 6.49
+      },
+      "burstCapacity": 1.4,
+      "sustainCapacity": 1.4
+    },
+    "8": {
+      "sourceHash": "1347dc4be6c062bf1e20d224b2dcebfd1f8169e34879bc25db65034336e46d71",
+      "scores": [
+        8,
+        8,
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      "auxiliaryAxesHash": "ff0a47cebf689a55745c2d440feea90e0d441b9b8461656749d29b68f37bf805",
+      "output": {
+        "burst": 71.27818364772965,
+        "late": 73.00372927756655
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "9": {
+      "sourceHash": "f83c51af7b0069a5d91f76a77b24c0004412214b0d6c0c431e1e50688971381e",
+      "scores": [
+        5,
+        5,
+        3,
+        3,
+        3,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "7dc336b19b83834ddfd47609af3296732727a7852261bc77d7beda243ce8e7d7",
+      "output": {
+        "burst": 16.171799999999998,
+        "late": 16.171799999999998
+      },
+      "burstCapacity": 1.45,
+      "sustainCapacity": 1.45
+    },
+    "10": {
+      "sourceHash": "38a8e6fd77cd4d58edd94568149b4d8f6f40145a5e7ab35a6dfea7128c4f3214",
+      "scores": [
+        5,
+        5,
+        0,
+        3,
+        0,
+        4,
+        0
+      ],
+      "auxiliaryAxesHash": "d004ea9fe7211e4f9191c7fa0892d709383420ccd02bba4cd3939a0ba694836c",
+      "output": {
+        "burst": 16.078719999999997,
+        "late": 16.078719999999997
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "11": {
+      "sourceHash": "8f0669532288864c3a344a44201442727aae90feed405e4f4381ff17cf2c8c87",
+      "scores": [
+        2,
+        2,
+        0,
+        0,
+        3,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "699eb94ed7539a0d8db1f124a20194bed34ca0892ee44586f9ecbfd0148cdf16",
+      "output": {
+        "burst": 2.45,
+        "late": 2.45
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "12": {
+      "sourceHash": "08fcbf4dfaf794e5737a375d63f7f6f8943102dde35786b419cb6833f0a65ebd",
+      "scores": [
+        5,
+        5,
+        0,
+        0,
+        5,
+        2,
+        0
+      ],
+      "auxiliaryAxesHash": "f0780778b4d92127136b35c9fa70ec87df8c675d82357188283bb55fc5112276",
+      "output": {
+        "burst": 11.200000000000001,
+        "late": 11.200000000000001
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "13": {
+      "sourceHash": "48ec97a100958d2953bef774462c160dc1d0a363b6fec7629f4fb3f5f3e3e8c8",
+      "scores": [
+        3,
+        3,
+        2,
+        2,
+        0,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "3a8e6a3160d7e25037ba25cb4671677f9510bfe1104d5227a0243daefc1d37f7",
+      "output": {
+        "burst": 4.65,
+        "late": 4.65
+      },
+      "burstCapacity": 1.2,
+      "sustainCapacity": 1.2
+    },
+    "14": {
+      "sourceHash": "d9508f25c176083ca36f99976d88e8eab1045ce12e442a4ba974bd64ae3c186c",
+      "scores": [
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "241ca31255a610abe8c4ba3a88a9f3d0882d15fe25708f58c29007579ff7f746",
+      "output": {
+        "burst": 2.6,
+        "late": 2.8600000000000003
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "15": {
+      "sourceHash": "27b82ac4c0ce3eee186de3d37bfc783b56fef90296e643b5a5d7450ffd7a64d4",
+      "scores": [
+        7,
+        7,
+        1,
+        7,
+        0,
+        0,
+        5
+      ],
+      "auxiliaryAxesHash": "b89e0166d180aaa341bd516789d76dfe7efd286c5f1309763593f66696f4f704",
+      "output": {
+        "burst": 38.23974374999999,
+        "late": 38.23974374999999
+      },
+      "burstCapacity": 1.07,
+      "sustainCapacity": 2.4
+    },
+    "16": {
+      "sourceHash": "e15c6afccb3f02fecb6e22484ab8645d3ec52037d74e6f163ead43ed906dca3a",
+      "scores": [
+        2,
+        2,
+        3,
+        4,
+        7,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "746861ed115a410949daae6383dcf3c5cb75fb5ba9f174a36e10aee73523b559",
+      "output": {
+        "burst": 3.4416666666666664,
+        "late": 3.4416666666666664
+      },
+      "burstCapacity": 1.2058823529411764,
+      "sustainCapacity": 1.2058823529411764
+    },
+    "17": {
+      "sourceHash": "f7bb7bcbb6019c1890d006c0defdf3465921971f0f1e8ae0acdd14c77a267a6c",
+      "scores": [
+        5,
+        5,
+        7,
+        5,
+        0,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "e2408c4166ad1e546611562a865e5005fe66070ebf994a16670e7f6d1595d520",
+      "output": {
+        "burst": 13.806000000000001,
+        "late": 16.814999999999998
+      },
+      "burstCapacity": 3,
+      "sustainCapacity": 1.5
+    },
+    "18": {
+      "sourceHash": "aebbe20953766e3f4f4b978a8de321ffa19550edd0490388597047b92147ae60",
+      "scores": [
+        7,
+        7,
+        6,
+        5,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "233de5055aacaadca3ea3c7fcd92c5d0f2cc911c3c48a8e3f7022d14cfad02a3",
+      "output": {
+        "burst": 30.399507187500003,
+        "late": 37.083282432
+      },
+      "burstCapacity": 2.9666666666666663,
+      "sustainCapacity": 1
+    },
+    "19": {
+      "sourceHash": "489e33db6ded4e443a0aab2984b2bd25cb355ac534471d1fd6166d6aec9569aa",
+      "scores": [
+        6,
+        6,
+        7,
+        7,
+        0,
+        1,
+        0
+      ],
+      "auxiliaryAxesHash": "cebc51c76e3fb991440e76ca4b3e32c803d28d364328203c5ed61fac876ff273",
+      "output": {
+        "burst": 27.026999999999997,
+        "late": 27.026999999999997
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "20": {
+      "sourceHash": "48ecbedf0605e8887e576b161bc83010198e341816c40f867b1cf834faaaf647",
+      "scores": [
+        3,
+        3,
+        6,
+        7,
+        5,
+        4,
+        0
+      ],
+      "auxiliaryAxesHash": "2280a4ec835e2025f7d93031a678985fd541f113066ffd247e273a3febe577c0",
+      "output": {
+        "burst": 5.711666666666666,
+        "late": 5.711666666666666
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "21": {
+      "sourceHash": "6d558efb3896bc5eb3842f9bc34c0594c2a6236b950716cdfa66b8822449d47c",
+      "scores": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "2947d24048c07d8f8dbfe7a7cfacfd8e3cc2c360d5e61b0b907d3ed265c795d1",
+      "output": {
+        "burst": 1.65,
+        "late": 1.65
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "22": {
+      "sourceHash": "1dbeb401bb68fdc60bde8de67984d46ea72a2539fb4bd000f66886fade50b1f1",
+      "scores": [
+        3,
+        3,
+        1,
+        1,
+        0,
+        0,
+        5
+      ],
+      "auxiliaryAxesHash": "0a756cbaf83575c49d6822c69eed25e86b1862628572f2fd94e466e2916b10bf",
+      "output": {
+        "burst": 5,
+        "late": 5
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "23": {
+      "sourceHash": "aebd9831e73292ddd40fdc61dd6af62d3818ae1979b73cf59e448f644a70af76",
+      "scores": [
+        3,
+        3,
+        5,
+        9,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "57809615e400c4d6f1abbbb02eb6d0dd2e39b2c27862d89044a6e107ee99fcb6",
+      "output": {
+        "burst": 4.766666666666667,
+        "late": 4.766666666666667
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "24": {
+      "sourceHash": "a671da5ad4736bf934cb5fd863460da97ab683eec55856f92ff33b6276d9bbc1",
+      "scores": [
+        3,
+        3,
+        3,
+        2,
+        0,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "fa92c93992eac6e436a52c756f6f94ed18ecd08a2ab1bbfde5522d3375f96007",
+      "output": {
+        "burst": 4.3,
+        "late": 4.3
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "25": {
+      "sourceHash": "6542ac87708ec13efa37287444fd50fcc81d4d167a3d7b70075253be385427ae",
+      "scores": [
+        6,
+        8,
+        0,
+        0,
+        0,
+        0,
+        3
+      ],
+      "auxiliaryAxesHash": "a12b85f1727935c9a85f116167b56e6bed1cb34c084be7ddad27f50c0543459b",
+      "output": {
+        "burst": 25.773999999999997,
+        "late": 74.46199999999999
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "26": {
+      "sourceHash": "a2a2c4eb676e68ff8bde54aed7ae84315f76ea96c9a265ff073ff15159910191",
+      "scores": [
+        2,
+        2,
+        2,
+        3,
+        6,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "ef3fd1c1cd134785378df2239ed1cdbf35c8cfd14fbf55b899499a33113bad13",
+      "output": {
+        "burst": 2.60072,
+        "late": 2.60072
+      },
+      "burstCapacity": 1.025,
+      "sustainCapacity": 1.025
+    },
+    "27": {
+      "sourceHash": "dc04a2d7e0af8aa6bd9a3da5616ed7be3cb5180392306273135ede3ac3a1f4a3",
+      "scores": [
+        8,
+        8,
+        2,
+        2,
+        0,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "946620fb1811d4f23f4d82af6d2e933f4c3cfa6feb0c5b1bbe629c240972304c",
+      "output": {
+        "burst": 54.423325714285724,
+        "late": 64.84590857142858
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "28": {
+      "sourceHash": "29535c46adbadbc5376d13ba2e6f4e56563d5d49458e7859163a3c52d3fd929e",
+      "scores": [
+        5,
+        5,
+        8,
+        8,
+        5,
+        5,
+        2
+      ],
+      "auxiliaryAxesHash": "8a7663a28711f99294c1bfb803f443ec821ab780288c83771fe3a1b2ee19b537",
+      "output": {
+        "burst": 14.193956834532374,
+        "late": 14.193956834532374
+      },
+      "burstCapacity": 1.4285714285714286,
+      "sustainCapacity": 1.4285714285714286
+    },
+    "29": {
+      "sourceHash": "a4a8f0fe70ddb2a2627b9b203cd11c724bd07277190d91f440d3d11b2910cfb3",
+      "scores": [
+        2,
+        2,
+        4,
+        7,
+        5,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "b2091d7d677b11be433ea544bbcd1241a27df6e84d6688284b381c9811e2a422",
+      "output": {
+        "burst": 3.225333333333333,
+        "late": 3.225333333333333
+      },
+      "burstCapacity": 1.8063333333333333,
+      "sustainCapacity": 1
+    },
+    "30": {
+      "sourceHash": "b19cec8c31aa9339862da204d6c85b6d3fb2c798fb569405187c30323f366632",
+      "scores": [
+        4,
+        4,
+        2,
+        2,
+        5,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "0caf0b778997882368be524053a62ba3cdb4ecd28e2aa64058b80e429904a5cb",
+      "output": {
+        "burst": 8.367916666666668,
+        "late": 8.367916666666668
+      },
+      "burstCapacity": 1.025,
+      "sustainCapacity": 1.025
+    },
+    "31": {
+      "sourceHash": "48e7f590348df172b32f51f3bf21b89b5027494848657f4e58c9857416be1df5",
+      "scores": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        3
+      ],
+      "auxiliaryAxesHash": "b7ba94da99f8cac161f362dd0efef1885534f15cb523037c2d366a94b344824f",
+      "output": {
+        "burst": 1.2000000000000002,
+        "late": 1.2000000000000002
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "32": {
+      "sourceHash": "e3c4a5f3eee1ea3a8487dfca5327662d8ca6d054540083394a493c0c23ca0b17",
+      "scores": [
+        1,
+        1,
+        3,
+        4,
+        3,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "41231800c430251bd09e1089d3ef8d09c567415b796ebe3cff96516c3d3fedcd",
+      "output": {
+        "burst": 1.8,
+        "late": 1.8
+      },
+      "burstCapacity": 1.3,
+      "sustainCapacity": 1.3
+    },
+    "33": {
+      "sourceHash": "f0eb1dfc4ca7bdd0645b36a743091a9d081888af2b081653de5c2b8211f9a5e0",
+      "scores": [
+        4,
+        4,
+        0,
+        3,
+        0,
+        0,
+        4
+      ],
+      "auxiliaryAxesHash": "88a16b75207c3dbec6f2ec5512cf31211368a50a1c82dea83b82c0284a2a581f",
+      "output": {
+        "burst": 8.274999999999999,
+        "late": 8.274999999999999
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "34": {
+      "sourceHash": "465d853c85154acc114570ca4c617a976a615b66f502c4acc97d1ef01290fb99",
+      "scores": [
+        4,
+        4,
+        0,
+        0,
+        0,
+        0,
+        3
+      ],
+      "auxiliaryAxesHash": "27c8df1180c57a29fcc3a95035216471ef17c483fc2835b04ac4ccb0b7af70d4",
+      "output": {
+        "burst": 10,
+        "late": 10
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "35": {
+      "sourceHash": "f06261d405d2fcca6fca6beec0977665ae954b61170f7b458b0faced2e4d0e95",
+      "scores": [
+        5,
+        6,
+        6,
+        6,
+        5,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "02e9912b69799335364b0938940b82c4aa7849fb5f64175795f7849ca7c977ee",
+      "output": {
+        "burst": 13.244714828897338,
+        "late": 19.035376425855514
+      },
+      "burstCapacity": 2.9988212927756654,
+      "sustainCapacity": 1
+    },
+    "36": {
+      "sourceHash": "b1d1e61b449aacd693cd060cddd67d708fd4575f05251e1c99684023ba34f3f3",
+      "scores": [
+        4,
+        4,
+        3,
+        5,
+        0,
+        5,
+        2
+      ],
+      "auxiliaryAxesHash": "fe0893f669bfbc38b26fb99f3ce87508b6d37aeb7c95b7d9e2ccd9c913e4c2b1",
+      "output": {
+        "burst": 7.211666666666666,
+        "late": 8.588333333333333
+      },
+      "burstCapacity": 1.4,
+      "sustainCapacity": 1.4
+    },
+    "37": {
+      "sourceHash": "fb39912c0412f622dc4f536cc5e1c84855eab0c37689daec253c67b0b03b0b5e",
+      "scores": [
+        4,
+        6,
+        0,
+        3,
+        6,
+        0,
+        5
+      ],
+      "auxiliaryAxesHash": "f75c309aa9e1a3c6231b0cbacc6e7843d0796ffa47de4896432c214736c7ab30",
+      "output": {
+        "burst": 10.44772,
+        "late": 17.530920000000002
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "38": {
+      "sourceHash": "8e3d9f075c4cc60ab5b943d4d52233976c4ddd2cdec7d96f0117da84b8e094af",
+      "scores": [
+        5,
+        6,
+        5,
+        6,
+        9,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "f2ccf764fdacae211ee55aa5689b20ca2567877130667af153ffa6a4367319b4",
+      "output": {
+        "burst": 13.275,
+        "late": 19.9125
+      },
+      "burstCapacity": 3.7732031249999998,
+      "sustainCapacity": 1.6575
+    },
+    "39": {
+      "sourceHash": "c0299a310046bf794348bea8c4cc63f06b526b915f0a8274f275f6f794d29914",
+      "scores": [
+        5,
+        5,
+        2,
+        2,
+        0,
+        9,
+        5
+      ],
+      "auxiliaryAxesHash": "e8e094cd1c7dd4ebb0ab421960ec1a8c384b9caca1ca3ef44abbe70bc453da8f",
+      "output": {
+        "burst": 16.523999999999997,
+        "late": 16.523999999999997
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "40": {
+      "sourceHash": "d2da00a0333bca4ed95219e805b1a6c22e448955daaee6ff9903f61a6e026b5c",
+      "scores": [
+        4,
+        4,
+        4,
+        5,
+        3,
+        7,
+        5
+      ],
+      "auxiliaryAxesHash": "a5390f809a266a033eb07c7680123a447db54266abf3b2ad03dffa9715902811",
+      "output": {
+        "burst": 8.201,
+        "late": 8.201
+      },
+      "burstCapacity": 1.6,
+      "sustainCapacity": 1.6
+    },
+    "41": {
+      "sourceHash": "07d3ab7603151d116473f3799da5bf18f9291897cdf0adcf1cee1354a88bd3f1",
+      "scores": [
+        7,
+        7,
+        3,
+        3,
+        0,
+        0,
+        5
+      ],
+      "auxiliaryAxesHash": "4b1df8fd9dab30811c263fb6114e5251fdfcb201cfb0ec85b3d9ca27d90b2acb",
+      "output": {
+        "burst": 32.807120000000005,
+        "late": 32.807120000000005
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "42": {
+      "sourceHash": "daa005faf3473b208456f7d03ffa3bf0ccae53f2c7115188fe363cfc0651f7a6",
+      "scores": [
+        3,
+        3,
+        8,
+        8,
+        10,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "d9a4630191d8ab2736f76aebb33a8c8fb9c313314f5fa541ba2fd14a6f4222ce",
+      "output": {
+        "burst": 5.484,
+        "late": 5.484
+      },
+      "burstCapacity": 6.292999999999999,
+      "sustainCapacity": 1.75
+    },
+    "43": {
+      "sourceHash": "66d8e1bc1f34de9016432835f812aee649c73a319641e84260c0fbe86c6a3ec7",
+      "scores": [
+        7,
+        7,
+        1,
+        1,
+        0,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "3bad5cc3e8e817877d332da16339ffb9975caeb2cfced3591dbde0d4300c4ad8",
+      "output": {
+        "burst": 47.09664000000001,
+        "late": 47.09664000000001
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "44": {
+      "sourceHash": "07ac896d2c9676e5b549f747ca7e9c85864548a5510f2d2497abff3596bbf304",
+      "scores": [
+        6,
+        7,
+        8,
+        2,
+        6,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "77bfd6fbcf794959d57afee4d4b636e12b81cf5a8a1c39ef2c787298b14e0c64",
+      "output": {
+        "burst": 21.82320863309352,
+        "late": 42.77900879296563
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "45": {
+      "sourceHash": "cb051368b4b762ad659928bae8900a9cd867a0af1ad53b4fda15d024a144b4b1",
+      "scores": [
+        6,
+        6,
+        8,
+        7,
+        0,
+        4,
+        0
+      ],
+      "auxiliaryAxesHash": "c4cece9940c9767267105fa7ef74ab84d5337bb91ed8e6b9cb269269d78055bd",
+      "output": {
+        "burst": 23.689733840304182,
+        "late": 23.689733840304182
+      },
+      "burstCapacity": 1.44,
+      "sustainCapacity": 2.25
+    },
+    "46": {
+      "sourceHash": "0367b27f53f54e9d14f6753b48b380f7cbcd22d0fd7c1307743ca94618bbc829",
+      "scores": [
+        3,
+        3,
+        4,
+        6,
+        3,
+        0,
+        9
+      ],
+      "auxiliaryAxesHash": "9f030f337563d88e385f4a16a77273b855c68a220c6c756f665cec6f2f633151",
+      "output": {
+        "burst": 6.224499999999999,
+        "late": 6.224499999999999
+      },
+      "burstCapacity": 1.6666666666666667,
+      "sustainCapacity": 1.6666666666666667
+    },
+    "47": {
+      "sourceHash": "1bb79a720d6ec65d152e815de98b3efd8e80f56fbca1c8670ed33566f1a73265",
+      "scores": [
+        8,
+        8,
+        6,
+        6,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "1395fdb1785fb3a2aa8ce2fac0c76a360bf4716320ca765f5c25c0a6b23ad2f6",
+      "output": {
+        "burst": 57.528,
+        "late": 57.528
+      },
+      "burstCapacity": 2.5,
+      "sustainCapacity": 1
+    },
+    "48": {
+      "sourceHash": "8294074d173fa4f7f1d72ac4928460895df3169ac5e349b8b53adc9279043f57",
+      "scores": [
+        6,
+        6,
+        9,
+        7,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "1395fdb1785fb3a2aa8ce2fac0c76a360bf4716320ca765f5c25c0a6b23ad2f6",
+      "output": {
+        "burst": 20.421599999999998,
+        "late": 20.421599999999998
+      },
+      "burstCapacity": 6.666666666666666,
+      "sustainCapacity": 2.5
+    },
+    "49": {
+      "sourceHash": "1ba41dd55e51354981b11d78aeabf69abf90fcb49462a3c0db6b5217c6dfadbf",
+      "scores": [
+        3,
+        3,
+        7,
+        7,
+        8,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "1bd8fedb44bd7abe3c09260e92db24f96a03858d5cc160cdfe944efb11f6c768",
+      "output": {
+        "burst": 6.726,
+        "late": 6.726
+      },
+      "burstCapacity": 2,
+      "sustainCapacity": 1.4
+    },
+    "50": {
+      "sourceHash": "1887aa904676024ccbb9092a27322c703ad4064d00d5832a828e9069ad68b3b1",
+      "scores": [
+        7,
+        8,
+        6,
+        4,
+        0,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "518443ddbeb33b0b29fb1b2cd6ad11ac0f959609bd738b7ab9e32957c4339a5d",
+      "output": {
+        "burst": 49.245599999999996,
+        "late": 56.303999999999995
+      },
+      "burstCapacity": 2.5,
+      "sustainCapacity": 1.6666666666666667
+    },
+    "51": {
+      "sourceHash": "9b280b48f677a3949d5956dee1b3e2de1cd6ad5e372e6f649f098e00b571288a",
+      "scores": [
+        7,
+        7,
+        4,
+        5,
+        5,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "b1b4b44f390b15c2bef995ddb6899515b5f5943767032bf5a35fba019dab3fb8",
+      "output": {
+        "burst": 33.641999999999996,
+        "late": 33.641999999999996
+      },
+      "burstCapacity": 1.3,
+      "sustainCapacity": 1.3
+    },
+    "52": {
+      "sourceHash": "575cc4a08eac2fdc1544b69a34b7e1fc945b746f7ff0de4bd3e9c053e9bcc94e",
+      "scores": [
+        5,
+        5,
+        6,
+        6,
+        7,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "32d35605b50e9be66ab781e17f29285c2199b2cf83c0a4158220d055a7e1b65c",
+      "output": {
+        "burst": 14.171800000000001,
+        "late": 14.171800000000001
+      },
+      "burstCapacity": 2.1785714285714284,
+      "sustainCapacity": 1.525
+    },
+    "53": {
+      "sourceHash": "e1b6e2c8683a5c98cd3dcdea68460f511be47a2dffdc20c6c39071bcfe87d77e",
+      "scores": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        0,
+        5
+      ],
+      "auxiliaryAxesHash": "56afb0f1181763349beeab23e8cf04820ed976b984198c935c853391d1f349a5",
+      "output": {
+        "burst": 17.7,
+        "late": 17.7
+      },
+      "burstCapacity": 2.1799999999999997,
+      "sustainCapacity": 1
+    },
+    "54": {
+      "sourceHash": "348e516873954f8b1b178fa572c214d29883d54314a04e10990d70ac63b5e8e2",
+      "scores": [
+        1,
+        1,
+        5,
+        5,
+        7,
+        5,
+        2
+      ],
+      "auxiliaryAxesHash": "43a798925494b59c0b4f4f309c6ed5ef57082a9565e4c35f52c08bdecf2f0022",
+      "output": {
+        "burst": 1.725,
+        "late": 1.725
+      },
+      "burstCapacity": 1.9500000000000002,
+      "sustainCapacity": 1.4949999999999999
+    },
+    "55": {
+      "sourceHash": "b92b21fd439ee82146f48aca7d01ff0efb4bf173a9e945ba7338e3558bef6a9e",
+      "scores": [
+        6,
+        7,
+        5,
+        2,
+        0,
+        3,
+        6
+      ],
+      "auxiliaryAxesHash": "ffc747fa0b14b7a7c1904712495e50343a2bee545cc30302560a12cb30fa87cd",
+      "output": {
+        "burst": 25.81416,
+        "late": 38.89566
+      },
+      "burstCapacity": 1.1764705882352942,
+      "sustainCapacity": 1.1764705882352942
+    },
+    "56": {
+      "sourceHash": "0a9203835d5f60dccc718eb6686cbf2171248042a87170fa2621fa5587156385",
+      "scores": [
+        7,
+        7,
+        7,
+        7,
+        0,
+        3,
+        4
+      ],
+      "auxiliaryAxesHash": "2d291e05bcc8bcc28e513fa0e7f5423a6f98f671990009772526aa8952643dae",
+      "output": {
+        "burst": 45.54,
+        "late": 45.54
+      },
+      "burstCapacity": 1.8654999999999997,
+      "sustainCapacity": 1.8654999999999997
+    },
+    "57": {
+      "sourceHash": "327bb7d4c5dd550f6922b920b319fd755bbc297df1cfa2710ea5425b80c9cc63",
+      "scores": [
+        4,
+        4,
+        8,
+        2,
+        3,
+        0,
+        7
+      ],
+      "auxiliaryAxesHash": "c4142553bf9fd7c75e87dd5cabf7c3130b76889e66e162238aad3d3ac3fe9836",
+      "output": {
+        "burst": 9.44,
+        "late": 9.44
+      },
+      "burstCapacity": 5.183333333333334,
+      "sustainCapacity": 1.25
+    },
+    "58": {
+      "sourceHash": "2eaf8f059c1a5c9dbbbca9b9abc07a6f80935b339c42484b24f0071d13db7ae4",
+      "scores": [
+        6,
+        6,
+        9,
+        8,
+        0,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "654d5a3ccbec254e70e0654ae72f10e2dc919eefc9bbe0266b4e96372e54160e",
+      "output": {
+        "burst": 25.08975,
+        "late": 25.08975
+      },
+      "burstCapacity": 1.8571428571428572,
+      "sustainCapacity": 1.8571428571428572
+    },
+    "59": {
+      "sourceHash": "fe51240eb47904afae4cb595b35c3163f45f1ceda0484035e700e5535974a694",
+      "scores": [
+        5,
+        6,
+        6,
+        7,
+        0,
+        0,
+        7
+      ],
+      "auxiliaryAxesHash": "541d2fcd1395523e55ac8ce4d93e544bc0836b389daacb88d011b75523f84381",
+      "output": {
+        "burst": 14.435333333333332,
+        "late": 21.775333333333332
+      },
+      "burstCapacity": 2.9666666666666663,
+      "sustainCapacity": 1
+    },
+    "60": {
+      "sourceHash": "00b99b2930a8e24167342ca86787a6f45cd4e7f0a9765edc7d64ecc881f0fca3",
+      "scores": [
+        3,
+        3,
+        6,
+        8,
+        8,
+        1,
+        0
+      ],
+      "auxiliaryAxesHash": "579d9cfb260895d47609b8e8e86d2e1931884aa400f0be31cbd3271eee5153e1",
+      "output": {
+        "burst": 6.832000000000001,
+        "late": 6.832000000000001
+      },
+      "burstCapacity": 2.255,
+      "sustainCapacity": 2.255
+    },
+    "61": {
+      "sourceHash": "eadd8a1ec93cff069982abca2461a990f7fb431bf799882c38967ea63e2f1929",
+      "scores": [
+        8,
+        9,
+        9,
+        6,
+        6,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "b6b9e46bfbd5032618225a12b7867771f1b68b01098c5e0061a15383d69e5721",
+      "output": {
+        "burst": 72.71935451679232,
+        "late": 97.36998316655243
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "62": {
+      "sourceHash": "c429b49a7d4b5aa19aa96b5f176489b176b767dbca5ac5953ece6aae6f8af971",
+      "scores": [
+        2,
+        2,
+        5,
+        5,
+        7,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "b758cbdd622e2a95938b34c9d87526fe3d62907159cd76b2847978c0edb0a573",
+      "output": {
+        "burst": 2.7376,
+        "late": 2.7376
+      },
+      "burstCapacity": 2.15,
+      "sustainCapacity": 1.72
+    },
+    "63": {
+      "sourceHash": "fee39dcfbf889e7dc7a8a43c1b556b2d03481634e533af010786f04e51be3f2a",
+      "scores": [
+        7,
+        7,
+        7,
+        4,
+        8,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "5435351380fd9b8b8be790b5ddb03acd92b16325fd7673fc8a1c6d543574559f",
+      "output": {
+        "burst": 42.739599999999996,
+        "late": 42.739599999999996
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "64": {
+      "sourceHash": "43b038589e6418f18df80be9908b45fc9127a6355ec101c9d047eef7224415f4",
+      "scores": [
+        3,
+        4,
+        7,
+        2,
+        0,
+        5,
+        5
+      ],
+      "auxiliaryAxesHash": "14e772b07fa187f7833684f2c05ef643677012528a05bffe3caef67d82de7c19",
+      "output": {
+        "burst": 4.4,
+        "late": 8.8
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "65": {
+      "sourceHash": "d088bd4a56838c81b956c869630f1392a2225056635f9ee0b9f3e147c3537726",
+      "scores": [
+        7,
+        7,
+        6,
+        8,
+        9,
+        4,
+        0
+      ],
+      "auxiliaryAxesHash": "6032b41a8666cf9ee8f0ed925d7ef5e957937722cfbee13c03b7f736c6302da8",
+      "output": {
+        "burst": 32.86014940729143,
+        "late": 33.17224066204428
+      },
+      "burstCapacity": 2.35,
+      "sustainCapacity": 1
+    },
+    "66": {
+      "sourceHash": "d9488ba4dec4c746494ab5c60d3a2769c4787270e9435c8679aded969dfa42dc",
+      "scores": [
+        6,
+        7,
+        6,
+        2,
+        6,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "e0a7e2454826f3e6b40610d3ab72ce3328922a0621e2f90b75ec762d35f4f38f",
+      "output": {
+        "burst": 23.954,
+        "late": 41.3
+      },
+      "burstCapacity": 2.1799999999999997,
+      "sustainCapacity": 1
+    },
+    "67": {
+      "sourceHash": "3ee749875b7c753d88120a1ddd2c9ef908a90bf14dacb7ce4bef3d418b9f47be",
+      "scores": [
+        2,
+        2,
+        7,
+        6,
+        7,
+        0,
+        5
+      ],
+      "auxiliaryAxesHash": "76f85746f7da97c923df9064cdba995bb67d14d464e868983febe7f03bd506ff",
+      "output": {
+        "burst": 3.4810000000000003,
+        "late": 3.4810000000000003
+      },
+      "burstCapacity": 3.708333333333333,
+      "sustainCapacity": 1.25
+    },
+    "68": {
+      "sourceHash": "f6630432a38b2c1cb2765e49540916606a74656eba56cfadd0e1f409270a4606",
+      "scores": [
+        3,
+        4,
+        7,
+        3,
+        6,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "4a9d3177172b203580b7c7931d50e7e5151c224966f59831d3b4663d5b7a9f06",
+      "output": {
+        "burst": 6.843999999999999,
+        "late": 10.855999999999998
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "69": {
+      "sourceHash": "af55a99a98283974405da25f79323686124f8837890477a14df9636fbc42ee3c",
+      "scores": [
+        5,
+        5,
+        10,
+        4,
+        4,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "5580bdd1a1cd784e8af2ec51ea3501f595fbbb38a3e431feded9fed5c0750ba1",
+      "output": {
+        "burst": 13.538139999999999,
+        "late": 13.538139999999999
+      },
+      "burstCapacity": 8.222222222222221,
+      "sustainCapacity": 1.6666666666666667
+    },
+    "70": {
+      "sourceHash": "7a14444823b83a958b47fa68cc1961b5deaeefb754b3224a8adbbd3e63615bf3",
+      "scores": [
+        5,
+        5,
+        5,
+        5,
+        0,
+        5,
+        5
+      ],
+      "auxiliaryAxesHash": "038c795836119e799acf6df0c41b73d757bd4ae0bf135a8b19e63ec1c97e5847",
+      "output": {
+        "burst": 16.844730760799997,
+        "late": 16.844730760799997
+      },
+      "burstCapacity": 2.0999999999999996,
+      "sustainCapacity": 2.0999999999999996
+    },
+    "71": {
+      "sourceHash": "0ca96aeabfb65f842ad526ee00f1a608eb890e60b318eb799e3410b95ba15e1c",
+      "scores": [
+        4,
+        5,
+        5,
+        6,
+        3,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "00c101350326b8bdbdf56a6ca8441aae9b90f87d14fd5586f2788ba528e93d12",
+      "output": {
+        "burst": 9.677,
+        "late": 16.131999999999998
+      },
+      "burstCapacity": 2,
+      "sustainCapacity": 2
+    },
+    "72": {
+      "sourceHash": "da2a4c37b5e4951b8bea42f7203d88bd89ef069c7f687cc10166c9480887a817",
+      "scores": [
+        5,
+        5,
+        3,
+        4,
+        3,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "45c935ca149f86a1fa8766f094164901ce53739833be3bb55dc9325586e30b5a",
+      "output": {
+        "burst": 12.389999999999999,
+        "late": 12.389999999999999
+      },
+      "burstCapacity": 1.525,
+      "sustainCapacity": 1.025
+    },
+    "73": {
+      "sourceHash": "1a3bf1062894af9db1424b33b7e06201f035584f09679ccc1545cf97a34fa75f",
+      "scores": [
+        5,
+        6,
+        8,
+        2,
+        4,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "2c9b94de6ae0bc7db2ed970289d3d60aaf76135997d97d4b4269f68d70dee221",
+      "output": {
+        "burst": 13.225439999999997,
+        "late": 25.261439999999997
+      },
+      "burstCapacity": 3.05,
+      "sustainCapacity": 1.22
+    },
+    "74": {
+      "sourceHash": "169faa0b0e5c1edf4171c0f82ec8914c1485fbe6c2428c5c2463419bf53e277f",
+      "scores": [
+        2,
+        2,
+        4,
+        5,
+        4,
+        5,
+        3
+      ],
+      "auxiliaryAxesHash": "2efff78388514d60891534babb27200a3155ec4f0a85fb6bd908a1617367b76d",
+      "output": {
+        "burst": 3.6633333333333336,
+        "late": 3.6633333333333336
+      },
+      "burstCapacity": 1.5999999999999999,
+      "sustainCapacity": 1.4
+    },
+    "75": {
+      "sourceHash": "3504023709d5880a0a4d0eecab6c3d0063e6650c5537a450e84e02f2d3638fba",
+      "scores": [
+        8,
+        8,
+        9,
+        3,
+        0,
+        1,
+        0
+      ],
+      "auxiliaryAxesHash": "d52fccc88b3a02ad1fc5ae88b5b5256462cb55d3d9526acacf407f6432114618",
+      "output": {
+        "burst": 64.06400000000001,
+        "late": 64.06400000000001
+      },
+      "burstCapacity": 6.6,
+      "sustainCapacity": 1
+    },
+    "76": {
+      "sourceHash": "6a7ddf416a6099875a0492c950b0df633537a696ae48cfae75e21b9da0b7e01d",
+      "scores": [
+        1,
+        1,
+        4,
+        4,
+        8,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "a4c69aee8b1ab503dd0c0deb4edc1b8476b6e0d987e3a2e24eacdd3385b093e5",
+      "output": {
+        "burst": 1.25,
+        "late": 1.25
+      },
+      "burstCapacity": 1.525,
+      "sustainCapacity": 1.525
+    },
+    "77": {
+      "sourceHash": "c99730844edda8202f60066ff975bcfccbd3765dffca79bb0fb24e5e1be29803",
+      "scores": [
+        4,
+        4,
+        7,
+        5,
+        5,
+        0,
+        3
+      ],
+      "auxiliaryAxesHash": "db0ca7bb05356170c9d9197264becb946bbf374ce7b49dee62701820d5d76918",
+      "output": {
+        "burst": 8.85,
+        "late": 8.85
+      },
+      "burstCapacity": 1.025,
+      "sustainCapacity": 1.025
+    },
+    "78": {
+      "sourceHash": "c6d9401072365813df21f946d3485eeb1fa82e377a2c2afef0bcde324357acec",
+      "scores": [
+        6,
+        8,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "6d242ecbfe596d04d12ba09e136cdc5eb4fe8b5a093c1f9c90f37ac5e5fd1800",
+      "output": {
+        "burst": 24.2934,
+        "late": 74.07339999999999
+      },
+      "burstCapacity": 10.366666666666667,
+      "sustainCapacity": 1
+    },
+    "79": {
+      "sourceHash": "ec277d294a96a9e112bef66fb4cf71f27b1d0564ef89f2441fff46827687462c",
+      "scores": [
+        6,
+        6,
+        8,
+        1,
+        0,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "21a6f475c2e3cc5732b78c0f8791de7fe598b67bad56c41dd62ef0aa5a9a488c",
+      "output": {
+        "burst": 22.832,
+        "late": 22.832
+      },
+      "burstCapacity": 4.250333333333333,
+      "sustainCapacity": 1.025
+    },
+    "80": {
+      "sourceHash": "88f0578fdc4057497cc6c6190ad1f1737b081235ab9d4ad9b6ed781da42aec09",
+      "scores": [
+        5,
+        7,
+        7,
+        9,
+        8,
+        0,
+        5
+      ],
+      "auxiliaryAxesHash": "484bc39636b28874c64bd99d2b187c740da9e29a1cc34d645d8f8f1e92280c4d",
+      "output": {
+        "burst": 12.389999999999999,
+        "late": 46.373999999999995
+      },
+      "burstCapacity": 3.1866666666666665,
+      "sustainCapacity": 3.1866666666666665
+    },
+    "81": {
+      "sourceHash": "2f4d80abccc755e85a39108d5b5a49338aee991d5b344018e42bb3df50a5f0ff",
+      "scores": [
+        5,
+        7,
+        7,
+        8,
+        7,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "e1aa33fc65592ea93705932316b0cdaaca62d72cd207a4f658be7fec41413395",
+      "output": {
+        "burst": 13.399555555555553,
+        "late": 48.642222222222216
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "82": {
+      "sourceHash": "f23120eef2bf5dee38e85e3921cc3b4212aca814bed60d65fd95445370dfe59d",
+      "scores": [
+        5,
+        7,
+        2,
+        7,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "1395fdb1785fb3a2aa8ce2fac0c76a360bf4716320ca765f5c25c0a6b23ad2f6",
+      "output": {
+        "burst": 14.041999999999998,
+        "late": 31.436999999999998
+      },
+      "burstCapacity": 1.22,
+      "sustainCapacity": 1.22
+    },
+    "83": {
+      "sourceHash": "9b0f4b497e423bde67a4b29397f03370aaff53eb882ed1a971b76a26e51c9df2",
+      "scores": [
+        5,
+        5,
+        6,
+        7,
+        7,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "88ced4a0fdeb1dae95d42876a7723334449801d5249f74f421f89d98240fb929",
+      "output": {
+        "burst": 11.091999999999999,
+        "late": 11.091999999999999
+      },
+      "burstCapacity": 2.5,
+      "sustainCapacity": 2.5
+    },
+    "84": {
+      "sourceHash": "30be7b7fa47e7716e25350e5eab3cb5c29246d8a3a0fb77110413f7ebce1eebd",
+      "scores": [
+        6,
+        7,
+        0,
+        2,
+        0,
+        0,
+        7
+      ],
+      "auxiliaryAxesHash": "5174cf1f1bd1903724b25063441d81f1b26fd73711740fd48590d480df42764b",
+      "output": {
+        "burst": 26.019,
+        "late": 37.044
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "85": {
+      "sourceHash": "3a9bfa6377cfbc81b477d9bb6d5fc6eb272750389f75c5afa8b3e80e9cfdbd06",
+      "scores": [
+        5,
+        5,
+        5,
+        5,
+        2,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "41a7934ee31948b029e884ff095b5b39932e660d1b54efaf8b5b950d1c31db1b",
+      "output": {
+        "burst": 11.249999999999998,
+        "late": 11.249999999999998
+      },
+      "burstCapacity": 2.033333333333333,
+      "sustainCapacity": 1.3555555555555556
+    },
+    "86": {
+      "sourceHash": "656a35112c2941eb13d642616b29fa2c2524d23dd29c34920cceba37962165d5",
+      "scores": [
+        6,
+        8,
+        5,
+        7,
+        5,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "38c56095f1ce250f95fea4a2470c68ca8ba76ccdf1e28d49647c24b1cf43ad96",
+      "output": {
+        "burst": 19.960251798561153,
+        "late": 82.05881294964027
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "87": {
+      "sourceHash": "3a724fd117fd70d0d453a591ae3cb2a401adf691d01fa763300932fc70ed68b0",
+      "scores": [
+        4,
+        4,
+        8,
+        5,
+        2,
+        5,
+        3
+      ],
+      "auxiliaryAxesHash": "f39b43b405e9638c9f5ed0715d0a53c6eb13c1338ea3f4726bdc9a18f12f6879",
+      "output": {
+        "burst": 10.384,
+        "late": 10.384
+      },
+      "burstCapacity": 4,
+      "sustainCapacity": 2
+    },
+    "88": {
+      "sourceHash": "7c463f9a279106f941cfcc83a3f879b6ba608e8e9541a3a92b662a5bd2b9b345",
+      "scores": [
+        5,
+        5,
+        6,
+        2,
+        5,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "19c06e2d9982c8a005aab25272ea1a3456ccec9abed0b7f199b397263f171d85",
+      "output": {
+        "burst": 12.036,
+        "late": 12.036
+      },
+      "burstCapacity": 2.1959999999999997,
+      "sustainCapacity": 1.22
+    },
+    "89": {
+      "sourceHash": "d1b3e499a049fed5546e97973753d78e52ad1568991d6548c40589c90e5b5328",
+      "scores": [
+        8,
+        8,
+        2,
+        0,
+        0,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "63baab69899af476c843d393aafb5c824a4080a18b2af3089c7539f1fe15b2ff",
+      "output": {
+        "burst": 52.170750000000005,
+        "late": 53.136875
+      },
+      "burstCapacity": 1.22,
+      "sustainCapacity": 1.22
+    },
+    "90": {
+      "sourceHash": "df875139585f10bf98a5e65cc865b5dba1cc65f7e2af5672a8082147d3842c34",
+      "scores": [
+        7,
+        8,
+        10,
+        9,
+        1,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "897f265df52d271dbc6831ef08d57dda40d23b70717eb86536a111caec0b684d",
+      "output": {
+        "burst": 35.742000000000004,
+        "late": 79.2
+      },
+      "burstCapacity": 13.125,
+      "sustainCapacity": 4.375
+    },
+    "92": {
+      "sourceHash": "fd67638a5168631a31d836d779ffece52c8017357f274158f02ef2dbd386588a",
+      "scores": [
+        5,
+        7,
+        6,
+        9,
+        9,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "e37f3757e4c2b1231eda90270e0412f1466eccda38eb27804769dddc5f915633",
+      "output": {
+        "burst": 16.56,
+        "late": 32.42399999999999
+      },
+      "burstCapacity": 2.2199999999999998,
+      "sustainCapacity": 3.02
+    },
+    "93": {
+      "sourceHash": "f8607be03eb8f51324771c7d9a54ca6b0c59261123a62db4ad9bccdaec330de8",
+      "scores": [
+        9,
+        9,
+        3,
+        0,
+        0,
+        7,
+        2
+      ],
+      "auxiliaryAxesHash": "c0f13b007c6d45d3ef80bd79e3de106ef181071f53a063d60d128d20d468ce2a",
+      "output": {
+        "burst": 87.69000000000001,
+        "late": 87.69000000000001
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "95": {
+      "sourceHash": "8edfaeeb996caecec1d1055ed3a4da8e847172704e0d7605d81af47d5fa86225",
+      "scores": [
+        4,
+        4,
+        7,
+        2,
+        7,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "4838df17b741dcf30715c07758ff6ecce0682d8d5704cdc86d166e3cf3369ad5",
+      "output": {
+        "burst": 9.835,
+        "late": 9.835
+      },
+      "burstCapacity": 3.052222222222222,
+      "sustainCapacity": 1.025
+    },
+    "96": {
+      "sourceHash": "cc22bcb5f528fbf57f66b222d754377137a60f69bcac8e83aaa2cd3c2f887e9e",
+      "scores": [
+        6,
+        8,
+        9,
+        9,
+        0,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "82e9cf493418e10e20feb5f175d0960d99c659cb47ed1daaca45eeacda6b2097",
+      "output": {
+        "burst": 23.93228571428571,
+        "late": 82.59085714285713
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "97": {
+      "sourceHash": "428f278d7ea7a11f2c572aeee668d12ce7466e2137364f1050e510490245035b",
+      "scores": [
+        4,
+        4,
+        8,
+        4,
+        7,
+        4,
+        0
+      ],
+      "auxiliaryAxesHash": "a8203646b4a869b547a85f76dc775b5f6b0f00d77b7c8fad2a46b84fb37da5b6",
+      "output": {
+        "burst": 8.407499999999999,
+        "late": 8.407499999999999
+      },
+      "burstCapacity": 5.068055555555555,
+      "sustainCapacity": 1.7083333333333333
+    },
+    "99": {
+      "sourceHash": "5136ecf2bbdcc45f585951410436f836073284a7efbec722584d9ff0c68f2f71",
+      "scores": [
+        7,
+        7,
+        1,
+        0,
+        3,
+        8,
+        7
+      ],
+      "auxiliaryAxesHash": "350409cbc83c9780e9af0d88567dbf0a5abbfb16171ccfb382ac94d35497dd5b",
+      "output": {
+        "burst": 35.035,
+        "late": 35.035
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "100": {
+      "sourceHash": "1fd245046b170484855a5b38e64f776a136b472a5b5697377a4805c9ead66710",
+      "scores": [
+        5,
+        6,
+        8,
+        1,
+        8,
+        6,
+        5
+      ],
+      "auxiliaryAxesHash": "4d1232a746777dc1e0561eea19a03a58725ae1aa2d3bce7df9c0c29cd6328c4d",
+      "output": {
+        "burst": 12.41247619047619,
+        "late": 21.08547619047619
+      },
+      "burstCapacity": 4.1466666666666665,
+      "sustainCapacity": 1
+    },
+    "101": {
+      "sourceHash": "520b9acf00878ad2d43bf5266eed085eb450a5bf754e1b44311e2bcdf0115141",
+      "scores": [
+        4,
+        4,
+        10,
+        7,
+        7,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "df16790069daa64d4a70fb72a59e6106393c11839555cd49246307da18b305fa",
+      "output": {
+        "burst": 10.561,
+        "late": 10.561
+      },
+      "burstCapacity": 10.66,
+      "sustainCapacity": 2.5625
+    },
+    "102": {
+      "sourceHash": "cf188885104b1cd894788fda591cc41c485361bf24567c8419e44b2504d3de7f",
+      "scores": [
+        6,
+        8,
+        3,
+        0,
+        0,
+        9,
+        6
+      ],
+      "auxiliaryAxesHash": "61490eab372f6071dc46aa0e0d31e13c932239914a880be453e65bb2df8c3b4c",
+      "output": {
+        "burst": 28.932499999999997,
+        "late": 57.457499999999996
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "103": {
+      "sourceHash": "ca03458f20b9be08e216f2ed4783dd225d3606f2292f7f557ba01a31815b14c7",
+      "scores": [
+        3,
+        5,
+        6,
+        8,
+        8,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "ab8c182812fbd50227a76383e2502e3736bd86584108d7911637b855b5667455",
+      "output": {
+        "burst": 5.664,
+        "late": 14.16
+      },
+      "burstCapacity": 2.3666666666666667,
+      "sustainCapacity": 2.3666666666666667
+    },
+    "105": {
+      "sourceHash": "af20d8240a0c59abb0630bb741c059e8af57480f23078cfb272a8dd94d4c54ab",
+      "scores": [
+        7,
+        7,
+        9,
+        8,
+        3,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "97bed18fc2282f229f8e87ff1371b5be5963bf56c9fac06a0470ce05d804fcde",
+      "output": {
+        "burst": 35.42927919838436,
+        "late": 35.42927919838436
+      },
+      "burstCapacity": 5.500000000000002,
+      "sustainCapacity": 5.500000000000002
+    },
+    "106": {
+      "sourceHash": "6cedc07e1974fd2ef560621fc314051610ea1c81f0bb48864ac6c9a8934dbeb9",
+      "scores": [
+        4,
+        4,
+        3,
+        1,
+        6,
+        4,
+        0
+      ],
+      "auxiliaryAxesHash": "63220415dab7cf2a218017377e8cf1040e030d73c117279138481233394b2189",
+      "output": {
+        "burst": 8.142,
+        "late": 8.142
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "107": {
+      "sourceHash": "caccead8befbd033c5029f5ccdaaf95cbae12e5e3b4f6faa2b9b89234b28e051",
+      "scores": [
+        5,
+        5,
+        2,
+        2,
+        0,
+        8,
+        7
+      ],
+      "auxiliaryAxesHash": "ad2c48180ef4ac21981d34028aa0b9707ed2a556e54351fdea14f44a29f4433a",
+      "output": {
+        "burst": 15.221999999999998,
+        "late": 15.221999999999998
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "108": {
+      "sourceHash": "bcf34fc26cf1b93f67a4cf00a833d9642a1678dbb5116a4f4d475ba54af7b837",
+      "scores": [
+        4,
+        7,
+        7,
+        7,
+        8,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "8e60d13ca776678ce38734f586bf704ff258e4982c38ada3c2ffaa58da8e6695",
+      "output": {
+        "burst": 10.423333333333334,
+        "late": 41.693333333333335
+      },
+      "burstCapacity": 3.05,
+      "sustainCapacity": 3.05
+    },
+    "109": {
+      "sourceHash": "d548f714f6f71b8b98debafdf82d98c79ae643abfe30f2a4ed1f8b3e471dd292",
+      "scores": [
+        4,
+        7,
+        7,
+        8,
+        7,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "1d9eb8909f7e6c80db29e8012bfc4248e33b8ffa0ae4b55c3aa606782eae1607",
+      "output": {
+        "burst": 10.62,
+        "late": 37.524
+      },
+      "burstCapacity": 3.333333333333333,
+      "sustainCapacity": 3.333333333333333
+    },
+    "111": {
+      "sourceHash": "17293b7abac5cd925671a508a50a292b53723ee7979db06357a0f4e800da74e7",
+      "scores": [
+        4,
+        4,
+        5,
+        8,
+        5,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "9099be441b8759c122ea8002b8aea11e028516cce50daf1a67e093c52b40b72e",
+      "output": {
+        "burst": 9.204,
+        "late": 9.204
+      },
+      "burstCapacity": 1.8,
+      "sustainCapacity": 1.8
+    },
+    "112": {
+      "sourceHash": "5eef6f675dcdd8b2bdc4d9735ec5f62e3182d265a2419ef61846d814df46b330",
+      "scores": [
+        8,
+        8,
+        3,
+        0,
+        2,
+        4,
+        5
+      ],
+      "auxiliaryAxesHash": "042c0e34604dad7bb4d3aab77dfc511717643f3f07e59d695529d1b619e95040",
+      "output": {
+        "burst": 71.28599999999999,
+        "late": 71.28599999999999
+      },
+      "burstCapacity": 1.025,
+      "sustainCapacity": 1.025
+    },
+    "113": {
+      "sourceHash": "f71382f52e59e74c611ab0336d0a04cada5db8a2efea9919ee6f3fb2dbe2d41c",
+      "scores": [
+        7,
+        8,
+        9,
+        8,
+        5,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "35211734d10da6041f0a50e5f2f4302dd6736a0401a198cebd76649808ab0ca0",
+      "output": {
+        "burst": 40.709999999999994,
+        "late": 56.536
+      },
+      "burstCapacity": 20.28133333333333,
+      "sustainCapacity": 4.1
+    },
+    "114": {
+      "sourceHash": "f71f7ab5eb97751c1d7be417758e508cb18f210f5553e5ea6c076c08a034ee79",
+      "scores": [
+        6,
+        8,
+        9,
+        9,
+        0,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "e13ebff4e0827b3e9febe03a76319aa02e007baefa0fb3282b823784854200aa",
+      "output": {
+        "burst": 21.183,
+        "late": 59.251
+      },
+      "burstCapacity": 6.3428571428571425,
+      "sustainCapacity": 6.3428571428571425
+    },
+    "115": {
+      "sourceHash": "ed4191b2e418ba8620740a2f790a23023c2fc937f4924de9398c5a864c7bff16",
+      "scores": [
+        5,
+        9,
+        8,
+        8,
+        4,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "f522cb13aa239af46efec2a8bb3ec8c454f0a2a9af71da0f6166be1ce292db13",
+      "output": {
+        "burst": 15.457999999999998,
+        "late": 86.49399999999999
+      },
+      "burstCapacity": 3.75,
+      "sustainCapacity": 3.75
+    },
+    "116": {
+      "sourceHash": "01d8b27eb0f520d0c2893513fd2777ed61b5f007e415d9aa806115743e8c8c76",
+      "scores": [
+        5,
+        5,
+        8,
+        8,
+        5,
+        7,
+        5
+      ],
+      "auxiliaryAxesHash": "c99edd856dc7f51beeaeb80ff925f8c9f49b2325a213444ec4aa522c84f022f4",
+      "output": {
+        "burst": 15.280999999999999,
+        "late": 15.280999999999999
+      },
+      "burstCapacity": 4,
+      "sustainCapacity": 4
+    },
+    "117": {
+      "sourceHash": "f0ccdbf29c62247129faa64a34f4cb3443e19edb31138e844ef68daffb9047bf",
+      "scores": [
+        6,
+        6,
+        9,
+        7,
+        6,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "ebbe8e86dd4940528f98d551083112d8102e9427a2829d49c197263278522ccd",
+      "output": {
+        "burst": 25.93354196642686,
+        "late": 25.93354196642686
+      },
+      "burstCapacity": 6.1000000000000005,
+      "sustainCapacity": 3.05
+    },
+    "121": {
+      "sourceHash": "f43a02d3d41fe2713881e8dbb37def5996883c7e96b27fc3d42a4d73469a3f4b",
+      "scores": [
+        8,
+        8,
+        0,
+        0,
+        0,
+        3,
+        0
+      ],
+      "auxiliaryAxesHash": "584dffce1ee48c7e380ce294e228d1a07481725ad49e451d13b1236c351b0362",
+      "output": {
+        "burst": 79.88912230215827,
+        "late": 63.69538129496402
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "122": {
+      "sourceHash": "521bc59b968b15bf871bee3f7b93c492fc39925795b8005bee200d5280e83e19",
+      "scores": [
+        6,
+        6,
+        0,
+        0,
+        0,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "7dcb39cb97e9779f6681a04a57bb229fa27c409fc0aa0a9a5809a21f921db0ee",
+      "output": {
+        "burst": 26.566,
+        "late": 21.180999999999997
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "123": {
+      "sourceHash": "9983d1685b3fd4bd3e4fc633075b09e05cd5729db9963fcc85ccdb61d86b9ad5",
+      "scores": [
+        7,
+        7,
+        10,
+        7,
+        7,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "bbfcf3b578ec92b32fcb51c5de2cd3ff319b63190360e5c1c95dcb46472dde32",
+      "output": {
+        "burst": 34.556,
+        "late": 33.451
+      },
+      "burstCapacity": 7.416666666666666,
+      "sustainCapacity": 2.5
+    },
+    "124": {
+      "sourceHash": "3b1870d1958cdffdbc1bd6b3adaef6da23c374f47403dee4d14a48857a119931",
+      "scores": [
+        5,
+        8,
+        8,
+        8,
+        7,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "8345b569783eb9a690ad11e1945ca62f35d86b8e9d81c6a28a728915890ff365",
+      "output": {
+        "burst": 13.499999999999998,
+        "late": 51.083999999999996
+      },
+      "burstCapacity": 3.1079999999999997,
+      "sustainCapacity": 3.1079999999999997
+    },
+    "125": {
+      "sourceHash": "f4357b6dddbd3fc73bcbf5edfa12fd38e817e3617ef1362cafa578dfcd9dc849",
+      "scores": [
+        5,
+        5,
+        8,
+        8,
+        7,
+        0,
+        1
+      ],
+      "auxiliaryAxesHash": "d2ef5eaf85555a50a5197c162d7ec81a08f106ac386a0008051e0dfc562fe9e3",
+      "output": {
+        "burst": 11.563999999999998,
+        "late": 11.563999999999998
+      },
+      "burstCapacity": 4,
+      "sustainCapacity": 4
+    },
+    "126": {
+      "sourceHash": "49272c4e74d1c365880cca7ed5e5ceae9f7536801e17dcc513201966627206ff",
+      "scores": [
+        4,
+        8,
+        9,
+        8,
+        6,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "5c8614074aca4f16788b20b9aa0be7d9283dad557775e1b1d918111312134b0d",
+      "output": {
+        "burst": 10.351999999999999,
+        "late": 59.058
+      },
+      "burstCapacity": 11.780666666666665,
+      "sustainCapacity": 4.1
+    },
+    "128": {
+      "sourceHash": "ad42eb7b8018105925af6550ae78577e6b23ddefe5035a1172def99039fbd206",
+      "scores": [
+        8,
+        8,
+        4,
+        0,
+        0,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "298d749369fb1cbc8ef9bb399e1dce5523b16a1f0ce8e4e7f17706109d0064f5",
+      "output": {
+        "burst": 55.00756197718631,
+        "late": 55.00756197718631
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "129": {
+      "sourceHash": "73043027036f41e4df410bb1cc35b23c19a235c40a781eb1f9f317a70fa9843b",
+      "scores": [
+        7,
+        7,
+        9,
+        8,
+        0,
+        4,
+        0
+      ],
+      "auxiliaryAxesHash": "b008e5406ead692e8766aebfa5b72336a545a2ec2c063bdfe173f2ea35938ece",
+      "output": {
+        "burst": 41.8721726618705,
+        "late": 41.8721726618705
+      },
+      "burstCapacity": 6.666666666666666,
+      "sustainCapacity": 3.333333333333333
+    },
+    "130": {
+      "sourceHash": "e5c1069ddab65b7a241735d7ad96d3edff39568881f5a1c08c7c0e787233e087",
+      "scores": [
+        9,
+        9,
+        3,
+        0,
+        0,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "aa6d9299bde076270193f747db5e40b856c4e1e15468021d299f5c8f729525c7",
+      "output": {
+        "burst": 102.38400000000001,
+        "late": 115.34399999999998
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "131": {
+      "sourceHash": "c90b8d28da9a013af5702ce911810ba4921660661393f6e36a7cfee79d912081",
+      "scores": [
+        5,
+        5,
+        8,
+        8,
+        3,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "f5c397c15a66fe286f677fca807e4860f395106ffa6d554d1bbce3881369f8b1",
+      "output": {
+        "burst": 14.927,
+        "late": 14.927
+      },
+      "burstCapacity": 3.333333333333333,
+      "sustainCapacity": 3.333333333333333
+    },
+    "132": {
+      "sourceHash": "e279fa9d91d45868996d1ddd201ae4ef9e43126a2281e4317dba89b1875e76d8",
+      "scores": [
+        7,
+        8,
+        8,
+        8,
+        2,
+        7,
+        5
+      ],
+      "auxiliaryAxesHash": "db6b35233a779ca4d2d0378dc7fb4b0e0ba9f8dbdde34ee4c1095ffa264b02a4",
+      "output": {
+        "burst": 37.07733333333334,
+        "late": 62.783999999999985
+      },
+      "burstCapacity": 5.833333333333334,
+      "sustainCapacity": 5.833333333333334
+    },
+    "134": {
+      "sourceHash": "f3d36d0f25cd5c2461ecfd497ed95da8619c7f31e6c1cc795157ad1a36067f35",
+      "scores": [
+        4,
+        4,
+        9,
+        8,
+        6,
+        5,
+        0
+      ],
+      "auxiliaryAxesHash": "8caf7016c8e7eab5f4925cd994a02e2eef602241f1c378760028eab699e67b00",
+      "output": {
+        "burst": 10.381666666666666,
+        "late": 10.381666666666666
+      },
+      "burstCapacity": 6.666666666666666,
+      "sustainCapacity": 3.333333333333333
+    },
+    "135": {
+      "sourceHash": "7c5c58e4303fb79c0070f21ca54c4d37ee126418d0c83ef5efb8bfe5bd31f83d",
+      "scores": [
+        6,
+        8,
+        10,
+        6,
+        0,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "1be5777f0b96d25ce5e262c53235eb9ccf12ce1efc6c1f16567adf79d6d8e2ee",
+      "output": {
+        "burst": 20.956000000000003,
+        "late": 65.72800000000001
+      },
+      "burstCapacity": 12.333333333333332,
+      "sustainCapacity": 2.5
+    },
+    "137": {
+      "sourceHash": "cba091aacaf3c14c970a3764f567ecf25a2d817b2a9a0cbe8c1fe115d2792c66",
+      "scores": [
+        5,
+        6,
+        8,
+        6,
+        5,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "e64877eb7d4ee7f2c03d5acd09cbd039a502e71f30321369237e42ce349b90ab",
+      "output": {
+        "burst": 14.381840000000002,
+        "late": 21.169200000000004
+      },
+      "burstCapacity": 4,
+      "sustainCapacity": 2.5
+    },
+    "139": {
+      "sourceHash": "e686f7e4bf35af8070697147c1148e8a3e2ac73b5599ded79bec31edb8bc2544",
+      "scores": [
+        3,
+        5,
+        10,
+        9,
+        5,
+        0,
+        7
+      ],
+      "auxiliaryAxesHash": "4391771b0e827598e88fef11c80816a155620eb53f9ecdb5a5f4ba12de0ab1d4",
+      "output": {
+        "burst": 6.529333333333334,
+        "late": 15.497333333333332
+      },
+      "burstCapacity": 9.888888888888888,
+      "sustainCapacity": 5
+    },
+    "140": {
+      "sourceHash": "109825e315b645ed472ae8ab15cf15eb4ae4b62eaf310f034938f26ccea8edfe",
+      "scores": [
+        5,
+        5,
+        7,
+        7,
+        7,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "ade555f8eab9cb086abacea492b1f34dc81382adefa724c12bea9473a6a19035",
+      "output": {
+        "burst": 12.094999999999999,
+        "late": 12.094999999999999
+      },
+      "burstCapacity": 3.5,
+      "sustainCapacity": 2.5
+    },
+    "141": {
+      "sourceHash": "18b1f9c45faed3f7e7a5a07b0c4bfb5b7fe128e208963803b5aff6d37e251728",
+      "scores": [
+        6,
+        6,
+        0,
+        0,
+        0,
+        7,
+        7
+      ],
+      "auxiliaryAxesHash": "8de78e7045d75e3c794884f24ba09de4c4ee2292ca3f14ced8218c1e4562bf85",
+      "output": {
+        "burst": 19.016000000000002,
+        "late": 19.016000000000002
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "148": {
+      "sourceHash": "17888b0a9711cd6e083cb323915034a0aac64e1d94384f08f21ac27b09e88ac1",
+      "scores": [
+        7,
+        8,
+        1,
+        0,
+        6,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "7bf8cd71e87956de3fd37d1f4b9215512c4382a40de66122fdcbbf0dbefdd657",
+      "output": {
+        "burst": 44.73,
+        "late": 60.59
+      },
+      "burstCapacity": 1,
+      "sustainCapacity": 1
+    },
+    "149": {
+      "sourceHash": "0cd508c4d2c0c4282096e67930010880ca4f44f5b6af2d41c1aa4998e6919840",
+      "scores": [
+        7,
+        7,
+        8,
+        8,
+        0,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "6e67cd94ead9fcf7c75e226d6b9e25061d83573b567f1b9d301adf3b23c273c5",
+      "output": {
+        "burst": 35.10849999999999,
+        "late": 32.921
+      },
+      "burstCapacity": 5.916666666666666,
+      "sustainCapacity": 3.416666666666666
+    },
+    "150": {
+      "sourceHash": "4081c29f9e19980b71494291944c71defc4f4b3e09c2d2b3ac8a71fe4136c1ea",
+      "scores": [
+        6,
+        10,
+        8,
+        7,
+        4,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "08c6aac4849b56aab704f8d9a1c612748b02d869e0f83da4fd62206f5b7df474",
+      "output": {
+        "burst": 23.656064,
+        "late": 174.9384
+      },
+      "burstCapacity": 5,
+      "sustainCapacity": 3.3333333333333335
+    },
+    "151": {
+      "sourceHash": "0e37a2971ebc0dbda6586affb87948a107305359fb7c1e95261ce06ee3b851bf",
+      "scores": [
+        6,
+        6,
+        8,
+        4,
+        7,
+        7,
+        0
+      ],
+      "auxiliaryAxesHash": "733626bd14d38474cf7a48004d2684505596bacab170afac98d04c07f226176c",
+      "output": {
+        "burst": 25.402,
+        "late": 20.826999999999998
+      },
+      "burstCapacity": 3.4857142857142858,
+      "sustainCapacity": 1.22
+    },
+    "153": {
+      "sourceHash": "d40dc2c85ad4d612866ec0a8a73cc541ffaac3fe7561cbf31fd42063543357c2",
+      "scores": [
+        6,
+        7,
+        8,
+        9,
+        8,
+        9,
+        0
+      ],
+      "auxiliaryAxesHash": "00b71c2f7bd47a9476a5106cb145b4d6eab8e610a477ba456b85c5dc505b1c42",
+      "output": {
+        "burst": 22.302,
+        "late": 31.151999999999997
+      },
+      "burstCapacity": 7.1,
+      "sustainCapacity": 7.1
+    },
+    "154": {
+      "sourceHash": "3eadbd3509939fe596c0b2b241bec2fd4576c596399649ea91763ae7a98a5b31",
+      "scores": [
+        5,
+        8,
+        8,
+        9,
+        6,
+        0,
+        0
+      ],
+      "auxiliaryAxesHash": "4aa6d049cb1cd9d03f4e172932173074271c21dce137d98d0b2beb5cfc10692e",
+      "output": {
+        "burst": 16.992,
+        "late": 55.224
+      },
+      "burstCapacity": 5.75,
+      "sustainCapacity": 5.75
+    },
+    "155": {
+      "sourceHash": "ae1c581614f5a3a7af0fccf642c8a4fb30c8a8e5c645303721c83db0e995e2e7",
+      "scores": [
+        9,
+        9,
+        2,
+        0,
+        7,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "e296d95433c1f008ab167e4ea64f8efc13de36593a23a5091da9ccedef6da366",
+      "output": {
+        "burst": 97.74668374100719,
+        "late": 110.69157237410073
+      },
+      "burstCapacity": 1.2048192771084338,
+      "sustainCapacity": 1
+    },
+    "156": {
+      "sourceHash": "c223353fb9e5b50e34f564b9405909f1eca086e081a8095ff5a0b6c7e6d7c62c",
+      "scores": [
+        8,
+        9,
+        10,
+        10,
+        2,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "58a59ac85b3b71b11192d4d4118984a2c348930593601b0e3ae8083a3e81e26c",
+      "output": {
+        "burst": 55.60577036408896,
+        "late": 134.97661383592745
+      },
+      "burstCapacity": 8,
+      "sustainCapacity": 8
+    },
+    "157": {
+      "sourceHash": "099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9",
+      "scores": [
+        5,
+        8,
+        9,
+        8,
+        8,
+        8,
+        0
+      ],
+      "auxiliaryAxesHash": "a87d2eb6a3e339e3aa271bac77035c9e8ff93b9a3222e7b48961e3b6db1c999f",
+      "output": {
+        "burst": 14.57777777777778,
+        "late": 62.57777777777778
+      },
+      "burstCapacity": 6.666666666666666,
+      "sustainCapacity": 4
+    }
+  }
+}

@@ -51,7 +51,8 @@ test('target exclusion never inflates ordinary EHP and its structured basis reac
   for(const id of Object.keys(targetAvoidance).map(Number)) {
     const record=records.find(r=>r.id===id)
     const original=previous.find(r=>r.id===id)
-    assert.deepEqual(record.survival.states,original.survival.states)
+    assert.deepEqual(record.survival.legacyStates,original.survival.states)
+    assert.deepEqual(record.survival.states.map(s=>s.effects),original.survival.states.map(s=>s.effects))
     const published=read(`../public/data/character-ratings/${id}.json`)
     assert.deepEqual(published.assessment.targetAvoidance,targetAvoidance[id])
     assert.equal(published.assessment.effectiveSustain,targetAvoidance[id].replenishment+'；'+targetAvoidance[id].afterExpiry)

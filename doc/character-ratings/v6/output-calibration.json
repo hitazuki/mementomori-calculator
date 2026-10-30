@@ -1,5 +1,5 @@
 {
-  "version": "output-calibration-2026-10-30-shared-window-bands",
+  "version": "output-calibration-2026-10-30-panel-reference",
   "targets": 5,
   "groupBenchmark": 3,
   "burstAnchors": [
@@ -5077,7 +5077,8 @@
       "events4": true,
       "rounds": false,
       "special": true,
-      "note": "3次事件解锁S1重放，6次满60%攻击；成熟S1重放也再次自损，两轮共2次自损。"
+      "note": "3次事件解锁S1重放，爆发统一4层40%攻击，成熟6层60%攻击；S2生命条件依用户指定按1520%×5上限计算，不取1140%中点；成熟S1重放也再次自损，两轮共2次自损。",
+      "conditionReason": "S2生命条件倍率按每段1520%上限计算。"
     },
     "131": {
       "sourceHash": "c90b8d28da9a013af5702ce911810ba4921660661393f6e36a7cfee79d912081",
@@ -5722,7 +5723,8 @@
       "events4": true,
       "rounds": false,
       "special": true,
-      "note": "第2回合仅结算一次来源加攻=min(第1回合全队实际自损总量×30%, 生效前攻击×50%)；统一面板上限0.59，之后不重复成长。自身满血S1两次20%当前生命自损合计1.08，给0.324加攻；来伤或其他顺序会改变实际量。"
+      "note": "4事件样本仍须首回合自损总量足以达到第2回合加攻上限；按当前自身面板攻击50%上限计算，不将专武面板混入技能区。易伤成功同时使S2变为540%并获得40%易伤，失败用360%且无易伤；这是单次施加状态参照，不冒充五敌逐段覆盖模拟。",
+      "conditionReason": "S1易伤按70%成功与30%失败联合计算S2强化，不重复折损。"
     },
     "156": {
       "sourceHash": "c223353fb9e5b50e34f564b9405909f1eca086e081a8095ff5a0b6c7e6d7c62c",
@@ -5817,10 +5819,10 @@
     7,
     11,
     17,
-    25,
-    37.5,
-    55,
-    80
+    30,
+    50,
+    85,
+    140
   ],
   "baseline": {
     "rubricVersion": "ai-capability-v6",
@@ -5830,5 +5832,21 @@
     "reviewPath": "doc/character-ratings/v6/review.json",
     "publishedPath": "public/data/character-ratings/",
     "verifiedCharacters": 138
+  },
+  "scaleRevision": {
+    "previousVersion": "output-calibration-2026-10-30-shared-window-bands",
+    "previousAnchors": [
+      0.1,
+      2,
+      4,
+      7,
+      11,
+      17,
+      25,
+      37.5,
+      55,
+      80
+    ],
+    "reason": "Keep shared early/mature windows and integer tiers; widen high-output thresholds to distinguish mature damage without changing samples or the other five axes."
   }
 }

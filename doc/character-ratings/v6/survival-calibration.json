@@ -1,6 +1,6 @@
 {
-  "version": "survival-calibration-2026-10-29",
-  "reviewedAt": "2026-10-29",
+  "version": "survival-calibration-2026-10-30-panel-reference",
+  "reviewedAt": "2026-10-30",
   "capacityAnchors": [
     1.05,
     1.15,
@@ -65,11 +65,11 @@
         4,
         2
       ],
-      "burstBase": 5,
+      "burstBase": 6,
       "sustain": 2,
       "burstState": 0,
       "sustainState": 1,
-      "note": "CD4击杀后才补盾，首轮与无击杀空窗另扣",
+      "note": "CD4击杀后才补盾，首轮与无击杀空窗另扣；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "08b66b681041ffd50dd4dc6480a4ac60b68ac262b6640a733e904486283ab9a5",
       "preservedOutputHash": "196520b40e9206aed76212675bf8c34351894967158dfd2f13232566809ea9ed",
       "preservedStatesHash": "79574d71f991b12dca277e40f955706026ecf5f9df9d24ac6fd179c190f95be4"
@@ -275,11 +275,11 @@
         7,
         5
       ],
-      "burstBase": 6,
+      "burstBase": 7,
       "sustain": 5,
       "burstState": 0,
       "sustainState": 1,
-      "note": "一次开局盾约297%，耗尽后靠CD4伤害回复",
+      "note": "一次开局盾约328%，耗尽后靠CD4伤害回复；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "8d260f3ffea56f22c0587ed5c67e3560f99eebe8c5c8e924ac618db3bf0a03dd",
       "preservedOutputHash": "01c9a55e7f0ee44c42783cc978b35325a4025421f062a8d6cbaa81074e8f7782",
       "preservedStatesHash": "0ca75eda96fe8e5cee8fde9e8e4feda31893cc6231bd0b6c9f9a8930429513bb"
@@ -440,11 +440,11 @@
         5,
         7
       ],
-      "burstBase": 6,
+      "burstBase": 7,
       "sustain": 7,
       "burstState": 2,
       "sustainState": 0,
-      "note": "周期伤害盾有空窗，低血可重发隐身和再生，群攻仍可命中",
+      "note": "周期伤害盾有空窗，低血可重发隐身和再生，群攻仍可命中；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "07d90d23fa66991068e8feef0309a082d0030b3c9ef607a7264c86d09a8d7f68",
       "preservedOutputHash": "31bfd045ee345008bc2ddc0fb1cd9df9f1365a75ac70c963028caa890bd367ab",
       "preservedStatesHash": "c0844b5106578733f0ffbc81af0e9d8fe1bf51bf1a470dd62e91e3ed2f3d30e4"
@@ -530,11 +530,11 @@
         5,
         6
       ],
-      "burstBase": 7,
+      "burstBase": 8,
       "sustain": 6,
       "burstState": 2,
       "sustainState": 0,
-      "note": "多敌伤害盾有上界，但S2开启、CD4重新生成有空窗",
+      "note": "多敌伤害盾有上界，但S2开启、CD4重新生成有空窗；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "84d4c98a3f432d7dae50d1b734e81cc34ab663d7a518f7b25210d6c887a26502",
       "preservedOutputHash": "496f19454d16ec7e508808f620a277c05c12a0ff9ab987f90cb80bcbccd3a58d",
       "preservedStatesHash": "d8ce1d9e40c6752be64085ff50c0e4db42d486637cc303fc3f757731b4f6e864"
@@ -575,11 +575,11 @@
         5,
         6
       ],
-      "burstBase": 7,
+      "burstBase": 8,
       "sustain": 6,
       "burstState": 2,
       "sustainState": 0,
-      "note": "S2盾CD6，S1加防短效；常驻容量保底，不以满盾当持续容量",
+      "note": "S2盾CD6，S1加防短效；常驻容量保底，不以满盾当持续容量；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "d10b363389455813036575df73f9cc073499c8ce95f600a89fc815c982220e26",
       "preservedOutputHash": "51ab0198b0aa87c65aaef973511f69073e1b17886a139ae6d46847b9ab923223",
       "preservedStatesHash": "6a76b5cc1a386aced6f9307c78dbb044dc070bddf9076e4fdfc04f3d1b21db36"
@@ -609,7 +609,7 @@
       "sustain": 5,
       "burstState": 0,
       "sustainState": 0,
-      "note": "160%常驻容量，回复按损耗生命且需友军事件",
+      "note": "157%常驻容量，回复按损耗生命且需友军事件",
       "preservedAxesHash": "35befa2f7c61da1600a7aa331173c5fce19e7a3df42bb8a9b6f17c013bfa9f20",
       "preservedOutputHash": "1473f14a613d8f664460421f996322dc0d7bea15388abb579c832dc6d923a554",
       "preservedStatesHash": "9ed480771bda0bec308306ce17db27fba7a620aba2a5b025211062d44433bc90"
@@ -639,7 +639,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 1,
-      "note": "前两次盾629%、后续478%，CD4补盾及再生，破盾空窗仍存在",
+      "note": "前两次盾686%、后续515%，CD4补盾及再生，破盾空窗仍存在",
       "preservedAxesHash": "47002839a78922301da614904a109f2c03a5a095b4e0211edba5d91f20d5a60c",
       "preservedOutputHash": "6bd75faa8859fe07fed8741beac0d0bd6149970d78d782868811ca4ed644d38a",
       "preservedStatesHash": "7e81856216a1d95a28f7bfea7e9af1fb67c8b857fbd85373a2bfcda0d28bf7a6"
@@ -684,7 +684,7 @@
       "sustain": 7,
       "burstState": 0,
       "sustainState": 1,
-      "note": "开局四层三防，短增益可成熟；90%大伤阻绝每行动一次，不覆盖全部多段",
+      "note": "开局四层三防，短增益可成熟；90%大伤阻绝每行动一次，不覆盖全部多段；新底座容量虽降一档，逐行动限次阻绝仍支撑原机制档，不机械降分。",
       "preservedAxesHash": "e8ab4f7ccf5de49432b49b59abe3e0bdb799b7c7f7f561f5296c00e3ab9417ad",
       "preservedOutputHash": "a25d8906829faf961ab78237726bb718c5a5bec68b51e0b4efd52e3851506aa1",
       "preservedStatesHash": "739b43c9ec3cb6198c6f312cd8c8ced161d04ba2d594968bf4a0d02dfef28a0f"
@@ -800,11 +800,11 @@
         6,
         6
       ],
-      "burstBase": 6,
+      "burstBase": 7,
       "sustain": 6,
       "burstState": 0,
       "sustainState": 1,
-      "note": "低血后触发盾净化，CD4与伤害回复；致命前不能临时补盾",
+      "note": "低血后触发盾净化，CD4与伤害回复；致命前不能临时补盾；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "1a2fedde36ab5ab9da3e6a1e55b08d93181c0d5ad48bacce46dae72781e67198",
       "preservedOutputHash": "81f87b6c8fa304a454ecdca0c81fb631e697ac925b4d1f11e4bd0447fb6cc1fd",
       "preservedStatesHash": "c7f5557ca06e6e7966e24ec3ed46162eb5174f993c5e2ff09e2dc7fc5a6b843f"
@@ -864,7 +864,7 @@
       "sustain": 2,
       "burstState": 0,
       "sustainState": 1,
-      "note": "一次开局盾518%，耗尽只剩小额可重发防御",
+      "note": "一次开局盾575%，耗尽只剩小额可重发防御",
       "preservedAxesHash": "f6c00860a2d197922fcef85e2de405cb6b5548c9c1d5df71dd675c7e09d3a657",
       "preservedOutputHash": "3366dea8fbdea8922adb09f61349655754a048405dea70d6ba8c26c2db71aa8c",
       "preservedStatesHash": "7651238d1f17986d37347467925620ee566f494acf180c996e22e5e911ae9ff0"
@@ -890,11 +890,11 @@
         7,
         7
       ],
-      "burstBase": 6,
+      "burstBase": 7,
       "sustain": 7,
       "burstState": 0,
       "sustainState": 1,
-      "note": "每行动条件补约297%容量盾，受控敌人存在时改分支，不能按无条件永久盾",
+      "note": "每行动条件补约328%容量盾，受控敌人存在时改分支，不能按无条件永久盾；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "00a8b2b48085a8ac552b7ed02b0061326242be53bfeec57f98b4cff239410c15",
       "preservedOutputHash": "1e49f3ecdbacae70b1fd742606a407132be936508d13fd016a5e13664526d2a3",
       "preservedStatesHash": "2fed0c5764308ef7d9d6a796851f5c6815cb579a283a40da081dd7659493ebd6"
@@ -984,7 +984,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 1,
-      "note": "专长盾约235%至253%，每行动补发与持盾抗暴，破盾后有空窗",
+      "note": "专长盾约230%至247%，每行动补发与持盾抗暴，破盾后有空窗",
       "preservedAxesHash": "f0b7407857ff6e52d1fa9170253f6704b7c094d38e1f11b5588104d455277987",
       "preservedOutputHash": "7786571ccbbd589bb8422b120ce22966f59214b49de632be9a3a537c43d3e93d",
       "preservedStatesHash": "e3238c32c5b16c912bb94a67978a76b96b7879e246d109ccaae18ded6787f5db"
@@ -995,11 +995,11 @@
         7,
         2
       ],
-      "burstBase": 6,
+      "burstBase": 7,
       "sustain": 2,
       "burstState": 0,
       "sustainState": 1,
-      "note": "开局结界与一次低血盾，均不构成长线补充",
+      "note": "开局结界与一次低血盾，均不构成长线补充；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "e697f9a80dedfa7bef2101ec1ca314c65523144f63cadd6097d13e66f7986f1f",
       "preservedOutputHash": "6282c4ed23db923d6f17ce187b47896ab9f5d80e7fb0fe6a235668cf5ab5f0fe",
       "preservedStatesHash": "06d61afeb0592e646f2b8e0b8650d9716b54b7920da6a1099afb05447512cbaa"
@@ -1010,11 +1010,11 @@
         8,
         7
       ],
-      "burstBase": 7,
+      "burstBase": 8,
       "sustain": 6,
       "burstState": 0,
       "sustainState": 1,
-      "note": "S1周期盾约371%，低血另补短盾，两路空窗不能拼总盾",
+      "note": "S1周期盾约406%，低血另补短盾，两路空窗不能拼总盾；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "bbba5e4ff1a4567dc052084c09995480ff12bb21bbfd78c0f9222472aafb4590",
       "preservedOutputHash": "4d743c4bbf6e6d30ccc61f5aec81d35e34a7bd5c0b625a4dc6c46512aec87e0f",
       "preservedStatesHash": "193dc6d0a53e7603d01d1f15dfea783a2261651b7b83b0234278891e0faeaff4"
@@ -1044,7 +1044,7 @@
       "sustain": 4,
       "burstState": 0,
       "sustainState": 1,
-      "note": "一次开局盾822%已达容量10档，耗尽后167%常驻容量，不能当持续满盾",
+      "note": "一次开局盾926%已达容量10档，耗尽后167%常驻容量，不能当持续满盾",
       "preservedAxesHash": "6cf28ed31fcee0d3b7e862f50112e8edd6242d5ec3a2d43a76913813f705af22",
       "preservedOutputHash": "b02e4999e3271c43b25acae87452609ec24af84e680eee573ef3a1e35df2ec45",
       "preservedStatesHash": "54f953acc9c030df70c7420de179adcb9d2b33abad7332b1f0012018a6208dee"
@@ -1059,7 +1059,7 @@
       "sustain": 5,
       "burstState": 0,
       "sustainState": 0,
-      "note": "210%稳定容量，无额外回复",
+      "note": "207%稳定容量，无额外回复",
       "preservedAxesHash": "911e8d5d9182c96d423132f95657e9f5049ac0807863270156f3dedbcadccdcf",
       "preservedOutputHash": "d4e1a747f3db6c91e118bc16d2cb3d3ca399eac0f942f73c6a60068ca8721653",
       "preservedStatesHash": "05c085396d2eeab983afb0feea07e95b8f831f40e87418f571d912b2ea2362b8"
@@ -1104,7 +1104,7 @@
       "sustain": 2,
       "burstState": 0,
       "sustainState": 1,
-      "note": "一次首击减伤及复活，后续资源不补充，无稳定回复",
+      "note": "一次首击减伤及复活，后续资源不补充，无稳定回复；新容量略低于300%，一次首击保护与复活的机制评价维持8分。",
       "preservedAxesHash": "b6cab3340fc5a5c3fd7088bb0b6f03ec50f0810933a4e656c40767cc037f768f",
       "preservedOutputHash": "8fc74758fd9ef2f3750ea546be144d2eb841cbb7796b516572a3b75044725289",
       "preservedStatesHash": "3d90678b325b422ca50f195af1c3dc25c318365e8b15471415cab3aa8c6011b6"
@@ -1134,7 +1134,7 @@
       "sustain": 3,
       "burstState": 0,
       "sustainState": 1,
-      "note": "一次开局盾660%，耗尽后自损与低比例伤害回复限制续航",
+      "note": "一次开局盾783%，耗尽后自损与低比例伤害回复限制续航",
       "preservedAxesHash": "7352ca1b1df2d7f4188a07b439b10e73578a5f335076d9f5f53717584d7ff3ea",
       "preservedOutputHash": "843252a71d0d1a8aa7b313b7f0a0f4f5b67a5915cddd0add985489d0f1d7ae46",
       "preservedStatesHash": "479e20bd9330ddb538e68eba7b0adb154fb66e4f9413f10d685b5f04f11b819a"
@@ -1145,11 +1145,11 @@
         3,
         4
       ],
-      "burstBase": 4,
-      "sustain": 4,
+      "burstBase": 3,
+      "sustain": 3,
       "burstState": 0,
       "sustainState": 0,
-      "note": "153%容量加抗暴，主动治疗未必选中自身",
+      "note": "145%容量加抗暴，主动治疗未必选中自身；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "586925b364af139e1ab8e4165da0ea752e7e832803f2f45990f71ecd9a8151c6",
       "preservedOutputHash": "a98ff984022e22e8cb1ff767a09f3ab7e94cd4eb5ed61fe70fc9f92cbd457631",
       "preservedStatesHash": "b1919875e3c49e42116d6a50d352a41a2bba01d7428a5cc3c5faeede41eb996c"
@@ -1176,13 +1176,19 @@
         1
       ],
       "burstBase": 10,
-      "sustain": 0,
+      "sustain": 5,
       "burstState": 0,
-      "sustainState": 2,
-      "note": "开局1037%盾容量，但第11回合所有额外保护到期且无回复",
+      "sustainState": 1,
+      "note": "前10回合去盾物理359%、魔法245%，较弱一路约245%为容量6档参照；长时防护覆盖应计入持续评价。第11回合后为100%，无治疗或补盾，综合持续生存5分；一次1136%完整盾仍只用于爆防。",
       "preservedAxesHash": "ce4dac3688682b44e671b4b7ad2c5be7f83bb4c87f61797db925b4a323606d0a",
       "preservedOutputHash": "4039a4f6860c160eaa3aa1ca6932a3fd6642a3ac33766fb32f77467dbcb7dd56",
-      "preservedStatesHash": "14635a5398a3c3cf890f1341a5151ae134b2a7353ce0f17dcf259c5e5ab6a155"
+      "preservedStatesHash": "14635a5398a3c3cf890f1341a5151ae134b2a7353ce0f17dcf259c5e5ab6a155",
+      "sustainWindow": {
+        "fromRound": 1,
+        "throughRound": 10,
+        "afterState": 2,
+        "reason": "双防与30%减伤持续10回合；护盾仅一次，无治疗或补盾。"
+      }
     },
     "79": {
       "sourceHash": "ec277d294a96a9e112bef66fb4cf71f27b1d0564ef89f2441fff46827687462c",
@@ -1194,7 +1200,7 @@
       "sustain": 1,
       "burstState": 0,
       "sustainState": 1,
-      "note": "425%开局盾仅前两回合可重发，后期没有补盾",
+      "note": "475%开局盾仅前两回合可重发，后期没有补盾",
       "preservedAxesHash": "4212fc1a708a5001ae9f829d6b70d13e036570cdf3a55a1f57c64c6bb823416d",
       "preservedOutputHash": "59bf322b9734e64bf4941114f35abd71d916972458ef08d1da0b314a9c8c2519",
       "preservedStatesHash": "ca10fa8a660b9548ea5f73452d98fe5f5e2f2757a5c8c470dac31f6367d27885"
@@ -1209,7 +1215,7 @@
       "sustain": 9,
       "burstState": 0,
       "sustainState": 0,
-      "note": "319%常驻容量，周期再生与双主动自疗可靠，回复不加入致命容量",
+      "note": "345%常驻容量，周期再生与双主动自疗可靠，回复不加入致命容量",
       "preservedAxesHash": "137ededb355b6e025f406aa9ed0ec52a8d577558cc6fef31efde523c61e732a7",
       "preservedOutputHash": "abff64c8f51463a51cc18c03a646e6cccb554464b97e4b49cf5aee8e7e9b814c",
       "preservedStatesHash": "72791da1a2322ff762523421f8cc8b3a8cd23136044ef7614362d5c3956b66ab"
@@ -1239,7 +1245,7 @@
       "sustain": 7,
       "burstState": 0,
       "sustainState": 0,
-      "note": "122%首击容量，受击80%回复最多五次，不等同80%阻绝",
+      "note": "117%首击容量，受击80%回复最多五次，不等同80%阻绝",
       "preservedAxesHash": "da1f1a9fcd76b40c103d49f1ba6f5888c52e06f17cb479471e609808a1159fed",
       "preservedOutputHash": "5e0f7ebcb0c52353ec01d617f15c2914ce4fa6ab80ede930c5bc8b4f22293996",
       "preservedStatesHash": "f4c5afe4d8adbf5fd710eb6228f211da5a2f142b67490b3326156e58034f3d7a"
@@ -1284,7 +1290,7 @@
       "sustain": 5,
       "burstState": 0,
       "sustainState": 1,
-      "note": "203%需其他友军至少两名，残局降136%；低血CD4治疗仍需存活",
+      "note": "195%需其他友军至少两名，残局降130%；低血CD4治疗仍需存活；残局容量在130%边界附近，小幅面板变化不重复压低条件续航评分。",
       "preservedAxesHash": "184d514b5d01dabfaadfc1ed34cea8ca468f9c3d0d357bec51468f31fa53a800",
       "preservedOutputHash": "d91157f8c266897b2d08f4506adf2f797c50e5866bf938beee113603f770a9a4",
       "preservedStatesHash": "844411664c655b298b99cb86152c8898ab856c01bd8f802f0fb8d527ddcf172c"
@@ -1344,7 +1350,7 @@
       "sustain": 0,
       "burstState": 0,
       "sustainState": 0,
-      "note": "专武122%容量保首击，主动自损持续消耗，无回复",
+      "note": "专武117%容量保首击，主动自损持续消耗，无回复",
       "preservedAxesHash": "9e6011de7809c249cdbf41b087913dddcca1bf57cfb997f87be85c4f15b2a40e",
       "preservedOutputHash": "7d5909a3c3262a18b6de33f9705fa6f003b530766885a4e0fa45f68af815e5ed",
       "preservedStatesHash": "f4c5afe4d8adbf5fd710eb6228f211da5a2f142b67490b3326156e58034f3d7a"
@@ -1359,7 +1365,7 @@
       "sustain": 9,
       "burstState": 0,
       "sustainState": 1,
-      "note": "周期盾1313%、底座438%，CD4可补但提前破盾不能无缝续航",
+      "note": "周期盾1285%、底座428%，CD4可补但提前破盾不能无缝续航",
       "preservedAxesHash": "daaaa42a314bfeb8dba82342484688c38d607f068459e9519c793bfa888b11d1",
       "preservedOutputHash": "2776f93b2e224f8a970439d589f79d6aeff310db0d83790fd43574d8805579f3",
       "preservedStatesHash": "f72befcfb31205fd1eba785bd6f2f2e24686922c358c84a5d9eadc3282c85274"
@@ -1374,7 +1380,7 @@
       "sustain": 9,
       "burstState": 0,
       "sustainState": 1,
-      "note": "开局222%成长至302%，60%受击回复与再生可循环，不能救致命",
+      "note": "开局234%成长至327%，60%受击回复与再生可循环，不能救致命",
       "preservedAxesHash": "f8840c2518d1040a43f64a04731e01fba6db58222a185e0b27f4da77d894cfb2",
       "preservedOutputHash": "83fbf72c9fd3e3a48d219f54653fd897bacab83833bd876c04de41285f677b9f",
       "preservedStatesHash": "99816761f5f9ab5e42100e4bfec4530b2ec5641051602d445e94ebd97e7cca99"
@@ -1404,7 +1410,7 @@
       "sustain": 2,
       "burstState": 0,
       "sustainState": 1,
-      "note": "开局305%持盾容量，破盾连带失去阻绝，补盾依赖友军死亡",
+      "note": "开局326%持盾容量，破盾连带失去阻绝，补盾依赖友军死亡",
       "preservedAxesHash": "b050489848909cc7678eaf09a2ec56d1edeab699139e667d684f46cde69737dd",
       "preservedOutputHash": "5dfe75611ca77c4a9935b559283458f370d064a62b0e588fa93fb2d23d05626f",
       "preservedStatesHash": "f788b849916e815c5b2275794afcd124cdb72992b76e7db3a6d8d0cbbb099456"
@@ -1434,7 +1440,7 @@
       "sustain": 4,
       "burstState": 0,
       "sustainState": 1,
-      "note": "一次忧蓝盾507%，耗尽171%常驻容量，概率净化不补生命",
+      "note": "一次忧蓝盾559%，耗尽171%常驻容量，概率净化不补生命",
       "preservedAxesHash": "fac32c94a038394c575110d91a5657fa80e83b54f736d78be1727449249e6115",
       "preservedOutputHash": "9e33edfa75c6babf1adec974e5b2093ff964bffebde4800e3895e90af2901b5a",
       "preservedStatesHash": "c467affe4a93858cafca815921e5ec2deff4416dd3f8e7e9d12e015711bece80"
@@ -1464,7 +1470,7 @@
       "sustain": 1,
       "burstState": 0,
       "sustainState": 1,
-      "note": "一次415%盾可持续十回合但不可补，不假造复制大盾",
+      "note": "一次464%盾可持续十回合但不可补，不假造复制大盾",
       "preservedAxesHash": "d62a635ec626d01d98ae12c5c5bd58b8366b5c98bc0db24003fe1fb17e551774",
       "preservedOutputHash": "ed8b1862f90f1c14e83691bfdff490066469ac28fc9b0725811bc67cbc954d43",
       "preservedStatesHash": "726b5abdad012e6d66f6017301e47583c6ccc96b81eca7466a7bc7a6acb21f2e"
@@ -1479,7 +1485,7 @@
       "sustain": 7,
       "burstState": 0,
       "sustainState": 1,
-      "note": "一次1066%容量，盾破后256%常驻及条件净化",
+      "note": "一次1160%容量，盾破后256%常驻及条件净化",
       "preservedAxesHash": "dc3992c9855432bb44c94205a5f8d6306e612b54e7aead5737ed2a94a8a09846",
       "preservedOutputHash": "976d3257a67b0d9c711cf8dfb84ef6846a9efc04842199727ef7f0f141b98491",
       "preservedStatesHash": "ec2c9a82ba5985c0ca7f283ff9616918ba65879d0ae3fedfa775a4beeee2fb3a"
@@ -1509,7 +1515,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 0,
-      "note": "237%常驻容量，40%受击回复与主动治疗，选人及致命限制保留",
+      "note": "234%常驻容量，40%受击回复与主动治疗，选人及致命限制保留",
       "preservedAxesHash": "6277b01bf2631eb2563f22c875c1d3a44aa4f7e142e9e49124d70648004a5f52",
       "preservedOutputHash": "5f00c81e733453b4832f107e7f1535d05e6e008cae0b1f698c45a637161d3eae",
       "preservedStatesHash": "c847fdb524bf0e1ca530624d98751233b49cbe9ee7728366b29d44fbd216b029"
@@ -1565,11 +1571,11 @@
         7,
         7
       ],
-      "burstBase": 7,
-      "sustain": 7,
+      "burstBase": 6,
+      "sustain": 6,
       "burstState": 0,
       "sustainState": 0,
-      "note": "305%常驻容量，80%吸血前六回合到期，不能延续到成熟高伤害阶段",
+      "note": "292%常驻容量，80%吸血前六回合到期，不能延续到成熟高伤害阶段；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "614c3685f15e833d6dbd5e11e0d239b6060375aa3e05941b90f9bb7f9e64f61c",
       "preservedOutputHash": "4c03c3a4387a8991d12f33d59e679fe4145b8262a90ef5f559942c8eb26b741d",
       "preservedStatesHash": "5445a4178bfcbc0cdcdd58fce22169fec0a53310f6d20407d6ae8ac030c4636c"
@@ -1644,7 +1650,7 @@
       "sustain": 9,
       "burstState": 0,
       "sustainState": 0,
-      "note": "634%常驻容量已属9档，治疗有限次与晚期停用不另抬至10",
+      "note": "668%常驻容量已属9档，治疗有限次与晚期停用不另抬至10",
       "preservedAxesHash": "d16c6a91ce1e6c5edd71deab61932dfdc9b9fcf5e5bc46ffb1b14ab20bcbf1d6",
       "preservedOutputHash": "79398e43e9654e9e649abb1b42677736041508d7706e8bb924697e8291c1b325",
       "preservedStatesHash": "a234d6014ce98bab52875f7f76abae1e6ddf4a9451647656b29ff44a866d8ea5"
@@ -1659,7 +1665,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 0,
-      "note": "魔法375%、物理563%，周期防护与护罩可靠，但不当作全来源563%",
+      "note": "魔法369%、物理541%，周期防护与护罩可靠，但不当作全来源541%",
       "preservedAxesHash": "f1ee2f0b27a81b4c1010d7503fffdd8406a2b2f9a1c4de5c214acff2124d28c4",
       "preservedOutputHash": "6e24dd79db0857ca7a24036d5c9604b532ea4542fd494ebb8ef4bc3edd04fdf9",
       "preservedStatesHash": "0734ebf5205af9c29148a00f97a92da74304b90df659a9a128157a17e07e02ea"
@@ -1685,11 +1691,11 @@
         9,
         7
       ],
-      "burstBase": 9,
-      "sustain": 7,
+      "burstBase": 8,
+      "sustain": 6,
       "burstState": 0,
       "sustainState": 1,
-      "note": "前四回合610%，之后305%，友军生命盾不默认给自己",
+      "note": "前四回合585%，之后292%，友军生命盾不默认给自己；新面板容量跨档后复核，原开启/到期及补充限制保留。",
       "preservedAxesHash": "ad4ffcf2a999b64a0323cfc445e17d3a9e20df18d71fc9ea2d21abf6d0cbb94f",
       "preservedOutputHash": "f4366e1b48b83141025baee3adc74b7aed7a07a87321acabd0c8e9e2133738ff",
       "preservedStatesHash": "bc707bacf25dac9d53e93bf4c6def7a903a5f519f280683bec77543ec157817b"
@@ -1734,7 +1740,7 @@
       "sustain": 7,
       "burstState": 0,
       "sustainState": 1,
-      "note": "开局742%盾加两屏障，耗尽后250%常驻及每行动净化，资源不补",
+      "note": "开局819%盾加两屏障，耗尽后250%常驻及每行动净化，资源不补",
       "preservedAxesHash": "601c5f5ce360dca1978c70529e1fd24b5829c097991484c7765473d55f4b14e4",
       "preservedOutputHash": "cc07751d776bb99351dcf7f025f66ebf54fd22dc7c5b7c9822034ec4156fc4e0",
       "preservedStatesHash": "b86170b13dd68cd4c96bdaa28e5b081374a2c429a7af581f442e947c2f4379e5"
@@ -1749,7 +1755,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 0,
-      "note": "魔法311%、物理435%，双主动小额自疗；合理属性条件不额外扣分",
+      "note": "魔法323%、物理444%，双主动小额自疗；合理属性条件不额外扣分",
       "preservedAxesHash": "18d993b4c1f692e5624958f60ed4ae5da7fe562a85dc55f07a0601facd129a1d",
       "preservedOutputHash": "494d3a0a456d3c6fda2e7eff8e50740cbf783f959f90f5762f5b56b756218fa0",
       "preservedStatesHash": "30a7cdca3fe2360bb8f1a6f846117c64b3968d892174d6c6e286de9b4651db0d"
@@ -1779,7 +1785,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 1,
-      "note": "早期盾1178%，仅前两次S1补发；长期410%底座",
+      "note": "早期盾1278%，仅前两次S1补发；长期410%底座",
       "preservedAxesHash": "a763a62a8aae3a9d9478a4f8197861af7b36599f9bc35b5c8b459255bc370904",
       "preservedOutputHash": "fad07c70a0901940aa28ec9ca57e407f662a2bc568b40efd35de8ddf200dfde7",
       "preservedStatesHash": "934a0120be3df04c653bfdc198e75d4de366768342c0f2c9567b476238bdd0cb"
@@ -1839,7 +1845,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 1,
-      "note": "普通来源333%，前六回合物理500%，后期净化保留但防御会到期",
+      "note": "普通来源333%，前六回合物理489%，后期净化保留但防御会到期",
       "preservedAxesHash": "855aac0f4fe9fdef538a7401c3df89d441cbe0cc440a417edb51dced7cc3b306",
       "preservedOutputHash": "0dde9412beab6cbc51565fba015caee5b145482aafe14287f36c48f3b2508a62",
       "preservedStatesHash": "62add138fd69e0e752b74754eeb3ee02bf69fedc638d028feb067132a7da2836"
@@ -1854,7 +1860,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 1,
-      "note": "常驻583%，成熟仅物理升758%，早期治疗会停止，不按全来源成熟上界",
+      "note": "常驻571%，成熟仅物理升731%，早期治疗会停止，不按全来源成熟上界",
       "preservedAxesHash": "5eb31d46ff32a5e84935ed400323e218bdb29a511f3bc5852703c1a8474c606f",
       "preservedOutputHash": "e24b6138abb01181fe1d2a640a2b40b6ed8f06ca1c27f988d81579e851a66662",
       "preservedStatesHash": "d803090af6018d86733fae6267977f2bba0be44831c0febe3403a85b5b03bf9e"
@@ -1884,7 +1890,7 @@
       "sustain": 6,
       "burstState": 0,
       "sustainState": 2,
-      "note": "早期周期盾1233%，第13回合停止；长期250%底座，晚成长不补盾",
+      "note": "早期周期盾1359%，第13回合停止；长期245%底座，晚成长不补盾",
       "preservedAxesHash": "f0742d8ee67a1994aa40106a7831e789ba39610a4c491852e26bb99f9ecb849c",
       "preservedOutputHash": "d937214bfd43d44ba07fac319be014d52ba62c72bebd46576fc8b3a14e931bfd",
       "preservedStatesHash": "35c367844032bfbaa13663be481da9cabe75f1865b0309f761e0bf12af52cec0"
@@ -1914,7 +1920,7 @@
       "sustain": 9,
       "burstState": 0,
       "sustainState": 2,
-      "note": "首行动前完整盾989%已达10档，不能因尚未加防扣掉开局容量；长期500%及条件吸血",
+      "note": "首行动前完整盾1092%已达10档，不能因尚未加防扣掉开局容量；长期492%及条件吸血",
       "preservedAxesHash": "7443d8d691c16beb674719a842055c74a1bdd15ec66d26dc85f635182ca036f2",
       "preservedOutputHash": "1f1602d2334b63bc43b6af34e6303873d4f88aeb4b34343fe3de57b2f73fb24d",
       "preservedStatesHash": "ef868b381a65ad6ac72a3b3ac666a2db5434cb00c7233c4689f77f8585bb1f7d"
@@ -1929,7 +1935,7 @@
       "sustain": 7,
       "burstState": 0,
       "sustainState": 1,
-      "note": "初期物理350%、魔法420%，晚期250%加一次低血治疗净化",
+      "note": "初期物理345%、魔法411%，晚期250%加一次低血治疗净化",
       "preservedAxesHash": "68db306dd5daf95a64030fa530ea0699a2b81b6178c5741d746e53cfba83269e",
       "preservedOutputHash": "7ae9b5c010ba26735969f9323ab4df639d96da85fd40445ce10a79324cbd2551",
       "preservedStatesHash": "8e04c528b541c6f119ec9081dbb0c22df7eb7b234dec223e047c390d48774eb1"
@@ -1974,7 +1980,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 1,
-      "note": "前六回合592%，之后342%及条件净化，按实际到期分开",
+      "note": "前六回合591%，之后341%及条件净化，按实际到期分开",
       "preservedAxesHash": "7c927e990f2b5d6486c20106ccd87dfe3918acad474c810d7781954a3f8bf9dd",
       "preservedOutputHash": "038816643f9b14282c8f2cbb8a9cf1397d99ef4874a0e3f5981f86ea61e23c3a",
       "preservedStatesHash": "f0ae80a1160e53bb90719e9b38674fa412410ead07adb435b5b7db424a0f266d"
@@ -1989,7 +1995,7 @@
       "sustain": 7,
       "burstState": 0,
       "sustainState": 1,
-      "note": "早期500%和有限治疗，十一回合后333%，治疗同步到期",
+      "note": "早期492%和有限治疗，十一回合后333%，治疗同步到期",
       "preservedAxesHash": "6bc5fb7b6758585964f065aef6e1f22ca9473ee850551fb9903ba133e1b17b06",
       "preservedOutputHash": "0db1270d157ba4c66f33ed4d8a70d6de9cf0e5edf58dbcdde13c7955a3ad7874",
       "preservedStatesHash": "9a01ab2344bc86313f8cb5ad520ac1d1a0fa151b86288a2e81d982cf219ea5ad"
@@ -2019,7 +2025,7 @@
       "sustain": 9,
       "burstState": 1,
       "sustainState": 1,
-      "note": "开局410%，首行动后710%，周期来源防御可刷新；无自疗不否决高容量",
+      "note": "开局410%，首行动后709%，周期来源防御可刷新；无自疗不否决高容量",
       "preservedAxesHash": "090b7f963977034d74f1f9fcde8a96365d299ae7ef4d5cd62ef65f15017163ef",
       "preservedOutputHash": "ee79978d9dfe90b37baa340b0eb82f24209cef381a6bc22ea862e473eed0cd7e",
       "preservedStatesHash": "67e0b07867eb64f9bbe51804195a30b7fb393466dde61f09c2e4178f7499df8f"
@@ -2034,7 +2040,7 @@
       "sustain": 9,
       "burstState": 1,
       "sustainState": 2,
-      "note": "开局500%，成熟物理575%魔法661%，可补魔法受击回复仅存活后触发",
+      "note": "开局500%，成熟物理575%魔法657%，可补魔法受击回复仅存活后触发",
       "preservedAxesHash": "2d444dca848f89bf409cb462c49748c8c503014284c42c8f94a4b8986b6d381f",
       "preservedOutputHash": "24233ecbd60a2f31b4f7cb8496e8bbb6b535bd144db020914e74ec9c847d2c5d",
       "preservedStatesHash": "834af72ecfcbe7221b766ee12b242f52ac1c3a9e2e865ccf2f3ea43e96a9233c"
@@ -2079,7 +2085,7 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 3,
-      "note": "开局667%，第4回合后才大幅补盾，第13回合停止；长期400%底座",
+      "note": "开局720%，第4回合后才大幅补盾，第13回合停止；长期400%底座",
       "preservedAxesHash": "3af9a70faafd57071dce3b8aed88959b16913fd7d96549db2e6850777a47ecd8",
       "preservedOutputHash": "6a44db190d2c1dbfc5098aefe9027ce14101b00fb29f7fc8b791a1cef7947716",
       "preservedStatesHash": "2cf83422f32f7eb5a8a449b030f6071292c044ad0f4cf457b2fafd2800cd8e77"

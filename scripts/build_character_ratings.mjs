@@ -4,6 +4,7 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { RATING_AXES, RATING_VERSION, RATING_MAX, ratingSource, validRating } from '../src/utils/characterRatings.js'
 import { SURVIVAL_SCENARIOS } from '../src/utils/characterSurvival.js'
+import { CHARACTER_RATING_PANEL } from '../src/utils/characterRatingPanel.js'
 import { readCharacterCatalog } from './lib/characterCatalog.mjs'
 
 const root = path.resolve(import.meta.dirname, '..')
@@ -75,7 +76,7 @@ const records = reviews.filter(line => !onlyIds || onlyIds.has(Number(line.split
   record.outputRoleDetail = assessment.output.targeting.detail
   const quantitative = { outputCalibration: assessment.outputCalibration, ...(assessment.teamCare?{teamCare:assessment.teamCare}:{}), finalOutput: assessment.output, survival: {
     version:'survival-reference-v6',reviewedAt:assessment.reviewedAt,scoringScenario:'neutral',
-    assumptions:SURVIVAL_SCENARIOS,states:assessment.survival.states,
+    panel:CHARACTER_RATING_PANEL,assumptions:SURVIVAL_SCENARIOS.map(({key,label,damageBonus})=>({key,label,damageBonus})),states:assessment.survival.states,
   } }
   if (Object.keys(quantitative).length) {
     record.quantitative = quantitative

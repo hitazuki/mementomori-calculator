@@ -17,7 +17,7 @@ test('all self-harm and active-recovery reference windows use four events, not f
   assert.ok(!get(150).output.stages.quick.firstActions.includes('S2'))
 })
 
-test('Aisha replays with the third and fourth event attack separately and retains S2 bounds',()=>{
+test('Aisha retains historical event bounds while published scores use the requested S2 maximum',()=>{
   const a=get(130),q=a.output.stages.quick.snapshots[0],high=a.output.stages.quickUpper.snapshots[0]
   assert.deepEqual(q.skills.S1.eventCounts,[3,4])
   near(q.skills.S1.segments[0].factors.source,1.48)
@@ -28,7 +28,7 @@ test('Aisha replays with the third and fourth event attack separately and retain
   assert.ok(a.output.stages.quick.openingDamage[0]<get(93).output.stages.quick.openingDamage[0])
   assert.ok(a.output.stages.quickUpper.openingDamage[0]>get(93).output.stages.quick.openingDamage[0])
   assert.equal(a.outputCalibration.events4,true)
-  assert.match(a.axes[0].reason,/特殊条件取折中伤害/)
+  assert.match(a.axes[0].reason,/S2生命条件倍率按每段1520%上限计算/)
 })
 
 test('equivalent coefficients include critical and nonlinear defense multipliers only when applicable',()=>{
