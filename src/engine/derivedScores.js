@@ -266,6 +266,27 @@ export function buildDerivedScoreState(baseScores) {
   for (const [key, score] of Object.entries(sealedChestScores)) {
     setScore(scores, key, score, '封印宝箱截图奖池期望推算；钥匙按同级宝箱价值的1/2')
   }
+  // Screenshot choice chest: compare full reward quantities after deriving sealed keys.
+  setVirtualScore(scores, '[99,5]', {
+    name: '団結の箱',
+    nameJa: '団結の箱',
+    iconId: 'unity-box',
+    score: Math.max(
+      getScore(scores, 17, 6) * 20,
+      getScore(scores, 13, 3) * 1300,
+      getScore(scores, 19, 1) * 8,
+      getScore(scores, 20, 1) * 8,
+      getScore(scores, 18, 3) * 10,
+    ),
+    reason: '五种可选奖励按当前评分取总价值最高的一项',
+  })
+  setVirtualScore(scores, '[99,6]', {
+    name: '団結ミッション票券',
+    nameJa: '団結ミッション票券',
+    iconId: 'unity-ticket',
+    score: 0,
+    reason: '按用户要求暂不计价值；名称为截图票券的临时描述',
+  })
   const sealedChestDetailRows = buildSealedChestDetailRows(scores)
 
   const referenceScores = {

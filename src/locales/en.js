@@ -690,6 +690,8 @@ export default {
   origin_unknown: "Unknown",
   origin_monthly_card: "Monthly Card",
   sourceTypeEvent: "Event Packs",
+  origin_unity_mission_pack: "団結ミッションパック",
+  packUnityMissionNote: "Daily limit: 1. The 4 tickets have no value assigned. The chest uses the highest total value among its five reward options (20 Lv3 runes, 1300 Holy Fragments, 8 Boss Tickets, 8 Tickets of Infinity, or 10 Gold Keys).",
   origin_anniversary_pack_1: "Anniversary Pack 1",
   origin_anniversary_pack_2: "Anniversary Pack 2",
   packAnniversaryRelicNote: "Purchase limit: 1. The gift box is valued as one relic using its derived value.",

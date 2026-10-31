@@ -2,21 +2,73 @@
   {
     "nameKey": "origin_anniversary_pack_1",
     "price": 6000,
-    "noteKeys": ["packAnniversaryRelicNote"],
+    "noteKeys": [
+      "packAnniversaryRelicNote"
+    ],
     "items": [
-      { "ItemType": 2, "ItemId": 1, "ItemCount": 3000 },
-      { "ItemType": 99, "ItemId": 4, "ItemCount": 1 },
-      { "ItemType": 16, "ItemId": 4, "ItemCount": 5 }
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 3000
+      },
+      {
+        "ItemType": 99,
+        "ItemId": 4,
+        "ItemCount": 1
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 4,
+        "ItemCount": 5
+      }
     ]
   },
   {
     "nameKey": "origin_anniversary_pack_2",
     "price": 11800,
-    "noteKeys": ["packAnniversaryRelicNote"],
+    "noteKeys": [
+      "packAnniversaryRelicNote"
+    ],
     "items": [
-      { "ItemType": 2, "ItemId": 1, "ItemCount": 5900 },
-      { "ItemType": 99, "ItemId": 4, "ItemCount": 1 },
-      { "ItemType": 16, "ItemId": 12, "ItemCount": 20 }
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 5900
+      },
+      {
+        "ItemType": 99,
+        "ItemId": 4,
+        "ItemCount": 1
+      },
+      {
+        "ItemType": 16,
+        "ItemId": 12,
+        "ItemCount": 20
+      }
+    ]
+  },
+  {
+    "nameKey": "origin_unity_mission_pack",
+    "price": 650,
+    "noteKeys": [
+      "packUnityMissionNote"
+    ],
+    "items": [
+      {
+        "ItemType": 2,
+        "ItemId": 1,
+        "ItemCount": 325
+      },
+      {
+        "ItemType": 99,
+        "ItemId": 6,
+        "ItemCount": 4
+      },
+      {
+        "ItemType": 99,
+        "ItemId": 5,
+        "ItemCount": 1
+      }
     ]
   }
 ]

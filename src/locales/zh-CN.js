@@ -686,6 +686,8 @@ export default {
   origin_unknown: "未知",
   origin_monthly_card: "月卡",
   sourceTypeEvent: "活动礼包",
+  origin_unity_mission_pack: "団結ミッションパック",
+  packUnityMissionNote: "每日限购1次。票券×4暂不计价值；団結の箱按未鉴定符石Lv3×20、圣装钢×1300、首领挑战券×8、无穷之塔挑战券×8、上级封印钥匙×10中价值最高的一项估算。",
   origin_anniversary_pack_1: "周年纪念组合包1",
   origin_anniversary_pack_2: "周年纪念组合包2",
   packAnniversaryRelicNote: "限购1次。礼盒按1件圣遗物的推算价值估算。",

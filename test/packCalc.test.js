@@ -18,7 +18,7 @@ const scores = normalizeScores({
 test('anniversary packs use the local gift box icon and follow the derived relic value', () => {
   const packs = JSON.parse(readFileSync(new URL('../src/constants/eventPacks.json', import.meta.url), 'utf8'))
   const base = JSON.parse(readFileSync(new URL('../src/constants/itemScores.json', import.meta.url), 'utf8'))
-  assert.deepEqual(packs.map(p => [p.nameKey, p.price, p.items]), [
+  assert.deepEqual(packs.filter(p => p.nameKey.startsWith('origin_anniversary_')).map(p => [p.nameKey, p.price, p.items]), [
     ['origin_anniversary_pack_1', 6000, [
       { ItemType: 2, ItemId: 1, ItemCount: 3000 },
       { ItemType: 99, ItemId: 4, ItemCount: 1 },
@@ -43,7 +43,7 @@ test('anniversary packs use the local gift box icon and follow the derived relic
       ['nameZh', 'nameTw', 'nameEn', 'nameJa', 'nameKo'].map(field => state.scores['[99,4]'][field]),
       ['圣天使宝箱', '聖天使寶箱', 'Chest of the Seraph', '聖天使の宝箱', '성천사의 보물상자'],
     )
-    for (const pack of calculatePackCE(packs, state.scores)) {
+    for (const pack of calculatePackCE(packs.filter(p => p.nameKey.startsWith('origin_anniversary_')), state.scores)) {
       const box = pack.items.find(item => item.itype === 99 && item.iid === 4)
       assert.equal(box.iconId, 195)
       assert.equal(box.value, relicValue)
@@ -222,4 +222,30 @@ test('sealed chest and key scores are derived from screenshot odds', () => {
 
   const goldChestRow = state.readonlyRows.find(row => row.key === '[17,37]')
   assert.equal(goldChestRow.detailRows.find(row => row.itemType === 10 && row.itemId === 7).nameZh, '经验珠(2小时)')
+})
+
+test('unity mission chest selects the highest full reward value and ignores tickets', () => {
+  const packs = JSON.parse(readFileSync(new URL('../src/constants/eventPacks.json', import.meta.url), 'utf8'))
+  const pack = packs.find(p => p.nameKey === 'origin_unity_mission_pack')
+  assert.equal(pack.price, 650)
+  assert.deepEqual(pack.items.map(i => i.ItemCount), [325, 4, 1])
+  const base = JSON.parse(readFileSync(new URL('../src/constants/itemScores.json', import.meta.url), 'utf8'))
+  const options = [[17, 6, 20], [13, 3, 1300], [19, 1, 8], [20, 1, 8], [18, 3, 10]]
+  // Drive each directly editable reward above the others, including batch conversion.
+  for (const [key, batch, winner] of [['[17,5]', 1, 0], ['[13,3]', 1000, 1], ['[19,1]', 1, 2], ['[20,1]', 1, 3]]) {
+    const state = buildDerivedScoreState(normalizeScores({ ...base, [key]: { ...base[key], score: 1e12, batch } }))
+    const values = options.map(([type, id, count]) => getScore(state.scores, type, id) * count)
+    assert.equal(values.indexOf(Math.max(...values)), winner)
+    assert.equal(getScore(state.scores, 99, 5), Math.max(...values))
+    assert.equal(getScore(state.scores, 99, 6), 0)
+    const [result] = calculatePackCE([pack], state.scores)
+    assert.equal(result.originalValue, Math.round(325 + Math.max(...values)))
+    assert.equal(result.items[1].value, 0)
+    assert.equal(result.rechargeValue, 390)
+  }
+  // A costly rune ticket raises the recursively derived gold key above other choices.
+  const state = buildDerivedScoreState(normalizeScores({ ...base, '[13,4]': { score: 1e12, batch: 1 } }))
+  const values = options.map(([type, id, count]) => getScore(state.scores, type, id) * count)
+  assert.equal(values.indexOf(Math.max(...values)), 4)
+  assert.equal(getScore(state.scores, 99, 5), Math.max(...values))
 })

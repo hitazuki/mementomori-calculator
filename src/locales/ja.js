@@ -442,6 +442,8 @@ export default {
   origin_unknown: "不明",
   origin_monthly_card: "マンスリーカード",
   sourceTypeEvent: "イベントパック",
+  origin_unity_mission_pack: "団結ミッションパック",
+  packUnityMissionNote: "1日1回限定。チケット4枚は価値に含めません。団結の箱は未鑑定ルーンLv3×20、聖装鋼×1300、ボスチケット×8、無窮の塔チケット×8、上級封印の鍵×10の最高価値で計算します。",
   origin_anniversary_pack_1: "周年記念パック1",
   origin_anniversary_pack_2: "周年記念パック2",
   packAnniversaryRelicNote: "購入上限1回。ギフトボックスは聖遺物1個の推定価値で計算します。",

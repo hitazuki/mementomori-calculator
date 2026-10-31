@@ -436,6 +436,8 @@ export default {
   origin_unknown: "알 수 없음",
   origin_monthly_card: "월정액 카드",
   sourceTypeEvent: "이벤트 패키지",
+  origin_unity_mission_pack: "団結ミッションパック",
+  packUnityMissionNote: "매일 1회 한정. 티켓 4장은 가치에서 제외합니다. 상자는 다섯 선택 보상 중 총가치가 가장 높은 보상으로 계산합니다.",
   origin_anniversary_pack_1: "주년 기념 패키지1",
   origin_anniversary_pack_2: "주년 기념 패키지2",
   packAnniversaryRelicNote: "구매 한도 1회. 선물 상자는 성유물 1개의 추산 가치로 계산합니다.",
