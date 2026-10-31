@@ -148,7 +148,7 @@
                     {{ getFullPackName(p) }}
                   </div>
                   <div v-if="p.noteKeys?.length" class="pack-note-list">
-                    <div v-for="noteKey in p.noteKeys" :key="noteKey">※ {{ $t(noteKey) }}</div>
+                    <div v-for="noteKey in p.noteKeys" :key="noteKey">※ {{ packNoteText(noteKey) }}</div>
                   </div>
                   <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:var(--fs-sm);align-items:flex-start;">
                     <div
@@ -201,7 +201,7 @@
             {{ getFullPackName(p) }}
           </div>
           <div v-if="expanded.has(i) && p.noteKeys?.length" class="mobile-pack-source">
-            <div v-for="noteKey in p.noteKeys" :key="noteKey">※ {{ $t(noteKey) }}</div>
+            <div v-for="noteKey in p.noteKeys" :key="noteKey">※ {{ packNoteText(noteKey) }}</div>
           </div>
 
           <div class="mobile-pack-items">
@@ -249,6 +249,18 @@ const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', 'en': 'nameEn', 'j
 function itemDisplayName(s) {
   const field = localeNameMap[locale.value] || 'nameZh'
   return s[field] || s.name || s.ItemName || ''
+}
+
+function packNoteText(noteKey) {
+  const note = t(noteKey)
+  if (noteKey !== 'packUnityMissionNote') return note
+  const choices = normalizedScores.value['[99,5]']?.highestValueChoices || []
+  if (!choices.length) return note
+  const rewards = choices.map(choice => itemDisplayName(choice) + ' ×' + choice.quantity).join(' / ')
+  return note + ' ' + t('packUnityHighestReward', {
+    rewards,
+    value: Math.round(choices[0].value).toLocaleString(),
+  })
 }
 
 function itemLocaleField() {

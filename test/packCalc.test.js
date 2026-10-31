@@ -230,12 +230,23 @@ test('unity mission chest selects the highest full reward value and ignores tick
   assert.equal(pack.price, 650)
   assert.deepEqual(pack.items.map(i => i.ItemCount), [325, 4, 1])
   const base = JSON.parse(readFileSync(new URL('../src/constants/itemScores.json', import.meta.url), 'utf8'))
+  const localized = buildDerivedScoreState(normalizeScores(base)).scores
+  for (const [key, icon, names] of [
+    ['[99,5]', 279, ['团结宝箱', '團結寶箱', 'United Missions Chest', '団結の箱', '단합의 상자']],
+    ['[99,6]', 278, ['团结任务券', '團結任務券', 'United Missions Ticket', '団結ミッションチケット', '단합 미션 티켓']],
+  ]) {
+    assert.deepEqual(['nameZh', 'nameTw', 'nameEn', 'nameJa', 'nameKo'].map(field => localized[key][field]), names)
+    assert.equal(localized[key].iconId, icon)
+    const png = readFileSync(new URL('../public/images/items/Item_' + String(icon).padStart(4, '0') + '.png', import.meta.url))
+    assert.equal(png.subarray(1, 4).toString(), 'PNG')
+  }
   const options = [[17, 6, 20], [13, 3, 1300], [19, 1, 8], [20, 1, 8], [18, 3, 10]]
   // Drive each directly editable reward above the others, including batch conversion.
   for (const [key, batch, winner] of [['[17,5]', 1, 0], ['[13,3]', 1000, 1], ['[19,1]', 1, 2], ['[20,1]', 1, 3]]) {
     const state = buildDerivedScoreState(normalizeScores({ ...base, [key]: { ...base[key], score: 1e12, batch } }))
     const values = options.map(([type, id, count]) => getScore(state.scores, type, id) * count)
     assert.equal(values.indexOf(Math.max(...values)), winner)
+    assert.deepEqual(state.scores['[99,5]'].highestValueChoices.map(c => [c.itemType, c.itemId, c.quantity]), [options[winner]])
     assert.equal(getScore(state.scores, 99, 5), Math.max(...values))
     assert.equal(getScore(state.scores, 99, 6), 0)
     const [result] = calculatePackCE([pack], state.scores)
@@ -247,5 +258,8 @@ test('unity mission chest selects the highest full reward value and ignores tick
   const state = buildDerivedScoreState(normalizeScores({ ...base, '[13,4]': { score: 1e12, batch: 1 } }))
   const values = options.map(([type, id, count]) => getScore(state.scores, type, id) * count)
   assert.equal(values.indexOf(Math.max(...values)), 4)
+  assert.deepEqual(state.scores['[99,5]'].highestValueChoices.map(c => [c.itemType, c.itemId, c.quantity]), [options[4]])
+  const zero = buildDerivedScoreState({}).scores['[99,5]']
+  assert.equal(zero.highestValueChoices.length, 5, 'all options are shown when tied')
   assert.equal(getScore(state.scores, 99, 5), Math.max(...values))
 })

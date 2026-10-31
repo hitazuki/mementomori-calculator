@@ -63,7 +63,14 @@
   - Theme/reset/base layout: `src/styles/base.css` and `src/styles/layout.css`.
   - Forms/buttons/tags/stats: `src/styles/controls.css`.
   - Charts/tables/mobile cards/modals/responsive behavior: inspect the matching file in `src/styles/` rather than opening all CSS.
-- Localization/proper noun tasks:
-  - Do not create secondary translations for in-game proper nouns.
-  - Search local docs first for official names.
-  - If not found, query `TextResource*MB.json` in an explicitly supplied external Master directory for the exact official game text.
+- Localization/proper noun and game icon tasks: read `doc/master-data-inputs.md` first and follow the verification requirements below.
+
+## Game Text and Asset Verification (Required)
+
+- Before adding or changing any game item/pack/character name, translation, or icon, actively query the remote Master data and original asset sources documented in `doc/master-data-inputs.md`. Do not wait for the user to request verification.
+- Local `data/Master` and `asset_downloader` contents may be stale. They are search hints, not proof of the current remote data. Prefer remote sources unless the user explicitly requests a historical/local version.
+- Resolve the entity's exact MB record, name/display-name key, and IconId. Query the same text key in all five TextResource languages. Do not invent translations or infer official names from screenshots, memory, or similar entities.
+- Obtain icons using the MB IconId from original remote resource files. Verify the downloaded file is an actual image and visually matches the entity. Do not crop screenshots, generate replacements, or guess icon IDs as a fallback.
+- Record source URLs, MB IDs, text keys, IconId, and verification date in the relevant task document before declaring completion. Tests for locale key parity alone do not establish factual correctness.
+- If a source fails, retry using the documented alternate transport for the same data. If verification remains unavailable, report the precise missing evidence; do not write guessed names/icons or claim the task is fully verified. Continue independent work that does not require that evidence.
+- Raw MB files remain temporary external inputs. Query only relevant rows/keys; do not print whole MB files, commit raw dumps, or add build/runtime dependencies on them.

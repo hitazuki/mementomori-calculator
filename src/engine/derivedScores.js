@@ -267,25 +267,37 @@ export function buildDerivedScoreState(baseScores) {
     setScore(scores, key, score, '封印宝箱截图奖池期望推算；钥匙按同级宝箱价值的1/2')
   }
   // Screenshot choice chest: compare full reward quantities after deriving sealed keys.
+  const unityChoices = [[17, 6, 20], [13, 3, 1300], [19, 1, 8], [20, 1, 8], [18, 3, 10]]
+    .map(([itemType, itemId, quantity]) => ({
+      ...getItemInfo(scores, itemType, itemId),
+      itemType, itemId, quantity,
+      value: getScore(scores, itemType, itemId) * quantity,
+    }))
+  const unityChestScore = Math.max(...unityChoices.map(choice => choice.value))
   setVirtualScore(scores, '[99,5]', {
-    name: '団結の箱',
-    nameJa: '団結の箱',
-    iconId: 'unity-box',
-    score: Math.max(
-      getScore(scores, 17, 6) * 20,
-      getScore(scores, 13, 3) * 1300,
-      getScore(scores, 19, 1) * 8,
-      getScore(scores, 20, 1) * 8,
-      getScore(scores, 18, 3) * 10,
-    ),
+    name: "团结宝箱",
+    nameZh: "团结宝箱",
+    nameTw: "團結寶箱",
+    nameEn: "United Missions Chest",
+    nameJa: "団結の箱",
+    nameKo: "단합의 상자",
+    iconId: 279,
+    reasonKey: 'scoreReasonUnityChest',
+    score: unityChestScore,
+    highestValueChoices: unityChoices.filter(choice => choice.value === unityChestScore),
     reason: '五种可选奖励按当前评分取总价值最高的一项',
   })
   setVirtualScore(scores, '[99,6]', {
-    name: '団結ミッション票券',
-    nameJa: '団結ミッション票券',
-    iconId: 'unity-ticket',
+    name: "团结任务券",
+    nameZh: "团结任务券",
+    nameTw: "團結任務券",
+    nameEn: "United Missions Ticket",
+    nameJa: "団結ミッションチケット",
+    nameKo: "단합 미션 티켓",
+    iconId: 278,
+    reasonKey: 'scoreReasonUnityTicket',
     score: 0,
-    reason: '按用户要求暂不计价值；名称为截图票券的临时描述',
+    reason: '团结任务券暂不计价值',
   })
   const sealedChestDetailRows = buildSealedChestDetailRows(scores)
 
