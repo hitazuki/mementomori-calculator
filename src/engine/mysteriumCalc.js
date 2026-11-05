@@ -1,5 +1,26 @@
 // src/engine/mysteriumCalc.js
 
+function isConnectedPlan(charSet, activated) {
+  const adjacency = new Map(Array.from(charSet, cid => [cid, new Set()]))
+  for (const col of activated) {
+    const required = col.reqCids.filter(cid => charSet.has(cid))
+    for (const cid of required.slice(1)) {
+      adjacency.get(required[0]).add(cid)
+      adjacency.get(cid).add(required[0])
+    }
+  }
+
+  const reached = new Set()
+  const pending = [charSet.values().next().value]
+  while (pending.length > 0) {
+    const cid = pending.pop()
+    if (reached.has(cid)) continue
+    reached.add(cid)
+    for (const next of adjacency.get(cid)) pending.push(next)
+  }
+  return reached.size === charSet.size
+}
+
 export function calculateMysteriumRankings(characters, collections, scoringTemplate, algorithmId) {
   // 1. Build score lookup map
   const scoresMap = new Map()
@@ -262,6 +283,9 @@ export function calculateMysteriumRankings(characters, collections, scoringTempl
         }
 
         for (const [pKey, pData] of uniquePlans.entries()) {
+          // Only activated collections can connect a recommendation. Keep all
+          // subsets in uniquePlans so marginal CE still considers every baseline.
+          if (!isConnectedPlan(pData.charSet, pData.activated)) continue
           let marginalCe = pData.ce
           let bottleneckPlanChars = []
 
