@@ -97,8 +97,8 @@
             </tr>
             <tr v-else-if="algo === 3">
               <th>{{ $t('ui_rank') }}</th>
-              <th>{{ $t('ui_characters') }}</th>
-              <th>{{ $t('ui_cost') }}</th>
+              <th>{{ $t('ui_added_characters') }}</th>
+              <th>{{ $t('ui_total_cost') }}</th>
               <th>{{ $t('ui_score') }}</th>
               <th>{{ $t('ui_ce') }}</th>
               <th>{{ $t('ui_marginal_ce') }}</th>
@@ -115,7 +115,7 @@
                   </template>
                   <template v-else>
                     <div class="char-list-inline">
-                      <div v-for="c in (r.chars || [r])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
+                      <div v-for="c in getSummaryCharacters(r)" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
                         <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
                         <span class="char-avatar-fallback" style="display: none;">?</span>
                       </div>
@@ -140,7 +140,7 @@
                   <td style="color:var(--success); font-weight:bold;">{{ r.marginalCe.toFixed(2) }}</td>
                   <td>
                     <div v-if="r.bottleneck && r.bottleneck.length > 0" class="char-avatar-group">
-                      <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-sm char-avatar-bw" :title="getCharFullName(c)">
+                      <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
                         <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
                         <span class="char-avatar-fallback" style="display: none;">?</span>
                       </div>
@@ -235,13 +235,14 @@
           </div>
 
           <div class="mobile-mysterium-meta">
-            <span>{{ $t('ui_cost') }} <b>{{ r.cost }}</b></span>
+            <span>{{ $t(r.type === 'plan' ? 'ui_total_cost' : 'ui_cost') }} <b>{{ r.cost }}</b></span>
             <span>{{ $t('ui_score') }} <b>{{ (r.totalScore ?? r.score ?? 0).toFixed(1) }}</b></span>
             <span v-if="mainTab === 'chars' && algo === 3">{{ $t('ui_marginal_ce') }} <b>{{ r.marginalCe.toFixed(2) }}</b></span>
           </div>
 
+          <div v-if="r.type === 'plan'" class="mobile-mysterium-added-label">{{ $t('ui_added_characters') }}</div>
           <div class="mobile-mysterium-avatars">
-            <div v-for="c in (r.chars || [r])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
+            <div v-for="c in getSummaryCharacters(r)" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
               <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
               <span class="char-avatar-fallback" style="display: none;">?</span>
             </div>
@@ -250,7 +251,7 @@
           <div v-if="mainTab === 'chars' && algo === 3 && r.bottleneck && r.bottleneck.length > 0" class="mobile-mysterium-bottleneck">
             <span>{{ $t('ui_bottleneck') }}</span>
             <div class="char-avatar-group">
-              <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-xs char-avatar-bw" :title="getCharFullName(c)">
+              <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-xs" :title="getCharFullName(c)">
                 <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
                 <span class="char-avatar-fallback" style="display: none;">?</span>
               </div>
@@ -391,10 +392,14 @@ const getCharFullNameById = (id) => {
 
 const getCharIconUrl = (id) => `${import.meta.env.BASE_URL}images/characters/${id}.png`
 
-const getCharNames = (r) => {
-  if (r.chars) return r.chars.map(c => getCharFullName(c)).join(' + ')
-  return getCharFullName(r)
+const getSummaryCharacters = (r) => {
+  const chars = r.chars || [r]
+  if (r.type !== 'plan') return chars
+  const prerequisiteIds = new Set((r.bottleneck || []).map(c => c.id))
+  return chars.filter(c => !prerequisiteIds.has(c.id))
 }
+
+const getCharNames = (r) => getSummaryCharacters(r).map(c => getCharFullName(c)).join(' + ')
 
 const getLimitedCharCount = (r) => {
   if (r.chars) return r.chars.filter(c => c.isLimited).length
@@ -600,9 +605,6 @@ function toggleSort(key) {
 .char-avatar-xs {
   width: 20px;
   height: 20px;
-}
-.char-avatar-bw {
-  filter: grayscale(100%) opacity(0.7);
 }
 .char-avatar-fallback {
   font-size: var(--fs-sm);
