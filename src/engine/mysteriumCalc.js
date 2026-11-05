@@ -217,7 +217,7 @@ export function calculateMysteriumRankings(characters, collections, scoringTempl
       result.rankings = setRankings.sort((a, b) => b.ce - a.ce)
 
     } else if (algorithmId === 3) {
-      const allPlans = []
+      const allPlans = new Map()
 
       // Generator for combinations
       function* combinations(elements, length) {
@@ -306,14 +306,41 @@ export function calculateMysteriumRankings(characters, collections, scoringTempl
             }
           }
 
-          pData.marginalCe = marginalCe
-          pData.bottleneck = bottleneckPlanChars
-          allPlans.push(pData)
+          const baselineIds = new Set(bottleneckPlanChars.map(c => c.id))
+          const addedIds = new Set(pData.chars.filter(c => !baselineIds.has(c.id)).map(c => c.id))
+          const requiredBaseline = new Set()
+          // A prerequisite contributes only if it is required by a nonzero
+          // collection unlocked by the added characters. Baseline-only rewards
+          // cancel out of marginal CE and must not create duplicate routes.
+          for (const col of pData.activated) {
+            if (col.totalScore === 0 || !col.reqCids.some(cid => addedIds.has(cid))) continue
+            for (const cid of col.reqCids) {
+              if (baselineIds.has(cid)) requiredBaseline.add(cid)
+            }
+          }
+          const minimalIds = new Set([...addedIds, ...requiredBaseline])
+          const activated = compCols.filter(item =>
+            Array.from(item.reqLims).every(cid => minimalIds.has(cid))
+          ).map(item => item.col)
+          const chars = pData.chars.filter(c => minimalIds.has(c.id))
+          const cost = chars.reduce((sum, c) => sum + c.cost, 0)
+          const score = levelCapBonusPerChar * chars.length +
+            activated.reduce((sum, col) => sum + col.totalScore, 0)
+          const addedCost = chars.filter(c => addedIds.has(c.id)).reduce((sum, c) => sum + c.cost, 0)
+          const addedScore = levelCapBonusPerChar * addedIds.size + activated
+            .filter(col => col.reqCids.some(cid => addedIds.has(cid)))
+            .reduce((sum, col) => sum + col.totalScore, 0)
+          const routeKey = `${Array.from(addedIds).sort().join(',')}|${Array.from(requiredBaseline).sort().join(',')}`
+          allPlans.set(routeKey, {
+            chars, cost, score, ce: score / cost, marginalCe: addedScore / addedCost,
+            bottleneck: bottleneckPlanChars.filter(c => requiredBaseline.has(c.id)),
+            activated
+          })
         }
       }
 
       // Sort by marginal CE descending
-      result.rankings = allPlans
+      result.rankings = Array.from(allPlans.values())
         .sort((a, b) => b.marginalCe - a.marginalCe)
         .map(p => ({
           type: 'plan',

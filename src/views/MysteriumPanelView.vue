@@ -66,7 +66,16 @@
       
       <!-- Table Panel -->
       <div class="panel desktop-mysterium-table" style="flex: 1; overflow-y: auto; padding: 0;">
-        <table class="data-table">
+        <table class="data-table" :class="{ 'mysterium-plan-table': mainTab === 'chars' && algo === 3 }">
+          <colgroup v-if="mainTab === 'chars' && algo === 3">
+            <col class="plan-rank-col" />
+            <col class="plan-added-col" />
+            <col class="plan-prerequisite-col" />
+            <col class="plan-cost-col" />
+            <col class="plan-score-col" />
+            <col class="plan-ce-col" />
+            <col class="plan-marginal-col" />
+          </colgroup>
           <thead>
             <tr v-if="mainTab === 'colls'">
               <th>{{ $t('ui_rank') }}</th>
@@ -98,11 +107,11 @@
             <tr v-else-if="algo === 3">
               <th>{{ $t('ui_rank') }}</th>
               <th>{{ $t('ui_added_characters') }}</th>
+              <th>{{ $t('ui_bottleneck') }}</th>
               <th>{{ $t('ui_total_cost') }}</th>
               <th>{{ $t('ui_score') }}</th>
               <th>{{ $t('ui_ce') }}</th>
-              <th>{{ $t('ui_marginal_ce') }}</th>
-              <th>{{ $t('ui_bottleneck') }} <span style="font-size: var(--fs-xs); color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
+              <th>{{ $t('ui_marginal_ce') }} <span style="font-size: var(--fs-xs); color: var(--text-muted); font-weight: normal; margin-left: 4px;">▼</span></th>
             </tr>
           </thead>
           <tbody>
@@ -122,6 +131,15 @@
                     </div>
                   </template>
                 </td>
+                <td v-if="mainTab === 'chars' && algo === 3">
+                  <div v-if="r.bottleneck && r.bottleneck.length > 0" class="char-avatar-group">
+                    <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
+                      <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
+                      <span class="char-avatar-fallback" style="display: none;">?</span>
+                    </div>
+                  </div>
+                  <span v-else style="font-size: var(--fs-xs); color:var(--text-muted)">-</span>
+                </td>
                 <td v-if="mainTab === 'colls'" style="max-width: 250px;">
                   <div class="char-avatar-group">
                     <div v-for="c in (r.chars || [])" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
@@ -138,15 +156,6 @@
                 <template v-if="mainTab === 'chars' && algo === 3">
                   <td>{{ r.ce.toFixed(2) }}</td>
                   <td style="color:var(--success); font-weight:bold;">{{ r.marginalCe.toFixed(2) }}</td>
-                  <td>
-                    <div v-if="r.bottleneck && r.bottleneck.length > 0" class="char-avatar-group">
-                      <div v-for="c in r.bottleneck" :key="c.id" class="char-avatar char-avatar-sm" :title="getCharFullName(c)">
-                        <img :src="getCharIconUrl(c.id)" @error="handleImgError" />
-                        <span class="char-avatar-fallback" style="display: none;">?</span>
-                      </div>
-                    </div>
-                    <span v-else style="font-size: var(--fs-xs); color:var(--text-muted)">-</span>
-                  </td>
                 </template>
               </tr>
               <tr v-show="r._expanded" style="background: rgba(var(--color-invert-rgb),0.04);">
@@ -565,6 +574,27 @@ function toggleSort(key) {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
+.mysterium-plan-table {
+  table-layout: fixed;
+  min-width: 820px;
+}
+.mysterium-plan-table .plan-rank-col { width: 6%; }
+.mysterium-plan-table .plan-added-col { width: 20%; }
+.mysterium-plan-table .plan-prerequisite-col { width: 26%; }
+.mysterium-plan-table .plan-cost-col { width: 10%; }
+.mysterium-plan-table .plan-score-col { width: 11%; }
+.mysterium-plan-table .plan-ce-col { width: 12%; }
+.mysterium-plan-table .plan-marginal-col { width: 15%; }
+.mysterium-plan-table th,
+.mysterium-plan-table .hover-row > td {
+  padding-inline: 8px;
+  text-align: center;
+}
+.mysterium-plan-table .hover-row > td:nth-child(n + 4) {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .hover-row:hover {
   background: rgba(var(--color-invert-rgb),0.05);
 }
