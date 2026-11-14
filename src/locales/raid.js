@@ -1624,3 +1624,82 @@ const holyLanceAlexandraTranslations = {
   }
 }
 for (const [locale, entries] of Object.entries(holyLanceAlexandraTranslations)) Object.assign(raidTranslations[locale], entries)
+
+const superbiaElfriedeTranslations = {
+  "zh-CN": {
+    "raidCharSuperbiaElfriede": "［斯佩比亚眷属］埃尔芙琳黛",
+    "raidSkillSuperbiaElfriedeS1": "救世的魔光",
+    "raidSkillSuperbiaElfriedeS2": "圣魔黑矛",
+    "raidBuffSuperbiaElfriedePride": "以魔制魔",
+    "raidBuffSuperbiaElfriedeProtection": "以魔制魔",
+    "raidIgnoredSuperbiaElfriedeIncoming": "忽略受击减伤、命中、敌方攻击后的赎罪层数与减贯通、死亡后继续触发；木桩不模拟敌方行动及死亡。",
+    "raidIgnoredSuperbiaElfriedeBarrierBypass": "直接伤害保留必暴；伤害免疫与多重屏障的无视效果不模拟。",
+    "raidSuperbiaElfriedeLowHp": "自身生命值低于50%",
+    "raidSuperbiaElfriedeHpHint": "固定场景：关闭时每回合叠2层，开启时叠1层；最多10层。",
+    "raidCharacterConditionActorStatusStacksAtLeast": "自身状态至少{n}层",
+    "raidCharacterConditionEnemyCountIs": "敌人数为{n}",
+    "raidCharacterConditionActorHpAtLeast50": "自身生命值至少50%",
+    "raidDetailAddStacks": "每次增加{n}层，属性按层数累计"
+  },
+  "zh-TW": {
+    "raidCharSuperbiaElfriede": "［斯佩比亞眷屬］埃爾芙琳黛",
+    "raidSkillSuperbiaElfriedeS1": "救世的魔光",
+    "raidSkillSuperbiaElfriedeS2": "聖魔黑槍",
+    "raidBuffSuperbiaElfriedePride": "以魔制魔",
+    "raidBuffSuperbiaElfriedeProtection": "以魔制魔",
+    "raidIgnoredSuperbiaElfriedeIncoming": "忽略受擊減傷、命中、敵方攻擊後的贖罪層數與減貫通、死亡後繼續觸發；木樁不模擬敵方行動及死亡。",
+    "raidIgnoredSuperbiaElfriedeBarrierBypass": "直接傷害保留必暴；傷害免疫與多重屏障的無視效果不模擬。",
+    "raidSuperbiaElfriedeLowHp": "自身生命值低於50%",
+    "raidSuperbiaElfriedeHpHint": "固定情境：關閉時每回合疊2層，開啟時疊1層；最多10層。",
+    "raidCharacterConditionActorStatusStacksAtLeast": "自身狀態至少{n}層",
+    "raidCharacterConditionEnemyCountIs": "敵人數為{n}",
+    "raidCharacterConditionActorHpAtLeast50": "自身生命值至少50%",
+    "raidDetailAddStacks": "每次增加{n}層，屬性按層數累計"
+  },
+  "en": {
+    "raidCharSuperbiaElfriede": "［Acolyte of Superbia］Elfriede",
+    "raidSkillSuperbiaElfriedeS1": "Demonic Salvation",
+    "raidSkillSuperbiaElfriedeS2": "Holy Lance of the Fallen",
+    "raidBuffSuperbiaElfriedePride": "Strike Down Evil With Evil",
+    "raidBuffSuperbiaElfriedeProtection": "Strike Down Evil With Evil",
+    "raidIgnoredSuperbiaElfriedeIncoming": "Incoming mitigation, accuracy, enemy-attack penance stacks and penetration reduction, and triggers after death are outside the dummy model.",
+    "raidIgnoredSuperbiaElfriedeBarrierBypass": "Direct attacks retain guaranteed critical hits; immunity and Multi-Barrier bypass are not simulated.",
+    "raidSuperbiaElfriedeLowHp": "Own HP below 50%",
+    "raidSuperbiaElfriedeHpHint": "Fixed scenario: off adds 2 stacks per round; on adds 1. Maximum 10 stacks.",
+    "raidCharacterConditionActorStatusStacksAtLeast": "Own status has at least {n} stacks",
+    "raidCharacterConditionEnemyCountIs": "Enemy count equals {n}",
+    "raidCharacterConditionActorHpAtLeast50": "Own HP is at least 50%",
+    "raidDetailAddStacks": "Add {n} stacks per application; modifiers scale with stacks"
+  },
+  "ja": {
+    "raidCharSuperbiaElfriede": "［スペルビアの眷属］エルフリンデ",
+    "raidSkillSuperbiaElfriedeS1": "救世の魔光",
+    "raidSkillSuperbiaElfriedeS2": "聖魔の黒槍",
+    "raidBuffSuperbiaElfriedePride": "悪魔を以て悪魔を制す",
+    "raidBuffSuperbiaElfriedeProtection": "悪魔を以て悪魔を制す",
+    "raidIgnoredSuperbiaElfriedeIncoming": "被ダメージ軽減、命中、敵の攻撃後の贖罪スタックと防御貫通減少、戦闘不能後の発動は計算対象外。",
+    "raidIgnoredSuperbiaElfriedeBarrierBypass": "直接攻撃の確定クリティカルは反映。ダメージ無効・多重バリアの無視は計算対象外。",
+    "raidSuperbiaElfriedeLowHp": "自身のHPが50%未満",
+    "raidSuperbiaElfriedeHpHint": "固定条件：オフは毎ターン2スタック、オンは1スタック。最大10。",
+    "raidCharacterConditionActorStatusStacksAtLeast": "自身の状態が{n}スタック以上",
+    "raidCharacterConditionEnemyCountIs": "敵の数が{n}体",
+    "raidCharacterConditionActorHpAtLeast50": "自身のHPが50%以上",
+    "raidDetailAddStacks": "付与ごとに{n}スタック増加、効果量はスタック数に比例"
+  },
+  "ko": {
+    "raidCharSuperbiaElfriede": "［수페르비아의 권속］엘프린데",
+    "raidSkillSuperbiaElfriedeS1": "구세의 마광",
+    "raidSkillSuperbiaElfriedeS2": "성스러운 마창",
+    "raidBuffSuperbiaElfriedePride": "악마를 죽이는 독",
+    "raidBuffSuperbiaElfriedeProtection": "악마를 죽이는 독",
+    "raidIgnoredSuperbiaElfriedeIncoming": "피격 피해 감소, 명중, 적 공격 후 속죄 중첩과 방어 관통 감소 및 사망 후 발동은 계산하지 않습니다.",
+    "raidIgnoredSuperbiaElfriedeBarrierBypass": "직접 공격의 확정 치명타는 반영하며 피해 무효와 다중 배리어 무시는 계산하지 않습니다.",
+    "raidSuperbiaElfriedeLowHp": "자신의 HP 50% 미만",
+    "raidSuperbiaElfriedeHpHint": "고정 조건: 끄면 매 턴 2중첩, 켜면 1중첩. 최대 10중첩.",
+    "raidCharacterConditionActorStatusStacksAtLeast": "자신의 상태가 {n}중첩 이상",
+    "raidCharacterConditionEnemyCountIs": "적 수가 {n}명",
+    "raidCharacterConditionActorHpAtLeast50": "자신의 HP 50% 이상",
+    "raidDetailAddStacks": "부여할 때 {n}중첩 추가, 효과는 중첩 수에 비례"
+  }
+}
+for (const [locale, entries] of Object.entries(superbiaElfriedeTranslations)) Object.assign(raidTranslations[locale], entries)

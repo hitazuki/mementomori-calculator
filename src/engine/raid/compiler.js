@@ -128,6 +128,8 @@ function normalizeConfig(config, characters) {
 }
 
 function compileCondition(condition, mechanics, path, character) {
+  if (condition?.type === 'enemyCountIs' && (!Number.isInteger(condition.count) || condition.count < 1 || condition.count > 5)) throw new Error(`Invalid raid enemy count at ${path}`)
+  if (condition?.type === 'actorStatusStacksAtLeast' && (typeof condition.statusId !== 'string' || !condition.statusId || !Number.isInteger(condition.count) || condition.count < 1)) throw new Error(`Invalid raid status stack condition at ${path}`)
   if (!condition) return null
   const handler = mechanics.conditionHandlers[condition.type]
   if (!handler) throw new Error(`Unregistered raid condition '${condition.type}' at ${path}`)
@@ -191,6 +193,13 @@ function validateEffectGroupIdValue(value, path) {
 }
 
 function compileEffect(effect, mechanics, path, character) {
+  if (effect.type === 'status' && (effect.addStacks != null || effect.maxStacks != null)) {
+    if (!Number.isInteger(effect.addStacks) || effect.addStacks < 1 || !Number.isInteger(effect.maxStacks) || effect.maxStacks < 1
+      || effect.attackSnapshotRatio != null || effect.symbolicModifiers?.length
+      || (effect.modifiers ?? []).some(modifier => !Number.isFinite(modifier.rate))) {
+      throw new Error(`Raid stacking status requires positive integer addStacks/maxStacks and fixed numeric modifiers at ${path}`)
+    }
+  }
   if (effect.attackSnapshotRatio != null && effect.type !== 'status') throw new Error(`Raid attackSnapshotRatio requires a status at ${path}`)
   if (effect.attackSnapshotRatio != null && typeof effect.attackSnapshotRatio !== 'number' && effect.attackSnapshotRatio?.type !== 'configuredRate') throw new Error(`Raid attackSnapshotRatio requires a fixed or configured rate at ${path}`)
   const compiledAttackSnapshotRatio = effect.attackSnapshotRatio == null ? null : compileValue(effect.attackSnapshotRatio, mechanics, `${path}.attackSnapshotRatio`, character)

@@ -120,6 +120,10 @@
           <span><strong>{{ $t('raidMerlynTargetLowHp', { target: characterName(id) }) }}</strong><small>{{ $t('raidMerlynTargetLowHpHint') }}</small></span>
         </label>
       </template>
+      <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE)" class="raid-toggle-control">
+        <input v-model="targetHpBelow50[RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE]" type="checkbox">
+        <span><strong>{{ $t('raidSuperbiaElfriedeLowHp') }}</strong><small>{{ $t('raidSuperbiaElfriedeHpHint') }}</small></span>
+      </label>
       <label v-if="lineup.includes(RAID_TABLE_CHARACTER_IDS.LIBERIA)" class="raid-toggle-control">
         <input v-model="probabilityOverrides.liberiaSand" type="checkbox">
         <span><strong>{{ $t('raidAssumeLiberiaSand') }}</strong><small>{{ $t('raidProbabilityHint') }}</small></span>
@@ -990,6 +994,9 @@ function characterConditionText(condition) {
   const element = value => t(elementNameKey(value))
   const args = { n: condition.count, round: condition.round, skill: condition.skillKey?.toUpperCase(), element: condition.element == null ? '' : element(condition.element), elements: (condition.elements ?? []).map(element).join('/') }
   const keys = {
+    actorHpAtLeast50: 'raidCharacterConditionActorHpAtLeast50',
+    actorStatusStacksAtLeast: 'raidCharacterConditionActorStatusStacksAtLeast',
+    enemyCountIs: 'raidCharacterConditionEnemyCountIs',
     otherLineupElementCountAtMost: 'raidCharacterConditionOtherElementCountAtMost',
     targetHpBelow50: 'raidCharacterConditionTargetHpBelow50', targetHpAtLeast50: 'raidCharacterConditionTargetHpAtLeast50',
     actorHasStatus: 'raidCharacterConditionActorHasStatus', actorRemovableBuffCountAtLeast: 'raidCharacterConditionActorBuffCountAtLeast',
@@ -1030,6 +1037,7 @@ function characterEffectDetailText(effect) {
   if (effect.targetElement != null) parts.push(t('raidDetailFilterBefore'))
   if (effect.targetConditions.length) parts.push(t('raidDetailFilterAfter'))
   if (effect.type === 'status') {
+    if (definition.addStacks != null) parts.push(t('raidDetailAddStacks', { n: definition.addStacks }))
     parts.push(t(definition.statusClass === 'removableBuff' ? 'raidStatusRemovable' : 'raidStatusUnremovable'))
     if (effect.duration == null) parts.push(t('raidDetailUnlimited'))
     parts.push(t('raidDetailRefresh'))
@@ -1155,6 +1163,7 @@ function activeRaidScenarioLines() {
   const lines = probabilityScenarioDefinitions
     .filter(([id, key]) => lineup.value.includes(id) && result.value.config.probabilityOverrides[key])
     .map(([, , labelKey]) => t(labelKey))
+  if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE)) lines.push(`${characterName(RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE)} · ${t('raidSuperbiaElfriedeLowHp')}: ${result.value.config.targetHpBelow50[RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE] ? '<50%' : '≥50%'}`)
   if (lineup.value.includes(RAID_TABLE_CHARACTER_IDS.HOLY_LANCE_ALEXANDRA)) {
     lines.push(`${t('raidHolyLanceP1Attack')}：${formatter().format(result.value.config.scenarioRates.holyLanceP1Attack * 100)}%`)
   }
@@ -1397,7 +1406,8 @@ function actorStatusText(status, includeDuration = true) {
     ? ` · ${status.remainingActions == null ? t('raidPermanent') : t('raidRemainingActions', { n: status.remainingActions })}`
     : ''
   const values = statusValueSummary(status)
-  return `${t(status.nameKey)}${values ? ` · ${values}` : ''} · ${statusClassLabel(status.statusClass)}${duration}`
+  const stacks = status.stacks == null ? '' : ` · ${t('raidStatusStacks', { n: status.stacks })}`
+  return `${t(status.nameKey)}${stacks}${values ? ` · ${values}` : ''} · ${statusClassLabel(status.statusClass)}${duration}`
 }
 
 function statusValueSummary(status) {

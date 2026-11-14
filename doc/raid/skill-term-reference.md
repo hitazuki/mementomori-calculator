@@ -1,5 +1,13 @@
 # 讨伐拉表技能词条与机制目录
 
+## 友方叠层状态与条件（斯佩比亚眷属·埃尔芙琳黛）
+
+- `status.addStacks` / `maxStacks`：均为正整数；按目标、来源、EffectGroup保存独立层数，施加时累加至上限并刷新目标行动持续时间。每层固定数字`modifiers`在施加时乘最终层数冻结；编译拒绝动态属性、符号项与攻击快照组合。重施同组仍只计一个可解除Buff。
+- `actorStatusStacksAtLeast`：自身指定`statusId`的层数不少于正整数`count`，缺失状态按0；编译拒绝空状态ID或非法阈值。
+- `enemyCountIs`：固定木桩敌人数等于1至5的整数`count`；不模拟死亡改变敌人数。
+- `actorHpAtLeast50`：读取`targetHpBelow50[ownerId]`固定场景，false表示来源HP至少50%；不模拟HP轨迹。埃尔芙琳黛默认每回合2层，低HP场景每回合1层。
+- 状态快照及施加记录保留`stacks/maxStacks`，UI显示层数与累计属性；不可解除状态不计Buff数。`conditionalValue`仅是共享声明构造器，与既有`conditional`数据完全等价。
+
 本文是 `src/constants/raidTableCharacters.js` 与 `src/engine/raidTableCalc.js` 的可复用词条索引。新增角色时先在本文查找已有结构；只有现有结构无法准确表达技能时，才新增字段或引擎分支。
 
 结算时序、Buff 计数、持续时间和待确认规则仍以 [skill-modeling-guide.md](./skill-modeling-guide.md) 为准；游戏内指南、MB字段与标准词条的映射见 [official-battle-guide.md](./official-battle-guide.md)。本文描述的是“代码中如何写”。

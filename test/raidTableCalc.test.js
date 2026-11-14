@@ -53,6 +53,96 @@ function closeTo(actual, expected, tolerance = 1e-8) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} should be close to ${expected}`)
 }
 
+test('Superbia Elfriede stacks before acting, caps at ten and unlocks guaranteed-critical STR follow-ups', () => {
+  const id = RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE
+  const result = simulateRaidTable(singleConfig(id, { guaranteedCritical: false, elementAdvantage: false }))
+  assert.ok(RAID_TABLE_ROSTER.includes(id))
+  assert.equal(result.config.defensePenetrations[id], 18_950)
+  assert.equal(result.config.pmDefensePenetrations[id], 72_700)
+  assert.deepEqual(actionsFor(result, id), ['s1', 's2', 'normal', 'normal', 's1', 's2', 'normal', 'normal', 's1', 's2'])
+  for (let turn = 1; turn <= 10; turn++) {
+    const event = action(result, turn, id)
+    const status = event.statusSnapshotBeforeAction[id].statuses.find(status => status.id === 'superbia-elfriede-pride')
+    assert.equal(status.stacks, Math.min(10, turn * 2))
+    assert.equal(status.statusClass, RAID_STATUS_CLASSES.UNREMOVABLE_STATE)
+    assert.equal(event.removableBuffCounts[id], 0)
+    closeTo(event.damageSteps[0].damageRate, Math.min(10, turn * 2) * 0.05)
+  }
+  assert.deepEqual(action(result, 1, id).cooldownsAfter, { s1: 3, s2: 0 })
+  assert.equal(action(result, 1, id).damageSteps[0].percent, 2040)
+  assert.equal(action(result, 5, id).damageSteps[0].percent, 3060)
+  assert.equal(action(result, 2, id).damageSteps.length, 5)
+  const sixth = action(result, 6, id).damageSteps
+  assert.equal(sixth.length, 8)
+  assert.ok(sixth.slice(0, 5).every(step => step.stat === 'ATK' && step.percent === 870 && step.criticalMultiplier === 1))
+  assert.ok(sixth.slice(5).every(step => step.stat === 'STR' && step.percent === 1500 && step.criticalMultiplier > 1 && step.defenseMultiplier === 1))
+})
+
+test('Superbia Elfriede HP scenario grows one stack per round and five enemies retain three S1 targets', () => {
+  const id = RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE
+  const result = simulateRaidTable(singleConfig(id, { targetHpBelow50: { [id]: true }, bossTemplateId: 'five-targets', randomSeed: 7 }))
+  assert.equal(action(result, 1, id).damageSteps.length, 3)
+  assert.ok(action(result, 1, id).damageSteps.every(step => step.percent === 680))
+  assert.equal(action(result, 5, id).damageSteps[0].percent, 680)
+  assert.equal(action(result, 6, id).damageSteps.length, 5)
+  assert.equal(action(result, 10, id).damageSteps.length, 8)
+  const normal = simulateRaidTable(singleConfig(id, { bossTemplateId: 'five-targets' }))
+  assert.ok(action(normal, 5, id).damageSteps.every(step => step.percent === 1020))
+})
+
+test('stacking actor statuses preserve independent recipient histories when priorities change', () => {
+  const id = RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE
+  const definition = RAID_TABLE_CHARACTERS[id]
+  const pride = definition.hooks[1].effects[0]
+  const env = { ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [id]: {
+    ...definition, hooks: [
+      hook('roundStart', [{ ...pride, target: 'self', addStacks: 2 }], { everyRounds: 1 }),
+      hook('roundStart', [{ ...pride, target: 'topAttackOther', targetCount: 1 }], { condition: { type: 'roundAtMost', round: 2 } }),
+      hook('roundStart', [{ ...pride, target: 'allOther', targetCount: 2 }], { condition: { type: 'roundAtLeast', round: 3 } }),
+    ],
+  } } }
+  const result = simulateRaidTable({ lineup: [id, FLORENCE, LUKE], attackPriority: [FLORENCE, LUKE, id], turns: 4 }, env)
+  const snapshots = action(result, 4, id).statusSnapshotBeforeAction
+  const stack = actorId => snapshots[actorId].statuses.find(status => status.id === pride.id).stacks
+  assert.equal(stack(id), 8)
+  assert.equal(stack(FLORENCE), 4)
+  assert.equal(stack(LUKE), 2)
+  closeTo(snapshots[LUKE].statuses.find(status => status.id === pride.id).modifiers[0].displayRate, 0.1)
+})
+
+test('stacking status schema rejects unsupported values and invalid stack conditions', () => {
+  const id = RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE
+  const definition = RAID_TABLE_CHARACTERS[id]
+  const invalid = effect => ({ ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [id]: {
+    ...definition, hooks: [hook('battleStart', [effect])],
+  } } })
+  const pride = definition.hooks[1].effects[0]
+  for (const change of [{ addStacks: 0 }, { maxStacks: 1.5 }, { modifiers: [{ channel: 'damageRate', rate: { type: 'fixed', value: 0.05 } }] }]) {
+    assert.throws(() => simulateRaidTable(singleConfig(id), invalid({ ...pride, ...change })), /stacking status/)
+  }
+  for (const condition of [{ type: 'actorStatusStacksAtLeast', count: 1 }, { type: 'enemyCountIs', count: 0 }]) {
+    assert.throws(() => simulateRaidTable(singleConfig(id), invalid({ ...pride, condition })), /Invalid raid/)
+  }
+})
+
+test('stacking statuses refresh one EffectGroup and expire on the recipient action clock', () => {
+  const id = RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE
+  const definition = RAID_TABLE_CHARACTERS[id]
+  const pride = { ...definition.hooks[1].effects[0], target: 'self', duration: 2, addStacks: 2,
+    statusClass: RAID_STATUS_CLASSES.REMOVABLE_BUFF }
+  const env = { ...DEFAULT_RAID_ENVIRONMENT, characters: { ...RAID_TABLE_CHARACTERS, [id]: {
+    ...definition, hooks: [hook('roundStart', [pride], { condition: { type: 'roundAtMost', round: 2 } })],
+  } } }
+  const result = simulateRaidTable(singleConfig(id, { turns: 4 }), env)
+  const statuses = turn => action(result, turn, id).statusSnapshotBeforeAction[id].statuses
+  assert.equal(statuses(1)[0].stacks, 2)
+  assert.equal(statuses(2).length, 1)
+  assert.equal(statuses(2)[0].stacks, 4)
+  assert.equal(action(result, 2, id).removableBuffCounts[id], 1)
+  assert.equal(statuses(3)[0].remainingActions, 1)
+  assert.equal(statuses(4).length, 0)
+})
+
 test('holy lance Alexandra applies a configurable frozen P1 gain at turn 2 and retains her rotation', () => {
   assert.equal(createDefaultRaidTableConfig().scenarioRates.holyLanceP1Attack, 0.5)
   assert.equal(createDefaultRaidTableConfig().defensePenetrations[HOLY_LANCE_ALEXANDRA], 18_950)
@@ -143,15 +233,15 @@ test('configured rates and attack snapshots reject invalid definitions at compil
   }
 })
 
-test('roster exposes fifty-one characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 51)
+test('roster exposes fifty-two characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 52)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-20), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA, HOLY_LANCE_ALEXANDRA])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-21), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA, HOLY_LANCE_ALEXANDRA, RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {

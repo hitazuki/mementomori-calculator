@@ -14,6 +14,7 @@ export const RAID_BASE_CRITICAL_DAMAGE_BONUS = 0.5
 export const DEFAULT_RAID_CRITICAL_DAMAGE_BONUS = 0.6
 
 export const RAID_EXCLUSIVE_WEAPON_PANEL_BONUSES = Object.freeze({
+  [RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE]: Object.freeze({ defensePenetration: 7_000, pmDefensePenetration: 7_000 }),
   [RAID_TABLE_CHARACTER_IDS.HOLY_LANCE_ALEXANDRA]: Object.freeze({ defensePenetration: 7_000 }),
   [RAID_TABLE_CHARACTER_IDS.FLORENCE]: Object.freeze({ pmDefensePenetration: 7_000 }),
   [RAID_TABLE_CHARACTER_IDS.LIBERIA]: Object.freeze({ pmDefensePenetration: 7_000 }),

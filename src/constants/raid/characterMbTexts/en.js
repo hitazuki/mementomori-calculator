@@ -6619,5 +6619,135 @@ export const RAID_CHARACTER_MB_TEXTS = Object.freeze({
         }
       ]
     }
+  ],
+  "156": [
+    {
+      "slot": "S1",
+      "source": "ActiveSkillMB",
+      "id": 156001,
+      "name": "Demonic Salvation",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 1,
+          "text": "“Though it be mired in sin, I shall use the Lance’s light to deliver our salvation...!” Deals 1 physical attack equal to 480% of Elfriede’s ATK to the 2 enemies with the highest ATK."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 81,
+          "text": "The physical attack’s damage becomes equal to\n680% of her ATK."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 161,
+          "text": "Additionally, before dealing the physical attack, if Elfriede is enhanced with [Demon of Arrogance] and its stack count is 10, the physical attack’s damage becomes equal to 1020% of her ATK."
+        },
+        {
+          "type": "exclusive",
+          "level": 1,
+          "unlockLevel": 161,
+          "text": "Strengthens Demonic Salvation. The targets of this skill become the 3 enemies with the highest ATK. Additionally, before dealing the physical attack, if the number of enemies who are alive is 2, the physical attack’s damage is multiplied by 1.5. Before dealing the physical attack, if the number of enemies who are alive is 1, the physical attack’s damage is multiplied by 3."
+        }
+      ]
+    },
+    {
+      "slot": "S2",
+      "source": "ActiveSkillMB",
+      "id": 156002,
+      "name": "Holy Lance of the Fallen",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 21,
+          "text": "The Lance gifted from God, imbued with the power of a demon, pierces through all creation— Deals 3 physical attacks equal to 580% of Elfriede’s ATK to enemies at random. Before dealing the initial physical attack, if Elfriede is enhanced with [Demon of Arrogance] and its stack count is 10, the physical attacks’ damage becomes equal to 870% of her ATK."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 41,
+          "text": "Additionally, before dealing the initial physical attack, if Elfriede is enhanced with [Demon of Arrogance] and its stack count is 10, after dealing the final physical attack, deals 3 direct attacks equal to 1500% of Elfriede’s STR to the enemy with the highest ATK."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 101,
+          "text": "Additionally, the direct attacks become guaranteed to deal critical hits, and also become able to ignore [Invulnerable] and [Multi-Barrier] if a target is enhanced with either of them."
+        },
+        {
+          "type": "level",
+          "level": 4,
+          "unlockLevel": 181,
+          "text": "The number of physical attacks becomes 5."
+        }
+      ]
+    },
+    {
+      "slot": "P1",
+      "source": "PassiveSkillMB",
+      "id": 156003,
+      "name": "Strike Down Evil With Evil",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 11,
+          "text": "“If keeping my hands clean changes nothing, then I rather save this world with hands sullied by sin—” At the start of each turn, this skill grants Elfriede and the 2 allies with\nthe highest ATK 1 stack of [Demon of Arrogance]\n(10 stacks max) (cannot be dispelled). [Demon of Arrogance] increases the damage the enhanced target deals by 2% for each stack they are enhanced with. This skill’s effect that grants [Demon of Arrogance] will activate even if Elfriede is defeated."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 121,
+          "text": "Additionally, if Elfriede’s remaining HP percentage is 50% or higher, the number of stacks of [Demon of Arrogance] granted by this skill becomes 2."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 201,
+          "text": "Additionally, at the start of the battle, decreases the damage Elfriede takes by 50%, and increases her chance to hit by 40% (cannot be dispelled)."
+        },
+        {
+          "type": "exclusive",
+          "level": 2,
+          "unlockLevel": 240,
+          "text": "Strengthens Strike Down Evil With Evil. The increase in damage the targets enhanced with [Demon of Arrogance] deal becomes 5%."
+        },
+        {
+          "type": "exclusive",
+          "level": 3,
+          "unlockLevel": 240,
+          "text": "Strengthens Strike Down Evil With Evil. The increase in Elfriede’s chance to hit becomes 50%."
+        }
+      ]
+    },
+    {
+      "slot": "P2",
+      "source": "PassiveSkillMB",
+      "id": 156004,
+      "name": "Former Pope of Longinus",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 61,
+          "text": "Though she is no longer Pope, her prayer for peace remains unchanged— If an enemy attacks, and Elfriede is not defeated by that attack, this skill inflicts 1 stack of [Angel of Atonement] on the enemy that attacked her\n(5 stacks max). [Angel of Atonement] decreases the afflicted target’s DEF Break by 5% for each stack they are afflicted with, and is dispelled from the afflicted target at the end of their action phase."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 141,
+          "text": "Additionally, when Elfriede is attacked, the attack’s damage is cut by 30%. If the enemy that attacked Elfriede is afflicted with [Angel of Atonement], the amount the damage from the enemy’s attack is cut by increases by\n3% for each stack of [Angel of Atonement] the enemy is afflicted with before dealing the attack (total increase of 45% max)."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 221,
+          "text": "The amount the damage from the enemy’s attack is cut by becomes 75%. If the enemy that attacked Elfriede is afflicted with [Angel of Atonement], the amount the damage from the enemy’s attack is cut by increases by\n3% for each stack of [Angel of Atonement] the enemy is afflicted with before dealing the attack (total increase of 90% max)."
+        }
+      ]
+    }
   ]
 })

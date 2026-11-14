@@ -1,0 +1,36 @@
+{
+  "formatVersion": 1,
+  "characterId": 156,
+  "slug": "superbia-elfriede",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [156001, 156002],
+    "passiveSkillIds": [156003, 156004],
+    "combatLogs": ["https://mentemori.icu/battle_log.html?token=3126f048e6c34bafac76ca43523aba1c"]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 156001, "model": "implemented", "summary": "CD4, highest-ATK three enemies, 680% or own ten-stack1020%; EX1 multiplies by3 for one enemy,1.5 for two. Dummy ties use position." },
+    { "kind": "activeSkill", "sourceId": 156002, "model": "implemented", "summary": "CD4, five random physical hits580%, or870% at ten own stacks before activation; then three1500% STR direct hits to highest-ATK enemy, guaranteed critical. Barrier/immunity bypass ignored." },
+    { "kind": "passiveSkill", "sourceId": 156003, "model": "implemented", "summary": "Round start: self and top two other allies independently gain1 Pride stack, plus1 if source HP>=50%; max10, permanent unremovable5% output per stack at EX2+. Opening combined accuracy/mitigation state retained without numeric modifiers." },
+    { "kind": "passiveSkill", "sourceId": 156004, "model": "ignored", "summary": "After enemy attacks while source survives, attacker gains Penance, max5, penetration-5% each, removed at attacker action end. Incoming block75% plus3% per pre-attack Penance, max90%. No enemy-action/HP simulation." }
+  ],
+  "effectGroups": [
+    { "id": 15600140101, "model": "outOfScope", "summary": "Category200 internal marker, not a buff or debuff." },
+    { "id": 15600300101, "model": "outOfScope", "summary": "Lower pre-EX2 Pride,2% per stack." },
+    { "id": 15600320102, "model": "outOfScope", "summary": "Hidden lower-tier conditional extra-stack flow marker." },
+    { "id": 15600330401, "model": "outOfScope", "summary": "Lower accuracy40% state replaced by LR50%." },
+    { "id": 15600340101, "model": "implemented", "summary": "Pride category4, source/granter31, targets31/11/21 at round start; permanent independent count1..10,5% output each." },
+    { "id": 15600340102, "model": "outOfScope", "summary": "Hidden extra-stack flow marker represented by second HP-conditioned application." },
+    { "id": 15600350401, "model": "implemented", "summary": "Combined mitigation50% and accuracy50%, source/target/granter31, category4; state retained, values ignored." },
+    { "id": 15600400101, "model": "ignored", "summary": "Penance category3 from source/granter31 to enemy attacker, incoming-only penetration reduction not synthesized on passive dummy." }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredSuperbiaElfriedeIncoming", "summary": "Incoming damage, accuracy, enemy-attack Penance, death and triggers after death outside model. Fixed source HP scenario controls stack growth." },
+    { "key": "raidIgnoredSuperbiaElfriedeBarrierBypass", "summary": "Immunity and barrier bypass not simulated; guaranteed-critical STR follow-ups retained." }
+  ],
+  "unresolved": [
+    { "summary": "Source dies before a full-stack S2 in this log.870% and three1500%STR guaranteed-critical hits follow remote MB text, not an isolated observed activation." },
+    { "summary": "One/two-enemy S1 bonus follows MB; five-enemy log does not isolate it. Fixed attack priority and enemy ties follow project conventions." },
+    { "summary": "HP is a fixed scenario rather than a per-round trajectory. Post-death Pride is observed but death remains outside the dummy boundary." }
+  ]
+}

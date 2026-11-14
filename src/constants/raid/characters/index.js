@@ -1,3 +1,4 @@
+import superbiaElfriede from './superbiaElfriede.js'
 import florence from './florence.js'
 import fenrir from './fenrir.js'
 import luke from './luke.js'
@@ -103,6 +104,7 @@ export const RAID_TABLE_CHARACTER_IDS = Object.freeze({
   GOLDEN_ARTORIA: 154,
   TWILIGHT_FORTINA: 151,
   HOLY_LANCE_ALEXANDRA: 155,
+  SUPERBIA_ELFRIEDE: 156,
 })
 
 export const RAID_TABLE_ROSTER = Object.freeze([
@@ -157,6 +159,7 @@ export const RAID_TABLE_ROSTER = Object.freeze([
   RAID_TABLE_CHARACTER_IDS.GOLDEN_ARTORIA,
   RAID_TABLE_CHARACTER_IDS.TWILIGHT_FORTINA,
   RAID_TABLE_CHARACTER_IDS.HOLY_LANCE_ALEXANDRA,
+  RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE,
 ])
 
 export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
@@ -211,9 +214,10 @@ export const RAID_TABLE_CHARACTER_JOB_FLAGS = Object.freeze({
   154: RAID_JOB_FLAGS.WARRIOR,
   151: RAID_JOB_FLAGS.SNIPER,
   155: RAID_JOB_FLAGS.WARRIOR,
+  156: RAID_JOB_FLAGS.WARRIOR,
 })
 
-const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya, lunalynn, armstrong, valeriede, aa, sivi, eirene, shiloh, matilda, warmMemorySoltina, artie, twilightFlorence, apostleRosalie, goldenArtoria, twilightFortina, holyLanceAlexandra]
+const definitions = [florence, fenrir, luke, merlyn, mertillier, rustica, artoria, liberia, springShizu, morgana, lucille, frack, guinevere, liebes, mifri, popri, cattleyya, merlan, tama, mowano, carol, asahi, milla, eidene, pola, yildiz, winterStella, aishe, lilicotte, cordie, summerSabrina, regina, flowerNatasha, candyCerberus, witchPaladia, witchIllya, lunalynn, armstrong, valeriede, aa, sivi, eirene, shiloh, matilda, warmMemorySoltina, artie, twilightFlorence, apostleRosalie, goldenArtoria, twilightFortina, holyLanceAlexandra, superbiaElfriede]
 export const RAID_TABLE_CHARACTERS = Object.freeze(Object.fromEntries(definitions.map(character => [character.id, Object.freeze({
   ...character,
   jobFlags: RAID_TABLE_CHARACTER_JOB_FLAGS[character.id],

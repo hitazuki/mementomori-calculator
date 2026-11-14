@@ -61,6 +61,11 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
   }),
 
   conditionHandlers: Object.freeze({
+    actorHpAtLeast50: (_condition, { ownerId, config }) => config.targetHpBelow50[ownerId] !== true,
+    enemyCountIs: (condition, { enemies }) => enemies.length === condition.count,
+    actorStatusStacksAtLeast: (condition, { ownerId, actors }) => (
+      (actors.get(ownerId).statuses.find(status => status.id === condition.statusId)?.stacks ?? 0) >= condition.count
+    ),
     otherLineupElementCountAtMost: (condition, { actor, ownerId, config, actors }) => (
       config.lineup.filter(id => id !== (actor?.id ?? ownerId) && actors.get(id).definition.element === condition.element).length <= condition.count
     ),

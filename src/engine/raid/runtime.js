@@ -185,6 +185,13 @@ export function runRaidProgram(program) {
       })),
       appliedSequence: context.sequence,
     }
+    if (effect.addStacks != null) {
+      status.stacks = Math.min(effect.maxStacks, (index >= 0 ? target.statuses[index].stacks ?? 0 : 0) + effect.addStacks)
+      status.maxStacks = effect.maxStacks
+      status.modifiers = effect.modifiers.map(({ compiledRate, ...modifier }) => ({
+        ...modifier, rate: modifier.rate * status.stacks, copyRate: modifier.rate * status.stacks,
+      }))
+    }
     if (attackSnapshot) {
       status.modifiers.push({ id: effect.id, channel: 'attackRate', rate: snapshotRatio * (1 + attackSnapshot.totals.attackRate) })
       status.symbolicModifiers.push(...attackSnapshot.symbolicSources.map(modifier => ({
@@ -222,6 +229,7 @@ export function runRaidProgram(program) {
       statusClass: sourceStatus.statusClass, countsTowardBuffCount: sourceStatus.countsTowardBuffCount,
       copyable: sourceStatus.copyable !== false, duration: sourceStatus.remainingActions, remainingActions: sourceStatus.remainingActions,
       modifiers, symbolicModifiers,
+      ...(sourceStatus.stacks == null ? {} : { stacks: sourceStatus.stacks, maxStacks: sourceStatus.maxStacks }),
       appliedSequence: context.sequence, copiedFromId,
     }
     const index = target.statuses.findIndex(existing => (
@@ -276,6 +284,7 @@ export function runRaidProgram(program) {
         id: effect.id, effectGroupId: status.effectGroupId, nameKey: effect.nameKey,
         statusClass: effect.statusClass, countsTowardBuffCount: status.countsTowardBuffCount,
         duration: effect.duration, modifiers: status.modifiers.map(modifier => ({ ...modifier })),
+        ...(status.stacks == null ? {} : { stacks: status.stacks, maxStacks: status.maxStacks }),
         symbolicModifiers: status.symbolicModifiers.map(modifier => ({ ...modifier })), selectionCounts,
       })
     }

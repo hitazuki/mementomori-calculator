@@ -57,3 +57,7 @@ export function bossStatusEffect({
 export function hook(trigger, effects, rest = {}) {
   return { trigger, effects, ...rest }
 }
+
+export function conditionalValue(condition, whenTrue, whenFalse) {
+  return { type: 'conditional', condition, whenTrue, whenFalse }
+}
