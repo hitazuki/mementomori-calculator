@@ -963,6 +963,6 @@
     "nameKey": "[CharacterName157]",
     "name2Key": null,
     "elementType": 4,
-    "isLimited": false
+    "isLimited": true
   }
 }

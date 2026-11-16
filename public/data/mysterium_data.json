@@ -2353,5 +2353,28 @@
       }
     ],
     "baseParams": []
+  },
+  {
+    "id": 104,
+    "nameKey": "[CharacterCollectionName104]",
+    "reqCids": [
+      157,
+      0
+    ],
+    "params": [
+      {
+        "ptype": 14,
+        "nameKey": "[BattleParameterTypeDamageEnhance]",
+        "ctype": 1,
+        "val": 250
+      },
+      {
+        "ptype": 5,
+        "nameKey": "[BattleParameterTypeHit]",
+        "ctype": 2,
+        "val": 150
+      }
+    ],
+    "baseParams": []
   }
 ]
