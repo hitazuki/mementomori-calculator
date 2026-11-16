@@ -40,12 +40,13 @@ test('Superbia Elfriede opens below ten stacks and applies critical only to expl
   assert.match(r.axes[4].reason,/行动结束即解除/)
 })
 
-test('provisional Lamis keeps late S2 casts separate from shields that stop before round thirteen',()=>{
+test('reviewed Lamis includes weapon stats without treating debuff resistance as mitigation',()=>{
   const r=reviews.find(r=>r.id===157)
   assert.deepEqual(r.axes.slice(2).map(a=>a.score),[9,8,8,8,0])
-  assert.match(r.conditions,/暂定评分/)
-  assert.match(r.conditions,/缺少专武被动属性/)
-  assert.equal(r.output.weapon.attack,0)
+  assert.doesNotMatch(r.conditions,/暂定评分|缺少专武被动属性/)
+  assert.equal(r.output.weapon.attack,.18)
+  assert.equal(r.output.weapon.defense,.05)
+  assert.equal(r.output.weapon.excluded.find(p=>p.name==='弱化效果抗性').value,10)
   const {lower,opening,thirdCast,mature}=r.output.stages
   assert.equal(lower.snapshots[0].skills.S2.components[0].coefficient,3.2)
   assert.equal(opening.snapshots[0].skills.S1.effects.attack,.1)
@@ -56,8 +57,8 @@ test('provisional Lamis keeps late S2 casts separate from shields that stop befo
   assert.equal(r.output.growth.totalEvents,6)
   assert.equal(r.survival.states[0].effects.shieldAttack,2)
   assert.equal(r.survival.states[2].effects.shieldAttack,6)
-  assert.ok(Math.abs(r.survival.states[2].comparisons[0].physical.withShield-(1+6/2.5*1.6)*4)<1e-9)
-  assert.equal(r.survival.states[3].comparisons[0].physical.withShield,4)
+  assert.ok(Math.abs(r.survival.states[2].comparisons[0].physical.withShield-21.997583827016562)<1e-9)
+  assert.ok(Math.abs(r.survival.states[3].comparisons[0].physical.withShield-4.09509379297765)<1e-9)
   assert.equal(r.survival.initiative.penalty,0)
   assert.match(r.output.lifecycle.replenishment,/第13回合起停止/)
   assert.equal(r.output.role,'单群兼顾')

@@ -49,7 +49,7 @@ test('one-time shields, early shield expiry and recovery do not silently become 
   assert.match(asahi.axes[3].reason,/前10回合物理359%、魔法245%；第11回合后100%/)
   assert.match(asahi.axes[3].reason,/无治疗或补盾/)
   assert.equal(get(157).survival.calibration.burstReference.state,0) // Not the mature 1680% shield.
-  assert.equal(get(157).survival.calibration.sustainReference.capacity,4)
+  assert.ok(Math.abs(get(157).survival.calibration.sustainReference.capacity-4.09509379297765)<1e-9) // Confirmed weapon DEF, not debuff resistance.
   assert.equal(get(155).survival.calibration.burstReference.state,1) // Four-event state, not 15-event ceiling.
   assert.equal(get(155).axes[3].score,0)
   assert.equal(get(82).survival.calibration.burstReference.capacity,1.52/1.3) // Panel HP only; healing is not block.

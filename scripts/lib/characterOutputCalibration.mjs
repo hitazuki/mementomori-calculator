@@ -79,7 +79,7 @@ export function outputCalibrationReference(c,stages,hash,output) {
   const expiryValues=afterExpiry?[0,1].map(i=>[evaluate('late',i)/2,afterExpiry.openingDamage[i]/2]):null
   if(expiryValues)expiryValues.forEach((values,i)=>lateActions[i]=(values[0]+values[1])/2)
   const normalized={burst:Math.max(burstTotals[0]/2,burstTotals[1]/6),late:Math.max(lateActions[0],lateActions[1]/3)}
-  return {version:outputCalibration.version,reviewedAt:outputCalibration.reviewedAt,sourceHash:hash,targets:[1,5],groupBenchmark:3,
+  return {version:outputCalibration.version,reviewedAt:review.reviewedAt??outputCalibration.reviewedAt,sourceHash:hash,targets:[1,5],groupBenchmark:3,
     panel:CHARACTER_RATING_PANEL,baseDamage:PANEL_BASE_DAMAGE,
     events4:review.events4,rounds:review.rounds,special:review.special,note:review.note,samples,expiryValues,
     ...(review.conditionReason?{conditionReason:review.conditionReason}:{}),

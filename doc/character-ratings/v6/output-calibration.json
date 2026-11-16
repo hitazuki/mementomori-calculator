@@ -5769,7 +5769,7 @@
       "note": "自身生命至少50%时每回合2层，最快第5回合满；低血每回合1层，最迟第10回合满；不消耗、不重置，死亡仍可给友军附层。"
     },
     "157": {
-      "sourceHash": "099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9",
+      "sourceHash": "c757bc55bc814e7cec7312ac6e6ee946677e44df665832dcc4d8d434215334ec",
       "previousAxes": [
         {
           "key": "burst",
@@ -5808,7 +5808,13 @@
       "events4": false,
       "rounds": true,
       "special": false,
-      "note": "自身每回合2层，每层5%攻击/命中，第6回合满60%；主攻友军法师同速、非法师每回合1层。S2第3/4次施放提高倍率，CD4且无加速冷却时约第10/14回合；不提前计入前两行动。"
+      "note": "自身每回合2层，每层5%攻击/命中，第6回合满60%；主攻友军法师同速、非法师每回合1层。S2第3/4次施放提高倍率，CD4且无加速冷却时约第10/14回合；不提前计入前两行动。",
+      "sourceReview": {
+        "date": "2026-11-16",
+        "previousSourceHash": "099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9",
+        "reason": "Remote MB added weapon passive stats: ATK 18%, DEF 5%, debuff resistance 10%; skills unchanged. Historical comparison values remain unchanged."
+      },
+      "reviewedAt": "2026-11-16"
     }
   },
   "reviewedAt": "2026-10-30",

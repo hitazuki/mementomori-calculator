@@ -2076,7 +2076,7 @@
       "preservedStatesHash": "ef6b3de73a4e13cbab4a8929b429f7b1c14af9f171c0d395fd8af54ece1b4277"
     },
     "157": {
-      "sourceHash": "099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9",
+      "sourceHash": "c757bc55bc814e7cec7312ac6e6ee946677e44df665832dcc4d8d434215334ec",
       "previousScores": [
         10,
         9
@@ -2085,10 +2085,18 @@
       "sustain": 8,
       "burstState": 0,
       "sustainState": 3,
-      "note": "开局720%，第4回合后才大幅补盾，第13回合停止；长期400%底座",
+      "note": "专武攻击18%、防御5%计入；抗性10%不折减伤。开局盾后重补始于第4回合，第13回合停补，常驻75%减伤保留；完整盾与到期底座分开评审。",
       "preservedAxesHash": "3af9a70faafd57071dce3b8aed88959b16913fd7d96549db2e6850777a47ecd8",
-      "preservedOutputHash": "6a44db190d2c1dbfc5098aefe9027ce14101b00fb29f7fc8b791a1cef7947716",
-      "preservedStatesHash": "2cf83422f32f7eb5a8a449b030f6071292c044ad0f4cf457b2fafd2800cd8e77"
+      "preservedOutputHash": "c1a10401315f12c6a3571d5f2782501a34d9215dab252e2041123c2f9d4772fd",
+      "preservedStatesHash": "2cf83422f32f7eb5a8a449b030f6071292c044ad0f4cf457b2fafd2800cd8e77",
+      "sourceReview": {
+        "date": "2026-11-16",
+        "previousSourceHash": "099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9",
+        "reason": "Remote MB added weapon passive stats: ATK 18%, DEF 5%, debuff resistance 10%; skills unchanged. Historical comparison values remain unchanged.",
+        "preservedOutputHash": "6a44db190d2c1dbfc5098aefe9027ce14101b00fb29f7fc8b791a1cef7947716",
+        "preservedStatesHash": "2cf83422f32f7eb5a8a449b030f6071292c044ad0f4cf457b2fafd2800cd8e77"
+      },
+      "reviewedAt": "2026-11-16"
     }
   }
 }

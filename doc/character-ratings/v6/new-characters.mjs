@@ -23,11 +23,11 @@ export const newCharacters = {
   },
 
   157: {
-    sourceHash: '099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9',
+    sourceHash: 'c757bc55bc814e7cec7312ac6e6ee946677e44df665832dcc4d8d434215334ec',
     reviewedAt: '2026-10-15',
     input: { S1: '6.4,1,5', S2: '12.8,5,1', N: '1,1,1' },
     effects: { attack: .6, specificDefenseDown: .2 },
-    note: '暂定评分：专武被动属性缺失，不补造。S1为640%五目标群攻；S2为320%最低魔防单体5连击，第3次升至960%、第4次起1280%。',
+    note: '最高专武攻击18%、防御5%已计入；弱化抗性10%不折固定减伤。S1为640%五目标群攻；S2为320%最低魔防单体5连击，第3次升至960%、第4次起1280%。',
     growth: { event: '每回合开始自身作为法师获得2层神圣指引', initial: 0, cap: 12, perEvent: 2, totalEvents: 6,
       detail: '自身每回合2层，每层5%攻击/命中，第6回合满60%；主攻友军法师同速、非法师每回合1层。S2第3/4次施放提高倍率，CD4且无加速冷却时约第10/14回合；不提前计入前两行动。' },
     stages: { thirdCast: { effects: { attack: .6 }, components: { S2: '9.6,5,1' } } },
@@ -46,7 +46,7 @@ export const newCharacters = {
       { key: 'support', score: 8, reason: 'P2每回合给1名主攻友军5%攻击与命中，法师每回合10%，最高60%且无法驱散；S1攻击前降低5敌20%魔防，持续4回合、CD4。增益选择按最高攻击，不保证固定同一人满层。' },
       { key: 'control', score: 0, reason: '无沉默、晕厥、减速等行动干扰。' },
     ],
-    conditions: '暂定评分：当前MB缺少专武被动属性，暂按无额外专武属性计算。流金护盾强化按合理配队满足；护盾早期停止补发，S2高倍率另需第3/4次施放。减魔防需弱化生效；回合开始盾与加攻顺序未确认，开局盾不预支指引加攻。',
+    conditions: '已核对最高专武攻击+18%、防御+5%、弱化抗性+10%；抗性不折固定减伤。流金护盾强化按合理配队满足；护盾早期停止补发，S2高倍率另需第3/4次施放。减魔防需弱化生效；回合开始盾与加攻顺序未确认，开局盾不预支指引加攻。',
     tags: 'attack@P2,accuracy@P2,reduction@P2,shield@P1+W,accuracyDown@S1,defenseDown@S1',
   },
   155: {

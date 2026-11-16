@@ -2605,7 +2605,7 @@
       "sustainCapacity": 8
     },
     "157": {
-      "sourceHash": "099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9",
+      "sourceHash": "c757bc55bc814e7cec7312ac6e6ee946677e44df665832dcc4d8d434215334ec",
       "scores": [
         5,
         8,
@@ -2621,7 +2621,12 @@
         "late": 62.57777777777778
       },
       "burstCapacity": 6.666666666666666,
-      "sustainCapacity": 4
+      "sustainCapacity": 4,
+      "sourceReview": {
+        "date": "2026-11-16",
+        "previousSourceHash": "099a8fcd947031fc77e2a8779a446a8dd5ac5bf01da08ccb1ff2c3d9c5769bd9",
+        "reason": "Remote MB added weapon passive stats: ATK 18%, DEF 5%, debuff resistance 10%; skills unchanged. Historical comparison values remain unchanged."
+      }
     }
   }
 }
