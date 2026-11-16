@@ -3,6 +3,17 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  shopPlanTitle: "最適な交換プラン",
+  shopPlanNote: "未交換の状態を前提に、現在のアイテム評価で予算内の合計価値を最大化します。",
+  shopPlanCalculate: "プランを計算",
+  shopPlanBudgetHint: "しおりの数を0～100,000の整数で入力してください。",
+  shopPlanSpent: "使用するしおり",
+  shopPlanRemaining: "残りのしおり",
+  shopPlanUnknownLimit: "購入上限が不明な商品は計算対象外です。",
+  shopPlanEmpty: "現在の予算と評価では、おすすめの交換商品はありません。",
+  shopPlanProduct: "商品 / 枠 / 交換1回のコスト",
+  shopPlanTimes: "交換回数",
+
   dataLoading: 'データを読み込み中…',
   dataLoadError: 'データを読み込めませんでした。再試行してください。',
   dataRetry: '再試行',

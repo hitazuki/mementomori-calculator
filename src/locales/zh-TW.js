@@ -3,6 +3,17 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  shopPlanTitle: "最優兌換方案",
+  shopPlanNote: "按全部未兌換及目前道具評分計算，在預算內最大化道具總價值。",
+  shopPlanCalculate: "計算方案",
+  shopPlanBudgetHint: "請輸入 0～100,000 的整數書籤數量。",
+  shopPlanSpent: "已用書籤",
+  shopPlanRemaining: "剩餘書籤",
+  shopPlanUnknownLimit: "限購未知的商品未參與計算。",
+  shopPlanEmpty: "目前預算和評分下沒有可推薦的兌換商品。",
+  shopPlanProduct: "商品 / 檔位 / 單次花費",
+  shopPlanTimes: "兌換次數",
+
   dataLoading: '正在載入資料…',
   dataLoadError: '資料載入失敗，請重試。',
   dataRetry: '重試',

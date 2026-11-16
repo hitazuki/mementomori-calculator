@@ -3,6 +3,17 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  shopPlanTitle: "最优兑换方案",
+  shopPlanNote: "按全部未兑换及当前道具评分计算，在预算内最大化道具总价值。",
+  shopPlanCalculate: "计算方案",
+  shopPlanBudgetHint: "请输入 0～100,000 的整数书签数量。",
+  shopPlanSpent: "已用书签",
+  shopPlanRemaining: "剩余书签",
+  shopPlanUnknownLimit: "限购未知的商品未参与计算。",
+  shopPlanEmpty: "当前预算和评分下没有可推荐的兑换商品。",
+  shopPlanProduct: "商品 / 档位 / 单次花费",
+  shopPlanTimes: "兑换次数",
+
   dataLoading: '正在加载数据…',
   dataLoadError: '数据加载失败，请重试。',
   dataRetry: '重试',

@@ -41,6 +41,37 @@
         </div>
       </div>
 
+      <section v-if="selectedShop.shopKey === 'witch-library-cleanup'" class="card shop-plan">
+        <h2>{{ $t('shopPlanTitle') }}</h2>
+        <p>{{ $t('shopPlanNote') }}</p>
+        <form class="shop-plan-controls" @submit.prevent="calculatePlan" novalidate>
+          <label for="shop-plan-budget">{{ itemDisplayName(selectedShop.currency) }}</label>
+          <input id="shop-plan-budget" v-model="planBudget" class="form-input" type="number" min="0" max="100000" step="1" :aria-invalid="planError" aria-describedby="shop-plan-budget-hint" />
+          <button class="btn btn-primary" type="submit">{{ $t('shopPlanCalculate') }}</button>
+        </form>
+        <p id="shop-plan-budget-hint" :class="{ 'shop-missing': planError }">{{ $t('shopPlanBudgetHint') }}</p>
+        <div v-if="exchangePlan" aria-live="polite">
+          <div class="shop-product-metrics">
+            <div><span>{{ $t('shopPlanSpent') }}</span><b>{{ exchangePlan.totalCost.toLocaleString() }}</b></div>
+            <div><span>{{ $t('shopPlanRemaining') }}</span><b>{{ exchangePlan.remainingBudget.toLocaleString() }}</b></div>
+            <div><span>{{ $t('packColValue') }}</span><b>{{ formatNumber(exchangePlan.totalValue) }}</b></div>
+            <div><span>CE</span><b>{{ formatCe(exchangePlan.ce) }}</b></div>
+          </div>
+          <p v-if="exchangePlan.missingScoreItems.length" class="shop-missing">{{ $t('shopMissingScoreNotice') }}</p>
+          <p v-if="exchangePlan.unknownLimitProducts.length" class="shop-missing">{{ $t('shopPlanUnknownLimit') }}</p>
+          <p v-if="!exchangePlan.entries.length">{{ $t('shopPlanEmpty') }}</p>
+          <div v-else class="shop-plan-table-wrap">
+            <table class="shop-plan-table">
+              <thead><tr><th>{{ $t('shopPlanProduct') }}</th><th>{{ $t('shopPlanTimes') }}</th><th>{{ $t('shopRewardQty') }}</th><th>{{ $t('shopPlanSpent') }}</th></tr></thead>
+              <tbody><tr v-for="entry in exchangePlan.entries" :key="entry.product.id">
+                <td><div class="shop-plan-name"><img :src="itemIconUrl(productIconId(entry.product))" @error="hideBrokenImage" /><span>{{ productDisplayName(entry.product) }} · {{ entry.product.tier }} · {{ entry.product.cost }}</span></div></td>
+                <td>{{ entry.count.toLocaleString() }}</td><td>{{ entry.quantity.toLocaleString() }}</td><td>{{ entry.cost.toLocaleString() }}</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <div class="shop-result-bar">
         <div class="shop-currency-strip">
           <img :src="itemIconUrl(selectedShop.currency.iconId)" @error="hideBrokenImage" />
@@ -135,7 +166,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ItemScorePanel from '../components/ItemScorePanel.vue'
 import { shopItems } from '../constants/shopItems.js'
-import { calculateShopCE, sortShopProducts } from '../engine/shopCalc.js'
+import { calculateShopCE, calculateShopExchangePlan, sortShopProducts } from '../engine/shopCalc.js'
 import { useItemScores } from '../composables/useItemScores.js'
 
 const { t, locale } = useI18n()
@@ -144,6 +175,17 @@ const showScores = ref(true)
 const selectedShopKey = ref(shopItems[0]?.shopKey || '')
 const sortState = reactive({ by: 'original', asc: true })
 const expanded = reactive(new Set())
+const planBudget = ref('')
+const exchangePlan = ref(null)
+const planError = ref(false)
+const validPlanBudget = computed(() => String(planBudget.value).trim() !== '' && Number.isInteger(Number(planBudget.value)) && Number(planBudget.value) >= 0 && Number(planBudget.value) <= 100000)
+function calculatePlan() {
+  planError.value = !validPlanBudget.value
+  exchangePlan.value = validPlanBudget.value
+    ? calculateShopExchangePlan(selectedShop.value, normalizedScores.value, Number(planBudget.value))
+    : null
+}
+
 
 const localeNameMap = { 'zh-CN': 'nameZh', 'zh-TW': 'nameTw', en: 'nameEn', ja: 'nameJa', ko: 'nameKo' }
 const unlimitedLimitText = {
@@ -194,6 +236,10 @@ const sortedProducts = computed(() => {
 })
 
 watch(selectedShopKey, () => expanded.clear())
+watch([planBudget, normalizedScores], () => {
+  exchangePlan.value = null
+  planError.value = false
+}, { deep: true, flush: 'sync' })
 
 function itemDisplayName(item) {
   const field = localeNameMap[locale.value] || 'nameZh'
@@ -264,6 +310,19 @@ function getCeColor(ce, bestCe) {
 </script>
 
 <style scoped>
+.shop-plan { padding: 16px; }
+.shop-plan h2 { margin: 0; font-size: var(--fs-md); }
+.shop-plan p { color: var(--text-secondary); font-size: var(--fs-sm); }
+.shop-plan .shop-missing { color: var(--danger); }
+.shop-plan-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.shop-plan-controls input { width: 160px; max-width: 100%; }
+.shop-plan-table-wrap { overflow-x: auto; margin-top: 12px; }
+.shop-plan-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.shop-plan-table th, .shop-plan-table td { padding: 8px; text-align: right; border-bottom: 1px solid var(--border-subtle); }
+.shop-plan-table th:first-child, .shop-plan-table td:first-child { text-align: left; }
+.shop-plan-name { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+.shop-plan-name img { width: 28px; height: 28px; }
+
 .shop-switch-card {
   display: flex;
   align-items: center;

@@ -3,6 +3,17 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  shopPlanTitle: "Optimal exchange plan",
+  shopPlanNote: "Assumes no prior exchanges and maximizes total item value within budget using current scores.",
+  shopPlanCalculate: "Calculate plan",
+  shopPlanBudgetHint: "Enter a whole number of bookmarks from 0 to 100,000.",
+  shopPlanSpent: "Bookmarks spent",
+  shopPlanRemaining: "Bookmarks remaining",
+  shopPlanUnknownLimit: "Products with unknown purchase limits are excluded.",
+  shopPlanEmpty: "No exchanges are recommended for this budget and these scores.",
+  shopPlanProduct: "Product / tier / unit cost",
+  shopPlanTimes: "Exchanges",
+
   dataLoading: 'Loading data…',
   dataLoadError: 'Could not load data. Please retry.',
   dataRetry: 'Retry',

@@ -3,6 +3,17 @@ import { raidTranslations } from './raid.js'
 import { serialCodeTranslations } from './serialCode.js'
 
 export default {
+  shopPlanTitle: "최적 교환 계획",
+  shopPlanNote: "모든 상품을 아직 교환하지 않은 것으로 가정하고 현재 점수로 예산 내 아이템 총가치를 최대화합니다.",
+  shopPlanCalculate: "계획 계산",
+  shopPlanBudgetHint: "책갈피 수를 0~100,000 사이의 정수로 입력하세요.",
+  shopPlanSpent: "사용 책갈피",
+  shopPlanRemaining: "남은 책갈피",
+  shopPlanUnknownLimit: "구매 한도를 알 수 없는 상품은 계산에서 제외됩니다.",
+  shopPlanEmpty: "현재 예산과 점수에서는 추천할 교환 상품이 없습니다.",
+  shopPlanProduct: "상품 / 등급 / 1회 비용",
+  shopPlanTimes: "교환 횟수",
+
   dataLoading: '데이터를 불러오는 중…',
   dataLoadError: '데이터를 불러오지 못했습니다. 다시 시도해 주세요.',
   dataRetry: '다시 시도',
