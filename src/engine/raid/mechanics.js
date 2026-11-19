@@ -118,6 +118,7 @@ export const DEFAULT_RAID_MECHANICS = Object.freeze({
     eventSourceHasStatus: (condition, { eventSourceId, actors }) => (
       eventSourceId != null && actors.get(eventSourceId).statuses.some(status => status.id === condition.statusId)
     ),
+    targetJobIs: (condition, { target }) => target.definition.jobFlags === condition.jobFlags,
     targetElementNot: (condition, { target }) => target.definition.element !== condition.element,
     targetElementIn: (condition, { target }) => condition.elements.includes(target.definition.element),
     targetElementNotIn: (condition, { target }) => !condition.elements.includes(target.definition.element),

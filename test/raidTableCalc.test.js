@@ -41,6 +41,58 @@ function action(result, turn, id) {
   return result.rounds[turn - 1].actions.find(item => item.actorId === id)
 }
 
+test('Lamis applies shields before Guidance and uses the round action order for passives', () => {
+  const { LAMIS } = RAID_TABLE_CHARACTER_IDS
+  const lineup = [LAMIS, MERLAN, LUKE]
+  const result = simulateRaidTable({
+    lineup, attackPriority: [LUKE, MERLAN, LAMIS], turns: 14,
+    speeds: { [LAMIS]: 3000, [MERLAN]: 3100, [LUKE]: 2900 },
+    actionOrderOverrides: { 1: [LAMIS, MERLAN, LUKE] },
+  })
+  const first = result.rounds[0].roundStartEffects
+  assert.deepEqual(first.filter(effect => effect.id.startsWith('lamis-shield')).map(effect => [effect.targetId, effect.effectGroupId]), [
+    [LAMIS, 15700320102], [MERLAN, 15700320102], [LUKE, 15700320101],
+  ])
+  assert.ok(first.findIndex(effect => effect.id === 'lamis-guidance') > first.findLastIndex(effect => effect.id.startsWith('lamis-shield')))
+  for (const [index, firstActor] of [[0, LAMIS], [1, MERLAN]]) {
+    assert.equal(result.rounds[index].roundStartEffects[0].sourceId, firstActor)
+  }
+  assert.deepEqual(result.rounds.filter(round => round.roundStartEffects.some(effect => effect.id === 'lamis-shield')).map(round => round.turn), [1, 4, 7, 10])
+  assert.equal(result.rounds[3].roundStartEffects.find(effect => effect.id === 'lamis-shield').effectGroupId, 15700330102)
+  const guidanceAtSix = result.rounds[5].roundStartEffects.filter(effect => effect.id === 'lamis-guidance')
+  assert.equal(guidanceAtSix.findLast(effect => effect.targetId === LAMIS).stacks, 12)
+  assert.equal(guidanceAtSix.findLast(effect => effect.targetId === LUKE).stacks, 6)
+  assert.equal(guidanceAtSix.some(effect => effect.targetId === MERLAN), false)
+  for (const [turn, percent] of [[2, 320], [6, 320], [10, 960], [14, 1280]]) {
+    assert.deepEqual(action(result, turn, LAMIS).damageSteps.map(step => step.percent), Array(5).fill(percent))
+  }
+})
+
+test('Lamis reselects minimum magic defense when it changes between S2 hits', () => {
+  const { LAMIS } = RAID_TABLE_CHARACTER_IDS
+  const lamis = RAID_TABLE_CHARACTERS[LAMIS]
+  const raiseFirstTargetDefense = bossStatusEffect({
+    id: 'test-magic-defense-up', effectGroupId: 900000001, enemyScope: 'first', magicDefenseRatePerStack: 0.5,
+  })
+  const environment = {
+    ...DEFAULT_RAID_ENVIRONMENT,
+    characters: {
+      ...RAID_TABLE_CHARACTERS,
+      [LAMIS]: {
+        ...lamis,
+        skills: { ...lamis.skills, s2: { ...lamis.skills.s2, hooks: [hook('afterHit', [raiseFirstTargetDefense])] } },
+      },
+    },
+  }
+  const result = simulateRaidTable(singleConfig(LAMIS, { turns: 2, bossTemplateId: 'five-targets' }), environment)
+  const s1 = action(result, 1, LAMIS)
+  assert.equal(s1.damageSteps.length, 5)
+  assert.ok(s1.damageSteps.every(step => step.percent === 640 && step.defense.pmDefenseRate === -0.2))
+  const targets = action(result, 2, LAMIS).damageSteps.map(step => step.targetId)
+  assert.notEqual(targets[0], targets[1])
+  assert.deepEqual(targets.slice(1), Array(4).fill(targets[1]))
+})
+
 function actionsFor(result, id) {
   return result.rounds.map(round => action(result, round.turn, id).actionKey)
 }
@@ -233,15 +285,15 @@ test('configured rates and attack snapshots reject invalid definitions at compil
   }
 })
 
-test('roster exposes fifty-two characters and the original five remain the default lineup', () => {
-  assert.equal(RAID_TABLE_ROSTER.length, 52)
+test('roster exposes fifty-three characters and the original five remain the default lineup', () => {
+  assert.equal(RAID_TABLE_ROSTER.length, 53)
   assert.deepEqual(RAID_ELEMENTS, { BLUE: 1, RED: 2, GREEN: 3, YELLOW: 4, LIGHT: 5, DARK: 6 })
   assert.equal(RAID_TABLE_CHARACTERS[LIBERIA].element, RAID_ELEMENTS.LIGHT)
   assert.deepEqual(DEFAULT_RAID_LINEUP, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(DEFAULT_RAID_ATTACK_PRIORITY, [FLORENCE, FENRIR, LUKE, MERLYN, MERTILLIER])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(22, 29), [MILLA, EIDENE, POLA, YILDIZ, WINTER_STELLA, AISHE, LILICOTTE])
   assert.deepEqual(RAID_TABLE_ROSTER.slice(29, 31), [CORDIE, SUMMER_SABRINA])
-  assert.deepEqual(RAID_TABLE_ROSTER.slice(-21), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA, HOLY_LANCE_ALEXANDRA, RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE])
+  assert.deepEqual(RAID_TABLE_ROSTER.slice(-22), [REGINA, FLOWER_NATASHA, CANDY_CERBERUS, WITCH_PALADIA, WITCH_ILLYA, LUNALYNN, ARMSTRONG, VALERIEDE, AA, SIVI, EIRENE, SHILOH, MATILDA, WARM_MEMORY_SOLTINA, ARTIE, TWILIGHT_FLORENCE, APOSTLE_ROSALIE, GOLDEN_ARTORIA, TWILIGHT_FORTINA, HOLY_LANCE_ALEXANDRA, RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE, RAID_TABLE_CHARACTER_IDS.LAMIS])
 })
 
 test('default defense config uses Sonya and per-character Lv500 dual penetration values', () => {
@@ -1513,7 +1565,8 @@ test('round-seven healing branches, cooldown resets, speed, and Stella debuffs a
   assert.equal(action(pola, 7, POLA).actionKey, 's1')
   assert.equal(action(pola, 7, POLA).damageSteps[0].percent, 1180)
   assert.equal(action(pola, 8, POLA).damageSteps[0].percent, 620)
-  assert.equal(pola.rounds[6].speedSnapshot[POLA].effectiveSpeed, 2956 * 1.3)
+  assert.equal(pola.rounds[6].speedSnapshot[POLA].effectiveSpeed, 2956)
+  assert.equal(pola.rounds[7].speedSnapshot[POLA].effectiveSpeed, 2956 * 1.3)
   assert.equal(action(pola, 8, POLA).runtimeAfter.counters.courage, 4)
 
   const stella = simulateRaidTable(singleConfig(WINTER_STELLA, { turns: 8 }))

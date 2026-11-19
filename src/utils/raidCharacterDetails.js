@@ -195,5 +195,6 @@ export function buildRaidCharacterDetail(character) {
     normal: character.normal ? buildSkillDetail('normal', character.normal) : null,
     passiveNameKeys,
     passiveItems,
+    passiveIgnoredKeys: unique(character.ignoredKeys ?? []),
   }
 }

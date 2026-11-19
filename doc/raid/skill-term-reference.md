@@ -499,7 +499,7 @@ eventHooks: [{
 
 页面配置可使用 `{ [round]: characterId[] }` 为指定全局回合提供完整行动顺序。每个数组必须恰好包含当前阵容全部角色一次，回合必须位于 `1..turns`；编译器拒绝缺失、重复、阵容外角色和越界回合。
 
-运行时仍在 `roundStart` 效果后生成 `speedSnapshot` 与 `speedOrder`，再决定最终 `actionOrder`。非冗余覆盖使用 `orderSource: 'manual'`，否则使用 `orderSource: 'speed'`；与当前 `speedOrder` 完全相同的覆盖会从规范化配置中删除。该配置只覆盖执行时序，不修改速度数值，也不改变 `lowestSpeedOther` 等选择器。
+运行时在 `roundStart` 被动前生成 `speedSnapshot` 与 `speedOrder`，再冻结该回合被动与行动共用的 `actionOrder`。非冗余覆盖使用 `orderSource: 'manual'`，否则使用 `orderSource: 'speed'`；与当前 `speedOrder` 完全相同的覆盖会从规范化配置中删除。该配置只覆盖执行时序，不修改速度数值，也不改变 `lowestSpeedOther` 等选择器。
 
 这是确定场景配置，不进行随机抽样或概率期望计算。较早回合的覆盖会通过正常状态、冷却和技能历史结算影响后续回合；后续回合已有的非冗余覆盖继续生效。
 
@@ -551,7 +551,7 @@ eventHooks: [{
 
 | 类别 | 名称 | 含义 |
 | --- | --- | --- |
-| trigger | `roundStart` | 每个全局回合开始、速度排序前执行的角色钩子。 |
+| trigger | `roundStart` | 每个全局回合开始、行动顺序冻结后且角色行动前执行的钩子。 |
 | hook schedule | `everyRounds` / `roundOffset` | 以全局回合而非角色行动次数调度钩子。 |
 | modifier channel | `cooldownRecoveryBonus` | 在行动结束时与基础冷却恢复 1 相加；恢复值最低为 0。 |
 | condition | `skillUsesAtLeast` / `skillUsesAtMost` | 当前技能本次发动前的历史使用次数比较。 |
@@ -687,6 +687,8 @@ Boss 状态的 `damageRatePerStack`、`defenseRatePerStack`、`physicalDefenseRa
 | `lowestMagicDefense` / `lowestPhysicalDefense` | 含状态修正后的对应防御最低者，并列按站位 |
 | `previousHit` | 已命中目标中站位最前者，适用于固定血量并列的追加攻击 |
 | `conditional` | `condition` 使用现有条件注册表，选择 `whenTrue` 或 `whenFalse` 选敌定义 |
+
+最低物防或魔防选择可声明 `reselectEachHit: true`，每击读取最新防御并重新选择，防御并列仍按站位。拉米斯 S2 使用该选项。友方的 `targetJobIs` 在候选列表截取后检查目标的 `jobFlags`，用于为神圣指引的法师目标额外增加1层。
 
 Boss效果默认作用于当前命中目标；命中外阶段使用该攻击计划或本次技能已命中目标集合。`enemyScope` 可显式为 `all`、`first`、`firstTwo`、`firstThree`、`firstHit`。随机多段的 `beforeDamage` Boss状态在每次命中前结算，己方状态/自损事件仍只按原技能阶段触发。`bossStacksAtLeast.anyEnemy: true` 在全场任一目标达标时满足。
 

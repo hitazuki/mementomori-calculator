@@ -495,6 +495,13 @@
             </ul>
           </section>
 
+          <section v-if="selectedCharacterDetail.passiveIgnoredKeys.length" class="raid-character-ignored-section">
+            <h4>{{ $t('raidIgnoredEffects') }}</h4>
+            <ul class="raid-character-effect-list ignored">
+              <li v-for="key in selectedCharacterDetail.passiveIgnoredKeys" :key="key">{{ $t(key) }}</li>
+            </ul>
+          </section>
+
           <div class="raid-character-skill-grid">
             <article v-for="skill in [...selectedCharacterDetail.skills, selectedCharacterDetail.normal].filter(Boolean)" :key="skill.key" class="raid-character-skill-card">
               <header>
@@ -892,7 +899,8 @@ function unresolvedScaling(totals) { return Object.fromEntries(Object.entries(to
 function normalizeRaidSeed(value) { return Number.isInteger(value) ? Math.max(0, Math.min(4294967295, value)) : 1 }
 function enemySelectionText(spec) {
   const keys = { first: 'raidEnemyFirst', randomHit: 'raidEnemyRandomHit', randomSingle: 'raidEnemyRandomSingle', randomGroup: 'raidEnemyRandomGroup', all: 'raidEnemyAll', lowestMagicDefense: 'raidEnemyLowestMagic', lowestPhysicalDefense: 'raidEnemyLowestPhysical', previousHit: 'raidEnemyPrevious', conditional: 'raidEnemyConditional' }
-  return t(keys[spec.type], { n: spec.count ?? 1 })
+  const target = t(keys[spec.type], { n: spec.count ?? 1 })
+  return spec.reselectEachHit ? t('raidEnemyReselectEachHit', { target }) : target
 }
 function formatStep(step) { return `${formatter().format(step.effectivePercent)}% ${step.stat}` }
 function characterDamageStepText(step) {
@@ -991,6 +999,7 @@ function characterEffectScopeText(effect) {
 }
 function characterConditionText(condition) {
   if (Array.isArray(condition)) return condition.map(characterConditionText).join(' · ')
+  if (condition.type === 'targetJobIs') return t('raidCharacterConditionTargetJob', { job: t(jobNameKey(condition.jobFlags)) })
   const element = value => t(elementNameKey(value))
   const args = { n: condition.count, round: condition.round, skill: condition.skillKey?.toUpperCase(), element: condition.element == null ? '' : element(condition.element), elements: (condition.elements ?? []).map(element).join('/') }
   const keys = {

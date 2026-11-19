@@ -457,7 +457,8 @@ export function runRaidProgram(program) {
       }))
       if (!eventTargetIds.length) return
     }
-    for (const listener of program.eventListeners[effect.event] ?? []) {
+    const listeners = program.eventListeners[effect.event] ?? []
+    for (const listener of [...listeners].sort((a, b) => passiveOrder.indexOf(a.actorId) - passiveOrder.indexOf(b.actorId))) {
       const actor = actors.get(listener.actorId)
       const listenerContext = {
         ...context, ownerId: listener.actorId, eventSourceId: sourceId, eventTargetIds, phase: context.phase,
@@ -640,8 +641,9 @@ export function runRaidProgram(program) {
       if (hits <= 0) continue
       const fixedTargets = context.enemyPlans?.[stepIndex] ?? chooseTargets(actor, rawStep, context.hitEnemyTargets)
       for (let hit = 1; hit <= hits; hit += 1) {
-        const targets = multipleEnemies && enemySpec(actor, rawStep).type === 'randomHit'
-          ? (hit === 1 ? fixedTargets : chooseTargets(actor, rawStep)) : fixedTargets
+        const spec = enemySpec(actor, rawStep)
+        const reselect = spec.reselectEachHit || (spec.type === 'randomHit' && hit > 1)
+        const targets = multipleEnemies && reselect ? chooseTargets(actor, rawStep) : fixedTargets
         context.actionEnemyTargets = targets
         for (const enemy of targets) {
           boss = enemy
@@ -752,7 +754,8 @@ export function runRaidProgram(program) {
   let teamAtkPercent = 0
   let sequence = 0
 
-  for (const actorId of config.lineup) {
+  let passiveOrder = roundOrder().actionOrder
+  for (const actorId of passiveOrder) {
     const actor = actors.get(actorId)
     runHooks(actor, actor.definition.hooksByTrigger.battleStart, {
       config, actors, boss, sequence: 0, round: 0, effectsApplied: battleStartEffects, phase: 'battleStart', ownerId: actorId,
@@ -761,14 +764,15 @@ export function runRaidProgram(program) {
 
   for (let turn = 1; turn <= config.turns; turn += 1) {
     const roundStartEffects = []
-    for (const actorId of config.lineup) {
+    const order = roundOrder()
+    const finalOrder = finalRoundOrder(turn, order.actionOrder)
+    passiveOrder = finalOrder.actionOrder
+    for (const actorId of passiveOrder) {
       const actor = actors.get(actorId)
       runHooks(actor, actor.definition.hooksByTrigger.roundStart, {
         config, actors, boss, sequence, round: turn, effectsApplied: roundStartEffects, phase: 'roundStart', ownerId: actorId,
       }, 'roundStart')
     }
-    const order = roundOrder()
-    const finalOrder = finalRoundOrder(turn, order.actionOrder)
     const round = {
       turn, speedOrder: order.actionOrder, actionOrder: finalOrder.actionOrder, orderSource: finalOrder.orderSource,
       speedSnapshot: order.speedSnapshot,

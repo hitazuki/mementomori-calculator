@@ -6749,5 +6749,135 @@ export const RAID_CHARACTER_MB_TEXTS = Object.freeze({
         }
       ]
     }
+  ],
+  "157": [
+    {
+      "slot": "S1",
+      "source": "ActiveSkillMB",
+      "id": 157001,
+      "name": "光之風",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 1,
+          "text": "狂風閃耀著光芒，隨機對3名敵人造成攻擊力×310%的魔法傷害，使技能目標減少30%弱化效果命中率，效果持續4回合。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 81,
+          "text": "發動攻擊前，使技能目標額外減少20%魔法防禦力，效果持續4回合。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 161,
+          "text": "造成的魔法傷害提升為攻擊力×590%。"
+        },
+        {
+          "type": "exclusive",
+          "level": 1,
+          "unlockLevel": 161,
+          "text": "強化光之風，攻擊目標增加為5名隨機敵人。"
+        },
+        {
+          "type": "exclusive",
+          "level": 3,
+          "unlockLevel": 240,
+          "text": "強化光之風，造成的魔法傷害提升為攻擊力×640%。"
+        }
+      ]
+    },
+    {
+      "slot": "S2",
+      "source": "ActiveSkillMB",
+      "id": 157002,
+      "name": "聖獸吹息",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 11,
+          "text": "「逆神的聖獸啊，制裁眼前的罪人吧！」狂風宛如聖獸咆哮，對魔法防禦力最低的敵人進行3次攻擊，每次造成攻擊力×320%的魔法傷害。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 21,
+          "text": "戰鬥中自第3次發動此技能起，造成的魔法傷害提升為攻擊力×960%。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 101,
+          "text": "戰鬥中自第4次發動此技能起，造成的魔法傷害提升為攻擊力×1280%。"
+        },
+        {
+          "type": "level",
+          "level": 4,
+          "unlockLevel": 181,
+          "text": "攻擊次數增加為5次。"
+        }
+      ]
+    },
+    {
+      "slot": "P1",
+      "source": "PassiveSkillMB",
+      "id": 157003,
+      "name": "姊姊留下的啟示",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 41,
+          "text": "我一直以為是我在保護姊姊，事實上卻正好相反。我不想重蹈覆轍，這次該換我來保護其他人了——回合開始時，拉米斯使自己與攻擊力最高的其他友軍獲得拉米斯攻擊力×100%的「護盾」，效果持續3回合。此技能須在結束3次行動後才可再次觸發。自第13回合起無法觸發此技能。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 121,
+          "text": "當「護盾」的附加目標為流金屬性時，「護盾」值提升為拉米斯攻擊力×200%。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 201,
+          "text": "戰鬥中自第2次觸發此技能起，當「護盾」的附加目標為流金屬性時，「護盾」值提升為拉米斯攻擊力×600%。"
+        },
+        {
+          "type": "exclusive",
+          "level": 2,
+          "unlockLevel": 240,
+          "text": "強化姊姊留下的啟示，「護盾」的附加目標增加為拉米斯與攻擊力最高的2名其他友軍。"
+        }
+      ]
+    },
+    {
+      "slot": "P2",
+      "source": "PassiveSkillMB",
+      "id": 157004,
+      "name": "信徒守則",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 61,
+          "text": "學到的東西不會白費，只要運用得當，就能成為助人的力量——每回合開始時，拉米斯使自己與攻擊力最高的其他友軍獲得1層「聖靈指引」（最多12層）（無法被解除）。每層「聖靈指引」使附帶者增加5%攻擊力與命中率。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 141,
+          "text": "當「聖靈指引」的附加目標的類型為法師時，獲得的「聖靈指引」層數增加為2層。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 221,
+          "text": "戰鬥開始時，拉米斯額外減少75%自身承受傷害（無法被解除）。"
+        }
+      ]
+    }
   ]
 })

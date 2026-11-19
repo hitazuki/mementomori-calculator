@@ -105,11 +105,11 @@ test('raid character details preserve targets, timing, and conditions for every 
     'counterAtMost', 'counterBeforeActionAtLeast', 'eventSourceHasStatus', 'eventSourceIsOwner',
     'otherLineupElementCountAtMost', 'eventTargetsIncludeOwner', 'guaranteedCritical', 'otherLineupElementCountAtLeast', 'otherLineupElementInCountAtLeast', 'probabilityEnabled',
     'roundAtLeast', 'roundAtMost', 'skillUsesAtLeast', 'skillUsesAtMost', 'targetElementIn',
-    'targetElementNot', 'targetElementNotIn', 'targetHasStatus', 'targetLacksStatus',
+    'targetElementNot', 'targetElementNotIn', 'targetHasStatus', 'targetJobIs', 'targetLacksStatus',
     'targetRemovableDebuffCountAtMost', 'targetHpBelow50', 'targetHpAtLeast50', 'lineupElementCountAtMost',
   ])
 
-  assert.equal(Object.keys(RAID_TABLE_CHARACTERS).length, 52)
+  assert.equal(Object.keys(RAID_TABLE_CHARACTERS).length, 53)
   for (const character of Object.values(RAID_TABLE_CHARACTERS)) {
     const detail = buildRaidCharacterDetail(character)
     const effects = [...detail.passiveItems, ...detail.skills.flatMap(skill => skill.effectItems)]
@@ -140,8 +140,8 @@ test('raid character damage summaries distinguish damage groups from actual hit 
     }
   }
 
-  assert.equal(skillCount, 104)
-  assert.equal(damageGroupCount, 108)
+  assert.equal(skillCount, 106)
+  assert.equal(damageGroupCount, 110)
   assert.equal(raidTranslations['zh-CN'].raidCharacterDamageStep, '伤害组 {n}')
   assert.equal(raidTranslations['zh-CN'].raidCharacterDamageFormula, '{hits}段 · 每段{percent} {stat}')
   assert.equal(raidTranslations.en.raidCharacterDamageStep, 'Damage Group {n}')

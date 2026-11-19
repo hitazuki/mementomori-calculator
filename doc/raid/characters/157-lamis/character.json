@@ -1,0 +1,41 @@
+{
+  "formatVersion": 1,
+  "characterId": 157,
+  "slug": "lamis",
+  "build": { "level": 240, "exclusive": "EX3" },
+  "sources": {
+    "activeSkillIds": [157001, 157002],
+    "passiveSkillIds": [157003, 157004],
+    "combatLogs": [
+      "tower-Infinite-2446-win-1795086445115-8df2f258b4674640a8bc38bbfb82f4c9.json",
+      "tower-Infinite-2447-lose-1795086777091-2c6dbb9edad140bca510df955d5da7ea.json"
+    ]
+  },
+  "terms": [
+    { "kind": "activeSkill", "sourceId": 157001, "model": "implemented", "summary": "CD4；EX3随机5敌各640%魔法伤害；先降魔防、后降弱化命中。单体只结算一击。" },
+    { "kind": "activeSkill", "sourceId": 157002, "model": "implemented", "summary": "CD4；每击重选实时魔防最低者，共五击。按施放前历史取320/320/960/1280%。" },
+    { "kind": "passiveSkill", "sourceId": 157003, "model": "implemented", "summary": "指引前给自身及攻击优先级前二其他友军施加3次目标行动的可解除护盾。常规木桩第1/4/7/10回合补发，第13回合起停止。只记录状态。" },
+    { "kind": "passiveSkill", "sourceId": 157004, "model": "implemented", "summary": "开战保留75%减伤状态；每回合开始给自身及攻击优先级第一的其他友军叠1层，法师共2层。每层5%攻击，最多12层，不可解除。" }
+  ],
+  "effectGroups": [
+    { "id": 15700120103, "model": "implemented", "summary": "攻击前尝试施加4回合可解除魔防降低20%；木桩按既有弱化成功口径。" },
+    { "id": 15700100102, "model": "implemented", "summary": "攻击后施加4回合可解除弱化命中降低；保留状态和弱化计数。" },
+    { "id": 15700300101, "model": "ignored", "summary": "低技能档的100%护盾；拉表使用满技能档。" },
+    { "id": 15700320101, "model": "implemented", "summary": "非流金100%盾，采用满技能档MB组；样本没有命中该属性分支。" },
+    { "id": 15700320102, "model": "implemented", "summary": "首次流金200%盾，日志类别2。" },
+    { "id": 15700330102, "model": "implemented", "summary": "第二次起流金600%盾，日志类别2。" },
+    { "id": 15700400101, "model": "implemented", "summary": "不可解除神圣指引，按目标独立叠层，日志类别4。" },
+    { "id": 15700420102, "model": "implemented", "summary": "法师额外加1层的隐藏操作，合入指引组，不产生独立状态。" },
+    { "id": 15700430401, "model": "implemented", "summary": "开战时75%承伤降低，日志类别4；保留状态，忽略来伤结算。" }
+  ],
+  "ignored": [
+    { "key": "raidIgnoredLamisDebuffHit", "summary": "弱化命中降低不改变确定性木桩的弱化命中结算。" },
+    { "key": "raidIgnoredLamisShieldAbsorption", "summary": "保留护盾可解除类别、到期与计数，不模拟吸收、破盾。" },
+    { "key": "raidIgnoredIncomingDamageReduction", "summary": "木桩没有敌方来伤。" },
+    { "key": "raidIgnoredHitRateUp", "summary": "神圣指引的命中增益不进入输出公式。" }
+  ],
+  "unresolved": [
+    "塔日志未隔离验证EX3的640%、S2各档精确倍率与非流金盾组；采用MB。",
+    "日志无同次S2期间最低魔防目标翻转的样本；按接入要求逐击重选。友方始终读取页面固定攻击优先级。"
+  ]
+}

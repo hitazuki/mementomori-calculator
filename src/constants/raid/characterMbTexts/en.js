@@ -6749,5 +6749,135 @@ export const RAID_CHARACTER_MB_TEXTS = Object.freeze({
         }
       ]
     }
+  ],
+  "157": [
+    {
+      "slot": "S1",
+      "source": "ActiveSkillMB",
+      "id": 157001,
+      "name": "Šār Nūrim",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 1,
+          "text": "A gust of light rushes forth, dealing 1 magical attack equal to 310% of Lamis’s ATK to 3 random enemies. Afterwards, this skill decreases all targets’ chance to inflict a debuff by 30% for 4 turns."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 81,
+          "text": "Additionally, before dealing the magical attack, decreases all targets’ M. DEF by 20% for 4 turns."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 161,
+          "text": "The magical attack’s damage becomes equal to\n590% of her ATK."
+        },
+        {
+          "type": "exclusive",
+          "level": 1,
+          "unlockLevel": 161,
+          "text": "Strengthens Šār Nūrim. The targets of the magical attack become 5 random enemies."
+        },
+        {
+          "type": "exclusive",
+          "level": 3,
+          "unlockLevel": 240,
+          "text": "Strengthens Šār Nūrim. The magical attack’s damage becomes equal to 640% of her ATK."
+        }
+      ]
+    },
+    {
+      "slot": "S2",
+      "source": "ActiveSkillMB",
+      "id": 157002,
+      "name": "Holy Beast’s Gale",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 11,
+          "text": "“O holy beast that defies thy maker, punish those who dare stand in our way...!” A gale with the force of a holy beast’s howl whips forward, dealing 3 magical attacks equal to 320% of Lamis’s ATK to the enemy with the lowest M. DEF."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 21,
+          "text": "Additionally, if this skill activates for the 3rd time and onwards during battle, the magical attacks’ damage becomes equal to 960% of her ATK."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 101,
+          "text": "Additionally, if this skill activates for the 4th time and onwards during battle, the magical attacks’ damage becomes equal to 1280% of her ATK."
+        },
+        {
+          "type": "level",
+          "level": 4,
+          "unlockLevel": 181,
+          "text": "The number of magical attacks becomes 5."
+        }
+      ]
+    },
+    {
+      "slot": "P1",
+      "source": "PassiveSkillMB",
+      "id": 157003,
+      "name": "What You Left Me",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 41,
+          "text": "“I thought I was protecting you, Mize, but you were always the one protecting me. So this time, I want to protect others. Because I can’t bear to lose anyone else important to me...!” At the start of the turn, this skill grants Lamis and the ally with the highest ATK [Shield] equal to 100% of the granter’s ATK for 3 turns. This skill will not activate again until 3 action phases have ended since its previous activation, and will not activate from the 13th turn and onwards."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 121,
+          "text": "Additionally, if a target who is granted [Shield] is an Amber Soul ally, the size of that target’s [Shield] becomes equal to 200% of the granter’s ATK."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 201,
+          "text": "Additionally, if this skill activates for the 2nd time and onwards during battle, and if a target who is granted [Shield] is an Amber Soul ally, the size of that target’s [Shield] becomes equal to 600% of the granter’s ATK."
+        },
+        {
+          "type": "exclusive",
+          "level": 2,
+          "unlockLevel": 240,
+          "text": "Strengthens What You Left Me. The targets who are granted [Shield] become Lamis and the 2 allies with the highest ATK."
+        }
+      ]
+    },
+    {
+      "slot": "P2",
+      "source": "PassiveSkillMB",
+      "id": 157004,
+      "name": "A Disciple’s Discipline",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 61,
+          "text": "“What I’ve learned wasn’t a waste. As long as I don’t misuse this power, it can save others...!” At the start of each turn, this skill grants Lamis and the ally with the highest ATK 1 stack of [Holy Guidance] (12 stacks max) (cannot be dispelled). [Holy Guidance] increases both the enhanced target’s ATK and chance to hit by 5% for each stack they are enhanced with."
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 141,
+          "text": "Additionally, if a target of [Holy Guidance]’s type is Sorcerer, the number of stacks of [Holy Guidance] granted to that target by this skill becomes 2."
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 221,
+          "text": "Additionally, at the start of the battle, decreases the damage Lamis takes by 75% (cannot be dispelled)."
+        }
+      ]
+    }
   ]
 })

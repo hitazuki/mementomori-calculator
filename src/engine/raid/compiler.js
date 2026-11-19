@@ -132,6 +132,9 @@ function compileCondition(condition, mechanics, path, character) {
   if (condition?.type === 'actorStatusStacksAtLeast' && (typeof condition.statusId !== 'string' || !condition.statusId || !Number.isInteger(condition.count) || condition.count < 1)) throw new Error(`Invalid raid status stack condition at ${path}`)
   if (!condition) return null
   const handler = mechanics.conditionHandlers[condition.type]
+  if (condition.type === 'targetJobIs' && !Object.values(RAID_JOB_FLAGS).includes(condition.jobFlags)) {
+    throw new Error(`Invalid raid target job at ${path}`)
+  }
   if (!handler) throw new Error(`Unregistered raid condition '${condition.type}' at ${path}`)
   if (condition.type === 'otherLineupElementCountAtMost' && (!SUPPORTED_ELEMENTS.has(condition.element) || !Number.isInteger(condition.count) || condition.count < 0)) throw new Error(`Invalid raid element count condition at ${path}`)
   if (condition.counter && !(condition.counter in (character?.runtime?.counters ?? {}))) {
@@ -299,6 +302,9 @@ function compileDamageStep(step, mechanics, path, character) {
   function validateEnemyTarget(spec, targetPath) {
     if (!spec || !['randomHit', 'randomSingle', 'randomGroup', 'first', 'all', 'lowestMagicDefense', 'previousHit', 'conditional', 'lowestPhysicalDefense'].includes(spec.type)) throw new Error(`Invalid raid enemy target at ${targetPath}`)
     if (spec.type === 'randomGroup' && spec.count == null) throw new Error(`Missing raid enemy target count at ${targetPath}`)
+    if (spec.reselectEachHit != null && (typeof spec.reselectEachHit !== 'boolean' || !['lowestMagicDefense', 'lowestPhysicalDefense'].includes(spec.type))) {
+      throw new Error(`Invalid raid per-hit enemy reselection at ${targetPath}`)
+    }
     if (spec.count != null && (!Number.isInteger(spec.count) || spec.count < 1 || spec.count > 5)) throw new Error(`Invalid raid enemy target count at ${targetPath}`)
     if (spec.type === 'conditional') {
       if (!spec.condition) throw new Error(`Missing raid enemy target condition at ${targetPath}`)

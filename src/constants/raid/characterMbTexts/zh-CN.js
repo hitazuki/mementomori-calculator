@@ -6749,5 +6749,135 @@ export const RAID_CHARACTER_MB_TEXTS = Object.freeze({
         }
       ]
     }
+  ],
+  "157": [
+    {
+      "slot": "S1",
+      "source": "ActiveSkillMB",
+      "id": 157001,
+      "name": "光之风",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 1,
+          "text": "拉米斯召来闪耀光芒的狂风，随机对3名敌人造成攻击力×310%的魔法伤害，使技能目标减少30%弱化效果命中率，效果持续4回合。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 81,
+          "text": "发动攻击前，使技能目标额外减少20%魔法防御力，效果持续4回合。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 161,
+          "text": "造成的魔法伤害提升为攻击力×590%。"
+        },
+        {
+          "type": "exclusive",
+          "level": 1,
+          "unlockLevel": 161,
+          "text": "强化光之风，技能目标增加为5名随机敌人。"
+        },
+        {
+          "type": "exclusive",
+          "level": 3,
+          "unlockLevel": 240,
+          "text": "强化光之风，造成的魔法伤害提升为攻击力×640%。"
+        }
+      ]
+    },
+    {
+      "slot": "S2",
+      "source": "ActiveSkillMB",
+      "id": 157002,
+      "name": "圣兽之息",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 11,
+          "text": "“与神明抗争的圣兽啊，制裁眼前的罪人吧！”拉米斯召来如圣兽咆哮般呼啸的狂风，对魔法防御力最低的敌人进行3次攻击，每次造成攻击力×320%的魔法伤害。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 21,
+          "text": "战斗中自第3次发动此技能起，造成的魔法伤害提升为攻击力×960%。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 101,
+          "text": "战斗中自第4次发动此技能起，造成的魔法伤害提升为攻击力×1280%。"
+        },
+        {
+          "type": "level",
+          "level": 4,
+          "unlockLevel": 181,
+          "text": "攻击次数增加为5次。"
+        }
+      ]
+    },
+    {
+      "slot": "P1",
+      "source": "PassiveSkillMB",
+      "id": 157003,
+      "name": "姐姐留下的启示",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 41,
+          "text": "我一直以为是我在保护姐姐，事实却正好相反。这一次我不想再重蹈覆辙，该由我去保护其他人了——回合开始时，拉米斯使自己与攻击力最高的其他友军获得拉米斯攻击力×100%的「护盾」，效果持续3回合。此技能须在结束3次行动后才可再次触发。自第13回合起无法触发此技能。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 121,
+          "text": "当「护盾」的附加目标为流金属性时，「护盾」值提升为拉米斯攻击力×200%。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 201,
+          "text": "战斗中自第2次触发此技能起，当「护盾」的附加目标为流金属性时，「护盾」值提升为拉米斯攻击力×600%。"
+        },
+        {
+          "type": "exclusive",
+          "level": 2,
+          "unlockLevel": 240,
+          "text": "强化姐姐留下的启示，「护盾」的附加目标增加为拉米斯与攻击力最高的2名其他友军。"
+        }
+      ]
+    },
+    {
+      "slot": "P2",
+      "source": "PassiveSkillMB",
+      "id": 157004,
+      "name": "信徒守则",
+      "levels": [
+        {
+          "type": "level",
+          "level": 1,
+          "unlockLevel": 61,
+          "text": "学到的东西不会白费，只要运用得当，就能成为帮助他人的力量——每回合开始时，拉米斯使自己与攻击力最高的其他友军获得1层「神圣指引」（最多12层）（无法被解除）。每层「神圣指引」使附带者增加5%攻击力与命中率。"
+        },
+        {
+          "type": "level",
+          "level": 2,
+          "unlockLevel": 141,
+          "text": "当「神圣指引」的附加目标为法师类型时，获得的「神圣指引」层数增加为2层。"
+        },
+        {
+          "type": "level",
+          "level": 3,
+          "unlockLevel": 221,
+          "text": "战斗开始时，拉米斯额外减少75%自身承受伤害（无法被解除）。"
+        }
+      ]
+    }
   ]
 })
