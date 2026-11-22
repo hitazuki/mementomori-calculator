@@ -11,7 +11,7 @@
 ## 装备和打磨
 
 - 五个套装（EquipmentSetId 10–14）各自沿真实进阶链计算，装备等级与强化等级同步且受角色等级上限约束。武器、饰品、手、头、身体、足独立成档。普通武器限定 Category=2，三职业的基础属性、四维总点数、等级链及碎片成本逐项验证后合并。
-- 装备基础效果使用 `BattleParameterChangeInfo.Value × EquipmentReinforcementParameterMB.ReinforcementCoefficient`，四维使用 `AdditionalParameterTotal` 和打磨比例分配，尾数按小数余量从大到小分配以保持整数点数总和。四项滑条合计 100%，同一方案的每档使用相同配分。金币单项 13⅓%～60% 为实测推算，锁定模式可接近 0%，模拟允许 0% 边界。 [金币打磨实测](https://note.com/wazu_019/n/ne6d87154066d) [锁定打磨实例](https://note.com/wazu_019/n/n56b62cb60bf3?hl=en)
+- 装备基础效果使用 `BattleParameterChangeInfo.Value × EquipmentReinforcementParameterMB.ReinforcementCoefficient`，四维使用 `AdditionalParameterTotal` 和打磨比例分配，尾数按小数余量从大到小分配以保持整数点数总和。打磨模拟允许单项分配 0%～60%，四项合计 100%，同一方案的每档使用相同配分。
 - 装备的基础效果与四维贡献分别开关。力量派生物防、命中。魔力派生魔防、弱化效果命中。战技派生闪避、暴击。耐力派生生命、暴击抗性。武器基础效果提供攻击，饰品基础效果提供弱化效果抗性。额外属性以评级点数展示。套装、神装和战斗技能效果按固定基准处理。 [官方潜在能力与战斗属性](https://mementomori.zendesk.com/hc/en-us/articles/44196520217881-About-Potential-Battle-Stats)
 
 ## 收益与成本

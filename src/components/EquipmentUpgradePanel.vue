@@ -45,15 +45,9 @@
       </div>
       <details v-if="plan.applyFourStats">
         <summary>{{ t('upgradeReforge') }} · {{ plan.shares.map(share => number(share)).join(' / ') }}%</summary>
-        <label>{{ t('upgradeReforgeMode') }}
-          <select v-model="plan.reforgeMode" class="form-select" @change="plan.shares = adjustReforge(plan.shares, plan.reforgeMode)">
-            <option value="gold">{{ t('upgradeReforgeGold') }}</option>
-            <option value="locked">{{ t('upgradeReforgeLocked') }}</option>
-          </select>
-        </label>
         <label v-for="(stat, i) in FOUR_STATS" :key="stat" class="upgrade-range">
           <span>{{ t(`upgrade_${stat}`) }} <output>{{ number(plan.shares[i]) }}%</output></span>
-          <input type="range" :min="reforgeMinimum(plan.reforgeMode)" max="60" step="any" :value="plan.shares[i]" :aria-valuetext="`${number(plan.shares[i])}%`" @input="plan.shares = adjustReforge(plan.shares, plan.reforgeMode, i, $event.target.valueAsNumber)">
+          <input type="range" min="0" max="60" step="any" :value="plan.shares[i]" :aria-valuetext="`${number(plan.shares[i])}%`" @input="plan.shares = adjustReforge(plan.shares, i, $event.target.valueAsNumber)">
         </label>
         <p class="view-desc">{{ t('upgradeReforgeHint') }}</p>
       </details>
@@ -109,7 +103,7 @@ import { getMoriTheme, LINE_COLORS } from '../utils/chartTheme.js'
 import { currentTheme } from '../utils/themeStore.js'
 import {
   DEFAULT_UPGRADE_PANEL, DEFAULT_UPGRADE_BONUSES, EQUIPMENT_UPGRADE_DATA, UPGRADE_STATS, CHARACTER_LEVEL_RANGE,
-  EQUIPMENT_SLOTS, FOUR_STATS, EQUAL_REFORGE, adjustReforge, reforgeMinimum, cordiePanel,
+  EQUIPMENT_SLOTS, FOUR_STATS, EQUAL_REFORGE, adjustReforge, cordiePanel,
   buildEquipmentUpgrade, upgradeMaterials, equivalentUpgradeLevels,
 } from '../engine/equipmentUpgradeCalc.js'
 
@@ -125,7 +119,7 @@ const enemyLevel = ref(500)
 let nextId = 0
 const slotBonus = slot => DEFAULT_UPGRADE_BONUSES[EQUIPMENT_SLOTS[slot]] ?? { outsideBonus: 0, insideBonus: 0 }
 function newPlan(slot) {
-  return { id: nextId++, slot, seriesId: 12, ...slotBonus(slot), applyBase: true, applyFourStats: true, reforgeMode: 'gold', shares: [...EQUAL_REFORGE] }
+  return { id: nextId++, slot, seriesId: 12, ...slotBonus(slot), applyBase: true, applyFourStats: true, shares: [...EQUAL_REFORGE] }
 }
 const plans = ref(['hands', 'head', 'body'].map(newPlan))
 const hoverTarget = ref(null)

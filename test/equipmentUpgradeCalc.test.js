@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {
   DEFAULT_UPGRADE_PANEL as defaults, EQUIPMENT_UPGRADE_DATA as data, EQUIPMENT_SLOTS, EQUAL_REFORGE,
   upgradeLevels, buildEquipmentUpgrade as build, upgradeMaterials, equivalentUpgradeLevels,
-  cordiePanel, adjustReforge, reforgeMinimum,
+  cordiePanel, adjustReforge,
 } from '../src/engine/equipmentUpgradeCalc.js'
 const plan = { stat: 'def', seriesId: 12, start: 0, outsideBonus: 0 }
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.00001, `${actual} != ${expected}`)
@@ -22,18 +22,15 @@ test('Cordie LR+5 preset updates by level and applies stamina before HP bonuses'
   assert.equal(cordiePanel(500.5, 0, 0), null)
 })
 
-test('reforge keeps the edited share and redistributes within the mode bounds', () => {
-  const goldMinimum = reforgeMinimum('gold')
-  const maximum = adjustReforge(EQUAL_REFORGE, 'gold', 3, 60)
+test('reforge keeps the edited share and redistributes within 0% to 60%', () => {
+  const maximum = adjustReforge(EQUAL_REFORGE, 3, 60)
   assert.equal(maximum[3], 60)
-  for (const share of maximum.slice(0, 3)) near(share, goldMinimum)
-  const suppressed = adjustReforge([60, 0, 40, 0], 'locked', 0, 0)
+  for (const share of maximum.slice(0, 3)) near(share, 40 / 3)
+  const suppressed = adjustReforge([60, 0, 40, 0], 0, 0)
   assert.deepEqual(suppressed, [0, 20, 60, 20])
-  const projected = adjustReforge(suppressed, 'gold')
-  for (const share of projected) assert.ok(share >= goldMinimum && share <= 60)
-  near(projected.reduce((sum, share) => sum + share, 0), 100)
-  const proportional = adjustReforge([15, 35, 25, 25], 'gold', 3, 35)
-  near(proportional[0], goldMinimum)
+  const proportional = adjustReforge([15, 35, 25, 25], 3, 0)
+  assert.equal(proportional[3], 0)
+  near(proportional.reduce((sum, share) => sum + share, 0), 100)
   near(proportional[1] / proportional[2], 35 / 25)
 })
 

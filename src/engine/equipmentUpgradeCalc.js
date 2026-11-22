@@ -37,10 +37,8 @@ export function cordiePanel(level, staminaBonus, hpBonus) {
   }
 }
 
-export const reforgeMinimum = mode => mode === 'locked' ? 0 : 40 / 3
-
-export function adjustReforge(shares, mode, index = -1, value = 0) {
-  const min = reforgeMinimum(mode)
+export function adjustReforge(shares, index, value) {
+  const min = 0
   const max = 60
   const clamp = share => Math.max(min, Math.min(max, share))
   const next = shares.map((share, i) => clamp(i === index ? value : share))
