@@ -57,3 +57,30 @@ test('Boss status cells and PNG export show only compact numeric modifiers', asy
   await download.saveAs('test-results/raid-compact-status-export.png')
   expect(errors).toEqual([])
 })
+
+test('PNG export keeps action modifiers, direct damage and compact cross-character sources', async ({ page }) => {
+  test.setTimeout(120000)
+  await page.route(/https:\/\/fonts\.(googleapis|gstatic)\.com\//, route => route.abort())
+  await page.addInitScript(() => localStorage.setItem('mmt-calc-current-view', 'raidTable'))
+  await page.goto('./', { waitUntil: 'domcontentloaded' })
+  const selected = page.locator('.raid-roster-select[aria-pressed="true"]')
+  await expect(selected).toHaveCount(5)
+  while (await selected.count()) await selected.first().click()
+  for (const id of [30, 26, 29, 61, 93]) {
+    await page.locator('.raid-roster-select').filter({ hasText: new RegExp(`#${id}\\b`) }).click()
+  }
+
+  const sourcePattern = /^[\d,.]+% ATK 阿尔托莉亚$/
+  const sources = page.locator('.raid-action-cell em').filter({ hasText: sourcePattern })
+  await expect(sources.first()).toBeVisible()
+  const source = await sources.first().innerText()
+  const modifier = await page.locator('.raid-cell-buffs').filter({ hasText: '攻击 +' }).first().innerText()
+  await page.getByRole('button', { name: /导出图片/ }).click()
+  await expect(page.locator('.raid-export-preview-image')).toBeVisible({ timeout: 90000 })
+
+  const matrix = page.locator('.raid-export-matrix')
+  expect(await matrix.locator('td:not(.total) .raid-export-source').allTextContents()).toContain(source)
+  expect(await matrix.locator('.total .raid-export-source').allTextContents()).toEqual(expect.arrayContaining([expect.stringMatching(sourcePattern)]))
+  expect(await matrix.locator('.raid-export-modifiers').allTextContents()).toContain(modifier)
+  expect(await matrix.locator('tbody td:not(.total) > span').allTextContents()).toEqual(expect.arrayContaining([expect.stringMatching(/^\+ [\d,.]+% STR$/)]))
+})

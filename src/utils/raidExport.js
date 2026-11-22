@@ -49,6 +49,7 @@ export function summarizeRaidBossRates(statuses, targetCount = 1) {
 export function buildRaidExportModel({
   result, lineup, attackPriority, characters, bossName, bossStats, generatedAt = new Date(),
   locale, characterName, skillName, iconUrl, turnLabel, formatPercent, formatSymbolic, formatConversionTotals,
+  compactSourceLines = () => [], modifierSummary = () => [],
   bossStatusText, bossStatusSummary, elementBonusLines = [], scenarioLines = [], warningLines = [], labels,
 }) {
   const rows = lineup.map(id => ({
@@ -58,6 +59,7 @@ export function buildRaidExportModel({
     total: formatPercent(result.characterTotals[id].atkPercent),
     conversionTotals: formatConversionTotals(result.characterTotals[id].conversionTotals),
     symbolicTotal: formatSymbolic(result.characterTotals[id].symbolicTotals),
+    sourceLines: compactSourceLines(result.characterTotals[id], id),
     panel: {
       level: result.config.levels[id],
       speed: result.config.speeds[id],
@@ -71,6 +73,10 @@ export function buildRaidExportModel({
         turn: round.turn,
         skill: skillName(action.skillNameKey),
         total: formatPercent(action.effectiveAtkPercent),
+        conversionTotals: formatConversionTotals(action.conversionTotals),
+        symbolicTotal: formatSymbolic(action.symbolicTotals),
+        sourceLines: compactSourceLines(action, id),
+        modifiers: modifierSummary(action),
       }
     }),
   }))

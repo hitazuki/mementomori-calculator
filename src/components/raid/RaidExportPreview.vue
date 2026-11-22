@@ -52,7 +52,23 @@
             <h2>{{ model.labels.matrix }}</h2>
             <table class="raid-export-matrix"><thead><tr><th>{{ model.labels.character }}</th><th>{{ model.labels.characterTotal }}</th><th v-for="round in model.rounds" :key="round.turn"><span>{{ round.label }}</span><RaidExportSequence :items="round.order" compact /><em :class="round.orderSource">{{ round.orderSource === 'manual' ? model.labels.manual : model.labels.automatic }}</em></th></tr></thead>
               <tbody>
-                <tr v-for="row in model.rows" :key="row.id"><th><RaidExportCharacter :item="row" /></th><td class="total"><strong>{{ row.total }}</strong><span v-for="value in row.conversionTotals" :key="value">+ {{ value }}</span><span v-if="row.symbolicTotal !== '—'">+ {{ row.symbolicTotal }}</span></td><td v-for="action in row.actions" :key="action.turn"><strong>{{ action.skill }}</strong><span>{{ action.total }}</span></td></tr>
+                <tr v-for="row in model.rows" :key="row.id">
+                  <th><RaidExportCharacter :item="row" /></th>
+                  <td class="total">
+                    <strong>{{ row.total }}</strong>
+                    <span v-for="value in row.conversionTotals" :key="value">+ {{ value }}</span>
+                    <span v-if="row.symbolicTotal !== '—'">+ {{ row.symbolicTotal }}</span>
+                    <small v-for="line in row.sourceLines" :key="line" class="raid-export-source">{{ line }}</small>
+                  </td>
+                  <td v-for="action in row.actions" :key="action.turn">
+                    <strong>{{ action.skill }}</strong>
+                    <span>{{ action.total }}</span>
+                    <span v-for="value in action.conversionTotals" :key="value">+ {{ value }}</span>
+                    <span v-if="action.symbolicTotal !== '—'">+ {{ action.symbolicTotal }}</span>
+                    <small v-for="line in action.sourceLines" :key="line" class="raid-export-source">{{ line }}</small>
+                    <small v-if="action.modifiers.length" class="raid-export-modifiers">{{ action.modifiers.join(' · ') }}</small>
+                  </td>
+                </tr>
                 <tr class="boss-row"><th>{{ model.labels.bossStatus }}</th><td>{{ model.labels.beforeBossAction }}</td><td v-for="round in model.rounds" :key="round.turn"><span v-for="status in round.bossStatuses" :key="status">{{ status }}</span><span v-if="!round.bossStatuses.length">—</span></td></tr>
               </tbody>
               <tfoot><tr><th>{{ model.labels.roundTotal }}</th><td class="total"><strong>{{ model.totals.attack }}</strong><span v-for="value in model.totals.conversion" :key="value">+ {{ value }}</span><span v-if="model.totals.symbolic !== '—'">+ {{ model.totals.symbolic }}</span></td><td v-for="round in model.rounds" :key="round.turn"><strong>{{ round.total }}</strong><span v-for="value in round.conversionTotals" :key="value">+ {{ value }}</span><span v-if="round.symbolicTotal !== '—'">+ {{ round.symbolicTotal }}</span></td></tr></tfoot>
@@ -199,5 +215,10 @@ onBeforeUnmount(releasePreview)
 .raid-export-matrix th:first-child { width: 150px; }.raid-export-matrix th:nth-child(2) { width: 145px; }.raid-export-matrix thead th { height: 74px; }.raid-export-matrix thead th > span,.raid-export-matrix thead th > em { display: block; }.raid-export-matrix thead em { margin-top: 3px; opacity: .6; font-size: 9px; font-style: normal; }.raid-export-matrix thead em.manual { color: #f5df9a; opacity: 1; }.theme-light .raid-export-matrix thead em.manual { color: #755912; }
 .raid-export-matrix tbody th { text-align: left; }.raid-export-matrix tbody td { height: 62px; }.raid-export-matrix td strong,.raid-export-matrix td span { display: block; }.raid-export-matrix td strong { font-size: 12px; }.raid-export-matrix td span { color: #f5df9a; font: 600 10px/1.35 'JetBrains Mono', Consolas, monospace; }.theme-light .raid-export-matrix td span { color: #755912; }.raid-export-matrix .total { color: #f5df9a; }.theme-light .raid-export-matrix .total { color: #755912; }.raid-export-matrix .boss-row td,.raid-export-matrix .boss-row th { background: rgba(46,204,113,.05); }.raid-export-matrix .boss-row span { color: #2ecc71; white-space: nowrap; line-height: 1.5; }.raid-export-matrix tfoot td,.raid-export-matrix tfoot th { background: rgba(212,186,112,.08); }
 .raid-export-sheet footer { display: grid; gap: 3px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(212,186,112,.25); opacity: .72; font-size: 10px; }.raid-export-sheet footer p { margin: 0; }.raid-export-sheet footer small { margin-top: 4px; text-align: right; }
+.raid-export-source, .raid-export-modifiers { display: block; margin-top: 2px; font-size: 10px; overflow-wrap: anywhere; }
+.raid-export-source { color: #c4a9d5; }
+.theme-light .raid-export-source { color: #684777; }
+.raid-export-modifiers { color: #2ecc71; }
+.theme-light .raid-export-modifiers { color: #17643c; }
 @media (max-width: 700px) { .raid-export-toolbar { align-items: stretch; flex-direction: column; }.raid-export-toolbar > div { display: grid; grid-template-columns: 1fr 1fr; }.raid-export-modal { width: 100vw; max-height: 100vh; border-radius: 0; }.raid-export-preview-scroll { max-height: calc(100vh - 170px); } }
 </style>

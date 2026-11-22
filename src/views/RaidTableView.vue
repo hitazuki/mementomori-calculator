@@ -304,8 +304,7 @@
             <td class="raid-row-total raid-sticky-total">
               {{ formatPercent(result.characterTotals[id].atkPercent) }}
               <small v-for="term in conversionStatEntries(result.characterTotals[id].conversionTotals)" :key="term.stat" class="raid-converted-stat">{{ formatConversionTotal(term) }}</small>
-              <small v-if="conversionSourceEntries(result.characterTotals[id].conversionTotals, id).length" class="raid-conversion-sources">{{ $t('raidIncludedConversionScaling', { terms: formatConversionSources(conversionSourceEntries(result.characterTotals[id].conversionTotals, id)) }) }}</small>
-              <small v-if="Object.keys(includedScaling(result.characterTotals[id].scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(result.characterTotals[id].scalingTotals)) }) }}</small>
+              <small v-for="line in compactSourceLines(result.characterTotals[id], id)" :key="line" class="raid-conversion-sources">{{ line }}</small>
               <small v-if="Object.keys(unresolvedScaling(result.characterTotals[id].scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(result.characterTotals[id].scalingTotals)) }}</small>
               <small v-if="Object.keys(result.characterTotals[id].symbolicTotals).length" class="raid-converted-stat">+ {{ formatSymbolic(result.characterTotals[id].symbolicTotals) }}</small>
             </td>
@@ -314,8 +313,7 @@
                 <strong>{{ $t(eventFor(round, id).skillNameKey) }}</strong>
                 <span>{{ formatPercent(eventFor(round, id).effectiveAtkPercent) }}</span>
                 <span v-for="term in conversionStatEntries(eventFor(round, id).conversionTotals)" :key="term.stat" class="raid-converted-stat">{{ formatConversionTotal(term) }}</span>
-                <em v-if="conversionSourceEntries(eventFor(round, id).conversionTotals, id).length">{{ $t('raidIncludedConversionScaling', { terms: formatConversionSources(conversionSourceEntries(eventFor(round, id).conversionTotals, id)) }) }}</em>
-                <em v-if="Object.keys(includedScaling(eventFor(round, id).scalingTotals)).length">{{ $t('raidIncludedSourceAttackScaling', { terms: formatScaling(includedScaling(eventFor(round, id).scalingTotals)) }) }}</em>
+                <em v-for="line in compactSourceLines(eventFor(round, id), id)" :key="line">{{ line }}</em>
                 <em v-if="Object.keys(unresolvedScaling(eventFor(round, id).scalingTotals)).length">+ {{ formatScaling(unresolvedScaling(eventFor(round, id).scalingTotals)) }}</em>
                 <span v-if="Object.keys(eventFor(round, id).symbolicTotals).length" class="raid-converted-stat">+ {{ formatSymbolic(eventFor(round, id).symbolicTotals) }}</span>
                 <span v-if="modifierSummary(eventFor(round, id)).length" class="raid-cell-buffs">{{ modifierSummary(eventFor(round, id)).join(' · ') }}</span>
@@ -887,14 +885,21 @@ function formatConversionTotal(term) { return `+ ${formatStat(term.value, term.s
 function formatConversionExportTotals(totals) { return conversionStatEntries(totals).map(term => formatStat(term.value, term.stat)) }
 function formatConversionSources(terms) { return terms.map(term => `${formatStat(term.value, term.stat)}（${valueSourceText(term.sourceId, term.stat)}）`).join(' + ') }
 function valueSourceText(sourceId, stat = 'ATK') { return t(stat === 'HP' ? 'raidValueSourceHp' : stat === 'DEF' ? 'raidValueSourceDefense' : 'raidValueSourceAttack', { source: characterName(sourceId) }) }
-function formatScalingTerm(term, ownerId = null) {
-  if (term.kind === 'targetBaseDefenseOverTargetAttack') return `${formatStat(term.coefficient, 'DEF')}${term.valueSourceId === ownerId ? '' : `（${valueSourceText(term.valueSourceId, 'DEF')}）`}`
-  if (term.kind === 'sourceMaxHpOverTargetAttack') return `${formatStat(term.coefficient, 'HP')}${term.valueSourceId === ownerId ? '' : `（${valueSourceText(term.valueSourceId, 'HP')}）`}`
+function compactSourceLines(entry, ownerId) {
+  return [
+    ...conversionSourceEntries(entry.conversionTotals, ownerId)
+      .map(term => `${formatStat(term.value, term.stat)} ${characterName(term.sourceId)}`),
+    ...Object.values(entry.scalingTotals).filter(term => term.kind === 'sourceAttackOverTargetAttack')
+      .map(term => `${formatStat(term.coefficient, 'ATK')} ${characterName(term.valueSourceId ?? term.sourceId)}`),
+  ]
+}
+function formatScalingTerm(term) {
+  if (term.kind === 'targetBaseDefenseOverTargetAttack') return `${formatStat(term.coefficient, 'DEF')}（${valueSourceText(term.valueSourceId, 'DEF')}）`
+  if (term.kind === 'sourceMaxHpOverTargetAttack') return `${formatStat(term.coefficient, 'HP')}（${valueSourceText(term.valueSourceId, 'HP')}）`
   const source = term.kind === 'sourceAttackOverTargetAttack' ? `（${valueSourceText(term.valueSourceId ?? term.sourceId)}）` : ''
   return `${formatter().format(term.coefficient)}% ATK×(${term.key})${source}`
 }
 function formatScaling(totals) { return Object.values(totals).map(formatScalingTerm).join(' + ') }
-function includedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind === 'sourceAttackOverTargetAttack')) }
 function unresolvedScaling(totals) { return Object.fromEntries(Object.entries(totals).filter(([, term]) => term.kind !== 'sourceAttackOverTargetAttack')) }
 function normalizeRaidSeed(value) { return Number.isInteger(value) ? Math.max(0, Math.min(4294967295, value)) : 1 }
 function enemySelectionText(spec) {
@@ -1219,6 +1224,8 @@ function openRaidExport() {
     formatPercent,
     formatSymbolic,
     formatConversionTotals: formatConversionExportTotals,
+    compactSourceLines,
+    modifierSummary,
     bossStatusText: bossStatusLabel,
     bossStatusSummary,
     elementBonusLines: elementBonusLines.value,
@@ -1296,7 +1303,7 @@ function modifierSummary(event) {
   const firstStep = event.damageSteps[0]
   if (!firstStep) return []
   const totals = modifierTotals(firstStep)
-  return modifierChannels.flatMap(([channel, labelKey]) => totals[channel] ? [`${t(labelKey)} +${formatRate(totals[channel])}`] : [])
+  return modifierChannels.flatMap(([channel, labelKey]) => totals[channel] ? [`${t(labelKey)} ${signedRate(totals[channel])}`] : [])
 }
 
 function modifierBreakdown(event) {

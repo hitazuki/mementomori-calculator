@@ -187,7 +187,7 @@ symbolicModifiers: [
 ]
 ```
 
-前端把自身来源的 `sourceAttackOverTargetAttack` 折入 `%ATK` 且不显示附加公式；跨角色 ATK 项在动作与角色明细显示原始比值和数值来源，回合与全队只显示相加后的 ATK。`targetBaseDefenseOverTargetAttack` 始终作为独立 `%DEF` 与 ATK 并列展示，并按 `valueSourceId` 保存。动作和角色层级若 `valueSourceId` 等于行动者，只显示 `XXX% DEF`；回合与全队先按 `stat` 合并显示 `XXX% DEF`，再以 `含 XXX% DEF（数值来源：角色 DEF）` 展开每个来源，样式复用同位置的 ATK 来源说明。不同单位或数值来源的项在结构化记录中必须分别保留。穆瓦诺复制时将复制到的 `attackRate` 转为以被复制目标为 `sourceId` 的符号项；原施加者仍保留在复制状态的 Buff 来源字段，不能与数值来源混用。
+前端把自身来源的 `sourceAttackOverTargetAttack` 折入 `%ATK` 且不显示附加公式。网页矩阵和导出图片的动作格、角色合计按 `百分比 类型 来源角色` 标注跨角色数值来源，行动详情保留完整公式。回合与全队只显示相加后的 ATK。`targetBaseDefenseOverTargetAttack` 始终作为独立 `%DEF` 与 ATK 并列展示，并按 `valueSourceId` 保存。动作和角色层级若 `valueSourceId` 等于行动者，只显示 `XXX% DEF`。网页的回合与全队先按 `stat` 合并显示 `XXX% DEF`，再以 `含 XXX% DEF（数值来源：角色 DEF）` 展开每个来源。不同单位或数值来源的项在结构化记录中必须分别保留。穆瓦诺复制时将复制到的 `attackRate` 转为以被复制目标为 `sourceId` 的符号项；原施加者仍保留在复制状态的 Buff 来源字段，不能与数值来源混用。
 
 符号项只作用于 `stat: 'ATK'` 的主动伤害段，并继续乘增伤和暴击。新增 `kind` 时必须同步增加键生成、显示公式、合并测试和文档说明。
 
