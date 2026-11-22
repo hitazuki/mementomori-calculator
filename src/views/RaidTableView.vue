@@ -33,8 +33,7 @@
         v-for="preset in RAID_PRESETS"
         :key="preset.mainAttackerId"
         type="button"
-        class="btn btn-sm"
-        :class="preset === DEFAULT_RAID_PRESET ? 'btn-primary' : 'btn-ghost'"
+        class="btn btn-ghost btn-sm"
         @click="applyConfig(createRaidPresetConfig(preset))"
       >
         {{ $t(preset.nameKey ?? elementNameKey(RAID_TABLE_CHARACTERS[preset.mainAttackerId].element)) }}
