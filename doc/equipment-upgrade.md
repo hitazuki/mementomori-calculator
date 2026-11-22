@@ -1,31 +1,27 @@
-# 装备主属性升级对比
+# 装备升级收益分析
 
-装备升级收益页使用已提交的 `src/constants/equipmentUpgrade.json`。从显式外部目录运行 `scripts/generate_equipment_upgrade.mjs` 生成；`--check` 只比对，不写入。表包含五个后期装备系列的官方五语言名称、三类主属性、合法等级和进阶关系，以及 0–1000 级强化系数。生成时核对手、足属性等价。
+## 角色和战斗基准
 
-系列按真实 EquipmentSetId 区分，不跨套装升级。特别是撒旦从 240 级开始：此前 SSR 180、200、220 级是其他套装，不能当作撒旦节点。
+- 默认使用科迪 LR+5 的 Lv500 裸装估算。调整角色等级会重算四维、生命和物魔防御。普通防御固定为 7。自定义面板填写扣除被测装备后的最大生命与三防，保留其他装备、符石、秘仪等贡献。
+- 预设以 `CharacterPotentialMB.TotalBaseParameter` 取得整数等级潜力基数。计算 `潜力基数 × m + b` 后，按 `CharacterMB.BaseParameterCoefficient / BaseParameterGrossCoefficient` 分配并逐项向下取整。系数来自 `CharacterPotentialCoefficientMB` 的初始 SR、当前 LR+5 行（Id 815，稀有度 16384）。基础生命为耐力 ×10，物防为力量，魔防为魔力。 [等级潜力基数](https://raw.githubusercontent.com/moonheart/mementomori-masterbook/master/Master/CharacterPotentialMB.json) [稀有度系数](https://raw.githubusercontent.com/moonheart/mementomori-masterbook/master/Master/CharacterPotentialCoefficientMB.json)
+- 用公开的角色图鉴面板核对同一公式的 LR、Lv240 结果。物防 631,721、魔防 554,510、生命 4,843,190、普通防御 7。科迪 `InitialBattleParameter.HP` 为 −2，直接加到上述已取整生命会得到 4,843,188。预设按已匹配口径使用耐力 ×10。LR+5 高等级裸装个位数与游戏未进一步核对。 [图鉴面板实测与派生关系](https://note.com/wazu_019/n/n5fe5ef49ba1c) [LR Lv240 面板记录](https://dark.namu.moe/w/%EC%BD%9C%EB%94%94(%EB%A9%94%EB%A9%98%ED%86%A0%20%EB%AA%A8%EB%A6%AC)#s-2)
+- 场外耐力和场外生命的默认值均为 0%。耐力先乘耐力倍率，再按 ×10 派生生命，最后乘生命倍率。装备耐力派生的暴击抗性使用加成后的耐力 ×0.5。预设的基础生命也使用两项倍率。自定义面板中的生命已包含场外加成，倍率只作用于被测装备增量。
+- 受击类型统一用于所有方案。防御路始终使用普通防御，物魔路按所选类型使用物防或魔防，并沿用攻防等级和穿透定数。每条三防方案保留原有场外和场内设置，作用于该部位基础属性对应的三防项，其他派生防御使用默认倍率 1。对应防御项的公式为 `(基准 + 装备增量 × 场外倍率) × max(0, 1 + 场内加成)`。默认场外防御 1%，物防和魔防 0%，来自常驻角色 LR+5 秘仪核对（双子座的庇翼 CollectionId=3，百分比 Value=100）。场内默认 0%，用户可以填写负值。
 
-0 是无装备贡献基准，首次装备独立展示。主属性增量为 `(目标基础值×强化系数 − 起始基础值×强化系数) × (1+增量加成%)`；0 基准的起始贡献为0。输入为无装备防御／物防／魔防。每个节点使用无装备属性加上该节点的完整装备贡献（基础值×强化系数×属性加成）；起点也加入起始装备贡献。
+## 装备和打磨
 
-每个方案独立改变一个属性，装备与强化等级同步，沿真实进阶链计算。相邻收益以前一节点为基准，累计收益统一以无装备属性为基准。有效生命提升为 `通过率前/通过率后−1`，承伤降低为 `1−通过率后/通过率前`。两路通过率复用伤害模块与等级常数，不先四舍五入。
+- 五个套装（EquipmentSetId 10–14）各自沿真实进阶链计算，装备等级与强化等级同步且受角色等级上限约束。武器、饰品、手、头、身体、足独立成档。普通武器限定 Category=2，三职业的基础属性、四维总点数、等级链及碎片成本逐项验证后合并。
+- 装备基础效果使用 `BattleParameterChangeInfo.Value × EquipmentReinforcementParameterMB.ReinforcementCoefficient`，四维使用 `AdditionalParameterTotal` 和打磨比例分配，尾数按小数余量从大到小分配以保持整数点数总和。四项滑条合计 100%，同一方案的每档使用相同配分。金币单项 13⅓%～60% 为实测推算，锁定模式可接近 0%，模拟允许 0% 边界。 [金币打磨实测](https://note.com/wazu_019/n/ne6d87154066d) [锁定打磨实例](https://note.com/wazu_019/n/n56b62cb60bf3?hl=en)
+- 装备的基础效果与四维贡献分别开关。力量派生物防、命中。魔力派生魔防、弱化效果命中。战技派生闪避、暴击。耐力派生生命、暴击抗性。武器基础效果提供攻击，饰品基础效果提供弱化效果抗性。额外属性以评级点数展示。套装、神装和战斗技能效果按固定基准处理。 [官方潜在能力与战斗属性](https://mementomori.zendesk.com/hc/en-us/articles/44196520217881-About-Potential-Battle-Stats)
 
-不模拟潜力、套装、神装或战斗状态变化。强化材料单列，不含装备升阶成本。不同升级跨度并非等成本比较。
+## 收益与成本
 
-装备节点不能超过角色等级（同时受 1000 级数据上限约束）。页面移除起始装备等级，所有方案从无装备基准计算；横轴自动覆盖实际节点，使用图表缩放调整可见范围。
+- 等效生命 = 最大生命 ÷ 综合伤害通过率。累计提升以扣除被测装备后的面板为基准，相邻提升比较两个真实档位；承伤降低只比较两档伤害通过率。闪避、暴击、弱化相关属性以评级展示。
+- 碎片效率 = 相邻等效生命提升百分点 ÷ 本档进阶碎片数。首次装备不计效率。碎片从 `EquipmentMB.EquipmentEvolutionId` 关联 `EquipmentEvolutionMB`，按实际前后档匹配。强化材料另列，使用武器或其他部位各自的消耗表。缺少碎片成本的档位显示空值并断开效率曲线。
+- 悬浮曲线对比同收益档位，≈ 表示插值结果，同时列出首个达到该收益的真实档位。图表保留用户设置的缩放区间。
 
-物防方案按物理伤害、魔防方案按魔法伤害计算；防御方案对两者的相对收益相同。页面不再选择统一伤害类型。累计等效生命提升仍是相对无装备状态的百分比，不是绝对生命值。
+## 数据复现
 
-悬浮曲线节点时显示同收益水平线及各方案交点。交点等级使用相邻曲线节点线性插值，仅供观察；提示另列首个达到该收益的真实装备档位。不存在交点或未达标时明确提示，不外推。相邻模式的交点计算不包含首次装备。
+运行 `node scripts/generate_equipment_upgrade.mjs <master-directory>` 生成 `src/constants/equipmentUpgrade.json`。附加 `--check` 可验证快照。运行、构建和测试使用提交的精简数据。
 
-相邻收益比较无装备属性加上一档完整装备属性，与无装备属性加当前档完整装备属性。相同升级区间的相邻收益不随曲线起点变化。移除旧470级截图快捷填入：截图是已穿装备面板，无法直接作为无装备输入；测试中按被比较部位扣除原装备贡献后保留回归验证。
-
-高级选项分别为场外属性加成（防御默认 1%，物防/魔防默认 0%）和场内属性加成（默认 0%），每条方案独立设置。所选属性按 `(无装备数值 + 装备基础属性 × 强化系数 × (1 + 场外% / 100)) × max(0, 1 + 场内% / 100)` 计算。累计基准为 `无装备数值 × max(0, 1 + 场内% / 100)`；相邻前后档均使用同一公式。属性增量与数值表包含两类加成。
-
-场外属性加成包含秘仪与装备词条的加成，输入两者合计百分比。
-
-档位碎片性价比 = 相邻档位有效生命提升（百分点）÷ 本档进化碎片数，单位为百分点/碎片。首次装备不参与；区间使用真实前后节点，不把跨度不同的档位伪装为10级。只比较碎片效率，不包含金币、进化素材及强化材料，不同系列碎片不代表等价值。悬浮水平线在此模式比较相同碎片效率。
-
-生成脚本通过 EquipmentMB.EquipmentEvolutionId 关联 EquipmentEvolutionMB，以 BeforeEquipmentLv/AfterEquipmentLv 匹配真实档位，导出 costs[stat] 的 [起点,终点,碎片数]；同时校验手足成本一致。武具召唤的旧需求表来自 tamamo GearParts 的手写分段；已核对圣天使 510→520 为30碎片、520→530 为40碎片，两张截图所选档位不同。
-
-默认值核对（2026-09-17）：常驻沿用现有秘仪分类，即成员均不在 GachaDestinyAddCharacterMB 中。读取 CharacterCollectionLevelMB 中 LR+5（CharacterRarityFlags=16384）对应阶段，不叠加低阶段重复奖励，只统计 ChangeParameterType=2。常驻集合中“双子座的庇翼”（CollectionId=3；小苍兰、琳恩、黛安）给予防御百分比 Value=100，即1%；物防与魔防百分比均为0。“金牛座的守护”（CollectionId=1）的物防、魔防各3000为固定值，不纳入百分比默认值，也不额外叠加到用户输入的无装备面板。限定角色秘仪及装备词条需用户自行填写。切换比较属性会恢复对应场外默认值，保留场内输入。
-
-场内属性加成允许负数：-80% 保留20%；-100%及以下使对应属性归零。无装备基准与装备贡献使用相同的非负倍率，相邻收益、累计收益及碎片性价比同步归零。场外加成仍要求非负数。
+科迪名称于 2026-11-22 核对远程 CharacterMB Id 27 和五语言名称键 `[CharacterName27]`。科迪（简繁）、Cordie、コルディ、콜디。本次预设使用纯文字。 [CharacterMB](https://raw.githubusercontent.com/moonheart/mementomori-masterbook/master/Master/CharacterMB.json) [简中](https://raw.githubusercontent.com/moonheart/mementomori-masterbook/master/Master/TextResourceZhCnMB.json) [繁中](https://raw.githubusercontent.com/moonheart/mementomori-masterbook/master/Master/TextResourceZhTwMB.json) [英语](https://raw.githubusercontent.com/moonheart/mementomori-masterbook/master/Master/TextResourceEnUsMB.json) [日语](https://raw.githubusercontent.com/moonheart/mementomori-masterbook/master/Master/TextResourceJaJpMB.json) [韩语](https://cdn.jsdelivr.net/gh/moonheart/mementomori-masterbook@master/Master/TextResourceKoKrMB.json)

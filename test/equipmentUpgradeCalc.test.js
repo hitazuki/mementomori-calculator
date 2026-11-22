@@ -1,8 +1,85 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { DEFAULT_UPGRADE_PANEL as defaults, EQUIPMENT_UPGRADE_DATA as data, upgradeLevels, buildEquipmentUpgrade as build, upgradeMaterials, equivalentUpgradeLevels } from '../src/engine/equipmentUpgradeCalc.js'
+import {
+  DEFAULT_UPGRADE_PANEL as defaults, EQUIPMENT_UPGRADE_DATA as data, EQUIPMENT_SLOTS, EQUAL_REFORGE,
+  upgradeLevels, buildEquipmentUpgrade as build, upgradeMaterials, equivalentUpgradeLevels,
+  cordiePanel, adjustReforge, reforgeMinimum,
+} from '../src/engine/equipmentUpgradeCalc.js'
 const plan = { stat: 'def', seriesId: 12, start: 0, outsideBonus: 0 }
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.00001, `${actual} != ${expected}`)
+
+test('Cordie LR+5 preset updates by level and applies stamina before HP bonuses', () => {
+  const base = cordiePanel(500, 0, 0)
+  const next = cordiePanel(501, 0, 0)
+  const boosted = cordiePanel(500, 20, 30)
+  assert.deepEqual(base, { str: 4301936, mag: 3776144, dex: 4779929, sta: 3298151, def: 7, pdef: 4301936, mdef: 3776144, hp: 32981510 })
+  for (const key of ['str', 'mag', 'dex', 'sta', 'pdef', 'mdef', 'hp']) assert.ok(next[key] > base[key])
+  assert.equal(next.def, 7)
+  near(boosted.sta, base.sta * 1.2)
+  near(boosted.hp, base.hp * 1.2 * 1.3)
+  assert.equal(boosted.pdef, base.pdef)
+  assert.equal(boosted.mdef, base.mdef)
+  assert.equal(cordiePanel(500.5, 0, 0), null)
+})
+
+test('reforge keeps the edited share and redistributes within the mode bounds', () => {
+  const goldMinimum = reforgeMinimum('gold')
+  const maximum = adjustReforge(EQUAL_REFORGE, 'gold', 3, 60)
+  assert.equal(maximum[3], 60)
+  for (const share of maximum.slice(0, 3)) near(share, goldMinimum)
+  const suppressed = adjustReforge([60, 0, 40, 0], 'locked', 0, 0)
+  assert.deepEqual(suppressed, [0, 20, 60, 20])
+  const projected = adjustReforge(suppressed, 'gold')
+  for (const share of projected) assert.ok(share >= goldMinimum && share <= 60)
+  near(projected.reduce((sum, share) => sum + share, 0), 100)
+  const proportional = adjustReforge([15, 35, 25, 25], 'gold', 3, 35)
+  near(proportional[0], goldMinimum)
+  near(proportional[1] / proportional[2], 35 / 25)
+})
+
+test('slot analysis composes stamina gains without multiplying existing HP', () => {
+  const baseline = { ...defaults, hp: 30000000, staminaBonus: 20, hpBonus: 30 }
+  const gear = { slot: 'hands', seriesId: 10, start: 0, applyBase: false, shares: [0, 40, 0, 60] }
+  const result = build(baseline, gear, 'phys')
+  assert.equal(result.valid, true)
+  const first = result.firstEquip
+  assert.equal(first.totals.mag + first.totals.sta, 65573)
+  assert.equal(first.totals.sta, 39344)
+  near(first.totals.hp, first.totals.sta * 15.6)
+  near(first.totals.critRes, first.totals.sta * 0.6)
+  near(first.hp, baseline.hp + first.totals.hp)
+  near(first.cumulative.ehp, first.totals.hp / baseline.hp * 100)
+  assert.equal(first.cumulative.reduction, 0)
+  assert.ok(build(baseline, gear, 'mag').firstEquip.cumulative.reduction > 0)
+  const disabled = build(baseline, { ...gear, applyFourStats: false }, 'phys').firstEquip
+  assert.equal(disabled.hp, baseline.hp)
+  assert.equal(disabled.cumulative.ehp, 0)
+  assert.ok(Object.values(disabled.totals).every(value => value === 0))
+})
+
+test('six ordinary slots use their own base effects, reforge points, and evolution costs', () => {
+  const baseline = { ...defaults, hp: 30000000 }
+  for (const series of data.series) {
+    for (const slot of Object.keys(EQUIPMENT_SLOTS)) {
+      const options = { slot, seriesId: series.id, start: 0 }
+      const actual = build(baseline, options, 'phys')
+      const { rows, costs } = series.slots[slot]
+      assert.equal(actual.valid, true)
+      const { totals } = actual.firstEquip
+      assert.equal(totals.str + totals.mag + totals.dex + totals.sta, rows[0][3])
+      assert.equal(actual.next.fragmentCost, costs[0][2])
+    }
+  }
+  const accessory = { slot: 'accessory', seriesId: 10, start: 0, applyFourStats: false }
+  assert.ok(build(baseline, accessory).firstEquip.totals.debuffRes > 0)
+  assert.equal(build(baseline, { ...accessory, applyBase: false }).firstEquip.totals.debuffRes, 0)
+  assert.ok(upgradeMaterials(240, 250, 'weapon').totals.potion > upgradeMaterials(240, 250, 'head').totals.potion)
+  for (const [slot, stat] of [['hands', 'def'], ['feet', 'def'], ['head', 'pdef'], ['body', 'mdef']]) {
+    const legacy = build(baseline, { ...plan, stat }, 'mag')
+    const current = build(baseline, { ...plan, stat: undefined, slot, applyFourStats: false }, 'mag')
+    assert.deepEqual(current, legacy)
+  }
+})
 
 test('fragment efficiency uses each real tier cost and excludes first equip', () => {
   for (const series of data.series) {
@@ -113,6 +190,8 @@ test('equal gain comparison keeps estimated crossings separate from legal tiers'
   assert.deepEqual(equivalentUpgradeLevels(points, 'cumulative', 8), { intersections: [240], firstReached: 240 })
   assert.deepEqual(equivalentUpgradeLevels(points, 'adjacent', 8), { intersections: [], firstReached: null })
   assert.deepEqual(equivalentUpgradeLevels([], 'adjacent', 1), { intersections: [], firstReached: null })
+  const efficiencyPoints = points.map((point, i) => ({ ...point, efficiency: { ehp: [null, 1, null, 3][i] } }))
+  assert.deepEqual(equivalentUpgradeLevels(efficiencyPoints, 'efficiency', 2), { intersections: [], firstReached: 270 })
 })
 
 test('upgrade default excludes first equip from next upgrade comparison', () => {
