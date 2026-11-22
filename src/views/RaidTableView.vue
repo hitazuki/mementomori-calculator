@@ -28,6 +28,13 @@
       <button type="button" class="btn btn-ghost btn-sm" @click="resetConfig">↻ {{ $t('raidReset') }}</button>
     </div>
 
+    <div class="raid-preset-controls" role="group" :aria-label="$t('raidPresets')">
+      <span>{{ $t('raidPresets') }}</span>
+      <button v-for="preset in RAID_PRESETS" :key="preset.mainAttackerId" type="button" class="btn btn-ghost btn-sm" @click="applyConfig(createRaidPresetConfig(preset))">
+        {{ $t(elementNameKey(RAID_TABLE_CHARACTERS[preset.mainAttackerId].element)) }}
+      </button>
+    </div>
+
     <div class="raid-element-filter" role="group" :aria-label="$t('raidElementFilter')">
       <span class="raid-element-filter-label">{{ $t('raidElementFilter') }}</span>
       <button
@@ -637,6 +644,7 @@ import { computed, defineComponent, h, nextTick, reactive, ref, watch } from 'vu
 import { useI18n } from 'vue-i18n'
 import { RAID_ACTIVATION_ROUND_LIMITS, RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
 import { loadRaidCharacterMbTexts } from '../constants/raid/characterMbTexts.js'
+import { createRaidPresetConfig, RAID_PRESETS } from '../constants/raid/presets.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
 import RaidSkillIcon from '../components/raid/RaidSkillIcon.vue'
@@ -1262,7 +1270,10 @@ function moveItem(list, index, delta) {
 }
 
 function resetConfig() {
-  const next = createDefaultRaidTableConfig()
+  applyConfig(createDefaultRaidTableConfig())
+}
+
+function applyConfig(next) {
   selectedRosterElement.value = null
   lineup.value = [...next.lineup]; attackPriority.value = [...next.attackPriority]
   actionOrderOverrides.value = cloneActionOrderOverrides(next.actionOrderOverrides)

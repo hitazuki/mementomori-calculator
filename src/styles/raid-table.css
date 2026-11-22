@@ -22,6 +22,7 @@
 
 .raid-summary-extra { margin-top: 5px; color: var(--purple-light); font-family: var(--font-mono); font-size: var(--fs-xs); }
 
+.raid-preset-controls,
 .raid-element-filter {
   display: flex;
   align-items: center;
@@ -30,6 +31,7 @@
   margin-bottom: 12px;
 }
 
+.raid-preset-controls > span,
 .raid-element-filter-label {
   margin-right: 2px;
   color: var(--text-muted);
