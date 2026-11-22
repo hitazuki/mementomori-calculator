@@ -12,7 +12,7 @@
   ],
   "effectGroups": [
     { "id": 11400320201, "model": "implemented", "summary": "翠属性全体攻击叠层，SkillCategory 4。" },
-    { "id": 11400420301, "model": "implemented", "summary": "第7回合速度+30%，不可解除。" },
+    { "id": 11400420301, "model": "implemented", "summary": "第7回合排序前施加速度+30%，不可解除。" },
     { "id": 11400420201, "model": "implemented", "summary": "第7回合冷却重置内部效果。" },
     { "id": 11400440101, "model": "outOfScope", "summary": "最大HP增加。" },
     { "id": 11400430401, "model": "outOfScope", "summary": "承伤降低。" },

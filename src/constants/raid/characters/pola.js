@@ -14,14 +14,16 @@ export default {
     { type: 'changeCounter', counter: 'courage', amount: 1, max: 15, id: 'pola-courage', nameKey: 'raidBuffPolaCourage', eventType: 'counter' },
     courage,
   ] }],
-  hooks: [hook('roundStart', [
-    { type: 'setCooldown', target: 'self', skills: ['s1', 's2'], value: 0, eventType: 'cooldownReset' },
-    statusEffect({
+  hooks: [
+    hook('beforeRoundOrder', [statusEffect({
       id: 'pola-speed', effectGroupId: 11400420301, nameKey: 'raidBuffPolaSpeed', target: 'self', duration: null,
       statusClass: RAID_STATUS_CLASSES.UNREMOVABLE_STATE,
       modifiers: [{ id: 'pola-speed', channel: 'speedRate', rate: 0.3 }],
-    }),
-  ], { condition: { type: 'roundAtLeast', round: 7 }, onceKey: 'polaRoundSeven' })],
+    })], { condition: { type: 'roundAtLeast', round: 7 }, onceKey: 'polaRoundSevenSpeed' }),
+    hook('roundStart', [
+      { type: 'setCooldown', target: 'self', skills: ['s1', 's2'], value: 0, eventType: 'cooldownReset' },
+    ], { condition: { type: 'roundAtLeast', round: 7 }, onceKey: 'polaRoundSeven' }),
+  ],
   skills: {
     s1: {
       key: 's1', nameKey: 'raidSkillPolaS1', cooldown: 4, damageType: 'phys', hooks: [hook('beforeDamage', [earlySelfHeal])],

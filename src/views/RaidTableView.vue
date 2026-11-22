@@ -25,13 +25,19 @@
   <section class="card raid-config-card animate-fadeup">
     <div class="raid-section-head">
       <div><h2>{{ $t('raidConfigTitle') }}</h2><p>{{ $t('raidRosterHint') }}</p></div>
-      <button type="button" class="btn btn-ghost btn-sm" @click="resetConfig">↻ {{ $t('raidReset') }}</button>
     </div>
 
     <div class="raid-preset-controls" role="group" :aria-label="$t('raidPresets')">
       <span>{{ $t('raidPresets') }}</span>
-      <button v-for="preset in RAID_PRESETS" :key="preset.mainAttackerId" type="button" class="btn btn-ghost btn-sm" @click="applyConfig(createRaidPresetConfig(preset))">
-        {{ $t(elementNameKey(RAID_TABLE_CHARACTERS[preset.mainAttackerId].element)) }}
+      <button
+        v-for="preset in RAID_PRESETS"
+        :key="preset.mainAttackerId"
+        type="button"
+        class="btn btn-sm"
+        :class="preset === DEFAULT_RAID_PRESET ? 'btn-primary' : 'btn-ghost'"
+        @click="applyConfig(createRaidPresetConfig(preset))"
+      >
+        {{ $t(preset.nameKey ?? elementNameKey(RAID_TABLE_CHARACTERS[preset.mainAttackerId].element)) }}
       </button>
     </div>
 
@@ -642,9 +648,9 @@
 <script setup>
 import { computed, defineComponent, h, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RAID_ACTIVATION_ROUND_LIMITS, RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER, createDefaultRaidTableConfig } from '../constants/raidTableCharacters.js'
+import { RAID_ACTIVATION_ROUND_LIMITS, RAID_BOSS_TEMPLATES, RAID_ELEMENTS, RAID_JOB_FLAGS, RAID_TABLE_CHARACTER_IDS, RAID_TABLE_CHARACTERS, RAID_TABLE_ROSTER } from '../constants/raidTableCharacters.js'
 import { loadRaidCharacterMbTexts } from '../constants/raid/characterMbTexts.js'
-import { createRaidPresetConfig, RAID_PRESETS } from '../constants/raid/presets.js'
+import { createRaidPresetConfig, DEFAULT_RAID_PRESET, RAID_PRESETS } from '../constants/raid/presets.js'
 import { simulateRaidTable } from '../engine/raidTableCalc.js'
 import RaidExportPreview from '../components/raid/RaidExportPreview.vue'
 import RaidSkillIcon from '../components/raid/RaidSkillIcon.vue'
@@ -713,7 +719,7 @@ const elementFilters = Object.freeze([
   { element: RAID_ELEMENTS.DARK, nameKey: 'raidElementDark' },
 ])
 const bossTemplates = Object.values(RAID_BOSS_TEMPLATES)
-const defaults = createDefaultRaidTableConfig()
+const defaults = createRaidPresetConfig(DEFAULT_RAID_PRESET)
 const selectedRosterElement = ref(null)
 const lineup = ref([...defaults.lineup])
 const attackPriority = ref([...defaults.attackPriority])
@@ -967,6 +973,7 @@ const characterEffectTargetKeys = {
 }
 const characterEffectTimingKeys = {
   permanent: 'raidCharacterTimingPermanent', battleStart: 'raidCharacterTimingBattleStart', roundStart: 'raidCharacterTimingRoundStart',
+  beforeRoundOrder: 'raidCharacterTimingBeforeRoundOrder',
   actionStart: 'raidCharacterTimingActionStart', beforeDamage: 'raidCharacterTimingBeforeDamage', afterHit: 'raidCharacterTimingAfterHit',
   afterCriticalHit: 'raidCharacterTimingAfterCriticalHit', afterDamage: 'raidCharacterTimingAfterDamage', actionEnd: 'raidCharacterTimingActionEnd',
   afterDamageStep: 'raidCharacterTimingAfterDamageStep',
@@ -1267,10 +1274,6 @@ function moveItem(list, index, delta) {
   const copy = [...list]; [copy[index], copy[next]] = [copy[next], copy[index]]
   list.splice(0, list.length, ...copy)
   selectedEvent.value = null
-}
-
-function resetConfig() {
-  applyConfig(createDefaultRaidTableConfig())
 }
 
 function applyConfig(next) {

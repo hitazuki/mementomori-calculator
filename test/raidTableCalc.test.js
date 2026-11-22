@@ -1555,6 +1555,20 @@ test('Milla and Yildiz read healing counters before their conditional damage', (
   assert.equal(action(yildiz, 6, YILDIZ).damageSteps[0].percent, 1120)
 })
 
+test('Pola speed changes turn seven order before manual overrides are applied', () => {
+  const lineup = [FLORENCE, POLA]
+  const config = { lineup, attackPriority: lineup, speeds: { [FLORENCE]: 3077 }, turns: 7 }
+  const automatic = simulateRaidTable(config)
+  assert.deepEqual(automatic.rounds[5].actionOrder, lineup)
+  assert.deepEqual(automatic.rounds[6].actions.map(action => action.actorId), [POLA, FLORENCE])
+
+  const manual = simulateRaidTable({ ...config, actionOrderOverrides: { 7: lineup } }).rounds[6]
+  assert.deepEqual(manual.speedOrder, [POLA, FLORENCE])
+  assert.deepEqual(manual.actions.map(action => action.actorId), lineup)
+  assert.equal(manual.orderSource, 'manual')
+  assert.equal(manual.speedSnapshot[POLA].effectiveSpeed, 2956 * 1.3)
+})
+
 test('round-seven healing branches, cooldown resets, speed, and Stella debuffs are structured', () => {
   const eidene = simulateRaidTable(singleConfig(EIDENE, { turns: 10 }))
   assert.equal(action(eidene, 2, EIDENE).runtimeAfter.counters.vigorousBloom, 3)
@@ -1565,9 +1579,11 @@ test('round-seven healing branches, cooldown resets, speed, and Stella debuffs a
   assert.equal(action(pola, 7, POLA).actionKey, 's1')
   assert.equal(action(pola, 7, POLA).damageSteps[0].percent, 1180)
   assert.equal(action(pola, 8, POLA).damageSteps[0].percent, 620)
-  assert.equal(pola.rounds[6].speedSnapshot[POLA].effectiveSpeed, 2956)
+  assert.equal(pola.rounds[5].speedSnapshot[POLA].effectiveSpeed, 2956)
+  assert.equal(pola.rounds[6].speedSnapshot[POLA].effectiveSpeed, 2956 * 1.3)
   assert.equal(pola.rounds[7].speedSnapshot[POLA].effectiveSpeed, 2956 * 1.3)
   assert.equal(action(pola, 8, POLA).runtimeAfter.counters.courage, 4)
+  assert.deepEqual(pola.rounds.filter(round => round.roundStartEffects.some(effect => effect.id === 'pola-speed')).map(round => round.turn), [7])
 
   const stella = simulateRaidTable(singleConfig(WINTER_STELLA, { turns: 8 }))
   const lateS1 = action(stella, 7, WINTER_STELLA)

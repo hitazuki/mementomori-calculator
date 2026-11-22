@@ -762,17 +762,23 @@ export function runRaidProgram(program) {
     })
   }
 
+  function runRoundHooks(phase, turn, effectsApplied) {
+    for (const actorId of passiveOrder) {
+      const actor = actors.get(actorId)
+      runHooks(actor, actor.definition.hooksByTrigger[phase], {
+        config, actors, boss, sequence, round: turn, effectsApplied, phase, ownerId: actorId,
+      })
+    }
+  }
+
   for (let turn = 1; turn <= config.turns; turn += 1) {
     const roundStartEffects = []
+    passiveOrder = config.lineup
+    runRoundHooks('beforeRoundOrder', turn, roundStartEffects)
     const order = roundOrder()
     const finalOrder = finalRoundOrder(turn, order.actionOrder)
     passiveOrder = finalOrder.actionOrder
-    for (const actorId of passiveOrder) {
-      const actor = actors.get(actorId)
-      runHooks(actor, actor.definition.hooksByTrigger.roundStart, {
-        config, actors, boss, sequence, round: turn, effectsApplied: roundStartEffects, phase: 'roundStart', ownerId: actorId,
-      }, 'roundStart')
-    }
+    runRoundHooks('roundStart', turn, roundStartEffects)
     const round = {
       turn, speedOrder: order.actionOrder, actionOrder: finalOrder.actionOrder, orderSource: finalOrder.orderSource,
       speedSnapshot: order.speedSnapshot,

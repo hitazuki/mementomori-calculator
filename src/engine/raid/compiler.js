@@ -16,7 +16,7 @@ import { DEFAULT_RAID_MECHANICS } from './mechanics.js'
 import { calculateRaidElementBonus } from './elementBonus.js'
 
 const SUPPORTED_TRIGGERS = new Set([
-  'battleStart', 'roundStart', 'actionStart', 'beforeDamage', 'afterHit', 'afterCriticalHit', 'afterDamage', 'actionEnd',
+  'battleStart', 'beforeRoundOrder', 'roundStart', 'actionStart', 'beforeDamage', 'afterHit', 'afterCriticalHit', 'afterDamage', 'actionEnd',
 ])
 const SUPPORTED_ELEMENTS = new Set(Object.values(RAID_ELEMENTS))
 const SUPPORTED_MODIFIER_CHANNELS = new Set(RAID_MODIFIER_CHANNELS)

@@ -31,6 +31,12 @@
   margin-bottom: 12px;
 }
 
+.raid-preset-controls {
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+}
+
 .raid-preset-controls > span,
 .raid-element-filter-label {
   margin-right: 2px;

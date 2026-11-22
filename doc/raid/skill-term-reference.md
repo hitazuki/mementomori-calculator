@@ -348,6 +348,7 @@ hook('afterDamage', [{
 | `phase` / `trigger` | 时点 | 常见用途 |
 | --- | --- | --- |
 | `battleStart` | 首回合排序前 | 开战加攻、加速、初始状态 |
+| `beforeRoundOrder` | 每回合读取速度快照前，按站位结算 | 宝拉第7回合加速 |
 | `actionStart` | 当前角色选择技能前 | 周期被动、按当前 Buff 数判断 |
 | `beforeDamage` | 主体伤害前 | 自损、技能 Buff、Boss 弱化 |
 | `afterHit` | 每个伤害段结算后 | 无条件段后触发 |

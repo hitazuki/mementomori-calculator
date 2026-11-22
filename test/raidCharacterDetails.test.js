@@ -96,7 +96,7 @@ test('raid character details preserve targets, timing, and conditions for every 
   ])
   const supportedTriggers = new Set([
     'actionEnd', 'actionStart', 'afterCriticalHit', 'afterDamage', 'afterDamageStep', 'afterHit', 'battleStart',
-    'beforeDamage', 'event', 'permanent', 'roundStart',
+    'beforeDamage', 'beforeRoundOrder', 'event', 'permanent', 'roundStart',
   ])
   const supportedConditions = new Set([
     'actorHpAtLeast50', 'actorStatusStacksAtLeast', 'enemyCountIs',
