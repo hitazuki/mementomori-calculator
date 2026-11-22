@@ -142,6 +142,20 @@ test('Superbia Elfriede HP scenario grows one stack per round and five enemies r
   assert.ok(action(normal, 5, id).damageSteps.every(step => step.percent === 1020))
 })
 
+test('support actions retain active modifier sources before applying their own buffs', () => {
+  const id = RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE
+  const lineup = [MERLYN, id]
+  const result = simulateRaidTable({ lineup, attackPriority: lineup, turns: 2 })
+  const support = action(result, 1, MERLYN)
+  assert.deepEqual(support.damageSteps, [])
+  assert.equal(support.effectiveAtkPercent, 0)
+  assert.deepEqual(support.modifierSources.map(({ id, rate }) => [id, rate]), [['superbia-elfriede-pride', 0.1]])
+  assert.ok(support.statusSnapshotAfterAction[MERLYN].statuses.some(status => status.id === 'merlyn-atk'))
+
+  const attack = action(result, 2, MERLYN)
+  assert.deepEqual(attack.modifierSources, attack.damageSteps[0].modifierSources)
+})
+
 test('stacking actor statuses preserve independent recipient histories when priorities change', () => {
   const id = RAID_TABLE_CHARACTER_IDS.SUPERBIA_ELFRIEDE
   const definition = RAID_TABLE_CHARACTERS[id]

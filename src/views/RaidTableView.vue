@@ -1307,25 +1307,21 @@ const modifierChannels = [
   ['defensePenetrationRate', 'raidDefensePenetration'],
 ]
 
-function modifierTotals(step) {
-  return Object.fromEntries(modifierChannels.map(([channel]) => [channel, step.modifierSources
+function modifierTotals(sources) {
+  return Object.fromEntries(modifierChannels.map(([channel]) => [channel, sources
     .filter(source => source.channel === channel)
     .reduce((total, source) => total + source.rate, 0)]))
 }
 
 function modifierSummary(event) {
-  const firstStep = event.damageSteps[0]
-  if (!firstStep) return []
-  const totals = modifierTotals(firstStep)
+  const totals = modifierTotals(event.modifierSources)
   return modifierChannels.flatMap(([channel, labelKey]) => totals[channel] ? [`${t(labelKey)} ${signedRate(totals[channel])}`] : [])
 }
 
 function modifierBreakdown(event) {
-  const firstStep = event.damageSteps[0]
-  if (!firstStep) return []
-  const totals = modifierTotals(firstStep)
+  const totals = modifierTotals(event.modifierSources)
   return modifierChannels.flatMap(([channel, labelKey]) => {
-    const sources = firstStep.modifierSources
+    const sources = event.modifierSources
       .filter(source => source.channel === channel && source.rate)
       .map(source => `${t(source.nameKey)} +${formatRate(source.rate)}${source.copiedFromId != null ? `（${valueSourceText(source.sourceId)}）` : ''}`)
     return sources.length ? [{ channel, label: t(labelKey), total: totals[channel], sources }] : []

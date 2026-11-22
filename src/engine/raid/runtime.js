@@ -814,9 +814,11 @@ export function runRaidProgram(program) {
       const beforeHooks = context.perHitBeforeHooks.length ? splitBeforeHooks(action.hooksByTrigger.beforeDamage) : action.hooksByTrigger.beforeDamage
       runHooks(actor, beforeHooks, context, 'beforeDamage')
       runHooks(actor, context.perHitBeforeHooks.length ? splitBeforeHooks(actor.definition.hooksByTrigger.beforeDamage) : actor.definition.hooksByTrigger.beforeDamage, context, 'beforeDamage')
-      const statusSnapshotAtDamage = snapshotStatuses({ ...context, phase: 'damage' })
+      const damageContext = { ...context, phase: 'damage' }
+      const statusSnapshotAtDamage = snapshotStatuses(damageContext)
       const removableBuffCountsAtDamage = removableBuffCounts()
-      const damage = executeDamageSteps(actor, action, { ...context, phase: 'damage' })
+      const damage = executeDamageSteps(actor, action, damageContext)
+      const modifierSources = damage.damageSteps[0]?.modifierSources ?? modifierSnapshot(actor, damageContext).sources
       context.actionEnemyTargets = context.hitEnemyTargets.length ? context.hitEnemyTargets : context.actionEnemyTargets
       runHooks(actor, action.hooksByTrigger.afterDamage, context, 'afterDamage')
       runHooks(actor, actor.definition.hooksByTrigger.afterDamage, context, 'afterDamage')
@@ -835,7 +837,7 @@ export function runRaidProgram(program) {
       const removableBuffCountsAfterAction = Object.fromEntries(Object.entries(statusSnapshotAfterAction).map(([id, snapshot]) => [id, snapshot.removableBuffCount]))
       const event = {
         sequence, turn, actorId, actionKey: action.key, skillNameKey: action.nameKey, damageType: action.damageType,
-        damageSteps: damage.damageSteps, baseAtkPercent: damage.baseAtkPercent,
+        damageSteps: damage.damageSteps, modifierSources, baseAtkPercent: damage.baseAtkPercent,
         effectiveAtkPercent: damage.effectiveAtkPercent, symbolicTotals: damage.symbolicTotals, conversionTotals: damage.conversionTotals,
         scalingTotals: damage.scalingTotals, cooldownsBefore, cooldownsAfter: { ...actor.cooldowns },
         effectsApplied, expiredEffects, ignoredKeys: [...(action.ignoredKeys ?? [])], runtimeBefore, runtimeAfter,

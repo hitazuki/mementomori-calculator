@@ -66,7 +66,7 @@ test('PNG export keeps action modifiers, direct damage and compact cross-charact
   const selected = page.locator('.raid-roster-select[aria-pressed="true"]')
   await expect(selected).toHaveCount(5)
   while (await selected.count()) await selected.first().click()
-  for (const id of [30, 26, 29, 61, 93]) {
+  for (const id of [61, 26, 30, 156, 93]) {
     await page.locator('.raid-roster-select').filter({ hasText: new RegExp(`#${id}\\b`) }).click()
   }
 
@@ -75,6 +75,11 @@ test('PNG export keeps action modifiers, direct damage and compact cross-charact
   await expect(sources.first()).toBeVisible()
   const source = await sources.first().innerText()
   const modifier = await page.locator('.raid-cell-buffs').filter({ hasText: '攻击 +' }).first().innerText()
+  const support = page.locator('.raid-action-cell').filter({ hasText: '向师父看齐' }).first()
+  await expect(support).toContainText('0% ATK')
+  await expect(support.locator('.raid-cell-buffs')).toHaveText('增伤 +10%')
+  await support.click()
+  await expect(page.locator('.raid-modifier-breakdown')).toContainText('以魔制魔 +10%')
   await page.getByRole('button', { name: /导出图片/ }).click()
   await expect(page.locator('.raid-export-preview-image')).toBeVisible({ timeout: 90000 })
 
@@ -82,5 +87,7 @@ test('PNG export keeps action modifiers, direct damage and compact cross-charact
   expect(await matrix.locator('td:not(.total) .raid-export-source').allTextContents()).toContain(source)
   expect(await matrix.locator('.total .raid-export-source').allTextContents()).toEqual(expect.arrayContaining([expect.stringMatching(sourcePattern)]))
   expect(await matrix.locator('.raid-export-modifiers').allTextContents()).toContain(modifier)
+  const exportedSupport = matrix.locator('td').filter({ hasText: '向师父看齐' }).first()
+  await expect(exportedSupport.locator('.raid-export-modifiers')).toHaveText('增伤 +10%')
   expect(await matrix.locator('tbody td:not(.total) > span').allTextContents()).toEqual(expect.arrayContaining([expect.stringMatching(/^\+ [\d,.]+% STR$/)]))
 })
